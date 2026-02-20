@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../../common_widget/map_picker_page.dart';
 import '/models/categories.dart';
 import '/models/service.dart';
 
@@ -447,19 +448,33 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               ),
 
               // Hierarchical Location Selector Field
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: HierarchicalLocationSelector(
-                  selectedCities: selectedCities,
-                  onChanged: (cities) {
-                    setState(() {
-                      selectedCities = cities;
-                    });
-                  },
-                  // Location selection is now optional
-                  validator: null,
-                ),
-              ),
+              InkWell(
+                onTap: (){
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context)=>
+                      LocationMapPicker(
+
+                      )
+                      ));
+                },
+                  child: Container(
+                    child:Text("Select Locations")
+                  )),
+              // Padding(
+              //   padding: const EdgeInsets.only(bottom: 16),
+              //   child: HierarchicalLocationSelector(
+              //     selectedCities: selectedCities,
+              //     onChanged: (cities) {
+              //
+              //       setState(() {
+              //         selectedCities = cities;
+              //       });
+              //     },
+              //     // Location selection is now optional
+              //     validator: null,
+              //   ),
+              // ),
+// Text(selectedCities.length.toString()),
 
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),

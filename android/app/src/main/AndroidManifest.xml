@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -65,6 +66,19 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBl4RQBYM_v-u2Oik_ENyxcGxnvyZGxL2o"/>
+
+        <!-- Add reCAPTCHA verification site key for Firebase Auth -->
+        <meta-data
+            android:name="com.google.android.gms.safetynet.API_KEY"
+            android:value="AIzaSyBk_ntYzCiL1uhCfuNBS9jqdK_Pmmzm0V8" />
+
+
+
             <activity
   android:name="com.yalantis.ucrop.UCropActivity"
   android:screenOrientation="portrait"

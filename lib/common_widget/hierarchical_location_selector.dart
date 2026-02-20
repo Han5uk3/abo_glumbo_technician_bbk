@@ -64,23 +64,50 @@ class _HierarchicalLocationSelectorState
     }
   }
 
+
   void _showLocationSelector() {
     if (hierarchicalData == null) return;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _LocationSelectorBottomSheet(
-        hierarchicalData: hierarchicalData!,
-        selectedCities: widget.selectedCities,
-        totalCitiesCount: _totalCitiesCount,
-        onConfirm: (selectedCities) {
-          widget.onChanged(selectedCities);
-          Navigator.pop(context);
-        },
+      builder: (context) => StatefulBuilder(
+        builder: (context, modalState) => _LocationSelectorBottomSheet(
+          hierarchicalData: hierarchicalData!,
+          selectedCities: widget.selectedCities,
+          totalCitiesCount: _totalCitiesCount,
+          onConfirm: (selectedCities) {
+            print("Selected 79 line  : ${selectedCities}");
+            modalState((){
+
+            });
+            widget.onChanged(selectedCities);
+            print("Selected 79 line  : ${selectedCities}");
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
+  //
+  // void _showLocationSelector() {
+  //   if (hierarchicalData == null) return;
+  //
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     builder: (context) => _LocationSelectorBottomSheet(
+  //       hierarchicalData: hierarchicalData!,
+  //       selectedCities: widget.selectedCities,
+  //       totalCitiesCount: _totalCitiesCount,
+  //       onConfirm: (selectedCities) {
+  //         widget.onChanged(selectedCities);
+  //         print("Selected 79 line  : ${selectedCities}");
+  //         Navigator.pop(context);
+  //       },
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -285,12 +312,19 @@ class _LocationSelectorBottomSheetState
           cityAr: city.city_ar,
         ),
       );
-
+print("The temp : 315 : ${selectedCity}");
       if (tempSelectedCities.contains(selectedCity)) {
+        setState(() {
+
+        });
         tempSelectedCities.remove(selectedCity);
       } else {
+        setState(() {
+
+        });
         tempSelectedCities.add(selectedCity);
       }
+      widget.onConfirm(tempSelectedCities);
     });
   }
 
@@ -619,7 +653,9 @@ class _LocationSelectorBottomSheetState
                                         ),
                                       ),
                                     )
-                                  : ListView.builder(
+                                  :
+
+                              ListView.builder(
                                       controller: scrollController,
                                       itemCount: filteredCities.length,
                                       itemBuilder: (context, index) {
@@ -697,7 +733,13 @@ class _LocationSelectorBottomSheetState
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          widget.onConfirm(tempSelectedCities);
+                          print("confirmed : ${tempSelectedCities.length.toString()}");
+                          setState(() {
+
+                          });
+
+                          widget.selectedCities.addAll(tempSelectedCities);
+                          // widget.onConfirm(tempSelectedCities);
                         },
                         child: Text('Confirm (${tempSelectedCities.length})'),
                       ),

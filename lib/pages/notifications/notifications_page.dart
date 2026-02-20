@@ -150,10 +150,11 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                       builder: (context) => AlertDialog(
                         actionsAlignment: MainAxisAlignment.start,
 
-                        shape: RoundedRectangleBorder(
+                        shape:
+                        RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        constraints: const BoxConstraints(maxWidth: 320),
+                        // constraints: const BoxConstraints(maxWidth: 320),
                         backgroundColor: Colors.white,
                         title: Row(
                           children: [

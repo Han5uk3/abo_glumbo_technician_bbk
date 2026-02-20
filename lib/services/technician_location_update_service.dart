@@ -18,7 +18,9 @@ class TechnicianLocationUpdateService {
 
   /// Initialize background location updates
   /// Should be called once on app startup
-  static Future<void> initializeBackgroundLocationUpdates() async {
+  static Future<void> initializeBackgroundLocationUpdates() async
+  {
+
     try {
       // Configure background fetch
       await BackgroundFetch.configure(
@@ -39,10 +41,12 @@ class TechnicianLocationUpdateService {
     } catch (e) {
       debugPrint('❌ Failed to initialize background location updates: $e');
     }
+
   }
 
   /// Callback for background fetch tasks
   static void _backgroundFetchHeadlessTask(String taskId) async {
+
     try {
       debugPrint('🔄 Running background location update task');
       await _updateTechnicianLocation();
@@ -54,7 +58,8 @@ class TechnicianLocationUpdateService {
   }
 
   /// Callback for background fetch timeout
-  static void _onBackgroundFetchTimeout(String taskId) {
+  static void _onBackgroundFetchTimeout(String taskId)
+  {
     debugPrint('⏱️ Background task timeout: $taskId');
     BackgroundFetch.finish(taskId);
   }

@@ -1,6 +1,6 @@
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/services/edit_services.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/services/edit_services_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/service_tile.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:flutter/material.dart';

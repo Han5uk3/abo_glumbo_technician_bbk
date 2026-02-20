@@ -35,11 +35,11 @@ class _ManageFaqState extends State<ManageFaq> {
                 context: context,
                 barrierDismissible: false,
                 builder: (context) => AlertDialog(
-                  constraints: BoxConstraints(
-                    maxWidth: 100,
-                    minWidth: 100,
-                    maxHeight: 100,
-                  ),
+                  // constraints: BoxConstraints(
+                  //   maxWidth: 100,
+                  //   minWidth: 100,
+                  //   maxHeight: 100,
+                  // ),
                   backgroundColor: Colors.white,
 
                   content: Center(

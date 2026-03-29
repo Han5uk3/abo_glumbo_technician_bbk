@@ -346,12 +346,14 @@ class _OtpPageState extends State<OtpPage> {
     }
 
     try {
-      final UserCredential userCredential = await AuthServices().verifyOTP(
+      final UserCredential? userCredential = await AuthServices().verifyOTP(
         context,
         otp,
         verificationId: verificationId,
         smsCode: otp,
+        phoneNumber: widget.phoneNumber ?? '',
       );
+      if (userCredential == null) return;
       if (widget.isFromProfile == true) {
         final String oldUid = LocalStore.getUID() ?? '';
         final String newUid = userCredential.user?.uid ?? '';

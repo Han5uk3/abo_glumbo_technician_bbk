@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -661,7 +662,7 @@ class _ManageAgentsState extends State<ManageAgents>
                     const SizedBox(width: 12),
 
                     // Enhanced Toggle Button
-                    if (agent.uid != null)
+                    if (agent.uid != null && (LocalStore.getCachedAdminData()?.accessLevel != 1))
                       Material(
                         color: Colors.transparent,
                         child: InkWell(

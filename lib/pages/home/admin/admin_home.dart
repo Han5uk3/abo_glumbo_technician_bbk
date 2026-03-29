@@ -16,8 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 class AdminHome extends StatefulWidget {
-  final VoidCallback? onToggleRole;
-  const AdminHome({super.key, this.onToggleRole});
+  const AdminHome({super.key});
 
   @override
   State<AdminHome> createState() => _AdminHomeState();
@@ -169,17 +168,10 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                 AppLocalizations.of(context)?.manageOrders ?? "Manage Orders",
               ),
               actions: [
-                if (widget.onToggleRole != null)
-                  IconButton(
-                    onPressed: widget.onToggleRole,
-                    icon: const Icon(Icons.engineering_rounded),
-                    tooltip: 'Switch to Technician',
-                  ),
                 StreamBuilder<int>(
                   stream: AppServices.getUnreadNotificationsCountStream(),
                   builder: (context, snapshot) {
                     final unreadCount = snapshot.data ?? 0;
-
                     return Stack(
                       children: [
                         IconButton(

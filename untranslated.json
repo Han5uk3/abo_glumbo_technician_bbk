@@ -1,1 +1,17 @@
-{}
+{
+  "ar": [
+    "choose",
+    "availableLocations",
+    "workHoursPricing",
+    "workStartTime",
+    "workEndTime",
+    "onWorkPrice",
+    "offWorkPrice",
+    "generalPrice",
+    "chooseLocations",
+    "pleaseEnterAnOnWorkPrice",
+    "pleaseEnterOffWorkPrice",
+    "pleaseEnterAGeneralPrice",
+    "netError"
+  ]
+}

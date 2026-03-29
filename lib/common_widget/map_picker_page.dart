@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'package:aboglumbo_bbk_panel/common_widget/place_suggestion_api.dart';
+import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-
-import '../helpers/text_form.dart';
-import '../l10n/app_localizations.dart';
 import '../models/address.dart';
-import 'loader.dart';
-import 'location_card.dart';
+import '../styles/color.dart';
 
 class LocationMapPicker extends StatefulWidget {
   final double? userLatitude;
@@ -19,6 +16,8 @@ class LocationMapPicker extends StatefulWidget {
   final Function(Map<String, dynamic>)? onLocationSelected;
   final bool isFromHomeAddress;
 
+  final List<Map<String, dynamic>>? initialLocations;
+
   const LocationMapPicker({
     super.key,
     this.userLatitude,
@@ -26,6 +25,7 @@ class LocationMapPicker extends StatefulWidget {
     this.onAddressSelected,
     this.onLocationSelected,
     this.isFromHomeAddress = false,
+    this.initialLocations,
   });
 
   @override
@@ -46,7 +46,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   final _buildingNameController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
-  bool _isAddingAddress = false;
+  final bool _isAddingAddress = false;
   final _formKey = GlobalKey<FormState>();
 
   String _locationTitle = '';
@@ -58,6 +58,23 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   Set<Circle> _circles = {};
   static const double _minRadius = 100;
   static const double _maxRadius = 50000;
+
+  final TextEditingController _nameEnController = TextEditingController();
+  final TextEditingController _nameArController = TextEditingController();
+  final TextEditingController _individualRadiusController =
+      TextEditingController();
+  final GlobalKey<FormState> _dialogFormKey = GlobalKey<FormState>();
+
+  final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
+       \u0750-\u077F
+       \u08A0-\u08FF
+       \uFB50-\uFDFF
+       \uFE70-\uFEFF
+       \u0660-\u0669
+       \u06F0-\u06F9
+       \u200C-\u200F
+       \s\n\r\d
+       \.\,\!\?\،\؛\؟\:\-\(\)\[\]\"\'\\u061F]+$''', multiLine: true);
 
   List<Map<String, dynamic>> _selectedLocations = [];
   Set<Marker> _markers = {};
@@ -78,6 +95,14 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       widget.userLongitude ?? defaultLng,
     );
     _selectedLocation = _initialPosition;
+
+    if (widget.initialLocations != null &&
+        widget.initialLocations!.isNotEmpty) {
+      _selectedLocations = widget.initialLocations!.map((loc) {
+        return {...loc, 'location': LatLng(loc['lat'], loc['lng'])};
+      }).toList();
+    }
+
     _updateMapElements();
   }
 
@@ -98,28 +123,35 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       var loc = _selectedLocations[i];
       LatLng pos = loc['location'];
 
-      updatedMarkers.add(Marker(
-        markerId: MarkerId('m_$i'),
-        position: pos,
-        infoWindow: InfoWindow(
-          title: loc['address'] ?? 'Location ${i + 1}',
-          snippet: '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
+      updatedMarkers.add(
+        Marker(
+          markerId: MarkerId('m_$i'),
+          position: pos,
+          infoWindow: InfoWindow(
+            title: loc['address'] ?? 'Location ${i + 1}',
+            snippet:
+                '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            i == 0
+                ? BitmapDescriptor.hueBlue
+                : BitmapDescriptor.hueGreen + (i * 10).toDouble(),
+          ),
+          draggable: false,
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          i == 0 ? BitmapDescriptor.hueBlue : BitmapDescriptor.hueGreen + (i * 10).toDouble(),
-        ),
-        draggable: false,
-      ));
+      );
 
       if (_showRadius) {
-        updatedCircles.add(Circle(
-          circleId: CircleId('c_$i'),
-          center: pos,
-          radius: _radiusInMeters,
-          fillColor: Colors.blue.withOpacity(0.1),
-          strokeColor: i == 0 ? Colors.blue : Colors.green,
-          strokeWidth: 2,
-        ));
+        updatedCircles.add(
+          Circle(
+            circleId: CircleId('c_$i'),
+            center: pos,
+            radius: loc['radius']?.toDouble() ?? _radiusInMeters,
+            fillColor: Colors.blue.withOpacity(0.1),
+            strokeColor: i == 0 ? Colors.blue : Colors.green,
+            strokeWidth: 2,
+          ),
+        );
       }
     }
 
@@ -129,33 +161,54 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     });
   }
 
-  void _addLocation() {
+  void _addLocation(
+    String nameEn,
+    String nameAr,
+    double radius, {
+    int? editIndex,
+  }) {
     if (_selectedLocation == null) return;
 
-    // Check if location already exists
-    bool exists = _selectedLocations.any((loc) {
-      LatLng pos = loc['location'];
-      // Compare with small tolerance for floating point
-      return (pos.latitude - _selectedLocation!.latitude).abs() < 0.0001 &&
-          (pos.longitude - _selectedLocation!.longitude).abs() < 0.0001;
-    });
+    if (editIndex == null) {
+      // Check if location already exists (only for new additions)
+      bool exists = _selectedLocations.any((loc) {
+        LatLng pos = loc['location'];
+        return (pos.latitude - _selectedLocation!.latitude).abs() < 0.0001 &&
+            (pos.longitude - _selectedLocation!.longitude).abs() < 0.0001;
+      });
 
-    if (exists) {
-      _showSnackBar('Location already added', Colors.orange);
-      return;
+      if (exists) {
+        _showSnackBar(
+          AppLocalizations.of(context)!.locationAlreadyAdded,
+          Colors.orange,
+        );
+        return;
+      }
     }
 
     setState(() {
-      _selectedLocations.add({
+      final locData = {
         'location': _selectedLocation,
-        'address': _locationTitle.isNotEmpty ? _locationTitle : 'Location ${_selectedLocations.length + 1}',
-        'fullAddress': _locationSubtitle,
+        'en_name': nameEn,
+        'ar_name': nameAr,
+        'radius': radius,
         'lat': _selectedLocation!.latitude,
         'lng': _selectedLocation!.longitude,
-      });
+      };
+
+      if (editIndex != null) {
+        _selectedLocations[editIndex] = locData;
+      } else {
+        _selectedLocations.add(locData);
+      }
       _updateMapElements();
     });
-    _showSnackBar('Location added to list', Colors.green);
+    _showSnackBar(
+      editIndex != null
+          ? AppLocalizations.of(context)!.locationUpdated
+          : AppLocalizations.of(context)!.locationAddedToList,
+      Colors.green,
+    );
   }
 
   void _removeLocation(int index) {
@@ -188,11 +241,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   }
 
   void _showSnackBar(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      duration: Duration(seconds: 1),
-      backgroundColor: color,
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: Duration(seconds: 1),
+        backgroundColor: color,
+      ),
+    );
   }
 
   Future<void> _getCurrentLocation() async {
@@ -201,7 +256,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _showSnackBar('Please enable location services', Colors.red);
+        _showSnackBar(
+          AppLocalizations.of(context)!.pleaseEnableLocationServices,
+          Colors.red,
+        );
         setState(() => _isLoading = false);
         return;
       }
@@ -210,7 +268,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _showSnackBar('Location permission denied', Colors.red);
+          _showSnackBar(
+            AppLocalizations.of(context)!.locationPermissionDenied,
+            Colors.red,
+          );
           setState(() => _isLoading = false);
           return;
         }
@@ -228,10 +289,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       await _getAddressFromLatLng(currentLocation);
 
       // Always ask to add in multi-select mode
-      _showAddConfirmationDialog();
-
+      _showLocationDetailsDialog();
     } catch (e) {
-      _showSnackBar('Location error: $e', Colors.red);
+      _showSnackBar(AppLocalizations.of(context)!.locationError, Colors.red);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -240,7 +300,8 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   Future<void> _getAddressFromLatLng(LatLng latLng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
-        latLng.latitude, latLng.longitude,
+        latLng.latitude,
+        latLng.longitude,
       ).timeout(Duration(seconds: 10));
 
       if (placemarks.isNotEmpty && mounted) {
@@ -248,21 +309,34 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         List<String> addressParts = [];
 
         if (p.name != null && p.name!.isNotEmpty) addressParts.add(p.name!);
-        if (p.street != null && p.street!.isNotEmpty) addressParts.add(p.street!);
-        if (p.subLocality != null && p.subLocality!.isNotEmpty) addressParts.add(p.subLocality!);
-        if (p.locality != null && p.locality!.isNotEmpty) addressParts.add(p.locality!);
+        if (p.street != null && p.street!.isNotEmpty) {
+          addressParts.add(p.street!);
+        }
+        if (p.subLocality != null && p.subLocality!.isNotEmpty) {
+          addressParts.add(p.subLocality!);
+        }
+        if (p.locality != null && p.locality!.isNotEmpty) {
+          addressParts.add(p.locality!);
+        }
 
         String address = addressParts.join(', ');
 
         setState(() {
-          _locationTitle = p.name ?? p.subLocality ?? p.locality ?? 'Selected Location';
-          _locationSubtitle = address.isNotEmpty ? address : '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
+          _locationTitle = (p.locality != null && p.locality!.isNotEmpty)
+              ? p.locality!
+              : (p.subLocality != null && p.subLocality!.isNotEmpty)
+              ? p.subLocality!
+              : AppLocalizations.of(context)!.selectedLocation;
+          _locationSubtitle = address.isNotEmpty
+              ? address
+              : '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
         });
       }
     } catch (e) {
       setState(() {
-        _locationTitle = 'Selected Location';
-        _locationSubtitle = '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
+        _locationTitle = AppLocalizations.of(context)!.selectedLocation;
+        _locationSubtitle =
+            '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
       });
     }
   }
@@ -280,7 +354,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         final results = await getPlaceSuggestions(input);
         if (mounted) setState(() => _predictions = results);
       } catch (e) {
-        print('Search error: $e');
+        debugPrint('Search error: $e');
       } finally {
         setState(() => _isLoading = false);
       }
@@ -295,7 +369,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     });
 
     try {
-      List<Location> locations = await locationFromAddress(address).timeout(Duration(seconds: 10));
+      List<Location> locations = await locationFromAddress(
+        address,
+      ).timeout(Duration(seconds: 10));
       if (locations.isNotEmpty && mounted) {
         final latLng = LatLng(locations[0].latitude, locations[0].longitude);
         await _moveCameraToLocation(latLng);
@@ -305,41 +381,210 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         await _getAddressFromLatLng(latLng);
 
         // Show add confirmation dialog
-        _showAddConfirmationDialog();
+        _showLocationDetailsDialog();
       } else {
-        _showSnackBar('Location not found', Colors.red);
+        _showSnackBar(
+          AppLocalizations.of(context)!.locationNotFound,
+          Colors.red,
+        );
       }
     } catch (e) {
-      _showSnackBar('Error finding location', Colors.red);
+      _showSnackBar(
+        AppLocalizations.of(context)!.errorFindingLocation,
+        Colors.red,
+      );
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void _showAddConfirmationDialog() {
+  void _showLocationDetailsDialog({int? editIndex}) {
+    if (editIndex != null) {
+      final loc = _selectedLocations[editIndex];
+      _nameEnController.text = loc['en_name'] ?? '';
+      _nameArController.text = loc['ar_name'] ?? '';
+      _individualRadiusController.text = (loc['radius'] ?? _radiusInMeters)
+          .toString();
+      _selectedLocation = loc['location'];
+    } else {
+      _nameEnController.text = _locationTitle;
+      _nameArController.text = '';
+      _individualRadiusController.text = _radiusInMeters.toString();
+    }
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Add Location'),
-        content: Text('Do you want to add this location to your list?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
+        title: Text(
+          editIndex != null
+              ? AppLocalizations.of(context)!.editLocation
+              : AppLocalizations.of(context)!.addLocation,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: AppColors.primary,
+          ),
+        ),
+        content: Form(
+          key: _dialogFormKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _nameEnController,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.englishName,
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    hintText: AppLocalizations.of(context)!.cityName,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterEnglishName;
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _nameArController,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.arabicName,
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    hintText: AppLocalizations.of(context)!.nameArabic,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterArabicName;
+                    }
+                    if (!arabicFullRegex.hasMatch(value)) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterArabicNameOnly;
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _individualRadiusController,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.radiusInMeters,
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    hintText: AppLocalizations.of(context)!.enterRadiusInMeters,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    suffixText: AppLocalizations.of(context)!.meters,
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return AppLocalizations.of(context)!.pleaseEnterRadius;
+                    }
+                    if (double.tryParse(value) == null) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterValidNumber;
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('No'),
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              _addLocation();
+              if (_dialogFormKey.currentState!.validate()) {
+                final nameEn = _nameEnController.text.trim();
+                final nameAr = _nameArController.text.trim();
+                final radius =
+                    double.tryParse(_individualRadiusController.text.trim()) ??
+                    _radiusInMeters;
+
+                Navigator.pop(context);
+                _addLocation(nameEn, nameAr, radius, editIndex: editIndex);
+              }
             },
-            child: Text('Yes', style: TextStyle(color: Colors.blue)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              editIndex != null
+                  ? AppLocalizations.of(context)!.update
+                  : AppLocalizations.of(context)!.addArea,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _moveCameraToLocation(LatLng latLng, {bool animate = true}) async {
+  Future<void> _moveCameraToLocation(
+    LatLng latLng, {
+    bool animate = true,
+  }) async {
     if (mapController == null) return;
     final update = CameraUpdate.newLatLngZoom(latLng, 15);
     if (animate) {
@@ -353,14 +598,14 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     setState(() {
       _selectedLocation = latLng;
       _predictions.clear();
-      _locationTitle = 'Getting address...';
+      _locationTitle = AppLocalizations.of(context)!.gettingAddress;
     });
     _searchFocusNode.unfocus();
     _getAddressFromLatLng(latLng);
 
     // Show option to add after getting address
     Future.delayed(Duration(milliseconds: 500), () {
-      _showAddConfirmationDialog();
+      _showLocationDetailsDialog();
     });
   }
 
@@ -369,11 +614,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     return Container(
       constraints: BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
-          ]
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+        ],
       ),
       child: ListView.builder(
         shrinkWrap: true,
@@ -392,49 +637,72 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!)
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('Service Radius', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
-          Row(children: [
-            IconButton(
-                icon: Icon(_showRadius ? Icons.visibility : Icons.visibility_off, size: 18, color: Colors.blue),
-                onPressed: _toggleRadius,
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints()
-            ),
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12)
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.serviceRadius,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
-                child: Text(
-                    '${(_radiusInMeters / 1000).toStringAsFixed(1)} km',
-                    style: GoogleFonts.poppins(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w600)
-                )
-            ),
-          ]),
-        ]),
-        SliderTheme(
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _showRadius ? Icons.visibility : Icons.visibility_off,
+                      size: 18,
+                      color: Colors.blue,
+                    ),
+                    onPressed: _toggleRadius,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${(_radiusInMeters / 1000).toStringAsFixed(1)} ${AppLocalizations.of(context)!.km}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SliderTheme(
             data: SliderThemeData(
-                activeTrackColor: Colors.blue,
-                thumbColor: Colors.blue,
-                overlayColor: Colors.blue.withOpacity(0.1)
+              activeTrackColor: Colors.blue,
+              thumbColor: Colors.blue,
+              overlayColor: Colors.blue.withOpacity(0.1),
             ),
             child: Slider(
-                value: _radiusInMeters,
-                min: _minRadius,
-                max: _maxRadius,
-                divisions: 20,
-                label: '${(_radiusInMeters / 1000).toStringAsFixed(1)} km',
-                onChanged: _onRadiusChanged
-            )
-        ),
-      ]),
+              value: _radiusInMeters,
+              min: _minRadius,
+              max: _maxRadius,
+              divisions: 20,
+              label:
+                  '${(_radiusInMeters / 1000).toStringAsFixed(1)} ${AppLocalizations.of(context)!.km}',
+              onChanged: _onRadiusChanged,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -449,7 +717,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         ),
         child: Center(
           child: Text(
-            'Tap on map or search to add locations',
+            AppLocalizations.of(context)!.tapOnMapOrSearchToAddLocations,
             style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
         ),
@@ -460,77 +728,96 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       margin: EdgeInsets.symmetric(vertical: 8),
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!)
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(
-              '${_selectedLocations.length} Selected',
-              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600)
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${_selectedLocations.length} ${AppLocalizations.of(context)!.selected}',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (_selectedLocations.isNotEmpty)
+                TextButton(
+                  onPressed: _clearLocations,
+                  child: Text(
+                    AppLocalizations.of(context)!.clearAll,
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+            ],
           ),
-          if (_selectedLocations.isNotEmpty)
-            TextButton(
-                onPressed: _clearLocations,
-                child: Text('Clear All', style: TextStyle(color: Colors.red, fontSize: 12))
-            ),
-        ]),
-        SizedBox(height: 8),
-        Container(
-          constraints: BoxConstraints(maxHeight: 150),
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: _selectedLocations.length,
-            separatorBuilder: (_, __) => Divider(height: 1),
-            itemBuilder: (context, i) {
-              var loc = _selectedLocations[i];
-              return ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
+          SizedBox(height: 8),
+          Container(
+            constraints: BoxConstraints(maxHeight: 150),
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: _selectedLocations.length,
+              separatorBuilder: (_, __) => Divider(height: 1),
+              itemBuilder: (context, i) {
+                var loc = _selectedLocations[i];
+                return ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
                     radius: 12,
                     backgroundColor: i == 0 ? Colors.blue : Colors.green,
                     child: Text(
-                        '${i + 1}',
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
-                    )
-                ),
-                title: Text(
-                  loc['address'] ?? 'Location',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                    '${loc['lat'].toStringAsFixed(4)}, ${loc['lng'].toStringAsFixed(4)}',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600])
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.close, size: 16, color: Colors.red),
-                  onPressed: () => _removeLocation(i),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                ),
-              );
-            },
-          ),
-        ),
-        if (_selectedLocation != null)
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: ElevatedButton.icon(
-              onPressed: _addLocation,
-              icon: Icon(Icons.add, size: 16),
-              label: Text('Add Current Location'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: Size(double.infinity, 36),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+                      '${i + 1}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    '${loc['en_name']} / ${loc['ar_name']}',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    '${AppLocalizations.of(context)!.radius}: ${loc['radius']}m | ${loc['lat'].toStringAsFixed(4)}, ${loc['lng'].toStringAsFixed(4)}',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  ),
+                  onTap: () => _showLocationDetailsDialog(editIndex: i),
+                  trailing: IconButton(
+                    icon: Icon(Icons.close, size: 16, color: Colors.red),
+                    onPressed: () => _removeLocation(i),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                );
+              },
             ),
           ),
-      ]),
+          if (_selectedLocation != null)
+            Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: ElevatedButton.icon(
+                onPressed: () => _showLocationDetailsDialog(),
+                icon: Icon(Icons.add, size: 16),
+                label: Text(AppLocalizations.of(context)!.addCurrentLocation),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: Size(double.infinity, 36),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -539,45 +826,24 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Choose Multiple Locations'),
+        title: Text(AppLocalizations.of(context)!.chooseLocations),
         elevation: 0,
         actions: [
-          Container(
-            margin: EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.blue),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Row(
-                children: [
-                  Icon(Icons.add_location_alt, color: Colors.blue, size: 18),
-                  SizedBox(width: 4),
-                  Text(
-                    'Multi-Select',
-                    style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          ),
           IconButton(
             icon: Icon(Icons.info_outline),
             onPressed: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
-                title: Text('How to use'),
+                title: Text(AppLocalizations.of(context)!.howToUse),
                 content: Text(
-                    '• Tap map to select a location\n'
-                        '• Use search to find places\n'
-                        '• Add multiple locations to the list\n'
-                        '• Adjust radius - applies to all locations\n'
-                        '• Remove individual locations with X\n'
-                        '• Confirm to save all selected locations'
+                  AppLocalizations.of(context)!.mapPickerInstructions,
                 ),
-                actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('OK'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -591,11 +857,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
             child: Stack(
               children: [
-                if (!_mapReady)
-                  Center(child: CircularProgressIndicator()),
+                if (!_mapReady) Center(child: CircularProgressIndicator()),
                 GoogleMap(
                   onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(target: _initialPosition, zoom: 14),
+                  initialCameraPosition: CameraPosition(
+                    target: _initialPosition,
+                    zoom: 14,
+                  ),
                   onTap: _onMapTap,
                   markers: _markers,
                   circles: _circles,
@@ -620,20 +888,25 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                           onChanged: _searchPlaces,
                           focusNode: _searchFocusNode,
                           decoration: InputDecoration(
-                            hintText: 'Search for a place',
+                            hintText: AppLocalizations.of(
+                              context,
+                            )!.searchForAPlace,
                             prefixIcon: Icon(Icons.search, color: Colors.grey),
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
-                              icon: Icon(Icons.clear, size: 20),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _predictions.clear());
-                                _searchFocusNode.unfocus();
-                              },
-                            )
+                                    icon: Icon(Icons.clear, size: 20),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() => _predictions.clear());
+                                      _searchFocusNode.unfocus();
+                                    },
+                                  )
                                 : null,
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             filled: true,
                             fillColor: Colors.white,
                           ),
@@ -656,7 +929,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                       onTap: _getCurrentLocation,
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
@@ -664,9 +940,20 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.my_location, size: 16, color: Colors.blue),
+                            Icon(
+                              Icons.my_location,
+                              size: 16,
+                              color: Colors.blue,
+                            ),
                             SizedBox(width: 4),
-                            Text('My Location', style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500)),
+                            Text(
+                              AppLocalizations.of(context)!.myLocation,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -693,7 +980,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, spreadRadius: 1)],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(16),
@@ -702,8 +995,12 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   children: [
                     // Current Location Card
                     LocationCard(
-                      title: _locationTitle.isNotEmpty ? _locationTitle : 'No location selected',
-                      subtitle: _locationSubtitle.isNotEmpty ? _locationSubtitle : 'Tap on map to select',
+                      title: _locationTitle.isNotEmpty
+                          ? _locationTitle
+                          : AppLocalizations.of(context)!.noLocationSelected,
+                      subtitle: _locationSubtitle.isNotEmpty
+                          ? _locationSubtitle
+                          : AppLocalizations.of(context)!.tapOnMapToSelect,
                       dense: true,
                     ),
                     SizedBox(height: 12),
@@ -716,17 +1013,30 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Selected Locations', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+                        Text(
+                          AppLocalizations.of(context)!.selectedLocations,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         if (_selectedLocations.isNotEmpty)
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               '${_selectedLocations.length}',
-                              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                       ],
@@ -748,17 +1058,26 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                                 'count': _selectedLocations.length,
                               });
                             }
-                            _showSnackBar('${_selectedLocations.length} locations selected', Colors.green);
-                            Navigator.pop(context, {
-                              'locations': _selectedLocations,
-                              'radius': _radiusInMeters,
-                            });
+                            _showSnackBar(
+                              AppLocalizations.of(
+                                context,
+                              )!.locationsSelectedCount(
+                                _selectedLocations.length,
+                              ),
+                              Colors.green,
+                            );
+                            Navigator.pop(context, _selectedLocations);
                           },
-                          child: Text('Confirm ${_selectedLocations.length} Locations', style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             minimumSize: Size(double.infinity, 45),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.confirmLocations,
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -782,6 +1101,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     _buildingNameController.dispose();
     _fullNameController.dispose();
     _phoneNumberController.dispose();
+    _nameEnController.dispose();
+    _nameArController.dispose();
+    _individualRadiusController.dispose();
     mapController?.dispose();
     super.dispose();
   }
@@ -797,7 +1119,7 @@ class LocationCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.dense = false,
-    super.key
+    super.key,
   });
 
   @override
@@ -831,8 +1153,8 @@ class LocationCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                        fontSize: dense ? 11 : 12,
-                        color: Colors.grey[600]
+                      fontSize: dense ? 11 : 12,
+                      color: Colors.grey[600],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

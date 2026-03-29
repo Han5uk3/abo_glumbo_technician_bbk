@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/models/notification_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:rxdart/rxdart.dart';
 import 'package:aboglumbo_bbk_panel/helpers/custom_exception.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -19,17 +20,22 @@ import 'package:aboglumbo_bbk_panel/models/customer.dart';
 import 'package:aboglumbo_bbk_panel/models/customer_support.dart';
 import 'package:aboglumbo_bbk_panel/models/faq.dart';
 import 'package:aboglumbo_bbk_panel/models/highlighted_services.dart';
+import 'package:aboglumbo_bbk_panel/models/admin_dashboard_data.dart';
 import 'package:aboglumbo_bbk_panel/models/location.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/models/tipping.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 class AppServices {
-  static Future<void> updateFCMToken(String token) async {
+  static Future<void> updateFCMToken(
+    String token, {
+    bool isAdmin = false,
+  }) async {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isEmpty) {
@@ -37,26 +43,19 @@ class AppServices {
         return;
       }
 
-      await AppFirestore.usersCollectionRef.doc(userId).set({
+      final collection = isAdmin
+          ? AppFirestore.adminsCollectionRef
+          : AppFirestore.usersCollectionRef;
+
+      await collection.doc(userId).set({
         'fcmToken': token,
         'fcmTokenUpdatedAt': Timestamp.now(),
       }, SetOptions(merge: true));
+      debugPrint(
+        '✅ FCM token updated in ${isAdmin ? 'admins' : 'users'} collection',
+      );
     } catch (e) {
       debugPrint('❌ Error updating FCM token: $e');
-
-      // Try to create the document if it doesn't exist
-      try {
-        String userId = LocalStore.getUID() ?? '';
-        if (userId.isNotEmpty) {
-          await AppFirestore.usersCollectionRef.doc(userId).set({
-            'fcmToken': token,
-            'fcmTokenUpdatedAt': Timestamp.now(),
-          }, SetOptions(merge: true));
-          debugPrint('✅ FCM token set successfully with merge option');
-        }
-      } catch (setError) {
-        debugPrint('❌ Error setting FCM token with merge: $setError');
-      }
     }
   }
 
@@ -807,9 +806,16 @@ class AppServices {
 
   static Stream<List<ServiceModel>> getAllServicesStream() {
     return AppFirestore.servicesCollectionRef.snapshots().map((snapshot) {
-      return snapshot.docs
+      final services = snapshot.docs
           .map((doc) => ServiceModel.fromQueryDocumentSnapshot(doc))
           .toList();
+      // Sort by category first, then by name
+      services.sort((a, b) {
+        int catComp = (a.category ?? '').compareTo(b.category ?? '');
+        if (catComp != 0) return catComp;
+        return (a.name ?? '').compareTo(b.name ?? '');
+      });
+      return services;
     });
   }
 
@@ -849,6 +855,38 @@ class AppServices {
                 }
               })
               .whereType<UserModel>() // Filter out nulls
+              .toList();
+        });
+  }
+
+  static Stream<List<AdminModel>> getAdminsStream() {
+    return AppFirestore.adminsCollectionRef
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map(
+                (doc) => AdminModel.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  id: doc.id,
+                ),
+              )
+              .toList();
+        });
+  }
+
+  static Stream<List<AdminModel>> getPendingAdminsStream() {
+    return AppFirestore.pendingAdminsCollectionRef
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map(
+                (doc) => AdminModel.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  id: doc.id,
+                ),
+              )
               .toList();
         });
   }
@@ -2284,6 +2322,107 @@ class AppServices {
       'warranty.rejectedTechnicians': FieldValue.arrayUnion([rejectedTech]),
       "warranty.updatedAt": FieldValue.serverTimestamp(),
     });
+  }
+
+  static Stream<AdminDashboardData> getAdminDashboardStream() {
+    final pending = AppFirestore.bookingsCollectionRef
+        .where('bookingStatusCode', isEqualTo: 'P')
+        .snapshots()
+        .map((s) => s.docs.length);
+
+    final assigned = AppFirestore.bookingsCollectionRef
+        .where('bookingStatusCode', isEqualTo: 'A')
+        .snapshots()
+        .map((s) => s.docs.length);
+
+    final completed = AppFirestore.bookingsCollectionRef
+        .where('bookingStatusCode', isEqualTo: 'C')
+        .where('paymentCompleted', isEqualTo: true)
+        .snapshots()
+        .map((s) => s.docs.length);
+
+    final warrantyClaims = AppFirestore.bookingsCollectionRef
+        .where('bookingStatusCode', isEqualTo: 'C')
+        .where('paymentCompleted', isEqualTo: true)
+        .where('warranty.availability', isEqualTo: true)
+        .snapshots()
+        .map((s) => s.docs.length);
+
+    final customers = AppFirestore.customersCollectionRef.snapshots().map(
+      (s) => s.docs.length,
+    );
+
+    final technicians = AppFirestore.usersCollectionRef.snapshots().map((s) {
+      return s.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['isAdmin'] != true;
+      }).length;
+    });
+
+    final completedBookings = AppFirestore.bookingsCollectionRef
+        .where('bookingStatusCode', isEqualTo: 'C')
+        .where('paymentCompleted', isEqualTo: true)
+        .snapshots()
+        .map(
+          (s) => s.docs
+              .map((doc) => BookingModel.fromDocumentSnapshot(doc))
+              .toList(),
+        );
+
+    return Rx.combineLatest7<
+      int,
+      int,
+      int,
+      int,
+      int,
+      int,
+      List<BookingModel>,
+      AdminDashboardData
+    >(
+      pending,
+      assigned,
+      completed,
+      warrantyClaims,
+      customers,
+      technicians,
+      completedBookings,
+      (p, a, c, w, cust, tech, bookings) {
+        Map<String, double> revenue = {};
+        final now = DateTime.now();
+
+        // Get last 6 months list
+        final last6Months = List.generate(6, (i) {
+          final date = DateTime(now.year, now.month - i, 1);
+          return DateFormat('MMM yyyy').format(date);
+        }).reversed.toList();
+
+        for (var month in last6Months) {
+          revenue[month] = 0.0;
+        }
+
+        for (var booking in bookings) {
+          if (booking.completedAt != null) {
+            final date = booking.completedAt!.toDate();
+            final monthStr = DateFormat('MMM yyyy').format(date);
+            if (revenue.containsKey(monthStr)) {
+              revenue[monthStr] =
+                  (revenue[monthStr] ?? 0.0) +
+                  (booking.completionData?.totalCost ?? 0.0);
+            }
+          }
+        }
+
+        return AdminDashboardData(
+          pendingCount: p,
+          assignedCount: a,
+          completedCount: c,
+          warrantyClaimsCount: w,
+          customerCount: cust,
+          technicianCount: tech,
+          monthlyRevenue: revenue,
+        );
+      },
+    );
   }
 
   static Future<bool> checkCustomerPhoneNumberAlredyExist(

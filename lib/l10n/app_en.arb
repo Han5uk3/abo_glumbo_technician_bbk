@@ -15,6 +15,18 @@
   "noReview": "No Review",
   "reject": "Reject",
   "tip": "Tip",
+  "choose": "Choose",
+  "availableLocations": "Available Locations",
+  "workHoursPricing": "Work Hours Pricing",
+  "workStartTime": "Work Start Time",
+  "workEndTime": "Work End Time",
+  "onWorkPrice": "On-Work Price",
+  "offWorkPrice": "Off-Work Price",
+  "generalPrice": "General Price (Fallback)",
+  "chooseLocations": "Choose Locations",
+  "pleaseEnterAnOnWorkPrice": "Please enter an on-work price",
+  "pleaseEnterOffWorkPrice": "Please enter off-work price",
+  "pleaseEnterAGeneralPrice": "Please enter a general price",
   "grantAdminAccess": "Grant Admin Access",
   "adminAccessManagement": "Admin Access Management",
   "searchByBookingId": "Search by Booking ID",
@@ -224,7 +236,7 @@
   "emailNotRegistered": "Email Not Registered",
   "invalidEmailFormat": "Invalid Email Format",
   "tooManyRequests": "Too many requests",
-  "netTechnicianror": "Network Error",
+  "netError": "Network Error",
   "wrongPassword": "Wrong password",
   "userNotFound": "User not found",
   "userDisabled": "User account disabled",
@@ -1348,5 +1360,55 @@
   "aboutNoHuntingTitle": "Zero Customer Hunting",
   "aboutNoHuntingDesc": "Say goodbye to chasing clients. We provide you with ready job requests from reliable customers, ensuring a continuous flow of work.",
   "aboutTransparencyTitle": "Guaranteed Transparency",
-  "aboutTransparencyDesc": "All service details and pricing are documented in advance, ensuring clarity in all financial dealings between you and the customer."
+  "aboutTransparencyDesc": "All service details and pricing are documented in advance, ensuring clarity in all financial dealings between you and the customer.",
+  "locationNumber": "Location {number}",
+  "@locationNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "selectedLocation": "Selected Location",
+  "mapPickerInstructions": "• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations",
+  "locationsSelectedCount": "{count, plural, one {{count} location selected} other {{count} locations selected}}",
+  "@locationsSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "addCurrentLocation": "Add Current Location",
+  "howToUse": "How to use",
+  "searchForAPlace": "Search for a place",
+  "myLocation": "My Location",
+  "noLocationSelected": "No Location Selected",
+  "tapOnMapToSelect": "Tap on map to select",
+  "confirmLocations": "Confirm Locations",
+  "radius": "Radius",
+  "locationAlreadyAdded": "Location already added",
+  "locationAddedToList": "Location added to list",
+  "pleaseEnableLocationServices": "Please enable location services",
+  "locationNotFound": "Location not found",
+  "errorFindingLocation": "Error finding location",
+  "editLocation": "Edit Location",
+  "addLocation": "Add Location",
+  "englishName": "English Name",
+  "pleaseEnterEnglishName": "Please enter English name",
+  "arabicName": "Arabic Name",
+  "pleaseEnterArabicName": "Please enter Arabic name",
+  "pleaseEnterArabicNameOnly": "Please enter Arabic name only",
+  "radiusInMeters": "Radius in meters",
+  "enterRadiusInMeters": "Enter radius in meters",
+  "meters": "meters",
+  "pleaseEnterRadius": "Please enter radius",
+  "addArea": "Add Area",
+  "gettingAddress": "Getting address...",
+  "serviceRadius": "Service Radius",
+  "km": "km",
+  "tapOnMapOrSearchToAddLocations": "Tap on map or search to add locations",
+  "selectedLocations": "Selected Locations"
 }

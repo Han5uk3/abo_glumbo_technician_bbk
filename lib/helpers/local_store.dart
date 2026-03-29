@@ -1,5 +1,6 @@
 import 'package:aboglumbo_bbk_panel/main.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -190,6 +191,41 @@ class LocalStore {
     await MyApp.box.flush();
   }
 
+  /// Store admin data
+  static Future<void> storeAdminData(AdminModel admin) async {
+    final Map<String, dynamic> adminData = admin.toJson();
+    final Map<String, dynamic> convertedData = _convertTimestampsToMillis(
+      adminData,
+    );
+    await MyApp.box.put('cached_admin_data', convertedData);
+    await MyApp.box.flush();
+  }
+
+  /// Get cached admin data
+  static AdminModel? getCachedAdminData() {
+    final adminData = MyApp.box.get('cached_admin_data');
+    if (adminData != null && adminData is Map) {
+      try {
+        final Map<String, dynamic> dataMap = Map<String, dynamic>.from(
+          adminData,
+        );
+        final Map<String, dynamic> convertedData = _convertMillisToTimestamps(
+          dataMap,
+        );
+        return AdminModel.fromJson(convertedData);
+      } catch (e) {
+        debugPrint('Error parsing cached admin data: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  static Future<void> clearCachedAdminData() async {
+    await MyApp.box.delete('cached_admin_data');
+    await MyApp.box.flush();
+  }
+
   // ============================================
   // Helper Methods for Timestamp Conversion
   // ============================================
@@ -233,14 +269,13 @@ class LocalStore {
   ) {
     final Map<String, dynamic> converted = {};
 
-    // Known timestamp fields in UserModel
+    // Known timestamp fields in UserModel and AdminModel
     final List<String> timestampFields = [
       'createdAt',
       'updatedAt',
       'lastLogin',
       'dateOfBirth',
       'registrationDate',
-      // Add any other timestamp fields your UserModel has
     ];
 
     data.forEach((key, value) {
@@ -274,6 +309,7 @@ class LocalStore {
   static Future<void> clearAllAuthData() async {
     await clearUID();
     await clearCachedUserData();
+    await clearCachedAdminData();
     await clearActiveBookingId();
 
     // ✅ FIXED: Only clear phone if Remember Me is disabled
@@ -281,9 +317,6 @@ class LocalStore {
       await clearRememberedPhone();
       await clearRememberMe();
     }
-
-    // ✅ Don't clear Remember Me checkbox state
-    // await clearRememberMe(); // Remove this line
 
     await MyApp.box.flush();
   }

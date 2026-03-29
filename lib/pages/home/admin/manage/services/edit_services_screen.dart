@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/crop_confirm_dialog.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/hierarchical_location_selector.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/new_text_field.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -12,6 +13,7 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../common_widget/map_picker_page.dart';
@@ -42,10 +44,17 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController descriptionArController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController onWorkHourPriceController =
+      TextEditingController();
+  final TextEditingController offWorkHourPriceController =
+      TextEditingController();
+  final TextEditingController workStartTimeController = TextEditingController();
+  final TextEditingController workEndTimeController = TextEditingController();
 
   XFile? selectedImage;
   CategoryModel? selectedCategory;
   List<SelectedCity> selectedCities = [];
+  List<Map<String, dynamic>> mapSelectedLocations = [];
 
   final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
        \u0750-\u077F
@@ -73,6 +82,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
 
       // Fill contents after loading
       fillContents();
+
+      // Fetch map-based locations
+      await fetchMapLocations();
     } catch (e) {
       log('Error initializing data: $e');
       if (mounted) {
@@ -126,6 +138,12 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       descriptionController.text = widget.service!.description ?? '';
       descriptionArController.text = widget.service!.description_ar ?? '';
       priceController.text = widget.service!.price.toString();
+      onWorkHourPriceController.text =
+          widget.service!.onWorkHourPrice?.toString() ?? '0';
+      offWorkHourPriceController.text =
+          widget.service!.offWorkHourPrice?.toString() ?? '0';
+      workStartTimeController.text = widget.service!.workStartTime ?? '08:00';
+      workEndTimeController.text = widget.service!.workEndTime ?? '17:00';
       isActive = widget.service!.isActive;
 
       // Restore hierarchical location data
@@ -170,10 +188,35 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     }
     if (widget.service == null) {
       priceController.text = '0';
+      onWorkHourPriceController.text = '0';
+      offWorkHourPriceController.text = '0';
+      workStartTimeController.text = '08:00';
+      workEndTimeController.text = '17:00';
     }
 
     // Set loading to false when data is filled
     setState(() => contentLoading = false);
+  }
+
+  Future<void> fetchMapLocations() async {
+    if (widget.service != null) {
+      try {
+        var snapshot = await AppFirestore.locationsCollectionRef
+            .where('service_id', isEqualTo: widget.service!.id)
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          var data = snapshot.docs.first.data() as Map<String, dynamic>;
+          setState(() {
+            mapSelectedLocations = List<Map<String, dynamic>>.from(
+              data['locations'] ?? [],
+            );
+          });
+        }
+      } catch (e) {
+        log('Error fetching map locations: $e');
+      }
+    }
   }
 
   Future pickImage() async {
@@ -219,6 +262,14 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
           description: descriptionController.text.trim(),
           description_ar: descriptionArController.text.trim(),
           price: double.tryParse(priceController.text.trim()),
+          onWorkHourPrice: double.tryParse(
+            onWorkHourPriceController.text.trim(),
+          ),
+          offWorkHourPrice: double.tryParse(
+            offWorkHourPriceController.text.trim(),
+          ),
+          workStartTime: workStartTimeController.text.trim(),
+          workEndTime: workEndTimeController.text.trim(),
           category: selectedCategory?.id,
           locations: selectedCities.isNotEmpty
               ? selectedCities
@@ -268,7 +319,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
         }
 
         if (widget.service == null) {
-          await AppFirestore.servicesCollectionRef.add(service.toJson());
+          final addedDocRef = await AppFirestore.servicesCollectionRef.add(
+            service.toJson(),
+          );
+          await saveMapLocations(addedDocRef.id);
         } else {
           // Check if the document exists before updating
           final docRef = AppFirestore.servicesCollectionRef.doc(
@@ -283,6 +337,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
           }
 
           await docRef.update(service.toEditJson(previous: widget.service!));
+          await saveMapLocations(widget.service!.id!);
         }
 
         if (mounted) {
@@ -321,6 +376,46 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     setState(() => isSaving = false);
   }
 
+  Future<void> saveMapLocations(String serviceId) async {
+    try {
+      var snapshot = await AppFirestore.locationsCollectionRef
+          .where('service_id', isEqualTo: serviceId)
+          .get();
+
+      final dataToSave = {
+        'service_id': serviceId,
+        'category_id': selectedCategory?.id,
+        'locations': mapSelectedLocations
+            .map(
+              (l) => {
+                'lat': l['lat'],
+                'lng': l['lng'],
+                'radius': l['radius'],
+                'en_name': l['en_name'],
+                'ar_name': l['ar_name'],
+              },
+            )
+            .toList(),
+        'updatedAt': Timestamp.now(),
+      };
+
+      if (snapshot.docs.isEmpty) {
+        if (mapSelectedLocations.isNotEmpty) {
+          await AppFirestore.locationsCollectionRef.add(dataToSave);
+        }
+      } else {
+        if (mapSelectedLocations.isEmpty) {
+          await snapshot.docs.first.reference.delete();
+        } else {
+          await snapshot.docs.first.reference.update(dataToSave);
+        }
+      }
+    } catch (e) {
+      log('Error saving map locations: $e');
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final safePadding = MediaQuery.of(context).padding;
@@ -351,13 +446,88 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               bottom: safePadding.bottom,
             ),
             children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(AppLocalizations.of(context)?.active ?? 'Active'),
+                value: isActive,
+                activeColor: AppColors.primary,
+                onChanged: (value) {
+                  setState(() {
+                    isActive = value;
+                  });
+                },
+              ),
+              Divider(),
+              SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context)!.category,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
-                  controller: nameController,
+                child: DropdownButtonFormField<CategoryModel>(
+                  value: selectedCategory,
+                  items: categories.map((category) {
+                    return DropdownMenuItem<CategoryModel>(
+                      value: category,
+                      child: Text(
+                        AppLocalizations.of(context)?.localeName == 'ar'
+                            ? category.name_ar ?? category.name ?? ''
+                            : category.name ?? '',
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() => selectedCategory = value);
+                  },
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.name ?? 'Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.red),
+                    ),
+                    hintText: AppLocalizations.of(context)?.choose ?? 'choose',
                   ),
+                  validator: (value) {
+                    if (value == null) {
+                      return AppLocalizations.of(
+                        context,
+                      )?.pleaseSelectACategory;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Text(
+                AppLocalizations.of(context)!.name,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: NewTextField(
+                  controller: nameController,
+                  hintText: AppLocalizations.of(context)?.name ?? 'Name',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(context)?.pleaseEnterAName;
@@ -366,15 +536,18 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   },
                 ),
               ),
+              Text(
+                AppLocalizations.of(context)!.nameArabic,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
+                child: NewTextField(
                   controller: nameArController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.nameArabic ??
-                        'Name (Arabic)',
-                  ),
+                  hintText:
+                      AppLocalizations.of(context)?.nameArabic ??
+                      'Name (Arabic)',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(
@@ -388,15 +561,18 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   },
                 ),
               ),
+              Text(
+                AppLocalizations.of(context)!.description,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
+                child: NewTextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.description ??
-                        'Description',
-                  ),
+                  hintText:
+                      AppLocalizations.of(context)?.description ??
+                      'Description',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(
@@ -407,15 +583,18 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   },
                 ),
               ),
+              Text(
+                AppLocalizations.of(context)!.descriptionArabic,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
+                child: NewTextField(
                   controller: descriptionArController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.descriptionArabic ??
-                        'Description (Arabic)',
-                  ),
+                  hintText:
+                      AppLocalizations.of(context)?.descriptionArabic ??
+                      'Description (Arabic)',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(
@@ -428,63 +607,273 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   },
                 ),
               ),
+
+              Text(
+                AppLocalizations.of(context)!.workHoursPricing,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TextFormField(
+                        controller: workStartTimeController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          disabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          hintText:
+                              AppLocalizations.of(context)?.choose ?? 'choose',
+                          labelStyle: TextStyle(color: Colors.black),
+                          labelText: AppLocalizations.of(
+                            context,
+                          )?.workStartTime,
+                          suffixIcon: Icon(Icons.access_time),
+                        ),
+                        onTap: () async {
+                          TimeOfDay? picked = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay(
+                              hour: int.parse(
+                                workStartTimeController.text.split(':')[0],
+                              ),
+                              minute: int.parse(
+                                workStartTimeController.text.split(':')[1],
+                              ),
+                            ),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              workStartTimeController.text =
+                                  '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TextFormField(
+                        controller: workEndTimeController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          disabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          hintText:
+                              AppLocalizations.of(context)?.choose ?? 'choose',
+                          labelStyle: TextStyle(color: Colors.black),
+                          labelText: AppLocalizations.of(context)?.workEndTime,
+                          suffixIcon: Icon(Icons.access_time),
+                        ),
+                        onTap: () async {
+                          TimeOfDay? picked = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay(
+                              hour: int.parse(
+                                workEndTimeController.text.split(':')[0],
+                              ),
+                              minute: int.parse(
+                                workEndTimeController.text.split(':')[1],
+                              ),
+                            ),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              workEndTimeController.text =
+                                  '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: NewTextField(
+                        keyboardType: TextInputType.number,
+                        labelText: AppLocalizations.of(context)!.onWorkPrice,
+                        hintText: AppLocalizations.of(context)!.onWorkPrice,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            )?.pleaseEnterAnOnWorkPrice;
+                          }
+                          return null;
+                        },
+                        controller: onWorkHourPriceController,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: NewTextField(
+                        keyboardType: TextInputType.number,
+                        controller: offWorkHourPriceController,
+                        hintText: AppLocalizations.of(context)!.offWorkPrice,
+                        labelText: AppLocalizations.of(context)!.offWorkPrice,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            )!.pleaseEnterOffWorkPrice;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
+                child: NewTextField(
                   keyboardType: TextInputType.number,
                   controller: priceController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.inspectionFee ?? 'Price',
-                  ),
+                  hintText: AppLocalizations.of(context)!.generalPrice,
+                  labelText: AppLocalizations.of(context)!.generalPrice,
                   validator: (value) {
-                    if (value == null || value.isEmpty || value == '') {
-                      priceController.text = '0';
-                      return null;
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterAGeneralPrice;
                     }
                     return null;
                   },
                 ),
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.availableLocations,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (selectedCities.isNotEmpty)
+                        Text(
+                          "${selectedCities.length} hierarchy selected",
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      if (mapSelectedLocations.isNotEmpty)
+                        Text(
+                          AppLocalizations.of(context)!.locationsSelectedCount(
+                            mapSelectedLocations.length,
+                          ),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
 
               // Hierarchical Location Selector Field
-              InkWell(
-                onTap: (){
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context)=>
-                      LocationMapPicker(
+              SizedBox(
+                height: 50,
+                child: eButton(
+                  onPressed: () async {
+                    final List<Map<String, dynamic>>? result =
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LocationMapPicker(
+                              initialLocations: mapSelectedLocations,
+                            ),
+                          ),
+                        );
 
-                      )
-                      ));
-                },
-                  child: Container(
-                    child:Text("Select Locations")
-                  )),
-              // Padding(
-              //   padding: const EdgeInsets.only(bottom: 16),
-              //   child: HierarchicalLocationSelector(
-              //     selectedCities: selectedCities,
-              //     onChanged: (cities) {
-              //
-              //       setState(() {
-              //         selectedCities = cities;
-              //       });
-              //     },
-              //     // Location selection is now optional
-              //     validator: null,
-              //   ),
-              // ),
-// Text(selectedCities.length.toString()),
-
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: FilledButton(
-                  onPressed: pickImage,
-                  child: Text(
-                    AppLocalizations.of(context)?.pickImage ?? 'Pick Image',
-                  ),
+                    if (result != null) {
+                      setState(() {
+                        mapSelectedLocations = result;
+                      });
+                    }
+                  },
+                  context: context,
+                  backgroundColor: AppColors.primary,
+                  text: AppLocalizations.of(context)!.chooseLocations,
+                  textColor: Colors.white,
                 ),
               ),
+              SizedBox(height: 16),
+
+              Text(
+                AppLocalizations.of(context)!.image,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: eButton(
+                  backgroundColor: AppColors.primary,
+                  context: context,
+                  onPressed: pickImage,
+                  text: AppLocalizations.of(context)?.pickImage ?? 'Pick Image',
+                  textColor: Colors.white,
+                ),
+              ),
+
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
@@ -506,49 +895,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                           )
                         : const SizedBox.shrink(),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: DropdownButtonFormField<CategoryModel>(
-                  value: selectedCategory,
-                  items: categories.map((category) {
-                    return DropdownMenuItem<CategoryModel>(
-                      value: category,
-                      child: Text(
-                        AppLocalizations.of(context)?.localeName == 'ar'
-                            ? category.name_ar ?? category.name ?? ''
-                            : category.name ?? '',
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => selectedCategory = value);
-                  },
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.category ?? 'Category',
-                  ),
-                  validator: (value) {
-                    if (value == null) {
-                      return AppLocalizations.of(
-                        context,
-                      )?.pleaseSelectACategory;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SwitchListTile(
-                  title: Text(AppLocalizations.of(context)?.active ?? 'Active'),
-                  value: isActive,
-                  onChanged: (value) {
-                    setState(() {
-                      isActive = value;
-                    });
-                  },
                 ),
               ),
             ],

@@ -265,13 +265,14 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
                 appBarTheme: AppBarTheme(
-                  centerTitle: false,
-                  backgroundColor: AppColors.primary,
+                  shape: Border(bottom: BorderSide(color: Colors.black12)),
+                  centerTitle: true,
+                  backgroundColor: AppColors.bgWhite,
                   elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.white),
+                  iconTheme: const IconThemeData(color: Colors.black, size: 18),
                   titleSpacing: 0,
                   titleTextStyle: GoogleFonts.dmSans(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),

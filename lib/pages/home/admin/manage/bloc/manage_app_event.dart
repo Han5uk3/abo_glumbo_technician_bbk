@@ -193,3 +193,12 @@ class DeleteServiceEvent extends ManageAppEvent {
   List<Object> get props => [serviceId];
 }
 
+class ToggleServiceStatusEvent extends ManageAppEvent {
+  final ServiceModel service;
+  final bool isActive;
+  const ToggleServiceStatusEvent(this.service, this.isActive);
+
+  @override
+  List<Object> get props => [service, isActive];
+}
+

@@ -19,17 +19,19 @@ class SendOTPPressed extends LoginEvent {
 class VerifyOTPPressed extends LoginEvent {
   final String verificationId;
   final String smsCode;
+  final String phoneNumber;
   final BuildContext context;
 
   VerifyOTPPressed({
     required this.verificationId,
     required this.smsCode,
+    required this.phoneNumber,
     required this.context,
   });
 
   @override
   String toString() =>
-      'VerifyOTPPressed { verificationId: $verificationId, smsCode: [HIDDEN] }';
+      'VerifyOTPPressed { verificationId: $verificationId, phoneNumber: $phoneNumber }';
 }
 
 class VerifyOTPForRegistration extends LoginEvent {

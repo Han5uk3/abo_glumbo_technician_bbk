@@ -194,6 +194,78 @@ abstract class AppLocalizations {
   /// **'Tip'**
   String get tip;
 
+  /// No description provided for @choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get choose;
+
+  /// No description provided for @availableLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Locations'**
+  String get availableLocations;
+
+  /// No description provided for @workHoursPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Hours Pricing'**
+  String get workHoursPricing;
+
+  /// No description provided for @workStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Start Time'**
+  String get workStartTime;
+
+  /// No description provided for @workEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Work End Time'**
+  String get workEndTime;
+
+  /// No description provided for @onWorkPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Work Price'**
+  String get onWorkPrice;
+
+  /// No description provided for @offWorkPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-Work Price'**
+  String get offWorkPrice;
+
+  /// No description provided for @generalPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'General Price (Fallback)'**
+  String get generalPrice;
+
+  /// No description provided for @chooseLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Locations'**
+  String get chooseLocations;
+
+  /// No description provided for @pleaseEnterAnOnWorkPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an on-work price'**
+  String get pleaseEnterAnOnWorkPrice;
+
+  /// No description provided for @pleaseEnterOffWorkPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter off-work price'**
+  String get pleaseEnterOffWorkPrice;
+
+  /// No description provided for @pleaseEnterAGeneralPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a general price'**
+  String get pleaseEnterAGeneralPrice;
+
   /// No description provided for @grantAdminAccess.
   ///
   /// In en, this message translates to:
@@ -1448,11 +1520,11 @@ abstract class AppLocalizations {
   /// **'Too many requests'**
   String get tooManyRequests;
 
-  /// No description provided for @netTechnicianror.
+  /// No description provided for @netError.
   ///
   /// In en, this message translates to:
   /// **'Network Error'**
-  String get netTechnicianror;
+  String get netError;
 
   /// No description provided for @wrongPassword.
   ///
@@ -7754,6 +7826,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All service details and pricing are documented in advance, ensuring clarity in all financial dealings between you and the customer.'**
   String get aboutTransparencyDesc;
+
+  /// No description provided for @locationNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Location {number}'**
+  String locationNumber(int number);
+
+  /// No description provided for @selectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Location'**
+  String get selectedLocation;
+
+  /// No description provided for @mapPickerInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations'**
+  String get mapPickerInstructions;
+
+  /// No description provided for @locationsSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} location selected} other {{count} locations selected}}'**
+  String locationsSelectedCount(int count);
+
+  /// No description provided for @addCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Current Location'**
+  String get addCurrentLocation;
+
+  /// No description provided for @howToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use'**
+  String get howToUse;
+
+  /// No description provided for @searchForAPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a place'**
+  String get searchForAPlace;
+
+  /// No description provided for @myLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'My Location'**
+  String get myLocation;
+
+  /// No description provided for @noLocationSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No Location Selected'**
+  String get noLocationSelected;
+
+  /// No description provided for @tapOnMapToSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap on map to select'**
+  String get tapOnMapToSelect;
+
+  /// No description provided for @confirmLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Locations'**
+  String get confirmLocations;
+
+  /// No description provided for @radius.
+  ///
+  /// In en, this message translates to:
+  /// **'Radius'**
+  String get radius;
+
+  /// No description provided for @locationAlreadyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Location already added'**
+  String get locationAlreadyAdded;
+
+  /// No description provided for @locationAddedToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Location added to list'**
+  String get locationAddedToList;
+
+  /// No description provided for @pleaseEnableLocationServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services'**
+  String get pleaseEnableLocationServices;
+
+  /// No description provided for @locationNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not found'**
+  String get locationNotFound;
+
+  /// No description provided for @errorFindingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error finding location'**
+  String get errorFindingLocation;
+
+  /// No description provided for @editLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Location'**
+  String get editLocation;
+
+  /// No description provided for @addLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Location'**
+  String get addLocation;
+
+  /// No description provided for @englishName.
+  ///
+  /// In en, this message translates to:
+  /// **'English Name'**
+  String get englishName;
+
+  /// No description provided for @pleaseEnterEnglishName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter English name'**
+  String get pleaseEnterEnglishName;
+
+  /// No description provided for @arabicName.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic Name'**
+  String get arabicName;
+
+  /// No description provided for @pleaseEnterArabicName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Arabic name'**
+  String get pleaseEnterArabicName;
+
+  /// No description provided for @pleaseEnterArabicNameOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Arabic name only'**
+  String get pleaseEnterArabicNameOnly;
+
+  /// No description provided for @radiusInMeters.
+  ///
+  /// In en, this message translates to:
+  /// **'Radius in meters'**
+  String get radiusInMeters;
+
+  /// No description provided for @enterRadiusInMeters.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter radius in meters'**
+  String get enterRadiusInMeters;
+
+  /// No description provided for @meters.
+  ///
+  /// In en, this message translates to:
+  /// **'meters'**
+  String get meters;
+
+  /// No description provided for @pleaseEnterRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter radius'**
+  String get pleaseEnterRadius;
+
+  /// No description provided for @addArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Area'**
+  String get addArea;
+
+  /// No description provided for @gettingAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting address...'**
+  String get gettingAddress;
+
+  /// No description provided for @serviceRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Radius'**
+  String get serviceRadius;
+
+  /// No description provided for @km.
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get km;
+
+  /// No description provided for @tapOnMapOrSearchToAddLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap on map or search to add locations'**
+  String get tapOnMapOrSearchToAddLocations;
+
+  /// No description provided for @selectedLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Locations'**
+  String get selectedLocations;
 }
 
 class _AppLocalizationsDelegate

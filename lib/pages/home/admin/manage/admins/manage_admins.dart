@@ -1,12 +1,11 @@
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
-import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/admins/add_admin.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ManageAdmins extends StatefulWidget {
   const ManageAdmins({super.key});
@@ -19,7 +18,7 @@ class _ManageAdminsState extends State<ManageAdmins>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  int _selectedFilter = 0; // 0 = All, 1 = Full Admin, 2 = Customer Service
+  int _selectedFilter = 0; // 0 = All, 1 = Customer Service, 2 = Full Admin
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
 
@@ -52,189 +51,65 @@ class _ManageAdminsState extends State<ManageAdmins>
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        final theme = Theme.of(context);
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: value,
-              child: AlertDialog(
-                backgroundColor: Colors.white,
-                actionsAlignment: MainAxisAlignment.start,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                title: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.red.shade400, Colors.red.shade600],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.remove_moderator_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.revokeAdminAccess,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                content: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    '${AppLocalizations.of(context)!.areYouSureYouWantToRevokeAdminAccessFor} $adminName?',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                actions: [
-                  eButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    text: AppLocalizations.of(context)!.cancel,
-                    context: context,
-                    textColor: Colors.black,
-                    backgroundColor: Colors.white,
-                  ),
-                  eButton(
-                    text: AppLocalizations.of(context)!.revoke,
-                    onPressed: () => Navigator.of(context).pop(true),
-                    context: context,
-                    textColor: Colors.white,
-                    backgroundColor: Colors.red.shade600,
-                  ),
-                ],
-              ),
-            );
-          },
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text('Revoke Access'),
+          content: Text('Are you sure you want to remove admin access for $adminName?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            eButton(
+              text: 'Revoke',
+              onPressed: () => Navigator.of(context).pop(true),
+              context: context,
+              textColor: Colors.white,
+              backgroundColor: Colors.red.shade600,
+            ),
+          ],
         );
       },
     );
   }
 
-  Future<void> _revokeAdminAccess(UserModel admin) async {
+  Future<void> _revokeAdminAccess(AdminModel admin) async {
+    if (admin.isCoreAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Core admin cannot be removed.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     try {
-      // Show loading
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => Center(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 20, child: Loader()),
-                  const SizedBox(height: 16),
-                  Text(
-                    '${AppLocalizations.of(context)!.revokingAdminAccess}...',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }
-
-      // Update Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(admin.uid)
-          .update({
-            'isAdmin': false,
-            'isGrantedAdminByMain': false,
-            'adminAccessLevel': FieldValue.delete(),
-            'grantedAdminAt': FieldValue.delete(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-
-      // Close loading dialog
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-
-      // Show success message
+      await AppFirestore.adminsCollectionRef.doc(admin.uid).delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '${AppLocalizations.of(context)!.adminAccessRevokedFor} ${admin.name}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Colors.green.shade600,
-            elevation: 6,
-          ),
+          SnackBar(content: Text('Admin access revoked for ${admin.name}')),
         );
       }
     } catch (e) {
-      // Close loading dialog if open
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-
-      // Show error message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '${AppLocalizations.of(context)!.error}: ${e.toString()}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Colors.red.shade600,
-            elevation: 6,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _deletePendingInvite(AdminModel admin) async {
+     try {
+      await AppFirestore.pendingAdminsCollectionRef.doc(admin.uid).delete();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invite deleted for ${admin.name}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -242,260 +117,81 @@ class _ManageAdminsState extends State<ManageAdmins>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.manageAdmins,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
-        centerTitle: false,
+        title: const Text('Manage Admins', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () {
-              setState(() {});
-            },
-            tooltip: AppLocalizations.of(context)!.refresh,
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: Column(
         children: [
-          // Header gradient section
-          Column(
-            children: [
-              // Modern Search Bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                child: Hero(
-                  tag: 'search_bar_admins',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.toLowerCase();
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.searchAdmins,
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 15,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: theme.colorScheme.primary,
-                            size: 24,
-                          ),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.clear_rounded,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _searchController.clear();
-                                      _searchQuery = '';
-                                    });
-                                  },
-                                  tooltip: AppLocalizations.of(context)!.clear,
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+              decoration: InputDecoration(
+                hintText: 'Search admins...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Colors.white,
               ),
-
-              // Enhanced Filter Chips
-              SizedBox(
-                width: double.infinity,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      SizedBox(width: 16),
-                      _buildFilterChip(
-                        context: context,
-                        label: AppLocalizations.of(context)!.all,
-                        icon: Icons.apps_rounded,
-                        isSelected: _selectedFilter == 0,
-                        onTap: () => setState(() => _selectedFilter = 0),
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 10),
-                      _buildFilterChip(
-                        context: context,
-                        label: AppLocalizations.of(context)!.fullAdmin,
-                        icon: Icons.admin_panel_settings_rounded,
-                        isSelected: _selectedFilter == 1,
-                        onTap: () => setState(() => _selectedFilter = 1),
-                        color: Colors.green,
-                      ),
-                      const SizedBox(width: 10),
-                      _buildFilterChip(
-                        context: context,
-                        label: AppLocalizations.of(context)!.customerService,
-                        icon: Icons.support_agent_rounded,
-                        isSelected: _selectedFilter == 2,
-                        onTap: () => setState(() => _selectedFilter = 2),
-                        color: Colors.orange,
-                      ),
-                      SizedBox(width: 16),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+          
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _buildFilterChip(0, 'All', Icons.apps),
+                const SizedBox(width: 8),
+                _buildFilterChip(1, 'Customer Service', Icons.support_agent),
+                const SizedBox(width: 8),
+                _buildFilterChip(2, 'Full Admin', Icons.admin_panel_settings),
+              ],
+            ),
           ),
 
-          // Admins List
           Expanded(
-            child: StreamBuilder<List<UserModel>>(
-              stream: AppServices.getAllAgentsStream(),
+            child: StreamBuilder<List<AdminModel>>(
+              stream: Rx.combineLatest2(
+                AppServices.getAdminsStream(),
+                AppServices.getPendingAdminsStream(),
+                (List<AdminModel> active, List<AdminModel> pending) {
+                  // Mark pending admins as pending for UI
+                  final pWithFlag = pending.map((e) => e.copyWith(uid: 'pending_${e.uid}')).toList();
+                  return [...active, ...pWithFlag];
+                },
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 25, child: Loader()),
-                        const SizedBox(height: 10),
-                        Text(
-                          AppLocalizations.of(context)!.loadingAdmins,
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
-
-                if (snapshot.hasError) {
-                  return _buildEmptyState(
-                    context: context,
-                    icon: Icons.error_outline_rounded,
-                    title: AppLocalizations.of(context)!.error,
-                    color: theme.colorScheme.error,
-                  );
-                }
-
+                
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return _buildEmptyState(
-                    context: context,
-                    icon: Icons.admin_panel_settings_rounded,
-                    title: AppLocalizations.of(context)!.noAdminsFound,
-                    color: theme.colorScheme.primary,
-                  );
+                  return const Center(child: Text('No admins found.'));
                 }
 
-                final allUsers = snapshot.data!;
-
-                // Filter only users with granted admin access (excluding main admin)
-                final admins = allUsers.where((user) {
-                  // Exclude main admin account
-                  if (user.phone == '111111111' ||
-                      user.phone == '+966111111111') {
-                    return false;
-                  }
-                  // Only show users with granted admin access
-                  return user.isGrantedAdminByMain == true;
+                final allAdmins = snapshot.data!.where((admin) {
+                  final matchesSearch = admin.name.toLowerCase().contains(_searchQuery) || 
+                                      admin.phoneNumber.contains(_searchQuery) ||
+                                      admin.email.toLowerCase().contains(_searchQuery);
+                  
+                  final matchesFilter = _selectedFilter == 0 || admin.accessLevel == _selectedFilter;
+                  
+                  return matchesSearch && matchesFilter;
                 }).toList();
-
-                if (admins.isEmpty) {
-                  return _buildEmptyState(
-                    context: context,
-                    icon: Icons.admin_panel_settings_rounded,
-                    title: AppLocalizations.of(context)!.noAdminsFound,
-
-                    color: theme.colorScheme.primary,
-                  );
-                }
-
-                // Apply filters
-                final filteredAdmins = admins.where((admin) {
-                  bool matchesSearch = true;
-                  if (_searchQuery.isNotEmpty) {
-                    final name = (admin.name ?? '').toLowerCase();
-                    final email = (admin.email ?? '').toLowerCase();
-                    final phone = (admin.phone ?? '').toLowerCase();
-                    matchesSearch =
-                        name.contains(_searchQuery) ||
-                        email.contains(_searchQuery) ||
-                        phone.contains(_searchQuery);
-                  }
-
-                  bool matchesAccessLevel = true;
-                  if (_selectedFilter == 1) {
-                    matchesAccessLevel = admin.adminAccessLevel == 1;
-                  } else if (_selectedFilter == 2) {
-                    matchesAccessLevel = admin.adminAccessLevel == 2;
-                  }
-
-                  return matchesSearch && matchesAccessLevel;
-                }).toList();
-
-                if (filteredAdmins.isEmpty) {
-                  return _buildEmptyState(
-                    context: context,
-                    icon: Icons.search_off_rounded,
-                    title: AppLocalizations.of(
-                      context,
-                    )!.noAdminsMatchYourFilters,
-
-                    color: theme.colorScheme.primary,
-                  );
-                }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.only(
-                    top: 16,
-                    bottom: 100,
-                    left: 16,
-                    right: 16,
-                  ),
-                  itemCount: filteredAdmins.length,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: allAdmins.length,
                   itemBuilder: (context, index) {
-                    return _buildAdminCard(
-                      context: context,
-                      admin: filteredAdmins[index],
-                      index: index,
-                    );
+                    final admin = allAdmins[index];
+                    final isPending = admin.uid?.startsWith('pending_') ?? false;
+                    return _buildAdminCard(admin, isPending);
                   },
                 );
               },
@@ -506,336 +202,100 @@ class _ManageAdminsState extends State<ManageAdmins>
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
         child: FloatingActionButton.extended(
-          onPressed: () {
-            setState(() {
-              _searchController.clear();
-              _searchQuery = '';
-              _selectedFilter = 0;
-            });
-          },
-          backgroundColor: theme.colorScheme.primaryContainer,
-          foregroundColor: theme.colorScheme.onPrimaryContainer,
-          elevation: 4,
-          icon: const Icon(Icons.refresh_rounded),
-          label: Text(
-            AppLocalizations.of(context)!.resetFilters,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddAdminPage())),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add),
+          label: const Text('Add Admin'),
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [color, color.withOpacity(0.8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: isSelected ? null : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected ? color : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: color.withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: isSelected ? Colors.white : color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  fontSize: 14,
+  Widget _buildFilterChip(int index, String label, IconData icon) {
+    final isSelected = _selectedFilter == index;
+    return FilterChip(
+      selected: isSelected,
+      onSelected: (val) => setState(() => _selectedFilter = index),
+      label: Text(label),
+      avatar: Icon(icon, size: 18, color: isSelected ? AppColors.primary : Colors.grey),
+      selectedColor: AppColors.primary.withOpacity(0.1),
+      checkmarkColor: AppColors.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
+      ),
+    );
+  }
+
+  Widget _buildAdminCard(AdminModel admin, bool isPending) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  child: Text(admin.name.isNotEmpty ? admin.name[0].toUpperCase() : 'A', style: TextStyle(color: AppColors.primary)),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdminCard({
-    required BuildContext context,
-    required UserModel admin,
-    required int index,
-  }) {
-    final theme = Theme.of(context);
-    final isFullAdmin = admin.adminAccessLevel == 1;
-    final accessLevelColor = isFullAdmin ? Colors.green : Colors.orange;
-    final accessLevelLabel = isFullAdmin
-        ? AppLocalizations.of(context)!.fullAdmin
-        : AppLocalizations.of(context)!.customerService;
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300 + (index * 50)),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 50 * (1 - value)),
-          child: Opacity(opacity: value, child: child),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        child: Material(
-          elevation: 3,
-          shadowColor: Colors.black.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Admin Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              admin.name ?? 'Unknown',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accessLevelColor.shade400,
-                                    accessLevelColor.shade600,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accessLevelColor.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isFullAdmin
-                                        ? Icons.admin_panel_settings_rounded
-                                        : Icons.support_agent_rounded,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    accessLevelLabel,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      // Revoke Button
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () async {
-                            final confirmed =
-                                await _showRevokeConfirmationDialog(
-                                  context: context,
-                                  adminName: admin.name ?? 'this user',
-                                );
-
-                            if (confirmed == true && context.mounted) {
-                              await _revokeAdminAccess(admin);
-                            }
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.red.shade400,
-                                  Colors.red.shade600,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.remove_moderator_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
+                      Text(admin.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(admin.email, style: const TextStyle(color: Colors.grey, fontSize: 14)),
                     ],
                   ),
-
-                  const SizedBox(height: 12),
-                  const Divider(),
-                  const SizedBox(height: 8),
-
-                  // Additional Info
-                  if (admin.email != null && admin.email!.isNotEmpty)
-                    _buildInfoRow(
-                      icon: Icons.email_outlined,
-                      text: admin.email!,
-                    ),
-                  if (admin.phone != null && admin.phone!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: _buildInfoRow(
-                        icon: Icons.phone_outlined,
-                        text: sanitizedPhone(admin.phone!),
-                      ),
-                    ),
-                  if (admin.grantedAdminAt != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: _buildInfoRow(
-                        icon: Icons.calendar_today_rounded,
-                        text:
-                            '${AppLocalizations.of(context)!.grantedOn}: ${DateFormat('MMM dd, yyyy').format(admin.grantedAdminAt!.toDate())}',
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String sanitizedPhone(String phone) {
-    if (phone.startsWith('0')) {
-      return '+966${phone.substring(1)}';
-    }
-    if (phone.startsWith('+966')) {
-      return phone;
-    }
-    return '+966$phone';
-  }
-
-  Widget _buildInfoRow({required IconData icon, required String text}) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required Color color,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 64, color: color),
+                if (isPending)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('Invited', style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Access Level', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(admin.accessLevel == 2 ? 'Full Admin' : 'Customer Service', style: const TextStyle(fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Phone', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(admin.phoneNumber, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                if (!admin.isCoreAdmin)
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
+                    onPressed: () async {
+                      final confirm = await _showRevokeConfirmationDialog(context: context, adminName: admin.name);
+                      if (confirm == true) {
+                        if (isPending) {
+                          final actualId = admin.uid!.replaceFirst('pending_', '');
+                          await _deletePendingInvite(admin.copyWith(uid: actualId));
+                        } else {
+                          await _revokeAdminAccess(admin);
+                        }
+                      }
+                    },
+                  ),
+              ],
             ),
-            const SizedBox(height: 12),
           ],
         ),
       ),

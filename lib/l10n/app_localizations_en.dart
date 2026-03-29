@@ -59,6 +59,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tip => 'Tip';
 
   @override
+  String get choose => 'Choose';
+
+  @override
+  String get availableLocations => 'Available Locations';
+
+  @override
+  String get workHoursPricing => 'Work Hours Pricing';
+
+  @override
+  String get workStartTime => 'Work Start Time';
+
+  @override
+  String get workEndTime => 'Work End Time';
+
+  @override
+  String get onWorkPrice => 'On-Work Price';
+
+  @override
+  String get offWorkPrice => 'Off-Work Price';
+
+  @override
+  String get generalPrice => 'General Price (Fallback)';
+
+  @override
+  String get chooseLocations => 'Choose Locations';
+
+  @override
+  String get pleaseEnterAnOnWorkPrice => 'Please enter an on-work price';
+
+  @override
+  String get pleaseEnterOffWorkPrice => 'Please enter off-work price';
+
+  @override
+  String get pleaseEnterAGeneralPrice => 'Please enter a general price';
+
+  @override
   String get grantAdminAccess => 'Grant Admin Access';
 
   @override
@@ -705,7 +741,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tooManyRequests => 'Too many requests';
 
   @override
-  String get netTechnicianror => 'Network Error';
+  String get netError => 'Network Error';
 
   @override
   String get wrongPassword => 'Wrong password';
@@ -4117,4 +4153,118 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutTransparencyDesc =>
       'All service details and pricing are documented in advance, ensuring clarity in all financial dealings between you and the customer.';
+
+  @override
+  String locationNumber(int number) {
+    return 'Location $number';
+  }
+
+  @override
+  String get selectedLocation => 'Selected Location';
+
+  @override
+  String get mapPickerInstructions =>
+      '• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations';
+
+  @override
+  String locationsSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count locations selected',
+      one: '$count location selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addCurrentLocation => 'Add Current Location';
+
+  @override
+  String get howToUse => 'How to use';
+
+  @override
+  String get searchForAPlace => 'Search for a place';
+
+  @override
+  String get myLocation => 'My Location';
+
+  @override
+  String get noLocationSelected => 'No Location Selected';
+
+  @override
+  String get tapOnMapToSelect => 'Tap on map to select';
+
+  @override
+  String get confirmLocations => 'Confirm Locations';
+
+  @override
+  String get radius => 'Radius';
+
+  @override
+  String get locationAlreadyAdded => 'Location already added';
+
+  @override
+  String get locationAddedToList => 'Location added to list';
+
+  @override
+  String get pleaseEnableLocationServices => 'Please enable location services';
+
+  @override
+  String get locationNotFound => 'Location not found';
+
+  @override
+  String get errorFindingLocation => 'Error finding location';
+
+  @override
+  String get editLocation => 'Edit Location';
+
+  @override
+  String get addLocation => 'Add Location';
+
+  @override
+  String get englishName => 'English Name';
+
+  @override
+  String get pleaseEnterEnglishName => 'Please enter English name';
+
+  @override
+  String get arabicName => 'Arabic Name';
+
+  @override
+  String get pleaseEnterArabicName => 'Please enter Arabic name';
+
+  @override
+  String get pleaseEnterArabicNameOnly => 'Please enter Arabic name only';
+
+  @override
+  String get radiusInMeters => 'Radius in meters';
+
+  @override
+  String get enterRadiusInMeters => 'Enter radius in meters';
+
+  @override
+  String get meters => 'meters';
+
+  @override
+  String get pleaseEnterRadius => 'Please enter radius';
+
+  @override
+  String get addArea => 'Add Area';
+
+  @override
+  String get gettingAddress => 'Getting address...';
+
+  @override
+  String get serviceRadius => 'Service Radius';
+
+  @override
+  String get km => 'km';
+
+  @override
+  String get tapOnMapOrSearchToAddLocations =>
+      'Tap on map or search to add locations';
+
+  @override
+  String get selectedLocations => 'Selected Locations';
 }

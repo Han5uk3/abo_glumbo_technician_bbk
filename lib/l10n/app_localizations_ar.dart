@@ -58,6 +58,42 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tip => 'إكرامية';
 
   @override
+  String get choose => 'Choose';
+
+  @override
+  String get availableLocations => 'Available Locations';
+
+  @override
+  String get workHoursPricing => 'Work Hours Pricing';
+
+  @override
+  String get workStartTime => 'Work Start Time';
+
+  @override
+  String get workEndTime => 'Work End Time';
+
+  @override
+  String get onWorkPrice => 'On-Work Price';
+
+  @override
+  String get offWorkPrice => 'Off-Work Price';
+
+  @override
+  String get generalPrice => 'General Price (Fallback)';
+
+  @override
+  String get chooseLocations => 'Choose Locations';
+
+  @override
+  String get pleaseEnterAnOnWorkPrice => 'Please enter an on-work price';
+
+  @override
+  String get pleaseEnterOffWorkPrice => 'Please enter off-work price';
+
+  @override
+  String get pleaseEnterAGeneralPrice => 'Please enter a general price';
+
+  @override
   String get grantAdminAccess => 'منح صلاحيات المشرف';
 
   @override
@@ -700,7 +736,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tooManyRequests => 'عدد كبير جدا من الطلبات';
 
   @override
-  String get netTechnicianror => 'حدث خطأ في تحميل الفنيين';
+  String get netError => 'Network Error';
 
   @override
   String get wrongPassword => 'كلمة المرور خاطئة';
@@ -4056,4 +4092,118 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get aboutTransparencyDesc =>
       'يتم توثيق جميع تفاصيل الخدمة والأسعار مسبقاً، مما يضمن وضوح التعاملات المالية بينك وبين العميل.';
+
+  @override
+  String locationNumber(int number) {
+    return 'موقع $number';
+  }
+
+  @override
+  String get selectedLocation => 'الموقع المختار';
+
+  @override
+  String get mapPickerInstructions =>
+      '• اضغط على الخريطة لاختيار موقع\n• استخدم البحث للعثور على الأماكن\n• أضف عدة مواقع إلى القائمة\n• اضبط نصف القطر - يتم تطبيقه على جميع المواقع\n• قم بإزالة المواقع الفردية باستخدام X\n• قم بالتأكيد لحفظ جميع المواقع المختارة';
+
+  @override
+  String locationsSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مواقع مختارة',
+      one: 'موقع واحد مختار',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addCurrentLocation => 'إضافة الموقع الحالي';
+
+  @override
+  String get howToUse => 'كيفية الاستخدام';
+
+  @override
+  String get searchForAPlace => 'بحث عن مكان';
+
+  @override
+  String get myLocation => 'موقعي';
+
+  @override
+  String get noLocationSelected => 'لم يتم اختيار موقع';
+
+  @override
+  String get tapOnMapToSelect => 'اضغط على الخريطة للاختيار';
+
+  @override
+  String get confirmLocations => 'تأكيد المواقع';
+
+  @override
+  String get radius => 'نصف القطر';
+
+  @override
+  String get locationAlreadyAdded => 'الموقع مضاف بالفعل';
+
+  @override
+  String get locationAddedToList => 'تم إضافة الموقع إلى القائمة';
+
+  @override
+  String get pleaseEnableLocationServices => 'يرجى تفعيل خدمات الموقع';
+
+  @override
+  String get locationNotFound => 'لم يتم العثور على الموقع';
+
+  @override
+  String get errorFindingLocation => 'خطأ في البحث عن الموقع';
+
+  @override
+  String get editLocation => 'تعديل الموقع';
+
+  @override
+  String get addLocation => 'إضافة الموقع';
+
+  @override
+  String get englishName => 'الاسم بالإنجليزية';
+
+  @override
+  String get pleaseEnterEnglishName => 'يرجى إدخال الاسم بالإنجليزية';
+
+  @override
+  String get arabicName => 'الاسم بالعربية';
+
+  @override
+  String get pleaseEnterArabicName => 'يرجى إدخال الاسم بالعربية';
+
+  @override
+  String get pleaseEnterArabicNameOnly => 'يرجى إدخال الاسم بالعربية فقط';
+
+  @override
+  String get radiusInMeters => 'نصف القطر بالأمتار';
+
+  @override
+  String get enterRadiusInMeters => 'أدخل نصف القطر بالأمتار';
+
+  @override
+  String get meters => 'أمتار';
+
+  @override
+  String get pleaseEnterRadius => 'يرجى إدخال نصف القطر';
+
+  @override
+  String get addArea => 'إضافة منطقة';
+
+  @override
+  String get gettingAddress => 'جاري الحصول على العنوان...';
+
+  @override
+  String get serviceRadius => 'نصف قطر الخدمة';
+
+  @override
+  String get km => 'كم';
+
+  @override
+  String get tapOnMapOrSearchToAddLocations =>
+      'اضغط على الخريطة أو ابحث لإضافة مواقع';
+
+  @override
+  String get selectedLocations => 'المواقع المختارة';
 }

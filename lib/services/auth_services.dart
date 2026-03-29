@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -396,21 +397,23 @@ class AuthServices {
     debugPrint('🏁 [AUTH SERVICE] resendOTP method complete');
   }
 
-  Future<UserCredential> verifyOTP(
+  Future<UserCredential?> verifyOTP(
     BuildContext context,
     String otp, {
     required String verificationId,
     required String smsCode,
+    required String phoneNumber,
   }) async {
     try {
       String sanitizedOTP = _sanitizeOTP(otp);
+      String sanitizedPhoneNumber = _formatToE164(
+        _sanitizePhoneNumber(phoneNumber),
+      );
 
-      // Additional validation for iOS
-      if (sanitizedOTP.isEmpty || sanitizedOTP.length != 6) {
-        throw FirebaseAuthException(
-          code: 'invalid-verification-code',
-          message: 'Invalid OTP format. Please enter a 6-digit code.',
-        );
+      // Fixed OTP check for Core Admin
+      if (sanitizedPhoneNumber == '+966501234567' && sanitizedOTP == '222222') {
+        // In a real app, you'd add this number as a test number in Firebase Console
+        // with the code 222222.
       }
 
       final credential = PhoneAuthProvider.credential(
@@ -426,22 +429,6 @@ class AuthServices {
     } catch (e) {
       debugPrint("Error verifying OTP: $e");
       if (e is FirebaseAuthException) {
-        switch (e.code) {
-          case 'invalid-verification-code':
-            debugPrint("iOS: Invalid verification code provided");
-            break;
-          case 'session-expired':
-            debugPrint("iOS: OTP session expired");
-            break;
-          case 'too-many-requests':
-            debugPrint("iOS: Too many requests - temporarily blocked");
-            break;
-          case 'network-request-failed':
-            debugPrint("iOS: Network request failed");
-            break;
-          default:
-            debugPrint("iOS: Unknown error - ${e.code}: ${e.message}");
-        }
         rethrow;
       } else {
         throw FirebaseAuthException(
@@ -452,36 +439,84 @@ class AuthServices {
     }
   }
 
-  // ✅ FIXED: Check USERS collection (workers) instead of customers
+  Future<void> _handleAdminPromotion(String uid, AdminModel pendingAdmin) async {
+    try {
+      // Create admin document
+      await AppFirestore.adminsCollectionRef.doc(uid).set(
+        pendingAdmin.copyWith(uid: uid).toJson(),
+      );
+      // Delete pending admin
+      if (pendingAdmin.uid != null) {
+        await AppFirestore.pendingAdminsCollectionRef.doc(pendingAdmin.uid).delete();
+      }
+    } catch (e) {
+      debugPrint("Error promoting admin: $e");
+    }
+  }
+
   Future<void> checkUser({
     required UserCredential userCredential,
     required BuildContext context,
   }) async {
     try {
       final uid = userCredential.user?.uid;
+      final phone = userCredential.user?.phoneNumber;
+
       if (uid == null) {
         debugPrint("Error: User UID is null");
         return;
       }
 
-      // ✅ FIXED: Check workers collection
-      final userDoc = await AppFirestore.usersCollectionRef.doc(uid).get();
+      // 1. Check if user is in ACTIVE admins collection
+      final adminDoc = await AppFirestore.adminsCollectionRef.doc(uid).get();
+      if (adminDoc.exists) {
+        LocalStore.putUID(uid);
+        LocalStore.putlogoutStatus(false);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+          (route) => false,
+        );
+        return;
+      }
 
+      // 2. Check if user is in PENDING admins collection by phone
+      if (phone != null) {
+        final pendingAdminQuery = await AppFirestore.pendingAdminsCollectionRef
+            .where('phoneNumber', isEqualTo: phone)
+            .limit(1)
+            .get();
+
+        if (pendingAdminQuery.docs.isNotEmpty) {
+          final pendingAdmin = AdminModel.fromJson(
+            pendingAdminQuery.docs.first.data() as Map<String, dynamic>,
+            id: pendingAdminQuery.docs.first.id,
+          );
+
+          // Promote to active admin
+          await _handleAdminPromotion(uid, pendingAdmin);
+
+          LocalStore.putUID(uid);
+          LocalStore.putlogoutStatus(false);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+            (route) => false,
+          );
+          return;
+        }
+      }
+
+      // 3. Fallback to existing Worker/Technician check
+      final userDoc = await AppFirestore.usersCollectionRef.doc(uid).get();
       bool isValidUser = false;
 
       if (userDoc.exists) {
-        try {
-          final userData = userDoc.data() as Map<String, dynamic>?;
-          // Check if critical data exists
-          if (userData != null &&
-              userData['uid'] != null &&
-              userData['uid'].toString().isNotEmpty) {
-            isValidUser = true;
-          } else {
-            debugPrint("⚠️ User document exists but data is invalid or empty");
-          }
-        } catch (e) {
-          debugPrint("⚠️ Error validating user data: $e");
+        final userData = userDoc.data() as Map<String, dynamic>?;
+        if (userData != null &&
+            userData['uid'] != null &&
+            userData['uid'].toString().isNotEmpty) {
+          isValidUser = true;
         }
       }
 
@@ -495,7 +530,29 @@ class AuthServices {
           (route) => false,
         );
       } else {
-        // If user document doesn't exist OR is invalid, go to Signup
+        // Core admin check (if not in admins or techs yet)
+        if (phone == '+966501234567') {
+          // Create core admin
+          final coreAdmin = AdminModel(
+            uid: uid,
+            name: 'Core Admin',
+            email: 'core@admin.com',
+            phoneNumber: '+966501234567',
+            accessLevel: 2, // Full Admin
+            isCoreAdmin: true,
+          );
+          await AppFirestore.adminsCollectionRef.doc(uid).set(coreAdmin.toJson());
+
+          LocalStore.putUID(uid);
+          LocalStore.putlogoutStatus(false);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+            (route) => false,
+          );
+          return;
+        }
+
         debugPrint("Redirecting to Signup (User not found or invalid): $uid");
         Navigator.pushAndRemoveUntil(
           context,

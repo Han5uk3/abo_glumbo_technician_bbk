@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/account.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_page.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/admin_dashboard.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/admin_home.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage_app.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/worker/dashboard.dart';
@@ -50,10 +51,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   int currentIndex = 0;
   String selectedBookingStatus = 'P';
 
-  // Role switcher state: 'admin' or 'technician'
-  String _currentRole = 'admin'; // Default to admin for users with admin access
-  bool _isLoadingRole = true;
-
   @override
   void initState() {
     super.initState();
@@ -66,28 +63,26 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     } else {
       selectedBookingStatus = 'P';
     }
-    
+
     // Add observer for app lifecycle
     WidgetsBinding.instance.addObserver(this);
-    
-    // Initialize notifications explicitly
+
+    // Initialize notifications and background services
     Future.delayed(Duration.zero, () async {
       await NotificationServices.initializeNotifications();
       await NotificationServices.setupFCMListeners();
       await NotificationServices.checkForInitialMessage();
-      
+
       // Initialize background location updates for technicians
       await TechnicianLocationUpdateService.initializeBackgroundLocationUpdates();
 
       // Update location immediately on app startup
       await TechnicianLocationUpdateService.updateLocationNow();
     });
-    
-    _loadRolePreference(); // Load saved role preference
+
     if (widget.byPassUid != null && widget.byPassUid!.isNotEmpty) {
       _handleBypassLogin();
     } else {
-      // ✅ ADDED: Load user data if not bypassing
       final uid = LocalStore.getUID();
       if (uid != null && uid.isNotEmpty) {
         context.read<LoginBloc>().add(LoadWorkerData(uid: uid));
@@ -106,71 +101,14 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      // App came to foreground - update location
       debugPrint('🔄 App resumed - updating location');
       TechnicianLocationUpdateService.updateLocationNow();
       TechnicianLocationUpdateService.startBackgroundLocationUpdates();
-    } else if (state == AppLifecycleState.paused) {
-      // App went to background
-      debugPrint('⏸️ App paused');
     }
   }
 
   void _handleBypassLogin() {
     context.read<LoginBloc>().add(LoadWorkerData(uid: widget.byPassUid!));
-  }
-
-  // Load role preference from local storage
-  Future<void> _loadRolePreference() async {
-    final savedRole = await LocalStore.getRolePreference();
-    setState(() {
-      _currentRole = savedRole ?? 'admin';
-      _isLoadingRole = false;
-    });
-  }
-
-  // Save role preference to local storage
-  Future<void> _saveRolePreference(String role) async {
-    await LocalStore.setRolePreference(role);
-  }
-
-  // Toggle between admin and technician roles
-  void _toggleRole() {
-    setState(() {
-      _currentRole = _currentRole == 'admin' ? 'technician' : 'admin';
-      if (_currentRole == 'technician') {
-        Home.hasShownWelcomeModal = false;
-      }
-      currentIndex = 0; // Reset to home page when switching roles
-    });
-    _saveRolePreference(_currentRole);
-
-    // Show feedback to user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              _currentRole == 'admin'
-                  ? Icons.admin_panel_settings_rounded
-                  : Icons.engineering_rounded,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Switched to ${_currentRole == 'admin' ? 'Admin' : 'Technician'} Mode',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-        backgroundColor: _currentRole == 'admin'
-            ? Colors.blue.shade600
-            : Colors.green.shade600,
-        behavior: SnackBarBehavior.floating,
-        elevation: 6,
-      ),
-    );
   }
 
   @override
@@ -179,66 +117,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
         if (state is LoginLoadWorkerDataFailure) {
-          return PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              if (currentIndex == 0) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    backgroundColor: Colors.white,
-                    actionsAlignment: MainAxisAlignment.start,
-                    title: Text(locale?.exitAppTitle ?? 'Exit App'),
-                    content: Text(
-                      locale?.exitAppMessage ??
-                          'Are you sure you want to exit the app?',
-                    ),
-                    actions: [
-                      eButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        text: locale?.cancel ?? 'Cancel',
-                        context: context,
-                        textColor: Colors.black,
-                        backgroundColor: Colors.white,
-                      ),
-                      eButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        text: locale?.exit ?? 'Exit',
-                        context: context,
-                        textColor: Colors.white,
-                        backgroundColor: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                setState(() {
-                  currentIndex = 0;
-                });
-              }
-            },
-            child: Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('${locale?.error}: ${state.error}'),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/',
-                          (route) => false,
-                        );
-                      },
-                      child: Text(AppLocalizations.of(context)!.retry),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          return _buildErrorState(context, state.error, locale);
         }
 
         UserModel userData;
@@ -252,13 +131,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           );
         }
 
-        // Show welcome modal when:
-        // 1. Availability is disabled (isOnline != true) - for both new registrations and subsequent logins
-        // 2. Only applies to non-admin or level-1 granted admins in technician mode
-        if ((userData.isAdmin != true ||
-                (userData.isGrantedAdminByMain == true &&
-                    userData.adminAccessLevel == 1 &&
-                    _currentRole == 'technician')) &&
+        // Show welcome modal for technicians
+        if (userData.isAdmin != true &&
             userData.isOnline != true &&
             !Home.hasShownWelcomeModal) {
           Home.hasShownWelcomeModal = true;
@@ -267,232 +141,52 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               context,
               onEnableAvailability: () {
                 Navigator.of(context).pop();
-                setState(() {
-                  currentIndex = 0; // Navigate to dashboard
-                });
+                setState(() => currentIndex = 0);
               },
             );
           });
         }
 
-        if (userData.isVerified != true) {
-          return PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              if (currentIndex == 0) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    backgroundColor: Colors.white,
-                    actionsAlignment: MainAxisAlignment.start,
-                    title: Text(locale?.exitAppTitle ?? 'Exit App'),
-                    content: Text(
-                      locale?.exitAppMessage ??
-                          'Are you sure you want to exit the app?',
-                    ),
-                    actions: [
-                      eButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        text: locale?.cancel ?? 'Cancel',
-                        context: context,
-                        textColor: Colors.black,
-                        backgroundColor: Colors.white,
-                      ),
-                      eButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        text: locale?.exit ?? 'Exit',
-                        context: context,
-                        textColor: Colors.white,
-                        backgroundColor: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                setState(() {
-                  currentIndex = 0;
-                });
-              }
-            },
-            child: PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) return;
-                if (currentIndex == 0) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: Colors.white,
-                      actionsAlignment: MainAxisAlignment.start,
-                      title: Text(locale?.exitAppTitle ?? 'Exit App'),
-                      content: Text(
-                        locale?.exitAppMessage ??
-                            'Are you sure you want to exit the app?',
-                      ),
-                      actions: [
-                        eButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          text: locale?.cancel ?? 'Cancel',
-                          context: context,
-                          textColor: Colors.black,
-                          backgroundColor: Colors.white,
-                        ),
-                        eButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          text: locale?.exit ?? 'Exit',
-                          context: context,
-                          textColor: Colors.white,
-                          backgroundColor: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  setState(() {
-                    currentIndex = 0;
-                  });
-                }
-              },
-              child: Scaffold(
-                appBar: AppBar(
-                  title: Text(locale?.account ?? ''),
-                  centerTitle: true,
-                ),
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.hourglass_empty,
-                          size: 80,
-                          color: AppColors.secondary,
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          AppLocalizations.of(
-                                context,
-                              )?.pleaseWaitAccountVerification ??
-                              'Please wait for account verification',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(
-                                context,
-                              )?.accountVerificationPending ??
-                              'Your account is pending verification. You will be notified once it is approved.',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: Colors.grey[600]),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginPage(),
-                              ),
-                              (route) => false,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                          ),
-                          child: Text(locale?.goToLogin ?? 'Go to Login'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
+        // Handle verification pending state
+        if (userData.isVerified != true && userData.isAdmin != true) {
+          return _buildVerificationPendingState(context, locale);
         }
-        // Determine which pages to show based on role switcher
-        // Only users who were GRANTED admin access by main admin can switch roles
-        // This excludes the main admin themselves and any default admin accounts
-        final bool canSwitchRoles = userData.isGrantedAdminByMain == true;
-        final roleSwitchCallback = canSwitchRoles ? _toggleRole : null;
 
-        List<Widget> adminPages = [
-          AdminHome(onToggleRole: roleSwitchCallback),
-          ManageApp(userData: userData),
-          WarrantyPage(
-            workerData: userData,
-            isTechnicianView: false,
-            isInAdminMode: true,
-          ),
-          AccountPage(workerData: userData),
-        ];
-        List<Widget> workerPages = [
-          DashboardScreen(
-            workerData: userData,
-            onToggleRole: roleSwitchCallback,
-          ),
-          WorkerHome(
-            selectedIndex: selectedBookingStatus,
-            isInAdminMode: canSwitchRoles && _currentRole == 'admin',
-          ),
-          WarrantyPage(
-            workerData: userData,
-            isTechnicianView: true,
-            isInAdminMode: canSwitchRoles && _currentRole == 'admin',
-          ),
-          AccountPage(workerData: userData),
-        ];
+        // Setup pages based on fixed role
+        final List<Widget> pages = userData.isAdmin == true
+            ? [
+                const AdminDashboardPage(),
+                const AdminHome(),
+                ManageApp(userData: userData),
+                WarrantyPage(
+                  workerData: userData,
+                  isTechnicianView: false,
+                  isInAdminMode: true,
+                ),
+                AccountPage(workerData: userData),
+              ]
+            : [
+                DashboardScreen(workerData: userData),
+                WorkerHome(
+                  selectedIndex: selectedBookingStatus,
+                  isInAdminMode: false,
+                ),
+                WarrantyPage(
+                  workerData: userData,
+                  isTechnicianView: true,
+                  isInAdminMode: false,
+                ),
+                AccountPage(workerData: userData),
+              ];
 
-        // Determine current pages based on role switcher or default admin status
-        final currentPages = canSwitchRoles
-            ? (_currentRole == 'admin' ? adminPages : workerPages)
-            : (userData.isAdmin == true ? adminPages : workerPages);
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) return;
             if (currentIndex == 0) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: Colors.white,
-                  actionsAlignment: MainAxisAlignment.start,
-                  title: Text(locale?.exitAppTitle ?? 'Exit App'),
-                  content: Text(
-                    locale?.exitAppMessage ??
-                        'Are you sure you want to exit the app?',
-                  ),
-                  actions: [
-                    eButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      text: locale?.cancel ?? 'Cancel',
-                      context: context,
-                      textColor: Colors.black,
-                      backgroundColor: Colors.white,
-                    ),
-                    eButton(
-                      text: locale?.exit ?? 'Exit',
-                      onPressed: () => Navigator.of(context).pop(true),
-                      context: context,
-                      textColor: Colors.white,
-                      backgroundColor: Colors.red,
-                    ),
-                  ],
-                ),
-              );
+              _showExitDialog(context, locale);
             } else {
-              setState(() {
-                currentIndex = 0;
-              });
+              setState(() => currentIndex = 0);
             }
           },
           child: Scaffold(
@@ -502,83 +196,70 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               transitionBuilder: (Widget child, Animation<double> animation) {
                 return FadeTransition(opacity: animation, child: child);
               },
-              child: currentPages[currentIndex],
+              child: pages[currentIndex],
             ),
             bottomNavigationBar: NavigationBar(
               selectedIndex: currentIndex,
               onDestinationSelected: (index) {
-                if (index < currentPages.length) {
+                if (index < pages.length) {
                   setState(() => currentIndex = index);
                 }
               },
               height: 70,
               destinations: [
-                NavigationDestination(
-                  icon: SvgPicture.asset(
-                    AppIcons.homeNav,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.grey,
-                      BlendMode.srcIn,
+                if (userData.isAdmin == true)
+                  NavigationDestination(
+                    icon: SvgPicture.asset(
+                      AppIcons.homeNav,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.grey,
+                        BlendMode.srcIn,
+                      ),
                     ),
-                  ),
-                  selectedIcon: SvgPicture.asset(
-                    AppIcons.homeNav,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.secondary,
-                      BlendMode.srcIn,
+                    selectedIcon: SvgPicture.asset(
+                      AppIcons.homeNav,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.secondary,
+                        BlendMode.srcIn,
+                      ),
                     ),
+                    label: locale?.dashboard ?? '',
                   ),
-                  label: locale?.home ?? '',
-                ),
-                // Show appropriate navigation based on current role
-                if (canSwitchRoles && _currentRole == 'admin') ...{
+
+                if (userData.isAdmin == true)
+                  NavigationDestination(
+                    icon: Icon(
+                      Icons.format_list_bulleted,
+                      color: AppColors.grey,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.format_list_bulleted,
+                      color: AppColors.secondary,
+                    ),
+                    label: locale?.orders ?? 'Orders',
+                  ),
+
+                if (userData.isAdmin == true)
                   NavigationDestination(
                     icon: Icon(Icons.settings_rounded, color: AppColors.grey),
                     selectedIcon: Icon(
                       Icons.settings_rounded,
                       color: AppColors.secondary,
                     ),
-                    label: AppLocalizations.of(context)?.manage ?? 'Manage',
-                  ),
-                } else if (canSwitchRoles && _currentRole == 'technician') ...{
+                    label: locale?.manage ?? 'Manage',
+                  )
+                else
                   NavigationDestination(
-                    selectedIcon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.secondary,
-                    ),
                     icon: Icon(
                       Icons.format_list_bulleted,
                       color: AppColors.grey,
                     ),
-                    label: AppLocalizations.of(context)?.orders ?? 'Orders',
-                  ),
-                } else if (!canSwitchRoles) ...{
-                  // For users without admin access, always show Orders
-                  NavigationDestination(
                     selectedIcon: Icon(
                       Icons.format_list_bulleted,
                       color: AppColors.secondary,
                     ),
-                    icon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.grey,
-                    ),
-                    label: AppLocalizations.of(context)?.orders ?? 'Orders',
+                    label: locale?.orders ?? 'Orders',
                   ),
-                } else if (!canSwitchRoles && _currentRole != 'techncian') ...{
-                  NavigationDestination(
-                    selectedIcon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.secondary,
-                    ),
-                    icon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.grey,
-                    ),
-                    label: AppLocalizations.of(context)?.manage ?? '',
-                  ),
-                },
-
                 NavigationDestination(
                   icon: Icon(
                     Icons.verified_user_rounded,
@@ -588,9 +269,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     Icons.verified_user_rounded,
                     color: AppColors.secondary,
                   ),
-                  label: AppLocalizations.of(context)!.warrantyClaims,
+                  label: locale?.warrantyClaims ?? 'Warranty Claims',
                 ),
-
                 NavigationDestination(
                   icon: SvgPicture.asset(
                     AppIcons.profileNav,
@@ -606,13 +286,128 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                       BlendMode.srcIn,
                     ),
                   ),
-                  label: locale?.account ?? '',
+                  label: locale?.account ?? 'Account',
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildErrorState(
+    BuildContext context,
+    String error,
+    AppLocalizations? locale,
+  ) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('${locale?.error}: $error'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/',
+                (route) => false,
+              ),
+              child: Text(locale?.retry ?? 'Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerificationPendingState(
+    BuildContext context,
+    AppLocalizations? locale,
+  ) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(locale?.account ?? 'Account'),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.hourglass_empty, size: 80, color: AppColors.secondary),
+              const SizedBox(height: 24),
+              Text(
+                locale?.pleaseWaitAccountVerification ??
+                    'Please wait for account verification',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                locale?.accountVerificationPending ??
+                    'Your account is pending verification.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(locale?.goToLogin ?? 'Go to Login'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showExitDialog(BuildContext context, AppLocalizations? locale) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(locale?.exitAppTitle ?? 'Exit App'),
+        content: Text(
+          locale?.exitAppMessage ?? 'Are you sure you want to exit the app?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              locale?.cancel ?? 'Cancel',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+          eButton(
+            text: locale?.exit ?? 'Exit',
+            onPressed: () => Navigator.of(context).pop(true),
+            context: context,
+            textColor: Colors.white,
+            backgroundColor: Colors.red,
+          ),
+        ],
+      ),
     );
   }
 }

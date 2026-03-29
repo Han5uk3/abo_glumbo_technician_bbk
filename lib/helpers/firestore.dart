@@ -65,6 +65,14 @@ class AppFirestore {
   static CollectionReference payoutHistoryCollectionRef = FirebaseFirestore
       .instance
       .collection('payout_history');
+
+  // Admnis collection
+  static CollectionReference adminsCollectionRef = FirebaseFirestore.instance
+      .collection('admins');
+
+  // Pending admins collection
+  static CollectionReference pendingAdminsCollectionRef = FirebaseFirestore.instance
+      .collection('pending_admins');
 }
 
 class AppFireStorage {

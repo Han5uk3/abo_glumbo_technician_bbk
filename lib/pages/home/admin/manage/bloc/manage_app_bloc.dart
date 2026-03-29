@@ -15,6 +15,7 @@ import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:image_picker/image_picker.dart';
 
 part 'manage_app_event.dart';
@@ -44,6 +45,7 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
     on<RejectPayoutEvent>(_rejectPayout);
     on<DeleteCategoryEvent>(_deleteCategory);
     on<DeleteServiceEvent>(_deleteService);
+    on<ToggleServiceStatusEvent>(_toggleServiceStatus);
   }
 
   Future<void> _clearTipWallet(
@@ -537,6 +539,43 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
       final List<dynamic> services = (map['services'] ?? []) as List<dynamic>;
       services.removeWhere((id) => id == serviceId);
       await highlightedServicesRef.doc(doc.id).update({'services': services});
+    }
+  }
+
+  Future<void> _toggleServiceStatus(
+    ToggleServiceStatusEvent event,
+    Emitter<ManageAppState> emit,
+  ) async {
+    emit(UpdatingServiceStatus());
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      final serviceRef = AppFirestore.servicesCollectionRef.doc(event.service.id);
+
+      if (event.isActive) {
+        // If turning ON, find all other active services in the same category
+        final category = event.service.category;
+        if (category != null && category.isNotEmpty) {
+          final otherActiveServices = await AppFirestore.servicesCollectionRef
+              .where('category', isEqualTo: category)
+              .where('isActive', isEqualTo: true)
+              .get();
+
+          for (var doc in otherActiveServices.docs) {
+            if (doc.id != event.service.id) {
+              batch.update(doc.reference, {'isActive': false});
+            }
+          }
+        }
+        batch.update(serviceRef, {'isActive': true});
+      } else {
+        // Just turning OFF
+        batch.update(serviceRef, {'isActive': false});
+      }
+
+      await batch.commit();
+      emit(ServiceStatusUpdated());
+    } catch (e) {
+      emit(ServiceStatusUpdateError(e.toString()));
     }
   }
 }

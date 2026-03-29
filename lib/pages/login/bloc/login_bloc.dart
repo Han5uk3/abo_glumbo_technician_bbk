@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:bloc/bloc.dart';
@@ -96,14 +97,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async {
     emit(LoginLoading());
     try {
-      UserCredential userCredential = await _authServices.verifyOTP(
+      UserCredential? userCredential = await _authServices.verifyOTP(
         event.context,
         event.smsCode,
         verificationId: event.verificationId,
         smsCode: event.smsCode,
+        phoneNumber: event.phoneNumber,
       );
 
-      if (userCredential.user != null) {
+      if (userCredential != null && userCredential.user != null) {
         if (kDebugMode) {
           print('✅ OTP verified. UID: ${userCredential.user!.uid}');
         }
@@ -111,14 +113,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // Check if user exists in WORKERS collection
         UserModel? user = await _checkWorkerUser(userCredential.user!.uid);
 
-        if (user != null) {
-          if (kDebugMode) {
-            print('✅ Worker user found: ${user.name}');
+        // If user not found in workers OR they have no name (placeholder), check admin
+        if (user == null || (user.name == null || user.name!.isEmpty)) {
+          UserModel? admin = await _checkAdminUser(userCredential.user!.uid);
+          if (admin != null) {
+            user = admin;
           }
+        }
+
+        if (user != null && (user.name != null && user.name!.isNotEmpty)) {
+          // Update FCM token AFTER identifying correctly
+          _updateToken(user);
           emit(LoginSuccess(user: user));
         } else {
           if (kDebugMode) {
-            print('❌ User not found in workers collection');
+            print('❌ User not found in collections or record is incomplete');
           }
           emit(LoginFailure(error: "user-not-found"));
         }
@@ -147,14 +156,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async {
     emit(LoginLoading());
     try {
-      UserCredential userCredential = await _authServices.verifyOTP(
+      UserCredential? userCredential = await _authServices.verifyOTP(
         event.context,
         event.smsCode,
         verificationId: event.verificationId,
         smsCode: event.smsCode,
+        phoneNumber: event.phoneNumber,
       );
 
-      if (userCredential.user != null) {
+      if (userCredential != null && userCredential.user != null) {
         final uid = userCredential.user!.uid;
 
         if (kDebugMode) {
@@ -213,13 +223,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     try {
-      UserModel? user = await _checkWorkerUser(
-        event.uid ?? LocalStore.getUID()!,
-      );
+      final uid = event.uid ?? LocalStore.getUID()!;
+      UserModel? user = await _checkWorkerUser(uid);
+      
+      // If user not found in workers OR they have no name (possible placeholder doc), 
+      // check if they are an admin
+      if (user == null || (user.name == null || user.name!.isEmpty)) {
+        UserModel? admin = await _checkAdminUser(uid);
+        if (admin != null) {
+          user = admin;
+        }
+      }
 
       if (user == null || user.uid == null || user.uid!.isEmpty) {
         emit(LoginLoadWorkerDataFailure(error: "User not found"));
       } else {
+        // Update FCM token AFTER identifying correctly
+        _updateToken(user);
         emit(LoginLoadWorkerData(user: user));
       }
     } catch (e) {
@@ -240,13 +260,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
 
       // If no cached data, fetch from Firebase
-      UserModel? user = await _checkWorkerUser(
-        event.uid ?? LocalStore.getUID()!,
-      );
+      final uid = event.uid ?? LocalStore.getUID()!;
+      UserModel? user = await _checkWorkerUser(uid);
+
+      if (user == null || (user.name == null || user.name!.isEmpty)) {
+        UserModel? admin = await _checkAdminUser(uid);
+        if (admin != null) {
+          user = admin;
+        }
+      }
 
       if (user == null || user.uid == null || user.uid!.isEmpty) {
         emit(LoginLoadWorkerDataFailure(error: "User not found"));
       } else {
+        // Update FCM token AFTER identifying correctly
+        _updateToken(user);
         emit(LoginLoadWorkerData(user: user));
       }
     } catch (e) {
@@ -287,22 +315,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           print('✅ Worker user found: ${userData?['name']}');
         }
 
-        // Update FCM token after login
-        try {
-          final token = await FirebaseMessaging.instance.getToken();
-          if (token != null && token.isNotEmpty) {
-            await AppServices.updateFCMToken(token);
-            if (kDebugMode) {
-              print('✅ FCM token updated after login');
-            }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('⚠️ Error updating FCM token after login: $e');
-          }
+        final data = userData ?? {};
+        if (data['uid'] == null) {
+          data['uid'] = uid;
         }
 
-        return UserModel.fromJson(userData ?? {});
+        final user = UserModel.fromJson(data);
+        
+        // Caching for local access
+        LocalStore.storeUserData(user);
+        
+        return user;
       } else {
         if (kDebugMode) {
           print('❌ Worker user not found in users collection');
@@ -312,6 +335,49 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error fetching worker user: $e');
+      }
+      return null;
+    }
+  }
+
+  // Helper method: Check if user exists in admins collection
+  Future<UserModel?> _checkAdminUser(String uid) async {
+    try {
+      final adminDoc = await AppFirestore.adminsCollectionRef.doc(uid).get();
+
+      if (adminDoc.exists) {
+        final adminData = adminDoc.data() as Map<String, dynamic>?;
+        
+        // Map AdminModel fields to UserModel structure for Home compatibility
+        final user = UserModel(
+          uid: uid,
+          name: adminData?['name'] ?? 'Admin',
+          email: adminData?['email'],
+          phone: adminData?['phoneNumber'],
+          isAdmin: true,
+          isVerified: true,
+          role: 'admin',
+          adminAccessLevel: adminData?['accessLevel'],
+          createdAt: adminData?['createdAt'],
+        );
+
+        LocalStore.putUID(uid);
+        LocalStore.putlogoutStatus(false);
+        
+        if (kDebugMode) {
+          print('✅ Admin user found: ${user.name}');
+        }
+
+        // Store both in local storage
+        LocalStore.storeUserData(user);
+        LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        
+        return user;
+      }
+      return null;
+    } catch (e) {
+       if (kDebugMode) {
+        print('❌ Error fetching admin user: $e');
       }
       return null;
     }
@@ -341,6 +407,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         print('❌ Error checking phone registration: $e');
       }
       return false;
+    }
+  }
+
+  // Update FCM token in the correct collection after identification
+  Future<void> _updateToken(UserModel user) async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null && token.isNotEmpty) {
+        await AppServices.updateFCMToken(token, isAdmin: user.isAdmin ?? false);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error updating FCM token: $e');
+      }
     }
   }
 }

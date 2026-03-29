@@ -336,3 +336,12 @@ final class ServiceDeleteError extends ManageAppState {
   List<Object> get props => [error];
 }
 
+final class UpdatingServiceStatus extends ManageAppState {}
+final class ServiceStatusUpdated extends ManageAppState {}
+final class ServiceStatusUpdateError extends ManageAppState {
+  final String error;
+  const ServiceStatusUpdateError(this.error);
+  @override
+  List<Object> get props => [error];
+}
+

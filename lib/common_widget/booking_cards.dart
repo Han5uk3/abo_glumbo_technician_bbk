@@ -201,13 +201,14 @@ class BookingCards extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if ((isAdmin &&
+                  if (((isAdmin &&
                           !isWarranty &&
                           onAssign != null &&
                           booking.bookingStatusCode == 'P') ||
                       (isAdmin &&
                           isWarranty &&
-                          booking.warranty!.warrantyStatusCode == 'R'))
+                          booking.warranty!.warrantyStatusCode == 'R')) &&
+                      (LocalStore.getCachedAdminData()?.accessLevel != 1))
                     OutlinedButton(
                       onPressed: onAssign,
                       style: OutlinedButton.styleFrom(

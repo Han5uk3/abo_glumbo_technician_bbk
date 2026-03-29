@@ -18,14 +18,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({
-    super.key,
-    required this.workerData,
-    this.onToggleRole,
-  });
+  const DashboardScreen({super.key, required this.workerData});
 
   final UserModel workerData;
-  final VoidCallback? onToggleRole;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -143,12 +138,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       elevation: 0,
       title: Text(AppLocalizations.of(context)!.dashboard),
       actions: [
-        if (widget.onToggleRole != null)
-          IconButton(
-            onPressed: widget.onToggleRole,
-            icon: const Icon(Icons.admin_panel_settings_rounded),
-            tooltip: AppLocalizations.of(context)!.switchToAdmin,
-          ),
         StreamBuilder<int>(
           stream: AppServices.getUnreadNotificationsCountStream(),
           builder: (context, snapshot) {

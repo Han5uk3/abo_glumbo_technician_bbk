@@ -31,6 +31,11 @@ class ServiceModel {
   // the price in its lowest form
   double? price;
 
+  String? workStartTime;
+  String? workEndTime;
+  double? onWorkHourPrice;
+  double? offWorkHourPrice;
+
   String? category;
   String? categoryNameFilled;
   List<String>? specialSection;
@@ -51,6 +56,10 @@ class ServiceModel {
     this.image,
     this.rating,
     this.price,
+    this.workStartTime,
+    this.workEndTime,
+    this.onWorkHourPrice,
+    this.offWorkHourPrice,
     this.category,
     this.specialSection,
     this.createdAt,
@@ -70,6 +79,10 @@ class ServiceModel {
     String? image,
     double? rating,
     double? price,
+    String? workStartTime,
+    String? workEndTime,
+    double? onWorkHourPrice,
+    double? offWorkHourPrice,
     String? category,
     List<String>? specialSection,
     Timestamp? createdAt,
@@ -92,6 +105,10 @@ class ServiceModel {
       image: image ?? this.image,
       rating: rating ?? this.rating,
       price: price ?? this.price,
+      workStartTime: workStartTime ?? this.workStartTime,
+      workEndTime: workEndTime ?? this.workEndTime,
+      onWorkHourPrice: onWorkHourPrice ?? this.onWorkHourPrice,
+      offWorkHourPrice: offWorkHourPrice ?? this.offWorkHourPrice,
       category: category ?? this.category,
       specialSection: specialSection ?? this.specialSection,
       createdAt: createdAt ?? this.createdAt,
@@ -115,6 +132,18 @@ class ServiceModel {
           ? (json['price'] is int
               ? (json['price'] as int).toDouble()
               : json['price'] as double)
+          : 0.0,
+      workStartTime: json['workStartTime'],
+      workEndTime: json['workEndTime'],
+      onWorkHourPrice: (json['onWorkHourPrice'] != null)
+          ? (json['onWorkHourPrice'] is int
+              ? (json['onWorkHourPrice'] as int).toDouble()
+              : json['onWorkHourPrice'] as double)
+          : 0.0,
+      offWorkHourPrice: (json['offWorkHourPrice'] != null)
+          ? (json['offWorkHourPrice'] is int
+              ? (json['offWorkHourPrice'] as int).toDouble()
+              : json['offWorkHourPrice'] as double)
           : 0.0,
       category: json['category'],
       specialSection: json['specialSection']?.cast<String>(),
@@ -142,6 +171,18 @@ class ServiceModel {
               ? (data['price'] as int).toDouble()
               : data['price'] as double)
           : 0.0,
+      workStartTime: data['workStartTime'],
+      workEndTime: data['workEndTime'],
+      onWorkHourPrice: (data['onWorkHourPrice'] != null)
+          ? (data['onWorkHourPrice'] is int
+              ? (data['onWorkHourPrice'] as int).toDouble()
+              : data['onWorkHourPrice'] as double)
+          : 0.0,
+      offWorkHourPrice: (data['offWorkHourPrice'] != null)
+          ? (data['offWorkHourPrice'] is int
+              ? (data['offWorkHourPrice'] as int).toDouble()
+              : data['offWorkHourPrice'] as double)
+          : 0.0,
       category: data['category'],
       specialSection: data['specialSection']?.cast<String>(),
       createdAt: data['createdAt'],
@@ -167,6 +208,18 @@ class ServiceModel {
               ? (data['price'] as int).toDouble()
               : data['price'] as double)
           : 0.0,
+      workStartTime: data['workStartTime'],
+      workEndTime: data['workEndTime'],
+      onWorkHourPrice: (data['onWorkHourPrice'] != null)
+          ? (data['onWorkHourPrice'] is int
+              ? (data['onWorkHourPrice'] as int).toDouble()
+              : data['onWorkHourPrice'] as double)
+          : 0.0,
+      offWorkHourPrice: (data['offWorkHourPrice'] != null)
+          ? (data['offWorkHourPrice'] is int
+              ? (data['offWorkHourPrice'] as int).toDouble()
+              : data['offWorkHourPrice'] as double)
+          : 0.0,
       category: data['category'],
       specialSection: data['specialSection']?.cast<String>(),
       createdAt: data['createdAt'],
@@ -186,6 +239,10 @@ class ServiceModel {
       'image': image,
       'rating': rating,
       'price': price,
+      'workStartTime': workStartTime,
+      'workEndTime': workEndTime,
+      'onWorkHourPrice': onWorkHourPrice,
+      'offWorkHourPrice': offWorkHourPrice,
       'category': category,
       'specialSection': specialSection,
       'createdAt': createdAt,
@@ -223,6 +280,19 @@ class ServiceModel {
     if (price != previous.price && price != null) {
       json['price'] = price;
     }
+    if (workStartTime != previous.workStartTime && workStartTime != null) {
+      json['workStartTime'] = workStartTime;
+    }
+    if (workEndTime != previous.workEndTime && workEndTime != null) {
+      json['workEndTime'] = workEndTime;
+    }
+    if (onWorkHourPrice != previous.onWorkHourPrice && onWorkHourPrice != null) {
+      json['onWorkHourPrice'] = onWorkHourPrice;
+    }
+    if (offWorkHourPrice != previous.offWorkHourPrice &&
+        offWorkHourPrice != null) {
+      json['offWorkHourPrice'] = offWorkHourPrice;
+    }
     if (category != previous.category && category != null) {
       json['category'] = category;
     }
@@ -242,5 +312,46 @@ class ServiceModel {
       json['locations'] = locations;
     }
     return json;
+  }
+
+  double getCurrentPrice({DateTime? currentTime}) {
+    final now = currentTime ?? DateTime.now();
+    if (workStartTime == null ||
+        workEndTime == null ||
+        onWorkHourPrice == null ||
+        offWorkHourPrice == null ||
+        onWorkHourPrice == 0 ||
+        offWorkHourPrice == 0) {
+      return price ?? 0.0;
+    }
+
+    try {
+      final startParts = workStartTime!.split(':');
+      final endParts = workEndTime!.split(':');
+
+      final startHour = int.parse(startParts[0]);
+      final startMinute = int.parse(startParts[1]);
+      final endHour = int.parse(endParts[0]);
+      final endMinute = int.parse(endParts[1]);
+
+      final currentMinutes = now.hour * 60 + now.minute;
+      final startMinutes = startHour * 60 + startMinute;
+      final endMinutes = endHour * 60 + endMinute;
+
+      bool isDuringWorkHours;
+      if (startMinutes <= endMinutes) {
+        // Normal case (e.g., 08:00 to 17:00)
+        isDuringWorkHours =
+            currentMinutes >= startMinutes && currentMinutes < endMinutes;
+      } else {
+        // Overnight case (e.g., 22:00 to 06:00)
+        isDuringWorkHours =
+            currentMinutes >= startMinutes || currentMinutes < endMinutes;
+      }
+
+      return isDuringWorkHours ? onWorkHourPrice! : offWorkHourPrice!;
+    } catch (e) {
+      return price ?? 0.0;
+    }
   }
 }

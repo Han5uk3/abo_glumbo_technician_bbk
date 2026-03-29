@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/admins/manage_admins.dart';
@@ -16,8 +17,7 @@ import 'package:flutter/material.dart';
 
 class ManageApp extends StatefulWidget {
   final UserModel userData;
-  final VoidCallback? onToggleRole;
-  const ManageApp({super.key, required this.userData, this.onToggleRole});
+  const ManageApp({super.key, required this.userData});
 
   @override
   State<ManageApp> createState() => _ManageAppState();
@@ -25,19 +25,25 @@ class ManageApp extends StatefulWidget {
 
 class _ManageAppState extends State<ManageApp> {
   late List<_TileInfo> tiles;
+  bool _isCoreAdmin = false;
+  bool _isCustomerService = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Check if user is main admin
-    final isMainAdmin =
-        widget.userData.isAdmin == true &&
-        widget.userData.isGrantedAdminByMain == false;
-    final isCustomerService = widget.userData.adminAccessLevel == 2;
+    // Get admin data from cache
+    final adminData = LocalStore.getCachedAdminData();
+
+    // Check if user is main/core admin
+    _isCoreAdmin = adminData?.isCoreAdmin ?? false;
+
+    // Check if user is customer service (Level 1)
+    _isCustomerService = adminData?.accessLevel == 1;
 
     List<_TileInfo> allTiles = [
-      // Only show Manage Admins to main admin
-      if (isMainAdmin)
+      // Only show Manage Admins to core admin
+      if (_isCoreAdmin)
         _TileInfo(
           key: 'manage_admins',
           labelFallback: 'Manage Admins',
@@ -126,7 +132,7 @@ class _ManageAppState extends State<ManageApp> {
     ];
 
     // Filter tiles based on access level
-    if (isCustomerService) {
+    if (_isCustomerService) {
       // Customer service only sees: customers, technicians, customer support, payouts
       tiles = allTiles.where((tile) {
         return tile.key == 'manage_customers' ||
@@ -157,11 +163,7 @@ class _ManageAppState extends State<ManageApp> {
             case 'Manage Banners':
               return const ManageBanners();
             case 'Manage Workers':
-              return ManageAgents(
-                isMainAdmin:
-                    (widget.userData.isAdmin == true &&
-                    widget.userData.isGrantedAdminByMain == false),
-              );
+              return ManageAgents(isMainAdmin: _isCoreAdmin);
             case 'Manage Customers':
               return const ManageCustomersPage();
 
@@ -187,20 +189,7 @@ class _ManageAppState extends State<ManageApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(AppLocalizations.of(context)?.manage ?? "Manage"),
-        ),
-        backgroundColor: const Color(0xFF0A2463),
-        foregroundColor: Colors.white,
-        actions: [
-          if (widget.onToggleRole != null)
-            IconButton(
-              onPressed: widget.onToggleRole,
-              icon: const Icon(Icons.engineering_rounded),
-              tooltip: 'Switch to Technician',
-            ),
-        ],
+        title: Text(AppLocalizations.of(context)?.manage ?? "Manage"),
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(16.0),

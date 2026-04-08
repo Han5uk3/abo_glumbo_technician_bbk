@@ -32,14 +32,12 @@ class BookingInfo extends StatefulWidget {
   final BookingModel booking;
   final bool isAdmin;
   final bool isWarranty;
-  final bool isInAdminMode;
 
   const BookingInfo({
     super.key,
     required this.booking,
     required this.isAdmin,
     this.isWarranty = false,
-    this.isInAdminMode = false,
   });
 
   @override
@@ -859,15 +857,13 @@ class _BookingInfoState extends State<BookingInfo> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Review and Tip Card
-                          if (!widget.isInAdminMode &&
-                              ((statusCode.toLowerCase() == 'a' &&
-                                      !widget.isAdmin) ||
-                                  (!widget.isAdmin &&
-                                      widget.isWarranty &&
-                                      currentBooking
-                                              .warranty?.warrantyStatusCode
-                                              .toLowerCase() ==
-                                          's'))) ...{
+                          if (((statusCode.toLowerCase() == 'a' &&
+                                  !widget.isAdmin) ||
+                              (!widget.isAdmin &&
+                                  widget.isWarranty &&
+                                  currentBooking.warranty?.warrantyStatusCode
+                                          .toLowerCase() ==
+                                      's'))) ...{
                             _buildChatWithCustomerButton(
                               context,
                               colorScheme,
@@ -878,8 +874,7 @@ class _BookingInfoState extends State<BookingInfo> {
                           },
 
                           // Booking controls (Normal)
-                          if (!widget.isInAdminMode &&
-                              !widget.isWarranty &&
+                          if (!widget.isWarranty &&
                               (statusCode.toLowerCase() == 'a'))
                             BookingControlsWidget(
                               booking: currentBooking,
@@ -887,9 +882,11 @@ class _BookingInfoState extends State<BookingInfo> {
                               onTrackingStarted: openDirections,
                             ),
 
-                          if (!widget.isAdmin &&
-                              !widget.isWarranty &&
-                              statusCode.toUpperCase() == 'P')
+                          if (!widget.isWarranty &&
+                              statusCode.toUpperCase() == 'P' &&
+                              (currentBooking.agent?.uid ==
+                                      LocalStore.getUID() ||
+                                  currentBooking.agent == null))
                             _buildPendingBookingControls(
                               context,
                               currentBooking,
@@ -984,8 +981,9 @@ class _BookingInfoState extends State<BookingInfo> {
                                   color: Colors.black,
                                 ),
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
                                   child: _buildTimestampText(
                                     context,
                                     currentBooking,
@@ -999,9 +997,7 @@ class _BookingInfoState extends State<BookingInfo> {
                           _buildCounterOfferUI(context, currentBooking),
 
                           // Verification Controls
-                          if (!widget.isInAdminMode &&
-                              !widget.isWarranty &&
-                              statusCode == 'VP')
+                          if (!widget.isWarranty && statusCode == 'VP')
                             VerifyPaymentControls(booking: currentBooking),
 
                           // Warranty controls (Warranty)
@@ -1009,10 +1005,9 @@ class _BookingInfoState extends State<BookingInfo> {
                               currentBooking.warranty != null) ...[
                             Builder(
                               builder: (context) {
-                                final warrantyStatus = currentBooking
-                                    .warranty?.warrantyStatusCode;
-                                if (!widget.isInAdminMode &&
-                                    warrantyStatus == 'S' &&
+                                final warrantyStatus =
+                                    currentBooking.warranty?.warrantyStatusCode;
+                                if (warrantyStatus == 'S' &&
                                     (currentBooking
                                                 .warranty
                                                 ?.assignedTechnician
@@ -1060,7 +1055,6 @@ class _BookingInfoState extends State<BookingInfo> {
         ),
       ),
     );
-
   }
 
   Widget _buildPaymentProofCard(
@@ -3280,36 +3274,39 @@ class _BookingInfoState extends State<BookingInfo> {
           ),
         );
       }
-    } else if (!widget.isAdmin &&
-        !widget.isWarranty &&
-        booking.bookingStatusCode.toUpperCase() == 'P') {
-      return Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 16),
-        child: ElevatedButton.icon(
-          onPressed: () =>
-              CounterOfferUtils.showCounterOfferDatePicker(context, booking),
-          icon: const Icon(Icons.history_toggle_off, size: 20),
-          label: Text(
-            l10n.proposeNewTime,
-            style: DMSansFont.textStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 15,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-      );
     }
+
+    if (activeOffer == null) {
+      final statusCode = booking.bookingStatusCode.toUpperCase();
+      final isAssigned = booking.agent?.uid == LocalStore.getUID();
+      final isUnassigned = booking.agent == null;
+
+      if ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
+          (statusCode == 'A' && isAssigned)) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  CounterOfferUtils.showCounterOfferDatePicker(context, booking),
+              icon: const Icon(Icons.history_toggle_off, size: 20),
+              label: Text(l10n.proposeNewTime),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
     return const SizedBox.shrink();
   }
 
@@ -3317,7 +3314,9 @@ class _BookingInfoState extends State<BookingInfo> {
     BuildContext context,
     BookingModel booking,
   ) {
-    if (booking.activeCounterOffer != null) return const SizedBox.shrink();
+    if (booking.activeCounterOffer?.status.toLowerCase() == 'pending') {
+      return const SizedBox.shrink();
+    }
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
@@ -3391,33 +3390,6 @@ class _BookingInfoState extends State<BookingInfo> {
             ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () => CounterOfferUtils.showCounterOfferDatePicker(
-                context,
-                booking,
-              ),
-              icon: const Icon(Icons.history_toggle_off, size: 20),
-              label: Text(
-                l10n.proposeNewTime,
-                style: DMSansFont.textStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -154,24 +154,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 const AdminDashboardPage(),
                 const AdminHome(),
                 ManageApp(userData: userData),
-                WarrantyPage(
-                  workerData: userData,
-                  isTechnicianView: false,
-                  isInAdminMode: true,
-                ),
+                WarrantyPage(workerData: userData, isTechnicianView: false),
                 AccountPage(workerData: userData),
               ]
             : [
                 DashboardScreen(workerData: userData),
-                WorkerHome(
-                  selectedIndex: selectedBookingStatus,
-                  isInAdminMode: false,
-                ),
-                WarrantyPage(
-                  workerData: userData,
-                  isTechnicianView: true,
-                  isInAdminMode: false,
-                ),
+                WorkerHome(selectedIndex: selectedBookingStatus),
+                WarrantyPage(workerData: userData, isTechnicianView: true),
                 AccountPage(workerData: userData),
               ];
 

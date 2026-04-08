@@ -43,7 +43,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _phoneController.addListener(_onPhoneNumberChanged);
     customerLastUid = LocalStore.getLastValidUID();
 
     // ✅ Check biometric with last valid UID
@@ -68,33 +67,8 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _onPhoneNumberChanged() {
-    final phoneNumber = _phoneController.text;
-    // if (phoneNumber.isNotEmpty) {
-    //   // Detect country by matching phone number pattern
-    //   // Works with both local format (0512345678) and international (+966512345678)
-    //   final detectedCountry = CountryCodeDetector.detectCountryByPattern(
-    //     phoneNumber,
-    //   );
-    //   if (detectedCountry != null && mounted) {
-    //     setState(() {
-    //       _detectedCountryCode = detectedCountry['country'];
-    //       _displayCountryCode = detectedCountry['dialCode'];
-    //       _detectedFlag = detectedCountry['flag'];
-    //     });
-    //   } else if (mounted) {
-    //     setState(() {
-    //       _detectedCountryCode = null;
-    //       _displayCountryCode = null;
-    //       _detectedFlag = null;
-    //     });
-    //   }
-    // }
-  }
-
   @override
   void dispose() {
-    _phoneController.removeListener(_onPhoneNumberChanged);
     _phoneController.dispose();
     super.dispose();
   }

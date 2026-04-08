@@ -32,6 +32,19 @@ async function sendAndStoreNotification({
     collectionName = "customers";
   }
 
+  // Check for duplicate notification
+  const query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications").where("titleEn", "==", titleEn).where("bodyEn", "==", bodyEn);
+  try {
+    const existing = await query.get();
+    if (!existing.empty) {
+      console.log(`Duplicate notification detected for ${targetRole} ${targetId}, skipping`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error checking for duplicate notification:`, error);
+    // Continue anyway
+  }
+
   // 2. Store in Firestore (subcollection 'notifications')
   try {
     await admin
@@ -228,10 +241,10 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
             ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
+              uid: doc.id,
+              token: data.fcmToken,
+              lanCode: data.lanCode || "en",
+            }
             : null;
         })
         .filter(Boolean);
@@ -461,9 +474,9 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
         ar: "تم رفض حجزك.",
       },
       C: {
-        // Service complete, awaiting payment
-        en: "Your service is complete!\nComplete your payment now.\nWe hope you had a great experience.",
-        ar: "تم الانتهاء من خدمتك!\nأكمل دفعتك الآن.\nنأمل أن تكون قد قضيت وقتًا رائعًا.",
+        // Service complete
+        en: "Your service is complete!\nWe hope you had a great experience.",
+        ar: "تم الانتهاء من خدمتك!\nنأمل أن تكون قد قضيت وقتًا رائعًا.",
       },
       C_PAYMENT_COMPLETED: {
         // Service complete and payment received
@@ -817,29 +830,10 @@ exports.onBookingUpdateToTip = onDocumentWritten(
           fcmToken: agentFcmToken,
           lanCode: agent.lanCode || "en",
         });
-
-        if (agentFcmToken && agentFcmToken.trim() !== "") {
-          try {
-            await admin.messaging().send(message);
-            console.log(
-              `Notification sent to agent ${agent.name} (${agent.uid})`
-            );
-          } catch (error) {
-            console.error(
-              "Error sending notification to agent:",
-              error.message
-            );
-          }
-        } else {
-          console.warn(
-            `No valid FCM token for agent ${agent.name} (${agent.uid})`
-          );
-        }
       });
 
       console.log(
-        `Successfully updated ${
-          isCardPayment ? "card" : "cash"
+        `Successfully updated ${isCardPayment ? "card" : "cash"
         } tip +${tipAmount} for agent ${agent.name} (${agent.uid})`
       );
     } catch (error) {
@@ -1021,15 +1015,6 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
       lanCode: lanCode,
     });
 
-    try {
-      const response = await admin.messaging().send(message);
-      console.log(
-        `Notification sent to worker ${workerId} for new booking ${bookingId}. MessageId: ${response}`
-      );
-    } catch (error) {
-      console.error("Error sending FCM notification to worker:", error);
-    }
-
     return null;
   }
 );
@@ -1105,8 +1090,7 @@ exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
       }
 
       console.log(
-        `Notified ${
-          results.filter((r) => r.success).length
+        `Notified ${results.filter((r) => r.success).length
         } admins about tip payout request.`
       );
     } catch (error) {
@@ -1203,13 +1187,6 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
       fcmToken: fcmToken,
       lanCode: lanCode,
     });
-
-    try {
-      await admin.messaging().send(message);
-      console.log(`Tip payout notification sent to worker ${agentId}`);
-    } catch (error) {
-      console.error("Error sending FCM notification to worker:", error);
-    }
   }
 );
 // ============================================
@@ -1869,8 +1846,7 @@ exports.notifyAdminsOnNewWorkerSignup = onDocumentCreated(
       }
 
       console.log(
-        `Notified ${
-          results.filter((r) => r.success).length
+        `Notified ${results.filter((r) => r.success).length
         } admins about new worker signup: ${workerName}`
       );
     } catch (error) {
@@ -1878,86 +1854,6 @@ exports.notifyAdminsOnNewWorkerSignup = onDocumentCreated(
     }
 
     return null;
-  }
-);
-exports.notifyWorkerOnPaymentComplete = onDocumentUpdated(
-  "bookings/{bookingId}",
-  async (event) => {
-    const beforeData = event.data.before.data();
-    const afterData = event.data.after.data();
-    const bookingId = event.params.bookingId;
-
-    // Check if paymentCompleted changed from false to true
-    const wasPaymentPending = beforeData.paymentCompleted === false;
-    const isPaymentCompleted = afterData.paymentCompleted === true;
-
-    // Only trigger when payment status changes AND booking is completed
-    if (!wasPaymentPending || !isPaymentCompleted) {
-      console.log(
-        "Payment status unchanged or already completed. Skipping notification."
-      );
-      return null;
-    }
-
-    // Verify booking is in completed status
-    if (afterData.bookingStatusCode !== "C") {
-      console.log("Booking is not in completed status. Skipping notification.");
-      return null;
-    }
-
-    // Get worker details
-    const agent = afterData.agent;
-    if (!agent || !agent.fcmToken) {
-      console.log("No agent assigned or agent has no FCM token.");
-      return null;
-    }
-
-    const workerToken = agent.fcmToken;
-    const workerLanCode = agent.lanCode || "en";
-    const customerName = afterData.customer?.name || "Customer";
-    const serviceName = afterData.service?.serviceName || "Service";
-
-    // Get payment details
-    const inspectionOnly = afterData.completionData?.mode === 0 || false;
-    const totalCost = inspectionOnly
-      ? afterData.completionData?.inspectionFee
-      : afterData.completionData?.totalCost || 0;
-    c;
-
-    try {
-      const message = {
-        notification: {
-          title:
-            workerLanCode === "ar"
-              ? "تم استلام الدفع! 💰"
-              : "Payment Received! 💰",
-          body:
-            workerLanCode === "ar"
-              ? `${customerName} أكمل الدفع بمبلغ ${totalCost.toFixed(2)}`
-              : `${customerName} completed payment of ${totalCost.toFixed(2)}`,
-        },
-        data: {
-          targetRole: "worker",
-          category: "payment_completed",
-          bookingId: bookingId,
-          customerName: customerName,
-          serviceName: serviceName,
-          totalCost: totalCost.toString(),
-          bookingStatusCode: afterData.bookingStatusCode,
-        },
-        token: workerToken,
-      };
-
-      const response = await admin.messaging().send(message);
-      console.log(
-        `Payment completion notification sent to worker ${agent.uid}: ${response}`
-      );
-
-      return { success: true, messageId: response };
-    } catch (error) {
-      console.error("Error sending payment notification to worker:", error);
-      return { success: false, error: error.message };
-    }
   }
 );
 // ============================================
@@ -2044,7 +1940,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
       status = "technician_rejected";
       const latestRejection =
         afterWarranty.rejectedTechnicians[
-          afterWarranty.rejectedTechnicians.length - 1
+        afterWarranty.rejectedTechnicians.length - 1
         ];
       notificationData = {
         rejectedTechnicianName: latestRejection?.name || "Technician",
@@ -2159,10 +2055,10 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
             ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
+              uid: doc.id,
+              token: data.fcmToken,
+              lanCode: data.lanCode || "en",
+            }
             : null;
         })
         .filter(Boolean);
@@ -2254,24 +2150,18 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
       },
       technician_rejected: {
         customer: {
-          en: `Technician ${
-            notificationData.rejectedTechnicianName || "has"
-          } declined your warranty repair request. We are assigning another technician.`,
-          ar: `رفض الفني ${
-            notificationData.rejectedTechnicianName || ""
-          } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
+          en: `Technician ${notificationData.rejectedTechnicianName || "has"
+            } declined your warranty repair request. We are assigning another technician.`,
+          ar: `رفض الفني ${notificationData.rejectedTechnicianName || ""
+            } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
         },
         admin: {
-          en: `Technician ${
-            notificationData.rejectedTechnicianName || "Unknown"
-          } rejected warranty repair for ${serviceName}. Reason: ${
-            notificationData.rejectionReason || "Not specified"
-          }`,
-          ar: `رفض الفني ${
-            notificationData.rejectedTechnicianName || "غير معروف"
-          } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${
-            notificationData.rejectionReason || "غير محدد"
-          }`,
+          en: `Technician ${notificationData.rejectedTechnicianName || "Unknown"
+            } rejected warranty repair for ${serviceName}. Reason: ${notificationData.rejectionReason || "Not specified"
+            }`,
+          ar: `رفض الفني ${notificationData.rejectedTechnicianName || "غير معروف"
+            } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${notificationData.rejectionReason || "غير محدد"
+            }`,
         },
       },
     };
@@ -2398,10 +2288,10 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
             ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
+              uid: doc.id,
+              token: data.fcmToken,
+              lanCode: data.lanCode || "en",
+            }
             : null;
         })
         .filter(Boolean);
@@ -2421,11 +2311,10 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
 
     const bodyEn = `A warranty request for "${serviceName}" from ${customerName} requires your attention.\n\nReason: This request has been ${escalationReason}.\n\nActions Available:\n✅ Approve Rejection: Confirm the technician's decision and close the request.\n🔁 Assign Alternate Technician: Use the "Assign" option to re-assign the job to another technician.`;
 
-    const bodyAr = `طلب ضمان لـ "${serviceName}" من ${customerName} يتطلب انتباهك.\n\nالسبب: تم ${
-      escalationReason === "staying unchanged (unattended) for a long time"
-        ? "ترك هذا الطلب دون تغيير (غير مُعالج) لفترة طويلة"
-        : "إلغاء/رفض الطلب من قبل الفني الأصلي"
-    }.\n\nالإجراءات المتاحة:\n✅ الموافقة على الرفض: تأكيد قرار الفني وإغلاق الطلب.\n🔁 تعيين فني بديل: استخدم خيار "تعيين" لإعادة تعيين العمل لفني آخر.`;
+    const bodyAr = `طلب ضمان لـ "${serviceName}" من ${customerName} يتطلب انتباهك.\n\nالسبب: تم ${escalationReason === "staying unchanged (unattended) for a long time"
+      ? "ترك هذا الطلب دون تغيير (غير مُعالج) لفترة طويلة"
+      : "إلغاء/رفض الطلب من قبل الفني الأصلي"
+      }.\n\nالإجراءات المتاحة:\n✅ الموافقة على الرفض: تأكيد قرار الفني وإغلاق الطلب.\n🔁 تعيين فني بديل: استخدم خيار "تعيين" لإعادة تعيين العمل لفني آخر.`;
 
     // Send notification to each admin
     for (const { uid, token, lanCode } of adminTokens) {
@@ -2455,6 +2344,222 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     console.log(
       `✅ Escalation notifications sent to ${adminTokens.length} admin(s) for booking ${bookingId}`
     );
+
+    return null;
+  }
+);
+
+// ============================================
+// Counter Offer Notifications
+// ============================================
+exports.notifyOnCounterOfferCreated = onDocumentCreated(
+  "counter_offers/{offerId}",
+  async (event) => {
+    const offerId = event.params.offerId;
+    const offerData = event.data?.data();
+
+    if (!offerData) {
+      console.log("No counter offer data found");
+      return null;
+    }
+
+    const bookingId = offerData.bookingId;
+    const proposedBy = offerData.proposedBy; // 'technician' or 'customer'
+    const proposedByUid = offerData.proposedByUid;
+    const proposedByName = offerData.proposedByName;
+
+    console.log(`New counter offer created: ${offerId} for booking ${bookingId} by ${proposedBy}`);
+
+    try {
+      const bookingDoc = await db.collection("bookings").doc(bookingId).get();
+      if (!bookingDoc.exists) {
+        console.log(`Booking ${bookingId} not found`);
+        return null;
+      }
+
+      const bookingData = bookingDoc.data();
+      const customer = bookingData.customer;
+      const agent = bookingData.agent;
+
+      let targetRole, targetId, fcmToken, lanCode;
+
+      if (proposedBy === 'technician') {
+        targetRole = 'customer';
+        targetId = customer?.uid;
+        if (targetId) {
+          const customerDoc = await db.collection("customers").doc(targetId).get();
+          if (customerDoc.exists) {
+            const customerData = customerDoc.data();
+            fcmToken = customerData?.fcmToken;
+            lanCode = customerData?.lanCode || 'en';
+          }
+        }
+      } else if (proposedBy === 'customer') {
+        targetRole = 'technician';
+        targetId = agent?.uid;
+        if (targetId) {
+          const technicianDoc = await db.collection("users").doc(targetId).get();
+          if (technicianDoc.exists) {
+            const technicianData = technicianDoc.data();
+            fcmToken = technicianData?.fcmToken;
+            lanCode = technicianData?.lanCode || 'en';
+          }
+        }
+      }
+
+      if (!targetId || !fcmToken || fcmToken.trim() === '') {
+        console.log(`No valid FCM token for ${targetRole} ${targetId}`);
+        return null;
+      }
+
+      const serviceName = bookingData.service?.name || 'Service';
+      const serviceNameAr = bookingData.service?.name_ar || serviceName;
+      const proposedTime = offerData.proposedTime.toDate();
+      const timeString = proposedTime.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      await sendAndStoreNotification({
+        targetRole,
+        targetId,
+        titleEn: 'New Counter Offer',
+        titleAr: 'اقتراح موعد جديد',
+        bodyEn: `${proposedByName} has proposed a new time: ${timeString} for ${serviceName}`,
+        bodyAr: `اقترح ${proposedByName} وقتاً جديداً: ${timeString} لـ ${serviceNameAr}`,
+        data: {
+          targetRole: targetRole,
+          category: 'counter_offer',
+          bookingId,
+          offerId,
+          proposedBy,
+          proposedByUid,
+          proposedTime: timeString,
+          serviceName,
+          serviceNameAr,
+        },
+        fcmToken,
+        lanCode,
+      });
+
+      console.log(`Counter offer notification sent to ${targetRole} ${targetId}`);
+    } catch (error) {
+      console.error('Error sending counter offer notification:', error);
+    }
+
+    return null;
+  }
+);
+
+exports.notifyOnCounterOfferStatusChange = onDocumentUpdated(
+  "counter_offers/{offerId}",
+  async (event) => {
+    const beforeData = event.data.before?.data();
+    const afterData = event.data.after?.data();
+    const offerId = event.params.offerId;
+
+    if (!beforeData || !afterData) {
+      console.log("Counter offer data missing");
+      return null;
+    }
+
+    const statusChanged = beforeData.status !== afterData.status;
+    const newStatus = afterData.status;
+    if (!statusChanged || !['accepted', 'rejected'].includes(newStatus)) {
+      return null;
+    }
+
+    const bookingId = afterData.bookingId;
+    const proposedBy = afterData.proposedBy;
+    const proposedByUid = afterData.proposedByUid;
+    const proposedByName = afterData.proposedByName;
+
+    console.log(`Counter offer ${offerId} status changed to ${newStatus} for booking ${bookingId}`);
+
+    try {
+      const bookingDoc = await db.collection("bookings").doc(bookingId).get();
+      if (!bookingDoc.exists) {
+        console.log(`Booking ${bookingId} not found`);
+        return null;
+      }
+
+      const bookingData = bookingDoc.data();
+      const customer = bookingData.customer;
+      const agent = bookingData.agent;
+
+      let targetRole, targetId, fcmToken, lanCode;
+      if (proposedBy === 'technician') {
+        targetRole = 'customer';
+        targetId = customer?.uid;
+        if (targetId) {
+          const customerDoc = await db.collection("customers").doc(targetId).get();
+          if (customerDoc.exists) {
+            const customerData = customerDoc.data();
+            fcmToken = customerData?.fcmToken;
+            lanCode = customerData?.lanCode || 'en';
+          }
+        }
+      } else if (proposedBy === 'customer') {
+        targetRole = 'technician';
+        targetId = agent?.uid;
+        if (targetId) {
+          const technicianDoc = await db.collection("users").doc(targetId).get();
+          if (technicianDoc.exists) {
+            const technicianData = technicianDoc.data();
+            fcmToken = technicianData?.fcmToken;
+            lanCode = technicianData?.lanCode || 'en';
+          }
+        }
+      }
+
+      if (!targetId || !fcmToken || fcmToken.trim() === '') {
+        console.log(`No valid FCM token for ${targetRole} ${targetId}`);
+        return null;
+      }
+
+      const serviceName = bookingData.service?.name || 'Service';
+      const serviceNameAr = bookingData.service?.name_ar || serviceName;
+      const proposedTime = afterData.proposedTime.toDate();
+      const timeString = proposedTime.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const statusTextEn = newStatus === 'accepted' ? 'accepted' : 'rejected';
+      const statusTextAr = newStatus === 'accepted' ? 'قبول' : 'رفض';
+
+      await sendAndStoreNotification({
+        targetRole,
+        targetId,
+        titleEn: 'Counter Offer Response',
+        titleAr: 'الرد على الاقتراح البديل',
+        bodyEn: `${proposedByName} has ${statusTextEn} your proposed time: ${timeString} for ${serviceName}`,
+        bodyAr: `${proposedByName} قام بـ ${statusTextAr} الوقت المقترح: ${timeString} لـ ${serviceNameAr}`,
+        data: {
+          targetRole: targetRole,
+          category: 'counter_offer_response',
+          bookingId,
+          offerId,
+          proposedBy,
+          proposedByUid,
+          status: newStatus,
+          proposedTime: timeString,
+          serviceName,
+          serviceNameAr,
+        },
+        fcmToken,
+        lanCode,
+      });
+
+      console.log(`Counter offer response notification sent to ${targetRole} ${targetId}`);
+    } catch (error) {
+      console.error('Error sending counter offer response notification:', error);
+    }
 
     return null;
   }
@@ -2498,7 +2603,6 @@ exports.expireUnchangedWarranties = onSchedule(
       let skippedCount = 0;
       const batch = db.batch();
       const batchSize = 500; // Firestore batch limit
-      let batchCount = 0;
 
       for (const bookingDoc of bookingsSnapshot.docs) {
         const bookingData = bookingDoc.data();
@@ -2572,8 +2676,7 @@ exports.expireUnchangedWarranties = onSchedule(
         batchCount++;
 
         logger.info(
-          `Scheduled warranty expiration for booking ${
-            bookingDoc.id
+          `Scheduled warranty expiration for booking ${bookingDoc.id
           } (created: ${createdDate.toISOString()})`
         );
 
@@ -2736,6 +2839,18 @@ exports.notifyOnNewChatMessage = onValueCreated(
 
       if (!receiverFcmToken || receiverFcmToken.trim() === "") {
         console.log(`[${chatId}] Receiver has no valid FCM token`);
+        return null;
+      }
+
+      // If the receiver is actively viewing this chat, skip push notifications.
+      const presenceSnapshot = await rtdb
+        .ref(`chats/${chatId}/presence/${receiverId}`)
+        .once("value");
+
+      if (presenceSnapshot.exists() && presenceSnapshot.val() === true) {
+        console.log(
+          `[${chatId}] Receiver ${receiverId} is actively viewing chat; skipping push notification.`
+        );
         return null;
       }
 
@@ -2955,9 +3070,8 @@ exports.applyMonthlyBonus = onSchedule(
 
         // Check if bonus already applied for this month
         const lastBonusMonth = userData.lastBonusMonth;
-        const currentMonthKey = `${today.getFullYear()}-${
-          today.getMonth() + 1
-        }`;
+        const currentMonthKey = `${today.getFullYear()}-${today.getMonth() + 1
+          }`;
 
         if (lastBonusMonth === currentMonthKey) {
           logger.info(`Bonus already applied for user ${userId}`);
@@ -3186,12 +3300,10 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
               targetId: workerId,
               titleEn: `🎊 Tier Upgraded to ${newTier}!`,
               titleAr: `🎊 تمت ترقية المستوى إلى ${newTier}!`,
-              bodyEn: `Congratulations! You've been upgraded to ${newTier} tier! You now earn ${
-                bonusPercentages[newTier] || "0%"
-              } bonus on your monthly earnings. Keep up the great work!`,
-              bodyAr: `تهانينا! تمت ترقيتك إلى مستوى ${newTier}! أنت الآن تكسب ${
-                bonusPercentages[newTier] || "0%"
-              } مكافأة على أرباحك الشهرية. استمر في العمل الرائع!`,
+              bodyEn: `Congratulations! You've been upgraded to ${newTier} tier! You now earn ${bonusPercentages[newTier] || "0%"
+                } bonus on your monthly earnings. Keep up the great work!`,
+              bodyAr: `تهانينا! تمت ترقيتك إلى مستوى ${newTier}! أنت الآن تكسب ${bonusPercentages[newTier] || "0%"
+                } مكافأة على أرباحك الشهرية. استمر في العمل الرائع!`,
               data: {
                 category: "tier_upgrade",
                 oldTier: currentTier,
@@ -3767,14 +3879,11 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
       // Rejected
       titleEn = "Payout Request Rejected";
       titleAr = "تم رفض طلب الصرف";
-      bodyEn = `Your ${
-        typeLabel.en
-      } payout request of ${amount} has been rejected.${
-        rejectionReason ? ` Reason: ${rejectionReason}` : ""
-      }`;
-      bodyAr = `تم رفض طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${amount}.${
-        rejectionReason ? ` السبب: ${rejectionReason}` : ""
-      }`;
+      bodyEn = `Your ${typeLabel.en
+        } payout request of ${amount} has been rejected.${rejectionReason ? ` Reason: ${rejectionReason}` : ""
+        }`;
+      bodyAr = `تم رفض طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${amount}.${rejectionReason ? ` السبب: ${rejectionReason}` : ""
+        }`;
     }
 
     // Send notification to technician
@@ -3802,8 +3911,7 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
       });
 
       console.log(
-        `[${payoutId}] ✅ Payout ${
-          afterStatus === "C" ? "approval" : "rejection"
+        `[${payoutId}] ✅ Payout ${afterStatus === "C" ? "approval" : "rejection"
         } notification sent to technician ${userId}`
       );
     } catch (error) {
@@ -3880,8 +3988,7 @@ exports.expireWarrantiesDaily = onSchedule(
         // Expire if exactly 7 or more days have passed
         if (daysSinceCompletion >= 7) {
           console.log(
-            `⏰ Expiring warranty for booking ${
-              doc.id
+            `⏰ Expiring warranty for booking ${doc.id
             } (${daysSinceCompletion.toFixed(2)} days old)`
           );
 

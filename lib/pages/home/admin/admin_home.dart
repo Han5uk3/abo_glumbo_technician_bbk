@@ -500,7 +500,6 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
             return BookingListTileWidget(
               key: ValueKey(booking.id),
               booking: booking,
-              isInAdminMode: true,
               isAdmin: true,
               onAssign: () {
                 showAssignToUserBottomSheet(booking);

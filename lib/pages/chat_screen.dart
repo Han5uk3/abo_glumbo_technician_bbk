@@ -1,6 +1,7 @@
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
+import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,10 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
   void initState() {
     super.initState();
     _chatService.markAsRead(widget.chatId);
+    _chatService.setActiveChat(widget.chatId);
+
+    // Set active chat for notification suppression
+    NotificationServices.setActiveChatId(widget.chatId);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -783,6 +788,9 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
 
   @override
   void dispose() {
+    _chatService.clearActiveChat(widget.chatId);
+    // Clear active chat for notification suppression
+    NotificationServices.setActiveChatId(null);
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();

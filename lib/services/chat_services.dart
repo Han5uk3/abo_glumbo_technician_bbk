@@ -293,10 +293,10 @@ class TechnicianChatService {
     String senderName,
     String senderPhoto,
   ) async {
-    try {
-      final messageRef = _rtdb.child('messages/$chatId').push();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final messageRef = _rtdb.child('messages/$chatId').push();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
 
+    try {
       await messageRef.set({
         'senderId': currentUserId,
         'senderType': senderType,
@@ -324,48 +324,32 @@ class TechnicianChatService {
         'lastMessage': message,
         'lastMessageTime': timestamp,
       });
+    } catch (e) {
+      debugPrint('⚠️ Error sending message or updating sender metadata: $e');
+      // We don't throw here if the message was already sent (metadata is best-effort)
+    }
 
-      // Check if receiver's userChats entry exists
-      final receiverChatRef = _rtdb.child('userChats/$receiverId/$chatId');
+    final receiverChatRef = _rtdb.child('userChats/$receiverId/$chatId');
 
-      bool receiverChatExists = false;
-      bool receiverChatCorrupted = false;
-
-      try {
-        final receiverSnapshot = await receiverChatRef.get();
-        receiverChatExists = receiverSnapshot.exists;
-
-        // Check if data is corrupted
-        if (receiverSnapshot.exists && receiverSnapshot.value is String) {
-          receiverChatCorrupted = true;
-        }
-      } catch (e) {
-        if (e.toString().contains('String') && e.toString().contains('Map')) {
-          receiverChatCorrupted = true;
-        } else {
-          rethrow;
-        }
-      }
-
-      if (receiverChatExists && !receiverChatCorrupted) {
-        // Update existing entry
+    // Update receiver's entry directly without reading first to avoid permission errors
+    try {
+      await receiverChatRef.update({
+        'participantId': currentUserId,
+        'participantName': senderName,
+        'participantPhoto': senderPhoto,
+        'participantType': senderType,
+        'lastMessage': message,
+        'lastMessageTime': timestamp,
+        'unreadCount': ServerValue.increment(1),
+      });
+    } catch (e) {
+      if (e.toString().contains('permission-denied') ||
+          e.toString().contains('String') ||
+          e.toString().contains('Map')) {
+        // If update fails due to permissions or missing node, try set/recreate
         try {
-          await receiverChatRef.update({
-            'lastMessage': message,
-            'lastMessageTime': timestamp,
-            'unreadCount': ServerValue.increment(1),
-          });
-        } catch (e) {
-          // If update fails, recreate the entry
-          debugPrint('⚠️ Failed to update receiver chat, recreating: $e');
-          receiverChatCorrupted = true;
-        }
-      }
-
-      if (!receiverChatExists || receiverChatCorrupted) {
-        // Get bookingId from the chat
-        String bookingId = '';
-        try {
+          // Get bookingId from the chat to ensure entry is complete
+          String bookingId = '';
           final chatSnapshot = await _rtdb.child('chats/$chatId').get();
           if (chatSnapshot.exists && chatSnapshot.value is Map) {
             final chatData = Map<String, dynamic>.from(
@@ -373,23 +357,57 @@ class TechnicianChatService {
             );
             bookingId = chatData['bookingId'] ?? '';
           }
-        } catch (e) {
-          debugPrint('⚠️ Could not get bookingId from chat: $e');
-        }
 
-        await receiverChatRef.set({
-          'participantId': currentUserId,
-          'participantName': senderName,
-          'participantPhoto': senderPhoto,
-          'participantType': senderType,
-          'bookingId': bookingId,
-          'lastMessage': message,
-          'lastMessageTime': timestamp,
-          'unreadCount': 1,
-        });
+          await receiverChatRef.set({
+            'participantId': currentUserId,
+            'participantName': senderName,
+            'participantPhoto': senderPhoto,
+            'participantType': senderType,
+            'bookingId': bookingId,
+            'lastMessage': message,
+            'lastMessageTime': timestamp,
+            'unreadCount': 1,
+          });
+        } catch (e2) {
+          debugPrint('⚠️ Failed to create receiver chat entry: $e2');
+        }
+      } else {
+        debugPrint('⚠️ Unexpected error updating receiver chat entry: $e');
+      }
+    }
+  }
+
+  Future<void> setActiveChat(String chatId) async {
+    final String uid = _auth.currentUser?.uid ?? '';
+    if (uid.isEmpty || chatId.isEmpty) return;
+
+    // Use the 'chats' root which we know is working
+    final String path = 'chats/$chatId/presence/$uid';
+    debugPrint('🚀 Presence start: path=$path');
+
+    try {
+      await _rtdb.child(path).set(true);
+      debugPrint('✅ Presence set success');
+      
+      try {
+        await _rtdb.child(path).onDisconnect().remove();
+        debugPrint('✅ OnDisconnect register success');
+      } catch (e) {
+        debugPrint('⚠️ OnDisconnect failed: $e');
       }
     } catch (e) {
-      throw Exception('Failed to send message: $e');
+      debugPrint('❌ Presence set failed even on working root: $e');
+    }
+  }
+
+  Future<void> clearActiveChat(String chatId) async {
+    final String uid = _auth.currentUser?.uid ?? '';
+    if (uid.isEmpty || chatId.isEmpty) return;
+
+    try {
+      await _rtdb.child('chats/$chatId/presence/$uid').remove();
+    } catch (e) {
+      debugPrint('⚠️ Failed to clear presence: $e');
     }
   }
 

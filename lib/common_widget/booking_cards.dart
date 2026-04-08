@@ -16,7 +16,6 @@ class BookingListTileWidget extends StatelessWidget {
   final bool isAdmin;
   final VoidCallback? onAssign;
   final bool isWarranty;
-  final bool isInAdminMode;
 
   const BookingListTileWidget({
     super.key,
@@ -24,7 +23,6 @@ class BookingListTileWidget extends StatelessWidget {
     this.isAdmin = false,
     this.onAssign,
     this.isWarranty = false,
-    this.isInAdminMode = false,
   });
 
   @override
@@ -54,7 +52,6 @@ class BookingListTileWidget extends StatelessWidget {
                   booking: booking,
                   isAdmin: isAdmin,
                   isWarranty: isWarranty,
-                  isInAdminMode: isInAdminMode,
                 ),
               ),
             ),
@@ -544,7 +541,6 @@ class BookingListTileWidget extends StatelessWidget {
       ],
     );
   }
-
 }
 
 // Removed backward-compatibility typedef as all usages have been updated.

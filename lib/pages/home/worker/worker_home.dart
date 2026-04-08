@@ -10,8 +10,7 @@ import 'package:shimmer/shimmer.dart';
 
 class WorkerHome extends StatefulWidget {
   final String? selectedIndex;
-  final bool isInAdminMode;
-  const WorkerHome({super.key, this.selectedIndex, this.isInAdminMode = false});
+  const WorkerHome({super.key, this.selectedIndex});
 
   @override
   State<WorkerHome> createState() => _WorkerHomeState();
@@ -124,7 +123,6 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
                   return _BookingListTab(
                     bookingStatusCode: _bookingStatuses[index]['code']!,
                     searchQuery: _searchQuery,
-                    isInAdminMode: widget.isInAdminMode,
                   );
                 }),
               ),
@@ -179,12 +177,10 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
 class _BookingListTab extends StatefulWidget {
   final String bookingStatusCode;
   final String searchQuery;
-  final bool isInAdminMode;
 
   const _BookingListTab({
     required this.bookingStatusCode,
     required this.searchQuery,
-    this.isInAdminMode = false,
   });
 
   @override
@@ -248,7 +244,6 @@ class _BookingListTabState extends State<_BookingListTab> {
             return BookingListTileWidget(
               key: ValueKey(booking.id),
               booking: booking,
-              isInAdminMode: widget.isInAdminMode,
             );
           },
         );

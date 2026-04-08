@@ -1,3 +1,4 @@
+import "package:aboglumbo_bbk_panel/styles/color.dart";
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -118,7 +119,7 @@ class ManageBanners extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Text(
             AppLocalizations.of(context)?.deleteBanner ?? 'Delete Banner',
@@ -133,7 +134,7 @@ class ManageBanners extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
               text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
               textColor: Colors.black,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
             ),
             eButton(
               context: context,

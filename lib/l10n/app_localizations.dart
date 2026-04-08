@@ -104,6 +104,30 @@ abstract class AppLocalizations {
   /// **'Abo Glumbo'**
   String get appName;
 
+  /// No description provided for @profileSentForVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile has been sent for Verification!'**
+  String get profileSentForVerification;
+
+  /// No description provided for @onlineStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now Online'**
+  String get onlineStatusOn;
+
+  /// No description provided for @onlineStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now Offline'**
+  String get onlineStatusOff;
+
+  /// No description provided for @errorUpdatingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating status'**
+  String get errorUpdatingStatus;
+
   /// No description provided for @appLoginCaption.
   ///
   /// In en, this message translates to:
@@ -176,11 +200,23 @@ abstract class AppLocalizations {
   /// **'Loading Technicians...'**
   String get loadingAgents;
 
+  /// No description provided for @bonusCardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned Bonus will be included in your wallet for Payout.'**
+  String get bonusCardDesc;
+
   /// No description provided for @noReview.
   ///
   /// In en, this message translates to:
   /// **'No Review'**
   String get noReview;
+
+  /// No description provided for @areYouSureYouWantToAcceptThisNewTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to accept this new time?'**
+  String get areYouSureYouWantToAcceptThisNewTime;
 
   /// No description provided for @reject.
   ///
@@ -188,11 +224,29 @@ abstract class AppLocalizations {
   /// **'Reject'**
   String get reject;
 
+  /// No description provided for @walletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Balance'**
+  String get walletBalance;
+
   /// No description provided for @tip.
   ///
   /// In en, this message translates to:
   /// **'Tip'**
   String get tip;
+
+  /// No description provided for @availableToWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Available To Work'**
+  String get availableToWork;
+
+  /// No description provided for @notAvailableToWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Available To Work'**
+  String get notAvailableToWork;
 
   /// No description provided for @choose.
   ///
@@ -1754,6 +1808,18 @@ abstract class AppLocalizations {
   /// **'Please Select Category'**
   String get pleaseSelectACategory;
 
+  /// No description provided for @discountPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Percentage (%)'**
+  String get discountPercentage;
+
+  /// No description provided for @pleaseEnterADiscountPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Discount Percentage'**
+  String get pleaseEnterADiscountPercentage;
+
   /// No description provided for @highlightedServiceAddedSuccessfully.
   ///
   /// In en, this message translates to:
@@ -2173,6 +2239,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel Booking'**
   String get cancelBooking;
+
+  /// No description provided for @counterPropose.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter Propose'**
+  String get counterPropose;
+
+  /// No description provided for @proposeNewTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose New Time'**
+  String get proposeNewTime;
+
+  /// No description provided for @counterOfferPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter Offer Pending'**
+  String get counterOfferPending;
+
+  /// No description provided for @customerProposedNewTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer proposed a new time'**
+  String get customerProposedNewTime;
+
+  /// No description provided for @acceptOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept Offer'**
+  String get acceptOffer;
+
+  /// No description provided for @rejectOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Offer'**
+  String get rejectOffer;
+
+  /// No description provided for @newProposedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'New Proposed Time'**
+  String get newProposedTime;
+
+  /// No description provided for @waitingForCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for customer response'**
+  String get waitingForCustomer;
+
+  /// No description provided for @proposedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed Time'**
+  String get proposedTime;
+
+  /// No description provided for @counterOfferSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter offer sent successfully'**
+  String get counterOfferSent;
+
+  /// No description provided for @counterOfferResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Response sent successfully'**
+  String get counterOfferResponse;
+
+  /// No description provided for @counterProposalStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter proposal started'**
+  String get counterProposalStarted;
+
+  /// No description provided for @counterProposalAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter proposal accepted'**
+  String get counterProposalAccepted;
+
+  /// No description provided for @proposalRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal Rejected'**
+  String get proposalRejected;
+
+  /// No description provided for @proposalAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal Accepted'**
+  String get proposalAccepted;
+
+  /// No description provided for @customerRejectedProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer rejected your proposal.'**
+  String get customerRejectedProposal;
+
+  /// No description provided for @youRejectedProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'You rejected customer\'s proposal.'**
+  String get youRejectedProposal;
+
+  /// No description provided for @appointmentRescheduledTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment rescheduled to'**
+  String get appointmentRescheduledTo;
+
+  /// No description provided for @rescheduleBookingTimeConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to accept this new appointment time? The booking schedule will be updated immediately.'**
+  String get rescheduleBookingTimeConfirmation;
 
   /// No description provided for @startWork.
   ///
@@ -2815,6 +2995,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Progress resets monthly, Maintain high ratings and complete more jobs to unlock better rewards.'**
   String get progressResetsMonthly;
+
+  /// No description provided for @progressResetsMonthlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Progresses rests monthly. Maintain high ratings and complete more jobs to unlock better rewards'**
+  String get progressResetsMonthlyDesc;
+
+  /// No description provided for @zeroPercentBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'0% Bonus'**
+  String get zeroPercentBonus;
+
+  /// No description provided for @fivepercentBonusOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'5% Bonus'**
+  String get fivepercentBonusOnly;
+
+  /// No description provided for @tenpercentBonusOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'10% Bonus'**
+  String get tenpercentBonusOnly;
+
+  /// No description provided for @fifteenpercentBonusOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'15% Bonus'**
+  String get fifteenpercentBonusOnly;
 
   /// No description provided for @viewYourRewards.
   ///
@@ -6831,12 +7041,6 @@ abstract class AppLocalizations {
   /// **'You are now offline'**
   String get youAreNowOffline;
 
-  /// No description provided for @errorUpdatingStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Error updating status'**
-  String get errorUpdatingStatus;
-
   /// No description provided for @youAreCurrentlyUnavailable.
   ///
   /// In en, this message translates to:
@@ -8030,6 +8234,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Selected Locations'**
   String get selectedLocations;
+
+  /// No description provided for @verificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Pending'**
+  String get verificationPending;
+
+  /// No description provided for @waitingForTechnicianVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for technician to verify payment'**
+  String get waitingForTechnicianVerification;
+
+  /// No description provided for @verifyPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Payment'**
+  String get verifyPayment;
+
+  /// No description provided for @confirmPaymentReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Payment Receipt'**
+  String get confirmPaymentReceipt;
+
+  /// No description provided for @uploadTechnicianPaymentProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Technician Payment Proof'**
+  String get uploadTechnicianPaymentProof;
+
+  /// No description provided for @paymentVerifiedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment verified successfully'**
+  String get paymentVerifiedSuccessfully;
+
+  /// No description provided for @selectFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Files'**
+  String get selectFiles;
+
+  /// No description provided for @pleaseSelectAtLeastOneFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one file'**
+  String get pleaseSelectAtLeastOneFile;
+
+  /// No description provided for @errorUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Error uploading'**
+  String get errorUploading;
+
+  /// No description provided for @warranty.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty'**
+  String get warranty;
+
+  /// No description provided for @warrantyAppliedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty applied on'**
+  String get warrantyAppliedOn;
+
+  /// No description provided for @bookingIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking ID Copied'**
+  String get bookingIdCopied;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get selectTime;
+
+  /// No description provided for @submitCounterOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Counter Offer'**
+  String get submitCounterOffer;
+
+  /// No description provided for @pleaseSelectALaterTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a time later than the current booking time'**
+  String get pleaseSelectALaterTime;
 }
 
 class _AppLocalizationsDelegate

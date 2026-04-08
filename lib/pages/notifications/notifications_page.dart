@@ -130,7 +130,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
           _cachedNotifications = asyncSnapshot.data!;
         }
         return Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: AppColors.bgWhite,
           appBar: AppBar(
             elevation: 0,
             backgroundColor: AppColors.primary,
@@ -155,7 +155,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         // constraints: const BoxConstraints(maxWidth: 320),
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.bgWhite,
                         title: Row(
                           children: [
                             Icon(
@@ -181,7 +181,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                         actions: [
                           eButton(
                             context: context,
-                            backgroundColor: Colors.white,
+                            backgroundColor: AppColors.bgWhite,
                             onPressed: () => Navigator.pop(context, false),
                             widget: Text(
                               AppLocalizations.of(context)?.cancel ?? 'Cancel',

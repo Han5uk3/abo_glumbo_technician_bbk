@@ -1,16 +1,14 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:aboglumbo_bbk_panel/common_widget/crop_confirm_dialog.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/searchable_dropdown.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/snackbar.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/models/location_selection.dart';
+import 'package:aboglumbo_bbk_panel/models/location.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
@@ -23,6 +21,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,14 +51,14 @@ class _EditProfileState extends State<EditProfile> {
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   );
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
-  List<Region> regions = [];
-  Region? selectedRegion;
-  City? selectedCity;
-  District? selectedDistrict;
-  bool isLoadingLocations = true;
+  Position? _currentPosition;
+  Placemark? _placeMark;
+  bool _isFetchingLocation = false;
+  String? _locationError;
+
   XFile? selectedImage;
   XFile? selectedProfileImage;
   List<String> selectedCertifications = [];
@@ -70,7 +70,7 @@ class _EditProfileState extends State<EditProfile> {
   bool isCategoriesLoading = true;
 
   // Helper getter to check if all data is loaded
-  bool get isDataLoading => isLoadingLocations || isCategoriesLoading;
+  bool get isDataLoading => isCategoriesLoading;
 
   Future<int?> _showSourceSelector() async {
     return showModalBottomSheet<int>(
@@ -257,7 +257,7 @@ class _EditProfileState extends State<EditProfile> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             actionsAlignment: MainAxisAlignment.start,
             title: Text(AppLocalizations.of(context)?.delete ?? 'Delete'),
             content: Text(
@@ -270,7 +270,7 @@ class _EditProfileState extends State<EditProfile> {
                 text: AppLocalizations.of(context)?.no ?? 'No',
                 context: context,
                 textColor: Colors.white,
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.bgWhite,
               ),
               eButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -405,44 +405,63 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  void preselectLocation(DetailedLocationModel detailedLoc) {
-    if (regions.isEmpty || !mounted) return;
-
-    final region = regions.firstWhere(
-      (r) => r.regionId == detailedLoc.regionId,
-      orElse: () => regions.first,
-    );
-
+  Future<void> _getCurrentLocation() async {
     setState(() {
-      selectedRegion = region;
+      _isFetchingLocation = true;
+      _locationError = null;
+    });
 
-      if (region.cities.isNotEmpty) {
-        final city = region.cities.firstWhere(
-          (c) => c.cityId == detailedLoc.cityId,
-          orElse: () => region.cities.first,
-        );
-        selectedCity = city;
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw 'Location services are disabled.';
+      }
 
-        if (city.districts.isNotEmpty) {
-          final district = city.districts.firstWhere(
-            (d) => d.districtId == detailedLoc.neighborhoodId,
-            orElse: () => city.districts.first,
-          );
-          selectedDistrict = district;
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw 'Location permissions are denied';
         }
       }
-    });
+
+      if (permission == LocationPermission.deniedForever) {
+        throw 'Location permissions are permanently denied.';
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+
+      List<Placemark> placemarks = [];
+      try {
+        placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+      } catch (e) {
+        debugPrint('Geocoding error: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          _placeMark = placemarks.isNotEmpty ? placemarks.first : null;
+          _isFetchingLocation = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isFetchingLocation = false;
+          _locationError = e.toString();
+        });
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
-
-    // Load data first, then fill content after frame is built
-    loadLocations();
-    loadJobCategories();
-
-    // Schedule fillContent after the first frame to avoid setState during build
+    _loadJobCategories();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         fillContent();
@@ -451,7 +470,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   /// Load job categories from Firebase
-  Future<void> loadJobCategories() async {
+  Future<void> _loadJobCategories() async {
     setState(() {
       isCategoriesLoading = true;
     });
@@ -478,42 +497,6 @@ class _EditProfileState extends State<EditProfile> {
             backgroundColor: Colors.red,
           ),
         );
-      }
-    }
-  }
-
-  Future<void> loadLocations() async {
-    setState(() {
-      isLoadingLocations = true;
-    });
-
-    try {
-      final jsonString = await rootBundle.loadString(
-        'assets/data/saudi_hierarchical.json',
-      );
-      final List<dynamic> jsonData = json.decode(jsonString);
-
-      if (mounted) {
-        setState(() {
-          regions = jsonData.map((r) => Region.fromJson(r)).toList();
-          isLoadingLocations = false;
-        });
-
-        // Pre-select location AFTER regions are loaded and state is set
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (widget.workerData?.detailedLocation != null && mounted) {
-            preselectLocation(widget.workerData!.detailedLocation!);
-          }
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading locations: $e');
-      }
-      if (mounted) {
-        setState(() {
-          isLoadingLocations = false;
-        });
       }
     }
   }
@@ -1088,8 +1071,8 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     final safePadding = MediaQuery.of(context).padding;
     final locale = AppLocalizations.of(context)!;
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
         title: Text(locale.profileManagement),
         centerTitle: true,
@@ -1107,20 +1090,13 @@ class _EditProfileState extends State<EditProfile> {
                     name: nameController.text,
                     email: emailController.text,
                     phone: phoneController.text,
-                    // ✅ Use detailedLocation instead of districtName
-                    detailedLocation: DetailedLocationModel(
-                      regionId: selectedRegion?.regionId,
-                      regionEn: selectedRegion?.regionEn,
-                      regionAr: selectedRegion?.regionAr,
-                      cityId: selectedCity?.cityId,
-                      cityEn: selectedCity?.cityEn,
-                      cityAr: selectedCity?.cityAr,
-                      neighborhoodId: selectedDistrict?.districtId,
-                      neighborhoodEn: selectedDistrict?.districtEn,
-                      neighborhoodAr: selectedDistrict?.districtAr,
-                      lat: selectedDistrict?.latitude,
-                      lon: selectedDistrict?.longitude,
-                    ),
+                    location: _currentPosition != null
+                        ? LocationModel.fromGPS(
+                            lat: _currentPosition!.latitude,
+                            lon: _currentPosition!.longitude,
+                            placemark: _placeMark,
+                          )
+                        : widget.workerData?.location,
                     jobRoles: selectedJobRoles,
                     profileUrl: profileImageUrl,
                     lanCode: widget.workerData?.lanCode,
@@ -1131,7 +1107,6 @@ class _EditProfileState extends State<EditProfile> {
                     isVerified: widget.workerData?.isVerified,
                     docUrl: widget.workerData?.docUrl,
                     fcmToken: widget.workerData?.fcmToken,
-                    location: widget.workerData?.location,
                     liveLocation: widget.workerData?.liveLocation,
                   );
 
@@ -1343,75 +1318,185 @@ class _EditProfileState extends State<EditProfile> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    _buildDropdownField<Region>(
-                      hintText: locale.typeProvinceNameToSearch,
-                      label: '${locale.province} *',
-                      value: selectedRegion,
-                      items: regions,
-                      itemLabel: (region) => region.getName(isArabic),
-                      onChanged: (region) {
-                        setState(() {
-                          selectedRegion = region;
-                          selectedCity = null;
-                          selectedDistrict = null;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return locale.pleaseSelectProvince;
-                        }
-                        return null;
-                      },
+                    const SizedBox(height: 16),
+                    // Location Fetch Section
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey.shade50,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            locale.location,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _isFetchingLocation
+                                  ? null
+                                  : _getCurrentLocation,
+                              icon: _isFetchingLocation
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.my_location),
+                              label: Text(
+                                _isFetchingLocation
+                                    ? 'Fetching...'
+                                    : (AppLocalizations.of(context)
+                                            ?.useCurrentLocation ??
+                                        'Use Current Location'),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_currentPosition != null) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (_placeMark != null)
+                                          Text(
+                                            "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
+                                            style: GoogleFonts.dmSans(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.green.shade900,
+                                            ),
+                                          ),
+                                        Text(
+                                          "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
+                                          style: GoogleFonts.dmSans(
+                                            fontSize: 11,
+                                            color: Colors.green.shade700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else if (widget.workerData?.location != null) ...[
+                            const SizedBox(height: 12),
+                            Builder(
+                              builder: (context) {
+                                final loc = widget.workerData?.location;
+                                final locationText =
+                                    loc?.displayName ?? 'Location saved';
+                                final lat = loc?.lat;
+                                final lon = loc?.lon;
+                                final coordText = (lat != null && lon != null)
+                                    ? 'Lat: ${lat.toStringAsFixed(4)}, Lon: ${lon.toStringAsFixed(4)}'
+                                    : '';
+
+                                return Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        AppColors.primary.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color:
+                                          AppColors.primary.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              locationText,
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                            if (coordText.isNotEmpty)
+                                              Text(
+                                                coordText,
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 11,
+                                                  color: AppColors.primary
+                                                      .withOpacity(0.7),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+
+                          if (_locationError != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              _locationError!,
+                              style: GoogleFonts.dmSans(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-
-                    if (selectedRegion != null) ...[
-                      const SizedBox(height: 16),
-
-                      // ✅ City Dropdown
-                      _buildDropdownField<City>(
-                        hintText: locale.typeCityNameToSearch,
-                        label: locale.city,
-                        value: selectedCity,
-                        items: selectedRegion!.cities,
-                        itemLabel: (city) => city.getName(isArabic),
-                        onChanged: (city) {
-                          setState(() {
-                            selectedCity = city;
-                            selectedDistrict = null;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return locale.pleaseSelectCity;
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-
-                    if (selectedCity != null) ...[
-                      const SizedBox(height: 16),
-
-                      // ✅ District Dropdown
-                      _buildDropdownField<District>(
-                        hintText: locale.typeNeighborhoodNameToSearch,
-                        label: locale.neighborhood,
-                        value: selectedDistrict,
-                        items: selectedCity!.districts,
-                        itemLabel: (district) => district.getName(isArabic),
-                        onChanged: (district) {
-                          setState(() {
-                            selectedDistrict = district;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return locale.pleaseSelectNeighborhood;
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
                     const SizedBox(height: 16),
 
                     // Replace TextFormWidget with custom job roles container
@@ -1782,19 +1867,7 @@ class _EditProfileState extends State<EditProfile> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState?.validate() ?? false) {
-                            // ✅ Validation for location
-                            if (selectedRegion == null ||
-                                selectedCity == null ||
-                                selectedDistrict == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    locale.pleaseSelectAllLocationFields,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
+                            // Location is now GPS-based; no manual validation needed.
 
                             // Validation for job roles
                             if (selectedJobRoles.isEmpty) {
@@ -1808,20 +1881,14 @@ class _EditProfileState extends State<EditProfile> {
                               return;
                             }
 
-                            // ✅ Create DetailedLocationModel
-                            final detailedLocation = DetailedLocationModel(
-                              regionId: selectedRegion!.regionId,
-                              regionEn: selectedRegion!.regionEn,
-                              regionAr: selectedRegion!.regionAr,
-                              cityId: selectedCity!.cityId,
-                              cityEn: selectedCity!.cityEn,
-                              cityAr: selectedCity!.cityAr,
-                              neighborhoodId: selectedDistrict!.districtId,
-                              neighborhoodEn: selectedDistrict!.districtEn,
-                              neighborhoodAr: selectedDistrict!.districtAr,
-                              lat: selectedDistrict!.latitude,
-                              lon: selectedDistrict!.longitude,
-                            );
+                            // Build unified LocationModel from GPS data
+                            final newLocation = _currentPosition != null
+                                ? LocationModel.fromGPS(
+                                    lat: _currentPosition!.latitude,
+                                    lon: _currentPosition!.longitude,
+                                    placemark: _placeMark,
+                                  )
+                                : widget.workerData?.location;
 
                             context.read<AccountBloc>().add(
                               UpdateProfileEvent(
@@ -1831,8 +1898,7 @@ class _EditProfileState extends State<EditProfile> {
                                   name: nameController.text,
                                   email: emailController.text,
                                   phone: phoneController.text,
-                                  detailedLocation:
-                                      detailedLocation, // ✅ Use detailedLocation
+                                  location: newLocation,
                                   jobRoles: selectedJobRoles,
                                   profileUrl: profileImageUrl,
                                   lanCode: widget.workerData?.lanCode,
@@ -1843,7 +1909,7 @@ class _EditProfileState extends State<EditProfile> {
                                   isVerified: widget.workerData?.isVerified,
                                   docUrl: widget.workerData?.docUrl,
                                   fcmToken: widget.workerData?.fcmToken,
-                                  location: widget.workerData?.location,
+                                 
                                   liveLocation: widget.workerData?.liveLocation,
                                   certifications: widget
                                       .workerData!
@@ -1882,26 +1948,6 @@ class _EditProfileState extends State<EditProfile> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildDropdownField<T extends Object>({
-    required String label,
-    required String hintText,
-    required T? value,
-    required List<T> items,
-    required String Function(T) itemLabel,
-    required void Function(T?) onChanged,
-    String? Function(T?)? validator,
-  }) {
-    return SearchableDropdown<T>(
-      label: label,
-      hintText: hintText,
-      value: value,
-      items: items,
-      itemLabel: itemLabel,
-      onChanged: onChanged,
-      validator: validator,
     );
   }
 

@@ -11,6 +11,7 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/bloc/admin_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/notifications/notifications_page.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -167,6 +168,8 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
               title: Text(
                 AppLocalizations.of(context)?.manageOrders ?? "Manage Orders",
               ),
+              elevation: 0,
+              shape: Border.all(style: BorderStyle.none),
               actions: [
                 StreamBuilder<int>(
                   stream: AppServices.getUnreadNotificationsCountStream(),
@@ -340,6 +343,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                   Container(
                     height: 64,
                     alignment: Alignment.centerLeft,
+                    color: Colors.white,
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
@@ -398,24 +402,25 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     required VoidCallback onPressed,
   }) {
     return ActionChip(
-      avatar: Icon(
-        isSelected ? Icons.check_circle : Icons.circle_outlined,
-        color: isSelected ? colorScheme.primary : null,
-        size: 20,
+      onPressed: onPressed,
+      backgroundColor: Colors.white,
+
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : Colors.grey.shade600,
+        width: 1,
       ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       label: Text(
         LocalizationHelper()
             .localizedBookingStatus(name, context: context)
             .toUpperCase(),
         style: TextStyle(
+          color: isSelected ? AppColors.primary : Colors.grey.shade600,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          fontSize: 14,
         ),
       ),
-      onPressed: onPressed,
-      backgroundColor: isSelected
-          ? colorScheme.primary.withOpacity(0.15)
-          : null,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
     );
   }
 
@@ -492,7 +497,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final booking = filteredBookings[index];
-            return BookingCards(
+            return BookingListTileWidget(
               key: ValueKey(booking.id),
               booking: booking,
               isInAdminMode: true,

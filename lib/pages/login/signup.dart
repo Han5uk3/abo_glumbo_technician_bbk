@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/models/location.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
@@ -415,7 +416,7 @@ class _SignupState extends State<Signup> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             actionsAlignment: MainAxisAlignment.start,
             title: Text(AppLocalizations.of(context)?.delete ?? 'Delete'),
             content: Text(
@@ -675,7 +676,7 @@ class _SignupState extends State<Signup> {
         return PopScope(
           canPop: false,
           child: AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -763,19 +764,10 @@ class _SignupState extends State<Signup> {
         }
       }
 
-      // ✅ Create DetailedLocationModel from Current Location
-      final detailedLocation = DetailedLocationModel(
-        regionId: null,
-        regionEn: _placeMark?.administrativeArea,
-        regionAr: _placeMark?.administrativeArea,
-        cityId: null,
-        cityEn: _placeMark?.locality,
-        cityAr: _placeMark?.locality,
-        neighborhoodId: null,
-        neighborhoodEn: _placeMark?.subLocality ?? _placeMark?.thoroughfare,
-        neighborhoodAr: _placeMark?.subLocality ?? _placeMark?.thoroughfare,
+      final location = LocationModel.fromGPS(
         lat: _currentPosition!.latitude,
         lon: _currentPosition!.longitude,
+        placemark: _placeMark,
       );
 
       // Create user document
@@ -788,7 +780,7 @@ class _SignupState extends State<Signup> {
             ? null
             : emailController.text.trim(),
         country: "SA",
-        detailedLocation: detailedLocation,
+        location: location,
         jobRoles: selectedJobRoles,
         profileUrl: profileImageUrl,
         docUrl: idImageUrl,
@@ -1358,7 +1350,7 @@ class _SignupState extends State<Signup> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         actionsAlignment: MainAxisAlignment.start,
         title: Text(AppLocalizations.of(context)!.cancelRegistration),
         content: Text(
@@ -1366,7 +1358,7 @@ class _SignupState extends State<Signup> {
         ),
         actions: [
           eButton(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             context: context,
             onPressed: () => Navigator.pop(context, false),
             text: AppLocalizations.of(context)!.no,

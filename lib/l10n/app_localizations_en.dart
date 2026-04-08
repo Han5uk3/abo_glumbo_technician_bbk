@@ -12,6 +12,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Abo Glumbo';
 
   @override
+  String get profileSentForVerification =>
+      'Your Profile has been sent for Verification!';
+
+  @override
+  String get onlineStatusOn => 'You are now Online';
+
+  @override
+  String get onlineStatusOff => 'You are now Offline';
+
+  @override
+  String get errorUpdatingStatus => 'Error updating status';
+
+  @override
   String get appLoginCaption =>
       'Your go-to app for finding qualified professionals.';
 
@@ -50,13 +63,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingAgents => 'Loading Technicians...';
 
   @override
+  String get bonusCardDesc =>
+      'Earned Bonus will be included in your wallet for Payout.';
+
+  @override
   String get noReview => 'No Review';
+
+  @override
+  String get areYouSureYouWantToAcceptThisNewTime =>
+      'Are you sure you want to accept this new time?';
 
   @override
   String get reject => 'Reject';
 
   @override
+  String get walletBalance => 'Wallet Balance';
+
+  @override
   String get tip => 'Tip';
+
+  @override
+  String get availableToWork => 'Available To Work';
+
+  @override
+  String get notAvailableToWork => 'Not Available To Work';
 
   @override
   String get choose => 'Choose';
@@ -861,6 +891,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSelectACategory => 'Please Select Category';
 
   @override
+  String get discountPercentage => 'Discount Percentage (%)';
+
+  @override
+  String get pleaseEnterADiscountPercentage =>
+      'Please Enter Discount Percentage';
+
+  @override
   String get highlightedServiceAddedSuccessfully =>
       'Highlighted Service Added Successfully';
 
@@ -1082,6 +1119,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelBooking => 'Cancel Booking';
+
+  @override
+  String get counterPropose => 'Counter Propose';
+
+  @override
+  String get proposeNewTime => 'Propose New Time';
+
+  @override
+  String get counterOfferPending => 'Counter Offer Pending';
+
+  @override
+  String get customerProposedNewTime => 'Customer proposed a new time';
+
+  @override
+  String get acceptOffer => 'Accept Offer';
+
+  @override
+  String get rejectOffer => 'Reject Offer';
+
+  @override
+  String get newProposedTime => 'New Proposed Time';
+
+  @override
+  String get waitingForCustomer => 'Waiting for customer response';
+
+  @override
+  String get proposedTime => 'Proposed Time';
+
+  @override
+  String get counterOfferSent => 'Counter offer sent successfully';
+
+  @override
+  String get counterOfferResponse => 'Response sent successfully';
+
+  @override
+  String get counterProposalStarted => 'Counter proposal started';
+
+  @override
+  String get counterProposalAccepted => 'Counter proposal accepted';
+
+  @override
+  String get proposalRejected => 'Proposal Rejected';
+
+  @override
+  String get proposalAccepted => 'Proposal Accepted';
+
+  @override
+  String get customerRejectedProposal => 'Customer rejected your proposal.';
+
+  @override
+  String get youRejectedProposal => 'You rejected customer\'s proposal.';
+
+  @override
+  String get appointmentRescheduledTo => 'Appointment rescheduled to';
+
+  @override
+  String get rescheduleBookingTimeConfirmation =>
+      'Are you sure you want to accept this new appointment time? The booking schedule will be updated immediately.';
 
   @override
   String get startWork => 'Start Work';
@@ -1411,6 +1506,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get progressResetsMonthly =>
       'Progress resets monthly, Maintain high ratings and complete more jobs to unlock better rewards.';
+
+  @override
+  String get progressResetsMonthlyDesc =>
+      'Progresses rests monthly. Maintain high ratings and complete more jobs to unlock better rewards';
+
+  @override
+  String get zeroPercentBonus => '0% Bonus';
+
+  @override
+  String get fivepercentBonusOnly => '5% Bonus';
+
+  @override
+  String get tenpercentBonusOnly => '10% Bonus';
+
+  @override
+  String get fifteenpercentBonusOnly => '15% Bonus';
 
   @override
   String get viewYourRewards => 'View your rewards';
@@ -3585,9 +3696,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youAreNowOffline => 'You are now offline';
 
   @override
-  String get errorUpdatingStatus => 'Error updating status';
-
-  @override
   String get youAreCurrentlyUnavailable =>
       'You are currently unavailable for requests';
 
@@ -4267,4 +4375,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectedLocations => 'Selected Locations';
+
+  @override
+  String get verificationPending => 'Verification Pending';
+
+  @override
+  String get waitingForTechnicianVerification =>
+      'Waiting for technician to verify payment';
+
+  @override
+  String get verifyPayment => 'Verify Payment';
+
+  @override
+  String get confirmPaymentReceipt => 'Confirm Payment Receipt';
+
+  @override
+  String get uploadTechnicianPaymentProof => 'Upload Technician Payment Proof';
+
+  @override
+  String get paymentVerifiedSuccessfully => 'Payment verified successfully';
+
+  @override
+  String get selectFiles => 'Select Files';
+
+  @override
+  String get pleaseSelectAtLeastOneFile => 'Please select at least one file';
+
+  @override
+  String get errorUploading => 'Error uploading';
+
+  @override
+  String get warranty => 'Warranty';
+
+  @override
+  String get warrantyAppliedOn => 'Warranty applied on';
+
+  @override
+  String get bookingIdCopied => 'Booking ID Copied';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get submitCounterOffer => 'Submit Counter Offer';
+
+  @override
+  String get pleaseSelectALaterTime =>
+      'Please select a time later than the current booking time';
 }

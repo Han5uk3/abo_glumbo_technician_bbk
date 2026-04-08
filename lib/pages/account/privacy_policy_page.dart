@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 
@@ -9,6 +10,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       appBar: AppBar(title: Text(locale.privacyPolicy)),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),

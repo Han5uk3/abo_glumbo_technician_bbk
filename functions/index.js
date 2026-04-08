@@ -478,7 +478,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
 
     // Determine which message to use
     let messageKey = bookingStatus;
-    if (bookingStatus === "C" && isPaymentCompleted) {
+    if (bookingStatus === "C" && isPaymentCompleted && afterData.completionData?.mode !== 0) {
       messageKey = "C_PAYMENT_COMPLETED";
     }
 
@@ -528,6 +528,12 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 
     if (!isPaymentCompleted || wasPaymentCompleted) {
       // Payment not completed or already was completed before
+      return;
+    }
+
+    // Omit payment received notification for inspection only bookings
+    if (afterData.completionData?.mode === 0) {
+      console.log(`[${bookingId}] Inspection only booking, skipping payment received notification.`);
       return;
     }
 

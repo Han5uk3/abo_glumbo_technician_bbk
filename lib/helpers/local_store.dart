@@ -147,6 +147,22 @@ class LocalStore {
   }
 
   // ============================================
+  // Welcome Modal Tracking
+  // ============================================
+
+  /// Check if welcome modal has been shown for this user
+  static bool getWelcomeModalShown(String uid) {
+    return MyApp.box.get('welcome_modal_shown_$uid', defaultValue: false) ??
+        false;
+  }
+
+  /// Mark welcome modal as shown for this user
+  static Future<void> setWelcomeModalShown(String uid, bool shown) async {
+    await MyApp.box.put('welcome_modal_shown_$uid', shown);
+    await MyApp.box.flush();
+  }
+
+  // ============================================
   // User Data Cache (for offline/quick access)
   // ============================================
 

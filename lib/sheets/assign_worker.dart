@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/searchable_dropdown.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -13,14 +11,15 @@ import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/widgets/conflict_widgets.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/conflict_check_services.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter/services.dart';
 
 class AssignUserBottomSheet extends StatefulWidget {
   final BookingModel booking;
-  final Function({required BookingModel booking, required UserModel user})
-  onAssignAgent;
+  final Function({required BookingModel booking, required UserModel user}) onAssignAgent;
   final Function(BookingModel booking) onRejectOrder;
   final bool isWarranty;
 
@@ -37,26 +36,21 @@ class AssignUserBottomSheet extends StatefulWidget {
 }
 
 class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
-  // Services
   late final ConflictCheckService _conflictService;
 
-  // Location state
   List<Region> _regions = [];
   Region? _selectedRegion;
   City? _selectedCity;
   District? _selectedDistrict;
   bool _isDataFullyLoaded = false;
 
-  // Loading states
   final ValueNotifier<bool> _isLoadingLocations = ValueNotifier(true);
   final ValueNotifier<bool> _isLoadingCategory = ValueNotifier(true);
   final ValueNotifier<bool> _isAssigning = ValueNotifier(false);
 
-  // Data
   CategoryModel? _categoryModel;
   final Map<String, CategoryModel> _categoryCache = {};
 
-  // Stream management
   Stream<List<UserModel>>? _cachedUsersStream;
   String? _lastLocationKey;
 
@@ -124,19 +118,12 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   Future<void> _loadCategories(List<String> categoryIds) async {
     if (categoryIds.isEmpty) return;
-
-    final uncachedIds = categoryIds
-        .where((id) => !_categoryCache.containsKey(id))
-        .toList();
-
+    final uncachedIds = categoryIds.where((id) => !_categoryCache.containsKey(id)).toList();
     if (uncachedIds.isEmpty) return;
-
     try {
       final categories = await AppServices.getCategoriesByIds(uncachedIds);
       for (var category in categories) {
-        if (category.id != null) {
-          _categoryCache[category.id!] = category;
-        }
+        if (category.id != null) _categoryCache[category.id!] = category;
       }
     } catch (e) {
       log('Error loading categories: $e');
@@ -145,81 +132,48 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   String _getJobRoleNames(List<String>? jobRoleIds, bool isArabic) {
     if (jobRoleIds == null || jobRoleIds.isEmpty) return '';
-
-    return jobRoleIds
-        .map((id) {
+    return jobRoleIds.map((id) {
           final category = _categoryCache[id];
           if (category == null) return null;
           return isArabic ? category.name_ar : category.name;
-        })
-        .where((name) => name != null)
-        .join(', ');
+        }).where((name) => name != null).join(', ');
   }
 
   Future<void> _preloadConflictData(List<UserModel> users) async {
-    if (!mounted || _conflictService.isCacheValid || _hasPreloadedConflicts) {
-      return;
-    }
-    if (_lastPreloadedUsers != null &&
-        _usersAreEqual(_lastPreloadedUsers!, users)) {
-      return;
-    }
+    if (!mounted || _conflictService.isCacheValid || _hasPreloadedConflicts) return;
+    if (_lastPreloadedUsers != null && _usersAreEqual(_lastPreloadedUsers!, users)) return;
 
     _hasPreloadedConflicts = true;
     _lastPreloadedUsers = users;
 
     try {
-      // Load job role categories
-      final jobRoleIds = users
-          .expand((u) => u.jobRoles ?? [])
-          .whereType<String>()
-          .toSet()
-          .toList();
-
+      final jobRoleIds = users.expand((u) => u.jobRoles ?? []).whereType<String>().toSet().toList();
       await _loadCategories(jobRoleIds);
-
-      // Get the list of UIDs to check for conflicts
       List<String> conflictUids = [];
 
       if (widget.isWarranty) {
-        // For warranties, only get rejected technician UIDs
-        final currentBookingDoc = await AppFirestore.bookingsCollectionRef
-            .doc(widget.booking.id)
-            .get();
-
+        final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
         if (currentBookingDoc.exists) {
           final data = currentBookingDoc.data() as Map<String, dynamic>?;
           final warrantyData = data?['warranty'] as Map<String, dynamic>?;
-          final rejectedTechnicians =
-              warrantyData?['rejectedTechnicians'] as List?;
-
+          final rejectedTechnicians = warrantyData?['rejectedTechnicians'] as List?;
           if (rejectedTechnicians != null) {
             for (var tech in rejectedTechnicians) {
               final uid = tech['uid'] as String?;
-              if (uid != null) {
-                conflictUids.add(uid);
-              }
+              if (uid != null) conflictUids.add(uid);
             }
           }
         }
       } else {
-        // For normal bookings, get cancelled worker UIDs
-        final currentBookingDoc = await AppFirestore.bookingsCollectionRef
-            .doc(widget.booking.id)
-            .get();
-
+        final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
         if (currentBookingDoc.exists) {
           final data = currentBookingDoc.data() as Map<String, dynamic>?;
           final uids = data?['cancelledWorkerUids'] as List?;
-          if (uids != null) {
-            conflictUids.addAll(uids.cast<String>());
-          }
+          if (uids != null) conflictUids.addAll(uids.cast<String>());
         }
       }
 
-      // Batch check conflicts with the appropriate UIDs
       final userIds = users.map((u) => u.uid).whereType<String>().toList();
-
       await _conflictService.batchCheckConflicts(
         userIds: userIds,
         booking: widget.booking,
@@ -228,275 +182,180 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     } catch (e) {
       log('Error preloading conflicts: $e');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isDataFullyLoaded = true;
-        });
-      }
+      if (mounted) setState(() => _isDataFullyLoaded = true);
     }
   }
 
   bool _usersAreEqual(List<UserModel> list1, List<UserModel> list2) {
     if (list1.length != list2.length) return false;
-
     final ids1 = list1.map((u) => u.uid).toSet();
     final ids2 = list2.map((u) => u.uid).toSet();
-
     return ids1.length == ids2.length && ids1.containsAll(ids2);
   }
 
   Future<void> _handleAssignAgent(UserModel user) async {
     final userId = user.uid;
     if (userId == null) return;
-
     if (_isAssigning.value) {
-      _showSnackBar(
-        AppLocalizations.of(context)?.assignmentInProgress ??
-            'Assignment in progress',
-      );
+      _showSnackBar(AppLocalizations.of(context)!.assignmentInProgress, Colors.orange);
       return;
     }
-
     _isAssigning.value = true;
 
     try {
-      _showSnackBar(
-        AppLocalizations.of(context)?.checkingAvailabilityAndAssigning ??
-            'Checking availability...',
-      );
-
-      // Get conflict data
-      final conflicts = await _conflictService.batchCheckConflicts(
-        userIds: [userId],
-        booking: widget.booking,
-        cancelledWorkerUids: [],
-      );
-
+      final conflicts = await _conflictService.batchCheckConflicts(userIds: [userId], booking: widget.booking, cancelledWorkerUids: []);
       final conflictData = conflicts[userId];
-
       if (conflictData?.hasConflict == true) {
         await _showConflictDialog(user, conflictData!);
         return;
       }
 
-      // Verify booking not already assigned
-      final currentDoc = await AppFirestore.bookingsCollectionRef
-          .doc(widget.booking.id)
-          .get();
-
+      final currentDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
       if (currentDoc.exists) {
         final data = currentDoc.data() as Map<String, dynamic>;
         final assignedTo = data['assignedTo'] as String?;
         final status = data['bookingStatusCode'] as String?;
-
         if (assignedTo != null && assignedTo.isNotEmpty && status != 'P') {
-          _showSnackBar(
-            AppLocalizations.of(
-              context,
-            )!.thisBookingAlreadyAssignedToAnotherAgent,
-          );
+          _showSnackBar(AppLocalizations.of(context)!.thisBookingAlreadyAssignedToAnotherAgent, Colors.red);
           Navigator.pop(context);
           return;
         }
       }
 
-      // Track assignment and execute
-      _conflictService.trackAssignment(
-        userId,
-        widget.booking.bookingDateTime.toDate(),
-      );
+      _conflictService.trackAssignment(userId, widget.booking.bookingDateTime.toDate());
       _conflictService.invalidateCache();
-
       widget.onAssignAgent(booking: widget.booking, user: user);
       Navigator.pop(context);
     } catch (e) {
-      _showSnackBar(
-        AppLocalizations.of(context)?.failedToAssignAgent ??
-            'Failed to assign agent',
-      );
+      _showSnackBar(AppLocalizations.of(context)!.failedToAssignAgent, Colors.red);
     } finally {
       if (mounted) _isAssigning.value = false;
     }
   }
 
-  Future<void> _showConflictDialog(
-    UserModel user,
-    ConflictData conflictData,
-  ) async {
-    final agentName =
-        user.name ?? AppLocalizations.of(context)?.agent ?? 'Agent';
-
+  Future<void> _showConflictDialog(UserModel user, ConflictData conflictData) async {
+    final agentName = user.name ?? AppLocalizations.of(context)?.agent ?? 'Agent';
     if (conflictData.type == ConflictType.workerCancelledThisBooking) {
-      await ConflictDialogs.showWorkerCancelledDialog(
-        context,
-        agentName: agentName,
-        conflictTime: conflictData.conflictTime!,
-        conflictDate: conflictData.conflictDate!,
-        isThisBooking: true,
-      );
+      await ConflictDialogs.showWorkerCancelledDialog(context, agentName: agentName, conflictTime: conflictData.conflictTime!, conflictDate: conflictData.conflictDate!, isThisBooking: true);
     } else if (conflictData.type == ConflictType.workerCancelled) {
-      await ConflictDialogs.showWorkerCancelledDialog(
-        context,
-        agentName: agentName,
-        conflictTime: conflictData.conflictTime!,
-        conflictDate: conflictData.conflictDate!,
-        isThisBooking: false,
-      );
+      await ConflictDialogs.showWorkerCancelledDialog(context, agentName: agentName, conflictTime: conflictData.conflictTime!, conflictDate: conflictData.conflictDate!, isThisBooking: false);
     } else {
-      await ConflictDialogs.showTimeConflictDialog(
-        context,
-        agentName: agentName,
-        conflictTime: conflictData.conflictTime!,
-        conflictDate: conflictData.conflictDate!,
-      );
+      await ConflictDialogs.showTimeConflictDialog(context, agentName: agentName, conflictTime: conflictData.conflictTime!, conflictDate: conflictData.conflictDate!);
     }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, Color color) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+        SnackBar(
+          content: Text(message, style: DMSansFont.textStyle(color: Colors.white)),
+          backgroundColor: color,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     }
   }
 
   Stream<List<UserModel>> _createUsersStream() {
     final categoryId = widget.booking.service.category;
-
-    if (categoryId != null) {
-      return _getCategoryWiseWorkersStream(categoryId).map(_filterByLocation);
-    }
-
+    if (categoryId != null) return _getCategoryWiseWorkersStream(categoryId);
     return AppFirestore.usersCollectionRef
         .where('isVerified', isEqualTo: true)
         .where('isAdmin', isNotEqualTo: true)
         .snapshots()
-        .map((snapshot) {
-          final users = snapshot.docs
-              .map(
-                (doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>),
-              )
-              .toList();
-          return _filterByLocation(users);
-        });
+        .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>)).toList());
   }
 
-  Stream<List<UserModel>> _getCategoryWiseWorkersStream(
-    String categoryId,
-  ) async* {
+  Stream<List<UserModel>> _getCategoryWiseWorkersStream(String categoryId) async* {
     try {
-      final doc = await AppFirestore.categoriesCollectionRef
-          .doc(categoryId)
-          .get();
-
-      if (!doc.exists) {
-        yield [];
-        return;
-      }
-
+      final doc = await AppFirestore.categoriesCollectionRef.doc(categoryId).get();
+      if (!doc.exists) { yield []; return; }
       final data = doc.data() as Map<String, dynamic>?;
       final catId = data?['id'] ?? '';
-
-      if (catId.isEmpty) {
-        yield [];
-        return;
-      }
-
+      if (catId.isEmpty) { yield []; return; }
       yield* AppFirestore.usersCollectionRef
           .where('isVerified', isEqualTo: true)
           .where('isAdmin', isNotEqualTo: true)
           .where('jobRoles', arrayContains: catId)
           .snapshots()
-          .map((snapshot) {
-            return snapshot.docs
-                .map(
-                  (doc) =>
-                      UserModel.fromJson(doc.data() as Map<String, dynamic>),
-                )
-                .toList();
-          });
-    } catch (e) {
-      log('Error in category stream: $e');
-      yield [];
-    }
-  }
-
-  List<UserModel> _filterByLocation(List<UserModel> users) {
-    if (_selectedRegion == null &&
-        _selectedCity == null &&
-        _selectedDistrict == null) {
-      return users;
-    }
-
-    return users.where((user) {
-      final location = user.detailedLocation;
-      if (location == null) return false;
-
-      if (_selectedRegion != null &&
-          location.regionId != _selectedRegion!.regionId) {
-        return false;
-      }
-
-      if (_selectedCity != null && location.cityId != _selectedCity!.cityId) {
-        return false;
-      }
-
-      if (_selectedDistrict != null &&
-          location.neighborhoodId != _selectedDistrict!.districtId) {
-        return false;
-      }
-
-      return true;
-    }).toList();
+          .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>)).toList());
+    } catch (e) { yield []; }
   }
 
   Stream<List<UserModel>> _getFilteredUsersStream() {
-    final locationKey =
-        '${_selectedRegion?.regionId}_${_selectedCity?.cityId}_${_selectedDistrict?.districtId}';
-
+    final locationKey = '${_selectedRegion?.regionId}_${_selectedCity?.cityId}_${_selectedDistrict?.districtId}';
     if (_cachedUsersStream == null || _lastLocationKey != locationKey) {
       _cachedUsersStream = _createUsersStream();
       _lastLocationKey = locationKey;
       _conflictService.invalidateCache();
-
-      // NEW: Reset preload flag when stream changes
       _hasPreloadedConflicts = false;
       _lastPreloadedUsers = null;
       _isDataFullyLoaded = false;
     }
-
     return _cachedUsersStream!;
   }
 
   Future<void> _showRejectConfirmationDialog() async {
-    final confirmed = await showDialog<bool>(
+    _showPremiumDialog(
+      title: AppLocalizations.of(context)!.confirmReject,
+      message: AppLocalizations.of(context)!.confirmRejectMessage,
+      icon: Icons.cancel_outlined,
+      iconColor: Colors.red,
+      primaryActionLabel: AppLocalizations.of(context)!.reject,
+      primaryAction: () {
+        widget.onRejectOrder(widget.booking);
+        Navigator.pop(context);
+      },
+      isDanger: true,
+    );
+  }
+
+  void _showPremiumDialog({
+    required String title,
+    required String message,
+    required IconData icon,
+    required Color iconColor,
+    required String primaryActionLabel,
+    required VoidCallback primaryAction,
+    bool isDanger = false,
+  }) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        actionsAlignment: MainAxisAlignment.start,
-        title: Text(AppLocalizations.of(context)!.confirmReject),
-        content: Text(AppLocalizations.of(context)!.confirmRejectMessage),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(title, style: DMSansFont.textStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          ],
+        ),
+        content: Text(message, style: DMSansFont.textStyle(fontSize: 15, color: Colors.grey[600], height: 1.5)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.reject),
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel, style: DMSansFont.textStyle(fontWeight: FontWeight.w600, color: Colors.grey[600])),
           ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-              Navigator.of(context).pop(false);
-            },
-            child: Text(AppLocalizations.of(context)!.cancel),
+          ElevatedButton(
+            onPressed: primaryAction,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDanger ? Colors.red : AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(primaryActionLabel, style: DMSansFont.textStyle(fontWeight: FontWeight.bold, color: Colors.white)),
           ),
         ],
       ),
     );
-
-    if (confirmed == true) {
-      widget.onRejectOrder(widget.booking);
-      Navigator.pop(context);
-    }
   }
 
   Future<void> _showLocationFilterDialog() async {
@@ -509,86 +368,56 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: Colors.white,
-          title: Text(AppLocalizations.of(context)!.filterByLocation),
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(AppLocalizations.of(context)!.filterByLocation, style: DMSansFont.textStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SearchableDropdown<Region>(
-                    label: AppLocalizations.of(context)!.province,
-                    value: tempRegion,
-                    items: _regions,
-                    itemLabel: (region) =>
-                        region.getName(LocalStore.getUserlanguage() == 'ar'),
-                    onChanged: (region) {
-                      setDialogState(() {
-                        tempRegion = region;
-                        tempCity = null;
-                        tempDistrict = null;
-                      });
-                    },
-                    hintText: AppLocalizations.of(
-                      context,
-                    )!.typeProvinceNameToSearch,
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSearchableDropdown<Region>(
+                  label: AppLocalizations.of(context)!.province,
+                  value: tempRegion,
+                  items: _regions,
+                  itemLabel: (r) => r.getName(LocalStore.getUserlanguage() == 'ar'),
+                  onChanged: (r) => setDialogState(() { tempRegion = r; tempCity = null; tempDistrict = null; }),
+                  hint: AppLocalizations.of(context)!.typeProvinceNameToSearch,
+                ),
+                if (tempRegion != null) ...[
+                  const SizedBox(height: 16),
+                  _buildSearchableDropdown<City>(
+                    label: AppLocalizations.of(context)!.city,
+                    value: tempCity,
+                    items: tempRegion!.cities,
+                    itemLabel: (c) => c.getName(LocalStore.getUserlanguage() == 'ar'),
+                    onChanged: (c) => setDialogState(() { tempCity = c; tempDistrict = null; }),
+                    hint: AppLocalizations.of(context)!.typeCityNameToSearch,
                   ),
-                  if (tempRegion != null) ...[
-                    const SizedBox(height: 16),
-                    SearchableDropdown<City>(
-                      label: AppLocalizations.of(context)!.city,
-                      value: tempCity,
-                      items: tempRegion!.cities,
-                      itemLabel: (city) =>
-                          city.getName(LocalStore.getUserlanguage() == 'ar'),
-                      onChanged: (city) {
-                        setDialogState(() {
-                          tempCity = city;
-                          tempDistrict = null;
-                        });
-                      },
-                      hintText: AppLocalizations.of(
-                        context,
-                      )!.typeCityNameToSearch,
-                    ),
-                  ],
-                  if (tempCity != null) ...[
-                    const SizedBox(height: 16),
-                    SearchableDropdown<District>(
-                      label: AppLocalizations.of(context)!.neighborhood,
-                      value: tempDistrict,
-                      items: tempCity!.districts,
-                      itemLabel: (district) => district.getName(
-                        LocalStore.getUserlanguage() == 'ar',
-                      ),
-                      onChanged: (district) {
-                        setDialogState(() {
-                          tempDistrict = district;
-                        });
-                      },
-                      hintText: AppLocalizations.of(
-                        context,
-                      )!.typeNeighborhoodNameToSearch,
-                    ),
-                  ],
                 ],
-              ),
+                if (tempCity != null) ...[
+                  const SizedBox(height: 16),
+                  _buildSearchableDropdown<District>(
+                    label: AppLocalizations.of(context)!.neighborhood,
+                    value: tempDistrict,
+                    items: tempCity!.districts,
+                    itemLabel: (d) => d.getName(LocalStore.getUserlanguage() == 'ar'),
+                    onChanged: (d) => setDialogState(() { tempDistrict = d; }),
+                    hint: AppLocalizations.of(context)!.typeNeighborhoodNameToSearch,
+                  ),
+                ],
+              ],
             ),
           ),
           actions: [
-            eButton(
-              backgroundColor: Colors.white,
-              context: context,
-              onPressed: () => Navigator.of(context).pop(false),
-              text: AppLocalizations.of(context)!.cancel,
-              textColor: Colors.black,
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel, style: DMSansFont.textStyle(color: Colors.grey[600], fontWeight: FontWeight.w600)),
             ),
-            eButton(
-              backgroundColor: Colors.blue,
-              context: context,
-              onPressed: () => Navigator.of(context).pop(true),
-              text: AppLocalizations.of(context)!.apply,
-              textColor: Colors.white,
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              child: Text(AppLocalizations.of(context)!.apply, style: DMSansFont.textStyle(fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ],
         ),
@@ -605,194 +434,161 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     }
   }
 
+  Widget _buildSearchableDropdown<T extends Object>({required String label, required T? value, required List<T> items, required String Function(T) itemLabel, required ValueChanged<T?> onChanged, required String hint}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: DMSansFont.textStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[700])),
+        const SizedBox(height: 6),
+        SearchableDropdown<T>(
+          label: "", 
+          value: value, 
+          items: items, 
+          itemLabel: itemLabel, 
+          onChanged: onChanged, 
+          hintText: hint,
+        ),
+      ],
+    );
+  }
+
   void _clearFilter() {
-    if (_selectedRegion != null ||
-        _selectedCity != null ||
-        _selectedDistrict != null) {
-      setState(() {
-        _selectedRegion = null;
-        _selectedCity = null;
-        _selectedDistrict = null;
-        _conflictService.invalidateCache();
-        _hasPreloadedConflicts = false;
-        _lastPreloadedUsers = null;
-        _isDataFullyLoaded = false;
-      });
-    }
+    setState(() {
+      _selectedRegion = null;
+      _selectedCity = null;
+      _selectedDistrict = null;
+      _conflictService.invalidateCache();
+      _hasPreloadedConflicts = false;
+      _lastPreloadedUsers = null;
+      _isDataFullyLoaded = false;
+    });
   }
 
   String _getSelectedLocationText() {
     final isArabic = LocalStore.getUserlanguage() == 'ar';
-    final parts = <String>[];
-
-    if (_selectedDistrict != null) {
-      parts.add(_selectedDistrict!.getName(isArabic));
-    }
-    if (_selectedCity != null) {
-      parts.add(_selectedCity!.getName(isArabic));
-    }
-    if (_selectedRegion != null) {
-      parts.add(_selectedRegion!.getName(isArabic));
-    }
-
+    final List<String> parts = [];
+    if (_selectedDistrict != null) parts.add(_selectedDistrict!.getName(isArabic));
+    if (_selectedCity != null) parts.add(_selectedCity!.getName(isArabic));
+    if (_selectedRegion != null) parts.add(_selectedRegion!.getName(isArabic));
     return parts.join(', ');
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return ValueListenableBuilder<bool>(
-      valueListenable: _isLoadingCategory,
-      builder: (context, isLoading, child) {
-        if (isLoading) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.8,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 24, child: Loader()),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)?.loading ?? 'Loading...',
-                    style: textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.8,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(textTheme),
-              _buildLocationFilter(textTheme),
-              const Divider(height: 1),
-              Expanded(child: _buildUserList()),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader(TextTheme textTheme) {
-    final categoryName = _categoryModel?.name;
-    final categoryNameAr = _categoryModel?.name_ar;
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              categoryName != null
-                  ? '${AppLocalizations.of(context)!.assignTo} ${isArabic ? categoryNameAr : categoryName}'
-                  : AppLocalizations.of(context)!.assignToUser,
-              style: textTheme.titleLarge,
-            ),
-          ),
-          ValueListenableBuilder<bool>(
-            valueListenable: _isAssigning,
-            builder: (context, isAssigning, _) {
-              return IconButton.filledTonal(
-                color: Colors.red,
-                onPressed: isAssigning ? null : _showRejectConfirmationDialog,
-                icon: const Icon(Icons.highlight_off_rounded),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationFilter(TextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    return Container(
+      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      height: MediaQuery.of(context).size.height * 0.85,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.filterByLocation,
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          ValueListenableBuilder<bool>(
-            valueListenable: _isAssigning,
-            builder: (context, isAssigning, _) {
-              return SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: isAssigning ? null : _showLocationFilterDialog,
-                  icon: const Icon(Icons.location_on_outlined, size: 20),
-                  label: Text(AppLocalizations.of(context)!.filterByLocation),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 16,
-                    ),
-                    alignment: Alignment.centerLeft,
-                  ),
-                ),
-              );
-            },
-          ),
-          if (_selectedRegion != null ||
-              _selectedCity != null ||
-              _selectedDistrict != null)
-            _buildSelectedLocationChip(),
+          _buildTopHandle(),
+          _buildHeader(),
+          _buildLocationSection(),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          Expanded(child: _buildUserList()),
         ],
       ),
     );
   }
 
-  Widget _buildSelectedLocationChip() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
+  Widget _buildTopHandle() {
+    return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.filter_alt, size: 18, color: colorScheme.primary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _getSelectedLocationText(),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
+        width: 40,
+        height: 4,
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(color: Colors.grey.withOpacity(0.2), borderRadius: BorderRadius.circular(2)),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final isArabic = LocalStore.getUserlanguage() == 'ar';
+    final name = isArabic ? _categoryModel?.name_ar : _categoryModel?.name;
+    
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name != null ? '${AppLocalizations.of(context)!.assignTo} $name' : AppLocalizations.of(context)!.assignToUser,
+                  style: DMSansFont.textStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  AppLocalizations.of(context)!.loadingAgents,
+                  style: DMSansFont.textStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isAssigning,
+            builder: (context, assigning, _) => IconButton.filled(
+              onPressed: assigning ? null : _showRejectConfirmationDialog,
+              icon: const Icon(Icons.close, size: 20),
+              style: IconButton.styleFrom(backgroundColor: Colors.red.withOpacity(0.08), foregroundColor: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationSection() {
+    final hasFilter = _selectedRegion != null || _selectedCity != null || _selectedDistrict != null;
+    
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: _showLocationFilterDialog,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.grey[50], 
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: hasFilter ? AppColors.primary.withOpacity(0.2) : Colors.grey[100]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on_outlined, color: hasFilter ? AppColors.primary : Colors.grey[600], size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      hasFilter ? _getSelectedLocationText() : AppLocalizations.of(context)!.filterByLocation,
+                      style: DMSansFont.textStyle(
+                        fontSize: 15, 
+                        fontWeight: hasFilter ? FontWeight.w600 : FontWeight.w500,
+                        color: hasFilter ? AppColors.primary : Colors.grey[700],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (hasFilter)
+                    GestureDetector(
+                      onTap: () { _clearFilter(); },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), shape: BoxShape.circle),
+                        child: Icon(Icons.close, size: 14, color: AppColors.primary),
+                      ),
+                    )
+                  else
+                    Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+                ],
               ),
             ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _isAssigning,
-              builder: (context, isAssigning, _) {
-                return IconButton(
-                  onPressed: isAssigning ? null : _clearFilter,
-                  icon: Icon(Icons.close, size: 18, color: colorScheme.error),
-                  tooltip: AppLocalizations.of(context)!.clearFilter,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -801,341 +597,161 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     return StreamBuilder<List<UserModel>>(
       stream: _getFilteredUsersStream(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  '${AppLocalizations.of(context)?.error ?? "Error"}: ${snapshot.error}',
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _cachedUsersStream = null;
-                      _isDataFullyLoaded = false;
-                      _hasPreloadedConflicts = false;
-                      _lastPreloadedUsers = null;
-                    });
-                  },
-                  child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
-                ),
-              ],
-            ),
-          );
-        }
+        if (snapshot.hasError) return _buildErrorState(snapshot.error.toString());
+        if (!snapshot.hasData) return _buildShimmerList();
+        
+        final users = snapshot.data!;
+        if (users.isEmpty) return _buildEmptyState();
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const UserListShimmer();
-        }
+        _preloadConflictData(users);
 
-        final users = snapshot.data ?? [];
-
-        if (users.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        // Trigger preload without causing rebuild flicker
-        if (!_hasPreloadedConflicts && !_conflictService.isCacheValid) {
-          Future.microtask(() {
-            if (mounted && !_hasPreloadedConflicts) {
-              _preloadConflictData(users);
-            }
-          });
-        }
-
-        // KEY CHANGE: Single condition check - show shimmer until fully loaded
-        if (!_isDataFullyLoaded) {
-          return const UserListShimmer();
-        }
-
-        // Only show the actual list when everything is ready
-        return ListView.builder(
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           itemCount: users.length,
-          itemBuilder: (context, index) {
-            return _UserTile(
-              user: users[index],
-              conflictService: _conflictService,
-              onAssign: _handleAssignAgent,
-              isAssigning: _isAssigning,
-              categoryCache: _categoryCache,
-              getJobRoleNames: _getJobRoleNames,
-            );
-          },
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) => _buildWorkerTile(users[index]),
         );
       },
+    );
+  }
+
+  Widget _buildWorkerTile(UserModel user) {
+    final conflictData = _conflictService.getConflictData(user.uid ?? '');
+    final isArabic = LocalStore.getUserlanguage() == 'ar';
+    final roleNames = _getJobRoleNames(user.jobRoles, isArabic);
+    
+    return InkWell(
+      onTap: () => _handleAssignAgent(user),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey[100]!),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            _buildAvatar(user),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user.name ?? '', style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  if (roleNames.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(roleNames, style: DMSansFont.textStyle(fontSize: 12, color: Colors.grey[600]), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                  if (conflictData != null && conflictData.hasConflict) ...[
+                    const SizedBox(height: 6),
+                    _buildConflictBadge(conflictData),
+                  ],
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(UserModel user) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.05), borderRadius: BorderRadius.circular(16)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: user.profileUrl != null && user.profileUrl!.isNotEmpty
+            ? Image.network(user.profileUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(user))
+            : _buildAvatarPlaceholder(user),
+      ),
+    );
+  }
+
+  Widget _buildAvatarPlaceholder(UserModel user) {
+    return Center(child: Text(user.name?.isNotEmpty == true ? user.name![0].toUpperCase() : '?', style: DMSansFont.textStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)));
+  }
+
+  Widget _buildConflictBadge(ConflictData data) {
+    final isCancelled = data.type == ConflictType.workerCancelled || data.type == ConflictType.workerCancelledThisBooking;
+    final color = isCancelled ? Colors.red : Colors.orange;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withOpacity(0.15))),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(isCancelled ? Icons.event_busy : Icons.schedule, size: 12, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              _getConflictLabel(data),
+              style: DMSansFont.textStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getConflictLabel(ConflictData data) {
+    // Add logic to use existing localization keys with fallbacks for missing ones
+    if (data.type == ConflictType.workerCancelledThisBooking) return "Worker cancelled this booking";
+    if (data.type == ConflictType.workerCancelled) return "Worker cancelled nearby";
+    return "Busy at this time";
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(24),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, __) => Shimmer.fromColors(
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+      ),
     );
   }
 
   Widget _buildEmptyState() {
-    final textTheme = Theme.of(context).textTheme;
-    final categoryName = _categoryModel?.name;
-    final categoryNameAr = _categoryModel?.name_ar;
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
-    final hasLocationFilter =
-        _selectedRegion != null ||
-        _selectedCity != null ||
-        _selectedDistrict != null;
-
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.person_off_rounded, size: 48),
+          Icon(Icons.person_search_outlined, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text(
-            hasLocationFilter
-                ? "${AppLocalizations.of(context)!.no} ${categoryName != null ? (isArabic ? categoryNameAr : categoryName) : AppLocalizations.of(context)?.agents ?? 'agents'} ${AppLocalizations.of(context)?.availableInSelectedLocation ?? 'available in selected location'}"
-                : categoryName != null
-                ? "${AppLocalizations.of(context)!.no} ${isArabic ? categoryNameAr : categoryName} ${AppLocalizations.of(context)!.agentsAvailable}"
-                : AppLocalizations.of(context)!.noAgentsAvailable,
-            style: textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          if (hasLocationFilter) ...[
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: _clearFilter,
-              icon: const Icon(Icons.clear_all),
-              label: Text(
-                AppLocalizations.of(context)?.showAllAgents ??
-                    'Show All Agents',
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _UserTile extends StatelessWidget {
-  final UserModel user;
-  final ConflictCheckService conflictService;
-  final Function(UserModel) onAssign;
-  final ValueNotifier<bool> isAssigning;
-  final Map<String, CategoryModel> categoryCache;
-  final String Function(List<String>?, bool) getJobRoleNames;
-
-  const _UserTile({
-    required this.user,
-    required this.conflictService,
-    required this.onAssign,
-    required this.isAssigning,
-    required this.categoryCache,
-    required this.getJobRoleNames,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final userId = user.uid ?? '';
-    final textTheme = Theme.of(context).textTheme;
-    final isArabic = Directionality.of(context) == TextDirection.rtl;
-
-    return ValueListenableBuilder<bool>(
-      valueListenable: isAssigning,
-      builder: (context, assigning, _) {
-        final conflictData = conflictService.getConflictData(userId);
-        final hasConflict = conflictData?.hasConflict ?? false;
-        final isDisabled = assigning || hasConflict;
-
-        return ListTile(
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  user.name ?? '',
-                  style: TextStyle(
-                    color: isDisabled ? Colors.grey.shade600 : null,
-                  ),
-                ),
-              ),
-              if (hasConflict && conflictData != null)
-                _buildConflictBadge(context, conflictData),
-            ],
-          ),
-          subtitle: _buildSubtitle(context, textTheme, isArabic, isDisabled),
-          trailing: _buildTrailing(conflictData, assigning),
-          tileColor: _getTileColor(conflictData),
-          enabled: !isDisabled,
-          onTap: isDisabled ? null : () => onAssign(user),
-        );
-      },
-    );
-  }
-
-  Widget _buildConflictBadge(BuildContext context, ConflictData data) {
-    final color = data.type == ConflictType.workerCancelledThisBooking
-        ? Colors.orange
-        : Colors.red;
-
-    String label;
-    if (data.type == ConflictType.workerCancelledThisBooking) {
-      label =
-          AppLocalizations.of(context)?.cancelledThisBooking ??
-          'Cancelled This Booking';
-    } else if (data.type == ConflictType.workerCancelled) {
-      label =
-          AppLocalizations.of(context)?.technicianCancelled ??
-          'Cancelled Worker';
-    } else {
-      label =
-          '${AppLocalizations.of(context)?.busyAt ?? 'Busy at'} ${data.conflictTime}';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.6)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: color.shade700,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubtitle(
-    BuildContext context,
-    TextTheme textTheme,
-    bool isArabic,
-    bool isDisabled,
-  ) {
-    return RichText(
-      text: TextSpan(
-        style: textTheme.labelMedium?.copyWith(
-          color: isDisabled ? Colors.grey.shade500 : null,
-        ),
-        children: [
-          if (user.detailedLocation != null) ...[
-            WidgetSpan(
-              child: Icon(
-                Icons.location_city,
-                size: 15,
-                color: isDisabled ? Colors.grey.shade500 : null,
-              ),
-            ),
-            TextSpan(
-              text: isArabic
-                  ? " ${user.detailedLocation?.neighborhoodAr}, ${user.detailedLocation?.cityAr}, ${user.detailedLocation?.regionAr} "
-                  : " ${user.detailedLocation?.neighborhoodEn}, ${user.detailedLocation?.cityEn}, ${user.detailedLocation?.regionEn} ",
-            ),
-          ],
-          if (user.jobRoles != null) ...[
-            WidgetSpan(
-              child: Icon(
-                Icons.work_rounded,
-                size: 15,
-                color: isDisabled ? Colors.grey.shade500 : null,
-              ),
-            ),
-            TextSpan(text: " ${getJobRoleNames(user.jobRoles, isArabic)}"),
-          ],
+          Text(AppLocalizations.of(context)!.noTechniciansFound, style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[600])),
+          const SizedBox(height: 8),
+          Text(AppLocalizations.of(context)!.appLoginCaption, style: DMSansFont.textStyle(fontSize: 14, color: Colors.grey[400])),
         ],
       ),
     );
   }
 
-  Widget? _buildTrailing(ConflictData? data, bool assigning) {
-    if (assigning) {
-      return SizedBox(width: 24, height: 24, child: Loader());
-    }
-
-    if (data?.hasConflict == true) {
-      final color = data!.type == ConflictType.workerCancelledThisBooking
-          ? Colors.orange
-          : Colors.red;
-      final icon = data.type == ConflictType.workerCancelledThisBooking
-          ? Icons.person_off_rounded
-          : Icons.block;
-
-      return Icon(icon, color: color, size: 22);
-    }
-
-    return null;
-  }
-
-  Color? _getTileColor(ConflictData? data) {
-    if (data?.hasConflict != true) return null;
-
-    final color = data!.type == ConflictType.workerCancelledThisBooking
-        ? Colors.orange
-        : Colors.red;
-
-    return color.withOpacity(0.05);
-  }
-}
-
-class UserListShimmer extends StatelessWidget {
-  final int itemCount;
-
-  const UserListShimmer({super.key, this.itemCount = 8});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: itemCount,
-      itemBuilder: (context, index) => _buildShimmerTile(),
-    );
-  }
-
-  Widget _buildShimmerTile() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: ListTile(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 16,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  height: 14,
-                  width: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Container(
-                  height: 12,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(error, textAlign: TextAlign.center, style: DMSansFont.textStyle(color: Colors.grey[600])),
+            TextButton(
+              onPressed: () => setState(() => _cachedUsersStream = null),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
-        trailing: Container(
-          height: 20,
-          width: 20,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
   }

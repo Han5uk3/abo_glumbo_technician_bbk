@@ -101,7 +101,7 @@ class CustomerInfo extends StatelessWidget {
                     ),
                     child: CircleAvatar(
                       radius: 60,
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.bgWhite,
 
                       child: Text(
                         customer.name?.isNotEmpty == true
@@ -338,9 +338,7 @@ class CustomerInfo extends StatelessWidget {
               context,
               Icons.location_city_outlined,
               AppLocalizations.of(context)!.location,
-              Directionality.of(context) == TextDirection.rtl
-                  ? "${customer.detailedLocation?.neighborhoodAr}, ${customer.detailedLocation?.cityAr}"
-                  : "${customer.detailedLocation?.neighborhoodEn}, ${customer.detailedLocation?.cityEn}",
+              customer.location?.fullAddress ?? "-",
             ),
             _buildDivider(),
             _buildModernInfoRow(

@@ -67,8 +67,8 @@ class UnifiedPayoutServices {
         });
   }
 
-  /// Update wallet amounts (called when tips/bonus are added)
-  /// NOTE: Earnings are NO LONGER tracked here - service payments handled outside app
+  /// Update wallet amounts (called when tips/bonus/earnings are added)
+  /// NOTE: Earnings are tracked for lifetime totals - service payments handled outside app
   static Future<void> updateWalletAmounts({
     required String workerId,
     double? tipsIncrement,
@@ -125,7 +125,9 @@ class UnifiedPayoutServices {
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
 
       final lifetimeTotal =
-          (wallet.totalTips ?? 0.0) + (wallet.totalBonus ?? 0.0);
+          (wallet.totalTips ?? 0.0) +
+          (wallet.totalBonus ?? 0.0) +
+          (wallet.totalCompletionAmount ?? 0.0);
 
       wallet = wallet.copyWith(
         totalAvailableBalance: totalAvailable,
@@ -547,14 +549,30 @@ class UnifiedPayoutServices {
   }
 
   /// Sync existing data to unified wallet (migration helper)
-  /// NOTE: Only migrates tips and bonus - earnings no longer tracked
+  /// NOTE: Now also migrates booking earnings for lifetime totals
   static Future<void> syncExistingDataToUnifiedWallet(String workerId) async {
     try {
       // Get existing data
       final tippingData = await AppServices.getWorkerTippingData(workerId);
       final bonusAmount = await AppServices.getWorkerBonusAmounts(workerId);
 
-      // Create/update unified wallet (NO earnings - handled outside app now)
+      // Get booking earnings (mode == 1 only, excluding inspection fees)
+      final bookingsQuery = await AppFirestore.bookingsCollectionRef
+          .where('agent.uid', isEqualTo: workerId)
+          .where('bookingStatusCode', isEqualTo: 'C')
+          .get();
+
+      double totalEarningsFromBookings = 0.0;
+      for (var doc in bookingsQuery.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final completionData = data['completionData'];
+        if (completionData != null && completionData['mode'] == 1) {
+          totalEarningsFromBookings +=
+              (completionData['totalCost'] as num?)?.toDouble() ?? 0.0;
+        }
+      }
+
+      // Create/update unified wallet
       final wallet = UnifiedWalletModel(
         workerId: workerId,
         totalTips: (tippingData.cardtip ?? 0.0) + (tippingData.cashtip ?? 0.0),
@@ -562,18 +580,19 @@ class UnifiedPayoutServices {
         cashTips: tippingData.cashtip ?? 0.0,
         paidTips: tippingData.payoutAmount ?? 0.0,
         totalBonus: bonusAmount,
-        paidBonus: 0.0, // Assuming no bonus has been paid yet
+        paidBonus: 0.0,
         availableBonus: bonusAmount,
-        totalCompletionAmount: 0.0, // Will be updated as bookings are completed
+        totalCompletionAmount: totalEarningsFromBookings,
         payoutRequested: tippingData.payoutRequested ?? false,
         lastUpdated: Timestamp.now(),
       );
 
-      // Calculate totals (only tips + bonus)
+      // Calculate totals
       final totalAvailable =
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
-      final lifetimeTotal =
-          (wallet.totalTips ?? 0.0) + (wallet.totalBonus ?? 0.0);
+      final lifetimeTotal = (wallet.totalTips ?? 0.0) +
+          (wallet.totalBonus ?? 0.0) +
+          (wallet.totalCompletionAmount ?? 0.0);
 
       final updatedWallet = wallet.copyWith(
         totalAvailableBalance: totalAvailable,
@@ -587,7 +606,7 @@ class UnifiedPayoutServices {
       if (kDebugMode) {
         print('✅ Synced existing data to unified wallet for worker $workerId');
         print('   Total Available: $totalAvailable (tips + bonus only)');
-        print('   Lifetime Total: $lifetimeTotal');
+        print('   Lifetime Total: $lifetimeTotal (includes $totalEarningsFromBookings earnings)');
       }
     } catch (e) {
       if (kDebugMode) {

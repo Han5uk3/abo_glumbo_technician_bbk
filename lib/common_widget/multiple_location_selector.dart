@@ -1,16 +1,16 @@
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/models/location.dart';
+import 'package:aboglumbo_bbk_panel/models/service_location.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LocationSelectorWidget extends StatefulWidget {
-  final List<LocationModel> locations;
-  final LocationModel? selectedLocation;
-  final List<LocationModel>? selectedLocations;
-  final Function(LocationModel)? onLocationSelected;
-  final Function(List<LocationModel>)? onLocationsSelected;
+  final List<ServiceLocationModel> locations;
+  final ServiceLocationModel? selectedLocation;
+  final List<ServiceLocationModel>? selectedLocations;
+  final Function(ServiceLocationModel)? onLocationSelected;
+  final Function(List<ServiceLocationModel>)? onLocationsSelected;
   final VoidCallback? onUseCurrentLocation;
   final bool isLoading;
   final String? searchHint;
@@ -41,8 +41,8 @@ class LocationSelectorWidget extends StatefulWidget {
 
 class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
   final TextEditingController searchController = TextEditingController();
-  List<LocationModel> filteredLocations = [];
-  List<LocationModel> selectedLocations = [];
+  List<ServiceLocationModel> filteredLocations = [];
+  List<ServiceLocationModel> selectedLocations = [];
   bool isArabic = false;
   bool isAllSelected = false;
 
@@ -87,11 +87,11 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
     }
   }
 
-  List<LocationModel> _removeDuplicates(List<LocationModel> locations) {
+  List<ServiceLocationModel> _removeDuplicates(List<ServiceLocationModel> locations) {
     final seen = <String>{};
     return locations.where((location) {
-      final name = isArabic ? location.name_ar : location.name;
-      if (name == null || name.isEmpty) return true;
+      final name = location.name;
+      if (name.isEmpty) return true;
 
       if (seen.contains(name)) {
         return false;
@@ -109,11 +109,9 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
       } else {
         filteredLocations = uniqueLocations.where((location) {
           final nameMatch =
-              location.name?.toLowerCase().contains(query.toLowerCase()) ??
-              false;
+              location.name.toLowerCase().contains(query.toLowerCase());
           final nameArMatch =
-              location.name_ar?.toLowerCase().contains(query.toLowerCase()) ??
-              false;
+              location.name_ar.toLowerCase().contains(query.toLowerCase());
           return nameMatch || nameArMatch;
         }).toList();
       }
@@ -126,13 +124,13 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
     });
   }
 
-  String _getLocationName(LocationModel location) {
+  String _getLocationName(ServiceLocationModel location) {
     return isArabic
-        ? (location.name_ar ?? location.name ?? '')
-        : (location.name ?? '');
+        ? (location.name_ar.isNotEmpty ? location.name_ar : location.name)
+        : location.name;
   }
 
-  bool _isLocationSelected(LocationModel location) {
+  bool _isLocationSelected(ServiceLocationModel location) {
     if (widget.allowMultipleSelection) {
       return selectedLocations.any((selected) => selected.id == location.id);
     } else {
@@ -140,7 +138,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
     }
   }
 
-  void _handleLocationTap(LocationModel location) {
+  void _handleLocationTap(ServiceLocationModel location) {
     if (widget.allowMultipleSelection) {
       setState(() {
         final index = selectedLocations.indexWhere(
@@ -396,10 +394,10 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
 }
 
 class LocationSelectorHelper {
-  static Future<LocationModel?> showLocationSelector({
+  static Future<ServiceLocationModel?> showLocationSelector({
     required BuildContext context,
-    required List<LocationModel> locations,
-    LocationModel? selectedLocation,
+    required List<ServiceLocationModel> locations,
+    ServiceLocationModel? selectedLocation,
     VoidCallback? onUseCurrentLocation,
     bool isLoading = false,
     String? searchHint,
@@ -407,7 +405,7 @@ class LocationSelectorHelper {
     String? noLocationsMessage,
     String? currentLocationText,
   }) async {
-    return await showModalBottomSheet<LocationModel>(
+    return await showModalBottomSheet<ServiceLocationModel>(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -429,10 +427,10 @@ class LocationSelectorHelper {
     );
   }
 
-  static Future<List<LocationModel>?> showMultipleLocationSelector({
+  static Future<List<ServiceLocationModel>?> showMultipleLocationSelector({
     required BuildContext context,
-    required List<LocationModel> locations,
-    List<LocationModel>? selectedLocations,
+    required List<ServiceLocationModel> locations,
+    List<ServiceLocationModel>? selectedLocations,
     VoidCallback? onUseCurrentLocation,
     bool isLoading = false,
     String? searchHint,
@@ -440,7 +438,7 @@ class LocationSelectorHelper {
     String? noLocationsMessage,
     String? currentLocationText,
   }) async {
-    List<LocationModel>? result;
+    List<ServiceLocationModel>? result;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -467,13 +465,13 @@ class LocationSelectorHelper {
   }
 
   static List<String> getLocationNames(
-    List<LocationModel> locations, {
+    List<ServiceLocationModel> locations, {
     bool isArabic = false,
   }) {
     return locations.map((location) {
       return isArabic
-          ? (location.name_ar ?? location.name ?? '')
-          : (location.name ?? '');
+          ? (location.name_ar.isNotEmpty ? location.name_ar : location.name)
+          : location.name;
     }).toList();
   }
 }

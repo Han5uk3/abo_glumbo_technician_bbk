@@ -65,7 +65,7 @@ class _ManageAgentsState extends State<ManageAgents>
             return Transform.scale(
               scale: value,
               child: AlertDialog(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.bgWhite,
                 actionsAlignment: MainAxisAlignment.start,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -125,7 +125,7 @@ class _ManageAgentsState extends State<ManageAgents>
                     text: AppLocalizations.of(context)!.cancel,
                     context: context,
                     textColor: Colors.black,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.bgWhite,
                   ),
                   eButton(
                     text: AppLocalizations.of(context)!.confirm,

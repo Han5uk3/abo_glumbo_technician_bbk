@@ -27,6 +27,8 @@ class ServiceModel {
 
   String? image;
   double? rating;
+  int? ratingCount;
+  double? totalRating;
 
   // the price in its lowest form
   double? price;
@@ -46,6 +48,7 @@ class ServiceModel {
   Timestamp? createdAt;
   Timestamp? updatedAt;
   List<String?> locations;
+  double? discountPercentage;
 
   ServiceModel({
     this.id,
@@ -55,6 +58,8 @@ class ServiceModel {
     this.description_ar,
     this.image,
     this.rating,
+    this.ratingCount,
+    this.totalRating,
     this.price,
     this.workStartTime,
     this.workEndTime,
@@ -67,6 +72,7 @@ class ServiceModel {
     this.isActive = true,
     this.categoryNameFilled,
     this.locations = const [],
+    this.discountPercentage,
   });
 
   // copyWith method
@@ -78,6 +84,8 @@ class ServiceModel {
     String? description_ar,
     String? image,
     double? rating,
+    int? ratingCount,
+    double? totalRating,
     double? price,
     String? workStartTime,
     String? workEndTime,
@@ -90,6 +98,7 @@ class ServiceModel {
     bool? isActive,
     List<CategoryModel>? categories,
     List<String?>? locations,
+    double? discountPercentage,
   }) {
     String? categoryName;
     if (categories != null && this.category != null) {
@@ -104,6 +113,8 @@ class ServiceModel {
       description_ar: description_ar ?? this.description_ar,
       image: image ?? this.image,
       rating: rating ?? this.rating,
+      ratingCount: ratingCount ?? this.ratingCount,
+      totalRating: totalRating ?? this.totalRating,
       price: price ?? this.price,
       workStartTime: workStartTime ?? this.workStartTime,
       workEndTime: workEndTime ?? this.workEndTime,
@@ -116,6 +127,7 @@ class ServiceModel {
       isActive: isActive ?? this.isActive,
       categoryNameFilled: categoryName,
       locations: locations ?? this.locations,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
     );
   }
 
@@ -127,7 +139,9 @@ class ServiceModel {
       description: json['description'],
       description_ar: json['description_ar'] ?? json['description'],
       image: json['image'],
-      rating: json['rating'],
+      rating: json['rating']?.toDouble(),
+      ratingCount: json['ratingCount'],
+      totalRating: json['totalRating']?.toDouble(),
       price: (json['price'] != null)
           ? (json['price'] is int
               ? (json['price'] as int).toDouble()
@@ -151,6 +165,11 @@ class ServiceModel {
       updatedAt: json['updatedAt'],
       isActive: json['isActive'],
       locations: json['locations']?.cast<String?>() ?? [],
+      discountPercentage: (json['discountPercentage'] != null)
+          ? (json['discountPercentage'] is int
+              ? (json['discountPercentage'] as int).toDouble()
+              : json['discountPercentage'] as double)
+          : 0.0,
     );
   }
 
@@ -165,7 +184,9 @@ class ServiceModel {
       description: data['description'],
       description_ar: data['description_ar'] ?? data['description'],
       image: data['image'],
-      rating: data['rating'],
+      rating: data['rating']?.toDouble(),
+      ratingCount: data['ratingCount'],
+      totalRating: data['totalRating']?.toDouble(),
       price: (data['price'] != null)
           ? (data['price'] is int
               ? (data['price'] as int).toDouble()
@@ -189,6 +210,11 @@ class ServiceModel {
       updatedAt: data['updatedAt'],
       isActive: data['isActive'],
       locations: data['locations']?.cast<String?>() ?? [],
+      discountPercentage: (data['discountPercentage'] != null)
+          ? (data['discountPercentage'] is int
+              ? (data['discountPercentage'] as int).toDouble()
+              : data['discountPercentage'] as double)
+          : 0.0,
     );
   }
 
@@ -202,7 +228,9 @@ class ServiceModel {
       description: data['description'],
       description_ar: data['description_ar'] ?? data['description'],
       image: data['image'],
-      rating: data['rating'],
+      rating: data['rating']?.toDouble(),
+      ratingCount: data['ratingCount'],
+      totalRating: data['totalRating']?.toDouble(),
       price: (data['price'] != null)
           ? (data['price'] is int
               ? (data['price'] as int).toDouble()
@@ -226,6 +254,11 @@ class ServiceModel {
       updatedAt: data['updatedAt'],
       isActive: data['isActive'],
       locations: data['locations']?.cast<String?>() ?? [],
+      discountPercentage: (data['discountPercentage'] != null)
+          ? (data['discountPercentage'] is int
+              ? (data['discountPercentage'] as int).toDouble()
+              : data['discountPercentage'] as double)
+          : 0.0,
     );
   }
 
@@ -238,6 +271,8 @@ class ServiceModel {
       'description_ar': description_ar,
       'image': image,
       'rating': rating,
+      'ratingCount': ratingCount,
+      'totalRating': totalRating,
       'price': price,
       'workStartTime': workStartTime,
       'workEndTime': workEndTime,
@@ -249,6 +284,7 @@ class ServiceModel {
       'updatedAt': updatedAt,
       'isActive': isActive,
       'locations': locations,
+      'discountPercentage': discountPercentage,
     };
     if (id != null) {
       json['id'] = id;
@@ -311,20 +347,22 @@ class ServiceModel {
     if (locations != previous.locations) {
       json['locations'] = locations;
     }
+    if (discountPercentage != previous.discountPercentage &&
+        discountPercentage != null) {
+      json['discountPercentage'] = discountPercentage;
+    }
     return json;
   }
 
-  double getCurrentPrice({DateTime? currentTime}) {
-    final now = currentTime ?? DateTime.now();
-    if (workStartTime == null ||
-        workEndTime == null ||
-        onWorkHourPrice == null ||
-        offWorkHourPrice == null ||
-        onWorkHourPrice == 0 ||
-        offWorkHourPrice == 0) {
-      return price ?? 0.0;
-    }
+  DateTime _getMiddleEastNow({DateTime? time}) {
+    final now = time ?? DateTime.now();
+    // Middle East / Saudi Arabia is UTC+3
+    return now.toUtc().add(const Duration(hours: 3));
+  }
 
+  bool isOnWorkHour({DateTime? currentTime}) {
+    if (workStartTime == null || workEndTime == null) return true;
+    final referenceTime = currentTime ?? _getMiddleEastNow();
     try {
       final startParts = workStartTime!.split(':');
       final endParts = workEndTime!.split(':');
@@ -334,24 +372,43 @@ class ServiceModel {
       final endHour = int.parse(endParts[0]);
       final endMinute = int.parse(endParts[1]);
 
-      final currentMinutes = now.hour * 60 + now.minute;
+      final currentMinutes = referenceTime.hour * 60 + referenceTime.minute;
       final startMinutes = startHour * 60 + startMinute;
       final endMinutes = endHour * 60 + endMinute;
 
-      bool isDuringWorkHours;
       if (startMinutes <= endMinutes) {
-        // Normal case (e.g., 08:00 to 17:00)
-        isDuringWorkHours =
-            currentMinutes >= startMinutes && currentMinutes < endMinutes;
+        return currentMinutes >= startMinutes && currentMinutes < endMinutes;
       } else {
-        // Overnight case (e.g., 22:00 to 06:00)
-        isDuringWorkHours =
-            currentMinutes >= startMinutes || currentMinutes < endMinutes;
+        return currentMinutes >= startMinutes || currentMinutes < endMinutes;
       }
-
-      return isDuringWorkHours ? onWorkHourPrice! : offWorkHourPrice!;
     } catch (e) {
+      return true;
+    }
+  }
+
+  bool get isCurrentlyOnHour => isOnWorkHour();
+
+  double getCurrentPrice({DateTime? currentTime}) {
+    if (workStartTime == null ||
+        workEndTime == null ||
+        onWorkHourPrice == null ||
+        offWorkHourPrice == null ||
+        onWorkHourPrice == 0 ||
+        offWorkHourPrice == 0) {
       return price ?? 0.0;
     }
+
+    if (isOnWorkHour(currentTime: currentTime)) {
+      return onWorkHourPrice!;
+    } else {
+      return offWorkHourPrice!;
+    }
+  }
+
+  double getDiscountedPrice(double currentPrice) {
+    if (discountPercentage == null || discountPercentage! <= 0) {
+      return currentPrice;
+    }
+    return currentPrice * (1 - (discountPercentage! / 100));
   }
 }

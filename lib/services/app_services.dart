@@ -26,6 +26,9 @@ import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/models/tipping.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
+import 'package:aboglumbo_bbk_panel/models/counter_offer.dart';
+import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
+import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -166,7 +169,7 @@ class AppServices {
           'districtName': user.districtName,
           'jobRoles': user.jobRoles,
           'updatedAt': Timestamp.now(),
-          'detailedLocation': user.detailedLocation
+          'location': user.location
               ?.toJson(), // ✅ Ensure detailedLocation is updated
         };
 
@@ -535,7 +538,7 @@ class AppServices {
       } else if (bookingStatusCode == 'CP') {
         return AppFirestore.bookingsCollectionRef
             .where('agent.uid', isEqualTo: workerId)
-            .where('bookingStatusCode', isEqualTo: 'C')
+            .where('bookingStatusCode', whereIn: ['C', 'VP'])
             .where('paymentCompleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
             .snapshots()
@@ -1166,6 +1169,7 @@ class AppServices {
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        'paymentCompleted': (mode == 0 || totalCost <= 0),
         'completionData': {
           'fileUrls': fileUrls, // Changed from imageUrls
           'serviceCost': serviceCost,
@@ -2041,35 +2045,50 @@ class AppServices {
       uid,
     ).map((claims) => claims.length);
 
-    return Rx.combineLatest6<
+    final wallet = UnifiedPayoutServices.getUnifiedWalletStream(uid);
+
+    return Rx.combineLatest7<
       int,
       int,
       int,
       int,
       double,
       int,
+      UnifiedWalletModel,
       Map<String, dynamic>
-    >(completed, latest, accepted, paymentPending, rating, warrantyClaims, (
-      int completedCount,
-      int latestCount,
-      int acceptedCount,
-      int paymentPendingCount,
-      double avgRating,
-      int warrantyClaimsCount,
-    ) {
-      debugPrint(
-        '✅ Stats Combined - Completed: $completedCount, Latest: $latestCount, '
-        'Accepted: $acceptedCount, Warranty Claims: $warrantyClaimsCount, Rating: ${avgRating.toStringAsFixed(1)}',
-      );
-      return {
-        'completed': completedCount,
-        'latest': latestCount,
-        'accepted': acceptedCount,
-        'paymentPending': paymentPendingCount,
-        'rating': avgRating.toStringAsFixed(1),
-        'warrantyClaims': warrantyClaimsCount,
-      };
-    });
+    >(
+      completed,
+      latest,
+      accepted,
+      paymentPending,
+      rating,
+      warrantyClaims,
+      wallet,
+      (
+        int completedCount,
+        int latestCount,
+        int acceptedCount,
+        int paymentPendingCount,
+        double avgRating,
+        int warrantyClaimsCount,
+        UnifiedWalletModel walletData,
+      ) {
+        debugPrint(
+          '✅ Stats Combined - Completed: $completedCount, Latest: $latestCount, '
+          'Accepted: $acceptedCount, Wallet: ${walletData.lifetimeTotal}',
+        );
+        return {
+          'completed': completedCount,
+          'latest': latestCount,
+          'accepted': acceptedCount,
+          'paymentPending': paymentPendingCount,
+          'rating': avgRating.toStringAsFixed(1),
+          'warrantyClaims': warrantyClaimsCount,
+          'paidAmounts': walletData.lifetimeTotal ?? 0.0,
+          'availableBalance': walletData.totalAvailableBalance ?? 0.0,
+        };
+      },
+    );
   }
 
   /// Real-time stream for transactions
@@ -2122,19 +2141,26 @@ class AppServices {
         });
   }
 
-  /// Real-time stream for paid amounts
-  static Stream<double> _getPaidAmountsStream(String uid) {
-    return AppFirestore.usersCollectionRef
-        .doc(uid)
+  /// Real-time stream for booking earnings (Full Service cost only)
+  static Stream<double> _getBookingEarningsStream(String uid) {
+    return AppFirestore.bookingsCollectionRef
+        .where('agent.uid', isEqualTo: uid)
+        .where('bookingStatusCode', isEqualTo: 'C')
         .snapshots()
         .map((snapshot) {
-          if (!snapshot.exists) return 0.0;
-
-          final data = snapshot.data() as Map<String, dynamic>?;
-          return (data?['paidAmounts'] as num?)?.toDouble() ?? 0.0;
+          double total = 0.0;
+          for (var doc in snapshot.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final completionData = data['completionData'];
+            // count only if mode is 1 (full service) and not inspection only
+            if (completionData != null && completionData['mode'] == 1) {
+              total += (completionData['totalCost'] as num?)?.toDouble() ?? 0.0;
+            }
+          }
+          return total;
         })
         .handleError((error) {
-          debugPrint('❌ Error fetching paid amounts stream: $error');
+          debugPrint('❌ Error fetching booking earnings stream: $error');
           return 0.0;
         });
   }
@@ -2175,24 +2201,23 @@ class AppServices {
             _getStatsStream(uid),
             _getTransactionsRealTimeStream(uid),
             _getTipsRealTimeStream(uid),
-            _getPaidAmountsStream(uid),
+            _getBookingEarningsStream(uid), // Was _getPaidAmountsStream
             _getLiveTipsStream(uid),
             (
               Map<String, dynamic> stats,
-
               List<TransactionModel> transactions,
               List<AllTipsModel> tips,
-              double paidAmounts,
+              double bookingEarnings,
               TippingModel liveTips,
             ) {
               debugPrint('📊 Dashboard stream updated - combining all data');
 
               return DashboardDataStream(
                 stats: stats,
-                totalEarnings: 0.0,
+                totalEarnings: stats['paidAmounts'] ?? 0.0,
                 transactions: transactions,
                 tips: tips,
-                paidAmounts: paidAmounts,
+                paidAmounts: stats['paidAmounts'] ?? 0.0,
               );
             },
           );
@@ -2472,6 +2497,151 @@ class AppServices {
       return resultOriginal.docs.isNotEmpty;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<bool> sendCounterOffer({
+    required String bookingId,
+    required String proposedBy,
+    required String proposedByUid,
+    required String proposedByName,
+    required Timestamp proposedTime,
+    required String customerId,
+  }) async {
+    try {
+      final docRef = AppFirestore.counterOffersCollectionRef.doc();
+      final counterOffer = CounterOfferModel(
+        id: docRef.id,
+        bookingId: bookingId,
+        proposedBy: proposedBy,
+        proposedByUid: proposedByUid,
+        proposedByName: proposedByName,
+        proposedTime: proposedTime,
+        status: 'pending',
+        createdAt: Timestamp.now(),
+      );
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
+        final bookingSnapshot = await transaction.get(bookingRef);
+
+        Map<String, dynamic> updateData = {
+          'activeCounterOffer': counterOffer.toMap(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        };
+
+        // Set startedAt if not already set (first counter proposal session)
+        if (bookingSnapshot.exists) {
+          final data = bookingSnapshot.data() as Map<String, dynamic>;
+          if (data['counterProposalStartedAt'] == null) {
+            updateData['counterProposalStartedAt'] =
+                FieldValue.serverTimestamp();
+          }
+        }
+
+        // Create counter offer
+        transaction.set(docRef, counterOffer.toMap());
+
+        // Update booking
+        transaction.update(bookingRef, updateData);
+      });
+
+      // Send notification to customer
+      await _recordCustomerNotification(
+        customerId: customerId,
+        titleEn: 'New Counter Offer',
+        titleAr: 'اقتراح موعد جديد',
+        bodyEn: 'Technician has proposed a new time for your booking.',
+        bodyAr: 'اقترح الفني موعداً جديداً لحجزك.',
+        type: 'counter_offer',
+        data: {'bookingId': bookingId},
+      );
+
+      return true;
+    } catch (e) {
+      debugPrint('Error sending counter offer: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> respondToCounterOffer({
+    required BookingModel booking,
+    required String response, // 'accepted' or 'rejected'
+  }) async {
+    try {
+      final bookingId = booking.id;
+      final activeCounterOffer = booking.activeCounterOffer;
+      if (activeCounterOffer == null) return false;
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
+        final offerRef = AppFirestore.counterOffersCollectionRef.doc(
+          activeCounterOffer.id!,
+        );
+
+        if (response == 'accepted') {
+          transaction.update(bookingRef, {
+            'bookingDateTime': activeCounterOffer.proposedTime,
+            'activeCounterOffer.status': response,
+            'counterProposalAcceptedAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } else {
+          transaction.update(bookingRef, {
+            'activeCounterOffer.status': response,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        transaction.update(offerRef, {
+          'status': response,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      });
+
+      await _recordCustomerNotification(
+        customerId: booking.customer.uid,
+        titleEn: 'Counter Offer Response',
+        titleAr: 'الرد على الاقتراح البديل',
+        bodyEn: 'Technician has $response your proposed time.',
+        bodyAr:
+            'قام الفني بـ ${response == 'accepted' ? 'قبول' : 'رفض'} موعدك المقترح.',
+        type: 'counter_offer_response',
+        data: {'bookingId': bookingId, 'status': response},
+      );
+
+      return true;
+    } catch (e) {
+      debugPrint('Error responding to counter offer: $e');
+      return false;
+    }
+  }
+
+  static Future<void> _recordCustomerNotification({
+    required String customerId,
+    required String titleEn,
+    required String titleAr,
+    required String bodyEn,
+    required String bodyAr,
+    required String type,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      await AppFirestore.customersCollectionRef
+          .doc(customerId)
+          .collection('notifications')
+          .add({
+            'titleEn': titleEn,
+            'titleAr': titleAr,
+            'bodyEn': bodyEn,
+            'bodyAr': bodyAr,
+            'type': type,
+            'data': data,
+            'createdAt': FieldValue.serverTimestamp(),
+            'isRead': false,
+          });
+    } catch (e) {
+      debugPrint('Error recording customer notification: $e');
     }
   }
 

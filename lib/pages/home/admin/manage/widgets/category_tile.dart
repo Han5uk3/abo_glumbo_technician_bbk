@@ -127,7 +127,7 @@ class CategoryTileDevWidget extends StatelessWidget {
         final isDeleting = state is DeletingCategory;
 
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Text(AppLocalizations.of(context)!.deleteCategory),
           content: Text(
@@ -140,7 +140,7 @@ class CategoryTileDevWidget extends StatelessWidget {
               widget: Text(AppLocalizations.of(context)!.cancel),
               context: context,
               textColor: Colors.black,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
             ),
             eButton(
               text: "",

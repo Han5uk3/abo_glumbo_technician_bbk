@@ -4,19 +4,14 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class WorkerHome extends StatefulWidget {
   final String? selectedIndex;
-  final VoidCallback? onToggleRole;
   final bool isInAdminMode;
-  const WorkerHome({
-    super.key,
-    this.selectedIndex,
-    this.onToggleRole,
-    this.isInAdminMode = false,
-  });
+  const WorkerHome({super.key, this.selectedIndex, this.isInAdminMode = false});
 
   @override
   State<WorkerHome> createState() => _WorkerHomeState();
@@ -89,32 +84,11 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: SearchBar(
-                controller: _searchController,
-                hintText: AppLocalizations.of(context)?.searchByBookingId,
-                leading: const Icon(Icons.search),
-                trailing: _searchQuery.isNotEmpty
-                    ? [
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                          },
-                        ),
-                      ]
-                    : null,
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-              ),
-            ),
-
+            // Search bar removed for technician view as per request
             Container(
               height: 64,
               alignment: Alignment.centerLeft,
+              color: Colors.white,
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
@@ -165,15 +139,8 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
     return AppBar(
       titleSpacing: 16,
       title: Text(AppLocalizations.of(context)?.orders ?? "Manage Orders"),
-      actions: [
-        if (widget.onToggleRole != null)
-          IconButton(
-            onPressed: widget.onToggleRole,
-            icon: const Icon(Icons.admin_panel_settings_rounded),
-            tooltip:
-                AppLocalizations.of(context)?.switchToAdmin ?? "Switch to Admin",
-          ),
-      ],
+      elevation: 0,
+      shape: Border.all(style: BorderStyle.none),
     );
   }
 
@@ -186,24 +153,25 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
     required VoidCallback onPressed,
   }) {
     return ActionChip(
-      avatar: Icon(
-        isSelected ? Icons.check_circle : Icons.circle_outlined,
-        color: isSelected ? colorScheme.primary : null,
-        size: 20,
+      onPressed: onPressed,
+      backgroundColor: Colors.white,
+
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : Colors.grey.shade600,
+        width: isSelected ? 1.5 : 1,
       ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       label: Text(
         LocalizationHelper()
             .localizedBookingStatus(name, context: context)
             .toUpperCase(),
         style: TextStyle(
+          color: isSelected ? AppColors.primary : Colors.grey.shade600,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          fontSize: 14,
         ),
       ),
-      onPressed: onPressed,
-      backgroundColor: isSelected
-          ? colorScheme.primary.withOpacity(0.15)
-          : null,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
     );
   }
 }
@@ -272,12 +240,12 @@ class _BookingListTabState extends State<_BookingListTab> {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
           itemCount: filteredBookings.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final booking = filteredBookings[index];
-            return BookingCards(
+            return BookingListTileWidget(
               key: ValueKey(booking.id),
               booking: booking,
               isInAdminMode: widget.isInAdminMode,

@@ -456,7 +456,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                                       borderRadius:
                                           BorderRadiusGeometry.circular(8),
                                     ),
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: AppColors.bgWhite,
                                   ),
                                   onPressed: () {
                                     setModalState(() {

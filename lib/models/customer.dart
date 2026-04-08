@@ -1,6 +1,5 @@
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/location.dart';
-import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/helpers/country_code_detector.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -25,8 +24,8 @@ class CustomerModel {
   final String? cityName;
   final String? postcode;
   final bool? isBlocked;
-  final DetailedLocationModel? detailedLocation;
   final String? extensionNumber;
+  final String? profileUrl;
 
   CustomerModel({
     required this.uid,
@@ -45,12 +44,12 @@ class CustomerModel {
     this.isAdmin,
     this.buildingNumber,
     this.streetName,
-    this.detailedLocation,
     this.districtName,
     this.cityName,
     this.isBlocked,
     this.postcode,
     this.extensionNumber,
+    this.profileUrl,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
@@ -65,7 +64,15 @@ class CustomerModel {
       country: json['country'],
       location: json['location'] != null
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
-          : null,
+          : (json['detailedLocation'] != null
+              ? LocationModel(
+                  lat: json['detailedLocation']['lat'] ?? 0.0,
+                  lon: json['detailedLocation']['lon'] ?? 0.0,
+                  fullAddress: json['detailedLocation']['neighborhoodEn'],
+                  city: json['detailedLocation']['cityEn'],
+                  province: json['detailedLocation']['regionEn'],
+                )
+              : null),
       addresses:
           (json['addresses'] as List<dynamic>?)
               ?.map((e) => AddressModel.fromJson(e as Map<String, dynamic>))
@@ -76,11 +83,6 @@ class CustomerModel {
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      detailedLocation: json['detailedLocation'] != null
-          ? DetailedLocationModel.fromJson(
-              json['detailedLocation'] as Map<String, dynamic>,
-            )
-          : null,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       isAdmin: json['isAdmin'],
@@ -91,6 +93,7 @@ class CustomerModel {
       postcode: json['postcode'],
       extensionNumber: json['extensionNumber'],
       isBlocked: json['isBlocked'],
+      profileUrl: json['profileUrl'],
     );
   }
 
@@ -115,7 +118,6 @@ class CustomerModel {
       'location': location?.toJson(),
       'addresses': addresses.map((e) => e.toJson()).toList(),
       'favourites': favourites,
-      'detailedLocation': detailedLocation?.toJson(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'isAdmin': isAdmin,
@@ -126,6 +128,7 @@ class CustomerModel {
       'postcode': postcode,
       'isBlocked': isBlocked,
       'extensionNumber': extensionNumber,
+      'profileUrl': profileUrl,
     };
   }
 
@@ -151,7 +154,7 @@ class CustomerModel {
     String? cityName,
     String? postcode,
     String? extensionNumber,
-    DetailedLocationModel? detailedLocation,
+    String? profileUrl,
   }) {
     return CustomerModel(
       uid: uid ?? this.uid,
@@ -175,7 +178,7 @@ class CustomerModel {
       postcode: postcode ?? this.postcode,
       isBlocked: isBlocked ?? this.isBlocked,
       extensionNumber: extensionNumber ?? this.extensionNumber,
-      detailedLocation: detailedLocation ?? this.detailedLocation,
+      profileUrl: profileUrl ?? this.profileUrl,
     );
   }
 
@@ -218,11 +221,6 @@ class CustomerModel {
       addresses.map((e) => e.toJson()).toList(),
       previous.addresses.map((e) => e.toJson()).toList(),
     );
-    checkAndSet(
-      'detailedLocation',
-      detailedLocation?.toJson(),
-      previous.detailedLocation?.toJson(),
-    );
     checkAndSet('favourites', favourites, previous.favourites);
     checkAndSet('createdAt', createdAt, previous.createdAt);
     checkAndSet('isAdmin', isAdmin, previous.isAdmin);
@@ -233,6 +231,7 @@ class CustomerModel {
     checkAndSet('postcode', postcode, previous.postcode);
     checkAndSet('isBlocked', isBlocked, previous.isBlocked);
     checkAndSet('extensionNumber', extensionNumber, previous.extensionNumber);
+    checkAndSet('profileUrl', profileUrl, previous.profileUrl);
 
     return json;
   }

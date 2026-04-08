@@ -366,7 +366,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         actionsAlignment: MainAxisAlignment.start,
         title: Text(AppLocalizations.of(context)!.deleteConfirmation),
         content: Text(
@@ -380,7 +380,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
             onPressed: () => Navigator.of(dialogContext).pop(),
             text: AppLocalizations.of(context)!.cancel,
             textColor: Colors.black,
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
           ),
           eButton(
             context: context,
@@ -438,7 +438,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                       state is UpdatingCustomerSupport;
 
                   return AlertDialog(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.bgWhite,
                     actionsAlignment: MainAxisAlignment.start,
                     title: Text(
                       isEdit ? getEditHeader() : getAddDialogHeader(),
@@ -594,7 +594,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                         text: AppLocalizations.of(context)!.cancel,
                         context: context,
                         textColor: Colors.black,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.bgWhite,
                       ),
                       isLoading
                           ? SizedBox(width: 70, height: 20, child: Loader())

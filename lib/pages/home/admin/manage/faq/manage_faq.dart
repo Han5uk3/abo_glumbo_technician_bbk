@@ -40,7 +40,7 @@ class _ManageFaqState extends State<ManageFaq> {
                   //   minWidth: 100,
                   //   maxHeight: 100,
                   // ),
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.bgWhite,
 
                   content: Center(
                     child: SizedBox(height: 24, child: Loader(size: 20)),
@@ -93,7 +93,7 @@ class _ManageFaqState extends State<ManageFaq> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return AlertDialog(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.bgWhite,
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -319,7 +319,7 @@ class _ManageFaqState extends State<ManageFaq> {
 
   Widget confirmDeleteDialog(FaqModel entry) {
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgWhite,
       actionsAlignment: MainAxisAlignment.start,
       title: Text(AppLocalizations.of(context)!.deleteFaqEntry),
       content: Column(
@@ -338,7 +338,7 @@ class _ManageFaqState extends State<ManageFaq> {
           onPressed: () => Navigator.of(context).pop(),
           context: context,
           textColor: Colors.black,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
         ),
         eButton(
           text: AppLocalizations.of(context)!.delete,

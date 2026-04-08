@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/common_widget/danger_alerts.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:aboglumbo_bbk_panel/helpers/constants.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -14,7 +15,7 @@ import 'package:aboglumbo_bbk_panel/pages/account/edit_profile.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/payout_accounts.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/privacy_policy_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/terms_and_conditions_page.dart';
-import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
+import 'package:aboglumbo_bbk_panel/pages/account/widgets/account_list_tile.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/biometric_service.dart';
@@ -70,6 +71,380 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AccountBloc, AccountState>(
+      listener: (context, state) {
+        if (state is UpdateWorkerNotificationLanguageSuccess) {
+          if (currentWorkerData != null) {
+            setState(() {
+              currentWorkerData = currentWorkerData!.copyWith(
+                lanCode: state.languageCode,
+              );
+            });
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.notificationLanguageUpdated ??
+                    'Notification language updated successfully',
+              ),
+              duration: const Duration(seconds: 2),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgBlueTint,
+        body: CustomScrollView(
+          physics: const ClampingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              centerTitle: true,
+              floating: false,
+              backgroundColor: AppColors.newYellow,
+              elevation: 0,
+              shape: const Border(),
+              title: Text(
+                AppLocalizations.of(context)!.account ?? '',
+                style: GoogleFonts.dmSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate([
+                _buildProfileHeader(),
+                _buildUserInfo(),
+                _buildAccountSection(),
+                _buildGeneralSettings(),
+                _buildSupportSection(),
+                _buildLegalSection(),
+                _buildDangerZone(),
+                _buildAuthSection(),
+                const SizedBox(height: 106),
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return SizedBox(
+      height: AccountPageConstants.profileHeaderHeight,
+      child: Stack(
+        children: [
+          Container(
+            width: double.maxFinite,
+            height: AccountPageConstants.primaryContainerHeight,
+            decoration: BoxDecoration(color: AppColors.newYellow),
+            child: Stack(
+              children: [
+                SizedBox(
+                  width: double.maxFinite,
+                  height: AccountPageConstants.primaryContainerHeight,
+                  child: Image.asset(
+                    "assets/images/appbarbg.png",
+                    fit: BoxFit.fitHeight,
+                    repeat: ImageRepeat.repeat,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.newYellow,
+                        AppColors.newYellow.withValues(alpha: 0.2),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: CircleAvatar(
+              radius: AccountPageConstants.avatarRadius,
+              backgroundColor: AppColors.yellow,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                ),
+                child: CircleAvatar(
+                  radius: AccountPageConstants.avatarRadius - 4,
+                  backgroundColor: AppColors.yellow,
+                  child: ClipOval(
+                    child: SizedBox(
+                      width: 120,
+                      height: 120,
+                      child: currentWorkerData?.profileUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: currentWorkerData!.profileUrl!,
+                              fit: BoxFit.cover,
+                              width: 120,
+                              height: 120,
+                              placeholder: (context, url) => Center(
+                                child: Loader(
+                                  size: 16,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                currentWorkerData?.name
+                                        ?.substring(0, 1)
+                                        .toUpperCase() ??
+                                    '',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: AccountPageConstants.avatarFontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserInfo() {
+    return Padding(
+      padding: AccountPageConstants.horizontalPadding.copyWith(top: 30),
+      child: Column(
+        children: [
+          Text(
+            currentWorkerData?.name ?? '',
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            currentWorkerData?.email ?? '',
+            style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AccountPageConstants.sectionSpacing),
+          if (currentWorkerData?.isAdmin != true)
+            AccountListTile.withArrow(
+              leading: const Icon(Icons.person_outline),
+              title: AppLocalizations.of(context)?.profileManagement ?? '',
+              onTap: () async {
+                final updatedUser = await Navigator.push<UserModel>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EditProfile(workerData: currentWorkerData),
+                  ),
+                );
+
+                if (updatedUser != null) {
+                  setState(() {
+                    currentWorkerData = updatedUser;
+                  });
+                }
+              },
+            ),
+          if (currentWorkerData?.isAdmin != true)
+            AccountListTile.withArrow(
+              leading: const Icon(Icons.account_balance_wallet_outlined),
+              title: AppLocalizations.of(context)?.payoutAccounts ?? '',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const PayoutAccountsPage(),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGeneralSettings() {
+    final currentLanguage = LocalStore.getUserlanguage();
+    final displayLanguage = currentLanguage == 'ar' ? 'عربي' : 'English';
+
+    final currentNotifLanguage = currentWorkerData?.lanCode ?? 'en';
+    final displayNotifLanguage = currentNotifLanguage == 'ar'
+        ? 'عربي'
+        : 'English';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        children: [
+          AccountListTile.withText(
+            leading: const Icon(Icons.translate),
+            title: AppLocalizations.of(context)?.language ?? 'Language',
+            trailingText: displayLanguage,
+            onTap: () => _showLanguageDialog(false),
+          ),
+          AccountListTile.withText(
+            leading: const Icon(Icons.language),
+            title:
+                AppLocalizations.of(context)?.notificationLanguage ??
+                'Notification Language',
+            trailingText: displayNotifLanguage,
+            onTap: () => _showLanguageDialog(true),
+          ),
+          _buildSecuritySettings(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecuritySettings() {
+    return AccountListTile(
+      leading: const Icon(Icons.fingerprint),
+      title: AppLocalizations.of(context)?.bioMetricAuthentication ?? '',
+      trailing: SizedBox(
+        width: 50,
+        height: 40,
+        child: FittedBox(
+          fit: BoxFit.fill,
+          child: Switch(
+            value: _isBiometricEnabled,
+            onChanged: _handleBiometricToggle,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSupportSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: AccountListTile.withArrow(
+        leading: const Icon(Icons.info_outline),
+        title: AppLocalizations.of(context)?.aboutUs ?? '',
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => const AboutUsPage())),
+      ),
+    );
+  }
+
+  Widget _buildLegalSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        children: [
+          AccountListTile.withArrow(
+            leading: const Icon(Icons.description_outlined),
+            title: AppLocalizations.of(context)?.termsAndConditions ?? '',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    const TermsAndConditionsPage(isFromLogin: false),
+              ),
+            ),
+          ),
+          AccountListTile.withArrow(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: AppLocalizations.of(context)?.privacyPolicy ?? '',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PrivacyPolicyPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDangerZone() {
+    if (isMainAdmin) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: AccountListTile(
+        leading: const Icon(Icons.delete, color: Colors.red),
+        textcolor: Colors.red,
+        title: AppLocalizations.of(context)?.deleteAccount ?? '',
+        onTap: _showDeleteAccountConfirmation,
+        dense: true,
+      ),
+    );
+  }
+
+  Widget _buildAuthSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: AccountListTile(
+        leading: const Icon(Icons.logout),
+        title: AppLocalizations.of(context)?.logout ?? 'Logout',
+        onTap: () => AccountActionDialogs.showLogoutConfirmation(
+          context,
+          onConfirm: _handleLogout,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await AppServices.clearFCMToken();
+      await NotificationServices.deleteFCMToken();
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error clearing FCM tokens during logout: $e');
+      }
+    }
+
+    await LocalStore.putlogoutStatus(true);
+    await LocalStore.clearAllAuthData();
+
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error signing out from Firebase Auth: $e');
+      }
+    }
+
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (route) => false,
+      );
+    }
+  }
+
   Future _showLanguageDialog(bool isForNotification) async {
     final currentLanguage = isForNotification
         ? (currentWorkerData?.lanCode ?? 'en')
@@ -79,7 +454,7 @@ class _AccountPageState extends State<AccountPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Text(
             AppLocalizations.of(context)?.selectLanguage ?? 'Select Language',
@@ -117,405 +492,11 @@ class _AccountPageState extends State<AccountPage> {
               text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
               context: context,
               textColor: Colors.black,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
             ),
           ],
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<AccountBloc, AccountState>(
-      listener: (context, state) {
-        if (state is UpdateWorkerNotificationLanguageSuccess) {
-          if (currentWorkerData != null) {
-            setState(() {
-              currentWorkerData = currentWorkerData!.copyWith(
-                lanCode: state.languageCode,
-              );
-            });
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)?.notificationLanguageUpdated ??
-                    'Notification language updated successfully',
-              ),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        body: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            SizedBox(
-              height: 275,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 207,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 67,
-                      child: ClipOval(
-                        child: SizedBox(
-                          width: 120,
-                          height: 120,
-                          child: currentWorkerData?.profileUrl != null
-                              ? CachedNetworkImage(
-                                  imageUrl: currentWorkerData!.profileUrl!,
-                                  fit: BoxFit.cover,
-                                  width: 120,
-                                  height: 120,
-                                  placeholder: (context, url) => Center(
-                                    child: Loader(
-                                      size: 16,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(
-                                        Icons.person,
-                                        size: 60,
-                                        color: Colors.grey,
-                                      ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    currentWorkerData?.name
-                                            ?.substring(0, 1)
-                                            .toUpperCase() ??
-                                        '',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 60,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ).copyWith(top: 15),
-              child: Column(
-                children: [
-                  Text(
-                    currentWorkerData?.name ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    currentWorkerData?.email ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14,
-                      color: const Color(0xff757575),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 5),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Version 1.0.13',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.lightGrey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                if (currentWorkerData?.isAdmin != true) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      AppLocalizations.of(context)?.account ?? '',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.lightGrey,
-                      ),
-                    ),
-                  ),
-                  if (currentWorkerData?.isAdmin != true) ...[
-                    ListTile(
-                      onTap: () async {
-                        final updatedUser = await Navigator.push<UserModel>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EditProfile(workerData: currentWorkerData),
-                          ),
-                        );
-
-                        if (updatedUser != null) {
-                          setState(() {
-                            currentWorkerData = updatedUser;
-                          });
-                        }
-                      },
-                      title: Text(
-                        AppLocalizations.of(context)?.profileManagement ?? '',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 16,
-                          color: AppColors.black1,
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios_sharp,
-                        size: 15,
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const PayoutAccountsPage(),
-                        ),
-                      ),
-                      title: Text(
-                        AppLocalizations.of(context)?.payoutAccounts ?? '',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 16,
-                          color: AppColors.black1,
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios_sharp,
-                        size: 15,
-                      ),
-                    ),
-                  ],
-                ],
-                ListTile(
-                  onTap: () => _showLanguageDialog(false),
-                  title: Text(
-                    AppLocalizations.of(context)?.language ?? 'Language',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-
-                  trailing: const Icon(Icons.language, size: 20),
-                ),
-                ListTile(
-                  onTap: () => _showLanguageDialog(true),
-                  title: Text(
-                    AppLocalizations.of(context)?.notificationLanguage ??
-                        'Language',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.language, size: 20),
-                ),
-                ListTile(
-                  title: Text(
-                    AppLocalizations.of(context)?.bioMetricAuthentication ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                  trailing: SizedBox(
-                    width: 50,
-                    height: 40,
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Switch(
-                        value: _isBiometricEnabled,
-                        onChanged: _handleBiometricToggle,
-                      ),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const TermsAndConditionsPage(isFromLogin: false),
-                    ),
-                  ),
-                  title: Text(
-                    AppLocalizations.of(context)?.termsAndConditions ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios_sharp, size: 15),
-                ),
-
-                ListTile(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const PrivacyPolicyPage(),
-                    ),
-                  ),
-                  title: Text(
-                    AppLocalizations.of(context)?.privacyPolicy ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios_sharp, size: 15),
-                ),
-
-                ListTile(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const AboutUsPage(),
-                    ),
-                  ),
-                  title: Text(
-                    AppLocalizations.of(context)?.aboutUs ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios_sharp, size: 15),
-                ),
-
-                ListTile(
-                  trailing: const Icon(Icons.logout, size: 18),
-                  onTap: () => AccountActionDialogs.showLogoutConfirmation(
-                    context,
-                    onConfirm: () async {
-                      try {
-                        // Clear FCM tokens
-                        await AppServices.clearFCMToken();
-                        await NotificationServices.deleteFCMToken();
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print(
-                            '❌ Error clearing FCM tokens during logout: $e',
-                          );
-                        }
-                      }
-
-                      Home.resetWelcomeModal();
-
-                      // ✅ FIXED: Set logout status FIRST before clearing data
-                      await LocalStore.putlogoutStatus(true);
-
-                      // ✅ FIXED: Clear auth data (preserves phone if Remember Me is enabled)
-                      await LocalStore.clearAllAuthData();
-
-                      // ✅ Sign out from Firebase
-                      try {
-                        await FirebaseAuth.instance.signOut();
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print('❌ Error signing out from Firebase Auth: $e');
-                        }
-                      }
-
-                      if (kDebugMode) {
-                        print('✅ Logout complete');
-                        print('Remember Me: ${LocalStore.getRememberMe()}');
-                        print(
-                          'Remembered Phone: ${LocalStore.getRememberedPhone()}',
-                        );
-                      }
-
-                      // Navigate to login
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                          (route) => false,
-                        );
-                      }
-                    },
-                  ),
-                  title: Text(
-                    AppLocalizations.of(context)?.logout ?? 'Logout',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      color: AppColors.black1,
-                    ),
-                  ),
-                ),
-                if (!isMainAdmin) ...[
-                  ListTile(
-                    onTap: _showDeleteAccountConfirmation,
-                    title: Text(
-                      AppLocalizations.of(context)?.deleteAccount ??
-                          'Delete Account',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 16,
-                        color: Colors.red,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -524,7 +505,7 @@ class _AccountPageState extends State<AccountPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Row(
             children: [
@@ -621,7 +602,7 @@ class _AccountPageState extends State<AccountPage> {
               text: AppLocalizations.of(dialogContext)?.cancel ?? 'Cancel',
               context: dialogContext,
               textColor: Colors.black,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
             ),
             eButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -689,7 +670,7 @@ class _AccountPageState extends State<AccountPage> {
           return PopScope(
             canPop: false,
             child: AlertDialog(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -698,12 +679,10 @@ class _AccountPageState extends State<AccountPage> {
                     child: Loader(size: 24, color: AppColors.primary),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(dialogContext)?.deletingAccount ??
-                          'Deleting account...',
-                      style: GoogleFonts.dmSans(fontSize: 14),
-                    ),
+                  Text(
+                    AppLocalizations.of(dialogContext)?.deletingAccount ??
+                        'Deleting account...',
+                    style: GoogleFonts.dmSans(fontSize: 14),
                   ),
                 ],
               ),
@@ -714,7 +693,6 @@ class _AccountPageState extends State<AccountPage> {
     }
 
     try {
-      // Clear FCM tokens
       try {
         await AppServices.clearFCMToken();
         await NotificationServices.deleteFCMToken();
@@ -724,31 +702,17 @@ class _AccountPageState extends State<AccountPage> {
         }
       }
 
-      // Delete user document from Firestore
       await AppFirestore.usersCollectionRef.doc(user.uid).delete();
-
-      // Delete Firebase Auth user
-      // Note: For phone auth, no reauthentication needed
       await user.delete();
 
-      // Clear all local storage
       await LocalStore.clearLogoutStatus();
       await LocalStore.putRememberMe(false);
       await LocalStore.clearRememberedPhone();
       await LocalStore.clearUID();
       await LocalStore.clearCachedUserData();
 
-      if (kDebugMode) {
-        print('✅ Account deleted successfully');
-      }
-
-      // Close loading dialog
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      // Navigate to login page
-      if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -756,7 +720,6 @@ class _AccountPageState extends State<AccountPage> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Close loading dialog
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
       }
@@ -796,21 +759,12 @@ class _AccountPageState extends State<AccountPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
-      // Close loading dialog
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      if (kDebugMode) {
-        print('❌ Error deleting account: $e');
       }
 
       if (mounted) {
@@ -821,7 +775,6 @@ class _AccountPageState extends State<AccountPage> {
                   'Failed to delete account: ${e.toString()}',
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -830,7 +783,6 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> _handleBiometricToggle(bool value) async {
     if (value) {
-      // Enabling biometric - authenticate first
       final authenticated = await BiometricService.authenticate(context);
       if (authenticated && mounted) {
         setState(() => _isBiometricEnabled = true);
@@ -849,16 +801,15 @@ class _AccountPageState extends State<AccountPage> {
         }
       }
     } else {
-      // Disabling biometric - show confirmation dialog
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             actionsAlignment: MainAxisAlignment.start,
             title: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -891,7 +842,11 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                      const Icon(
+                        Icons.info_outline,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -916,7 +871,7 @@ class _AccountPageState extends State<AccountPage> {
                 text: AppLocalizations.of(dialogContext)?.cancel ?? 'Cancel',
                 context: dialogContext,
                 textColor: Colors.black,
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.bgWhite,
               ),
               eButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -930,7 +885,6 @@ class _AccountPageState extends State<AccountPage> {
         },
       );
 
-      // If user confirmed, disable biometric
       if (confirmed == true && mounted) {
         setState(() => _isBiometricEnabled = false);
         BiometricService.setBiometricEnabled(false);
@@ -947,158 +901,6 @@ class _AccountPageState extends State<AccountPage> {
             ),
           );
         }
-      }
-    }
-  }
-
-  Future<void> deleteAccount(BuildContext context, String userPassword) async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.userNotFound ?? 'User not found',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
-    Navigator.of(
-      context,
-    ).popUntil((route) => route.isFirst || route is! PopupRoute);
-
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
-            key: const ValueKey('delete_account_progress_dialog'),
-            content: Row(
-              children: [
-                Loader(size: 24, color: AppColors.primary),
-                const SizedBox(width: 16),
-                Text(
-                  AppLocalizations.of(dialogContext)?.deletingAccount ??
-                      'Deleting account...',
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
-    try {
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: userPassword,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-
-      try {
-        await AppServices.clearFCMToken();
-        await NotificationServices.deleteFCMToken();
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error clearing FCM tokens during account deletion: $e');
-        }
-      }
-
-      await AppFirestore.usersCollectionRef.doc(user.uid).delete();
-
-      await user.delete();
-
-      await LocalStore.clearLogoutStatus();
-      await LocalStore.putRememberMe(false);
-      await LocalStore.clearRememberedPhone();
-      await LocalStore.clearUID();
-      await LocalStore.clearCachedUserData();
-
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false,
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      String errorMessage;
-      switch (e.code) {
-        case 'wrong-password':
-          errorMessage =
-              AppLocalizations.of(context)?.wrongPassword ?? 'Wrong password';
-          break;
-        case 'requires-recent-login':
-          errorMessage =
-              AppLocalizations.of(context)?.requiresRecentLogin ??
-              'This operation requires recent authentication. Please log out and log back in.';
-          break;
-        case 'too-many-requests':
-          errorMessage =
-              AppLocalizations.of(context)?.tooManyRequests ??
-              'Too many requests. Please try again later.';
-          break;
-        case 'network-request-failed':
-          errorMessage =
-              AppLocalizations.of(context)?.networkError ??
-              'Network error. Please check your connection.';
-          break;
-        case 'user-disabled':
-          errorMessage =
-              AppLocalizations.of(context)?.userDisabled ??
-              'This user account has been disabled.';
-          break;
-        case 'user-not-found':
-          errorMessage =
-              AppLocalizations.of(context)?.userNotFound ??
-              'User account not found.';
-          break;
-        default:
-          errorMessage =
-              AppLocalizations.of(context)?.failedToDeleteAccount ??
-              'Failed to delete account: ${e.message}';
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.failedToDeleteAccount ??
-                  'Failed to delete account: ${e.toString()}',
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
       }
     }
   }

@@ -65,7 +65,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
             return Transform.scale(
               scale: value,
               child: AlertDialog(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.bgWhite,
                 actionsAlignment: MainAxisAlignment.start,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -125,7 +125,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                     onPressed: () => Navigator.of(context).pop(false),
                     context: context,
                     textColor: Colors.black,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.bgWhite,
                   ),
                   eButton(
                     text: AppLocalizations.of(context)!.confirm,

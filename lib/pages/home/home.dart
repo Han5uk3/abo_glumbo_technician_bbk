@@ -18,6 +18,7 @@ import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/services/technician_location_update_service.dart';
 
+import 'package:aboglumbo_bbk_panel/common_widget/animated_expanding_nav_bar.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/styles/icons.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,6 @@ class Home extends StatefulWidget {
     this.selectedFilter,
     this.isNewRegistration = false,
   });
-
-  static bool hasShownWelcomeModal = false;
-
-  static void resetWelcomeModal() {
-    hasShownWelcomeModal = false;
-  }
 
   @override
   State<Home> createState() => _HomeState();
@@ -131,11 +126,17 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           );
         }
 
+        // Handle verification pending state
+        if (userData.isVerified != true && userData.isAdmin != true) {
+          return _buildVerificationPendingState(context, locale);
+        }
+
         // Show welcome modal for technicians
         if (userData.isAdmin != true &&
             userData.isOnline != true &&
-            !Home.hasShownWelcomeModal) {
-          Home.hasShownWelcomeModal = true;
+            userData.isVerified == true &&
+            !LocalStore.getWelcomeModalShown(userData.uid ?? '')) {
+          LocalStore.setWelcomeModalShown(userData.uid ?? '', true);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             TechnicianWelcomeModal.show(
               context,
@@ -145,11 +146,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               },
             );
           });
-        }
-
-        // Handle verification pending state
-        if (userData.isVerified != true && userData.isAdmin != true) {
-          return _buildVerificationPendingState(context, locale);
         }
 
         // Setup pages based on fixed role
@@ -191,6 +187,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           },
           child: Scaffold(
             extendBodyBehindAppBar: true,
+            extendBody: true,
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               transitionBuilder: (Widget child, Animation<double> animation) {
@@ -198,7 +195,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               },
               child: pages[currentIndex],
             ),
-            bottomNavigationBar: NavigationBar(
+            bottomNavigationBar: AnimatedExpandingNavBar(
               selectedIndex: currentIndex,
               onDestinationSelected: (index) {
                 if (index < pages.length) {
@@ -206,86 +203,41 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 }
               },
               height: 70,
+              selectedItemColor: AppColors.newYellow,
               destinations: [
-                if (userData.isAdmin == true)
-                  NavigationDestination(
-                    icon: SvgPicture.asset(
-                      AppIcons.homeNav,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.grey,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    selectedIcon: SvgPicture.asset(
-                      AppIcons.homeNav,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.secondary,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    label: locale?.dashboard ?? '',
-                  ),
+                AnimatedNavDestination(
+                  icon: SvgPicture.asset(AppIcons.homeNav),
+                  selectedIcon: SvgPicture.asset(AppIcons.homeNav),
+                  label: locale?.dashboard ?? 'Dashboard',
+                ),
 
                 if (userData.isAdmin == true)
-                  NavigationDestination(
-                    icon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.grey,
-                    ),
-                    selectedIcon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.secondary,
-                    ),
+                  AnimatedNavDestination(
+                    icon: const Icon(Icons.format_list_bulleted),
+                    selectedIcon: const Icon(Icons.format_list_bulleted),
                     label: locale?.orders ?? 'Orders',
                   ),
 
                 if (userData.isAdmin == true)
-                  NavigationDestination(
-                    icon: Icon(Icons.settings_rounded, color: AppColors.grey),
-                    selectedIcon: Icon(
-                      Icons.settings_rounded,
-                      color: AppColors.secondary,
-                    ),
+                  AnimatedNavDestination(
+                    icon: const Icon(Icons.settings_rounded),
+                    selectedIcon: const Icon(Icons.settings_rounded),
                     label: locale?.manage ?? 'Manage',
                   )
                 else
-                  NavigationDestination(
-                    icon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.grey,
-                    ),
-                    selectedIcon: Icon(
-                      Icons.format_list_bulleted,
-                      color: AppColors.secondary,
-                    ),
+                  AnimatedNavDestination(
+                    icon: const Icon(Icons.format_list_bulleted),
+                    selectedIcon: const Icon(Icons.format_list_bulleted),
                     label: locale?.orders ?? 'Orders',
                   ),
-                NavigationDestination(
-                  icon: Icon(
-                    Icons.verified_user_rounded,
-                    color: AppColors.grey,
-                  ),
-                  selectedIcon: Icon(
-                    Icons.verified_user_rounded,
-                    color: AppColors.secondary,
-                  ),
+                AnimatedNavDestination(
+                  icon: const Icon(Icons.verified_user_rounded),
+                  selectedIcon: const Icon(Icons.verified_user_rounded),
                   label: locale?.warrantyClaims ?? 'Warranty Claims',
                 ),
-                NavigationDestination(
-                  icon: SvgPicture.asset(
-                    AppIcons.profileNav,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.grey,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  selectedIcon: SvgPicture.asset(
-                    AppIcons.profileNav,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.secondary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
+                AnimatedNavDestination(
+                  icon: SvgPicture.asset(AppIcons.profileNav),
+                  selectedIcon: SvgPicture.asset(AppIcons.profileNav),
                   label: locale?.account ?? 'Account',
                 ),
               ],
@@ -386,7 +338,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         title: Text(locale?.exitAppTitle ?? 'Exit App'),
         content: Text(
           locale?.exitAppMessage ?? 'Are you sure you want to exit the app?',

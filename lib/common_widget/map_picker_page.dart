@@ -52,17 +52,16 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   String _locationTitle = '';
   String _locationSubtitle = '';
 
-  // Multiple location selection - always enabled
-  double _radiusInMeters = 500;
-  bool _showRadius = true;
-  Set<Circle> _circles = {};
-  static const double _minRadius = 100;
-  static const double _maxRadius = 50000;
+  // Multiple location selection - Polygon based
+  final List<LatLng> _currentPolygonPoints = [];
+  Set<Polygon> _polygons = {};
 
   final TextEditingController _nameEnController = TextEditingController();
   final TextEditingController _nameArController = TextEditingController();
-  final TextEditingController _individualRadiusController =
-      TextEditingController();
+  final TextEditingController _priorityController = TextEditingController(
+    text: '0',
+  );
+  final int _priority = 0;
   final GlobalKey<FormState> _dialogFormKey = GlobalKey<FormState>();
 
   final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
@@ -88,8 +87,8 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   }
 
   void _initializeLocation() {
-    const defaultLat = 12.9716;
-    const defaultLng = 77.5946;
+    const defaultLat = 24.7136; // Riyadh, Saudi Arabia
+    const defaultLng = 46.6753;
     _initialPosition = LatLng(
       widget.userLatitude ?? defaultLat,
       widget.userLongitude ?? defaultLng,
@@ -99,7 +98,25 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     if (widget.initialLocations != null &&
         widget.initialLocations!.isNotEmpty) {
       _selectedLocations = widget.initialLocations!.map((loc) {
-        return {...loc, 'location': LatLng(loc['lat'], loc['lng'])};
+        final lat = (loc['lat'] as num?)?.toDouble();
+        final lng = (loc['lng'] as num?)?.toDouble();
+
+        // If lat/lng are missing (legacy or polygon-only), use default or first polygon point
+        LatLng pos;
+        if (lat != null && lng != null) {
+          pos = LatLng(lat, lng);
+        } else if (loc['polygon'] != null &&
+            (loc['polygon'] as List).isNotEmpty) {
+          final firstPoint = (loc['polygon'] as List).first;
+          pos = LatLng(
+            (firstPoint['lat'] as num).toDouble(),
+            (firstPoint['lng'] as num).toDouble(),
+          );
+        } else {
+          pos = _initialPosition;
+        }
+
+        return {...loc, 'location': pos};
       }).toList();
     }
 
@@ -117,7 +134,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
   void _updateMapElements() {
     Set<Marker> updatedMarkers = {};
-    Set<Circle> updatedCircles = {};
+    Set<Polygon> updatedPolygons = {};
 
     for (var i = 0; i < _selectedLocations.length; i++) {
       var loc = _selectedLocations[i];
@@ -141,12 +158,22 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         ),
       );
 
-      if (_showRadius) {
-        updatedCircles.add(
-          Circle(
-            circleId: CircleId('c_$i'),
-            center: pos,
-            radius: loc['radius']?.toDouble() ?? _radiusInMeters,
+      if (loc['polygon'] != null) {
+        List<dynamic> rawPoints = loc['polygon'];
+        List<LatLng> points = rawPoints
+            .where((p) => p['lat'] != null && p['lng'] != null)
+            .map(
+              (p) => LatLng(
+                (p['lat'] as num).toDouble(),
+                (p['lng'] as num).toDouble(),
+              ),
+            )
+            .toList();
+
+        updatedPolygons.add(
+          Polygon(
+            polygonId: PolygonId('p_$i'),
+            points: points,
             fillColor: Colors.blue.withOpacity(0.1),
             strokeColor: i == 0 ? Colors.blue : Colors.green,
             strokeWidth: 2,
@@ -155,16 +182,28 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       }
     }
 
+    if (_currentPolygonPoints.isNotEmpty) {
+      updatedPolygons.add(
+        Polygon(
+          polygonId: const PolygonId('current_drawing'),
+          points: _currentPolygonPoints,
+          fillColor: Colors.orange.withOpacity(0.2),
+          strokeColor: Colors.orange,
+          strokeWidth: 2,
+        ),
+      );
+    }
+
     setState(() {
       _markers = updatedMarkers;
-      _circles = updatedCircles;
+      _polygons = updatedPolygons;
     });
   }
 
   void _addLocation(
     String nameEn,
     String nameAr,
-    double radius, {
+    int priority, {
     int? editIndex,
   }) {
     if (_selectedLocation == null) return;
@@ -191,7 +230,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         'location': _selectedLocation,
         'en_name': nameEn,
         'ar_name': nameAr,
-        'radius': radius,
+        'polygon': _currentPolygonPoints
+            .map((p) => {'lat': p.latitude, 'lng': p.longitude})
+            .toList(),
+        'priority': priority,
         'lat': _selectedLocation!.latitude,
         'lng': _selectedLocation!.longitude,
       };
@@ -201,6 +243,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       } else {
         _selectedLocations.add(locData);
       }
+      _currentPolygonPoints.clear();
       _updateMapElements();
     });
     _showSnackBar(
@@ -222,23 +265,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     setState(() {
       _selectedLocations.clear();
       _markers.clear();
-      if (!_showRadius) _circles.clear();
+      _polygons.clear();
     });
   }
 
-  void _onRadiusChanged(double value) {
-    setState(() {
-      _radiusInMeters = value;
-      _updateMapElements();
-    });
-  }
-
-  void _toggleRadius() {
-    setState(() {
-      _showRadius = !_showRadius;
-      _updateMapElements();
-    });
-  }
+  // Priority mapping handled by text controller now
 
   void _showSnackBar(String msg, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -403,13 +434,12 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       final loc = _selectedLocations[editIndex];
       _nameEnController.text = loc['en_name'] ?? '';
       _nameArController.text = loc['ar_name'] ?? '';
-      _individualRadiusController.text = (loc['radius'] ?? _radiusInMeters)
-          .toString();
+      _priorityController.text = (loc['priority'] ?? _priority).toString();
       _selectedLocation = loc['location'];
     } else {
       _nameEnController.text = _locationTitle;
       _nameArController.text = '';
-      _individualRadiusController.text = _radiusInMeters.toString();
+      _priorityController.text = _priority.toString();
     }
 
     showDialog(
@@ -489,22 +519,22 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         context,
                       )!.pleaseEnterArabicName;
                     }
-                    if (!arabicFullRegex.hasMatch(value)) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterArabicNameOnly;
-                    }
+                    // if (!arabicFullRegex.hasMatch(value)) {
+                    //   return AppLocalizations.of(
+                    //     context,
+                    //   )!.pleaseEnterArabicNameOnly;
+                    // }
                     return null;
                   },
                 ),
                 SizedBox(height: 16),
                 TextFormField(
-                  controller: _individualRadiusController,
+                  controller: _priorityController,
                   style: GoogleFonts.poppins(fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.radiusInMeters,
+                    labelText: 'Priority',
                     labelStyle: TextStyle(color: Colors.grey[700]),
-                    hintText: AppLocalizations.of(context)!.enterRadiusInMeters,
+                    hintText: 'Enter priority',
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -516,14 +546,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         width: 2,
                       ),
                     ),
-                    suffixText: AppLocalizations.of(context)!.meters,
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return AppLocalizations.of(context)!.pleaseEnterRadius;
+                      return 'Please enter priority';
                     }
-                    if (double.tryParse(value) == null) {
+                    if (int.tryParse(value) == null) {
                       return AppLocalizations.of(
                         context,
                       )!.pleaseEnterValidNumber;
@@ -551,12 +580,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               if (_dialogFormKey.currentState!.validate()) {
                 final nameEn = _nameEnController.text.trim();
                 final nameAr = _nameArController.text.trim();
-                final radius =
-                    double.tryParse(_individualRadiusController.text.trim()) ??
-                    _radiusInMeters;
+                final priority =
+                    int.tryParse(_priorityController.text.trim()) ?? _priority;
 
                 Navigator.pop(context);
-                _addLocation(nameEn, nameAr, radius, editIndex: editIndex);
+                _addLocation(nameEn, nameAr, priority, editIndex: editIndex);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -597,16 +625,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   void _onMapTap(LatLng latLng) {
     setState(() {
       _selectedLocation = latLng;
+      _currentPolygonPoints.add(latLng);
       _predictions.clear();
       _locationTitle = AppLocalizations.of(context)!.gettingAddress;
+      _updateMapElements();
     });
     _searchFocusNode.unfocus();
     _getAddressFromLatLng(latLng);
-
-    // Show option to add after getting address
-    Future.delayed(Duration(milliseconds: 500), () {
-      _showLocationDetailsDialog();
-    });
   }
 
   Widget _buildSearchResults() {
@@ -634,76 +659,41 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   }
 
   Widget _buildRadiusControl() {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.serviceRadius,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      _showRadius ? Icons.visibility : Icons.visibility_off,
-                      size: 18,
-                      color: Colors.blue,
-                    ),
-                    onPressed: _toggleRadius,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${(_radiusInMeters / 1000).toStringAsFixed(1)} ${AppLocalizations.of(context)!.km}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
+    return _currentPolygonPoints.isNotEmpty
+        ? SizedBox(
+            width: double.infinity,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showLocationDetailsDialog(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
+                    child: Text(
+                      'Complete Region',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
-          SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: Colors.blue,
-              thumbColor: Colors.blue,
-              overlayColor: Colors.blue.withOpacity(0.1),
+                ),
+                SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentPolygonPoints.clear();
+                      _updateMapElements();
+                    });
+                  },
+                  icon: Icon(Icons.clear, color: Colors.red),
+                  tooltip: 'Clear Drawing',
+                ),
+              ],
             ),
-            child: Slider(
-              value: _radiusInMeters,
-              min: _minRadius,
-              max: _maxRadius,
-              divisions: 20,
-              label:
-                  '${(_radiusInMeters / 1000).toStringAsFixed(1)} ${AppLocalizations.of(context)!.km}',
-              onChanged: _onRadiusChanged,
-            ),
-          ),
-        ],
-      ),
-    );
+          )
+        : SizedBox.shrink();
   }
 
   Widget _buildLocationsList() {
@@ -786,7 +776,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    '${AppLocalizations.of(context)!.radius}: ${loc['radius']}m | ${loc['lat'].toStringAsFixed(4)}, ${loc['lng'].toStringAsFixed(4)}',
+                    'Priority: ${loc['priority']} | ${loc['polygon'].length} points',
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                   onTap: () => _showLocationDetailsDialog(editIndex: i),
@@ -866,7 +856,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   ),
                   onTap: _onMapTap,
                   markers: _markers,
-                  circles: _circles,
+                  polygons: _polygons,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
@@ -1054,7 +1044,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                             if (widget.onLocationSelected != null) {
                               widget.onLocationSelected!({
                                 'locations': _selectedLocations,
-                                'radius': _radiusInMeters,
+                                'priority': _priority,
                                 'count': _selectedLocations.length,
                               });
                             }
@@ -1103,7 +1093,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     _phoneNumberController.dispose();
     _nameEnController.dispose();
     _nameArController.dispose();
-    _individualRadiusController.dispose();
+    _priorityController.dispose();
     mapController?.dispose();
     super.dispose();
   }

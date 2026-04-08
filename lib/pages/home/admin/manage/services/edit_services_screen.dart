@@ -50,6 +50,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       TextEditingController();
   final TextEditingController workStartTimeController = TextEditingController();
   final TextEditingController workEndTimeController = TextEditingController();
+  final TextEditingController discountPercentageController =
+      TextEditingController();
 
   XFile? selectedImage;
   CategoryModel? selectedCategory;
@@ -145,6 +147,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       workStartTimeController.text = widget.service!.workStartTime ?? '08:00';
       workEndTimeController.text = widget.service!.workEndTime ?? '17:00';
       isActive = widget.service!.isActive;
+      discountPercentageController.text =
+          widget.service!.discountPercentage?.toString() ?? '0';
 
       // Restore hierarchical location data
       // Support both old district-based and new city-based formats
@@ -190,6 +194,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       priceController.text = '0';
       onWorkHourPriceController.text = '0';
       offWorkHourPriceController.text = '0';
+      discountPercentageController.text = '0';
       workStartTimeController.text = '08:00';
       workEndTimeController.text = '17:00';
     }
@@ -278,6 +283,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     .cast<String?>()
               : <String?>[],
           isActive: isActive,
+          discountPercentage:
+              double.tryParse(discountPercentageController.text.trim()) ?? 0,
           updatedAt: Timestamp.now(),
         );
         if (widget.service != null) {
@@ -388,9 +395,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
         'locations': mapSelectedLocations
             .map(
               (l) => {
-                'lat': l['lat'],
-                'lng': l['lng'],
-                'radius': l['radius'],
+                'polygon': l['polygon'],
+                'priority': l['priority'],
                 'en_name': l['en_name'],
                 'ar_name': l['ar_name'],
               },
@@ -793,6 +799,31 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                       return AppLocalizations.of(
                         context,
                       )!.pleaseEnterAGeneralPrice;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: NewTextField(
+                  keyboardType: TextInputType.number,
+                  controller: discountPercentageController,
+                  hintText:
+                      AppLocalizations.of(context)?.discountPercentage ??
+                      'Discount Percentage (%)',
+                  labelText:
+                      AppLocalizations.of(context)?.discountPercentage ??
+                      'Discount Percentage (%)',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(
+                        context,
+                      )?.pleaseEnterADiscountPercentage;
+                    }
+                    final perc = double.tryParse(value);
+                    if (perc == null || perc < 0 || perc > 100) {
+                      return 'Enter a value between 0 and 100';
                     }
                     return null;
                   },

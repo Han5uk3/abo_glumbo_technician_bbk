@@ -1,3 +1,4 @@
+import "package:aboglumbo_bbk_panel/styles/color.dart";
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/faq.dart';
@@ -116,7 +117,7 @@ class _AddFaqPageState extends State<AddFaqPage> {
                   barrierDismissible: false,
                   useRootNavigator: true,
                   builder: (context) => AlertDialog(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.bgWhite,
                     // constraints: BoxConstraints(
                     //   maxWidth: 100,
                     //   minWidth: 100,
@@ -162,7 +163,7 @@ class _AddFaqPageState extends State<AddFaqPage> {
                   barrierDismissible: false,
                   useRootNavigator: true,
                   builder: (context) => AlertDialog(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.bgWhite,
                     // constraints: BoxConstraints(
                     //   maxWidth: 100,
                     //   minWidth: 100,

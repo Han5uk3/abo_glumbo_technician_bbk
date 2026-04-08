@@ -1,0 +1,97 @@
+import 'package:aboglumbo_bbk_panel/helpers/constants.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class AccountListTile extends StatelessWidget {
+  final String title;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  final bool dense;
+  final Color? textcolor;
+  final Widget? leading;
+
+  const AccountListTile({
+    super.key,
+    required this.title,
+    this.onTap,
+    this.leading,
+    this.trailing,
+    this.textcolor,
+    this.dense = false,
+  });
+
+  factory AccountListTile.withArrow({
+    Widget? leading,
+    required String title,
+    VoidCallback? onTap,
+  }) {
+    return AccountListTile(
+      title: title,
+      onTap: onTap,
+      trailing: const Icon(Icons.arrow_forward_ios_sharp, size: 15),
+      leading: leading,
+    );
+  }
+
+  factory AccountListTile.withText({
+    Widget? leading,
+    required String title,
+    required String trailingText,
+    VoidCallback? onTap,
+    Color? textColor,
+  }) {
+    return AccountListTile(
+      title: title,
+      onTap: onTap,
+      leading: leading,
+      trailing: Text(
+        trailingText,
+        style: GoogleFonts.dmSans(
+          fontSize: 12,
+          color: textColor ?? AppColors.black1,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: dense,
+      onTap: onTap,
+      title: Text(
+        title,
+        style: GoogleFonts.dmSans(
+          fontSize: 13, // Matches font-size change requested in historical context
+          color: textcolor ?? Colors.black,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: trailing,
+      leading: leading,
+    );
+  }
+}
+
+class SectionHeader extends StatelessWidget {
+  final String title;
+
+  const SectionHeader({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: AccountPageConstants.horizontalPadding,
+      child: Text(
+        title,
+        style: GoogleFonts.dmSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightGrey,
+        ),
+      ),
+    );
+  }
+}

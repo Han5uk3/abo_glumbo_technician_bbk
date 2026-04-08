@@ -12,6 +12,7 @@
     "pleaseEnterAnOnWorkPrice",
     "pleaseEnterOffWorkPrice",
     "pleaseEnterAGeneralPrice",
-    "netError"
+    "netError",
+    "proposedTime"
   ]
 }

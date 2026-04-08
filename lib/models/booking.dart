@@ -1,5 +1,6 @@
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/models/warranty.dart';
+import 'package:aboglumbo_bbk_panel/models/counter_offer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/models/customer.dart';
 import '/models/service.dart';
@@ -37,11 +38,20 @@ class BookingModel {
   String? orderId;
   String? transactionId; // Added transactionId
   Timestamp? paymentCompletedAt;
+  Timestamp? counterProposalAcceptedAt;
+  Timestamp? counterProposalStartedAt;
 
   bool paymentCompleted = false;
   List<String>? cancelledWorkerUids;
+  List<String>? technicianPaymentProof;
 
   WarrantyModel? warranty;
+  CounterOfferModel? activeCounterOffer;
+  bool? isOnHour; // ✅ Added
+
+  /// The polygon service zone matched when the customer validated their address.
+  /// Written by the customer app; read here by the technician/admin app.
+  BookingServiceLocation? serviceLocation;
 
   BookingModel({
     required this.id,
@@ -73,8 +83,14 @@ class BookingModel {
     this.orderId,
     this.transactionId, // Added transactionId
     this.cancelledWorkerUids,
+    this.serviceLocation,
     this.paymentCompleted = false,
+    this.technicianPaymentProof,
     this.warranty,
+    this.activeCounterOffer,
+    this.isOnHour, // ✅ Added
+    this.counterProposalAcceptedAt,
+    this.counterProposalStartedAt,
   });
 
   BookingModel.fromMap(Map<String, dynamic> data)
@@ -115,12 +131,26 @@ class BookingModel {
       trackingStartedAt = data['trackingStartedAt'] as Timestamp?,
       trackingStoppedAt = data['trackingStoppedAt'] as Timestamp?,
       orderId = data['orderId'],
+      activeCounterOffer = data['activeCounterOffer'] != null
+          ? CounterOfferModel.fromMap(data['activeCounterOffer'])
+          : null,
       transactionId = data['transactionId'], // Added transactionId
       cancelledWorkerUids = data['cancelledWorkerUids'] != null
           ? List<String>.from(data['cancelledWorkerUids'])
           : null,
+      serviceLocation = data['serviceLocation'] != null
+          ? BookingServiceLocation.fromJson(
+              data['serviceLocation'] as Map<String, dynamic>,
+            )
+          : null,
       rejectedBy = data['rejectedBy'] as String?,
-      cancelledAt = data['cancelledAt'] as Timestamp?;
+      isOnHour = data['isOnHour'], // ✅ Added
+      technicianPaymentProof = data['technicianPaymentProof'] != null
+          ? List<String>.from(data['technicianPaymentProof'])
+          : null,
+      cancelledAt = data['cancelledAt'] as Timestamp?,
+      counterProposalAcceptedAt = data['counterProposalAcceptedAt'] as Timestamp?,
+      counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?;
 
   factory BookingModel.fromQueryDocumentSnapshot(
     QueryDocumentSnapshot snapshot,
@@ -162,9 +192,15 @@ class BookingModel {
       'cancellationReason': cancellationReason,
       'rejectedBy': rejectedBy,
       'paymentCompleted': paymentCompleted,
+      'technicianPaymentProof': technicianPaymentProof,
+      'activeCounterOffer': activeCounterOffer?.toMap(),
+      'isOnHour': isOnHour, // ✅ Added
     };
 
     map['id'] = id;
+    if (serviceLocation != null) {
+      map['serviceLocation'] = serviceLocation!.toJson();
+    }
     if (warranty != null) {
       map['warranty'] = warranty!.toJson();
     }
@@ -179,6 +215,37 @@ class BookingModel {
     }
     return map;
   }
+}
+
+/// The service zone that the customer's address matched during booking validation.
+/// Stored on the booking document by the customer app; read by the technician/admin app.
+class BookingServiceLocation {
+  final String nameEn;
+  final String nameAr;
+  final int priority;
+
+  const BookingServiceLocation({
+    required this.nameEn,
+    required this.nameAr,
+    required this.priority,
+  });
+
+  factory BookingServiceLocation.fromJson(Map<String, dynamic> json) {
+    return BookingServiceLocation(
+      nameEn: json['nameEn'] as String? ?? json['en_name'] as String? ?? '',
+      nameAr: json['nameAr'] as String? ?? json['ar_name'] as String? ?? '',
+      priority: (json['priority'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'nameEn': nameEn,
+    'nameAr': nameAr,
+    'priority': priority,
+  };
+
+  String localizedName(String? locale) =>
+      locale == 'ar' ? nameAr : nameEn;
 }
 
 class ReviewModel {

@@ -52,7 +52,7 @@ class _ManageAdminsState extends State<ManageAdmins>
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: const Text('Revoke Access'),
           content: Text('Are you sure you want to remove admin access for $adminName?'),

@@ -262,7 +262,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: AppColors.bgWhite.withOpacity(0.2),
               backgroundImage: widget.participantPhoto.isNotEmpty
                   ? NetworkImage(widget.participantPhoto)
                   : null,

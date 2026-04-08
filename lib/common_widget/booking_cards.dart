@@ -1,26 +1,24 @@
-import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
-import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
-import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 
-class BookingCards extends StatelessWidget {
+// Renamed to BookingListTileWidget to match customer side standardized naming
+class BookingListTileWidget extends StatelessWidget {
   final BookingModel booking;
   final bool isAdmin;
   final VoidCallback? onAssign;
   final bool isWarranty;
   final bool isInAdminMode;
 
-  BookingCards({
+  const BookingListTileWidget({
     super.key,
     required this.booking,
     this.isAdmin = false,
@@ -29,64 +27,22 @@ class BookingCards extends StatelessWidget {
     this.isInAdminMode = false,
   });
 
-  Color _getStatusColor() {
-    final bool bookingCancelled = isWarranty
-        ? (booking.warranty?.rejectedTechnicians?.any(
-                (worker) => worker.uid == LocalStore.getUID(),
-              ) ??
-              false)
-        : booking.cancelledWorkers.any(
-            (worker) => worker.uid == LocalStore.getUID(),
-          );
-
-    if (bookingCancelled) {
-      return Colors.red;
-    }
-    if (isWarranty) {
-      switch (booking.warranty!.warrantyStatusCode) {
-        case "X":
-          return Colors.red;
-        case "E":
-          return Colors.grey;
-        case "R":
-          return Colors.blue;
-        case "S":
-          return Colors.orange;
-        case "C":
-          return Colors.green;
-        default:
-          return Colors.blue;
-      }
-    } else {
-      switch (booking.bookingStatusCode) {
-        case "X":
-        case "R":
-        case "XC":
-          return Colors.red;
-        case "C":
-          return Colors.green;
-        default:
-          return Colors.blue;
-      }
-    }
-  }
-
-  final TextEditingController reasonController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     final addresses = booking.customer.addresses;
     AddressModel? selectedAddress =
         addresses.where((a) => a.isSelected == true).isNotEmpty
         ? addresses.firstWhere((a) => a.isSelected == true)
+        : addresses.isNotEmpty
+        ? addresses.first
         : null;
 
     final bool bookingCancelled = booking.cancelledWorkers.any(
       (worker) => worker.uid == LocalStore.getUID(),
     );
+
+    final localization = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).languageCode;
 
     return GestureDetector(
       onTap: bookingCancelled
@@ -103,515 +59,219 @@ class BookingCards extends StatelessWidget {
               ),
             ),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        width: double.maxFinite,
         decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
-        ),
-        child: Column(
-          children: [
-            // Top section with service name and status
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _getStatusColor().withOpacity(0.05),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)?.localeName == 'en'
-                          ? (booking.service.name ?? '')
-                          : (booking.service.name_ar ?? ''),
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  if (!isInAdminMode &&
-                      ((!isAdmin &&
-                              booking.bookingStatusCode == 'P' &&
-                              !booking.cancelledWorkers.any(
-                                (worker) => worker.uid == LocalStore.getUID(),
-                              )) ||
-                          (!isAdmin &&
-                              isWarranty &&
-                              booking.warranty!.warrantyStatusCode == 'R' &&
-                              !(booking.warranty!.rejectedTechnicians?.any(
-                                    (tech) => tech.uid == LocalStore.getUID(),
-                                  ) ??
-                                  false)))) ...[
-                    ElevatedButton(
-                      onPressed: () {
-                        _showAcceptConfirmationDialog(
-                          context,
-                          booking,
-                          isWarranty,
-                        );
-                      },
-                      style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(Colors.green),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)!.accept,
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        showRejectBookingDialog(context, booking, isWarranty);
-                      },
-                      style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(Colors.red),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)!.reject,
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                  if (((isAdmin &&
-                          !isWarranty &&
-                          onAssign != null &&
-                          booking.bookingStatusCode == 'P') ||
-                      (isAdmin &&
-                          isWarranty &&
-                          booking.warranty!.warrantyStatusCode == 'R')) &&
-                      (LocalStore.getCachedAdminData()?.accessLevel != 1))
-                    OutlinedButton(
-                      onPressed: onAssign,
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(60, 28),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)?.assign ?? 'Assign',
-                      ),
-                    ),
-                ],
-              ),
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+          borderRadius: BorderRadius.circular(16), // Increased for premium feel
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-
-            // Main content
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  // Customer row
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.person,
-                          size: 16,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              // (selectedAddress != null &&
-                              //         selectedAddress.id.isNotEmpty)
-                              //     ? (selectedAddress.fullName)
-                              //     :
-                              (booking.customer.name ?? ''),
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (booking.customer.location != null)
-                              Text(
-                                (selectedAddress != null &&
-                                        selectedAddress.id.isNotEmpty)
-                                    ? (selectedAddress.streetName ?? '')
-                                    : (booking.customer.location?.name ?? ''),
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.6),
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Agent row (if exists)
-                  if (isAdmin && !isWarranty && booking.agent != null) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: colorScheme.secondaryContainer,
-                          child: Icon(
-                            Icons.support_agent,
-                            size: 16,
-                            color: colorScheme.onSecondaryContainer,
+          ],
+        ),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section (Service Info)
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            booking.agent?.name ?? '',
-                            style: textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child:
+                            (booking.service.image != null &&
+                                booking.service.image!.isNotEmpty)
+                            ? CachedNetworkImage(
+                                imageUrl: booking.service.image!,
+                                height: 48,
+                                width: 48,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  height: 48,
+                                  width: 48,
+                                  color: Colors.grey[100],
+                                  child: Center(child: Loader()),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 48,
+                                  width: 48,
+                                  color: Colors.grey[300],
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 20,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                height: 48,
+                                width: 48,
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 20,
+                                ),
+                              ),
+                      ),
                     ),
-                  ],
-
-                  // Assigned Technician row for warranty bookings
-                  if (isAdmin && isWarranty) ...[
-                    const SizedBox(height: 12),
-                    Builder(
-                      builder: (context) {
-                        final technician = booking.warranty?.assignedTechnician;
-                        final warrantyStatusCode = booking
-                            .warranty!
-                            .warrantyStatusCode
-                            .toLowerCase();
-
-                        // Only show technician info for active warranties (not completed, rejected, or expired)
-                        final isActiveWarranty =
-                            warrantyStatusCode != 'c' && // Not completed
-                            warrantyStatusCode != 'x' && // Not rejected
-                            warrantyStatusCode != 'e'; // Not expired
-
-                        // Don't show technician section for inactive warranties
-                        if (!isActiveWarranty) {
-                          return const SizedBox.shrink();
-                        }
-
-                        if (technician != null) {
-                          return Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: colorScheme.secondaryContainer,
-                                child: Icon(
-                                  Icons.support_agent,
-                                  size: 16,
-                                  color: colorScheme.onSecondaryContainer,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  technician.name ?? '',
-                                  style: textTheme.bodyMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-
-                        // No technician assigned yet - show waiting message
-                        return Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: colorScheme.errorContainer,
-                              child: Icon(
-                                Icons.pending_actions,
-                                size: 16,
-                                color: colorScheme.onErrorContainer,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                AppLocalizations.of(
-                                      context,
-                                    )?.waitingForAdminAction ??
-                                    'Waiting for admin action',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.error,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-
-                  const SizedBox(height: 12),
-                  const Divider(height: 1),
-                  const SizedBox(height: 12),
-
-                  // Date info
-                  Column(
-                    spacing: 2,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.schedule,
-                            size: 16,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  LocalizationHelper().formatDateLocalized(
-                                    booking.bookingDateTime.toDate(),
-                                    context,
+                          Row(
+                            children: [
+                              Text(
+                                "#${booking.id}",
+                                style: DMSansFont.textStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                              if (isWarranty) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
                                   ),
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w500,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Text(
+                                    localization.warranty.toUpperCase(),
+                                    style: DMSansFont.textStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
                                 ),
                               ],
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            locale == 'en'
+                                ? (booking.service.name ?? '')
+                                : (booking.service.name_ar ?? ''),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: DMSansFont.textStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black,
                             ),
                           ),
                         ],
                       ),
-                      // Warranty-specific date display
-                      if (isWarranty) ...[
-                        if (booking.warranty?.warrantyStatusCode == 'R' &&
-                            booking.warranty?.requestedOn != null)
-                          Text(
-                            "${AppLocalizations.of(context)!.requestedOn}: ${LocalizationHelper().formatDateLocalized(booking.warranty!.requestedOn!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        else if (booking.warranty?.warrantyStatusCode == 'S' &&
-                            booking.warranty?.acceptedAt != null)
-                          Text(
-                            "${AppLocalizations.of(context)!.acceptedOn}: ${LocalizationHelper().formatDateLocalized(booking.warranty!.acceptedAt!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        else if (booking.warranty?.warrantyStatusCode == 'C' &&
-                            booking.warranty?.completedAt != null)
-                          Text(
-                            "${AppLocalizations.of(context)!.completedOn}: ${LocalizationHelper().formatDateLocalized(booking.warranty!.completedAt!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        else if (booking.warranty?.warrantyStatusCode == 'X' &&
-                            booking.warranty?.rejectedAt != null)
-                          Text(
-                            "${AppLocalizations.of(context)!.rejectedOn}: ${LocalizationHelper().formatDateLocalized(booking.warranty!.rejectedAt!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        else if (booking.warranty?.warrantyStatusCode == 'E' &&
-                            booking.warranty?.expiredOn != null)
-                          Text(
-                            "${AppLocalizations.of(context)!.expiredOn}: ${LocalizationHelper().formatDateLocalized(booking.warranty!.expiredOn!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          isWarranty
+                              ? "0.0" // Warranty repairs are free
+                              : "${(booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP") ? ((booking.completionData?.totalCost ?? 0) + (booking.service.price ?? 0)).toStringAsFixed(1) : (booking.service.price ?? 0).toStringAsFixed(1)}",
+                          style: DMSansFont.textStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
-                      ]
-                      // Normal booking date display
-                      else ...[
-                        if (booking.bookingStatusCode == 'P' &&
-                            booking.cancelledWorkers.any(
-                              (worker) => worker.uid != LocalStore.getUID(),
-                            )) ...{
-                          if (booking.createdAt != null)
-                            Text(
-                              "${AppLocalizations.of(context)!.bookedOn}: ${LocalizationHelper().formatDateLocalized(booking.createdAt!.toDate(), context)}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        } else if (booking.bookingStatusCode == 'A') ...{
-                          if (booking.acceptedAt != null)
-                            Text(
-                              "${AppLocalizations.of(context)!.acceptedOn}: ${LocalizationHelper().formatDateLocalized(booking.acceptedAt!.toDate(), context)}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (isAdmin)
-                            Text(
-                              "${AppLocalizations.of(context)!.acceptedBy}: ${booking.agent?.name ?? ''}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        } else if (booking.bookingStatusCode == 'C') ...{
-                          if (booking.completedAt != null)
-                            if (booking.paymentCompleted == false) ...{
-                              Text(
-                                "${AppLocalizations.of(context)!.completedOn}: ${LocalizationHelper().formatDateLocalized(booking.completedAt!.toDate(), context)}",
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.5),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (isAdmin)
-                                Text(
-                                  "${AppLocalizations.of(context)!.completedBy}: ${booking.agent?.name ?? ''}",
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: colorScheme.onSurface.withOpacity(
-                                      0.5,
-                                    ),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                            } else if (booking.paymentCompleted == true &&
-                                booking.paymentCompletedAt != null) ...{
-                              Text(
-                                "${AppLocalizations.of(context)!.paymentCompletedAt}: ${LocalizationHelper().formatDateLocalized(booking.paymentCompletedAt!.toDate(), context)}",
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.5),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            },
-                        } else if (booking.bookingStatusCode == 'XC') ...{
-                          if (booking.cancelledAt != null)
-                            Text(
-                              "${AppLocalizations.of(context)!.cancelledOn}: ${LocalizationHelper().formatDateLocalized(booking.cancelledAt!.toDate(), context)}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          Text(
-                            "${AppLocalizations.of(context)!.cancelledBy}: ${AppLocalizations.of(context)!.customer}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          localization.sar,
+                          style: DMSansFont.textStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
                           ),
-                        } else if (booking.bookingStatusCode == 'XC') ...{
-                          Text(
-                            "${AppLocalizations.of(context)!.rejectedOn}: ${LocalizationHelper().formatDateLocalized(booking.cancelledWorkers.firstWhere((worker) => worker.uid == LocalStore.getUID()).cancelledAt.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (!isAdmin)
-                            Text(
-                              "${AppLocalizations.of(context)!.rejectedBy}: ${AppLocalizations.of(context)!.admin}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        } else if (booking.bookingStatusCode == 'R') ...{
-                          Text(
-                            "${AppLocalizations.of(context)!.rejectedAt}: ${LocalizationHelper().formatDateLocalized(booking.rejectedAt!.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-
-                          Text(
-                            "${AppLocalizations.of(context)!.rejectedBy}: ${AppLocalizations.of(context)!.admin}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        } else if (!isAdmin &&
-                            booking.cancelledWorkers.any(
-                              (worker) => worker.uid == LocalStore.getUID(),
-                            )) ...{
-                          Text(
-                            "${AppLocalizations.of(context)!.rejectedOn}: ${LocalizationHelper().formatDateLocalized(booking.cancelledWorkers.firstWhere((worker) => worker.uid == LocalStore.getUID()).cancelledAt.toDate(), context)}",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        },
+                        ),
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+            ),
+            const SizedBox(height: 16),
+
+            // Details Section
+            _buildDetailTile(
+              Icons.person_outline_rounded,
+              booking.customer.name ?? '',
+              isBold: true,
+            ),
+            const SizedBox(height: 8),
+            _buildDetailTile(
+              Icons.location_on_outlined,
+              (selectedAddress != null && selectedAddress.id.isNotEmpty)
+                  ? (selectedAddress.streetName ?? '')
+                  : (booking.customer.location?.fullAddress ?? 'N/A'),
+              color: Colors.grey[600],
+            ),
+
+            if (isAdmin && !isWarranty && booking.agent != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailTile(
+                Icons.handyman_outlined,
+                booking.agent?.name ?? '',
+                prefix: "${localization.technicianName}: ",
+                color: Colors.grey[600],
+              ),
+            ],
+
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Divider(thickness: 1, height: 1, color: Color(0xffF0F0F0)),
+            ),
+
+            // Footer Section
+            Row(
+              children: [
+                Expanded(child: _buildTimestamp(context)),
+
+                // Action Buttons or Status Badge
+                if (isAdmin &&
+                    ((!isWarranty &&
+                            onAssign != null &&
+                            booking.bookingStatusCode == 'P') ||
+                        (isWarranty &&
+                            booking.warranty!.warrantyStatusCode == 'R')) &&
+                    (LocalStore.getCachedAdminData()?.accessLevel != 1))
+                  _buildActionButton(
+                    label: localization.assign,
+                    color: AppColors.primary,
+                    onPressed: onAssign!,
+                  )
+                else
+                  _buildStatusBadge(context, localization),
+              ],
             ),
           ],
         ),
@@ -619,189 +279,272 @@ class BookingCards extends StatelessWidget {
     );
   }
 
-  void _showAcceptConfirmationDialog(
-    BuildContext context,
-    BookingModel booking,
-    bool isWarranty,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actionsAlignment: MainAxisAlignment.start,
-          backgroundColor: Colors.white,
-          title: Text(
-            isWarranty
-                ? AppLocalizations.of(context)!.acceptWarrantyRepair
-                : AppLocalizations.of(context)!.acceptBooking,
+  Widget _buildDetailTile(
+    IconData icon,
+    String text, {
+    bool isBold = false,
+    String? prefix,
+    Color? color,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: (color ?? Colors.grey[600]!).withOpacity(0.08),
+            borderRadius: BorderRadius.circular(6),
           ),
-          content: Text(
-            AppLocalizations.of(context)!.areYouSureYouWantToAcceptThisBooking,
-          ),
-          actions: [
-            eButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              text: AppLocalizations.of(context)!.cancel,
-              context: context,
-              textColor: Colors.black,
-              backgroundColor: Colors.white,
-            ),
-            eButton(
-              onPressed: isWarranty
-                  ? () {
-                      AppFirestore.bookingsCollectionRef
-                          .doc(booking.id)
-                          .update({
-                            'warranty.warrantyStatusCode': 'S',
-                            'warranty.acceptedAt': FieldValue.serverTimestamp(),
-                            'warranty.updatedAt': FieldValue.serverTimestamp(),
-                            'updatedAt': FieldValue.serverTimestamp(),
-                          });
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              Home(newIndex: 2, selectedFilter: "S"),
-                        ),
-                        (route) => false,
-                      );
-                    }
-                  : () {
-                      AppFirestore.bookingsCollectionRef
-                          .doc(booking.id)
-                          .update({
-                            'bookingStatusCode': 'A',
-                            'acceptedAt': FieldValue.serverTimestamp(),
-                            'updatedAt': FieldValue.serverTimestamp(),
-                          });
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              Home(newIndex: 1, selectedFilter: "A"),
-                        ),
-                        (route) => false,
-                      );
-                    },
-              text: AppLocalizations.of(context)!.accept,
-              context: context,
-              textColor: Colors.white,
-              backgroundColor: Colors.green,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showRejectBookingDialog(
-    BuildContext context,
-    BookingModel booking,
-    bool isWarranty,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          actionsAlignment: MainAxisAlignment.start,
-          title: Text(AppLocalizations.of(context)!.rejectBooking),
-          content: isWarranty
-              ? Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.areYouSureYouWantToRejectThisBooking,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: reasonController,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(
-                            context,
-                          )!.reasonforrejection,
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.enterReasonForReject,
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 3,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.pleaseProvideARejectionReason;
-                          }
-                          if (value.trim().length < 10) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.reasonMustBeAtLeast10Characters;
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
+          child: Icon(icon, size: 14, color: color ?? Colors.grey[600]),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              style: DMSansFont.textStyle(
+                fontSize: 12,
+                color: color ?? Colors.black,
+              ),
+              children: [
+                if (prefix != null)
+                  TextSpan(
+                    text: prefix,
+                    style: const TextStyle(fontWeight: FontWeight.w400),
                   ),
-                )
-              : Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.areYouSureYouWantToRejectThisBooking,
+                TextSpan(
+                  text: text,
+                  style: TextStyle(
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+                  ),
                 ),
-          actions: [
-            eButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              text: AppLocalizations.of(context)!.cancel,
-              context: context,
-              textColor: Colors.black,
-              backgroundColor: Colors.white,
+              ],
             ),
-            eButton(
-              onPressed: isWarranty
-                  ? () async {
-                      if (formKey.currentState!.validate()) {
-                        final technician = booking.warranty?.assignedTechnician;
-
-                        if (context.mounted && technician != null) {
-                          context.read<WarrantyBloc>().add(
-                            CancelWarranty(
-                              bookingId: booking.id,
-                              technicianName: technician.name ?? "",
-                              technicianPhone: technician.phone ?? "",
-                              technicianUid: technician.uid ?? '',
-                              rejectionReason: reasonController.text.trim(),
-                            ),
-                          );
-
-                          Navigator.of(context).pop();
-                        }
-                      }
-                    }
-                  : () {
-                      context.read<BookingBloc>().add(
-                        CancelBooking(
-                          bookingId: booking.id,
-                          agentUid: booking.agent?.uid ?? '',
-                          agentName: booking.agent?.name ?? '',
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    },
-              text: AppLocalizations.of(context)!.reject,
-              context: context,
-              textColor: Colors.white,
-              backgroundColor: Colors.red,
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
+
+  Widget _buildActionButton({
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+    bool isOutlined = false,
+  }) {
+    return SizedBox(
+      height: 36,
+      child: isOutlined
+          ? OutlinedButton(
+              onPressed: onPressed,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: color.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            )
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildStatusBadge(
+    BuildContext context,
+    AppLocalizations localization,
+  ) {
+    if (booking.bookingStatusCode == 'VP') {
+      return _statusBadge(
+        localization.verificationPending.toUpperCase(),
+        Colors.orange,
+      );
+    }
+
+    final bool currentTechCancelled = isWarranty
+        ? (booking.warranty?.rejectedTechnicians?.any(
+                (worker) => worker.uid == LocalStore.getUID(),
+              ) ??
+              false)
+        : booking.cancelledWorkers.any(
+            (worker) => worker.uid == LocalStore.getUID(),
+          );
+
+    if (currentTechCancelled) {
+      return _statusBadge(localization.rejected.toUpperCase(), Colors.red);
+    }
+
+    String label = '';
+    Color color = Colors.grey;
+
+    if (isWarranty) {
+      final status = booking.warranty!.warrantyStatusCode;
+      switch (status) {
+        case 'C':
+          label = localization.completed;
+          color = Colors.green;
+          break;
+        case 'X':
+          label = localization.rejected;
+          color = Colors.red;
+          break;
+        case 'E':
+          label = localization.expired;
+          color = Colors.grey;
+          break;
+        case 'S':
+          label = localization.accepted;
+          color = Colors.green;
+          break;
+        case 'A':
+          label = localization.requested;
+          color = AppColors.blue1;
+          break;
+      }
+    } else {
+      switch (booking.bookingStatusCode) {
+        case 'C':
+          label = localization.completed;
+          color = Colors.green;
+          break;
+        case 'X':
+        case 'XC':
+        case 'R':
+          label = localization.canceled;
+          color = Colors.red;
+          break;
+        case 'A':
+          label = localization.accepted;
+          color = Colors.green;
+          break;
+        case 'P':
+          label = localization.pending;
+          color = Colors.orange;
+          break;
+      }
+    }
+
+    if (label.isEmpty) return const SizedBox.shrink();
+    return _statusBadge(label.toUpperCase(), color);
+  }
+
+  Widget _statusBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
+      ),
+      child: Text(
+        label,
+        style: DMSansFont.textStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 9,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimestamp(BuildContext context) {
+    String text = '';
+    final localization = AppLocalizations.of(context)!;
+
+    if (isWarranty) {
+      final warranty = booking.warranty;
+      if (warranty != null) {
+        final statusCode = warranty.warrantyStatusCode;
+        if (statusCode == 'R' && warranty.requestedOn != null) {
+          text =
+              "${localization.requestedOn}: ${LocalizationHelper().formatDateLocalized(warranty.requestedOn!.toDate(), context)}";
+        } else if (statusCode == 'S' && warranty.acceptedAt != null) {
+          text =
+              "${localization.acceptedOn}: ${LocalizationHelper().formatDateLocalized(warranty.acceptedAt!.toDate(), context)}";
+        } else if (statusCode == 'C' && warranty.completedAt != null) {
+          text =
+              "${localization.completedOn}: ${LocalizationHelper().formatDateLocalized(warranty.completedAt!.toDate(), context)}";
+        } else if (statusCode == 'X' && warranty.rejectedAt != null) {
+          text =
+              "${localization.rejectedOn}: ${LocalizationHelper().formatDateLocalized(warranty.rejectedAt!.toDate(), context)}";
+        } else if (warranty.createdAt != null) {
+          text =
+              "${localization.bookedOn}: ${LocalizationHelper().formatDateLocalized(warranty.createdAt!.toDate(), context)}";
+        }
+      }
+    } else {
+      if (booking.bookingStatusCode == 'P' && booking.createdAt != null) {
+        text =
+            "${localization.bookedOn}: ${LocalizationHelper().formatDateLocalized(booking.createdAt!.toDate(), context)}";
+      } else if (booking.bookingStatusCode == 'A' &&
+          booking.acceptedAt != null) {
+        text =
+            "${localization.acceptedOn}: ${LocalizationHelper().formatDateLocalized(booking.acceptedAt!.toDate(), context)}";
+      } else if (booking.bookingStatusCode == 'C' &&
+          booking.completedAt != null) {
+        text =
+            "${localization.completedOn}: ${LocalizationHelper().formatDateLocalized(booking.completedAt!.toDate(), context)}";
+      } else if ((booking.bookingStatusCode == 'X' ||
+              booking.bookingStatusCode == 'XC' ||
+              booking.bookingStatusCode == 'R') &&
+          booking.cancelledAt != null) {
+        text =
+            "${localization.cancelledOn}: ${LocalizationHelper().formatDateLocalized(booking.cancelledAt!.toDate(), context)}";
+      } else if (booking.bookingStatusCode == 'VP' &&
+          booking.paymentCompletedAt != null) {
+        text =
+            "${localization.paymentCompletedAt}: ${LocalizationHelper().formatDateLocalized(booking.paymentCompletedAt!.toDate(), context)}";
+      }
+    }
+
+    if (text.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      children: [
+        Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey[400]),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: DMSansFont.textStyle(
+              color: Colors.grey[500],
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
 }
+
+// Removed backward-compatibility typedef as all usages have been updated.

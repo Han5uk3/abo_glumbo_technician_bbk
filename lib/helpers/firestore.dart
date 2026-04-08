@@ -73,6 +73,10 @@ class AppFirestore {
   // Pending admins collection
   static CollectionReference pendingAdminsCollectionRef = FirebaseFirestore.instance
       .collection('pending_admins');
+
+  // counter_offers collection
+  static CollectionReference counterOffersCollectionRef =
+      FirebaseFirestore.instance.collection('counter_offers');
 }
 
 class AppFireStorage {

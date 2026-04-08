@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 
 class AboutUsPage extends StatelessWidget {
@@ -9,6 +10,7 @@ class AboutUsPage extends StatelessWidget {
     final theme = Theme.of(context);
     final locale = AppLocalizations.of(context)!;
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(

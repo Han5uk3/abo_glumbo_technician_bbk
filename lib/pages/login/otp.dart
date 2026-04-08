@@ -525,7 +525,7 @@ class _OtpPageState extends State<OtpPage> {
     final locn = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgWhite,
       appBar: AppBar(backgroundColor: AppColors.primary, elevation: 0),
       body: AbsorbPointer(
         absorbing: _isMigratingCustomerData,
@@ -746,7 +746,7 @@ class _OtpPageState extends State<OtpPage> {
 
   Widget _migratingDataDialog() {
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       contentPadding: const EdgeInsets.all(32),
       content: WillPopScope(

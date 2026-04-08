@@ -11,9 +11,7 @@ class UserModel {
   String? lanCode;
   Timestamp? createdAt;
   Timestamp? updatedAt;
-  LocationModel? location; // ✅ Keep existing LocationModel
-  DetailedLocationModel?
-  detailedLocation; // ✅ NEW: Detailed location with cascading data
+  LocationModel? location;
   LiveLocation? liveLocation;
   bool? isAdmin;
   bool? isVerified;
@@ -56,7 +54,6 @@ class UserModel {
     this.createdAt,
     this.updatedAt,
     this.location,
-    this.detailedLocation, // ✅ Add this
     this.liveLocation,
     this.isAdmin,
     this.isVerified,
@@ -95,7 +92,6 @@ class UserModel {
     String? country,
     String? lanCode,
     LocationModel? location,
-    DetailedLocationModel? detailedLocation, // ✅ Add this
     LiveLocation? liveLocation,
     List<String>? favourites,
     Timestamp? createdAt,
@@ -136,7 +132,6 @@ class UserModel {
       phone: phone ?? this.phone,
       districtName: districtName ?? this.districtName,
       location: location ?? this.location,
-      detailedLocation: detailedLocation ?? this.detailedLocation, // ✅ Add this
       liveLocation: liveLocation ?? this.liveLocation,
       lanCode: lanCode ?? this.lanCode,
       country: country ?? this.country,
@@ -196,14 +191,7 @@ class UserModel {
       role:
           json['role'] ??
           'technician', // Provide default value to prevent null error
-      location: json['location'] != null
-          ? LocationModel.fromJson(json['location'])
-          : null,
-      detailedLocation:
-          json['detailedLocation'] !=
-              null // ✅ Add this
-          ? DetailedLocationModel.fromJson(json['detailedLocation'])
-          : null,
+      location: _parseLocation(json),
       jobRoles: json['jobRoles'] != null
           ? List<String>.from(json['jobRoles'])
           : <String>[],
@@ -267,7 +255,6 @@ class UserModel {
       'country': country,
       'createdAt': createdAt,
       'location': location?.toJson(),
-      'detailedLocation': detailedLocation?.toJson(), // ✅ Add this
       'updatedAt': updatedAt,
       'isAdmin': isAdmin ?? false,
       'isVerified': isVerified ?? false,
@@ -319,7 +306,6 @@ class UserModel {
       'country': country,
       'liveLocation': liveLocation?.toJson(),
       'location': location?.toJson(),
-      'detailedLocation': detailedLocation?.toJson(), // ✅ Add this
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'isAdmin': isAdmin ?? false,
@@ -583,140 +569,43 @@ class PayoutAccountModel {
   }
 }
 
-// lib/models/detailed_location.dart
-class DetailedLocationModel {
-  // Province
-  final String? regionId;
-  final String? regionEn;
-  final String? regionAr;
+/// Attempt to build a [LocationModel] from any legacy or current JSON shape.
+/// Priority: new 'location' key → migrate from 'detailedLocation' key.
+LocationModel? _parseLocation(Map<String, dynamic> json) {
+  // New unified format
+  if (json['location'] is Map<String, dynamic>) {
+    final raw = json['location'] as Map<String, dynamic>;
+    // Make sure it's the new format (has at least lat or fullAddress)
+    if (raw.containsKey('lat') || raw.containsKey('fullAddress')) {
+      return LocationModel.fromJson(raw);
+    }
+  }
 
-  // Governorate
-  final String? cityId;
-  final String? cityEn;
-  final String? cityAr;
+  // Legacy: migrate from detailedLocation
+  if (json['detailedLocation'] is Map<String, dynamic>) {
+    final dl = json['detailedLocation'] as Map<String, dynamic>;
+    final neighborhoodEn = dl['neighborhoodEn'] as String?;
+    final cityEn = dl['cityEn'] as String?;
+    final regionEn = dl['regionEn'] as String?;
+    final lat = (dl['lat'] as num?)?.toDouble();
+    final lon = (dl['lon'] as num?)?.toDouble();
 
-  // Neighborhood
-  final String? neighborhoodId;
-  final String? neighborhoodEn;
-  final String? neighborhoodAr;
+    final parts = <String>[
+      if (neighborhoodEn != null && neighborhoodEn.trim().isNotEmpty)
+        neighborhoodEn.trim(),
+      if (cityEn != null && cityEn.trim().isNotEmpty) cityEn.trim(),
+      if (regionEn != null && regionEn.trim().isNotEmpty) regionEn.trim(),
+    ];
 
-  final double? lon;
-  final double? lat;
-
-  DetailedLocationModel({
-    this.regionId,
-    this.regionEn,
-    this.regionAr,
-    this.cityId,
-    this.cityEn,
-    this.cityAr,
-    this.neighborhoodId,
-    this.neighborhoodEn,
-    this.neighborhoodAr,
-    this.lon,
-    this.lat,
-  });
-
-  factory DetailedLocationModel.fromJson(Map<String, dynamic> json) {
-    return DetailedLocationModel(
-      regionId: json['regionId'],
-      regionEn: json['regionEn'],
-      regionAr: json['regionAr'],
-      cityId: json['cityId'],
-      cityEn: json['cityEn'],
-      cityAr: json['cityAr'],
-      neighborhoodId: json['neighborhoodId'],
-      neighborhoodEn: json['neighborhoodEn'],
-      neighborhoodAr: json['neighborhoodAr'],
-      lon: json['lon'],
-      lat: json['lat'],
+    return LocationModel(
+      lat: lat,
+      lon: lon,
+      city: cityEn,
+      province: regionEn,
+      street: neighborhoodEn,
+      fullAddress: parts.isNotEmpty ? parts.join(', ') : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'regionId': regionId,
-      'regionEn': regionEn,
-      'regionAr': regionAr,
-      'cityId': cityId,
-      'cityEn': cityEn,
-      'cityAr': cityAr,
-      'neighborhoodId': neighborhoodId,
-      'neighborhoodEn': neighborhoodEn,
-      'neighborhoodAr': neighborhoodAr,
-      'lat': lat,
-      'lon': lon,
-    };
-  }
-
-  DetailedLocationModel copyWith({
-    String? regionId,
-    String? regionEn,
-    String? regionAr,
-    String? cityId,
-    String? cityEn,
-    String? cityAr,
-    String? neighborhoodId,
-    String? neighborhoodEn,
-    String? neighborhoodAr,
-    double? lon,
-    double? lat,
-  }) {
-    return DetailedLocationModel(
-      regionId: regionId ?? this.regionId,
-      regionEn: regionEn ?? this.regionEn,
-      regionAr: regionAr ?? this.regionAr,
-      cityId: cityId ?? this.cityId,
-      cityEn: cityEn ?? this.cityEn,
-      cityAr: cityAr ?? this.cityAr,
-      neighborhoodId: neighborhoodId ?? this.neighborhoodId,
-      neighborhoodEn: neighborhoodEn ?? this.neighborhoodEn,
-      neighborhoodAr: neighborhoodAr ?? this.neighborhoodAr,
-      lon: lon ?? this.lon,
-      lat: lat ?? this.lat,
-    );
-  }
-
-  // Helper methods
-  String getProvinceName(bool isArabic) =>
-      isArabic ? (regionAr ?? regionEn ?? '') : (regionEn ?? '');
-
-  String getGovernorateName(bool isArabic) =>
-      isArabic ? (cityAr ?? cityEn ?? '') : (cityEn ?? '');
-
-  String getNeighborhoodName(bool isArabic) => isArabic
-      ? (neighborhoodAr ?? neighborhoodEn ?? '')
-      : (neighborhoodEn ?? '');
-
-  // Get full address: Neighborhood, Governorate, Province
-  String getFullAddress(bool isArabic) {
-    final parts = <String>[];
-    if (neighborhoodEn != null && neighborhoodEn!.isNotEmpty) {
-      parts.add(getNeighborhoodName(isArabic));
-    }
-    if (cityEn != null && cityEn!.isNotEmpty) {
-      parts.add(getGovernorateName(isArabic));
-    }
-    if (regionEn != null && regionEn!.isNotEmpty) {
-      parts.add(getProvinceName(isArabic));
-    }
-    return parts.join(', ');
-  }
-
-  // Get short address (Neighborhood, Governorate)
-  String getShortAddress(bool isArabic) {
-    final parts = <String>[];
-    if (neighborhoodEn != null && neighborhoodEn!.isNotEmpty) {
-      parts.add(getNeighborhoodName(isArabic));
-    }
-    if (cityEn != null && cityEn!.isNotEmpty) {
-      parts.add(getGovernorateName(isArabic));
-    }
-    return parts.join(', ');
-  }
-
-  @override
-  String toString() {
-    return 'DetailedLocationModel(province: $regionEn, governorate: $cityEn, neighborhood: $neighborhoodEn)';
-  }
+  return null;
 }

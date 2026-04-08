@@ -1,3 +1,4 @@
+import "package:aboglumbo_bbk_panel/styles/color.dart";
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
@@ -25,7 +26,7 @@ class CustomerTileMinimal extends StatelessWidget {
       builder: (context) {
         final TextTheme textTheme = Theme.of(context).textTheme;
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Text(
             (approve
@@ -53,7 +54,7 @@ class CustomerTileMinimal extends StatelessWidget {
               widget: Text(AppLocalizations.of(context)?.cancel ?? "Cancel"),
               context: context,
               textColor: Colors.black,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
             ),
             eButton(
               text: "",

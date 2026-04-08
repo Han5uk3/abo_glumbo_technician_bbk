@@ -285,7 +285,7 @@ class ServiceTileDevWidget extends StatelessWidget {
         final isDeleting = state is DeletingService;
 
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
           title: Text(
             AppLocalizations.of(context)?.deleteService ?? 'Delete Service',
@@ -298,7 +298,7 @@ class ServiceTileDevWidget extends StatelessWidget {
             eButton(
               textColor: Colors.black,
               context: context,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
               text: AppLocalizations.of(context)!.cancel,
               onPressed: isDeleting ? null : () => Navigator.of(context).pop(),
             ),

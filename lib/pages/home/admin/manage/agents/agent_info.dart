@@ -133,7 +133,7 @@ class _AgentInfoState extends State<AgentInfo> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -462,7 +462,7 @@ class _AgentInfoState extends State<AgentInfo> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
@@ -1129,7 +1129,7 @@ class _AgentInfoState extends State<AgentInfo> {
                     ),
                     child: CircleAvatar(
                       radius: 60,
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.bgWhite,
                       backgroundImage: agent.profileUrl != null
                           ? NetworkImage(agent.profileUrl!)
                           : null,
@@ -1480,9 +1480,7 @@ class _AgentInfoState extends State<AgentInfo> {
               context,
               Icons.location_city_outlined,
               AppLocalizations.of(context)!.location,
-              Directionality.of(context) == TextDirection.rtl
-                  ? "${agent.detailedLocation?.neighborhoodAr}, ${agent.detailedLocation?.cityAr}"
-                  : "${agent.detailedLocation?.neighborhoodEn}, ${agent.detailedLocation?.cityEn}",
+              agent.location?.fullAddress ?? "-",
             ),
           ],
         ),

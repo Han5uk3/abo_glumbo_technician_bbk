@@ -250,9 +250,6 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           paid: wallet.paidTips ?? 0.0,
           icon: Icons.star,
           color: Colors.orange,
-          subtitle: (wallet.cashTips ?? 0.0) > 0
-              ? '${AppLocalizations.of(context)!.cashTips}: ${(wallet.cashTips ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar} (${AppLocalizations.of(context)!.alreadyInHand})'
-              : null,
         ),
         const SizedBox(height: 12),
         _buildBreakdownCard(
@@ -819,7 +816,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bgWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -1161,14 +1158,14 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         actionsAlignment: MainAxisAlignment.start,
         title: Text(AppLocalizations.of(context)!.confirmCancellation),
         content: Text(AppLocalizations.of(context)!.cancelPayoutConfirmation),
         actions: [
           eButton(
             onPressed: () => Navigator.pop(context, false),
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.bgWhite,
             textColor: Colors.black,
             text: AppLocalizations.of(context)!.no,
             context: context,

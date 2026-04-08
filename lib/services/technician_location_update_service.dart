@@ -1,4 +1,3 @@
-import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -138,20 +137,8 @@ class TechnicianLocationUpdateService {
         debugPrint('⚠️ Reverse geocoding failed: $e');
       }
 
-      // Create DetailedLocationModel
-      final detailedLocation = DetailedLocationModel(
-        lat: position.latitude,
-        lon: position.longitude,
-        regionId: null,
-        regionEn: null,
-        regionAr: null,
-        cityId: null,
-        cityEn: null,
-        cityAr: null,
-        neighborhoodId: null,
-        neighborhoodEn: placeName,
-        neighborhoodAr: placeName,
-      );
+      // Get formatted place name
+
 
       // Update user document with live location
       await _firestore.collection('users').doc(uid).update({
@@ -164,7 +151,6 @@ class TechnicianLocationUpdateService {
           'heading': position.heading,
           'speed': position.speed,
         },
-        'detailedLocation': detailedLocation.toJson(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

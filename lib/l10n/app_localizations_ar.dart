@@ -12,6 +12,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'أبو جلمبو';
 
   @override
+  String get profileSentForVerification => 'لقد تم إرسال ملفك الشخصي للتحقق!';
+
+  @override
+  String get onlineStatusOn => 'أنت الآن متصل';
+
+  @override
+  String get onlineStatusOff => 'أنت الآن غير متصل';
+
+  @override
+  String get errorUpdatingStatus => 'حدث خطأ أثناء تحديث الحالة';
+
+  @override
   String get appLoginCaption => 'التطبيق للعثور على محترفين مؤهلين.';
 
   @override
@@ -49,13 +61,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingAgents => 'جاري تحميل الفنيين...';
 
   @override
+  String get bonusCardDesc => 'المكافأة المكتسبة سيتم تضمينها في محفظتك للدفع.';
+
+  @override
   String get noReview => 'لا توجد مراجعات';
+
+  @override
+  String get areYouSureYouWantToAcceptThisNewTime =>
+      'هل أنت متأكد من رغبتك في قبول هذا الوقت الجديد؟';
 
   @override
   String get reject => 'رفض';
 
   @override
+  String get walletBalance => 'رصيد المحفظة';
+
+  @override
   String get tip => 'إكرامية';
+
+  @override
+  String get availableToWork => 'متاح للعمل';
+
+  @override
+  String get notAvailableToWork => 'غير متاح للعمل';
 
   @override
   String get choose => 'Choose';
@@ -856,6 +884,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseSelectACategory => 'الرجاء اختيار قسم';
 
   @override
+  String get discountPercentage => 'نسبة الخصم (%)';
+
+  @override
+  String get pleaseEnterADiscountPercentage => 'الرجاء إدخال نسبة الخصم';
+
+  @override
   String get highlightedServiceAddedSuccessfully =>
       'تم اضافة الخدمة المميزة بنجاح';
 
@@ -1075,6 +1109,64 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelBooking => 'إلغاء الحجز';
+
+  @override
+  String get counterPropose => 'اقتراح بديل';
+
+  @override
+  String get proposeNewTime => 'اقتراح وقت جديد';
+
+  @override
+  String get counterOfferPending => 'اقتراح بديل قيد الانتظار';
+
+  @override
+  String get customerProposedNewTime => 'اقترح العميل وقتاً جديداً';
+
+  @override
+  String get acceptOffer => 'قبول العرض';
+
+  @override
+  String get rejectOffer => 'رفض العرض';
+
+  @override
+  String get newProposedTime => 'الوقت المقترح الجديد';
+
+  @override
+  String get waitingForCustomer => 'في انتظار رد العميل';
+
+  @override
+  String get proposedTime => 'Proposed Time';
+
+  @override
+  String get counterOfferSent => 'تم إرسال العرض بنجاح';
+
+  @override
+  String get counterOfferResponse => 'تم إرسال الرد بنجاح';
+
+  @override
+  String get counterProposalStarted => 'بدء الاقتراح البديل';
+
+  @override
+  String get counterProposalAccepted => 'قبول الاقتراح البديل';
+
+  @override
+  String get proposalRejected => 'تم رفض الاقتراح';
+
+  @override
+  String get proposalAccepted => 'تم قبول الاقتراح';
+
+  @override
+  String get customerRejectedProposal => 'رفض العميل اقتراحك.';
+
+  @override
+  String get youRejectedProposal => 'لقد رفضت اقتراح العميل.';
+
+  @override
+  String get appointmentRescheduledTo => 'تم إعادة جدولة الموعد إلى';
+
+  @override
+  String get rescheduleBookingTimeConfirmation =>
+      'هل أنت متأكد من أنك تريد قبول وقت الموعد الجديد هذا؟ سيتم تحديث جدول الحجز على الفور.';
 
   @override
   String get startWork => 'بدء العمل';
@@ -1398,6 +1490,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get progressResetsMonthly => ' إعادة تعيين الشهري';
+
+  @override
+  String get progressResetsMonthlyDesc =>
+      'يتم إعادة تصفير التقدم شهرياً. حافظ على تقييمات عالية وأكمل المزيد من المهام للحصول على مكافآت أفضل';
+
+  @override
+  String get zeroPercentBonus => '0% مكافأة';
+
+  @override
+  String get fivepercentBonusOnly => '5% مكافأة';
+
+  @override
+  String get tenpercentBonusOnly => '10% مكافأة';
+
+  @override
+  String get fifteenpercentBonusOnly => '15% مكافأة';
 
   @override
   String get viewYourRewards => 'عرض جوائزك';
@@ -3531,9 +3639,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youAreNowOffline => 'أنت الآن غير متاح';
 
   @override
-  String get errorUpdatingStatus => 'حدث خطأ أثناء تحديث الحالة';
-
-  @override
   String get youAreCurrentlyUnavailable => 'أنت حالياً غير متاح للطلبات';
 
   @override
@@ -4206,4 +4311,51 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectedLocations => 'المواقع المختارة';
+
+  @override
+  String get verificationPending => 'قيد التحقق من الدفع';
+
+  @override
+  String get waitingForTechnicianVerification =>
+      'في انتظار تحقق الفني من الدفع';
+
+  @override
+  String get verifyPayment => 'التحقق من الدفع';
+
+  @override
+  String get confirmPaymentReceipt => 'تأكيد استلام الدفع';
+
+  @override
+  String get uploadTechnicianPaymentProof => 'رفع إثبات استلام الدفع';
+
+  @override
+  String get paymentVerifiedSuccessfully => 'تم التحقق من الدفع بنجاح';
+
+  @override
+  String get selectFiles => 'اختر الملفات';
+
+  @override
+  String get pleaseSelectAtLeastOneFile => 'يرجى اختيار ملف واحد على الأقل';
+
+  @override
+  String get errorUploading => 'خطأ أثناء الرفع';
+
+  @override
+  String get warranty => 'ضمان';
+
+  @override
+  String get warrantyAppliedOn => 'تم تطبيق الضمان في';
+
+  @override
+  String get bookingIdCopied => 'تم نسخ رقم الحجز';
+
+  @override
+  String get selectTime => 'اختر الوقت';
+
+  @override
+  String get submitCounterOffer => 'إرسال الاقتراح البديل';
+
+  @override
+  String get pleaseSelectALaterTime =>
+      'يرجى اختيار وقت لاحق لموعد الحجز الحالي';
 }

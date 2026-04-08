@@ -32,7 +32,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: colorScheme.surfaceContainerLowest,
+      backgroundColor: AppColors.bgWhite,
       appBar: _buildAppBar(localizations, colorScheme),
       body: Column(
         children: [
@@ -199,7 +199,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
     return showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         actionsAlignment: MainAxisAlignment.start,
         icon: Icon(
           Icons.delete_outline_rounded,

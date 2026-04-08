@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class TermsAndConditionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
         centerTitle: false,
         title: Text(

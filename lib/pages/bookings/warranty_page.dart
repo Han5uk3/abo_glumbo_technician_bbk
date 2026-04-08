@@ -3,6 +3,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
@@ -13,13 +14,11 @@ class WarrantyPage extends StatefulWidget {
   const WarrantyPage({
     super.key,
     required this.workerData,
-    this.onToggleRole,
     this.isTechnicianView = false,
     this.isInAdminMode = false,
   });
 
   final UserModel workerData;
-  final VoidCallback? onToggleRole;
   final bool isTechnicianView;
   final bool isInAdminMode;
 
@@ -86,33 +85,34 @@ class _WarrantyPageState extends State<WarrantyPage>
       body: SafeArea(
         child: Column(
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: SearchBar(
-                controller: _searchController,
-                hintText: AppLocalizations.of(context)!.searchByBookingId,
-                leading: const Icon(Icons.search),
-                trailing: _searchQuery.isNotEmpty
-                    ? [
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                          },
-                        ),
-                      ]
-                    : null,
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
+            if (!widget.isTechnicianView)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: SearchBar(
+                  controller: _searchController,
+                  hintText: AppLocalizations.of(context)!.searchByBookingId,
+                  leading: const Icon(Icons.search),
+                  trailing: _searchQuery.isNotEmpty
+                      ? [
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          ),
+                        ]
+                      : null,
+                  padding: const WidgetStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
                 ),
               ),
-            ),
 
             // Filter Chips
             Container(
               height: 64,
               alignment: Alignment.centerLeft,
+              color: Colors.white,
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
@@ -164,20 +164,10 @@ class _WarrantyPageState extends State<WarrantyPage>
     return AppBar(
       titleSpacing: 16,
       title: Text(AppLocalizations.of(context)!.warrantyClaims),
-      actions: [
-        if (widget.onToggleRole != null)
-          IconButton(
-            onPressed: widget.onToggleRole,
-            icon: Icon(
-              widget.isTechnicianView
-                  ? Icons.admin_panel_settings_rounded
-                  : Icons.engineering_rounded,
-            ),
-            tooltip: widget.isTechnicianView
-                ? 'Switch to Admin'
-                : 'Switch to Technician',
-          ),
-      ],
+      foregroundColor: Colors.black,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      shape: const Border(),
     );
   }
 
@@ -190,22 +180,23 @@ class _WarrantyPageState extends State<WarrantyPage>
     required VoidCallback onPressed,
   }) {
     return ActionChip(
-      avatar: Icon(
-        isSelected ? Icons.check_circle : Icons.circle_outlined,
-        color: isSelected ? colorScheme.primary : null,
-        size: 20,
+      onPressed: onPressed,
+      backgroundColor: Colors.white,
+
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : Colors.grey.shade600,
+        width: isSelected ? 1.5 : 1,
       ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       label: Text(
         getLocalizedName(name, context).toUpperCase(),
         style: TextStyle(
+          color: isSelected ? AppColors.primary : Colors.grey.shade600,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          fontSize: 14,
         ),
       ),
-      onPressed: onPressed,
-      backgroundColor: isSelected
-          ? colorScheme.primary.withOpacity(0.15)
-          : null,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
     );
   }
 
@@ -328,7 +319,7 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final warranty = filteredWarranties[index];
-            return BookingCards(
+            return BookingListTileWidget(
               onAssign: () {
                 _showAssignToUserBottomSheet(warranty);
               },

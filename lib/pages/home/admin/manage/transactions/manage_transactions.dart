@@ -558,7 +558,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
           _selectedFilter = value;
         });
       },
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgWhite,
       selectedColor: AppColors.primary,
       checkmarkColor: AppColors.bgWhite,
       labelStyle: TextStyle(

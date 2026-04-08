@@ -206,7 +206,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   }) {
     final isSelected = _selectedFilter == value;
     return FilterChip(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgWhite,
       label: Row(mainAxisSize: MainAxisSize.min, children: [Text(label)]),
       selected: isSelected,
       onSelected: (selected) {
@@ -665,7 +665,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
     await showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bgWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 500),

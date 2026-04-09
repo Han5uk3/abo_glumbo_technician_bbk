@@ -31,15 +31,32 @@ class _ManageCustomerSupportState extends State<ManageCustomerSupport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.manageCustomerSupport),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
+        title: Text(
+          AppLocalizations.of(context)!.manageCustomerSupport,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         itemCount: getTitles().length,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.only(bottom: 12),
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -54,26 +71,25 @@ class _ManageCustomerSupportState extends State<ManageCustomerSupport> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.2),
-                    width: 1.5,
+                    color: Colors.black.withOpacity(0.08),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.08),
-                      blurRadius: 12,
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
                       Container(
-                        width: 56,
-                        height: 56,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Padding(
@@ -86,24 +102,18 @@ class _ManageCustomerSupportState extends State<ManageCustomerSupport> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              getTitles()[index],
-                              style: GoogleFonts.dmSans(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          getTitles()[index],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       Icon(
                         Icons.arrow_forward_ios_rounded,
-                        size: 18,
+                        size: 16,
                         color: Colors.grey.shade400,
                       ),
                     ],

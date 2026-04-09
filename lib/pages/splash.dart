@@ -197,12 +197,12 @@ class _SplashScreenState extends State<SplashScreen>
                                   width: 120,
                                   height: 120,
                                   child: Image.asset(
-                                    'assets/images/app_icon.png',
-                                    color: Colors.white,
+                                    'assets/images/app_icon_new.png',
+
                                     fit: BoxFit.contain,
                                   ),
                                 ),
-
+                                SizedBox(height: 8),
                                 // Text
                                 Text(
                                   state.locale.languageCode == "ar"
@@ -252,4 +252,3 @@ class BottomShapePainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
-

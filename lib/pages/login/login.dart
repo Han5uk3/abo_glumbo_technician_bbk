@@ -311,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                               height: 181,
                               width: 182,
                               child: Image.asset(
-                                'assets/images/app_icon.png',
+                                'assets/images/app_icon_new.png',
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -359,7 +359,8 @@ class _LoginPageState extends State<LoginPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  AppLocalizations.of(context)?.mobileNumber ?? '',
+                                  AppLocalizations.of(context)?.mobileNumber ??
+                                      '',
                                   style: GoogleFonts.dmSans(
                                     color: Colors.black.withOpacity(.7),
                                     fontSize: 14,
@@ -390,7 +391,8 @@ class _LoginPageState extends State<LoginPage> {
                                           horizontal: 16,
                                         ),
                                         child: Text(
-                                          AppLocalizations.of(context)?.or ?? 'OR',
+                                          AppLocalizations.of(context)?.or ??
+                                              'OR',
                                           style: GoogleFonts.dmSans(
                                             color: Colors.grey.withOpacity(0.7),
                                             fontSize: 14,
@@ -573,9 +575,7 @@ class _LoginPageState extends State<LoginPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: isLoading
             ? Loader(size: 20, color: Colors.white)

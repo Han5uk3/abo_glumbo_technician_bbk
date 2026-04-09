@@ -45,35 +45,28 @@ class _TransactionTileState extends State<TransactionTile> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.black.withOpacity(0.08)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withOpacity(0.02),
                 blurRadius: 10,
-                offset: const Offset(0, 2),
+                offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
           ),
-          child: Material(
-            color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showTransactionDetailsDialog(context, booking),
             borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => _showTransactionDetailsDialog(context, booking),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    // Payment Method Icon
-                    _buildPaymentIcon(isCompleted),
-                    const SizedBox(width: 16),
-                    // Transaction Info Section
-                    Expanded(child: _buildTransactionInfo(context, booking)),
-                    const SizedBox(width: 12),
-                    // Amount Badge
-                    _buildAmountBadge(isCompleted, context),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  _buildPaymentIcon(isCompleted),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildTransactionInfo(context, booking)),
+                  const SizedBox(width: 12),
+                  _buildAmountBadge(isCompleted, context),
+                ],
               ),
             ),
           ),
@@ -126,19 +119,17 @@ class _TransactionTileState extends State<TransactionTile> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Customer Name
         Text(
           booking?.customer.name ?? '-',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
-            letterSpacing: -0.2,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         // Payment Method
         Row(
           children: [

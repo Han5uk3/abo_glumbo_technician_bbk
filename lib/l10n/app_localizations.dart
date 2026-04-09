@@ -170,6 +170,42 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get login;
 
+  /// No description provided for @admins.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get admins;
+
+  /// No description provided for @banners.
+  ///
+  /// In en, this message translates to:
+  /// **'Banners'**
+  String get banners;
+
+  /// No description provided for @customers.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get customers;
+
+  /// No description provided for @technicians.
+  ///
+  /// In en, this message translates to:
+  /// **'Technicians'**
+  String get technicians;
+
+  /// No description provided for @payouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Payouts'**
+  String get payouts;
+
+  /// No description provided for @faqs.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQs'**
+  String get faqs;
+
   /// No description provided for @totalPayoutAmount.
   ///
   /// In en, this message translates to:

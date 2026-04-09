@@ -23,12 +23,21 @@ class HighlightedServiceWidget extends StatelessWidget {
     final currentLanguage = AppLocalizations.of(context)?.localeName ?? 'en';
     final isRtlLanguage = currentLanguage == 'ar';
 
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -39,22 +48,25 @@ class HighlightedServiceWidget extends StatelessWidget {
                 children: [
                   Text(
                     data.titleLocalized(languageCode: currentLanguage) ?? '',
-                    style: GoogleFonts.dmSans(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                       color: Colors.black,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit),
+                    icon: Icon(Icons.edit_outlined,
+                        size: 20, color: AppColors.primary),
                     onPressed: editCallback,
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.zero,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SizedBox(
-              height: 127,
+              height: 110,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -76,59 +88,51 @@ class HighlightedServiceWidget extends StatelessWidget {
                         snapshot.data as DocumentSnapshot,
                       );
 
-                      return GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 127,
-                          width: 127,
-                          margin: isRtlLanguage
-                              ? const EdgeInsets.only(left: 13)
-                              : const EdgeInsets.only(right: 13),
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Stack(
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              SizedBox(
-                                height: 127,
-                                width: 127,
-                                child: _buildServiceImage(service),
-                              ),
-                              Container(
-                                height: 88,
-                                width: 127,
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    stops: [0, 1],
-                                    begin: Alignment.center,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.transparent, Colors.black],
-                                  ),
-                                ),
-                                alignment:
-                                    Directionality.of(context) ==
-                                        TextDirection.ltr
-                                    ? Alignment.bottomLeft
-                                    : Alignment.bottomRight,
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  Directionality.of(context) ==
-                                          TextDirection.ltr
-                                      ? service.name ?? ""
-                                      : service.name_ar ?? "",
-                                  style: GoogleFonts.dmSans(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                      return Container(
+                        height: 110,
+                        width: 140,
+                        margin: isRtlLanguage
+                            ? const EdgeInsets.only(left: 10)
+                            : const EdgeInsets.only(right: 10),
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: Colors.black.withOpacity(0.05)),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            SizedBox.expand(
+                              child: _buildServiceImage(service),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.8),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                              child: Text(
+                                Directionality.of(context) == TextDirection.ltr
+                                    ? service.name ?? ""
+                                    : service.name_ar ?? "",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },

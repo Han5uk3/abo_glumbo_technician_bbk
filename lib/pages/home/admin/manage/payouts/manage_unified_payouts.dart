@@ -31,12 +31,25 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.managePayouts),
         elevation: 0,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
+        title: Text(
+          AppLocalizations.of(context)!.managePayouts,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,35 +64,24 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: FutureBuilder<Map<String, dynamic>>(
         future: UnifiedPayoutServices.getPayoutStatistics(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return SizedBox(
-              height: 90,
-              child: Center(child: Loader(color: Colors.white)),
+            return  SizedBox(
+              height: 100,
+              child: Center(child: Loader()),
             );
           }
           if (!snapshot.hasData) {
             return SizedBox(
-              height: 90,
+              height: 100,
               child: Center(
                 child: Text(
-                  snapshot.error.toString(),
-                  style: TextStyle(color: Colors.white),
+                  snapshot.error?.toString() ?? 'Error',
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
             );
@@ -92,7 +94,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                 child: _buildStatCard(
                   label: AppLocalizations.of(context)!.pending,
                   count: stats['pendingCount'].toString(),
-                  icon: Icons.schedule,
+                  icon: Icons.schedule_rounded,
                   color: Colors.orange,
                 ),
               ),
@@ -101,8 +103,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                 child: _buildStatCard(
                   label: AppLocalizations.of(context)!.approved,
                   count: stats['approvedCount'].toString(),
-
-                  icon: Icons.check_circle,
+                  icon: Icons.check_circle_outline_rounded,
                   color: Colors.green,
                 ),
               ),
@@ -120,24 +121,32 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 18),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -146,12 +155,11 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
           Text(
             count,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Colors.black,
             ),
           ),
-          const SizedBox(height: 4),
         ],
       ),
     );
@@ -159,7 +167,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
 
   Widget _buildFilterChips() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -168,28 +176,28 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             _buildFilterChip(
               label: AppLocalizations.of(context)!.all,
               value: 'All',
-              icon: Icons.list,
-              color: Colors.blue,
+              icon: Icons.list_rounded,
+              color: AppColors.primary,
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.pending,
               value: 'P',
-              icon: Icons.schedule,
+              icon: Icons.schedule_rounded,
               color: Colors.orange,
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.approved,
               value: 'A',
-              icon: Icons.check_circle,
+              icon: Icons.check_circle_outline_rounded,
               color: Colors.green,
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.rejected,
               value: 'R',
-              icon: Icons.cancel,
+              icon: Icons.cancel_outlined,
               color: Colors.red,
             ),
           ],
@@ -205,20 +213,37 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
     required Color color,
   }) {
     final isSelected = _selectedFilter == value;
-    return FilterChip(
-      backgroundColor: AppColors.bgWhite,
-      label: Row(mainAxisSize: MainAxisSize.min, children: [Text(label)]),
-      selected: isSelected,
-      onSelected: (selected) {
-        setState(() {
-          _selectedFilter = value;
-        });
-      },
-      selectedColor: color,
-      checkmarkColor: Colors.white,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = value),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? color : Colors.black.withOpacity(0.08),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? color : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? color : Colors.grey,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -226,101 +251,44 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      child: Hero(
-        tag: 'search_bar',
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.searchByTechnicianName,
-                hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 15),
-                prefixIcon: Icon(
-                  Icons.search_rounded,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear_rounded,
-                          color: Colors.grey.shade600,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            _searchQuery = '';
-                          });
-                        },
-                        tooltip: AppLocalizations.of(context)!.clear,
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-              ),
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value.toLowerCase();
+            });
+          },
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.searchByTechnicianName,
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
           ),
+          style: const TextStyle(fontSize: 14),
         ),
       ),
     );
-
-    // return Padding(
-    //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    //   child: TextField(
-    //     controller: _searchController,
-    //     decoration: InputDecoration(
-    //       hintText: AppLocalizations.of(context)!.searchByWorkerName,
-    //       prefixIcon: const Icon(Icons.search),
-    //       suffixIcon: _searchQuery.isNotEmpty
-    //           ? IconButton(
-    //               icon: const Icon(Icons.clear),
-    //               onPressed: () {
-    //                 setState(() {
-    //                   _searchController.clear();
-    //                   _searchQuery = '';
-    //                 });
-    //               },
-    //             )
-    //           : null,
-    //       border: OutlineInputBorder(
-    //         borderRadius: BorderRadius.circular(12),
-    //         borderSide: BorderSide(color: Colors.grey[300]!),
-    //       ),
-    //       filled: true,
-    //       fillColor: Colors.white,
-    //       contentPadding: const EdgeInsets.symmetric(
-    //         horizontal: 16,
-    //         vertical: 12,
-    //       ),
-    //     ),
-    //     onChanged: (value) {
-    //       setState(() {
-    //         _searchQuery = value.toLowerCase();
-    //       });
-    //     },
-    //   ),
-    // );
   }
 
   Widget _buildPayoutsList() {
@@ -330,7 +298,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
           : UnifiedPayoutServices.getAllPayoutRequests(status: _selectedFilter),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: Loader(color: AppColors.primary));
+          return  Center(child: Loader());
         }
 
         if (snapshot.hasError) {
@@ -338,7 +306,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                Icon(Icons.error_outline, size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
                 Text(
                   '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
@@ -354,7 +322,8 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long, size: 64, color: Colors.grey[300]),
+                Icon(Icons.receipt_long_rounded,
+                    size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context)!.noPayoutRequests,
@@ -380,7 +349,8 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                Icon(Icons.search_off_rounded,
+                    size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context)!.noResultsFound,
@@ -395,10 +365,9 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
           onRefresh: () async {
             setState(() {});
           },
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
             itemCount: requests.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final request = requests[index];
               return _buildPayoutRequestCard(request);
@@ -418,29 +387,40 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
       case 'P':
         statusColor = Colors.orange;
         statusText = AppLocalizations.of(context)!.pending;
-        statusIcon = Icons.schedule;
+        statusIcon = Icons.schedule_rounded;
         break;
       case 'A':
         statusColor = Colors.green;
         statusText = AppLocalizations.of(context)!.approved;
-        statusIcon = Icons.check_circle;
+        statusIcon = Icons.check_circle_outline_rounded;
         break;
       case 'R':
         statusColor = Colors.red;
         statusText = AppLocalizations.of(context)!.rejected;
-        statusIcon = Icons.cancel;
+        statusIcon = Icons.cancel_outlined;
         break;
       default:
         statusColor = Colors.grey;
         statusText = AppLocalizations.of(context)!.unknown;
-        statusIcon = Icons.help;
+        statusIcon = Icons.help_outline_rounded;
     }
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => _showPayoutDetails(request),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -448,7 +428,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
@@ -458,19 +438,19 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                           request.workerName ??
                               AppLocalizations.of(context)!.unknown,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          DateFormat('MMM dd, yyyy HH:mm').format(
+                          DateFormat('MMM dd, yyyy • HH:mm').format(
                             request.createdAt?.toDate() ?? DateTime.now(),
                           ),
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                            fontSize: 11,
+                            color: Colors.grey.shade500,
                           ),
                         ),
                       ],
@@ -478,24 +458,23 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: statusColor),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(statusIcon, size: 16, color: statusColor),
+                        Icon(statusIcon, size: 12, color: statusColor),
                         const SizedBox(width: 4),
                         Text(
-                          statusText,
+                          statusText.toUpperCase(),
                           style: TextStyle(
                             color: statusColor,
-                            fontSize: 12,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -508,8 +487,8 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -517,17 +496,17 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                     Text(
                       AppLocalizations.of(context)!.totalAmount,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       '${AppLocalizations.of(context)!.sar} ${(request.totalAmount ?? 0.0).toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue[700],
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -536,14 +515,6 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  // Expanded(
-                  //   child: _buildAmountChip(
-                  //     label: AppLocalizations.of(context)!.earnings,
-                  //     amount: request.earningsAmount ?? 0.0,
-                  //     color: Colors.purple,
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 8),
                   Expanded(
                     child: _buildAmountChip(
                       label: AppLocalizations.of(context)!.tips,
@@ -566,25 +537,40 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
+                      child: TextButton(
                         onPressed: () => _rejectPayout(request),
-                        icon: const Icon(Icons.close, size: 18),
-                        label: Text(AppLocalizations.of(context)!.reject),
-                        style: OutlinedButton.styleFrom(
+                        style: TextButton.styleFrom(
                           foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.reject,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton.icon(
+                      child: ElevatedButton(
                         onPressed: () => _approvePayout(request),
-                        icon: const Icon(Icons.check, size: 18),
-                        label: Text(AppLocalizations.of(context)!.approve),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.approve,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

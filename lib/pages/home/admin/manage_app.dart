@@ -13,6 +13,7 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/notification_alerts/
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/payouts/manage_unified_payouts.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/services/manage_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/transactions/manage_transactions.dart';
+import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
 import 'package:flutter/material.dart';
 
 class ManageApp extends StatefulWidget {
@@ -46,29 +47,28 @@ class _ManageAppState extends State<ManageApp> {
       if (_isCoreAdmin)
         _TileInfo(
           key: 'manage_admins',
-          labelFallback: 'Manage Admins',
+          labelFallback: AppLocalizations.of(context)!.admins,
           icon: Icons.admin_panel_settings_rounded,
           onTap: () => _navigateToPage('Manage Admins'),
         ),
       _TileInfo(
         key: 'manage_users',
         labelFallback:
-            AppLocalizations.of(context)?.manageCategories ??
-            "Manage Categories",
+            AppLocalizations.of(context)?.categories ?? "Manage Categories",
         icon: Icons.category,
         onTap: () => _navigateToPage('Manage Categories'),
       ),
       _TileInfo(
         key: 'manage_services',
         labelFallback:
-            AppLocalizations.of(context)?.manageServices ?? "Manage Services",
+            AppLocalizations.of(context)?.services ?? "Manage Services",
         icon: Icons.settings,
         onTap: () => _navigateToPage('Manage Services'),
       ),
       _TileInfo(
         key: 'view_logs',
         labelFallback:
-            AppLocalizations.of(context)?.manageHighlightedServices ??
+            AppLocalizations.of(context)?.highlightedServices ??
             "Manage Highlighted Services",
         icon: Icons.history,
         onTap: () => _navigateToPage('Manage Highlighted Services'),
@@ -76,21 +76,21 @@ class _ManageAppState extends State<ManageApp> {
       _TileInfo(
         key: 'manage_banners',
         labelFallback:
-            AppLocalizations.of(context)?.manageBanners ?? "Manage Banners",
+            AppLocalizations.of(context)?.banners ?? "Manage Banners",
         icon: Icons.ads_click,
         onTap: () => _navigateToPage('Manage Banners'),
       ),
       _TileInfo(
         key: 'manage_agents',
         labelFallback:
-            AppLocalizations.of(context)?.manageTechnicians ?? "Manage Workers",
+            AppLocalizations.of(context)?.technicians ?? "Manage Workers",
         icon: Icons.engineering_outlined,
         onTap: () => _navigateToPage('Manage Workers'),
       ),
       _TileInfo(
         key: 'manage_customers',
         labelFallback:
-            AppLocalizations.of(context)?.manageCustomers ?? "Manage Customers",
+            AppLocalizations.of(context)?.customers ?? "Manage Customers",
         icon: Icons.group,
         onTap: () => _navigateToPage('Manage Customers'),
       ),
@@ -98,34 +98,33 @@ class _ManageAppState extends State<ManageApp> {
       _TileInfo(
         key: 'manage_payouts',
         labelFallback:
-            AppLocalizations.of(context)?.managePayouts ?? "Manage Payouts",
+            AppLocalizations.of(context)?.payouts ?? "Manage Payouts",
         icon: Icons.wallet,
         onTap: () => _navigateToPage('Manage Payouts'),
       ),
       _TileInfo(
         key: 'manage_faq',
-        labelFallback:
-            AppLocalizations.of(context)?.manageFaqs ?? "Manage FAQs",
+        labelFallback: AppLocalizations.of(context)?.faqs ?? "Manage FAQs",
         icon: Icons.help,
         onTap: () => _navigateToPage('Manage FAQ'),
       ),
       _TileInfo(
         key: 'manage_customer_support',
         labelFallback:
-            AppLocalizations.of(context)?.manageCustomerSupport ??
+            AppLocalizations.of(context)?.customerSupport ??
             "Manage Customer Support",
         icon: Icons.support_agent_outlined,
         onTap: () => _navigateToPage('Manage Customer Support'),
       ),
       _TileInfo(
         key: 'send_notifications',
-        labelFallback: AppLocalizations.of(context)!.manageNotificationAlerts,
+        labelFallback: AppLocalizations.of(context)!.notifications,
         icon: Icons.notifications,
         onTap: () => _navigateToPage('Manage Notification Alerts'),
       ),
       _TileInfo(
         key: 'manage_transactions',
-        labelFallback: AppLocalizations.of(context)!.manageTransactions,
+        labelFallback: AppLocalizations.of(context)!.transactions,
         icon: Icons.payment,
         onTap: () => _navigateToPage('Manage Transactions'),
       ),
@@ -166,7 +165,6 @@ class _ManageAppState extends State<ManageApp> {
               return ManageAgents(isMainAdmin: _isCoreAdmin);
             case 'Manage Customers':
               return const ManageCustomersPage();
-
             case 'Manage FAQ':
               return const ManageFaq();
             case 'Manage Payouts':
@@ -188,56 +186,75 @@ class _ManageAppState extends State<ManageApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)?.manage ?? "Manage"),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          AppLocalizations.of(context)?.manage ?? "Manage",
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
-      body: ListView.separated(
+      body: GridView.count(
         padding: const EdgeInsets.all(16.0),
-        itemCount: tiles.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final tile = tiles[index];
-          return _buildTile(tile);
-        },
+        crossAxisCount: 3,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.0,
+        children: tiles.map((tile) => _buildTile(tile)).toList(),
       ),
     );
   }
 
   Widget _buildTile(_TileInfo tile) {
-    const Color primary = Color(0xFF0A2463);
-    const Color secondary = Color(0xFF0081FA);
+    final Color primary = AppColors.primary;
 
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.grey.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        onTap: tile.onTap,
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [primary.withOpacity(0.1), secondary.withOpacity(0.05)],
+    return GestureDetector(
+      onTap: tile.onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(tile.icon, size: 24, color: primary),
+          ],
         ),
-        title: Text(
-          tile.labelFallback,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: Icon(tile.icon, size: 32, color: primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              tile.labelFallback,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: secondary.withOpacity(0.7),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
   }

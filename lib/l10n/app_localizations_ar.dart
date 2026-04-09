@@ -45,6 +45,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get login => 'تسجيل الدخول';
 
   @override
+  String get admins => 'Admins';
+
+  @override
+  String get banners => 'Banners';
+
+  @override
+  String get customers => 'Customers';
+
+  @override
+  String get technicians => 'Technicians';
+
+  @override
+  String get payouts => 'Payouts';
+
+  @override
+  String get faqs => 'FAQs';
+
+  @override
   String get totalPayoutAmount => 'إجمالي مبلغ الدفع';
 
   @override

@@ -19,20 +19,28 @@ class CategoryTileDevWidget extends StatelessWidget {
     return Container(
       width: double.maxFinite,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         color: Colors.white,
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      padding: const EdgeInsets.only(left: 13, right: 13, top: 13, bottom: 13),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      padding: const EdgeInsets.all(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(12),
             child: CachedNetworkImage(
               imageUrl: category.svg ?? '',
-              height: 85,
-              width: 85,
+              height: 60,
+              width: 60,
               fit: BoxFit.cover,
               placeholder: (context, url) => Center(
                 child: Loader(size: 20, color: Colors.grey.withOpacity(0.5)),
@@ -41,7 +49,7 @@ class CategoryTileDevWidget extends StatelessWidget {
                   Icon(Icons.error, color: Colors.red.withOpacity(0.7)),
             ),
           ),
-          const SizedBox(width: 17),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,36 +61,25 @@ class CategoryTileDevWidget extends StatelessWidget {
                       : category.name ?? "",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.dmSans(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.black,
                   ),
                 ),
               ],
             ),
           ),
-          TextButton(
-            style: ButtonStyle(
-              padding: WidgetStatePropertyAll(EdgeInsets.all(1)),
-              maximumSize: WidgetStatePropertyAll(Size(40, 40)),
-              minimumSize: WidgetStatePropertyAll(Size(40, 40)),
-            ),
+          IconButton(
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => AddNewCategories(category: category),
               ),
             ),
-            child: const Icon(Icons.edit),
+            icon: Icon(Icons.edit_outlined, size: 20, color: AppColors.primary),
           ),
-          TextButton(
-            style: ButtonStyle(
-              side: WidgetStatePropertyAll(BorderSide.none),
-              padding: WidgetStatePropertyAll(EdgeInsets.zero),
-              maximumSize: WidgetStatePropertyAll(Size(40, 40)),
-              minimumSize: WidgetStatePropertyAll(Size(40, 40)),
-            ),
+          IconButton(
             onPressed: () {
               showDialog(
                 context: context,
@@ -90,7 +87,7 @@ class CategoryTileDevWidget extends StatelessWidget {
                     showDeleteConfirmDialog(dialogContext),
               );
             },
-            child: const Icon(Icons.delete, color: Colors.red),
+            icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
           ),
         ],
       ),

@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
@@ -23,6 +24,7 @@ import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/utils/counter_offer_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -962,7 +964,8 @@ class _BookingInfoState extends State<BookingInfo> {
                         children: [
                           // Booking controls (Normal)
                           if (!widget.isWarranty &&
-                              (statusCode.toLowerCase() == 'a'))
+                              (statusCode.toLowerCase() == 'a') &&
+                              !widget.isAdmin)
                             BookingControlsWidget(
                               booking: currentBooking,
                               isTracking: isTracking,
@@ -970,6 +973,7 @@ class _BookingInfoState extends State<BookingInfo> {
                             ),
 
                           if (!widget.isWarranty &&
+                              !widget.isAdmin &&
                               statusCode.toUpperCase() == 'P' &&
                               (currentBooking.agent?.uid ==
                                       LocalStore.getUID() ||
@@ -1087,7 +1091,9 @@ class _BookingInfoState extends State<BookingInfo> {
                           _buildCounterOfferUI(context, currentBooking),
 
                           // Verification Controls
-                          if (!widget.isWarranty && statusCode == 'VP')
+                          if (!widget.isWarranty &&
+                              !widget.isAdmin &&
+                              statusCode == 'VP')
                             VerifyPaymentControls(booking: currentBooking),
 
                           // Warranty controls (Warranty)
@@ -1098,14 +1104,11 @@ class _BookingInfoState extends State<BookingInfo> {
                                 final warrantyStatus =
                                     currentBooking.warranty?.warrantyStatusCode;
                                 if (warrantyStatus == 'S' &&
-                                    (currentBooking
-                                                .warranty
-                                                ?.assignedTechnician
-                                                ?.uid ==
-                                            LocalStore.getUID() ||
-                                        (LocalStore.getCachedUserData()
-                                                ?.isAdmin ??
-                                            false))) {
+                                    currentBooking
+                                            .warranty
+                                            ?.assignedTechnician
+                                            ?.uid ==
+                                        LocalStore.getUID()) {
                                   return WarrantyControlsWidget(
                                     booking: currentBooking,
                                     isTracking: isTracking,
@@ -3465,6 +3468,9 @@ class _BookingInfoState extends State<BookingInfo> {
     if (booking.activeCounterOffer?.status.toLowerCase() == 'pending') {
       return const SizedBox.shrink();
     }
+    if (widget.isAdmin) {
+      return _buildAdminPendingBookingControls(context, booking);
+    }
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
@@ -3541,6 +3547,211 @@ class _BookingInfoState extends State<BookingInfo> {
         ],
       ),
     );
+  }
+
+  Widget _buildAdminPendingBookingControls(
+    BuildContext context,
+    BookingModel booking,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.06)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => _showAssignToUserBottomSheet(booking),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.assign,
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => _rejectBookingAsAdmin(context, booking),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.reject,
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAssignToUserBottomSheet(BookingModel booking) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return AssignUserBottomSheet(
+          booking: booking,
+          isWarranty: widget.isWarranty,
+          onAssignAgent:
+              ({required BookingModel booking, required UserModel user}) {
+                _assignAgentToDriver(context, booking, user);
+              },
+          onRejectOrder: (booking) {
+            _rejectBookingAsAdmin(context, booking);
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _assignAgentToDriver(
+    BuildContext context,
+    BookingModel booking,
+    UserModel user,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await AppFirestore.bookingsCollectionRef.doc(booking.id).update({
+        'agent': user.toJson(),
+        'bookingStatusCode': 'A',
+        'acceptedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'cancelledBy': FieldValue.delete(),
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookingAssignedTo),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.failedToAssignBookingTo} ${user.name ?? ''}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _rejectBookingAsAdmin(
+    BuildContext context,
+    BookingModel booking,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          l10n.rejectBooking,
+          style: DMSansFont.textStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          l10n.areYouSureYouWantToRejectThisBooking,
+          style: DMSansFont.textStyle(color: Colors.grey[600]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await AppFirestore.bookingsCollectionRef.doc(booking.id).update({
+        'bookingStatusCode': 'R',
+        'rejectedBy': 'Admin',
+        'rejectedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.orderRejectedSuccessfully),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.failedToRejectOrder}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {

@@ -37,67 +37,66 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
         title: Text(
           AppLocalizations.of(context)!.manageTransactions,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: Column(
         children: [
           // Stats Overview Section
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: StreamBuilder(
-                stream: AppServices.getAllTransactionsStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final transactions = snapshot.data ?? [];
-                    final total = transactions.length;
-                    final totalAmount = transactions.fold<double>(
-                      0.0,
-                      (sum, t) => sum + t.amount,
-                    );
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: StreamBuilder(
+              stream: AppServices.getAllTransactionsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final transactions = snapshot.data ?? [];
+                  final total = transactions.length;
+                  final totalAmount = transactions.fold<double>(
+                    0.0,
+                    (sum, t) => sum + t.amount,
+                  );
 
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            context,
-                            AppLocalizations.of(context)!.total,
-                            total.toString(),
-                            Icons.receipt_long_outlined,
-                          ),
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          AppLocalizations.of(context)!.total,
+                          total.toString(),
+                          Icons.receipt_long_outlined,
                         ),
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: _buildStatCard(
-                            context,
-                            AppLocalizations.of(context)!.amount,
-                            totalAmount.toStringAsFixed(2),
-                            Icons.payments_outlined,
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          AppLocalizations.of(context)!.amount,
+                          totalAmount.toStringAsFixed(2),
+                          Icons.payments_outlined,
                         ),
-                      ],
-                    );
-                  }
-                  return _buildStatsShimmer();
-                },
-              ),
+                      ),
+                    ],
+                  );
+                }
+                return _buildStatsShimmer();
+              },
             ),
           ),
 
@@ -509,34 +508,39 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
     IconData icon,
   ) {
     return Container(
-      height: 125,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      height: 100,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white, size: 24),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: value.length > 5
-                  ? 16
-                  : value.length > 7
-                  ? 14
-                  : 24,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -550,30 +554,30 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
 
   Widget _buildFilterChip(BuildContext context, String label, String value) {
     final isSelected = _selectedFilter == value;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        setState(() {
-          _selectedFilter = value;
-        });
-      },
-      backgroundColor: AppColors.bgWhite,
-      selectedColor: AppColors.primary,
-      checkmarkColor: AppColors.bgWhite,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.primary,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : Colors.grey[300]!,
-          width: isSelected ? 1.5 : 1,
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = value),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color:
+                isSelected ? AppColors.primary : Colors.black.withOpacity(0.08),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : Colors.grey,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
         ),
       ),
-      elevation: 0,
-      pressElevation: 2,
     );
   }
 }

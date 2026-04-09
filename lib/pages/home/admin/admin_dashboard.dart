@@ -1,7 +1,10 @@
 import 'package:aboglumbo_bbk_panel/models/admin_dashboard_data.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/pages/notifications/notifications_page.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/dashboard_stat_card.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -17,13 +20,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
-      appBar: AppBar(
-        title: Text(l10n.dashboard),
-        elevation: 0,
-      ),
       body: StreamBuilder<AdminDashboardData>(
         stream: AppServices.getAdminDashboardStream(),
         builder: (context, snapshot) {
@@ -38,120 +37,203 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           }
 
           final data = snapshot.data!;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatsGrid(data, l10n),
-                const SizedBox(height: 24),
-                _buildRevenueChart(data, l10n),
-                const SizedBox(height: 24),
-              ],
-            ),
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildSliverHeader(l10n.dashboard),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildStatsGrid(data, l10n),
+                    _buildRevenueChart(data, l10n),
+                    const SizedBox(height: 16),
+                  ]),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
+  Widget _buildSliverHeader(String title) {
+    return SliverAppBar(
+      expandedHeight: 85,
+      backgroundColor: AppColors.primary,
+      automaticallyImplyLeading: false,
+      elevation: 0,
+      pinned: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(24),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/images/appbarbg.png',
+                fit: BoxFit.fitHeight,
+                repeat: ImageRepeat.repeat,
+                color: Colors.white.withOpacity(0.3),
+                colorBlendMode: BlendMode.dstIn,
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      StreamBuilder<int>(
+                        stream: AppServices.getUnreadNotificationsCountStream(),
+                        builder: (context, snapshot) {
+                          final unreadCount = snapshot.data ?? 0;
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                              child: Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.18),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.25),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.notifications_none_rounded,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const NewNotificationsPage(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    if (unreadCount > 0)
+                                      Positioned(
+                                        right: 8,
+                                        top: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 14,
+                                            minHeight: 14,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFF4848),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              unreadCount > 9
+                                                  ? '9+'
+                                                  : unreadCount.toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatsGrid(AdminDashboardData data, AppLocalizations l10n) {
     return GridView.count(
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.3,
+      childAspectRatio: 2.2,
       children: [
-        _buildStatCard(
-          title: l10n.pending,
+        DashboardStatCard(
+          label: l10n.pending,
           value: data.pendingCount.toString(),
           icon: Icons.hourglass_empty,
           color: Colors.orange,
         ),
-        _buildStatCard(
-          title: l10n.accepted, // Assigned
+        DashboardStatCard(
+          label: l10n.accepted,
           value: data.assignedCount.toString(),
           icon: Icons.assignment_ind_outlined,
           color: Colors.blue,
         ),
-        _buildStatCard(
-          title: l10n.completed,
+        DashboardStatCard(
+          label: l10n.completed,
           value: data.completedCount.toString(),
           icon: Icons.check_circle_outline,
           color: Colors.green,
         ),
-        _buildStatCard(
-          title: l10n.warrantyClaims,
+        DashboardStatCard(
+          label: l10n.warrantyClaims,
           value: data.warrantyClaimsCount.toString(),
           icon: Icons.verified_user_outlined,
           color: Colors.purple,
         ),
-        _buildStatCard(
-          title: 'Customers',
+        DashboardStatCard(
+          label: 'Customers',
           value: data.customerCount.toString(),
           icon: Icons.people_outline,
           color: Colors.teal,
         ),
-        _buildStatCard(
-          title: 'Technicians',
+        DashboardStatCard(
+          label: 'Technicians',
           value: data.technicianCount.toString(),
           icon: Icons.engineering_outlined,
           color: Colors.indigo,
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: color, size: 24),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -164,12 +246,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       spots.add(FlSpot(i.toDouble(), values[i]));
     }
 
-    double maxRevenue = values.isNotEmpty ? values.reduce((a, b) => a > b ? a : b) : 0;
+    double maxRevenue = values.isNotEmpty
+        ? values.reduce((a, b) => a > b ? a : b)
+        : 0;
     if (maxRevenue == 0) maxRevenue = 1000;
 
     return Container(
-      height: 350,
-      padding: const EdgeInsets.all(20),
+      height: 300,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -182,16 +266,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             "Monthly Revenue",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           Expanded(
             child: LineChart(
               LineChartData(
@@ -199,10 +281,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey[200]!,
-                      strokeWidth: 1,
-                    );
+                    return FlLine(color: Colors.grey[200]!, strokeWidth: 1);
                   },
                 ),
                 titlesData: FlTitlesData(
@@ -247,7 +326,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         return SideTitleWidget(
                           meta: meta,
                           child: Text(
-                            value >= 1000 ? '${(value / 1000).toStringAsFixed(1)}k' : value.toInt().toString(),
+                            value >= 1000
+                                ? '${(value / 1000).toStringAsFixed(1)}k'
+                                : value.toInt().toString(),
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontWeight: FontWeight.bold,
@@ -259,9 +340,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ),
                   ),
                 ),
-                borderData: FlBorderData(
-                  show: false,
-                ),
+                borderData: FlBorderData(show: false),
                 minX: 0,
                 maxX: (labels.length - 1).toDouble(),
                 minY: 0,
@@ -271,16 +350,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     spots: spots,
                     isCurved: true,
                     gradient: LinearGradient(
-                      colors: [
-                        AppColors.primary,
-                        AppColors.secondary,
-                      ],
+                      colors: [AppColors.primary, AppColors.secondary],
                     ),
                     barWidth: 4,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(
-                      show: true,
-                    ),
+                    dotData: const FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(

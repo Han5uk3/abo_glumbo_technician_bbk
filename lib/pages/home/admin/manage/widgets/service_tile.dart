@@ -20,11 +20,19 @@ class ServiceTileDevWidget extends StatelessWidget {
     return Container(
       width: double.maxFinite,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         color: Colors.white,
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      padding: const EdgeInsets.all(13),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -33,15 +41,14 @@ class ServiceTileDevWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
-                    height: 80,
-                    width: 80,
+                    height: 60,
+                    width: 60,
                     child: _buildImageWidget(),
                   ),
                 ),
-                const SizedBox(width: 17),
-
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,76 +59,59 @@ class ServiceTileDevWidget extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   Directionality.of(context) ==
                                           TextDirection.rtl
                                       ? service.name_ar ?? ""
                                       : service.name ?? "",
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.dmSans(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     color: Colors.black,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
                                   Directionality.of(context) ==
                                           TextDirection.rtl
                                       ? service.description_ar ?? ""
                                       : service.description ?? "",
-                                  style: GoogleFonts.dmSans(
+                                  style: const TextStyle(
                                     color: Colors.black45,
-                                    fontSize: 12,
-                                    height: 1.3,
+                                    fontSize: 11,
+                                    height: 1.2,
                                   ),
-                                  maxLines: 3,
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-
-                          SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: IconButton(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddServicesDevPage(service: service),
-                                ),
-                              ),
-                              icon: const Icon(Icons.edit_outlined, size: 18),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
+                          IconButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddServicesDevPage(service: service),
                               ),
                             ),
+                            icon: Icon(Icons.edit_outlined,
+                                size: 18, color: AppColors.primary),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                           ),
-                          SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: IconButton(
-                              onPressed: () =>
-                                  _showDeleteConfirmDialog(context),
-
-                              icon: const Icon(
-                                CupertinoIcons.delete,
-                                size: 18,
-                                color: Colors.red,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
-                              ),
-                            ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            onPressed: () => _showDeleteConfirmDialog(context),
+                            icon: const Icon(CupertinoIcons.delete,
+                                size: 18, color: Colors.red),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                           ),
                         ],
                       ),

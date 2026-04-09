@@ -47,6 +47,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
+  String get admins => 'Admins';
+
+  @override
+  String get banners => 'Banners';
+
+  @override
+  String get customers => 'Customers';
+
+  @override
+  String get technicians => 'Technicians';
+
+  @override
+  String get payouts => 'Payouts';
+
+  @override
+  String get faqs => 'FAQs';
+
+  @override
   String get totalPayoutAmount => 'Total Payout Amount';
 
   @override

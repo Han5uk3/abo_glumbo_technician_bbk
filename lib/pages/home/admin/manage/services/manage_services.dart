@@ -15,13 +15,25 @@ class ManageServices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.manageServices),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          iconSize: 18,
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
+        title: Text(
+          AppLocalizations.of(context)!.manageServices,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: StreamBuilder<List<CategoryModel>>(
         stream: AppFirestore.categoriesCollectionRef.snapshots().map(

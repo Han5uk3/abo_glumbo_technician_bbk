@@ -1,5 +1,11 @@
 {
   "ar": [
+    "admins",
+    "banners",
+    "customers",
+    "technicians",
+    "payouts",
+    "faqs",
     "choose",
     "availableLocations",
     "workHoursPricing",

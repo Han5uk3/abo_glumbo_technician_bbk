@@ -31,10 +31,26 @@ class ManageBanners extends StatelessWidget {
         }
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon:
+                const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          ),
           title: Text(
             AppLocalizations.of(context)?.manageBanners ?? 'Manage Banners',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
           ),
+          shape: Border.all(style: BorderStyle.none),
         ),
         body: StreamBuilder(
           stream: AppServices.getAllBannersStream(),

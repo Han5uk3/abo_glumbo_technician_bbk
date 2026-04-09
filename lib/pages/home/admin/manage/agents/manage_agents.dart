@@ -186,19 +186,29 @@ class _ManageAgentsState extends State<ManageAgents>
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgWhite,
+        backgroundColor: Colors.white,
         appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon:
+                const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          ),
           title: Text(
             AppLocalizations.of(context)!.manageTechnicians,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
           ),
-          elevation: 0,
-          centerTitle: false,
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          shape: Border.all(style: BorderStyle.none),
           actions: [
             IconButton(
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(Icons.refresh_rounded, color: Colors.black),
               onPressed: () {
                 setState(() {});
               },
@@ -209,120 +219,104 @@ class _ManageAgentsState extends State<ManageAgents>
         ),
         body: Column(
           children: [
-            // Header gradient section
-            Column(
-              children: [
-                // Modern Search Bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                  child: Hero(
-                    tag: 'search_bar_agents',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black.withOpacity(0.08)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizations.of(context)!.searchByTechnicianName,
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.clear_rounded,
+                              color: Colors.grey.shade400,
+                              size: 20,
                             ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value.toLowerCase();
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.searchByTechnicianName,
-                            hintStyle: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 15,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search_rounded,
-                              color: theme.colorScheme.primary,
-                              size: 24,
-                            ),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(
-                                      Icons.clear_rounded,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _searchController.clear();
-                                        _searchQuery = '';
-                                      });
-                                    },
-                                    tooltip: AppLocalizations.of(
-                                      context,
-                                    )!.clear,
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                          ),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                   ),
+                  style: const TextStyle(fontSize: 14),
                 ),
+              ),
+            ),
 
-                // Enhanced Filter Chips
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip(
-                          context: context,
-                          label: AppLocalizations.of(context)!.all,
-                          icon: Icons.apps_rounded,
-                          isSelected: _selectedFilter == 0,
-                          onTap: () => setState(() => _selectedFilter = 0),
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 10),
-                        _buildFilterChip(
-                          context: context,
-                          label: AppLocalizations.of(context)!.verified,
-                          icon: Icons.verified_rounded,
-                          isSelected: _selectedFilter == 1,
-                          onTap: () => setState(() => _selectedFilter = 1),
-                          color: Colors.green,
-                        ),
-                        const SizedBox(width: 10),
-                        _buildFilterChip(
-                          context: context,
-                          label: AppLocalizations.of(context)!.pending,
-                          icon: Icons.pending_rounded,
-                          isSelected: _selectedFilter == 2,
-                          onTap: () => setState(() => _selectedFilter = 2),
-                          color: Colors.orange,
-                        ),
-                      ],
+            // Filter Chips
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip(
+                      context: context,
+                      label: AppLocalizations.of(context)!.all,
+                      icon: Icons.apps_rounded,
+                      isSelected: _selectedFilter == 0,
+                      onTap: () => setState(() => _selectedFilter = 0),
+                      color: AppColors.primary,
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      context: context,
+                      label: AppLocalizations.of(context)!.verified,
+                      icon: Icons.verified_rounded,
+                      isSelected: _selectedFilter == 1,
+                      onTap: () => setState(() => _selectedFilter = 1),
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      context: context,
+                      label: AppLocalizations.of(context)!.pending,
+                      icon: Icons.pending_rounded,
+                      isSelected: _selectedFilter == 2,
+                      onTap: () => setState(() => _selectedFilter = 2),
+                      color: Colors.orange,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
 
             // Agents List
@@ -331,23 +325,7 @@ class _ManageAgentsState extends State<ManageAgents>
                 stream: AppServices.getAllAgentsStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 25, child: Loader()),
-                          const SizedBox(height: 10),
-                          Text(
-                            AppLocalizations.of(context)!.loadingTechnicians,
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                    return Center(child: Loader());
                   }
 
                   if (snapshot.hasError) {
@@ -356,7 +334,7 @@ class _ManageAgentsState extends State<ManageAgents>
                       icon: Icons.error_outline_rounded,
                       title: AppLocalizations.of(context)!.error,
                       subtitle: '${snapshot.error}',
-                      color: theme.colorScheme.error,
+                      color: Colors.red,
                     );
                   }
 
@@ -366,17 +344,14 @@ class _ManageAgentsState extends State<ManageAgents>
                       icon: Icons.engineering_rounded,
                       title: AppLocalizations.of(context)!.noAgentsFound,
                       subtitle: AppLocalizations.of(context)!.noAgentsAvailable,
-                      color: theme.colorScheme.primary,
+                      color: AppColors.primary,
                     );
                   }
 
                   final allUsers = snapshot.data!;
-                  // Filter out admins locally
-                  final agents = allUsers
-                      .where((user) => user.isAdmin != true)
-                      .toList();
+                  final agents =
+                      allUsers.where((user) => user.isAdmin != true).toList();
 
-                  // Apply filters
                   final filteredAgents = agents.where((agent) {
                     bool matchesSearch = true;
                     if (_searchQuery.isNotEmpty) {
@@ -391,13 +366,11 @@ class _ManageAgentsState extends State<ManageAgents>
 
                     bool matchesVerification = true;
                     final isVerified = agent.isVerified ?? false;
-
                     if (_selectedFilter == 1) {
                       matchesVerification = isVerified;
                     } else if (_selectedFilter == 2) {
                       matchesVerification = !isVerified;
                     }
-
                     return matchesSearch && matchesVerification;
                   }).toList();
 
@@ -405,19 +378,17 @@ class _ManageAgentsState extends State<ManageAgents>
                     return _buildEmptyState(
                       context: context,
                       icon: Icons.search_off_rounded,
-                      title: AppLocalizations.of(
-                        context,
-                      )!.noTechniciansMatchYourFilters,
-                      subtitle: AppLocalizations.of(
-                        context,
-                      )!.tryAdjustingYourSearchCriteria,
-                      color: theme.colorScheme.primary,
+                      title: AppLocalizations.of(context)!
+                          .noTechniciansMatchYourFilters,
+                      subtitle: AppLocalizations.of(context)!
+                          .tryAdjustingYourSearchCriteria,
+                      color: AppColors.primary,
                     );
                   }
 
                   return ListView.builder(
                     padding: const EdgeInsets.only(
-                      top: 16,
+                      top: 4,
                       bottom: 100,
                       left: 16,
                       right: 16,
@@ -436,25 +407,16 @@ class _ManageAgentsState extends State<ManageAgents>
             ),
           ],
         ),
-        floatingActionButton: ScaleTransition(
-          scale: _fabAnimation,
-          child: FloatingActionButton.extended(
-            onPressed: () {
-              setState(() {
-                _searchController.clear();
-                _searchQuery = '';
-                _selectedFilter = 0;
-              });
-            },
-            backgroundColor: theme.colorScheme.primaryContainer,
-            foregroundColor: theme.colorScheme.onPrimaryContainer,
-            elevation: 4,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(
-              AppLocalizations.of(context)!.resetFilters,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _searchController.clear();
+              _searchQuery = '';
+              _selectedFilter = 0;
+            });
+          },
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.refresh_rounded, color: Colors.white),
         ),
       ),
     );
@@ -468,53 +430,32 @@ class _ManageAgentsState extends State<ManageAgents>
     required VoidCallback onTap,
     required Color color,
   }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [color, color.withOpacity(0.8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: isSelected ? null : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected ? color : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: color.withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? color : Colors.black.withOpacity(0.08),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: isSelected ? Colors.white : color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  fontSize: 14,
-                ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: isSelected ? color : Colors.grey),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? color : Colors.grey,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -525,211 +466,132 @@ class _ManageAgentsState extends State<ManageAgents>
     required agent,
     required int index,
   }) {
-    final theme = Theme.of(context);
     final isVerified = agent.isVerified ?? false;
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300 + (index * 50)),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 50 * (1 - value)),
-          child: Opacity(opacity: value, child: child),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        child: Material(
-          elevation: 3,
-          shadowColor: Colors.black.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    AgentInfo(agent: agent, isMainAdmin: widget.isMainAdmin),
-              ),
-            ),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                AgentInfo(agent: agent, isMainAdmin: widget.isMainAdmin),
+          ),
+        ),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Agent Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  agent.name ?? 'Unknown',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: isVerified
-                                        ? [
-                                            Colors.green.shade400,
-                                            Colors.green.shade600,
-                                          ]
-                                        : [
-                                            Colors.orange.shade400,
-                                            Colors.orange.shade600,
-                                          ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          (isVerified
-                                                  ? Colors.green
-                                                  : Colors.orange)
-                                              .withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isVerified
-                                          ? Icons.verified_rounded
-                                          : Icons.pending_rounded,
-                                      size: 14,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      isVerified
-                                          ? AppLocalizations.of(
-                                              context,
-                                            )!.verified
-                                          : AppLocalizations.of(
-                                              context,
-                                            )!.pending,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            agent.name ?? 'Unknown',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 8),
-                          if (agent.email != null && agent.email!.isNotEmpty)
-                            _buildInfoRow(
-                              context: context,
-                              icon: Icons.email_outlined,
-                              text: agent.email!,
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: (isVerified ? Colors.green : Colors.orange)
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            (isVerified
+                                    ? AppLocalizations.of(context)!.verified
+                                    : AppLocalizations.of(context)!.pending)
+                                .toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isVerified ? Colors.green : Colors.orange,
                             ),
-                          if (agent.phone != null && agent.phone!.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: _buildInfoRow(
-                                isPhone: true,
-                                context: context,
-                                icon: Icons.phone_outlined,
-                                text: agent.phone!,
-                              ),
-                            ),
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-
-                    const SizedBox(width: 12),
-
-                    // Enhanced Toggle Button
-                    if (agent.uid != null && (LocalStore.getCachedAdminData()?.accessLevel != 1))
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () async {
-                            final confirmed = await _showConfirmationDialog(
-                              context: context,
-                              title: isVerified
-                                  ? AppLocalizations.of(
-                                      context,
-                                    )!.disapproveAgent
-                                  : AppLocalizations.of(context)!.approveAgent,
-                              message: isVerified
-                                  ? AppLocalizations.of(
-                                      context,
-                                    )!.areYouSureYouWantToDisapproveAgent
-                                  : AppLocalizations.of(
-                                      context,
-                                    )!.areYouSureYouWantToApproveThisAgent,
-                              isApproval: !isVerified,
-                            );
-
-                            if (confirmed == true && context.mounted) {
-                              context.read<ManageAppBloc>().add(
-                                ApproveRejectAgentEvent(
-                                  agent.uid!,
-                                  !isVerified,
-                                ),
-                              );
-                            }
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isVerified
-                                    ? [Colors.red.shade400, Colors.red.shade600]
-                                    : [
-                                        Colors.green.shade400,
-                                        Colors.green.shade600,
-                                      ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      (isVerified ? Colors.red : Colors.green)
-                                          .withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              isVerified
-                                  ? Icons.block_rounded
-                                  : Icons.check_circle_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
+                    const SizedBox(height: 8),
+                    if (agent.email != null && agent.email!.isNotEmpty)
+                      _buildInfoRow(
+                        context: context,
+                        icon: Icons.email_outlined,
+                        text: agent.email!,
+                      ),
+                    if (agent.phone != null && agent.phone!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: _buildInfoRow(
+                          isPhone: true,
+                          context: context,
+                          icon: Icons.phone_outlined,
+                          text: agent.phone!,
                         ),
                       ),
                   ],
                 ),
               ),
-            ),
+              const SizedBox(width: 12),
+              if (agent.uid != null &&
+                  (LocalStore.getCachedAdminData()?.accessLevel != 1))
+                IconButton(
+                  onPressed: () async {
+                    final confirmed = await _showConfirmationDialog(
+                      context: context,
+                      title: isVerified
+                          ? AppLocalizations.of(context)!.disapproveAgent
+                          : AppLocalizations.of(context)!.approveAgent,
+                      message: isVerified
+                          ? AppLocalizations.of(context)!
+                              .areYouSureYouWantToDisapproveAgent
+                          : AppLocalizations.of(context)!
+                              .areYouSureYouWantToApproveThisAgent,
+                      isApproval: !isVerified,
+                    );
+
+                    if (confirmed == true && context.mounted) {
+                      context.read<ManageAppBloc>().add(
+                            ApproveRejectAgentEvent(
+                              agent.uid!,
+                              !isVerified,
+                            ),
+                          );
+                    }
+                  },
+                  icon: Icon(
+                    isVerified
+                        ? Icons.block_rounded
+                        : Icons.check_circle_outline,
+                    color: isVerified ? Colors.red : Colors.green,
+                  ),
+                ),
+            ],
           ),
         ),
       ),

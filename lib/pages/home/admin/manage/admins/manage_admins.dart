@@ -118,40 +118,87 @@ class _ManageAdminsState extends State<ManageAdmins>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Manage Admins', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
+        title: const Text(
+          'Manage Admins',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: Column(
         children: [
+          // Search Bar
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
-              decoration: InputDecoration(
-                hintText: 'Search admins...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                filled: true,
-                fillColor: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.black.withOpacity(0.08)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) =>
+                    setState(() => _searchQuery = value.toLowerCase()),
+                decoration: InputDecoration(
+                  hintText: 'Search admins...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                style: const TextStyle(fontSize: 14),
               ),
             ),
           ),
-          
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _buildFilterChip(0, 'All', Icons.apps),
-                const SizedBox(width: 8),
-                _buildFilterChip(1, 'Customer Service', Icons.support_agent),
-                const SizedBox(width: 8),
-                _buildFilterChip(2, 'Full Admin', Icons.admin_panel_settings),
-              ],
+
+          // Filter Chips
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip(0, 'All', Icons.apps_rounded),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                      1, 'Customer Service', Icons.support_agent_rounded),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                      2, 'Full Admin', Icons.admin_panel_settings_rounded),
+                ],
+              ),
             ),
           ),
 
@@ -162,7 +209,9 @@ class _ManageAdminsState extends State<ManageAdmins>
                 AppServices.getPendingAdminsStream(),
                 (List<AdminModel> active, List<AdminModel> pending) {
                   // Mark pending admins as pending for UI
-                  final pWithFlag = pending.map((e) => e.copyWith(uid: 'pending_${e.uid}')).toList();
+                  final pWithFlag = pending
+                      .map((e) => e.copyWith(uid: 'pending_${e.uid}'))
+                      .toList();
                   return [...active, ...pWithFlag];
                 },
               ),
@@ -170,27 +219,30 @@ class _ManageAdminsState extends State<ManageAdmins>
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                
+
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No admins found.'));
                 }
 
                 final allAdmins = snapshot.data!.where((admin) {
-                  final matchesSearch = admin.name.toLowerCase().contains(_searchQuery) || 
-                                      admin.phoneNumber.contains(_searchQuery) ||
-                                      admin.email.toLowerCase().contains(_searchQuery);
-                  
-                  final matchesFilter = _selectedFilter == 0 || admin.accessLevel == _selectedFilter;
-                  
+                  final matchesSearch =
+                      admin.name.toLowerCase().contains(_searchQuery) ||
+                          admin.phoneNumber.contains(_searchQuery) ||
+                          admin.email.toLowerCase().contains(_searchQuery);
+
+                  final matchesFilter =
+                      _selectedFilter == 0 || admin.accessLevel == _selectedFilter;
+
                   return matchesSearch && matchesFilter;
                 }).toList();
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
                   itemCount: allAdmins.length,
                   itemBuilder: (context, index) {
                     final admin = allAdmins[index];
-                    final isPending = admin.uid?.startsWith('pending_') ?? false;
+                    final isPending =
+                        admin.uid?.startsWith('pending_') ?? false;
                     return _buildAdminCard(admin, isPending);
                   },
                 );
@@ -199,39 +251,69 @@ class _ManageAdminsState extends State<ManageAdmins>
           ),
         ],
       ),
-      floatingActionButton: ScaleTransition(
-        scale: _fabAnimation,
-        child: FloatingActionButton.extended(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddAdminPage())),
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.add),
-          label: const Text('Add Admin'),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const AddAdminPage())),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
     );
   }
 
   Widget _buildFilterChip(int index, String label, IconData icon) {
     final isSelected = _selectedFilter == index;
-    return FilterChip(
-      selected: isSelected,
-      onSelected: (val) => setState(() => _selectedFilter = index),
-      label: Text(label),
-      avatar: Icon(icon, size: 18, color: isSelected ? AppColors.primary : Colors.grey),
-      selectedColor: AppColors.primary.withOpacity(0.1),
-      checkmarkColor: AppColors.primary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = index),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.black.withOpacity(0.08),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? AppColors.primary : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppColors.primary : Colors.grey,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAdminCard(AdminModel admin, bool isPending) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -240,59 +322,126 @@ class _ManageAdminsState extends State<ManageAdmins>
             Row(
               children: [
                 CircleAvatar(
+                  radius: 20,
                   backgroundColor: AppColors.primary.withOpacity(0.1),
-                  child: Text(admin.name.isNotEmpty ? admin.name[0].toUpperCase() : 'A', style: TextStyle(color: AppColors.primary)),
+                  child: Text(
+                    admin.name.isNotEmpty ? admin.name[0].toUpperCase() : 'A',
+                    style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(admin.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(admin.email, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              admin.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isPending)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6)),
+                              child: const Text('INVITED',
+                                  style: TextStyle(
+                                      color: Colors.orange,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                        ],
+                      ),
+                      Text(
+                        admin.email,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
-                if (isPending)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                    child: const Text('Invited', style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Access Level', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    Text(admin.accessLevel == 2 ? 'Full Admin' : 'Customer Service', style: const TextStyle(fontWeight: FontWeight.w500)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('ACCESS LEVEL',
+                          style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        admin.accessLevel == 2
+                            ? 'Full Admin'
+                            : 'Customer Service',
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Phone', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    Text(admin.phoneNumber, style: const TextStyle(fontWeight: FontWeight.w500)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('PHONE',
+                          style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        admin.phoneNumber,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
                 ),
                 if (!admin.isCoreAdmin)
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
                     onPressed: () async {
-                      final confirm = await _showRevokeConfirmationDialog(context: context, adminName: admin.name);
+                      final confirm = await _showRevokeConfirmationDialog(
+                          context: context, adminName: admin.name);
                       if (confirm == true) {
                         if (isPending) {
-                          final actualId = admin.uid!.replaceFirst('pending_', '');
-                          await _deletePendingInvite(admin.copyWith(uid: actualId));
+                          final actualId =
+                              admin.uid!.replaceFirst('pending_', '');
+                          await _deletePendingInvite(
+                              admin.copyWith(uid: actualId));
                         } else {
                           await _revokeAdminAccess(admin);
                         }
                       }
                     },
+                    icon: Icon(Icons.delete_outline_rounded,
+                        color: Colors.red.shade400, size: 20),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.zero,
                   ),
               ],
             ),

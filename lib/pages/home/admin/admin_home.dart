@@ -8,7 +8,6 @@ import 'package:aboglumbo_bbk_panel/models/categories.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/bloc/admin_bloc.dart';
-import 'package:aboglumbo_bbk_panel/pages/notifications/notifications_page.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
@@ -166,63 +165,11 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
             appBar: AppBar(
               titleSpacing: 16,
               title: Text(
-                AppLocalizations.of(context)?.manageOrders ?? "Manage Orders",
+                AppLocalizations.of(context)?.orders ?? "Orders",
               ),
               elevation: 0,
               shape: Border.all(style: BorderStyle.none),
-              actions: [
-                StreamBuilder<int>(
-                  stream: AppServices.getUnreadNotificationsCountStream(),
-                  builder: (context, snapshot) {
-                    final unreadCount = snapshot.data ?? 0;
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded, color: Colors.black, size: 24),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NewNotificationsPage(),
-                              ),
-                            );
-                          },
-                        ),
-                        if (unreadCount > 0)
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              constraints: const BoxConstraints(
-                                minWidth: 14,
-                                minHeight: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFF4848),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 1.5),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  unreadCount > 9 ? '9+' : unreadCount.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
+              actions: [],
             ),
             body: SafeArea(
               child: Column(

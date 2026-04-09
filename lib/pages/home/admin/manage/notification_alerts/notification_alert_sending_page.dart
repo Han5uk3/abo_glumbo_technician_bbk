@@ -530,11 +530,25 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.manageNotificationAlerts),
-        backgroundColor: AppColors.primary,
         elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
+        title: Text(
+          AppLocalizations.of(context)!.manageNotificationAlerts,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        shape: Border.all(style: BorderStyle.none),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -555,7 +569,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                   _buildSelectedRecipientsCard(),
                   const SizedBox(height: 24),
                   _buildSendButton(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),

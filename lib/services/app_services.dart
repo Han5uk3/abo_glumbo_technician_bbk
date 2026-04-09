@@ -2381,12 +2381,13 @@ class AppServices {
     final technicians = AppFirestore.usersCollectionRef.snapshots().map((s) {
       return s.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        return data['isAdmin'] != true;
+        return data['isAdmin'] != true &&
+            data['uid'] != null &&
+            data['uid'].toString().isNotEmpty;
       }).length;
     });
 
     final completedBookings = AppFirestore.bookingsCollectionRef
-        .where('bookingStatusCode', isEqualTo: 'C')
         .where('paymentCompleted', isEqualTo: true)
         .snapshots()
         .map(
@@ -2427,13 +2428,17 @@ class AppServices {
         }
 
         for (var booking in bookings) {
-          if (booking.completedAt != null) {
-            final date = booking.completedAt!.toDate();
+          final date = booking.paymentCompletedAt?.toDate() ??
+              booking.completedAt?.toDate();
+          if (date != null) {
             final monthStr = DateFormat('MMM yyyy').format(date);
             if (revenue.containsKey(monthStr)) {
-              revenue[monthStr] =
-                  (revenue[monthStr] ?? 0.0) +
-                  (booking.completionData?.totalCost ?? 0.0);
+              // Only consider Online payments (Telr: 'C' or 'A')
+              final mode = booking.paymentModeCode.toUpperCase();
+              if (mode == 'C' || mode == 'A') {
+                final amount = (booking.service.price ?? 0.0);
+                revenue[monthStr] = (revenue[monthStr] ?? 0.0) + amount;
+              }
             }
           }
         }

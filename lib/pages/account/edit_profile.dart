@@ -16,6 +16,7 @@ import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
 import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,9 +42,8 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
-  String? profileImageUrl = null;
+  String? profileImageUrl;
   bool isLoading = false;
-  bool isPhoneNumberUpdated = false;
   bool _isUpdatingPhone = false;
   int? _resendToken;
 
@@ -82,8 +82,8 @@ class _EditProfileState extends State<EditProfile> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                AppLocalizations.of(context)?.selectSource ?? 'Select Source',
-                style: GoogleFonts.dmSans(
+                AppLocalizations.of(context)!.selectSource,
+                style: DMSansFont.textStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -269,7 +269,7 @@ class _EditProfileState extends State<EditProfile> {
                 onPressed: () => Navigator.pop(context, false),
                 text: AppLocalizations.of(context)?.no ?? 'No',
                 context: context,
-                textColor: Colors.white,
+                textColor: Colors.black,
                 backgroundColor: AppColors.bgWhite,
               ),
               eButton(
@@ -311,15 +311,18 @@ class _EditProfileState extends State<EditProfile> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
                 AppLocalizations.of(context)?.idDocument ?? 'ID Document',
-                style: GoogleFonts.dmSans(color: Colors.white),
+                style: GoogleFonts.dmSans(
+                  color: Colors.black,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ),
             body: Center(
@@ -356,15 +359,18 @@ class _EditProfileState extends State<EditProfile> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
                 AppLocalizations.of(context)?.idDocument ?? 'ID Document',
-                style: GoogleFonts.dmSans(color: Colors.white),
+                style: GoogleFonts.dmSans(
+                  color: Colors.black,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ),
             body: Center(
@@ -479,6 +485,10 @@ class _EditProfileState extends State<EditProfile> {
       final categories = await AppServices.fetchJobCategories();
       setState(() {
         jobCategories = categories;
+        // Normalize selected roles to keys if they are names
+        selectedJobRoles = selectedJobRoles
+            .map((role) => getJobCategoryKey(role))
+            .toList();
         isCategoriesLoading = false;
       });
     } catch (e) {
@@ -507,16 +517,15 @@ class _EditProfileState extends State<EditProfile> {
     return jobCategories[key]?[isArabic ? 'ar' : 'en'] ?? key;
   }
 
-  String getJobCategoryKey(String displayName) {
-    final currentLanguage = AppLocalizations.of(context)?.localeName ?? 'en';
-    final isArabic = currentLanguage == 'ar';
-
+  String getJobCategoryKey(String role) {
     for (var entry in jobCategories.entries) {
-      if (entry.value[isArabic ? 'ar' : 'en'] == displayName) {
+      if (entry.key == role ||
+          entry.value['en'] == role ||
+          entry.value['ar'] == role) {
         return entry.key;
       }
     }
-    return displayName;
+    return role;
   }
 
   void selectJobRolesBottomSheet() {
@@ -630,14 +639,9 @@ class _EditProfileState extends State<EditProfile> {
                               final displayName =
                                   entry.value[isArabic ? 'ar' : 'en'] ??
                                   entry.value['en']!;
-                              final isSelected =
-                                  tempSelectedJobRoles.contains(displayName) ||
-                                  tempSelectedJobRoles.contains(
-                                    entry.value['en'],
-                                  ) ||
-                                  tempSelectedJobRoles.contains(
-                                    entry.value['ar'],
-                                  );
+                              final isSelected = tempSelectedJobRoles.contains(
+                                entry.key,
+                              );
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
@@ -647,20 +651,11 @@ class _EditProfileState extends State<EditProfile> {
                                     onTap: () {
                                       setModalState(() {
                                         if (isSelected) {
-                                          tempSelectedJobRoles.removeWhere(
-                                            (role) =>
-                                                role == displayName ||
-                                                role == entry.value['en'] ||
-                                                role == entry.value['ar'],
+                                          tempSelectedJobRoles.remove(
+                                            entry.key,
                                           );
                                         } else {
-                                          tempSelectedJobRoles.removeWhere(
-                                            (role) =>
-                                                role == displayName ||
-                                                role == entry.value['en'] ||
-                                                role == entry.value['ar'],
-                                          );
-                                          tempSelectedJobRoles.add(displayName);
+                                          tempSelectedJobRoles.add(entry.key);
                                         }
                                       });
                                     },
@@ -991,7 +986,7 @@ class _EditProfileState extends State<EditProfile> {
       }
 
       if (phoneController.text.startsWith('05')) {
-        if (mounted) setState(() => isPhoneNumberUpdated = true);
+        if (mounted) setState(() {});
         final formattedPhone = '+966${phoneController.text.substring(1)}';
 
         await AuthServices().sendOTP(
@@ -1072,11 +1067,24 @@ class _EditProfileState extends State<EditProfile> {
     final safePadding = MediaQuery.of(context).padding;
     final locale = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(locale.profileManagement),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: Text(
+          locale.profileManagement,
+          style: DMSansFont.textStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 18),
+        ),
       ),
       body: BlocConsumer<AccountBloc, AccountState>(
         listener: (context, state) {
@@ -1140,308 +1148,221 @@ class _EditProfileState extends State<EditProfile> {
 
           return SavingStackWidget(
             isSaving: state is UpdateProfileLoading,
-            isLoading: state is UpdateProfileLoading,
+            isLoading: false,
             child: Form(
               key: _formKey,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                  bottom: safePadding.bottom + 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: AppColors.grey2.withOpacity(0.3),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: selectedProfileImage != null
-                                ? ClipOval(
-                                    child: Image.file(
-                                      File(selectedProfileImage!.path),
-                                      fit: BoxFit.cover,
-                                      width: 120,
-                                      height: 120,
-                                    ),
-                                  )
-                                : profileImageUrl != null
-                                ? ClipOval(
-                                    child: CachedNetworkImage(
-                                      imageUrl: profileImageUrl!,
-                                      fit: BoxFit.cover,
-                                      width: 120,
-                                      height: 120,
-                                      placeholder: (context, url) => Center(
-                                        child: Loader(
-                                          size: 20,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(
-                                            Icons.person,
-                                            size: 60,
-                                            color: Colors.grey,
-                                          ),
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.person,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              height: 36,
-                              width: 36,
-                              decoration: BoxDecoration(
-                                color: AppColors.secondary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                              ),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                onPressed: () => pickImage(true),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    TextFormWidget(
-                      controller: nameController,
-                      label: locale.yourName,
-                      keyboardType: TextInputType.name,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return locale.nameIsRequired;
-                        } else if (value.trim().length < 3) {
-                          return locale.enterAValidName;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormWidget(
-                      controller: emailController,
-                      label: locale.emailAddress,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
-                      readOnly: false,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (!emailRegex.hasMatch(value)) {
-                            return locale.pleaseEnterValidEmail;
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextFormWidget(
-                          controller: phoneController,
-                          label: locale.phoneNumber,
-                          keyboardType: TextInputType.phone,
-                          enabled: !_isUpdatingPhone,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^[0-9]*'),
-                            ),
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          suffixIcon: _isUpdatingPhone
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                )
-                              : TextButton(
-                                  onPressed: _isUpdatingPhone
-                                      ? null
-                                      : _updatePhoneNumber,
-                                  child: Text(locale.update),
-                                ),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return locale.pleaseEnterAValidPhoneNumber;
-                            }
-                            return null;
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, top: 4),
-                          child: Text(
-                            locale.phoneNumberFormatHint,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 16),
-                    // Location Fetch Section
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey.shade50,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        top: 20,
+                        left: 20,
+                        right: 20,
+                        bottom: safePadding.bottom + 20,
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            locale.location,
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _isFetchingLocation
-                                  ? null
-                                  : _getCurrentLocation,
-                              icon: _isFetchingLocation
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Icon(Icons.my_location),
-                              label: Text(
-                                _isFetchingLocation
-                                    ? 'Fetching...'
-                                    : (AppLocalizations.of(context)
-                                            ?.useCurrentLocation ??
-                                        'Use Current Location'),
+                          _buildProfileImage(),
+                          const SizedBox(height: 32),
+                          _buildSection(
+                            title: locale.personalInformation,
+                            icon: Icons.person_outline,
+                            children: [
+                              TextFormWidget(
+                                controller: nameController,
+                                label: locale.yourName,
+                                keyboardType: TextInputType.name,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return locale.nameIsRequired;
+                                  } else if (value.trim().length < 3) {
+                                    return locale.enterAValidName;
+                                  }
+                                  return null;
+                                },
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                              const SizedBox(height: 16),
+                              TextFormWidget(
+                                controller: emailController,
+                                label: locale.emailAddress,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.done,
+                                readOnly: false,
+                                validator: (value) {
+                                  if (value != null && value.isNotEmpty) {
+                                    if (!emailRegex.hasMatch(value)) {
+                                      return locale.pleaseEnterValidEmail;
+                                    }
+                                  }
+                                  return null;
+                                },
                               ),
-                            ),
-                          ),
-                          if (_currentPosition != null) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.green.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
+                              const SizedBox(height: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (_placeMark != null)
-                                          Text(
-                                            "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.green.shade900,
+                                  TextFormWidget(
+                                    controller: phoneController,
+                                    label: locale.phoneNumber,
+                                    keyboardType: TextInputType.phone,
+                                    enabled: !_isUpdatingPhone,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^[0-9]*'),
+                                      ),
+                                      LengthLimitingTextInputFormatter(10),
+                                    ],
+                                    suffixIcon: _isUpdatingPhone
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: Padding(
+                                              padding: EdgeInsets.all(12.0),
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                          )
+                                        : TextButton(
+                                            onPressed: _isUpdatingPhone
+                                                ? null
+                                                : _updatePhoneNumber,
+                                            child: Text(
+                                              locale.update,
+                                              style: DMSansFont.textStyle(
+                                                color: AppColors.secondary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ),
-                                        Text(
-                                          "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 11,
-                                            color: Colors.green.shade700,
-                                          ),
-                                        ),
-                                      ],
+                                    textInputAction: TextInputAction.next,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return locale
+                                            .pleaseEnterAValidPhoneNumber;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 12,
+                                      top: 4,
+                                    ),
+                                    child: Text(
+                                      locale.phoneNumberFormatHint,
+                                      style: DMSansFont.textStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ] else if (widget.workerData?.location != null) ...[
-                            const SizedBox(height: 12),
-                            Builder(
-                              builder: (context) {
-                                final loc = widget.workerData?.location;
-                                final locationText =
-                                    loc?.displayName ?? 'Location saved';
-                                final lat = loc?.lat;
-                                final lon = loc?.lon;
-                                final coordText = (lat != null && lon != null)
-                                    ? 'Lat: ${lat.toStringAsFixed(4)}, Lon: ${lon.toStringAsFixed(4)}'
-                                    : '';
-
-                                return Container(
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          _buildSection(
+                            title: locale.location,
+                            icon: Icons.location_on_outlined,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: _isFetchingLocation
+                                      ? null
+                                      : _getCurrentLocation,
+                                  icon: _isFetchingLocation
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.my_location, size: 18),
+                                  label: Text(
+                                    _isFetchingLocation
+                                        ? 'Fetching...'
+                                        : (locale.useCurrentLocation),
+                                    style: DMSansFont.textStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_currentPosition != null) ...[
+                                const SizedBox(height: 16),
+                                Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color:
-                                        AppColors.primary.withOpacity(0.05),
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.green.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color:
-                                          AppColors.primary.withOpacity(0.1),
+                                      color: Colors.green.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (_placeMark != null)
+                                              Text(
+                                                "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
+                                                style: DMSansFont.textStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.green.shade900,
+                                                ),
+                                              ),
+                                            Text(
+                                              "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
+                                              style: DMSansFont.textStyle(
+                                                fontSize: 12,
+                                                color: Colors.green.shade700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else if (widget.workerData?.location !=
+                                  null) ...[
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.primary.withOpacity(0.1),
                                     ),
                                   ),
                                   child: Row(
@@ -1451,27 +1372,31 @@ class _EditProfileState extends State<EditProfile> {
                                         color: AppColors.primary,
                                         size: 20,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              locationText,
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.primary,
+                                              widget
+                                                      .workerData
+                                                      ?.location
+                                                      ?.displayName ??
+                                                  'Location saved',
+                                              style: DMSansFont.textStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
                                               ),
                                             ),
-                                            if (coordText.isNotEmpty)
+                                            if (widget.workerData?.location !=
+                                                null)
                                               Text(
-                                                coordText,
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 11,
-                                                  color: AppColors.primary
-                                                      .withOpacity(0.7),
+                                                "Lat: ${widget.workerData!.location!.lat?.toStringAsFixed(4)}, Lon: ${widget.workerData!.location!.lon?.toStringAsFixed(4)}",
+                                                style: DMSansFont.textStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey.shade600,
                                                 ),
                                               ),
                                           ],
@@ -1479,474 +1404,581 @@ class _EditProfileState extends State<EditProfile> {
                                       ),
                                     ],
                                   ),
-                                );
-                              },
-                            ),
-                          ],
-
-                          if (_locationError != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              _locationError!,
-                              style: GoogleFonts.dmSans(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Replace TextFormWidget with custom job roles container
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          locale.jobRoles,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        InkWell(
-                          onTap: isCategoriesLoading
-                              ? null
-                              : selectJobRolesBottomSheet,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: double.infinity,
-                            constraints: const BoxConstraints(minHeight: 56),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.grey2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: selectedJobRoles.isEmpty
-                                      ? Text(
-                                          locale.selectJobRoles,
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        )
-                                      : Wrap(
-                                          spacing: 6,
-                                          runSpacing: 6,
-                                          children: selectedJobRoles.map((
-                                            role,
-                                          ) {
-                                            return Chip(
-                                              label: Text(
-                                                getJobCategoryDisplayName(
-                                                  getJobCategoryKey(role),
-                                                ),
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                              deleteIcon: const Icon(
-                                                Icons.close,
-                                                size: 16,
-                                              ),
-                                              onDeleted: () {
-                                                setState(() {
-                                                  selectedJobRoles.remove(role);
-                                                });
-                                              },
-                                              backgroundColor: AppColors
-                                                  .secondary
-                                                  .withOpacity(0.1),
-                                              labelStyle: TextStyle(
-                                                color: AppColors.secondary,
-                                              ),
-                                              deleteIconColor:
-                                                  AppColors.secondary,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                  ),
-                                              materialTapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                            );
-                                          }).toList(),
-                                        ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  size: 16,
-                                  color: selectedJobRoles.isEmpty
-                                      ? Colors.grey
-                                      : AppColors.secondary,
                                 ),
                               ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // ID Document Upload
-                    Text(
-                      '${locale.idDocument} *',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: _pickIdImage,
-                      icon: const Icon(Icons.upload_file),
-                      label: Text(
-                        selectedImage == null &&
-                                widget.workerData?.docUrl == null
-                            ? locale.uploadIdDocument
-                            : locale.changeIdDocument,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor:
-                            selectedImage != null ||
-                                widget.workerData?.docUrl != null
-                            ? Colors.green
-                            : AppColors.primary,
-                      ),
-                    ),
-
-                    if (selectedImage != null)
-                      Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: GestureDetector(
-                          onTap: () =>
-                              _showFullScreenImage(selectedImage!, context),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade700),
-                            ),
-                            child: Row(
-                              children: [
+                              if (_locationError != null) ...[
+                                const SizedBox(height: 8),
                                 Text(
-                                  AppLocalizations.of(context)!.idDocument,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey.shade700,
+                                  _locationError!,
+                                  style: DMSansFont.textStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
                                   ),
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.open_in_new,
-                                  color: Colors.grey.shade700,
-                                ),
-                                SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () => _removeIdImage(),
-                                  child: Icon(Icons.delete, color: Colors.red),
                                 ),
                               ],
-                            ),
+                            ],
                           ),
-                        ),
-                      )
-                    else if (widget.workerData?.docUrl != null)
-                      Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: GestureDetector(
-                          onTap: () async {
-                            try {
-                              final url = Uri.parse(widget.workerData!.docUrl!);
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(
-                                  url,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${AppLocalizations.of(context)?.error ?? 'Error'}: $e',
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade700),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.idDocument,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.open_in_new,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-
-                    // Certifications Upload
-                    Text(
-                      '${AppLocalizations.of(context)?.certifications ?? 'Certifications'} (${AppLocalizations.of(context)?.optional ?? 'Optional'})',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: _pickCertifications,
-                      icon: const Icon(Icons.attach_file),
-                      label: Text(
-                        AppLocalizations.of(context)?.uploadCertifications ??
-                            'Upload Certifications',
-                      ),
-                    ),
-
-                    // Display newly picked certifications (Local Files)
-                    if (certifications.isNotEmpty)
-                      ...certifications.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        PlatformFile file = entry.value;
-                        return Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: GestureDetector(
-                            onTap: () => _viewCertification(file),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade700),
-                              ),
-                              child: Row(
+                          const SizedBox(height: 20),
+                          _buildSection(
+                            title: locale.jobRoles,
+                            icon: Icons.engineering_outlined,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    file.name,
-                                    style: GoogleFonts.dmSans(
+                                    locale.jobRoles,
+                                    style: DMSansFont.textStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: Colors.grey.shade700,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                  const Spacer(),
-                                  Icon(
-                                    Icons.open_in_new,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                  SizedBox(width: 8),
-                                  GestureDetector(
-                                    onTap: () => _removeCertification(index),
-                                    child: Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
+                                  const SizedBox(height: 8),
+                                  InkWell(
+                                    onTap: isCategoriesLoading
+                                        ? null
+                                        : selectJobRolesBottomSheet,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      width: double.infinity,
+                                      constraints: const BoxConstraints(
+                                        minHeight: 56,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.black12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: selectedJobRoles.isEmpty
+                                                ? Text(
+                                                    locale.selectJobRoles,
+                                                    style: DMSansFont.textStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  )
+                                                : Wrap(
+                                                    spacing: 6,
+                                                    runSpacing: 6,
+                                                    children: selectedJobRoles.map((
+                                                      role,
+                                                    ) {
+                                                      return Chip(
+                                                        label: Text(
+                                                          getJobCategoryDisplayName(
+                                                            getJobCategoryKey(
+                                                              role,
+                                                            ),
+                                                          ),
+                                                          style:
+                                                              DMSansFont.textStyle(
+                                                                fontSize: 12,
+                                                              ),
+                                                        ),
+                                                        deleteIcon: const Icon(
+                                                          Icons.close,
+                                                          size: 16,
+                                                        ),
+                                                        onDeleted: () {
+                                                          setState(() {
+                                                            selectedJobRoles
+                                                                .remove(role);
+                                                          });
+                                                        },
+                                                        backgroundColor:
+                                                            AppColors.secondary
+                                                                .withOpacity(
+                                                                  0.1,
+                                                                ),
+                                                        labelStyle:
+                                                            DMSansFont.textStyle(
+                                                              color: AppColors
+                                                                  .secondary,
+                                                              fontSize: 12,
+                                                            ),
+                                                        deleteIconColor:
+                                                            AppColors.secondary,
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                            ),
+                                                        materialTapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                          side: BorderSide.none,
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 14,
+                                            color: selectedJobRoles.isEmpty
+                                                ? Colors.grey
+                                                : AppColors.secondary,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        );
-                      }),
-                    const SizedBox(height: 10),
-
-                    // Display existing certifications (URLs) - with tap to view
-                    if (widget.workerData!.certifications != null &&
-                        widget.workerData!.certifications!.isNotEmpty)
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.workerData!.certifications!.length,
-                        itemBuilder: (context, index) {
-                          final certUrl =
-                              widget.workerData!.certifications![index];
-                          return Padding(
-                            padding: EdgeInsets.only(top: 16),
-                            child: GestureDetector(
-                              onTap: () => _viewCertificate(
-                                certUrl,
-                                'Certificate ${index + 1}',
+                          const SizedBox(height: 20),
+                          _buildSection(
+                            title: locale.documents,
+                            icon: Icons.file_present_outlined,
+                            children: [
+                              _buildDocumentUpload(
+                                title: '${locale.idDocument} *',
+                                isUploaded:
+                                    selectedImage != null ||
+                                    widget.workerData?.docUrl != null,
+                                onUpload: _pickIdImage,
+                                buttonLabel:
+                                    selectedImage == null &&
+                                        widget.workerData?.docUrl == null
+                                    ? locale.uploadIdDocument
+                                    : locale.changeIdDocument,
                               ),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey.shade700,
+                              if (selectedImage != null)
+                                _buildFileItem(
+                                  label: locale.idDocument,
+                                  onTap: () => _showFullScreenImage(
+                                    selectedImage!,
+                                    context,
                                   ),
+                                  onRemove: _removeIdImage,
+                                )
+                              else if (widget.workerData?.docUrl != null)
+                                _buildFileItem(
+                                  label: locale.idDocument,
+                                  onTap: () async {
+                                    try {
+                                      final url = Uri.parse(
+                                        widget.workerData!.docUrl!,
+                                      );
+                                      if (await canLaunchUrl(url)) {
+                                        await launchUrl(
+                                          url,
+                                          mode: LaunchMode.externalApplication,
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        _showSnackBar(
+                                          '${locale.error}: $e',
+                                          backgroundColor: AppColors.red,
+                                        );
+                                      }
+                                    }
+                                  },
                                 ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'Certificate ${index + 1}',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Icon(
-                                      Icons.open_in_new,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                    SizedBox(width: 8),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        final confirm =
-                                            await _showDeleteConfirmation();
-                                        if (confirm) {
-                                          setState(() {
-                                            widget.workerData!.certifications!
-                                                .removeAt(index);
-                                          });
-                                        }
-                                      },
-                                      child: Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              const SizedBox(height: 20),
+                              _buildDocumentUpload(
+                                title:
+                                    '${locale.certifications} (${locale.optional})',
+                                isUploaded:
+                                    certifications.isNotEmpty ||
+                                    (widget.workerData?.certifications !=
+                                            null &&
+                                        widget
+                                            .workerData!
+                                            .certifications!
+                                            .isNotEmpty),
+                                onUpload: _pickCertifications,
+                                buttonLabel: locale.uploadCertifications,
+                                icon: Icons.attach_file,
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.maxFinite,
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            // Location is now GPS-based; no manual validation needed.
-
-                            // Validation for job roles
-                            if (selectedJobRoles.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    locale.pleaseSelectAtLeastOneJobRole,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // Build unified LocationModel from GPS data
-                            final newLocation = _currentPosition != null
-                                ? LocationModel.fromGPS(
-                                    lat: _currentPosition!.latitude,
-                                    lon: _currentPosition!.longitude,
-                                    placemark: _placeMark,
-                                  )
-                                : widget.workerData?.location;
-
-                            context.read<AccountBloc>().add(
-                              UpdateProfileEvent(
-                                user: UserModel(
-                                  role: 'technician',
-                                  uid: widget.workerData?.uid ?? '',
-                                  name: nameController.text,
-                                  email: emailController.text,
-                                  phone: phoneController.text,
-                                  location: newLocation,
-                                  jobRoles: selectedJobRoles,
-                                  profileUrl: profileImageUrl,
-                                  lanCode: widget.workerData?.lanCode,
-                                  country: widget.workerData?.country,
-                                  createdAt: widget.workerData?.createdAt,
-                                  updatedAt: widget.workerData?.updatedAt,
-                                  isAdmin: widget.workerData?.isAdmin,
-                                  isVerified: widget.workerData?.isVerified,
-                                  docUrl: widget.workerData?.docUrl,
-                                  fcmToken: widget.workerData?.fcmToken,
-                                 
-                                  liveLocation: widget.workerData?.liveLocation,
-                                  certifications: widget
-                                      .workerData!
-                                      .certifications, // Pass existing (modified) certifications
-                                ),
-                                selectedIqamaImage: selectedImage,
-                                selectedProfileImage: selectedProfileImage,
-                                newCertifications:
-                                    certifications, // Pass new certifications
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                              if (certifications.isNotEmpty)
+                                ...certifications.asMap().entries.map((entry) {
+                                  int index = entry.key;
+                                  PlatformFile file = entry.value;
+                                  return _buildFileItem(
+                                    label: file.name,
+                                    onTap: () => _viewCertification(file),
+                                    onRemove: () => _removeCertification(index),
+                                  );
+                                }),
+                              if (widget.workerData!.certifications != null &&
+                                  widget.workerData!.certifications!.isNotEmpty)
+                                ...widget.workerData!.certifications!
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                      int index = entry.key;
+                                      String certUrl = entry.value;
+                                      return _buildFileItem(
+                                        label: 'Certificate ${index + 1}',
+                                        onTap: () => _viewCertificate(
+                                          certUrl,
+                                          'Certificate ${index + 1}',
+                                        ),
+                                        onRemove: () async {
+                                          final confirm =
+                                              await _showDeleteConfirmation();
+                                          if (confirm) {
+                                            setState(() {
+                                              widget.workerData!.certifications!
+                                                  .removeAt(index);
+                                            });
+                                          }
+                                        },
+                                      );
+                                    }),
+                            ],
                           ),
-                        ),
-                        child: state is UpdateProfileLoading
-                            ? Loader(color: Colors.white, size: 20)
-                            : Text(
-                                locale.update,
-                                style: GoogleFonts.dmSans(
-                                  color: Colors.white,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          const SizedBox(height: 40),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  _buildBottomButton(state, locale),
+                ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: DMSansFont.textStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileImage() {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            width: 130,
+            height: 130,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: selectedProfileImage != null
+                  ? Image.file(
+                      File(selectedProfileImage!.path),
+                      fit: BoxFit.cover,
+                    )
+                  : profileImageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: profileImageUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Center(
+                        child: Loader(size: 20, color: AppColors.primary),
+                      ),
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey.shade100,
+                      child: const Icon(
+                        Icons.person,
+                        size: 65,
+                        color: Colors.grey,
+                      ),
+                    ),
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => pickImage(true),
+              child: Container(
+                height: 38,
+                width: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentUpload({
+    required String title,
+    required bool isUploaded,
+    required VoidCallback onUpload,
+    required String buttonLabel,
+    IconData icon = Icons.upload_file,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: DMSansFont.textStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: onUpload,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isUploaded ? Colors.green.shade300 : AppColors.primary,
+                style: BorderStyle.solid,
+              ),
+              color: isUploaded
+                  ? Colors.green.withOpacity(0.05)
+                  : AppColors.primary.withOpacity(0.05),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isUploaded ? Icons.check_circle_outline : icon,
+                  color: isUploaded ? Colors.green : AppColors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  buttonLabel,
+                  style: DMSansFont.textStyle(
+                    color: isUploaded ? Colors.green : AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFileItem({
+    required String label,
+    required VoidCallback onTap,
+    VoidCallback? onRemove,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.black12),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.description_outlined, color: Colors.grey),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: DMSansFont.textStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Icon(Icons.open_in_new, size: 16, color: Colors.grey),
+              if (onRemove != null) ...[
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: onRemove,
+                  child: const Icon(Icons.delete_outline, color: Colors.red),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomButton(AccountState state, AppLocalizations locale) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + (Platform.isIOS ? 20 : 0)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              if (selectedJobRoles.isEmpty) {
+                _showSnackBar(
+                  locale.pleaseSelectAtLeastOneJobRole,
+                  backgroundColor: AppColors.red,
+                );
+                return;
+              }
+
+              final newLocation = _currentPosition != null
+                  ? LocationModel.fromGPS(
+                      lat: _currentPosition!.latitude,
+                      lon: _currentPosition!.longitude,
+                      placemark: _placeMark,
+                    )
+                  : widget.workerData?.location;
+
+              context.read<AccountBloc>().add(
+                UpdateProfileEvent(
+                  user: UserModel(
+                    role: 'technician',
+                    uid: widget.workerData?.uid ?? '',
+                    name: nameController.text,
+                    email: emailController.text,
+                    phone: phoneController.text,
+                    location: newLocation,
+                    jobRoles: selectedJobRoles,
+                    profileUrl: profileImageUrl,
+                    lanCode: widget.workerData?.lanCode,
+                    country: widget.workerData?.country,
+                    createdAt: widget.workerData?.createdAt,
+                    updatedAt: widget.workerData?.updatedAt,
+                    isAdmin: widget.workerData?.isAdmin,
+                    isVerified: widget.workerData?.isVerified,
+                    docUrl: widget.workerData?.docUrl,
+                    fcmToken: widget.workerData?.fcmToken,
+                    liveLocation: widget.workerData?.liveLocation,
+                    certifications: widget.workerData!.certifications,
+                  ),
+                  selectedIqamaImage: selectedImage,
+                  selectedProfileImage: selectedProfileImage,
+                  newCertifications: certifications,
+                ),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: state is UpdateProfileLoading
+              ? Loader(color: Colors.white, size: 24)
+              : Text(
+                  locale.update,
+                  style: DMSansFont.textStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+        ),
       ),
     );
   }
@@ -1962,8 +1994,6 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _viewCertificate(String url, String fileName) async {
     try {
       final Uri uri = Uri.parse(url);
-
-      // Remove canLaunchUrl check - just try to launch
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (kDebugMode) {

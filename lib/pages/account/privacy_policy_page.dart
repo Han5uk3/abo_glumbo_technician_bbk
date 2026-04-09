@@ -11,7 +11,23 @@ class PrivacyPolicyPage extends StatelessWidget {
     final locale = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
-      appBar: AppBar(title: Text(locale.privacyPolicy)),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          locale.privacyPolicy,
+          style: DMSansFont.textStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(

@@ -42,6 +42,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rememberMe => 'تذكرني';
 
   @override
+  String get login => 'تسجيل الدخول';
+
+  @override
+  String get totalPayoutAmount => 'إجمالي مبلغ الدفع';
+
+  @override
+  String get reviewPayoutDetails => 'مراجعة تفاصيل الدفع';
+
+  @override
   String get manageOrders => 'إدارة الطلبات';
 
   @override
@@ -269,6 +278,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get unknown => 'غير معروف';
 
   @override
+  String get timedOut => 'انتهت المهلة';
+
+  @override
+  String get technicianNotFound => 'لم يتم العثور على فني';
+
+  @override
+  String get verificationPending => 'قيد التحقق من الدفع';
+
+  @override
   String get otpAutoVerified => 'تم التحقق التلقائي من رمز التحقق';
 
   @override
@@ -276,6 +294,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get otpSent => 'تم إرسال رمز التحقق';
+
+  @override
+  String get otpHasbeensentto => 'تم إرسال رمز التحقق إلى';
 
   @override
   String get anErrorOccurredPleaseTryAgainLater =>
@@ -995,6 +1016,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orders => 'طلبات';
+
+  @override
+  String get offers => 'العروض';
 
   @override
   String get failedToLoadUserData => 'فشل تحميل بيانات المستخدم';
@@ -1937,7 +1961,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get now => 'الان';
 
   @override
-  String get assigningTechnician => 'يتم تعيين الفني';
+  String get assigningTechnician => 'في انتظار الموافقة';
 
   @override
   String get selectProvince => 'اختر المحافظة';
@@ -4311,9 +4335,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectedLocations => 'المواقع المختارة';
-
-  @override
-  String get verificationPending => 'قيد التحقق من الدفع';
 
   @override
   String get waitingForTechnicianVerification =>

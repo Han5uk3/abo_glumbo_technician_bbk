@@ -112,32 +112,21 @@ async function sendAndStoreNotification({
 // Excludes customer service admins (adminAccessLevel == 2)
 async function getAllAdminUsers() {
   try {
-    // Fetch main admins (isAdmin == true)
-    const adminUsersDocs = await getAllAdminUsers();
-
-    // Fetch technicians granted admin access (isGrantedAdminByMain == true)
-    const grantedAdminsSnapshot = await admin
+    // The source of truth for admins is now the dedicated 'admins' collection.
+    const adminsSnapshot = await admin
       .firestore()
-      .collection("users")
-      .where("isGrantedAdminByMain", "==", true)
+      .collection("admins")
       .get();
 
-    // Combine both groups and filter out customer service admins
     const adminUsersMap = new Map();
 
-    mainAdminsSnapshot.forEach((doc) => {
+    adminsSnapshot.forEach((doc) => {
       const data = doc.data();
-      // Include if adminAccessLevel is 1 or undefined (main admin)
-      // Exclude if adminAccessLevel is 2 (customer service)
-      if (!data.adminAccessLevel || data.adminAccessLevel === 1) {
-        adminUsersMap.set(doc.id, doc);
-      }
-    });
-
-    grantedAdminsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Only include full admins (level 1), exclude customer service (level 2)
-      if (data.adminAccessLevel === 1 && !adminUsersMap.has(doc.id)) {
+      const level = data.accessLevel;
+      
+      // Per USER request: Only access level 1 or 2 needs to get notifications.
+      // Those with level 0 should not get notifications.
+      if (level === 1 || level === 2) {
         adminUsersMap.set(doc.id, doc);
       }
     });
@@ -4056,16 +4045,22 @@ exports.autoAssignTechnician = onDocumentWritten(
       return null;
     }
 
-    // Only run if:
-    // a) It was just created
-    // b) The agent was just cleared (reAssignment)
-    const isNew = !oldBooking;
-    const isReassigned = oldBooking && oldBooking.agent && !booking.agent;
+    if (booking.bookingStatusCode !== "P") {
+      return null;
+    }
+
+    // 2. Prevent redundant triggers and infinite loops
+    // If it's already in searching state, don't start a new cycle.
+    if (booking.autoAssignmentStatus === "searching") {
+      return null;
+    }
+
+    const isNew = !change.before.exists;
+    const isReassigned = change.before.exists && oldBooking?.agent && !booking.agent;
     
     if (!isNew && !isReassigned) {
-      // Avoid redundant triggers if it's already in "searching" state or was already empty P
-      if (booking.autoAssignmentStatus === "searching") return null;
-      if (oldBooking && oldBooking.bookingStatusCode === "P" && !oldBooking.agent && !booking.agent) return null;
+      // Avoid triggers for other field updates if it's already an empty P
+      if (change.before.exists && oldBooking?.bookingStatusCode === "P" && !oldBooking?.agent && !booking.agent) return null;
     }
 
     // Trust the isOnHour flag set by the app. 
@@ -4075,29 +4070,55 @@ exports.autoAssignTechnician = onDocumentWritten(
 
     logger.info(`[${bookingId}] Function triggered. isNew: ${isNew}, isReassigned: ${isReassigned}`);
 
-    // Mark as searching to prevent double triggers
-    await db.collection("bookings").doc(bookingId).update({
-      autoAssignmentStatus: "searching",
-      updatedAt: FieldValue.serverTimestamp()
-    });
+    // Use a transaction to perform a check-and-set "lock" to prevent race conditions
+    let shouldContinue = false;
+    try {
+      await db.runTransaction(async (t) => {
+        const doc = await t.get(db.collection("bookings").doc(bookingId));
+        if (!doc.exists) return;
+        const data = doc.data();
 
-    const addresses = booking.customer?.addresses || [];
-    const selectedAddress = addresses.find(a => a.isSelected === true);
-    
-    if (!selectedAddress) {
-      logger.error(`[${bookingId}] No selected address found in booking.customer.addresses`);
+        // If it's already being handled by another instance, bail out
+        if (data.autoAssignmentStatus === "searching") {
+          return;
+        }
+
+        // Lock it
+        t.update(db.collection("bookings").doc(bookingId), {
+          autoAssignmentStatus: "searching",
+          updatedAt: FieldValue.serverTimestamp()
+        });
+        shouldContinue = true;
+      });
+    } catch (e) {
+      logger.error(`[${bookingId}] Transaction lock failed:`, e);
       return null;
     }
 
-    const custLat = selectedAddress.lat;
-    const custLon = selectedAddress.lon;
+    if (!shouldContinue) {
+      logger.info(`[${bookingId}] Trigger ignored. Already being processed or document missing.`);
+      return null;
+    }
+
+    logger.info(`[${bookingId}] Lock acquired. Starting assignment cycle. isNew: ${isNew}, isReassigned: ${isReassigned}`);
+
+    const addresses = booking.customer?.addresses || [];
+    const selectedAddress = addresses.find(a => a.isSelected === true) || (addresses.length > 0 ? addresses[0] : null);
+    
+    // Support multiple coordinate field names and handle potential string values
+    const custLat = parseFloat(selectedAddress?.lat || booking.location?.lat || booking.lat || booking.latitude);
+    const custLon = parseFloat(selectedAddress?.lon || booking.location?.lon || booking.lon || booking.longitude);
+    
     const serviceCategoryId = booking.service?.category;
     const cancelledWorkerUids = new Set(booking.cancelledWorkerUids || []);
 
-    logger.info(`[${bookingId}] Params: Lat=${custLat}, Lon=${custLon}, Category=${serviceCategoryId}, Exclusions=${cancelledWorkerUids.size}`);
+    logger.info(`[${bookingId}] Triggered. isOnHour=${booking.isOnHour}, Lat=${custLat}, Lon=${custLon}, Category=${serviceCategoryId}`);
 
-    if (!custLat || !custLon) {
-      logger.error(`[${bookingId}] Customer coordinates missing.`);
+    if (isNaN(custLat) || isNaN(custLon)) {
+      logger.error(`[${bookingId}] Customer coordinates missing or invalid. Lat=${custLat}, Lon=${custLon}`);
+      await db.collection("bookings").doc(bookingId).update({
+        autoAssignmentStatus: "technicianNotFound" // Fallback status
+      });
       return null;
     }
 
@@ -4116,31 +4137,46 @@ exports.autoAssignTechnician = onDocumentWritten(
       // Verify booking is still eligible before each expansion
       const currentSnap = await db.collection("bookings").doc(bookingId).get();
       if (!currentSnap.exists) {
-        logger.info(`[${bookingId}] Booking deleted. Stopping.`);
+        logger.info(`[${bookingId}] Booking deleted. Stopping loop.`);
         return null;
       }
       const currentBooking = currentSnap.data();
+      const hasAgent = currentBooking.agent && currentBooking.agent.uid;
 
-      if (currentBooking.bookingStatusCode !== "P" || currentBooking.agent) {
-        logger.info(`[${bookingId}] Booking already handled (status: ${currentBooking.bookingStatusCode}). Stopping.`);
+      if (currentBooking.bookingStatusCode !== "P" || hasAgent) {
+        logger.info(`[${bookingId}] Stopping loop. Status=${currentBooking.bookingStatusCode}, HasAgent=${!!hasAgent}`);
         return null;
       }
 
       // Fetch potential technicians
-      logger.info(`[${bookingId}] Querying technicians with role=technician, isOnline=true, isVerified=true, jobRoles contains ${serviceCategoryId}`);
+      logger.info(`[${bookingId}] Searching for technicians. Category required: ${serviceCategoryId}`);
+      
       const techQuery = await db.collection("users")
-        .where("role", "==", "technician")
         .where("isOnline", "==", true)
         .where("isVerified", "==", true)
-        .where("jobRoles", "array-contains", serviceCategoryId)
         .get();
 
-      logger.info(`[${bookingId}] Found ${techQuery.size} matching technicians in database.`);
+      const candidateDocs = techQuery.docs.filter(doc => {
+        const d = doc.data();
+        const hasRole = d.jobRoles && d.jobRoles.includes(serviceCategoryId);
+        const notAdmin = d.isAdmin !== true;
+        const isTechRole = d.role === 'technician';
+        
+        // Log details for Riyadh technician to help debug matching issues
+        if (d.name && d.name.includes("Riyadh")) {
+           logger.info(`[${bookingId}] Debug Riyadh Tech ${doc.id}: hasRole=${hasRole}, notAdmin=${notAdmin}, role=${d.role}, isOnline=${d.isOnline}, isVerified=${d.isVerified}`);
+        }
+
+        // Must have the required job role and be a technician (either by role or not being admin)
+        return hasRole && (isTechRole || notAdmin);
+      });
+
+      logger.info(`[${bookingId}] Found ${candidateDocs.length} matching technicians after filtering roles/admin status.`);
 
       const newOffers = [];
       const offerPromises = [];
 
-      for (const doc of techQuery.docs) {
+      for (const doc of candidateDocs) {
         const techId = doc.id;
         if (notifiedTechnicians.has(techId) || cancelledWorkerUids.has(techId)) {
           logger.info(`[${bookingId}] Skipping technician ${techId} (already notified or cancelled)`);
@@ -4155,16 +4191,16 @@ exports.autoAssignTechnician = onDocumentWritten(
           continue;
         }
 
-        const techLat = techLoc.latitude || techLoc.lat;
-        const techLon = techLoc.longitude || techLoc.lon;
+        const techLat = parseFloat(techLoc.latitude || techLoc.lat);
+        const techLon = parseFloat(techLoc.longitude || techLoc.lon);
 
-        if (!techLat || !techLon) {
-          logger.info(`[${bookingId}] Technician ${techId} has invalid coordinates. Skipping.`);
+        if (isNaN(techLat) || isNaN(techLon)) {
+          logger.info(`[${bookingId}] Technician ${techId} has invalid coordinates. Lat=${techLat}, Lon=${techLon}`);
           continue;
         }
 
         const distance = calculateDistance(custLat, custLon, techLat, techLon);
-        logger.info(`[${bookingId}] Technician ${techId} distance: ${distance.toFixed(2)}km (Radius cap: ${radius}km)`);
+        logger.info(`[${bookingId}] Tech ${techId} (${doc.data().name}) distance: ${distance.toFixed(2)}km. Target: ${radius}km`);
 
         if (distance <= radius) {
           const activeJobs = await db.collection("bookings")
@@ -4227,6 +4263,19 @@ exports.autoAssignTechnician = onDocumentWritten(
     }
 
     console.log(`[${bookingId}] Radius escalation reached limit (40km). Ending search.`);
+    
+    if (notifiedTechnicians.size === 0) {
+      await db.collection("bookings").doc(bookingId).update({
+        autoAssignmentStatus: "technicianNotFound",
+        updatedAt: FieldValue.serverTimestamp()
+      });
+    } else {
+      // It reached the end of the loop, meaning either they rejected or ignored.
+      await db.collection("bookings").doc(bookingId).update({
+        autoAssignmentStatus: "timedOut",
+        updatedAt: FieldValue.serverTimestamp()
+      });
+    }
     return null;
   }
 );

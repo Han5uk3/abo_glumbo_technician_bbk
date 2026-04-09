@@ -62,7 +62,7 @@ class AnimatedExpandingNavBar extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? (selectedItemColor ?? AppColors.newYellow)
+                    ? (selectedItemColor ?? AppColors.primary)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
               ),

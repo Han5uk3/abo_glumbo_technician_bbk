@@ -796,15 +796,15 @@ class _AgentInfoState extends State<AgentInfo> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
                 AppLocalizations.of(context)!.issueImage,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
               ),
             ),
             body: Center(
@@ -1098,7 +1098,12 @@ class _AgentInfoState extends State<AgentInfo> {
       expandedHeight: 300,
       floating: false,
       pinned: true,
-      backgroundColor: primary,
+      backgroundColor: Colors.white,
+      leading: IconButton(
+        iconSize: 18,
+        onPressed: () => Navigator.of(context).pop(),
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+      ),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(

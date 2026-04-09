@@ -97,22 +97,23 @@ class _AccountPageState extends State<AccountPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgBlueTint,
+        backgroundColor: AppColors.bgWhite,
         body: CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
             SliverAppBar(
               centerTitle: true,
               floating: false,
-              backgroundColor: AppColors.newYellow,
+              backgroundColor: AppColors.primary,
               elevation: 0,
-              shape: const Border(),
+              pinned: true,
+              shape: Border.all(style: BorderStyle.none),
               title: Text(
-                AppLocalizations.of(context)!.account ?? '',
+                AppLocalizations.of(context)!.account,
                 style: GoogleFonts.dmSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -143,7 +144,7 @@ class _AccountPageState extends State<AccountPage> {
           Container(
             width: double.maxFinite,
             height: AccountPageConstants.primaryContainerHeight,
-            decoration: BoxDecoration(color: AppColors.newYellow),
+            decoration: BoxDecoration(color: AppColors.primary),
             child: Stack(
               children: [
                 SizedBox(
@@ -161,8 +162,8 @@ class _AccountPageState extends State<AccountPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.newYellow,
-                        AppColors.newYellow.withValues(alpha: 0.2),
+                        AppColors.primary,
+                        AppColors.primary.withValues(alpha: 0.2),
                       ],
                     ),
                   ),

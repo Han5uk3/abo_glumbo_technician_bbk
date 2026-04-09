@@ -176,39 +176,38 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                   builder: (context, snapshot) {
                     final unreadCount = snapshot.data ?? 0;
                     return Stack(
+                      alignment: Alignment.center,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.notifications),
+                          icon: const Icon(Icons.notifications_none_rounded, color: Colors.black, size: 24),
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const NewNotificationsPage(),
+                                builder: (context) => const NewNotificationsPage(),
                               ),
                             );
                           },
                         ),
-                        // Badge
                         if (unreadCount > 0)
                           Positioned(
-                            right: 6,
-                            top: 6,
+                            right: 8,
+                            top: 8,
                             child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
+                              padding: const EdgeInsets.all(2),
                               constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
+                                minWidth: 14,
+                                minHeight: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF4848),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5),
                               ),
                               child: Center(
                                 child: Text(
-                                  unreadCount > 99
-                                      ? '99+'
-                                      : unreadCount.toString(),
-                                  style: TextStyle(
+                                  unreadCount > 9 ? '9+' : unreadCount.toString(),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 8,
                                     fontWeight: FontWeight.bold,
@@ -222,6 +221,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                     );
                   },
                 ),
+                const SizedBox(width: 8),
               ],
             ),
             body: SafeArea(

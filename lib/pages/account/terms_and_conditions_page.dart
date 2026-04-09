@@ -15,9 +15,20 @@ class TermsAndConditionsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
-        centerTitle: false,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           isFromLogin ? locale.termsOfUse : locale.termsAndConditions,
+          style: DMSansFont.textStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -135,8 +146,23 @@ class TermsAndConditionsPage extends StatelessWidget {
                         builder: (context) => Scaffold(
                           appBar: AppBar(
                             centerTitle: true,
+                            backgroundColor: Colors.white,
+                            elevation: 0,
+                            leading: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
                             title: Text(
                               AppLocalizations.of(context)!.warrantyPolicy,
+                              style: DMSansFont.textStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                           body: SingleChildScrollView(

@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/models/booking.dart';
 
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -36,7 +37,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
     super.initState();
 
     final initialIndex = _bookingStatuses.indexWhere(
-      (e) => e['code'] == (widget.selectedIndex ?? 'P'),
+      (e) => e['code'] == (widget.selectedIndex ?? 'O'),
     );
     _tabController = TabController(
       length: _bookingStatuses.length,
@@ -46,13 +47,11 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
 
     // Fixed listener - rebuild on ANY index change
     _tabController.addListener(() {
-      if (_tabController.index != _tabController.previousIndex) {
-        setState(() {}); // rebuild to update check mark UI
+      if (!mounted) return;
+      if (!_tabController.indexIsChanging) {
+        setState(() {}); // build for check mark UI update
       }
     });
-
-    // Rest of your code...
-
     _shimmerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -64,8 +63,19 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
         _searchQuery = _searchController.text.toLowerCase();
       });
     });
+  }
 
-    setState(() {});
+  @override
+  void didUpdateWidget(covariant WorkerHome oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedIndex != oldWidget.selectedIndex && widget.selectedIndex != null) {
+      final newIndex = _bookingStatuses.indexWhere(
+        (e) => e['code'] == widget.selectedIndex,
+      );
+      if (newIndex != -1 && newIndex != _tabController.index) {
+        _tabController.animateTo(newIndex);
+      }
+    }
   }
 
   @override
@@ -136,10 +146,18 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      titleSpacing: 16,
-      title: Text(AppLocalizations.of(context)?.orders ?? "Manage Orders"),
+      centerTitle: true,
+      backgroundColor: Colors.white,
       elevation: 0,
-      shape: Border.all(style: BorderStyle.none),
+      title: Text(
+        AppLocalizations.of(context)?.orders ?? "Manage Orders",
+        style: DMSansFont.textStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      shape:  Border.all(style: BorderStyle.none),
     );
   }
 
@@ -188,8 +206,11 @@ class _BookingListTab extends StatefulWidget {
   State<_BookingListTab> createState() => _BookingListTabState();
 }
 
-class _BookingListTabState extends State<_BookingListTab> {
+class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliveClientMixin {
   late Stream<List<dynamic>> _bookingsStream;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -204,11 +225,23 @@ class _BookingListTabState extends State<_BookingListTab> {
   }
 
   List<dynamic> _filterData(List<dynamic> data) {
+    // 1. Remove duplicates by Booking ID to avoid UI ghosting
+    // Even if multiple offer documents were created, we only want one card per booking.
+    final Map<String, dynamic> uniqueMap = {};
+    for (var item in data) {
+      if (item is JobOfferWithBooking) {
+        uniqueMap[item.booking.id] = item;
+      } else if (item is BookingModel) {
+        uniqueMap[item.id] = item;
+      }
+    }
+    final List<dynamic> uniqueData = uniqueMap.values.toList();
+
     if (widget.searchQuery.isEmpty) {
-      return data;
+      return uniqueData;
     }
 
-    return data.where((item) {
+    return uniqueData.where((item) {
       String id = '';
       if (item is BookingModel) {
         id = item.id.toLowerCase();
@@ -221,6 +254,7 @@ class _BookingListTabState extends State<_BookingListTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return StreamBuilder<List<dynamic>>(
       stream: _bookingsStream,
       builder: (context, snapshot) {
@@ -259,6 +293,7 @@ class _BookingListTabState extends State<_BookingListTab> {
               return BookingListTileWidget(
                 key: ValueKey(item.id),
                 booking: item,
+                isFromOffersTab: widget.bookingStatusCode == 'O',
               );
             }
             return const SizedBox.shrink();

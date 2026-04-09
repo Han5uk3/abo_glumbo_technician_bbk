@@ -39,7 +39,15 @@ class _OtpPageState extends State<OtpPage> {
   Timer? _timer;
   Timer? _smsListeningTimer;
   final _formKey = GlobalKey<FormState>();
-  final otpController = TextEditingController();
+  // List of OTP controllers for 6 digits
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
+
+  // List of focus nodes for each OTP field
+  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+
   String? _verificationId;
   int? _resendToken;
   bool _isDialogShowing = false;
@@ -52,6 +60,11 @@ class _OtpPageState extends State<OtpPage> {
     _resendToken = widget.resendToken;
     startTimer();
     _startSmsAutofillListener();
+  }
+
+  // Get the complete OTP from all controllers
+  String get _fullOtp {
+    return _otpControllers.map((controller) => controller.text).join();
   }
 
   int get _remainingTime => resendSeconds;
@@ -109,6 +122,11 @@ class _OtpPageState extends State<OtpPage> {
             setState(() {
               _verificationId = verificationId;
               _resendToken = resendToken;
+
+              // Clear all OTP fields when resending
+              for (var controller in _otpControllers) {
+                controller.clear();
+              }
             });
 
             ScaffoldMessenger.of(context).showSnackBar(
@@ -321,15 +339,31 @@ class _OtpPageState extends State<OtpPage> {
       }
     }
   }
-
   void verifyOtp() async {
-    if (!_formKey.currentState!.validate() || isLoading) return;
+    if (isLoading) return;
 
     setState(() {
       isLoading = true;
     });
 
-    final otp = otpController.text.trim();
+    final otp = _fullOtp;
+
+    // Validate OTP length
+    if (otp.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enterOtp),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
     final verificationId = _verificationId ?? widget.verificationId;
 
     if (verificationId == null) {
@@ -441,6 +475,13 @@ class _OtpPageState extends State<OtpPage> {
             ),
           ),
         );
+
+        // Clear all OTP fields on error
+        for (var controller in _otpControllers) {
+          controller.clear();
+        }
+        // Focus on first field
+        _focusNodes[0].requestFocus();
       }
     }
   }
@@ -479,10 +520,11 @@ class _OtpPageState extends State<OtpPage> {
       );
 
       if (smsCode != null && smsCode.isNotEmpty && mounted) {
-        debugPrint('✅ [PANEL OTP] SMS code received: $smsCode');
-
-        // Fill the OTP field with the received code
-        otpController.text = smsCode;
+        // Split the SMS code into individual digits and fill the boxes
+        final List<String> digits = smsCode.split('');
+        for (int i = 0; i < digits.length && i < 6; i++) {
+          _otpControllers[i].text = digits[i];
+        }
 
         // Clear the form to reset validation
         _formKey.currentState?.reset();
@@ -516,8 +558,69 @@ class _OtpPageState extends State<OtpPage> {
     _timer?.cancel();
     _smsListeningTimer?.cancel();
     _smsAutofillService.cancelListening();
-    otpController.dispose();
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (var focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
+  }
+
+  // Widget for individual OTP input box
+  Widget _buildOtpTextField(int index) {
+    return SizedBox(
+      width: 45,
+      height: 60,
+      child: TextFormField(
+        controller: _otpControllers[index],
+        focusNode: _focusNodes[index],
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        style: GoogleFonts.dmSans(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+        decoration: InputDecoration(
+          counterText: '',
+          contentPadding: EdgeInsets.zero,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: AppColors.secondary,
+              width: 2,
+            ),
+          ),
+          fillColor: Colors.white,
+          filled: true,
+        ),
+        onChanged: (value) {
+          if (value.isNotEmpty && index < 5) {
+            // Move to next field
+            _focusNodes[index + 1].requestFocus();
+          } else if (value.isEmpty && index > 0) {
+            // Move to previous field on backspace
+            _focusNodes[index - 1].requestFocus();
+          }
+
+          // Auto-verify when all fields are filled
+          if (_fullOtp.length == 6) {
+            FocusScope.of(context).unfocus();
+            verifyOtp();
+          }
+        },
+      ),
+    );
   }
 
   @override
@@ -525,200 +628,183 @@ class _OtpPageState extends State<OtpPage> {
     final locn = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      appBar: AppBar(backgroundColor: AppColors.primary, elevation: 0),
+      backgroundColor: AppColors.bgBlueTint,
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: AppColors.bgWhite,
+        leading: IconButton(
+          iconSize: 18,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+        ),
+        title: Text(
+          AppLocalizations.of(context)!.enterOtp,
+          style: GoogleFonts.dmSans(
+            fontSize: 18,
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: AbsorbPointer(
         absorbing: _isMigratingCustomerData,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  locn.otpVerification,
-                  style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          text: locn.enterTheOtpSentToTheNumber,
-                          style: GoogleFonts.dmSans(
-                            color: Colors.black54,
-                            fontSize: 16,
-                          ),
-                          children: [
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: Text(
-                                  " ${widget.phoneNumber} ",
-                                  style: GoogleFonts.dmSans(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black87,
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              text: locn.otpHasbeensentto,
+                              style: GoogleFonts.dmSans(
+                                color: Colors.black45,
+                                fontSize: 14,
+                              ),
+                              children: [
+                                WidgetSpan(
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Text(
+                                      " ${widget.phoneNumber} ",
+                                      style: GoogleFonts.dmSans(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 6 OTP Boxes
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: List.generate(
+                                6,
+                                (index) => _buildOtpTextField(index),
                               ),
                             ),
+                            if (_isSmsAutofillListening)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.green,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Listening for SMS...',
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 12,
+                                        color: AppColors.green,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                Text(
-                  locn.enterOtp,
-                  style: GoogleFonts.dmSans(
-                    color: Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Form(
-                  key: _formKey,
-                  child: TextFormField(
-                    controller: otpController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    maxLength: 6,
-                    obscureText: true,
-                    obscuringCharacter: "*",
-                    autofillHints: const [AutofillHints.oneTimeCode],
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      helperText: _isSmsAutofillListening
-                          ? '🎯 Listening for SMS...'
-                          : null,
-                      helperStyle: GoogleFonts.dmSans(
-                        fontSize: 12,
-                        color: AppColors.green,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: _isSmsAutofillListening
-                              ? AppColors.green
-                              : AppColors.green,
-                        ),
-                      ),
-                      disabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      if (value.length == 6) {
-                        FocusScope.of(context).unfocus();
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return locn.enterOtp;
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _remainingTime > 0
-                          ? '${locn.resend} ($_formattedTime)'
-                          : AppLocalizations.of(context)!.didNotReceiveOTP,
-                      style: GoogleFonts.dmSans(
-                        color: Colors.black54,
-                        fontSize: 14,
-                      ),
-                    ),
-                    if (_remainingTime <= 0) ...[
-                      const SizedBox(width: 4),
-                      TextButton(
-                        onPressed: isResendingOtp ? null : resendOTP,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: isResendingOtp
-                            ? SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.green,
-                                ),
-                              )
-                            : Text(
-                                locn.resend,
-                                style: GoogleFonts.dmSans(
-                                  color: AppColors.green,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                      ),
-                    ],
-                  ],
-                ),
-                const Spacer(),
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : verifyOtp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                      disabledBackgroundColor: AppColors.secondary.withOpacity(
-                        0.7,
-                      ),
-                    ),
-                    child: isLoading
-                        ? Loader(color: Colors.white, size: 24)
-                        : Text(
-                            locn.verifyOtp,
+
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _remainingTime > 0
+                                ? '${locn.resend} ($_formattedTime)'
+                                : AppLocalizations.of(context)!.didNotReceiveOTP,
                             style: GoogleFonts.dmSans(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                              fontSize: 14,
                             ),
                           ),
+                          if (_remainingTime <= 0) ...[
+                            const SizedBox(width: 4),
+                            TextButton(
+                              onPressed: isResendingOtp ? null : resendOTP,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: isResendingOtp
+                                  ? Loader(color: AppColors.green, size: 16)
+                                  : Text(
+                                      locn.resend,
+                                      style: GoogleFonts.dmSans(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : verifyOtp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            elevation: 0,
+                            disabledBackgroundColor: AppColors.primary
+                                .withOpacity(0.7),
+                          ),
+                          child: isLoading
+                              ? Loader(color: Colors.white, size: 24)
+                              : Text(
+                                  locn.verifyOtp,
+                                  style: GoogleFonts.dmSans(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

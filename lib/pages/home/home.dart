@@ -44,7 +44,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   int currentIndex = 0;
-  String selectedBookingStatus = 'P';
+  String selectedBookingStatus = 'O';
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (widget.selectedFilter != null) {
       selectedBookingStatus = widget.selectedFilter!;
     } else {
-      selectedBookingStatus = 'P';
+      selectedBookingStatus = 'O';
     }
 
     // Add observer for app lifecycle
@@ -122,6 +122,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           userData = state.user;
         } else {
           return Scaffold(
+            backgroundColor: AppColors.bgWhite,
             body: Center(child: Loader(color: AppColors.primary)),
           );
         }
@@ -175,6 +176,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             }
           },
           child: Scaffold(
+            backgroundColor: AppColors.bgWhite,
             extendBodyBehindAppBar: true,
             extendBody: true,
             body: AnimatedSwitcher(
@@ -188,11 +190,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               selectedIndex: currentIndex,
               onDestinationSelected: (index) {
                 if (index < pages.length) {
-                  setState(() => currentIndex = index);
+                  setState(() {
+                    currentIndex = index;
+                    if (index == 1) {
+                      selectedBookingStatus = 'O';
+                    }
+                  });
                 }
               },
               height: 70,
-              selectedItemColor: AppColors.newYellow,
+              selectedItemColor: AppColors.primary,
               destinations: [
                 AnimatedNavDestination(
                   icon: SvgPicture.asset(AppIcons.homeNav),
@@ -243,6 +250,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     AppLocalizations? locale,
   ) {
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -268,7 +276,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     AppLocalizations? locale,
   ) {
     return Scaffold(
+      backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
+        backgroundColor: AppColors.bgWhite,
+        surfaceTintColor: AppColors.bgWhite,
         title: Text(locale?.account ?? 'Account'),
         centerTitle: true,
       ),

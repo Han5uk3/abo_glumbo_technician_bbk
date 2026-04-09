@@ -257,17 +257,19 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        elevation: 1,
-        backgroundColor: AppColors.primary,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.bgWhite.withOpacity(0.2),
+              backgroundColor: AppColors.primary.withOpacity(0.1),
               backgroundImage: widget.participantPhoto.isNotEmpty
                   ? NetworkImage(widget.participantPhoto)
                   : null,
@@ -279,29 +281,31 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
                       style: GoogleFonts.dmSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: AppColors.primary,
                       ),
                     )
                   : null,
             ),
             const SizedBox(width: 12),
-            Expanded(
+            Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.participantName,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black,
                     ),
                   ),
                   Text(
                     localization.customer,
                     style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 10,
+                      color: Colors.black54,
                     ),
                   ),
                 ],

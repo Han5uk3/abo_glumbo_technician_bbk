@@ -32,12 +32,16 @@ class BookingInfo extends StatefulWidget {
   final BookingModel booking;
   final bool isAdmin;
   final bool isWarranty;
+  final String? offerId;
+  final bool isFromOffersTab;
 
   const BookingInfo({
     super.key,
     required this.booking,
     required this.isAdmin,
     this.isWarranty = false,
+    this.offerId,
+    this.isFromOffersTab = false,
   });
 
   @override
@@ -224,10 +228,29 @@ class _BookingInfoState extends State<BookingInfo> {
   }
 
   Future<void> _checkJobOffer() async {
-    if (widget.isWarranty || widget.isAdmin) {
+    // Skip check for Warranty, Admin, or bookings coming from non-offer tabs
+    if (widget.isWarranty || widget.isAdmin || !widget.isFromOffersTab) {
       if (mounted) setState(() => _isCheckingOffer = false);
       return;
     }
+
+    // If we already have the offer ID from the caller, use it immediately
+    if (widget.offerId != null) {
+      if (mounted) {
+        setState(() {
+          _offerId = widget.offerId;
+          _isCheckingOffer = false;
+        });
+      }
+      return;
+    }
+
+    // Skip check for traditional bookings (not on-hour)
+    if (!(widget.booking.isOnHour ?? false)) {
+      if (mounted) setState(() => _isCheckingOffer = false);
+      return;
+    }
+
     final offerId = await AppServices.getPendingJobOfferId(widget.booking.id);
     if (mounted) {
       setState(() {
@@ -257,9 +280,9 @@ class _BookingInfoState extends State<BookingInfo> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
@@ -277,9 +300,9 @@ class _BookingInfoState extends State<BookingInfo> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
@@ -330,7 +353,7 @@ class _BookingInfoState extends State<BookingInfo> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.blue1.withOpacity(0.1),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -340,7 +363,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                   ],
                 ),
-                child: Icon(icon, color: AppColors.primary, size: 16),
+                child: Icon(icon, color: AppColors.white, size: 16),
               ),
               const SizedBox(width: 8),
               Text(
@@ -447,7 +470,7 @@ class _BookingInfoState extends State<BookingInfo> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.blue1.withOpacity(0.1),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -459,7 +482,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 child: Icon(
                   Icons.build_outlined,
-                  color: AppColors.primary,
+                  color: AppColors.white,
                   size: 16,
                 ),
               ),
@@ -595,7 +618,7 @@ class _BookingInfoState extends State<BookingInfo> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.blue1.withOpacity(0.1),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -607,7 +630,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 child: Icon(
                   Icons.location_on_outlined,
-                  color: AppColors.primary,
+                  color: AppColors.white,
                   size: 16,
                 ),
               ),
@@ -644,15 +667,14 @@ class _BookingInfoState extends State<BookingInfo> {
         builder: (context) => Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
-            backgroundColor: AppColors.primary,
-            elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
               AppLocalizations.of(context)!.image,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
             ),
           ),
           body: Center(
@@ -895,15 +917,27 @@ class _BookingInfoState extends State<BookingInfo> {
               SliverAppBar(
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                centerTitle: true,
                 pinned: true,
                 floating: true,
                 backgroundColor: Colors.white,
                 leading: IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.black,
+                    size: 20,
+                  ),
                 ),
                 shape: Border.all(style: BorderStyle.none),
-                title: Text(AppLocalizations.of(context)!.bookingInfo),
+                title: Text(
+                  AppLocalizations.of(context)!.bookingInfo,
+                  style: DMSansFont.textStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -922,29 +956,10 @@ class _BookingInfoState extends State<BookingInfo> {
                       final isTracking =
                           currentBooking.isStartTracking ?? false;
 
+                      // Chat with Customer Button visibility logic
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Review and Tip Card
-                          if (((statusCode.toLowerCase() == 'a' &&
-                                  !widget.isAdmin) ||
-                              (!widget.isAdmin &&
-                                  statusCode.toLowerCase() == 'p' &&
-                                  currentBooking.agent != null) ||
-                              (!widget.isAdmin &&
-                                  widget.isWarranty &&
-                                  currentBooking.warranty?.warrantyStatusCode
-                                          .toLowerCase() ==
-                                      's'))) ...{
-                            _buildChatWithCustomerButton(
-                              context,
-                              colorScheme,
-                              chatroomId,
-                              widget.isWarranty,
-                            ),
-                            const SizedBox(height: 16),
-                          },
-
                           // Booking controls (Normal)
                           if (!widget.isWarranty &&
                               (statusCode.toLowerCase() == 'a'))
@@ -972,8 +987,9 @@ class _BookingInfoState extends State<BookingInfo> {
                             width: double.maxFinite,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xffEAF1FF).withOpacity(0.50),
+                              color: AppColors.primary.withAlpha(30),
                             ),
+                            margin: EdgeInsets.only(top: 10),
                             padding: const EdgeInsets.all(12),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -1007,12 +1023,14 @@ class _BookingInfoState extends State<BookingInfo> {
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w500,
+                                                    color: Colors.black,
                                                   ),
                                                 ),
                                                 Text(
                                                   "#${currentBooking.id}",
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 10,
+                                                    color: Colors.black,
                                                   ),
                                                 ),
                                               ],
@@ -1051,10 +1069,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                     ],
                                   ),
                                 ),
-                                const Divider(
-                                  thickness: 0.5,
-                                  color: Colors.black,
-                                ),
+                                Divider(thickness: 0.5, color: Colors.black),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 4,
@@ -1220,8 +1235,23 @@ class _BookingInfoState extends State<BookingInfo> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.image,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
           body: Center(
             child: InteractiveViewer(
               child: CachedNetworkImage(
@@ -1515,7 +1545,7 @@ class _BookingInfoState extends State<BookingInfo> {
                       ? AppLocalizations.of(context)!.continueChat
                       : AppLocalizations.of(context)!.chatWithCustomer,
                   style: DMSansFont.textStyle(
-                    fontSize: 16,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -1616,17 +1646,21 @@ class _BookingInfoState extends State<BookingInfo> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
               AppLocalizations.of(context)!.video,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+              ),
             ),
           ),
           body: Center(
@@ -1646,23 +1680,36 @@ class _BookingInfoState extends State<BookingInfo> {
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
+    // Chat with Customer Button visibility logic
+    bool showChat = false;
+    if (!widget.isAdmin) {
+      if (widget.isWarranty) {
+        final wStatus = widget.booking.warranty?.warrantyStatusCode
+            .toUpperCase();
+        showChat =
+            widget.booking.warranty != null && wStatus != 'C' && wStatus != 'E';
+      } else {
+        showChat = widget.booking.bookingStatusCode.toUpperCase() == 'A';
+      }
+    }
+
     return _buildSectionCard(
       context: context,
       title: AppLocalizations.of(context)!.customerInfo,
       icon: Icons.person_outline,
-      hasChat: !widget.isAdmin && widget.booking.bookingStatusCode == 'A',
+      hasChat: false, // Moved to Row below
       children: [
         Row(
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: AppColors.blue1.withOpacity(0.1),
+              backgroundColor: AppColors.primary,
               child: Text(
                 _getInitials(widget.booking.customer.name ?? ""),
                 style: DMSansFont.textStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -1689,6 +1736,24 @@ class _BookingInfoState extends State<BookingInfo> {
                 ],
               ),
             ),
+            if (showChat) ...[
+              GestureDetector(
+                onTap: isInitiatingChat ? null : handleChatButton,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.chat_bubble_rounded,
+                    color: AppColors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             if (widget.booking.bookingStatusCode != 'C' && !widget.isAdmin)
               GestureDetector(
                 onTap: () async {
@@ -1743,18 +1808,18 @@ class _BookingInfoState extends State<BookingInfo> {
                   CircleAvatar(radius: 20, backgroundImage: imageProvider),
               placeholder: (context, url) => CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.blue1.withOpacity(0.1),
-                child: Center(child: Loader()),
+                backgroundColor: AppColors.primary,
+                child: Center(child: Loader(color: AppColors.white)),
               ),
               errorWidget: (context, url, error) => CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.blue1.withOpacity(0.1),
+                backgroundColor: AppColors.primary,
                 child: Text(
                   _getInitials(agent.name ?? ""),
                   style: DMSansFont.textStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -2324,14 +2389,18 @@ class _BookingInfoState extends State<BookingInfo> {
               });
             } else {
               // Initial state, waiting for technician to accept
+              final isSearching =
+                  widget.booking.autoAssignmentStatus == 'searching';
               timelineItems.add({
-                'title': AppLocalizations.of(
-                  context,
-                )!.waitingForServiceProvider,
+                'title': isSearching
+                    ? AppLocalizations.of(context)!.assigningTechnician
+                    : AppLocalizations.of(context)!.waitingForServiceProvider,
                 'time': AppLocalizations.of(context)!.pending,
-                'description': AppLocalizations.of(
-                  context,
-                )!.waitingForServiceProviderResponse,
+                'description': isSearching
+                    ? AppLocalizations.of(context)!.assigningTechnician
+                    : AppLocalizations.of(
+                        context,
+                      )!.waitingForServiceProviderResponse,
                 'status': 'current',
                 'date': DateTime.now(),
               });
@@ -2365,12 +2434,18 @@ class _BookingInfoState extends State<BookingInfo> {
               'date': DateTime.now(),
             });
           } else {
+            final isSearching =
+                widget.booking.autoAssignmentStatus == 'searching';
             timelineItems.add({
-              'title': AppLocalizations.of(context)!.waitingForAcceptance,
+              'title': isSearching
+                  ? AppLocalizations.of(context)!.assigningTechnician
+                  : AppLocalizations.of(context)!.waitingForAcceptance,
               'time': AppLocalizations.of(context)!.pending,
-              'description': AppLocalizations.of(
-                context,
-              )!.waitingForServiceProviderResponse,
+              'description': isSearching
+                  ? AppLocalizations.of(context)!.assigningTechnician
+                  : AppLocalizations.of(
+                      context,
+                    )!.waitingForServiceProviderResponse,
               'status': 'current',
               'date': DateTime.now(),
             });
@@ -2406,20 +2481,16 @@ class _BookingInfoState extends State<BookingInfo> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer.withOpacity(0.3),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.timeline,
-                    color: colorScheme.primary,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.timeline, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.bookingTimeline,
                   style: DMSansFont.textStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
                   ),
@@ -3364,8 +3435,10 @@ class _BookingInfoState extends State<BookingInfo> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-              onPressed: () =>
-                  CounterOfferUtils.showCounterOfferDatePicker(context, booking),
+              onPressed: () => CounterOfferUtils.showCounterOfferDatePicker(
+                context,
+                booking,
+              ),
               icon: const Icon(Icons.history_toggle_off, size: 20),
               label: Text(l10n.proposeNewTime),
               style: ElevatedButton.styleFrom(
@@ -3472,10 +3545,12 @@ class _BookingInfoState extends State<BookingInfo> {
 
   Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {
     if (_isOfferLoading) {
-      return const Center(child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: CircularProgressIndicator(),
-      ));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
     final l10n = AppLocalizations.of(context)!;
     return Container(
@@ -3863,9 +3938,9 @@ class _BookingInfoState extends State<BookingInfo> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.calendar_month, size: 19, color: AppColors.black1),
+        Icon(Icons.calendar_month, size: 19, color: Colors.black),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(color: AppColors.black1, fontSize: 10.5)),
+        Text(text, style: TextStyle(color: Colors.black, fontSize: 10.5)),
       ],
     );
   }
@@ -3882,23 +3957,22 @@ class VerifyPaymentControls extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.payment_rounded, color: Colors.blue.shade700),
+              Icon(Icons.payment_rounded, color: AppColors.white),
               const SizedBox(width: 12),
               Text(
                 AppLocalizations.of(context)!.verificationPending,
                 style: DMSansFont.textStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade900,
+                  color: AppColors.white,
                 ),
               ),
             ],
@@ -3906,10 +3980,7 @@ class VerifyPaymentControls extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             AppLocalizations.of(context)!.waitingForTechnicianVerification,
-            style: DMSansFont.textStyle(
-              fontSize: 13,
-              color: Colors.blue.shade700,
-            ),
+            style: DMSansFont.textStyle(fontSize: 13, color: AppColors.white),
           ),
           const SizedBox(height: 20),
           SizedBox(

@@ -9,7 +9,7 @@ class LocalizationHelper {
   }) {
     switch (bookingStatus.toLowerCase()) {
       case 'offers':
-        return AppLocalizations.of(context)!.orders;
+        return AppLocalizations.of(context)!.offers;
       case 'pending':
         return AppLocalizations.of(context)!.pending;
       case 'accepted':
@@ -22,6 +22,12 @@ class LocalizationHelper {
         return AppLocalizations.of(context)!.cancelled;
       case 'payment pending':
         return AppLocalizations.of(context)!.paymentPending;
+      case 'searching':
+        return AppLocalizations.of(context)!.assigningTechnician;
+      case 'timed_out':
+        return AppLocalizations.of(context)!.timedOut;
+      case 'not_found':
+        return AppLocalizations.of(context)!.technicianNotFound;
       default:
         return AppLocalizations.of(context)!.unknown;
     }
@@ -55,8 +61,23 @@ class LocalizationHelper {
     return formatted;
   }
 
-  getLocalizedBookingStatus(String status, BuildContext context) {
-    switch (status) {
+  /// Formats date time as dd/MM/yy, hh:mm AM/PM (localized AM/PM)
+  String formatDateTimeCompact(DateTime date, BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    String formatted =
+        intl.DateFormat('dd/MM/yy, hh:mm a', locale).format(date);
+
+    if (locale == 'ar') {
+      formatted = formatted.replaceAllMapped(RegExp(r'[0-9]'), (match) {
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return arabicNumbers[int.parse(match.group(0)!)];
+      });
+    }
+    return formatted;
+  }
+
+  String getLocalizedBookingStatus(String status, BuildContext context) {
+    switch (status.toUpperCase()) {
       case 'P':
         return AppLocalizations.of(context)!.pending;
       case 'A':
@@ -66,7 +87,10 @@ class LocalizationHelper {
       case 'C':
         return AppLocalizations.of(context)!.completed;
       case 'X':
+      case 'XC':
         return AppLocalizations.of(context)!.cancelled;
+      case 'VP':
+        return AppLocalizations.of(context)!.verificationPending;
       default:
         return status;
     }

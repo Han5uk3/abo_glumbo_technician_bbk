@@ -7,6 +7,7 @@ import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -135,12 +136,16 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
         return Scaffold(
           backgroundColor: AppColors.bgWhite,
           appBar: AppBar(
+            centerTitle: true,
             elevation: 0,
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.black87,
+            backgroundColor: Colors.white,
             title: Text(
               AppLocalizations.of(context)?.notifications ?? 'Notifications',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: DMSansFont.textStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
             ),
             actions: [
               if (_cachedNotifications.isNotEmpty)

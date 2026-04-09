@@ -461,6 +461,7 @@ class AppServices {
             .where('bookingStatusCode', isEqualTo: 'C')
             .where('paymentCompleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -472,6 +473,7 @@ class AppServices {
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
             .where('paymentCompleted', isEqualTo: true)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -482,6 +484,7 @@ class AppServices {
         return AppFirestore.bookingsCollectionRef
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -541,6 +544,7 @@ class AppServices {
             .where('bookingStatusCode', whereIn: ['C', 'VP'])
             .where('paymentCompleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -553,6 +557,7 @@ class AppServices {
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
             .where('paymentCompleted', isEqualTo: true)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -564,6 +569,7 @@ class AppServices {
             .where('agent.uid', isEqualTo: workerId)
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
             .orderBy('createdAt', descending: true)
+            .limit(50)
             .snapshots()
             .map((snapshot) {
               return snapshot.docs
@@ -1083,18 +1089,13 @@ class AppServices {
 
   static Stream<List<UserModel>> getCatagoryWiseWorkersStream(
     String categoryId,
-  ) async* {
-    final docSnapshot = await AppFirestore.categoriesCollectionRef
-        .doc(categoryId)
-        .get();
-    final data = docSnapshot.data() as Map<String, dynamic>?;
-    String categoryName = data?['name'] ?? '';
+  ) {
     Query query = AppFirestore.usersCollectionRef
         .where('isVerified', isEqualTo: true)
         .where('isAdmin', isNotEqualTo: true)
-        .where('jobRoles', arrayContains: categoryName);
+        .where('jobRoles', arrayContains: categoryId);
 
-    yield* query.snapshots().map((snapshot) {
+    return query.snapshots().map((snapshot) {
       return snapshot.docs
           .map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
@@ -2679,34 +2680,57 @@ class AppServices {
   }
 
   static Stream<List<JobOfferWithBooking>> getJobOffersStream() {
-    String userId = LocalStore.getUID() ?? '';
-    if (userId.isEmpty) return Stream.value([]);
-
-    return AppFirestore.jobOffersCollectionRef
+    final userId = LocalStore.getUID();
+    if (userId == null || userId.isEmpty) return Stream.value([]);
+    
+    final firestoreStream = AppFirestore.jobOffersCollectionRef
         .where('technicianId', isEqualTo: userId)
         .where('status', isEqualTo: 'pending')
-        .snapshots()
+        .snapshots();
+        
+    // Combine with a periodic timer to force re-evaluation of 'expiresAt' every 10s
+    // Added .startWith(0) to ensure the stream emits immediately on subscription
+    final timerStream = Stream.periodic(const Duration(seconds: 10), (i) => i).startWith(0);
+
+    return Rx.combineLatest2(firestoreStream, timerStream, (snapshot, _) => snapshot)
         .asyncMap((snapshot) async {
-      List<JobOfferWithBooking> offers = [];
-      for (var doc in snapshot.docs) {
+      final now = DateTime.now();
+      
+      // 1. Filter active offers and identify booking IDs
+      final activeOffers = snapshot.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final expiresAt = data['expiresAt'] as Timestamp?;
+        return expiresAt != null && expiresAt.toDate().isAfter(now);
+      }).toList();
+
+      if (activeOffers.isEmpty) return [];
+
+      // 2. Fetch all related bookings in parallel (Concurrently)
+      // This is much faster than sequential 'await' in a for-loop
+      final List<Future<JobOfferWithBooking?>> fetchFutures = activeOffers.map((doc) async {
         try {
           final data = doc.data() as Map<String, dynamic>;
-          final expiresAt = data['expiresAt'] as Timestamp;
-          if (expiresAt.toDate().isAfter(DateTime.now())) {
-            final bookingId = data['bookingId'];
-            final booking = await getBookingById(bookingId);
-            if (booking != null && booking.bookingStatusCode == 'P') {
-              offers.add(JobOfferWithBooking(
-                offerId: doc.id,
-                booking: booking,
-              ));
-            }
+          final bookingId = data['bookingId'];
+          if (bookingId == null) return null;
+          
+          final booking = await getBookingById(bookingId);
+          // Only show 'Pending' bookings that haven't been assigned yet
+          if (booking != null && booking.bookingStatusCode == 'P') {
+            return JobOfferWithBooking(
+              offerId: doc.id,
+              booking: booking,
+            );
           }
         } catch (e) {
-          debugPrint('Error processing job offer: $e');
+          debugPrint('Error fetching booking for offer ${doc.id}: $e');
         }
-      }
-      return offers;
+        return null;
+      }).toList();
+
+      final results = await Future.wait(fetchFutures);
+      
+      // Filter out nulls and return valid offers
+      return results.whereType<JobOfferWithBooking>().toList();
     });
   }
 

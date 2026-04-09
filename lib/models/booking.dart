@@ -48,6 +48,7 @@ class BookingModel {
   WarrantyModel? warranty;
   CounterOfferModel? activeCounterOffer;
   bool? isOnHour; // ✅ Added
+  String? autoAssignmentStatus; // ✅ Added
 
   /// The polygon service zone matched when the customer validated their address.
   /// Written by the customer app; read here by the technician/admin app.
@@ -89,6 +90,7 @@ class BookingModel {
     this.warranty,
     this.activeCounterOffer,
     this.isOnHour, // ✅ Added
+    this.autoAssignmentStatus, // ✅ Added
     this.counterProposalAcceptedAt,
     this.counterProposalStartedAt,
   });
@@ -145,6 +147,7 @@ class BookingModel {
           : null,
       rejectedBy = data['rejectedBy'] as String?,
       isOnHour = data['isOnHour'], // ✅ Added
+      autoAssignmentStatus = data['autoAssignmentStatus'], // ✅ Added
       technicianPaymentProof = data['technicianPaymentProof'] != null
           ? List<String>.from(data['technicianPaymentProof'])
           : null,
@@ -195,6 +198,7 @@ class BookingModel {
       'technicianPaymentProof': technicianPaymentProof,
       'activeCounterOffer': activeCounterOffer?.toMap(),
       'isOnHour': isOnHour, // ✅ Added
+      'autoAssignmentStatus': autoAssignmentStatus, // ✅ Added
     };
 
     map['id'] = id;

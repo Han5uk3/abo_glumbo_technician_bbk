@@ -18,8 +18,9 @@ class ManageServices extends StatelessWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.manageServices),
         leading: IconButton(
+          iconSize: 18,
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
       ),
       body: StreamBuilder<List<CategoryModel>>(

@@ -44,6 +44,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rememberMe => 'Remember Me';
 
   @override
+  String get login => 'Login';
+
+  @override
+  String get totalPayoutAmount => 'Total Payout Amount';
+
+  @override
+  String get reviewPayoutDetails => 'Review Payout Details';
+
+  @override
   String get manageOrders => 'Manage Orders';
 
   @override
@@ -273,6 +282,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknown => 'Unknown';
 
   @override
+  String get timedOut => 'Timed Out';
+
+  @override
+  String get technicianNotFound => 'Technician Not Found';
+
+  @override
+  String get verificationPending => 'Verification Pending';
+
+  @override
   String get otpAutoVerified => 'OTP Auto Verified';
 
   @override
@@ -280,6 +298,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otpSent => 'OTP Sent';
+
+  @override
+  String get otpHasbeensentto => 'OTP has been sent to';
 
   @override
   String get anErrorOccurredPleaseTryAgainLater =>
@@ -1002,6 +1023,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orders => 'Orders';
+
+  @override
+  String get offers => 'Offers';
 
   @override
   String get failedToLoadUserData => 'Failed to load user data';
@@ -1968,7 +1992,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get now => 'Now';
 
   @override
-  String get assigningTechnician => 'Assigning Technician';
+  String get assigningTechnician => 'Pending Acceptance';
 
   @override
   String get selectProvince => 'Select Province';
@@ -4375,9 +4399,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectedLocations => 'Selected Locations';
-
-  @override
-  String get verificationPending => 'Verification Pending';
 
   @override
   String get waitingForTechnicianVerification =>

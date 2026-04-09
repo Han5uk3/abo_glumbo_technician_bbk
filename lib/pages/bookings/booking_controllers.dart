@@ -229,9 +229,12 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                           label: isThisBookingTracked
                               ? AppLocalizations.of(context)!.stopTracking
                               : AppLocalizations.of(context)!.startTracking,
-                          color: isThisBookingTracked ? Colors.orange : AppColors.blue1,
+                          color: isThisBookingTracked
+                              ? Colors.orange
+                              : AppColors.blue1,
                           isOutlined: true,
-                          isLoading: isStartWorkingLoading || isStopWorkingLoading,
+                          isLoading:
+                              isStartWorkingLoading || isStopWorkingLoading,
                         ),
                       ),
                     ],
@@ -265,14 +268,13 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                           : Text(
                               AppLocalizations.of(context)!.completeWork,
                               style: DMSansFont.textStyle(
-                                fontSize: 16,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
                     ),
                   ),
-                  
                 ],
               ),
             );
@@ -300,19 +302,24 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: baseColor.withOpacity(0.3)),
                 backgroundColor: baseColor.withOpacity(0.04),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: isLoading
                   ? SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: baseColor, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: baseColor,
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
                       label,
                       style: DMSansFont.textStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: baseColor,
                       ),
@@ -324,19 +331,24 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: baseColor,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
                       label,
                       style: DMSansFont.textStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -346,24 +358,25 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
     );
   }
 
-
   void _showCancelBottomSheet(BuildContext context) {
     _showAppBottomSheet(
       context: context,
       icon: Icons.cancel_outlined,
       iconColor: Colors.red,
       title: AppLocalizations.of(context)!.cancelBooking,
-      message: AppLocalizations.of(context)!.areYouSureYouWantToCancelThisBooking,
+      message: AppLocalizations.of(
+        context,
+      )!.areYouSureYouWantToCancelThisBooking,
       primaryActionLabel: AppLocalizations.of(context)!.yes,
       primaryAction: () {
         Navigator.of(context).pop();
         context.read<BookingBloc>().add(
-              CancelBooking(
-                bookingId: widget.booking.id,
-                agentUid: widget.booking.agent?.uid ?? '',
-                agentName: widget.booking.agent?.name ?? '',
-              ),
-            );
+          CancelBooking(
+            bookingId: widget.booking.id,
+            agentUid: widget.booking.agent?.uid ?? '',
+            agentName: widget.booking.agent?.name ?? '',
+          ),
+        );
       },
       secondaryActionLabel: AppLocalizations.of(context)!.no,
       additionalActionLabel: AppLocalizations.of(context)!.proposeNewTime,
@@ -380,15 +393,19 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
       icon: Icons.play_circle_outline,
       iconColor: AppColors.blue1,
       title: AppLocalizations.of(context)!.startTracking,
-      message: AppLocalizations.of(context)!.areYouSureYouWantToStartTrackingThisBooking,
+      message: AppLocalizations.of(
+        context,
+      )!.areYouSureYouWantToStartTrackingThisBooking,
       primaryActionLabel: AppLocalizations.of(context)!.yes,
       primaryAction: () {
         Navigator.of(context).pop();
-        context.read<BookingBloc>().add(StartWorkingOnBooking(
-          bookingId: widget.booking.id,
-          uid: widget.booking.agent?.uid ?? '',
-          context: context,
-        ));
+        context.read<BookingBloc>().add(
+          StartWorkingOnBooking(
+            bookingId: widget.booking.id,
+            uid: widget.booking.agent?.uid ?? '',
+            context: context,
+          ),
+        );
       },
       secondaryActionLabel: AppLocalizations.of(context)!.no,
     );
@@ -400,11 +417,15 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
       icon: Icons.pause_circle_outline,
       iconColor: Colors.orange,
       title: AppLocalizations.of(context)!.stopTracking,
-      message: AppLocalizations.of(context)!.areYouSureYouWantToStopTrackingThisBooking,
+      message: AppLocalizations.of(
+        context,
+      )!.areYouSureYouWantToStopTrackingThisBooking,
       primaryActionLabel: AppLocalizations.of(context)!.yes,
       primaryAction: () {
         Navigator.of(context).pop();
-        context.read<BookingBloc>().add(StopWorkingOnBooking(bookingId: widget.booking.id));
+        context.read<BookingBloc>().add(
+          StopWorkingOnBooking(bookingId: widget.booking.id),
+        );
       },
       secondaryActionLabel: AppLocalizations.of(context)!.no,
     );
@@ -486,7 +507,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   // Addtional Action (e.g. Propose New Time) - Full Width & Prominent
+                  // Addtional Action (e.g. Propose New Time) - Full Width & Prominent
                   if (additionalActionLabel != null) ...[
                     SizedBox(
                       width: double.infinity,
@@ -524,7 +545,9 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                           child: SizedBox(
                             height: 52,
                             child: OutlinedButton(
-                              onPressed: secondaryAction ?? () => Navigator.of(context).pop(),
+                              onPressed:
+                                  secondaryAction ??
+                                  () => Navigator.of(context).pop(),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.grey[700],
                                 side: BorderSide(color: Colors.grey[300]!),
@@ -542,8 +565,9 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                             ),
                           ),
                         ),
-                      
-                      if (secondaryActionLabel != null) const SizedBox(width: 12),
+
+                      if (secondaryActionLabel != null)
+                        const SizedBox(width: 12),
 
                       // Primary Action (Yes/Confirm)
                       Expanded(
@@ -553,7 +577,9 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                             onPressed: primaryAction,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: iconColor,
-                              side: BorderSide(color: iconColor.withOpacity(0.5)),
+                              side: BorderSide(
+                                color: iconColor.withOpacity(0.5),
+                              ),
                               backgroundColor: iconColor.withOpacity(0.05),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

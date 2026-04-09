@@ -1,9 +1,9 @@
-import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,11 +32,11 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      appBar: _buildAppBar(localizations, colorScheme),
+      backgroundColor: AppColors.bgBlueTint,
+      appBar: _buildAppBar(localizations),
       body: Column(
         children: [
-          _buildHeader(localizations, theme, colorScheme),
+          _buildHeader(localizations),
           Expanded(child: _buildAccountsList(colorScheme)),
         ],
       ),
@@ -44,55 +44,68 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(
-    AppLocalizations localizations,
-    ColorScheme colorScheme,
-  ) {
+  PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
       title: Text(
         localizations.payoutAccounts,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
+        style: DMSansFont.textStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
       ),
-      centerTitle: false,
-      elevation: 0,
-      backgroundColor: AppColors.primary,
     );
   }
 
-  Widget _buildHeader(
-    AppLocalizations localizations,
-    ThemeData theme,
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildHeader(AppLocalizations localizations) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primary, width: 2),
         color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            spreadRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
-        borderRadius: BorderRadius.circular(12),
       ),
-      child: Center(
-        child: Text(
-          localizations.addAndManageYourPayoutAccounts,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              color: AppColors.primary,
+              size: 24,
+            ),
           ),
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              localizations.addAndManageYourPayoutAccounts,
+              style: DMSansFont.textStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -133,9 +146,15 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
   Widget _buildFAB(AppLocalizations localizations) {
     return FloatingActionButton.extended(
       onPressed: _showAddEditDialog,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      elevation: 4,
       icon: const Icon(Icons.add_rounded),
-      label: Text(localizations.addAccount),
-      elevation: 2,
+      label: Text(
+        localizations.addAccount,
+        style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 
@@ -195,36 +214,104 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
   }
 
   Future<bool?> _showDeleteConfirmation(AppLocalizations localizations) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return showDialog<bool>(
+    return showModalBottomSheet<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.bgWhite,
-        actionsAlignment: MainAxisAlignment.start,
-        icon: Icon(
-          Icons.delete_outline_rounded,
-          size: 48,
-          color: colorScheme.error,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        title: Text(localizations.deleteAccount),
-        content: Text(localizations.deleteAccountConfirmation),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        actions: [
-          eButton(
-            onPressed: () => Navigator.pop(context, false),
-            text: localizations.cancel,
-            context: context,
-            textColor: Colors.white,
-            backgroundColor: colorScheme.primary,
-          ),
-          eButton(
-            onPressed: () => Navigator.pop(context, true),
-            text: localizations.delete,
-            context: context,
-            textColor: Colors.white,
-            backgroundColor: colorScheme.error,
-          ),
-        ],
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                size: 40,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              localizations.deleteAccount,
+              style: DMSansFont.textStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              localizations.deleteAccountConfirmation,
+              textAlign: TextAlign.center,
+              style: DMSansFont.textStyle(
+                fontSize: 14,
+                color: Colors.black45,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      localizations.cancel,
+                      style: DMSansFont.textStyle(
+                        color: Colors.black38,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      localizations.delete,
+                      style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }
@@ -269,7 +356,6 @@ class _EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final localizations = AppLocalizations.of(context)!;
 
     return Center(
@@ -279,43 +365,62 @@ class _EmptyStateWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
+                color: Colors.white,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Icon(
                 Icons.account_balance_wallet_outlined,
                 size: 64,
-                color: colorScheme.primary,
+                color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             Text(
               localizations.noPayoutAccountsAdded,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+              style: DMSansFont.textStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               localizations.addAnAccountToReceivePayments,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              style: DMSansFont.textStyle(
+                fontSize: 14,
+                color: Colors.black45,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
+            const SizedBox(height: 48),
+            ElevatedButton.icon(
               onPressed: onAddAccount,
               icon: const Icon(Icons.add_rounded),
-              label: Text(localizations.addFirstAccount),
-              style: FilledButton.styleFrom(
+              label: Text(
+                localizations.addFirstAccount,
+                style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+                  horizontal: 32,
+                  vertical: 18,
+                ),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
@@ -333,7 +438,6 @@ class _ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final localizations = AppLocalizations.of(context);
 
     return Center(
@@ -342,24 +446,34 @@ class _ErrorStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: colorScheme.error,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.red,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               localizations?.error ?? 'Error',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.error,
+              style: DMSansFont.textStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               error,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              style: DMSansFont.textStyle(
+                fontSize: 13,
+                color: Colors.black45,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
@@ -388,32 +502,38 @@ class _AccountCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final localizations = AppLocalizations.of(context)!;
 
-    return Card.filled(
-      elevation: 0,
-      color: colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: account.isPrimary
-              ? colorScheme.primary
-              : colorScheme.outlineVariant,
-          width: account.isPrimary ? 2 : 1,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: account.isPrimary
+            ? Border.all(color: AppColors.primary.withOpacity(0.2), width: 1.5)
+            : null,
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onEdit,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context, colorScheme, localizations),
-              const SizedBox(height: 20),
-              _buildDetailsSection(context, colorScheme, localizations),
-              const SizedBox(height: 16),
-              _buildActionButtons(context, colorScheme, localizations),
-            ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onEdit,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, colorScheme, localizations),
+                const SizedBox(height: 24),
+                _buildDetailsSection(context, colorScheme, localizations),
+                const SizedBox(height: 24),
+                _buildActionButtons(context, colorScheme, localizations),
+              ],
+            ),
           ),
         ),
       ),
@@ -428,19 +548,17 @@ class _AccountCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: account.isPrimary
-                ? colorScheme.primaryContainer
-                : colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+                ? AppColors.primary.withOpacity(0.1)
+                : AppColors.bgBlueTint,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             Icons.account_balance_rounded,
-            color: account.isPrimary
-                ? colorScheme.onPrimaryContainer
-                : colorScheme.onSurfaceVariant,
-            size: 24,
+            color: account.isPrimary ? AppColors.primary : Colors.black45,
+            size: 26,
           ),
         ),
         const SizedBox(width: 16),
@@ -453,9 +571,10 @@ class _AccountCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       account.accountHolderName ?? '',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                      style: DMSansFont.textStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -466,8 +585,10 @@ class _AccountCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 account.bankName ?? '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: DMSansFont.textStyle(
+                  fontSize: 13,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -483,10 +604,10 @@ class _AccountCard extends StatelessWidget {
     AppLocalizations localizations,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.bgBlueTint.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -495,7 +616,7 @@ class _AccountCard extends StatelessWidget {
             label: localizations.accountNumber,
             value: _maskAccountNumber(account.accountNumber ?? ''),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _AccountDetailRow(
             icon: Icons.code_rounded,
             label: localizations.ifscCode,
@@ -515,36 +636,49 @@ class _AccountCard extends StatelessWidget {
       children: [
         if (!account.isPrimary) ...[
           Expanded(
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               onPressed: onSetPrimary,
-              icon: const Icon(Icons.star_outline_rounded, size: 18),
-              label: Text(localizations.setPrimary),
               style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.primary,
-                side: BorderSide(color: colorScheme.primary),
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                localizations.setPrimary,
+                style: DMSansFont.textStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
         ],
         Expanded(
-          child: FilledButton.icon(
+          child: ElevatedButton(
             onPressed: onEdit,
-            icon: const Icon(Icons.edit_rounded, size: 18),
-            label: Text(localizations.edit),
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.secondaryContainer,
-              foregroundColor: colorScheme.onSecondaryContainer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary.withOpacity(0.08),
+              foregroundColor: AppColors.primary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              localizations.edit,
+              style: DMSansFont.textStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        IconButton.filled(
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline_rounded),
-          style: IconButton.styleFrom(
-            backgroundColor: colorScheme.errorContainer,
-            foregroundColor: colorScheme.onErrorContainer,
+        const SizedBox(width: 12),
+        Container(
+          height: 46,
+          width: 46,
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
           ),
         ),
       ],
@@ -608,10 +742,16 @@ class _AccountDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 18, color: colorScheme.onSurfaceVariant),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: Colors.black45),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -619,17 +759,19 @@ class _AccountDetailRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: DMSansFont.textStyle(
+                  color: Colors.black38,
+                  fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                style: DMSansFont.textStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -693,9 +835,9 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
     final localizations = AppLocalizations.of(context)!;
 
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -704,8 +846,18 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             _buildDialogHeader(context, colorScheme, localizations),
             _buildDialogForm(context, colorScheme, localizations),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -719,33 +871,19 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
   ) {
     final isEdit = widget.account != null;
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 12, 12, 24),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isEdit ? Icons.edit_rounded : Icons.add_rounded,
-              color: colorScheme.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   isEdit ? localizations.editAccount : localizations.addAccount,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
+                  style: DMSansFont.textStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -753,8 +891,9 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
                   isEdit
                       ? localizations.updateAccountDetails
                       : localizations.enterAccountDetails,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  style: DMSansFont.textStyle(
+                    fontSize: 13,
+                    color: Colors.black45,
                   ),
                 ),
               ],
@@ -762,9 +901,9 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
           ),
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close_rounded),
+            icon: const Icon(Icons.close_rounded, color: Colors.black45),
             style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surfaceContainerHighest,
+              backgroundColor: AppColors.bgBlueTint,
             ),
           ),
         ],
@@ -874,20 +1013,46 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: colorScheme.surfaceContainerHighest,
-      ),
-      textCapitalization: textCapitalization,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: DMSansFont.textStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          style: DMSansFont.textStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 20),
+            filled: true,
+            fillColor: AppColors.bgBlueTint,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintStyle: DMSansFont.textStyle(
+              color: Colors.black26,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+          textCapitalization: textCapitalization,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+        ),
+      ],
     );
   }
 
@@ -909,39 +1074,54 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
     ColorScheme colorScheme,
     AppLocalizations localizations,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _isPrimary ? colorScheme.primary : Colors.transparent,
-          width: 2,
+    return InkWell(
+      onTap: () => setState(() => _isPrimary = !_isPrimary),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: _isPrimary ? AppColors.primary.withOpacity(0.05) : AppColors.bgBlueTint,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isPrimary ? AppColors.primary.withOpacity(0.2) : Colors.transparent,
+            width: 1,
+          ),
         ),
-      ),
-      child: CheckboxListTile(
-        value: _isPrimary,
-        onChanged: (value) => setState(() => _isPrimary = value ?? false),
-        title: Row(
+        child: Row(
           children: [
+            Container(
+              height: 24,
+              width: 24,
+              decoration: BoxDecoration(
+                color: _isPrimary ? AppColors.primary : Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: _isPrimary ? AppColors.primary : Colors.black12,
+                  width: 1.5,
+                ),
+              ),
+              child: _isPrimary
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                localizations.setAsPrimaryAccount,
+                style: DMSansFont.textStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _isPrimary ? AppColors.primary : Colors.black54,
+                ),
+              ),
+            ),
             Icon(
               Icons.star_rounded,
               size: 20,
-              color: _isPrimary
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              localizations.setAsPrimaryAccount,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              color: _isPrimary ? AppColors.primary : Colors.black12,
             ),
           ],
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        controlAffinity: ListTileControlAffinity.leading,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -954,24 +1134,33 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: TextButton(
             onPressed: () => Navigator.pop(context),
-            style: OutlinedButton.styleFrom(
+            style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(localizations.cancel),
+            child: Text(
+              localizations.cancel,
+              style: DMSansFont.textStyle(
+                color: Colors.black45,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           flex: 2,
-          child: FilledButton(
+          child: ElevatedButton(
             onPressed: _isLoading ? null : _saveAccount,
-            style: FilledButton.styleFrom(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -979,14 +1168,14 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
             child: _isLoading
                 ? SizedBox(
                     height: 20,
-                    width: 35,
-                    child: Loader(size: 16, color: colorScheme.onPrimary),
+                    width: 20,
+                    child: Loader(size: 16, color: Colors.white),
                   )
                 : Text(
                     isEdit
                         ? localizations.updateAccount
                         : localizations.addAccount,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
                   ),
           ),
         ),

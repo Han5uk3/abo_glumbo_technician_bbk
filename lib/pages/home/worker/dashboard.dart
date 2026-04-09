@@ -278,12 +278,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
-                iconSize: 20,
+                iconSize: 22,
                 icon: const Icon(
                   Icons.notifications_none_rounded,
                   color: Colors.white,
@@ -296,27 +296,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            // if (unreadCount > 0)
-            Positioned(
-              right: -2,
-              top: -2,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFF5C5C),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  unreadCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
+            if (unreadCount > 0)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
                   ),
-                  textAlign: TextAlign.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF4848),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 1.5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      unreadCount > 9 ? '9+' : unreadCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Mulish',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
               ),
-            ),
           ],
         );
       },

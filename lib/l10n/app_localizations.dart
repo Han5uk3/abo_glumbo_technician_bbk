@@ -164,6 +164,24 @@ abstract class AppLocalizations {
   /// **'Remember Me'**
   String get rememberMe;
 
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// No description provided for @totalPayoutAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Payout Amount'**
+  String get totalPayoutAmount;
+
+  /// No description provided for @reviewPayoutDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Payout Details'**
+  String get reviewPayoutDetails;
+
   /// No description provided for @manageOrders.
   ///
   /// In en, this message translates to:
@@ -602,6 +620,24 @@ abstract class AppLocalizations {
   /// **'Unknown'**
   String get unknown;
 
+  /// No description provided for @timedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed Out'**
+  String get timedOut;
+
+  /// No description provided for @technicianNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Not Found'**
+  String get technicianNotFound;
+
+  /// No description provided for @verificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Pending'**
+  String get verificationPending;
+
   /// No description provided for @otpAutoVerified.
   ///
   /// In en, this message translates to:
@@ -619,6 +655,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OTP Sent'**
   String get otpSent;
+
+  /// No description provided for @otpHasbeensentto.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP has been sent to'**
+  String get otpHasbeensentto;
 
   /// No description provided for @anErrorOccurredPleaseTryAgainLater.
   ///
@@ -2023,6 +2065,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Orders'**
   String get orders;
+
+  /// No description provided for @offers.
+  ///
+  /// In en, this message translates to:
+  /// **'Offers'**
+  String get offers;
 
   /// No description provided for @failedToLoadUserData.
   ///
@@ -3863,7 +3911,7 @@ abstract class AppLocalizations {
   /// No description provided for @assigningTechnician.
   ///
   /// In en, this message translates to:
-  /// **'Assigning Technician'**
+  /// **'Pending Acceptance'**
   String get assigningTechnician;
 
   /// No description provided for @selectProvince.
@@ -8234,12 +8282,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Selected Locations'**
   String get selectedLocations;
-
-  /// No description provided for @verificationPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Verification Pending'**
-  String get verificationPending;
 
   /// No description provided for @waitingForTechnicianVerification.
   ///

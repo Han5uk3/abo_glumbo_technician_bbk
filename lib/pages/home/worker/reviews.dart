@@ -3,6 +3,7 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 
 class WorkerReviewsPage extends StatefulWidget {
@@ -93,10 +94,21 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.reviews),
+        title: Text(
+          AppLocalizations.of(context)!.reviews,
+          style: DMSansFont.textStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        centerTitle: true,
         elevation: 0,
-        backgroundColor: AppColors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
       ),
       body: isLoading
           ? Center(child: Loader(color: AppColors.primary))

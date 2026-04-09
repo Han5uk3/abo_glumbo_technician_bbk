@@ -265,16 +265,16 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
                 appBarTheme: AppBarTheme(
-                  shape: Border(bottom: BorderSide(color: Colors.black12)),
                   centerTitle: true,
-                  backgroundColor: AppColors.bgWhite,
+                  backgroundColor: Colors.white,
+                  surfaceTintColor: Colors.transparent,
                   elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.black, size: 18),
+                  iconTheme: const IconThemeData(color: Colors.black, size: 20),
                   titleSpacing: 0,
                   titleTextStyle: GoogleFonts.dmSans(
                     color: Colors.black,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 searchBarTheme: SearchBarThemeData(

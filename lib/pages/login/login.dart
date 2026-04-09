@@ -10,7 +10,6 @@ import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/styles/images.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -239,222 +238,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget _buildHeaderImage() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 60),
-      child: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              child: Container(
-                height: 305,
-                width: 256,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(32),
-                ),
-              ),
-            ),
-            Container(
-              height: 295,
-              width: 278,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: SizedBox(
-                height: 285,
-                width: 290,
-                child: Image.asset(
-                  AppImages.newLogin,
-
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhoneInputField() {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withOpacity(0.1), width: 1),
-      ),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.only(left: 22, right: 22),
-      child: TextFormField(
-        controller: _phoneController,
-        textInputAction: TextInputAction.done,
-        keyboardType: TextInputType.number,
-
-        style: GoogleFonts.dmSans(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(12),
-          prefixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('🇸🇦', style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: Text(
-                        '+966',
-                        style: GoogleFonts.dmSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-           
-        ),
-        onFieldSubmitted: (_) => _onLoginPressed(),
-      ),
-    );
-  }
-
-  Widget _buildRememberMeCheckbox() {
-    return Center(
-      child: CheckboxListTile.adaptive(
-        dense: true,
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: const EdgeInsets.all(0),
-        title: Text(
-          AppLocalizations.of(context)?.rememberMe ?? 'Remember Me',
-          style: GoogleFonts.dmSans(color: Colors.white, fontSize: 14),
-        ),
-        side: const BorderSide(color: Colors.white),
-        activeColor: Colors.blue,
-        checkColor: Colors.white,
-        value: _isRememberMeChecked,
-        onChanged: _onRememberMeChanged,
-      ),
-    );
-  }
-
-  Widget _buildFingerprintAuth() {
-    return Center(
-      child: GestureDetector(
-        onTap: () => _byPassUsingBioAuth(context),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withOpacity(0.1),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/fingerPrint.png',
-                height: 60,
-                width: 60,
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoginButton(LoginState state) {
-    final isLoading = state is LoginLoading;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: SizedBox(
-        width: double.maxFinite,
-        height: 50,
-        child: ElevatedButton(
-          onPressed: isLoading ? null : _onLoginPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.secondary,
-            disabledBackgroundColor: AppColors.secondary.withOpacity(0.6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: isLoading
-              ? Loader(size: 20, color: Colors.white)
-              : Text(
-                  AppLocalizations.of(context)?.continueText ?? 'Continue',
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTermsAndPrivacyText() {
-    return Center(
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          children: <TextSpan>[
-            TextSpan(
-              text:
-                  "${AppLocalizations.of(context)?.byContinuingYouAgreeToOur ?? ''} ",
-              style: GoogleFonts.dmSans(fontSize: 11, color: Colors.white60),
-            ),
-            TextSpan(
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const TermsAndConditionsPage(isFromLogin: true),
-                    ),
-                  );
-                },
-              text: AppLocalizations.of(context)?.termsOfUse ?? '',
-              style: GoogleFonts.dmSans(fontSize: 11, color: Colors.blue),
-            ),
-            TextSpan(
-              text: ' ${AppLocalizations.of(context)?.and ?? ''} ',
-              style: GoogleFonts.dmSans(fontSize: 11, color: Colors.white60),
-            ),
-            TextSpan(
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const PrivacyPolicyPage(),
-                    ),
-                  );
-                },
-              text: AppLocalizations.of(context)?.privacyPolicy ?? '',
-              style: GoogleFonts.dmSans(fontSize: 11, color: Colors.blue),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
@@ -475,6 +258,7 @@ class _LoginPageState extends State<LoginPage> {
                   countryCode: "SA",
                 ),
                 verificationId: state.verificationId,
+                resendToken: state.resendToken,
               ),
             ),
           );
@@ -503,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
         return Stack(
           children: [
             Scaffold(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.bgBlueTint,
               extendBodyBehindAppBar: true,
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
@@ -513,94 +297,129 @@ class _LoginPageState extends State<LoginPage> {
               body: Form(
                 key: _formKey,
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeaderImage(),
-                        const SizedBox(height: 10),
-                        Center(
-                          child: Text(
-                            AppLocalizations.of(context)?.loginDescription ??
-                                '',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.dmSans(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              fontSize: 24,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 13),
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: LanguageSelectorCard(isInLoginPage: true),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          AppLocalizations.of(context)?.mobileNumber ?? '',
-                          style: GoogleFonts.dmSans(
-                            color: Colors.white.withOpacity(.7),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        _buildPhoneInputField(),
-                        const SizedBox(height: 6),
-                        _buildRememberMeCheckbox(),
-                        const SizedBox(height: 10),
-                        _buildLoginButton(state),
-                        const SizedBox(height: 20),
-
-                        if (isCheckUserEnableTwoStepVerification &&
-                            customerLastUid != null &&
-                            customerLastUid!.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withOpacity(0.5),
-                                  thickness: 1,
-                                ),
+                  child: Column(
+                    children: [
+                      // Top Image Container
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.27,
+                        color: AppColors.primary,
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 32),
+                            SizedBox(
+                              height: 181,
+                              width: 182,
+                              child: Image.asset(
+                                'assets/images/app_icon.png',
+                                fit: BoxFit.contain,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Text(
-                                  AppLocalizations.of(context)?.or ?? 'OR',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Bottom Container with Border Radius
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.bgBlueTint,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(60),
+                            topRight: Radius.circular(60),
+                          ),
+                        ),
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height * 0.73,
+                        ),
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.login,
                                   style: GoogleFonts.dmSans(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withOpacity(0.5),
-                                  thickness: 1,
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: LanguageSelectorCard(isInLoginPage: true),
+                            ),
+                            const SizedBox(height: 20),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)?.mobileNumber ?? '',
+                                  style: GoogleFonts.dmSans(
+                                    color: Colors.black.withOpacity(.7),
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          _buildFingerprintAuth(),
-                        ],
-
-                        const SizedBox(height: 20),
-                        _buildTermsAndPrivacyText(),
-                        const SizedBox(height: 60),
-                      ],
-                    ),
+                                const SizedBox(height: 6),
+                                _buildPhoneInputField(),
+                                const SizedBox(height: 10),
+                                _buildRememberMeCheckbox(),
+                                const SizedBox(height: 20),
+                                _buildLoginButton(state),
+                                const SizedBox(height: 20),
+                                _buildTermsAndPrivacyText(),
+                                if (isCheckUserEnableTwoStepVerification &&
+                                    customerLastUid != null &&
+                                    customerLastUid!.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Divider(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          thickness: 1,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                        ),
+                                        child: Text(
+                                          AppLocalizations.of(context)?.or ?? 'OR',
+                                          style: GoogleFonts.dmSans(
+                                            color: Colors.grey.withOpacity(0.7),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Divider(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          thickness: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _buildFingerprintAuth(),
+                                ],
+                                const SizedBox(height: 60),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-
-            // ✅ Alternative: Material Design Loading
             if (_isBiometricLoading)
               Material(
                 color: Colors.black.withOpacity(0.7),
@@ -642,6 +461,214 @@ class _LoginPageState extends State<LoginPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildPhoneInputField() {
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black.withOpacity(0.1), width: 1),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🇸🇦', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  "+966",
+                  style: GoogleFonts.dmSans(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                height: 24,
+                width: 1,
+                color: Colors.black.withOpacity(0.1),
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
+          Expanded(
+            child: TextFormField(
+              controller: _phoneController,
+              textInputAction: TextInputAction.done,
+              keyboardType: TextInputType.number,
+              textAlignVertical: TextAlignVertical.center,
+              style: GoogleFonts.dmSans(
+                color: Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+                hintText: '5XXXXXXXX',
+                hintStyle: GoogleFonts.dmSans(
+                  color: Colors.black.withOpacity(0.3),
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              onFieldSubmitted: (_) => _onLoginPressed(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRememberMeCheckbox() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 24,
+          width: 24,
+          child: Checkbox(
+            value: _isRememberMeChecked,
+            onChanged: _onRememberMeChanged,
+            activeColor: AppColors.primary,
+            side: BorderSide(color: Colors.black.withOpacity(0.4), width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: () => _onRememberMeChanged(!_isRememberMeChecked),
+          child: Text(
+            AppLocalizations.of(context)?.rememberMe ?? 'Remember me',
+            style: GoogleFonts.dmSans(
+              color: Colors.black.withOpacity(0.7),
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginButton(LoginState state) {
+    final isLoading = state is LoginLoading;
+    return SizedBox(
+      height: 54,
+      width: double.maxFinite,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : _onLoginPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: isLoading
+            ? Loader(size: 20, color: Colors.white)
+            : Text(
+                AppLocalizations.of(context)?.continueText ?? '',
+                style: GoogleFonts.dmSans(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildTermsAndPrivacyText() {
+    return Center(
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text:
+                  "${AppLocalizations.of(context)?.byContinuingYouAgreeToOur ?? ''}\n ",
+              style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+            ),
+            TextSpan(
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const TermsAndConditionsPage(isFromLogin: true),
+                    ),
+                  );
+                },
+              text: AppLocalizations.of(context)?.termsOfUse ?? '',
+              style: GoogleFonts.dmSans(
+                fontSize: 12,
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: " ${AppLocalizations.of(context)!.and} ",
+              style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+            ),
+            TextSpan(
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PrivacyPolicyPage(),
+                    ),
+                  );
+                },
+              text: AppLocalizations.of(context)?.privacyPolicy ?? '',
+              style: GoogleFonts.dmSans(
+                fontSize: 12,
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFingerprintAuth() {
+    return Center(
+      child: GestureDetector(
+        onTap: () => _byPassUsingBioAuth(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.black.withOpacity(0.05),
+            border: Border.all(color: Colors.black.withOpacity(0.1), width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/fingerPrint.png',
+                height: 60,
+                width: 60,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

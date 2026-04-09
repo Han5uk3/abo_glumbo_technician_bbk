@@ -13,6 +13,7 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/firestorage.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -453,15 +454,16 @@ class _SignupState extends State<Signup> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                iconSize: 18,
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
                 AppLocalizations.of(context)!.idDocument,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
               ),
             ),
             body: Center(
@@ -854,482 +856,480 @@ class _SignupState extends State<Signup> {
     }
   }
 
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: DMSansFont.textStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade100),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileItem({
+    required String label,
+    required VoidCallback onTap,
+    VoidCallback? onRemove,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          children: [
+            const Icon(Icons.description_outlined, size: 20, color: Colors.grey),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.open_in_new, size: 16, color: Colors.grey),
+            if (onRemove != null) ...[
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: onRemove,
+                child: const Icon(Icons.delete_outline, color: Colors.red),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfilePicker() {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 56,
+              backgroundColor: Colors.grey.shade100,
+              backgroundImage: profileImage != null
+                  ? FileImage(File(profileImage!.path))
+                  : null,
+              child: profileImage == null
+                  ? Icon(Icons.person_outline, size: 48, color: Colors.grey.shade400)
+                  : null,
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: _pickProfileImage,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.camera_alt,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
     final safePadding = MediaQuery.of(context).padding;
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
-          await _handleCancelRegistration(); // ✅ We control navigation
+          await _handleCancelRegistration();
         }
       },
-
       child: Scaffold(
+        backgroundColor: AppColors.bgWhite,
         appBar: AppBar(
+          backgroundColor: AppColors.bgWhite,
+          elevation: 0,
+          surfaceTintColor: AppColors.bgWhite,
           centerTitle: true,
           title: Text(
-            AppLocalizations.of(context)?.completeRegistration ??
-                'Complete Registration',
+            locale.completeRegistration,
+            style: DMSansFont.textStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            iconSize: 18,
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
             onPressed: _handleCancelRegistration,
           ),
         ),
         body: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            padding: EdgeInsets.only(
-              top: 16,
-              left: 16,
-              right: 16,
-              bottom: safePadding.bottom + 16,
-            ),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, safePadding.bottom + 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Loading indicator
-                if (isLoadingCategories) const LinearProgressIndicator(),
+                if (isLoadingCategories) 
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: LinearProgressIndicator(),
+                  ),
 
-                const SizedBox(height: 16),
+                _buildProfilePicker(),
+                const SizedBox(height: 32),
 
-                // Profile Image Picker
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickProfileImage,
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: AppColors.primary.withOpacity(0.1),
-                          backgroundImage: profileImage != null
-                              ? FileImage(File(profileImage!.path))
-                              : null,
-                          child: profileImage == null
-                              ? Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: AppColors.primary,
-                                )
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
+                _buildSection(
+                  title: locale.personalInformation,
+                  icon: Icons.person_outline,
+                  children: [
+                    TextFormWidget(
+                      controller: nameController,
+                      label: locale.fullName,
+                      keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return locale.pleaseEnterYourName;
+                        }
+                        return null;
+                      },
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    TextFormWidget(
+                      controller: phoneController,
+                      label: locale.phoneNumber,
+                      enabled: false,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormWidget(
+                      controller: emailController,
+                      label: '${locale.email} (${locale.optional})',
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          if (!emailRegex.hasMatch(value)) {
+                            return locale.pleaseEnterValidEmail;
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 24),
-
-                // Name Field
-                TextFormWidget(
-                  controller: nameController,
-                  label: AppLocalizations.of(context)?.fullName ?? 'Full Name',
-                  keyboardType: TextInputType.name,
-                  textInputAction: TextInputAction.next,
-                  readOnly: false,
-                  enabled: true,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return AppLocalizations.of(
-                            context,
-                          )?.pleaseEnterYourName ??
-                          'Please enter your name';
-                    }
-                    if (value.trim().length < 3) {
-                      return AppLocalizations.of(context)?.nameTooShort ??
-                          'Name must be at least 3 characters';
-                    }
-                    return null;
-                  },
-                ),
-
-                // Phone Field (Read-only)
-                TextFormWidget(
-                  controller: phoneController,
-                  label:
-                      AppLocalizations.of(context)?.phoneNumber ??
-                      'Phone Number',
-                  keyboardType: TextInputType.phone,
-                  enabled: false,
-                ),
-
-                TextFormWidget(
-                  controller: emailController,
-                  label:
-                      '${AppLocalizations.of(context)?.email ?? 'Email'} (${AppLocalizations.of(context)?.optional ?? 'Optional'})',
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    // Only validate if user entered something
-                    if (value != null && value.isNotEmpty) {
-                      if (!emailRegex.hasMatch(value)) {
-                        return AppLocalizations.of(
-                              context,
-                            )?.pleaseEnterValidEmail ??
-                            'Please enter a valid email address';
-                      }
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-                // Location Fetch Section
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey.shade50,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)?.location ?? 'Location',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _isFetchingLocation
-                              ? null
-                              : _getCurrentLocation,
-                          icon: _isFetchingLocation
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.my_location),
-                          label: Text(
-                            _isFetchingLocation
-                                ? 'Fetching...'
-                                : (AppLocalizations.of(
-                                        context,
-                                      )?.useCurrentLocation ??
-                                      'Use Current Location'),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_currentPosition != null) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.green.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (_placeMark != null)
-                                      Text(
-                                        "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.green.shade900,
-                                        ),
-                                      ),
-                                    Text(
-                                      "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 11,
-                                        color: Colors.green.shade700,
-                                      ),
-                                    ),
-                                  ],
+                _buildSection(
+                  title: locale.location,
+                  icon: Icons.location_on_outlined,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isFetchingLocation ? null : _getCurrentLocation,
+                        icon: _isFetchingLocation
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
                                 ),
-                              ),
-                            ],
+                              )
+                            : const Icon(Icons.my_location, size: 18),
+                        label: Text(
+                          _isFetchingLocation ? '...' : locale.useCurrentLocation,
+                          style: DMSansFont.textStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                      if (_locationError != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          _locationError!,
-                          style: GoogleFonts.dmSans(
-                            color: Colors.red,
-                            fontSize: 12,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                const SizedBox(height: 16),
-
-                // Job Roles Selector
-                Text(
-                  AppLocalizations.of(context)!.jobRoles,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                InkWell(
-                  onTap: isLoadingCategories ? null : _selectJobRoles,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
-                      borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedJobRoles.isEmpty
-                                ? (AppLocalizations.of(
-                                        context,
-                                      )?.selectJobRoles ??
-                                      'Select Job Roles')
-                                : _getJobRoleNames(),
-                            style: GoogleFonts.dmSans(
-                              color: selectedJobRoles.isEmpty
-                                  ? Colors.grey
-                                  : Colors.black,
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_drop_down),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ID Document Upload
-                Text(
-                  '${AppLocalizations.of(context)!.idDocument} *',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _pickIdImage,
-                  icon: const Icon(Icons.upload_file),
-                  label: Text(
-                    idImage == null
-                        ? AppLocalizations.of(context)!.uploadIdDocument
-                        : AppLocalizations.of(context)!.changeIdDocument,
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: idImage != null
-                        ? Colors.green
-                        : AppColors.primary,
-                  ),
-                ),
-
-                if (idImage != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: GestureDetector(
-                      onTap: () => _showFullScreenImage(idImage!, context),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 12,
-                        ),
+                    if (_currentPosition != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade700),
+                          color: Colors.green.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.withOpacity(0.1)),
                         ),
                         child: Row(
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.idDocument,
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade700,
+                            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_placeMark != null)
+                                    Text(
+                                      "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
+                                      style: DMSansFont.textStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.green.shade900,
+                                      ),
+                                    ),
+                                  Text(
+                                    "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
+                                    style: DMSansFont.textStyle(
+                                      fontSize: 12,
+                                      color: Colors.green.shade700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              Icons.open_in_new,
-                              color: Colors.grey.shade700,
-                            ),
-                            SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () => _removeIdImage(),
-                              child: Icon(Icons.delete, color: Colors.red),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                // Certifications Upload
-                Text(
-                  '${AppLocalizations.of(context)!.certifications} (${AppLocalizations.of(context)!.optional})',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _pickCertifications,
-                  icon: const Icon(Icons.attach_file),
-                  label: Text(
-                    AppLocalizations.of(context)!.uploadCertifications,
-                  ),
+                    ],
+                    if (_locationError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _locationError!,
+                        style: DMSansFont.textStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ],
+                  ],
                 ),
 
-                if (certifications.isNotEmpty)
-                  ...certifications.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    PlatformFile file = entry.value;
-                    return Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: GestureDetector(
-                        onTap: () => _viewCertification(file),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade700),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                file.name,
-                                style: GoogleFonts.dmSans(
+                _buildSection(
+                  title: locale.jobRoles,
+                  icon: Icons.engineering_outlined,
+                  children: [
+                    InkWell(
+                      onTap: isLoadingCategories ? null : _selectJobRoles,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                selectedJobRoles.isEmpty
+                                    ? locale.selectJobRoles
+                                    : _getJobRoleNames(),
+                                style: DMSansFont.textStyle(
+                                  color: selectedJobRoles.isEmpty
+                                      ? Colors.grey
+                                      : Colors.black,
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey.shade700,
                                 ),
                               ),
-                              const Spacer(),
-                              Icon(
-                                Icons.open_in_new,
-                                color: Colors.grey.shade700,
-                              ),
-                              SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: () => _removeCertification(index),
-                                child: Icon(Icons.delete, color: Colors.red),
-                              ),
-                            ],
+                            ),
+                            const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                _buildSection(
+                  title: locale.documents,
+                  icon: Icons.file_present_outlined,
+                  children: [
+                    Text(
+                      locale.idDocument,
+                      style: DMSansFont.textStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (idImage != null)
+                      _buildFileItem(
+                        label: locale.idDocument,
+                        onTap: () => _showFullScreenImage(idImage!, context),
+                        onRemove: _removeIdImage,
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _pickIdImage,
+                          icon: const Icon(Icons.add_photo_alternate_outlined, size: 20),
+                          label: Text(locale.uploadIdDocument),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
-                    );
-
-                    // return ListTile(
-                    //   onTap: () => _viewCertification(file),
-                    //   leading: const Icon(Icons.description),
-                    //   title: Text(file.name),
-                    //   subtitle: Align(
-                    //     alignment: isArabic
-                    //         ? Alignment.centerRight
-                    //         : Alignment.centerLeft,
-                    //     child: Directionality(
-                    //       textDirection: TextDirection.ltr,
-                    //       child: Text(
-                    //         '${(file.size / 1024).toStringAsFixed(2)} KB',
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   trailing: IconButton(
-                    //     icon: const Icon(Icons.delete, color: Colors.red),
-                    //     onPressed: () => _removeCertification(index),
-                    //   ),
-                    // );
-                  }),
-
-                // Submit Button
-                Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: SizedBox(
-                    width: double.maxFinite,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: isCreatingAccount ? null : _submitSignup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 20),
+                    Text(
+                      '${locale.certifications} (${locale.optional})',
+                      style: DMSansFont.textStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...certifications.asMap().entries.map((entry) {
+                      return _buildFileItem(
+                        label: entry.value.name,
+                        onTap: () => _viewCertification(entry.value),
+                        onRemove: () => _removeCertification(entry.key),
+                      );
+                    }),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _pickCertifications,
+                        icon: const Icon(Icons.add_circle_outline, size: 20),
+                        label: Text(locale.uploadCertifications),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey.shade700,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
-                      child: isCreatingAccount
-                          ? Loader()
-                          : Text(
-                              AppLocalizations.of(context)!.createAccount,
-                              style: GoogleFonts.dmSans(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                     ),
-                  ),
+                  ],
                 ),
               ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + safePadding.bottom),
+          decoration: BoxDecoration(
+            color: AppColors.bgWhite,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: 55,
+            child: ElevatedButton(
+              onPressed: isCreatingAccount ? null : _submitSignup,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.black,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: isCreatingAccount
+                  ? Loader(color: Colors.white, size: 24)
+                  : Text(
+                      locale.createAccount,
+                      style: DMSansFont.textStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -1375,25 +1375,25 @@ class _SignupState extends State<Signup> {
       ),
     );
 
-    if (confirm == true && mounted) {
-      try {
-        await FirebaseAuth.instance.currentUser?.delete();
-      } catch (_) {
-        await FirebaseAuth.instance.signOut();
-      }
+    if (confirm != true) return false;
+    if (!mounted) return false;
 
-      await LocalStore.clearUID();
-      await LocalStore.putlogoutStatus(true);
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-        (route) => false,
-      );
-
-      return false; // ✅ allow pop after handling
+    try {
+      await FirebaseAuth.instance.currentUser?.delete();
+    } catch (_) {
+      await FirebaseAuth.instance.signOut();
     }
 
-    return false; // ✅ prevent default pop
+    await LocalStore.clearUID();
+    await LocalStore.putlogoutStatus(true);
+
+    if (!mounted) return false;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
+
+    return false; // ✅ allow pop after handling
   }
 }

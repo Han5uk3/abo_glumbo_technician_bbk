@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 
 class RewardsPage extends StatefulWidget {
@@ -74,15 +75,21 @@ class _RewardsPageState extends State<RewardsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
+        centerTitle: true,
         elevation: 0,
-        backgroundColor: AppColors.white,
-        leading: IconButton(
-          iconSize: 18,
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        backgroundColor: Colors.white,
+        title: Text(
+          AppLocalizations.of(context)!.rewards,
+          style: DMSansFont.textStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
-        foregroundColor: Colors.black,
-        title: Text(AppLocalizations.of(context)!.rewards),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
       ),
       body: isLoading
           ? Center(child: Loader())

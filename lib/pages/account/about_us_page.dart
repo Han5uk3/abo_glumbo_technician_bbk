@@ -15,8 +15,21 @@ class AboutUsPage extends StatelessWidget {
         slivers: [
           SliverAppBar(
             pinned: true,
-            centerTitle: false,
-            title: Text(locale.aboutUsTitle),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              locale.aboutUsTitle,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
           ),
 
           SliverPadding(

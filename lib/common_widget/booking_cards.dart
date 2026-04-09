@@ -18,6 +18,8 @@ class BookingListTileWidget extends StatelessWidget {
   final VoidCallback? onAssign;
   final bool isWarranty;
   final Widget? actionOverride;
+  final String? offerId;
+  final bool isFromOffersTab;
 
   const BookingListTileWidget({
     super.key,
@@ -26,6 +28,8 @@ class BookingListTileWidget extends StatelessWidget {
     this.onAssign,
     this.isWarranty = false,
     this.actionOverride,
+    this.offerId,
+    this.isFromOffersTab = false,
   });
 
   @override
@@ -55,6 +59,8 @@ class BookingListTileWidget extends StatelessWidget {
                   booking: booking,
                   isAdmin: isAdmin,
                   isWarranty: isWarranty,
+                  offerId: offerId,
+                  isFromOffersTab: isFromOffersTab,
                 ),
               ),
             ),
@@ -447,8 +453,13 @@ class BookingListTileWidget extends StatelessWidget {
           color = Colors.green;
           break;
         case 'P':
-          label = localization.pending;
-          color = Colors.orange;
+          if (booking.autoAssignmentStatus == 'searching') {
+            label = localization.assigningTechnician;
+            color = AppColors.primary;
+          } else {
+            label = localization.pending;
+            color = Colors.orange;
+          }
           break;
       }
     }
@@ -485,44 +496,34 @@ class BookingListTileWidget extends StatelessWidget {
       if (warranty != null) {
         final statusCode = warranty.warrantyStatusCode;
         if (statusCode == 'R' && warranty.requestedOn != null) {
-          text =
-              "${localization.requestedOn}: ${LocalizationHelper().formatDateLocalized(warranty.requestedOn!.toDate(), context)}";
+          text = LocalizationHelper().formatDateTimeCompact(warranty.requestedOn!.toDate(), context);
         } else if (statusCode == 'S' && warranty.acceptedAt != null) {
-          text =
-              "${localization.acceptedOn}: ${LocalizationHelper().formatDateLocalized(warranty.acceptedAt!.toDate(), context)}";
+          text = LocalizationHelper().formatDateTimeCompact(warranty.acceptedAt!.toDate(), context);
         } else if (statusCode == 'C' && warranty.completedAt != null) {
-          text =
-              "${localization.completedOn}: ${LocalizationHelper().formatDateLocalized(warranty.completedAt!.toDate(), context)}";
+          text = LocalizationHelper().formatDateTimeCompact(warranty.completedAt!.toDate(), context);
         } else if (statusCode == 'X' && warranty.rejectedAt != null) {
-          text =
-              "${localization.rejectedOn}: ${LocalizationHelper().formatDateLocalized(warranty.rejectedAt!.toDate(), context)}";
+          text = LocalizationHelper().formatDateTimeCompact(warranty.rejectedAt!.toDate(), context);
         } else if (warranty.createdAt != null) {
-          text =
-              "${localization.bookedOn}: ${LocalizationHelper().formatDateLocalized(warranty.createdAt!.toDate(), context)}";
+          text = LocalizationHelper().formatDateTimeCompact(warranty.createdAt!.toDate(), context);
         }
       }
     } else {
       if (booking.bookingStatusCode == 'P' && booking.createdAt != null) {
-        text =
-            "${localization.bookedOn}: ${LocalizationHelper().formatDateLocalized(booking.createdAt!.toDate(), context)}";
+        text = LocalizationHelper().formatDateTimeCompact(booking.createdAt!.toDate(), context);
       } else if (booking.bookingStatusCode == 'A' &&
           booking.acceptedAt != null) {
-        text =
-            "${localization.acceptedOn}: ${LocalizationHelper().formatDateLocalized(booking.acceptedAt!.toDate(), context)}";
+        text = LocalizationHelper().formatDateTimeCompact(booking.acceptedAt!.toDate(), context);
       } else if (booking.bookingStatusCode == 'C' &&
           booking.completedAt != null) {
-        text =
-            "${localization.completedOn}: ${LocalizationHelper().formatDateLocalized(booking.completedAt!.toDate(), context)}";
+        text = LocalizationHelper().formatDateTimeCompact(booking.completedAt!.toDate(), context);
       } else if ((booking.bookingStatusCode == 'X' ||
               booking.bookingStatusCode == 'XC' ||
               booking.bookingStatusCode == 'R') &&
           booking.cancelledAt != null) {
-        text =
-            "${localization.cancelledOn}: ${LocalizationHelper().formatDateLocalized(booking.cancelledAt!.toDate(), context)}";
+        text = LocalizationHelper().formatDateTimeCompact(booking.cancelledAt!.toDate(), context);
       } else if (booking.bookingStatusCode == 'VP' &&
           booking.paymentCompletedAt != null) {
-        text =
-            "${localization.paymentCompletedAt}: ${LocalizationHelper().formatDateLocalized(booking.paymentCompletedAt!.toDate(), context)}";
+        text = LocalizationHelper().formatDateTimeCompact(booking.paymentCompletedAt!.toDate(), context);
       }
     }
 
@@ -608,6 +609,8 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
 
     return BookingListTileWidget(
       booking: widget.offer.booking,
+      offerId: widget.offer.offerId,
+      isFromOffersTab: true,
       actionOverride: _isLoading
           ? const SizedBox(
               width: 24,

@@ -339,15 +339,16 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
-              backgroundColor: Colors.black,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                iconSize: 18,
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
                 file.path.split('/').last,
-                style: DMSansFont.textStyle(color: Colors.white, fontSize: 16),
+                style: DMSansFont.textStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.normal),
               ),
             ),
             body: Center(

@@ -2677,6 +2677,123 @@ class AppServices {
               .toList();
         });
   }
+
+  static Stream<List<JobOfferWithBooking>> getJobOffersStream() {
+    String userId = LocalStore.getUID() ?? '';
+    if (userId.isEmpty) return Stream.value([]);
+
+    return AppFirestore.jobOffersCollectionRef
+        .where('technicianId', isEqualTo: userId)
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<JobOfferWithBooking> offers = [];
+      for (var doc in snapshot.docs) {
+        try {
+          final data = doc.data() as Map<String, dynamic>;
+          final expiresAt = data['expiresAt'] as Timestamp;
+          if (expiresAt.toDate().isAfter(DateTime.now())) {
+            final bookingId = data['bookingId'];
+            final booking = await getBookingById(bookingId);
+            if (booking != null && booking.bookingStatusCode == 'P') {
+              offers.add(JobOfferWithBooking(
+                offerId: doc.id,
+                booking: booking,
+              ));
+            }
+          }
+        } catch (e) {
+          debugPrint('Error processing job offer: $e');
+        }
+      }
+      return offers;
+    });
+  }
+
+  static Future<void> acceptJobOffer({
+    required String bookingId,
+    required String offerId,
+    required UserModel technician,
+  }) async {
+    final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
+    final offerRef = AppFirestore.jobOffersCollectionRef.doc(offerId);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+      final offerSnapshot = await transaction.get(offerRef);
+
+      if (!bookingSnapshot.exists) throw Exception('Booking not found');
+      if (!offerSnapshot.exists) throw Exception('Offer not found');
+
+      final bookingData = bookingSnapshot.data() as Map<String, dynamic>;
+      final offerData = offerSnapshot.data() as Map<String, dynamic>;
+
+      if (bookingData['bookingStatusCode'] != 'P') {
+        throw Exception('Booking is already assigned or cancelled');
+      }
+
+      if (offerData['status'] != 'pending') {
+        throw Exception('Offer is no longer available');
+      }
+
+      final expiresAt = offerData['expiresAt'] as Timestamp;
+      if (expiresAt.toDate().isBefore(DateTime.now())) {
+        throw Exception('Offer has expired');
+      }
+
+      // Update Booking
+      transaction.update(bookingRef, {
+        'bookingStatusCode': 'P',
+        'agent': {
+          'uid': technician.uid,
+          'name': technician.name,
+          'phone': technician.phone,
+          'profileUrl': technician.profileUrl,
+        },
+        'assignedAt': FieldValue.serverTimestamp(),
+        'autoAssignmentStatus': 'accepted',
+      });
+
+      // Update Offer
+      transaction.update(offerRef, {
+        'status': 'accepted',
+        'acceptedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  static Future<void> declineJobOffer(String offerId) async {
+    await AppFirestore.jobOffersCollectionRef.doc(offerId).update({
+      'status': 'declined',
+      'declinedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  static Future<String?> getPendingJobOfferId(String bookingId) async {
+    String userId = LocalStore.getUID() ?? '';
+    if (userId.isEmpty) return null;
+
+    final snapshot = await AppFirestore.jobOffersCollectionRef
+        .where('bookingId', isEqualTo: bookingId)
+        .where('technicianId', isEqualTo: userId)
+        .where('status', isEqualTo: 'pending')
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final expiresAt = snapshot.docs.first['expiresAt'] as Timestamp;
+      if (expiresAt.toDate().isAfter(DateTime.now())) {
+        return snapshot.docs.first.id;
+      }
+    }
+    return null;
+  }
+}
+
+class JobOfferWithBooking {
+  final String offerId;
+  final BookingModel booking;
+  JobOfferWithBooking({required this.offerId, required this.booking});
 }
 
 class DashboardDataStream {

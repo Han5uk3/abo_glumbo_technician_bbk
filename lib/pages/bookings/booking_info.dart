@@ -46,6 +46,9 @@ class BookingInfo extends StatefulWidget {
 
 class _BookingInfoState extends State<BookingInfo> {
   bool isInitiatingChat = false;
+  bool _isCheckingOffer = true;
+  String? _offerId;
+  bool _isOfferLoading = false;
   Future<void> handleChatButton() async {
     if (isInitiatingChat) return;
 
@@ -206,12 +209,80 @@ class _BookingInfoState extends State<BookingInfo> {
         );
       }
       log('❌ Chat error: $e');
-    } finally {
+    }
+  }
+
+  late Stream<DocumentSnapshot> _bookingStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookingStream = AppFirestore.bookingsCollectionRef
+        .doc(widget.booking.id)
+        .snapshots();
+    _checkJobOffer();
+  }
+
+  Future<void> _checkJobOffer() async {
+    if (widget.isWarranty || widget.isAdmin) {
+      if (mounted) setState(() => _isCheckingOffer = false);
+      return;
+    }
+    final offerId = await AppServices.getPendingJobOfferId(widget.booking.id);
+    if (mounted) {
+      setState(() {
+        _offerId = offerId;
+        _isCheckingOffer = false;
+      });
+    }
+  }
+
+  Future<void> _acceptJobOffer(BookingModel booking) async {
+    if (_offerId == null) return;
+    setState(() => _isOfferLoading = true);
+    try {
+      final technician = LocalStore.getCachedUserData();
+      if (technician == null) throw Exception('Technician data not found');
+
+      await AppServices.acceptJobOffer(
+        bookingId: booking.id,
+        offerId: _offerId!,
+        technician: technician,
+      );
       if (mounted) {
-        setState(() {
-          isInitiatingChat = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Offer accepted successfully')),
+        );
+        setState(() => _offerId = null); // Refresh UI
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isOfferLoading = false);
+    }
+  }
+
+  Future<void> _declineJobOffer() async {
+    if (_offerId == null) return;
+    setState(() => _isOfferLoading = true);
+    try {
+      await AppServices.declineJobOffer(_offerId!);
+      if (mounted) {
+        setState(() => _offerId = null);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isOfferLoading = false);
     }
   }
 
@@ -838,9 +909,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: StreamBuilder<DocumentSnapshot>(
-                    stream: AppFirestore.bookingsCollectionRef
-                        .doc(widget.booking.id)
-                        .snapshots(),
+                    stream: _bookingStream,
                     builder: (context, snapshot) {
                       final docData =
                           snapshot.data?.data() as Map<String, dynamic>?;
@@ -859,6 +928,9 @@ class _BookingInfoState extends State<BookingInfo> {
                           // Review and Tip Card
                           if (((statusCode.toLowerCase() == 'a' &&
                                   !widget.isAdmin) ||
+                              (!widget.isAdmin &&
+                                  statusCode.toLowerCase() == 'p' &&
+                                  currentBooking.agent != null) ||
                               (!widget.isAdmin &&
                                   widget.isWarranty &&
                                   currentBooking.warranty?.warrantyStatusCode
@@ -887,10 +959,13 @@ class _BookingInfoState extends State<BookingInfo> {
                               (currentBooking.agent?.uid ==
                                       LocalStore.getUID() ||
                                   currentBooking.agent == null))
-                            _buildPendingBookingControls(
-                              context,
-                              currentBooking,
-                            ),
+                            if (_offerId != null)
+                              _buildJobOfferControls(context, currentBooking)
+                            else if (!_isCheckingOffer)
+                              _buildPendingBookingControls(
+                                context,
+                                currentBooking,
+                              ),
 
                           // blue booking id card
                           Container(
@@ -3390,6 +3465,95 @@ class _BookingInfoState extends State<BookingInfo> {
             ],
           ),
           const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {
+    if (_isOfferLoading) {
+      return const Center(child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: CircularProgressIndicator(),
+      ));
+    }
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            l10n.acceptOffer,
+            style: DMSansFont.textStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: _declineJobOffer,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.reject,
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => _acceptJobOffer(booking),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.accept,
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

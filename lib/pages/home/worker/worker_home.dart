@@ -18,6 +18,7 @@ class WorkerHome extends StatefulWidget {
 
 class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
   static const List<Map<String, String>> _bookingStatuses = [
+    {'code': 'O', 'name': 'Offers'},
     {'code': 'P', 'name': 'Pending'},
     {'code': 'A', 'name': 'Accepted'},
     {'code': 'CP', 'name': 'Payment Pending'},
@@ -188,31 +189,39 @@ class _BookingListTab extends StatefulWidget {
 }
 
 class _BookingListTabState extends State<_BookingListTab> {
-  late Stream<List<BookingModel>> _bookingsStream;
+  late Stream<List<dynamic>> _bookingsStream;
 
   @override
   void initState() {
     super.initState();
-    _bookingsStream = AppServices.getBookingsStream(
-      bookingStatusCode: widget.bookingStatusCode,
-    );
+    if (widget.bookingStatusCode == 'O') {
+      _bookingsStream = AppServices.getJobOffersStream().cast<List<dynamic>>();
+    } else {
+      _bookingsStream = AppServices.getBookingsStream(
+        bookingStatusCode: widget.bookingStatusCode,
+      ).cast<List<dynamic>>();
+    }
   }
 
-  List<BookingModel> _filterBookings(List<BookingModel> bookings) {
+  List<dynamic> _filterData(List<dynamic> data) {
     if (widget.searchQuery.isEmpty) {
-      return bookings;
+      return data;
     }
 
-    return bookings.where((booking) {
-      final bookingId = booking.id.toLowerCase();
-
-      return bookingId.contains(widget.searchQuery);
+    return data.where((item) {
+      String id = '';
+      if (item is BookingModel) {
+        id = item.id.toLowerCase();
+      } else if (item is JobOfferWithBooking) {
+        id = item.booking.id.toLowerCase();
+      }
+      return id.contains(widget.searchQuery);
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<BookingModel>>(
+    return StreamBuilder<List<dynamic>>(
       stream: _bookingsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
@@ -224,10 +233,10 @@ class _BookingListTabState extends State<_BookingListTab> {
           return _buildErrorState(context, snapshot.error.toString());
         }
 
-        final allBookings = snapshot.data ?? [];
-        final filteredBookings = _filterBookings(allBookings);
+        final allData = snapshot.data ?? [];
+        final filteredData = _filterData(allData);
 
-        if (filteredBookings.isEmpty) {
+        if (filteredData.isEmpty) {
           return _buildEmptyState(
             context,
             widget.bookingStatusCode,
@@ -237,14 +246,22 @@ class _BookingListTabState extends State<_BookingListTab> {
 
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-          itemCount: filteredBookings.length,
+          itemCount: filteredData.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
-            final booking = filteredBookings[index];
-            return BookingListTileWidget(
-              key: ValueKey(booking.id),
-              booking: booking,
-            );
+            final item = filteredData[index];
+            if (item is JobOfferWithBooking) {
+              return JobOfferTileWidget(
+                key: ValueKey(item.offerId),
+                offer: item,
+              );
+            } else if (item is BookingModel) {
+              return BookingListTileWidget(
+                key: ValueKey(item.id),
+                booking: item,
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },

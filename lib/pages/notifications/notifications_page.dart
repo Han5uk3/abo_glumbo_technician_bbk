@@ -26,9 +26,12 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
   // Cache the notifications list
   List<NotificationModel> _cachedNotifications = [];
 
+  late Stream<List<NotificationModel>> _notificationsStream;
+
   @override
   void initState() {
     super.initState();
+    _notificationsStream = AppServices.getNotificationsStream();
     _scrollController.addListener(_onScroll);
   }
 
@@ -124,7 +127,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
     final isAr = lanCode == 'ar';
 
     return StreamBuilder<List<NotificationModel>>(
-      stream: AppServices.getNotificationsStream(),
+      stream: _notificationsStream,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.hasData) {
           _cachedNotifications = asyncSnapshot.data!;

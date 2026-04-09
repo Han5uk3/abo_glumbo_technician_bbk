@@ -246,7 +246,7 @@ class LocalStore {
   // Helper Methods for Timestamp Conversion
   // ============================================
 
-  /// Convert Timestamp objects to milliseconds recursively
+  /// Convert Timestamp and GeoPoint objects to serializable formats recursively
   static Map<String, dynamic> _convertTimestampsToMillis(
     Map<String, dynamic> data,
   ) {
@@ -256,16 +256,29 @@ class LocalStore {
       if (value is Timestamp) {
         // Convert Timestamp to milliseconds
         converted[key] = value.millisecondsSinceEpoch;
+      } else if (value is GeoPoint) {
+        // Convert GeoPoint to Map
+        converted[key] = {
+          '_type': 'GeoPoint',
+          'latitude': value.latitude,
+          'longitude': value.longitude,
+        };
       } else if (value is Map) {
         // Recursively convert nested maps
         converted[key] = _convertTimestampsToMillis(
           Map<String, dynamic>.from(value),
         );
       } else if (value is List) {
-        // Handle lists (in case there are timestamps in arrays)
+        // Handle lists
         converted[key] = value.map((item) {
           if (item is Timestamp) {
             return item.millisecondsSinceEpoch;
+          } else if (item is GeoPoint) {
+            return {
+              '_type': 'GeoPoint',
+              'latitude': item.latitude,
+              'longitude': item.longitude,
+            };
           } else if (item is Map) {
             return _convertTimestampsToMillis(Map<String, dynamic>.from(item));
           }
@@ -279,25 +292,33 @@ class LocalStore {
     return converted;
   }
 
-  /// Convert milliseconds back to Timestamp objects recursively
+  /// Convert milliseconds and serialized GeoPoints back to original types recursively
   static Map<String, dynamic> _convertMillisToTimestamps(
     Map<String, dynamic> data,
   ) {
     final Map<String, dynamic> converted = {};
 
-    // Known timestamp fields in UserModel and AdminModel
+    // Known timestamp fields in models
     final List<String> timestampFields = [
       'createdAt',
       'updatedAt',
       'lastLogin',
       'dateOfBirth',
       'registrationDate',
+      'grantedAdminAt',
+      'lastBonusDate',
     ];
 
     data.forEach((key, value) {
       if (value is int && timestampFields.contains(key)) {
         // Convert milliseconds back to Timestamp
         converted[key] = Timestamp.fromMillisecondsSinceEpoch(value);
+      } else if (value is Map && value['_type'] == 'GeoPoint') {
+        // Convert Map back to GeoPoint
+        converted[key] = GeoPoint(
+          (value['latitude'] as num).toDouble(),
+          (value['longitude'] as num).toDouble(),
+        );
       } else if (value is Map) {
         // Recursively convert nested maps
         converted[key] = _convertMillisToTimestamps(
@@ -306,7 +327,12 @@ class LocalStore {
       } else if (value is List) {
         // Handle lists
         converted[key] = value.map((item) {
-          if (item is Map) {
+          if (item is Map && item['_type'] == 'GeoPoint') {
+            return GeoPoint(
+              (item['latitude'] as num).toDouble(),
+              (item['longitude'] as num).toDouble(),
+            );
+          } else if (item is Map) {
             return _convertMillisToTimestamps(Map<String, dynamic>.from(item));
           }
           return item;

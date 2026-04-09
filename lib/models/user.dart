@@ -41,6 +41,8 @@ class UserModel {
   bool? isGrantedAdminByMain; // Track if admin access was granted by main admin
   int? adminAccessLevel; // 1 = Full Admin, 2 = Customer Service (view only)
   Timestamp? grantedAdminAt; // When admin access was granted
+  GeoPoint? lastKnownLocation;
+  String? geohash;
   String role;
 
   UserModel({
@@ -80,6 +82,8 @@ class UserModel {
     this.isGrantedAdminByMain,
     this.adminAccessLevel,
     this.grantedAdminAt,
+    this.lastKnownLocation,
+    this.geohash,
     required this.role,
     this.paidoutTips,
   });
@@ -161,6 +165,8 @@ class UserModel {
       isGrantedAdminByMain: isGrantedAdminByMain ?? this.isGrantedAdminByMain,
       adminAccessLevel: adminAccessLevel ?? this.adminAccessLevel,
       grantedAdminAt: grantedAdminAt ?? this.grantedAdminAt,
+      lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation,
+      geohash: geohash ?? this.geohash,
       role: role,
       certifications: certifications ?? this.certifications,
       isOnline: isOnline ?? this.isOnline,
@@ -234,6 +240,8 @@ class UserModel {
       isGrantedAdminByMain: json['isGrantedAdminByMain'] ?? false,
       adminAccessLevel: json['adminAccessLevel'] as int?,
       grantedAdminAt: json['grantedAdminAt'],
+      lastKnownLocation: json['last_known_location'],
+      geohash: json['geohash'],
     );
   }
 
@@ -286,6 +294,8 @@ class UserModel {
       'isGrantedAdminByMain': isGrantedAdminByMain ?? false,
       'adminAccessLevel': adminAccessLevel,
       'grantedAdminAt': grantedAdminAt,
+      'last_known_location': lastKnownLocation,
+      'geohash': geohash,
     };
   }
 

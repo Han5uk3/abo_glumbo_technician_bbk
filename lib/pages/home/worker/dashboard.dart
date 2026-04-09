@@ -31,6 +31,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   late ValueNotifier<bool> _isOnlineNotifier;
 
+  late Stream<int> _unreadCountStream;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       widget.workerData.uid ?? "",
       _appServices.dashboardRefreshTrigger,
     );
+    _unreadCountStream = AppServices.getUnreadNotificationsCountStream();
     _isOnlineNotifier = ValueNotifier<bool>(
       widget.workerData.isOnline ?? false,
     );
@@ -266,7 +269,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildNotificationIcon() {
     return StreamBuilder<int>(
-      stream: AppServices.getUnreadNotificationsCountStream(),
+      stream: _unreadCountStream,
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;
         return Stack(

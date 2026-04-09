@@ -4016,3 +4016,217 @@ exports.expireWarrantiesDaily = onSchedule(
     }
   }
 );
+/**
+ * Haversine formula to calculate distance between two points on Earth
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Automatically assigns technicians to a new booking based on proximity and service role.
+ * Progressively expands search radius (5, 10, 20, 30, 40 km) every 2 minutes.
+ */
+exports.autoAssignTechnician = onDocumentWritten(
+  {
+    document: "bookings/{bookingId}",
+    timeoutSeconds: 540,
+    memory: "256MiB",
+    region: "asia-southeast1",
+  },
+  async (event) => {
+    const change = event.data;
+    if (!change) return null;
+
+    const booking = change.after.data();
+    const oldBooking = change.before.exists ? change.before.data() : null;
+    const bookingId = event.params.bookingId;
+
+    if (!booking) return null; // Deletion
+
+    // 1. Initial validation
+    if (booking.bookingStatusCode !== "P") {
+      return null;
+    }
+
+    // Only run if:
+    // a) It was just created
+    // b) The agent was just cleared (reAssignment)
+    const isNew = !oldBooking;
+    const isReassigned = oldBooking && oldBooking.agent && !booking.agent;
+    
+    if (!isNew && !isReassigned) {
+      // Avoid redundant triggers if it's already in "searching" state or was already empty P
+      if (booking.autoAssignmentStatus === "searching") return null;
+      if (oldBooking && oldBooking.bookingStatusCode === "P" && !oldBooking.agent && !booking.agent) return null;
+    }
+
+    // Trust the isOnHour flag set by the app. 
+    if (booking.isOnHour !== true) {
+      return null;
+    }
+
+    logger.info(`[${bookingId}] Function triggered. isNew: ${isNew}, isReassigned: ${isReassigned}`);
+
+    // Mark as searching to prevent double triggers
+    await db.collection("bookings").doc(bookingId).update({
+      autoAssignmentStatus: "searching",
+      updatedAt: FieldValue.serverTimestamp()
+    });
+
+    const addresses = booking.customer?.addresses || [];
+    const selectedAddress = addresses.find(a => a.isSelected === true);
+    
+    if (!selectedAddress) {
+      logger.error(`[${bookingId}] No selected address found in booking.customer.addresses`);
+      return null;
+    }
+
+    const custLat = selectedAddress.lat;
+    const custLon = selectedAddress.lon;
+    const serviceCategoryId = booking.service?.category;
+    const cancelledWorkerUids = new Set(booking.cancelledWorkerUids || []);
+
+    logger.info(`[${bookingId}] Params: Lat=${custLat}, Lon=${custLon}, Category=${serviceCategoryId}, Exclusions=${cancelledWorkerUids.size}`);
+
+    if (!custLat || !custLon) {
+      logger.error(`[${bookingId}] Customer coordinates missing.`);
+      return null;
+    }
+
+    if (!serviceCategoryId) {
+      logger.error(`[${bookingId}] Service category ID is missing.`);
+      return null;
+    }
+
+    const radii = [5, 10, 20, 30, 40];
+    const notifiedTechnicians = new Set();
+
+    for (let i = 0; i < radii.length; i++) {
+      const radius = radii[i];
+      logger.info(`[${bookingId}] Iteration ${i + 1}: Searching within ${radius}km...`);
+
+      // Verify booking is still eligible before each expansion
+      const currentSnap = await db.collection("bookings").doc(bookingId).get();
+      if (!currentSnap.exists) {
+        logger.info(`[${bookingId}] Booking deleted. Stopping.`);
+        return null;
+      }
+      const currentBooking = currentSnap.data();
+
+      if (currentBooking.bookingStatusCode !== "P" || currentBooking.agent) {
+        logger.info(`[${bookingId}] Booking already handled (status: ${currentBooking.bookingStatusCode}). Stopping.`);
+        return null;
+      }
+
+      // Fetch potential technicians
+      logger.info(`[${bookingId}] Querying technicians with role=technician, isOnline=true, isVerified=true, jobRoles contains ${serviceCategoryId}`);
+      const techQuery = await db.collection("users")
+        .where("role", "==", "technician")
+        .where("isOnline", "==", true)
+        .where("isVerified", "==", true)
+        .where("jobRoles", "array-contains", serviceCategoryId)
+        .get();
+
+      logger.info(`[${bookingId}] Found ${techQuery.size} matching technicians in database.`);
+
+      const newOffers = [];
+      const offerPromises = [];
+
+      for (const doc of techQuery.docs) {
+        const techId = doc.id;
+        if (notifiedTechnicians.has(techId) || cancelledWorkerUids.has(techId)) {
+          logger.info(`[${bookingId}] Skipping technician ${techId} (already notified or cancelled)`);
+          continue;
+        }
+
+        const techData = doc.data();
+        const techLoc = techData.liveLocation || techData.location;
+        
+        if (!techLoc) {
+          logger.info(`[${bookingId}] Technician ${techId} has no location data. Skipping.`);
+          continue;
+        }
+
+        const techLat = techLoc.latitude || techLoc.lat;
+        const techLon = techLoc.longitude || techLoc.lon;
+
+        if (!techLat || !techLon) {
+          logger.info(`[${bookingId}] Technician ${techId} has invalid coordinates. Skipping.`);
+          continue;
+        }
+
+        const distance = calculateDistance(custLat, custLon, techLat, techLon);
+        logger.info(`[${bookingId}] Technician ${techId} distance: ${distance.toFixed(2)}km (Radius cap: ${radius}km)`);
+
+        if (distance <= radius) {
+          const activeJobs = await db.collection("bookings")
+            .where("agent.uid", "==", techId)
+            .where("bookingStatusCode", "==", "A")
+            .limit(1)
+            .get();
+
+          if (activeJobs.empty) {
+            logger.info(`[${bookingId}] Adding technician ${techId} to offer list.`);
+            newOffers.push({ id: techId, fcmToken: techData.fcmToken, lanCode: techData.lanCode });
+            notifiedTechnicians.add(techId);
+          } else {
+            logger.info(`[${bookingId}] Technician ${techId} is busy with another booking. Skipping.`);
+          }
+        }
+      }
+
+      if (newOffers.length > 0) {
+        console.log(`[${bookingId}] Creating ${newOffers.length} offers for radius ${radius}km.`);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minute timeout
+
+        for (const tech of newOffers) {
+          const offerPayload = {
+            bookingId: bookingId,
+            technicianId: tech.id,
+            status: "pending",
+            radius: radius,
+            createdAt: FieldValue.serverTimestamp(),
+            expiresAt: expiresAt,
+          };
+
+          offerPromises.push(db.collection("job_offers").add(offerPayload));
+          
+          // Send push notification
+          offerPromises.push(sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: tech.id,
+            titleEn: "New Job Request Nearby!",
+            titleAr: "طلب عمل جديد قريب منك!",
+            bodyEn: `A new ${booking.service.name || 'service'} request is within ${radius}km.`,
+            bodyAr: `هناك طلب ${booking.service.name_ar || booking.service.name || 'خدمة'} جديد على بعد ${radius}كم.`,
+            data: {
+              bookingId: bookingId,
+              category: "job_offer",
+              click_action: "FLUTTER_NOTIFICATION_CLICK"
+            },
+            fcmToken: tech.fcmToken,
+            lanCode: tech.lanCode || "en"
+          }));
+        }
+        await Promise.all(offerPromises);
+      }
+
+      // Wait 2 minutes before expanding radius, unless it's the last step
+      if (i < radii.length - 1) {
+        console.log(`[${bookingId}] Waiting 2 minutes for next expansion...`);
+        await new Promise(resolve => setTimeout(resolve, 120 * 1000));
+      }
+    }
+
+    console.log(`[${bookingId}] Radius escalation reached limit (40km). Ending search.`);
+    return null;
+  }
+);

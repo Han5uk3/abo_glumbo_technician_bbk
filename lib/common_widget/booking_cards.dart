@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 
 // Renamed to BookingListTileWidget to match customer side standardized naming
@@ -16,6 +17,7 @@ class BookingListTileWidget extends StatelessWidget {
   final bool isAdmin;
   final VoidCallback? onAssign;
   final bool isWarranty;
+  final Widget? actionOverride;
 
   const BookingListTileWidget({
     super.key,
@@ -23,6 +25,7 @@ class BookingListTileWidget extends StatelessWidget {
     this.isAdmin = false,
     this.onAssign,
     this.isWarranty = false,
+    this.actionOverride,
   });
 
   @override
@@ -254,7 +257,9 @@ class BookingListTileWidget extends StatelessWidget {
                 Expanded(child: _buildTimestamp(context)),
 
                 // Action Buttons or Status Badge
-                if (isAdmin &&
+                if (actionOverride != null)
+                  actionOverride!
+                else if (isAdmin &&
                     ((!isWarranty &&
                             onAssign != null &&
                             booking.bookingStatusCode == 'P') ||
@@ -539,6 +544,146 @@ class BookingListTileWidget extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class JobOfferTileWidget extends StatefulWidget {
+  final JobOfferWithBooking offer;
+
+  const JobOfferTileWidget({super.key, required this.offer});
+
+  @override
+  State<JobOfferTileWidget> createState() => _JobOfferTileWidgetState();
+}
+
+class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
+  bool _isLoading = false;
+
+  Future<void> _acceptOffer(BuildContext context) async {
+    setState(() => _isLoading = true);
+    try {
+      final technician = LocalStore.getCachedUserData();
+      if (technician == null) throw Exception('Technician data not found');
+
+      await AppServices.acceptJobOffer(
+        bookingId: widget.offer.booking.id,
+        offerId: widget.offer.offerId,
+        technician: technician,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Offer accepted successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _declineOffer(BuildContext context) async {
+    setState(() => _isLoading = true);
+    try {
+      await AppServices.declineJobOffer(widget.offer.offerId);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context)!;
+
+    return BookingListTileWidget(
+      booking: widget.offer.booking,
+      actionOverride: _isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: Padding(
+                padding: EdgeInsets.all(4.0),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSmallButton(
+                  label: localization.reject,
+                  color: Colors.red,
+                  onPressed: () => _declineOffer(context),
+                  isOutlined: true,
+                ),
+                const SizedBox(width: 8),
+                _buildSmallButton(
+                  label: localization.accept,
+                  color: AppColors.primary,
+                  onPressed: () => _acceptOffer(context),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildSmallButton({
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+    bool isOutlined = false,
+  }) {
+    return SizedBox(
+      height: 32,
+      child: isOutlined
+          ? OutlinedButton(
+              onPressed: onPressed,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: color.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            )
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
     );
   }
 }

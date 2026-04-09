@@ -8,6 +8,8 @@ class LocalizationHelper {
     required BuildContext context,
   }) {
     switch (bookingStatus.toLowerCase()) {
+      case 'offers':
+        return AppLocalizations.of(context)!.orders;
       case 'pending':
         return AppLocalizations.of(context)!.pending;
       case 'accepted':
@@ -21,7 +23,7 @@ class LocalizationHelper {
       case 'payment pending':
         return AppLocalizations.of(context)!.paymentPending;
       default:
-        return 'unknown';
+        return AppLocalizations.of(context)!.unknown;
     }
   }
 

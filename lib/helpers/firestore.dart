@@ -77,6 +77,10 @@ class AppFirestore {
   // counter_offers collection
   static CollectionReference counterOffersCollectionRef =
       FirebaseFirestore.instance.collection('counter_offers');
+
+  // job_offers collection
+  static CollectionReference jobOffersCollectionRef =
+      FirebaseFirestore.instance.collection('job_offers');
 }
 
 class AppFireStorage {

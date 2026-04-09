@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/helpers/geohash_helper.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -140,7 +141,7 @@ class TechnicianLocationUpdateService {
       // Get formatted place name
 
 
-      // Update user document with live location
+      // Update user document with live location and last known location
       await _firestore.collection('users').doc(uid).update({
         'liveLocation': {
           'latitude': position.latitude,
@@ -151,6 +152,8 @@ class TechnicianLocationUpdateService {
           'heading': position.heading,
           'speed': position.speed,
         },
+        'last_known_location': GeoPoint(position.latitude, position.longitude),
+        'geohash': GeohashHelper.encode(position.latitude, position.longitude),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

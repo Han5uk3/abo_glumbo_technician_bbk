@@ -369,18 +369,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         height: 150,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 10, 35, 85),
-              AppColors.primary,
-              Color.fromARGB(255, 10, 35, 85),
-            ],
+            colors: [Colors.transparent, AppColors.primary, Colors.transparent],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.3),
+              color: AppColors.primary.withOpacity(0.2),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -602,8 +598,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _buildWideActionCard(
           l10n.overallRating,
           data['rating']?.toString() ?? '0.0',
-          Icons.star_rounded,
-          const Color(0xFF4F46E5),
+          Icons.star_outline,
+          const Color.fromARGB(255, 15, 7, 176),
           () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -617,7 +613,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           l10n.rewards,
           null,
           Icons.card_giftcard_rounded,
-          const Color(0xFF4F46E5),
+          const Color.fromARGB(255, 15, 7, 176),
           () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -674,20 +670,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 16),
             Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF334155),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(color: Colors.black, fontSize: 14),
             ),
             const Spacer(),
             if (value != null)
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
+                  color: Colors.black,
                 ),
               ),
             if (trailing != null) trailing,

@@ -9,7 +9,9 @@ import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
-import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart' as localcolor;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -287,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
         return Stack(
           children: [
             Scaffold(
-              backgroundColor: AppColors.bgBlueTint,
+              backgroundColor: AppColors.primary,
               extendBodyBehindAppBar: true,
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
@@ -304,117 +306,126 @@ class _LoginPageState extends State<LoginPage> {
                         height: MediaQuery.of(context).size.height * 0.27,
                         color: AppColors.primary,
                         width: MediaQuery.of(context).size.width,
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 32),
-                            SizedBox(
-                              height: 181,
-                              width: 182,
-                              child: Image.asset(
-                                'assets/images/app_icon_new.png',
-                                fit: BoxFit.contain,
-                              ),
+                        child: Center(
+                          child: SizedBox(
+                            height: 80,
+                            width: 80,
+                            child: Image.asset(
+                              'assets/images/app_icon_new.png',
+                              fit: BoxFit.contain,
                             ),
-                          ],
-                        ),
-                      ),
-
-                      // Bottom Container with Border Radius
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.bgBlueTint,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(60),
-                            topRight: Radius.circular(60),
                           ),
                         ),
-                        constraints: BoxConstraints(
-                          minHeight: MediaQuery.of(context).size.height * 0.73,
+                      ),
+                      // Bottom Container with Border Radius
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
                         ),
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.login,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
                             ),
-                            const SizedBox(height: 20),
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: LanguageSelectorCard(isInLoginPage: true),
-                            ),
-                            const SizedBox(height: 20),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)?.mobileNumber ??
-                                      '',
-                                  style: GoogleFonts.dmSans(
-                                    color: Colors.black.withOpacity(.7),
-                                    fontSize: 14,
+                          ),
+                          constraints: BoxConstraints(
+                            minHeight:
+                                MediaQuery.of(context).size.height * 0.73,
+                          ),
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!.login,
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: LanguageSelectorCard(
+                                  isInLoginPage: true,
                                 ),
-                                const SizedBox(height: 6),
-                                _buildPhoneInputField(),
-                                const SizedBox(height: 10),
-                                _buildRememberMeCheckbox(),
-                                const SizedBox(height: 20),
-                                _buildLoginButton(state),
-                                const SizedBox(height: 20),
-                                _buildTermsAndPrivacyText(),
-                                if (isCheckUserEnableTwoStepVerification &&
-                                    customerLastUid != null &&
-                                    customerLastUid!.isNotEmpty) ...[
+                              ),
+                              const SizedBox(height: 20),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(
+                                          context,
+                                        )?.mobileNumber ??
+                                        '',
+                                    style: GoogleFonts.dmSans(
+                                      color: Colors.black.withOpacity(.7),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  _buildPhoneInputField(),
                                   const SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Divider(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          thickness: 1,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                        ),
-                                        child: Text(
-                                          AppLocalizations.of(context)?.or ??
-                                              'OR',
-                                          style: GoogleFonts.dmSans(
-                                            color: Colors.grey.withOpacity(0.7),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
+                                  _buildRememberMeCheckbox(),
+                                  const SizedBox(height: 20),
+                                  _buildLoginButton(state),
+                                  const SizedBox(height: 20),
+                                  _buildTermsAndPrivacyText(),
+                                  if (isCheckUserEnableTwoStepVerification &&
+                                      customerLastUid != null &&
+                                      customerLastUid!.isNotEmpty) ...[
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Divider(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            thickness: 1,
                                           ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: Divider(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          thickness: 1,
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(context)?.or ??
+                                                'OR',
+                                            style: GoogleFonts.dmSans(
+                                              color: Colors.grey.withOpacity(
+                                                0.7,
+                                              ),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  _buildFingerprintAuth(),
+                                        Expanded(
+                                          child: Divider(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            thickness: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    _buildFingerprintAuth(),
+                                  ],
+                                  const SizedBox(height: 60),
                                 ],
-                                const SizedBox(height: 60),
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -573,8 +584,8 @@ class _LoginPageState extends State<LoginPage> {
       child: ElevatedButton(
         onPressed: isLoading ? null : _onLoginPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+          backgroundColor: localcolor.AppColors.primary,
+          disabledBackgroundColor: localcolor.AppColors.primary.withOpacity(0.6),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: isLoading

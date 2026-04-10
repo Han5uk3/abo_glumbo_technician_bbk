@@ -1,6 +1,5 @@
-
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
-import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,7 +69,7 @@ class LanguageSelectorCard extends StatelessWidget {
         final currentState = context.read<AccountBloc>().state;
         final currentLanguageCode = currentState.locale.languageCode;
         if (langCode != currentLanguageCode) {
-          context.read<AccountBloc>().add(ChangeLanguageEvent( langCode));
+          context.read<AccountBloc>().add(ChangeLanguageEvent(langCode));
         }
       },
       child: AnimatedContainer(

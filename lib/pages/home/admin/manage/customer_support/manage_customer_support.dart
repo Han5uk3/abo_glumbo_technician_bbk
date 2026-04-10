@@ -2,7 +2,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/customer_support/add_remove_details_page.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ManageCustomerSupport extends StatefulWidget {
   const ManageCustomerSupport({super.key});

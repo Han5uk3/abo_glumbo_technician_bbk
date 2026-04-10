@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:aboglumbo_bbk_panel/models/hierarchical_location.dart';
@@ -26,7 +27,7 @@ class LocationMatcherService {
           .map((item) => HierarchicalLocationModel.fromJson(item))
           .toList();
     } catch (e) {
-      print('Error loading hierarchical data: $e');
+      debugPrint('Error loading hierarchical data: $e');
       _hierarchicalData = [];
     }
   }
@@ -77,7 +78,7 @@ class LocationMatcherService {
         };
       }
     } catch (e) {
-      print('Geocoding failed for $districtEn: $e');
+      debugPrint('Geocoding failed for $districtEn: $e');
     }
 
     // Fallback to JSON coordinates
@@ -221,7 +222,7 @@ class LocationMatcherService {
         return parts.join(', ');
       }
     } catch (e) {
-      print('Reverse geocoding failed: $e');
+      debugPrint('Reverse geocoding failed: $e');
     }
 
     return null;

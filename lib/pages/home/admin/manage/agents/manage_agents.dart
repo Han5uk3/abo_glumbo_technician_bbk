@@ -147,7 +147,6 @@ class _ManageAgentsState extends State<ManageAgents>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     return BlocListener<ManageAppBloc, ManageAppState>(
       listener: (context, state) {

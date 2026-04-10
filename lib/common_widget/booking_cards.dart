@@ -204,7 +204,13 @@ class BookingListTileWidget extends StatelessWidget {
                         Text(
                           isWarranty
                               ? "0.0" // Warranty repairs are free
-                              : "${(booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP") ? ((booking.completionData?.totalCost ?? 0) + (booking.service.price ?? 0)).toStringAsFixed(1) : (booking.service.price ?? 0).toStringAsFixed(1)}",
+                              : (booking.bookingStatusCode == "C" ||
+                                      booking.bookingStatusCode == "VP")
+                                  ? ((booking.completionData?.totalCost ?? 0) +
+                                          (booking.service.price ?? 0))
+                                      .toStringAsFixed(1)
+                                  : (booking.service.price ?? 0)
+                                      .toStringAsFixed(1),
                           style: DMSansFont.textStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -489,8 +495,6 @@ class BookingListTileWidget extends StatelessWidget {
 
   Widget _buildTimestamp(BuildContext context) {
     String text = '';
-    final localization = AppLocalizations.of(context)!;
-
     if (isWarranty) {
       final warranty = booking.warranty;
       if (warranty != null) {

@@ -954,7 +954,6 @@ class _BookingInfoState extends State<BookingInfo> {
                           : widget.booking;
 
                       final statusCode = currentBooking.bookingStatusCode;
-                      final chatroomId = currentBooking.chatroomId;
                       final isTracking =
                           currentBooking.isStartTracking ?? false;
 
@@ -1502,64 +1501,64 @@ class _BookingInfoState extends State<BookingInfo> {
   }
 
   // 🔥 UPDATED CHAT BUTTON - Accepts chatroomId parameter from StreamBuilder
-  Widget _buildChatWithCustomerButton(
-    BuildContext context,
-    ColorScheme colorScheme,
-    String? chatroomId,
-    bool isWarranty,
-  ) {
-    final bool hasChatRoom = chatroomId != null && chatroomId.isNotEmpty;
+  // Widget _buildChatWithCustomerButton(
+  //   BuildContext context,
+  //   ColorScheme colorScheme,
+  //   String? chatroomId,
+  //   bool isWarranty,
+  // ) {
+  //   final bool hasChatRoom = chatroomId != null && chatroomId.isNotEmpty;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isInitiatingChat ? null : handleChatButton,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  hasChatRoom ? Icons.chat_bubble : Icons.chat_bubble_outline,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  hasChatRoom
-                      ? AppLocalizations.of(context)!.continueChat
-                      : AppLocalizations.of(context)!.chatWithCustomer,
-                  style: DMSansFont.textStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       gradient: LinearGradient(
+  //         colors: [AppColors.primary, AppColors.primary],
+  //         begin: Alignment.topLeft,
+  //         end: Alignment.bottomRight,
+  //       ),
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: AppColors.primary.withOpacity(0.3),
+  //           blurRadius: 12,
+  //           offset: const Offset(0, 4),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Material(
+  //       color: Colors.transparent,
+  //       child: InkWell(
+  //         onTap: isInitiatingChat ? null : handleChatButton,
+  //         borderRadius: BorderRadius.circular(16),
+  //         child: Padding(
+  //           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+  //           child: Row(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Icon(
+  //                 hasChatRoom ? Icons.chat_bubble : Icons.chat_bubble_outline,
+  //                 color: Colors.white,
+  //                 size: 24,
+  //               ),
+  //               const SizedBox(width: 12),
+  //               Text(
+  //                 hasChatRoom
+  //                     ? AppLocalizations.of(context)!.continueChat
+  //                     : AppLocalizations.of(context)!.chatWithCustomer,
+  //                 style: DMSansFont.textStyle(
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.w600,
+  //                   color: Colors.white,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildIssueMediaCard(
     BuildContext context,

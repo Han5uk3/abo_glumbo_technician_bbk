@@ -6,7 +6,7 @@ class Loader extends StatefulWidget {
   final double size;
   final double? height;
 
-  Loader({super.key, Color? color, this.size = 20.0, this.height})
+  const Loader({super.key, Color? color, this.size = 20.0, this.height})
     : color = color ?? AppColors.primary;
 
   @override

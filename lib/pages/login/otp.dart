@@ -161,7 +161,8 @@ class _OtpPageState extends State<OtpPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  AppLocalizations.of(context)!.smsRetrievalTimedOut,
+                  AppLocalizations.of(context)?.smsRetrievalTimedOut ??
+                      'SMS Retrieval Timed Out',
                 ),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 3),
@@ -214,7 +215,7 @@ class _OtpPageState extends State<OtpPage> {
             debugPrint('📢 [RESEND OTP] Showing error message: $errorMessage');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(errorMessage),
+                content: Text(errorMessage.isEmpty ? 'Error' : errorMessage),
                 backgroundColor: Colors.red,
                 duration: Duration(seconds: 3),
                 behavior: SnackBarBehavior.floating,
@@ -625,7 +626,8 @@ class _OtpPageState extends State<OtpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final locn = AppLocalizations.of(context)!;
+    final locn = AppLocalizations.of(context);
+    if (locn == null) return const SizedBox.shrink();
 
     return Scaffold(
       backgroundColor: AppColors.bgBlueTint,
@@ -640,7 +642,7 @@ class _OtpPageState extends State<OtpPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: Text(
-          AppLocalizations.of(context)!.enterOtp,
+          locn.enterOtp,
           style: GoogleFonts.dmSans(
             fontSize: 18,
             fontWeight: FontWeight.normal,
@@ -676,7 +678,7 @@ class _OtpPageState extends State<OtpPage> {
                                   child: Directionality(
                                     textDirection: TextDirection.ltr,
                                     child: Text(
-                                      " ${widget.phoneNumber} ",
+                                      " ${widget.phoneNumber ?? ''} ",
                                       style: GoogleFonts.dmSans(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -741,7 +743,7 @@ class _OtpPageState extends State<OtpPage> {
                           Text(
                             _remainingTime > 0
                                 ? '${locn.resend} ($_formattedTime)'
-                                : AppLocalizations.of(context)!.didNotReceiveOTP,
+                                : locn.didNotReceiveOTP,
                             style: GoogleFonts.dmSans(
                               color: Colors.black54,
                               fontSize: 14,

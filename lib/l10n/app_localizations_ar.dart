@@ -45,22 +45,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get login => 'تسجيل الدخول';
 
   @override
-  String get admins => 'Admins';
+  String get monthlyRevenue => 'الإيرادات الشهرية';
 
   @override
-  String get banners => 'Banners';
+  String get admins => 'المشرفون';
 
   @override
-  String get customers => 'Customers';
+  String get banners => 'اللافتات';
 
   @override
-  String get technicians => 'Technicians';
+  String get customers => 'العملاء';
 
   @override
-  String get payouts => 'Payouts';
+  String get technicians => 'الفنيون';
 
   @override
-  String get faqs => 'FAQs';
+  String get payouts => 'المدفوعات';
+
+  @override
+  String get faqs => 'الأسئلة الشائعة';
 
   @override
   String get totalPayoutAmount => 'إجمالي مبلغ الدفع';
@@ -113,40 +116,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notAvailableToWork => 'غير متاح للعمل';
 
   @override
-  String get choose => 'Choose';
+  String get choose => 'اختر';
 
   @override
-  String get availableLocations => 'Available Locations';
+  String get availableLocations => 'المواقع المتاحة';
 
   @override
-  String get workHoursPricing => 'Work Hours Pricing';
+  String get workHoursPricing => 'تسعير ساعات العمل';
 
   @override
-  String get workStartTime => 'Work Start Time';
+  String get workStartTime => 'وقت بدء العمل';
 
   @override
-  String get workEndTime => 'Work End Time';
+  String get workEndTime => 'وقت انتهاء العمل';
 
   @override
-  String get onWorkPrice => 'On-Work Price';
+  String get onWorkPrice => 'سعر وقت العمل';
 
   @override
-  String get offWorkPrice => 'Off-Work Price';
+  String get offWorkPrice => 'سعر خارج وقت العمل';
 
   @override
-  String get generalPrice => 'General Price (Fallback)';
+  String get generalPrice => 'السعر العام';
 
   @override
-  String get chooseLocations => 'Choose Locations';
+  String get chooseLocations => 'اختر المواقع';
 
   @override
-  String get pleaseEnterAnOnWorkPrice => 'Please enter an on-work price';
+  String get pleaseEnterAnOnWorkPrice => 'يرجى إدخال سعر وقت العمل';
 
   @override
-  String get pleaseEnterOffWorkPrice => 'Please enter off-work price';
+  String get pleaseEnterOffWorkPrice => 'يرجى إدخال سعر خارج وقت العمل';
 
   @override
-  String get pleaseEnterAGeneralPrice => 'Please enter a general price';
+  String get pleaseEnterAGeneralPrice => 'يرجى إدخال السعر العام';
 
   @override
   String get grantAdminAccess => 'منح صلاحيات المشرف';
@@ -803,7 +806,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tooManyRequests => 'عدد كبير جدا من الطلبات';
 
   @override
-  String get netError => 'Network Error';
+  String get netError => 'خطأ في الشبكة';
 
   @override
   String get wrongPassword => 'كلمة المرور خاطئة';
@@ -1177,7 +1180,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get waitingForCustomer => 'في انتظار رد العميل';
 
   @override
-  String get proposedTime => 'Proposed Time';
+  String get proposedTime => 'الوقت المقترح';
 
   @override
   String get counterOfferSent => 'تم إرسال العرض بنجاح';

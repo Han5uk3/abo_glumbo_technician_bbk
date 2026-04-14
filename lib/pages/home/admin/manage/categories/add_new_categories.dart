@@ -381,6 +381,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
                         ),
                       ),
                       Switch(
+                        activeThumbColor: AppColors.primary,
                         value: isActive,
                         onChanged: isLoading
                             ? null
@@ -396,6 +397,11 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: FilledButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                        AppColors.primary,
+                      ),
+                    ),
                     onPressed: isLoading ? null : () => pickImage(),
                     icon: const Icon(Icons.image),
                     label: Text(

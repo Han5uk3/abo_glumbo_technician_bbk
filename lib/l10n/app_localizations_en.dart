@@ -47,6 +47,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
+  String get monthlyRevenue => 'Monthly Revenue';
+
+  @override
   String get admins => 'Admins';
 
   @override
@@ -3766,7 +3769,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cash => 'Cash';
 
   @override
-  String get transactions => 'transactions';
+  String get transactions => 'Transactions';
 
   @override
   String get transactionDetails => 'Transaction Details';

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -348,6 +349,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: SwitchListTile(
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                   title: Text(AppLocalizations.of(context)?.active ?? 'Active'),
                   value: isActive,
@@ -403,11 +405,17 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                   children: [
                     Text(AppLocalizations.of(context)?.services ?? 'Services'),
                     TextButton.icon(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                          AppColors.primary,
+                        ),
+                      ),
                       onPressed: selectServiceBottomSheet,
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.add, color: Colors.white),
                       label: Text(
                         AppLocalizations.of(context)?.addService ??
                             'Add Service',
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ],

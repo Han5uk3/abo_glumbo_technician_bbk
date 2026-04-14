@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<List<String>> getPlaceSuggestions(String input) async {
-  const apiKey = 'AIzaSyBl4RQBYM_v-u2Oik_ENyxcGxnvyZGxL2o';
+  final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   final url =
       'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&components=country:sa';
   final response = await http.get(Uri.parse(url));

@@ -329,7 +329,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
               Icon(
                 Icons.search_off,
                 size: 100,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Colors.grey,
               ),
               const SizedBox(height: 12),
               Text(
@@ -367,7 +367,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
             Icon(
               Icons.hourglass_empty,
               size: 100,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Colors.grey,
             ),
             const SizedBox(height: 12),
             Text(localizations!.noBookings, textAlign: TextAlign.center),

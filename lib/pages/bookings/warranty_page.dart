@@ -354,7 +354,7 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
               Icon(
                 Icons.search_off,
                 size: 100,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Colors.grey,
               ),
               const SizedBox(height: 12),
               Text(
@@ -391,7 +391,7 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
             Icon(
               Icons.build_circle_outlined,
               size: 100,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Colors.grey,
             ),
             const SizedBox(height: 12),
             Text(

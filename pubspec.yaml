@@ -69,6 +69,8 @@ dependencies:
   google_maps_flutter: ^2.14.2
   fl_chart: ^0.70.2
   rxdart: ^0.28.0
+  flutter_dotenv: ^5.2.1
+  dotted_border: ^2.1.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -89,6 +91,7 @@ flutter:
     - assets/images/
     - assets/
     - assets/data/
+    - .env
   
   fonts:
     - family: DMSans

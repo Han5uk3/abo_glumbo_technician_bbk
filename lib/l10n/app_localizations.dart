@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get login;
 
+  /// No description provided for @monthlyRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Revenue'**
+  String get monthlyRevenue;
+
   /// No description provided for @admins.
   ///
   /// In en, this message translates to:
@@ -7182,7 +7188,7 @@ abstract class AppLocalizations {
   /// No description provided for @transactions.
   ///
   /// In en, this message translates to:
-  /// **'transactions'**
+  /// **'Transactions'**
   String get transactions;
 
   /// No description provided for @transactionDetails.

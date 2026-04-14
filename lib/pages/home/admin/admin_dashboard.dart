@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:intl/intl.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -61,7 +62,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Widget _buildSliverHeader(String title) {
     return SliverAppBar(
       expandedHeight: 85,
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.primarytwo,
       automaticallyImplyLeading: false,
       elevation: 0,
       pinned: false,
@@ -222,13 +223,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           color: Colors.purple,
         ),
         DashboardStatCard(
-          label: 'Customers',
+          label: l10n.customers,
           value: data.customerCount.toString(),
           icon: Icons.people_outline,
           color: Colors.teal,
         ),
         DashboardStatCard(
-          label: 'Technicians',
+          label: l10n.technicians,
           value: data.technicianCount.toString(),
           icon: Icons.engineering_outlined,
           color: Colors.indigo,
@@ -269,9 +270,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Monthly Revenue",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            l10n.monthlyRevenue,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -300,11 +301,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       getTitlesWidget: (double value, TitleMeta meta) {
                         int index = value.toInt();
                         if (index >= 0 && index < labels.length) {
-                          String label = labels[index].split(' ')[0];
+                          String label = labels[index];
+                          String monthLabel;
+                          try {
+                            final date = DateFormat('MMM yyyy').parse(label);
+                            monthLabel = DateFormat.MMM(l10n.localeName).format(date);
+                          } catch (e) {
+                            monthLabel = label.split(' ')[0];
+                          }
                           return SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              label,
+                              monthLabel,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.bold,
@@ -317,18 +325,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       },
                     ),
                   ),
-                  leftTitles: AxisTitles(
+                    leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: maxRevenue / 4,
-                      reservedSize: 42,
+                      interval: maxRevenue > 0 ? maxRevenue / 4 : 250,
+                      reservedSize: 45,
                       getTitlesWidget: (double value, TitleMeta meta) {
+                        String formattedValue;
+                        if (value >= 1000) {
+                          formattedValue = '${(value / 1000).toStringAsFixed(1)}k';
+                        } else {
+                          formattedValue = value.toInt().toString();
+                        }
+                        
                         return SideTitleWidget(
                           meta: meta,
                           child: Text(
-                            value >= 1000
-                                ? '${(value / 1000).toStringAsFixed(1)}k'
-                                : value.toInt().toString(),
+                            formattedValue,
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontWeight: FontWeight.bold,

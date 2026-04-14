@@ -285,6 +285,7 @@ class _AddBannerState extends State<AddBanner> {
             ),
             children: [
               SwitchListTile(
+                activeThumbColor: AppColors.primary,
                 value: isActive,
                 contentPadding: EdgeInsets.zero,
                 onChanged: (value) => setState(() => isActive = value),
@@ -292,6 +293,7 @@ class _AddBannerState extends State<AddBanner> {
               ),
               const SizedBox(height: 16),
               SwitchListTile(
+                activeThumbColor: AppColors.primary,
                 value: setction == 1,
                 contentPadding: EdgeInsets.zero,
                 onChanged: (value) => setState(() => setction = value ? 1 : 2),
@@ -339,6 +341,9 @@ class _AddBannerState extends State<AddBanner> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: FilledButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(AppColors.primary),
+                  ),
                   onPressed: pickImage,
                   child: Text(
                     AppLocalizations.of(context)?.pickImage ?? 'Pick Image',

@@ -474,7 +474,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
             Icon(
               Icons.search_off,
               size: 100,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Colors.grey,
             ),
             const SizedBox(height: 12),
             Text(
@@ -501,7 +501,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           Icon(
             Icons.hourglass_empty,
             size: 100,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Colors.grey,
           ),
           const SizedBox(height: 12),
           Text(

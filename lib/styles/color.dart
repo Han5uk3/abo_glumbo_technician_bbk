@@ -5,6 +5,7 @@ class AppColors {
   static Color secondary = const Color(0xFF0081FA);
   static Color bgWhite = const Color(0xFFFFFFFF);
   static Color bgBlueTint = const Color(0xFFFFFFFF);
+  static Color primarytwo = const Color(0xFF0A2463);
 
   static Color green = const Color(0XFF1C6156);
   static Color yellow = const Color(0XFFFABC1D);

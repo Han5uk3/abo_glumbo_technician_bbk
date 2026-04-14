@@ -7,17 +7,20 @@ class NewTextField extends StatelessWidget {
     required this.hintText,
     this.labelText,
     this.keyboardType,
+    this.isDescription = false,
     this.validator,
   });
   final TextEditingController controller;
   final String hintText;
   final String? labelText;
   final TextInputType? keyboardType;
+  final bool isDescription;
   final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: isDescription ? 5 : 1,
       keyboardType: keyboardType,
       cursorColor: Colors.black,
       controller: controller,
@@ -32,7 +35,7 @@ class NewTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.black),
+          borderSide: BorderSide(color: Colors.grey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

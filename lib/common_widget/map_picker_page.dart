@@ -795,8 +795,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               padding: EdgeInsets.only(top: 8),
               child: ElevatedButton.icon(
                 onPressed: () => _showLocationDetailsDialog(),
-                icon: Icon(Icons.add, size: 16),
-                label: Text(AppLocalizations.of(context)!.addCurrentLocation),
+                icon: Icon(Icons.add, size: 16, color: Colors.white),
+                label: Text(
+                  AppLocalizations.of(context)!.addCurrentLocation,
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   minimumSize: Size(double.infinity, 36),
@@ -1059,7 +1062,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                             Navigator.pop(context, _selectedLocations);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppColors.primary,
                             minimumSize: Size(double.infinity, 45),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),

@@ -14,6 +14,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../common_widget/map_picker_page.dart';
@@ -467,12 +468,13 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               SizedBox(height: 12),
               Text(
                 AppLocalizations.of(context)!.category,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: DropdownButtonFormField<CategoryModel>(
+                  dropdownColor: Colors.white,
                   value: selectedCategory,
                   items: categories.map((category) {
                     return DropdownMenuItem<CategoryModel>(
@@ -490,7 +492,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.black),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -498,11 +499,11 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.black),
+                      borderSide: BorderSide(color: Colors.grey),
                     ),
                     disabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.black),
+                      borderSide: BorderSide(color: Colors.grey),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -526,7 +527,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               ),
               Text(
                 AppLocalizations.of(context)!.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               SizedBox(height: 8),
               Padding(
@@ -544,7 +545,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               ),
               Text(
                 AppLocalizations.of(context)!.nameArabic,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               SizedBox(height: 8),
               Padding(
@@ -569,7 +570,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               ),
               Text(
                 AppLocalizations.of(context)!.description,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               SizedBox(height: 8),
               Padding(
@@ -579,6 +580,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   hintText:
                       AppLocalizations.of(context)?.description ??
                       'Description',
+                  isDescription: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(
@@ -591,13 +593,14 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               ),
               Text(
                 AppLocalizations.of(context)!.descriptionArabic,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: NewTextField(
                   controller: descriptionArController,
+                  isDescription: true,
                   hintText:
                       AppLocalizations.of(context)?.descriptionArabic ??
                       'Description (Arabic)',
@@ -616,9 +619,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
 
               Text(
                 AppLocalizations.of(context)!.workHoursPricing,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -630,7 +633,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -638,11 +640,11 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
+                            borderSide: BorderSide(color: Colors.grey),
                           ),
                           disabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
+                            borderSide: BorderSide(color: Colors.grey),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -692,7 +694,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -700,11 +701,11 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
+                            borderSide: BorderSide(color: Colors.grey),
                           ),
                           disabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
+                            borderSide: BorderSide(color: Colors.grey),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -834,7 +835,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.availableLocations,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -891,40 +895,75 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
 
               Text(
                 AppLocalizations.of(context)!.image,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: eButton(
-                  backgroundColor: AppColors.primary,
-                  context: context,
-                  onPressed: pickImage,
-                  text: AppLocalizations.of(context)?.pickImage ?? 'Pick Image',
-                  textColor: Colors.white,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
-
+              const SizedBox(height: 8),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: Directionality.of(context) == TextDirection.rtl
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: selectedImage != null
-                        ? Image.file(
-                            File(selectedImage!.path),
-                            height: 130,
-                            width: 130,
-                          )
-                        : widget.service?.image != null
-                        ? CachedNetworkImage(
-                            imageUrl: widget.service?.image ?? "",
-                            height: 130,
-                            width: 130,
-                            fit: BoxFit.cover,
-                          )
-                        : const SizedBox.shrink(),
+                  child: GestureDetector(
+                    onTap: pickImage,
+                    child: DottedBorder(
+                      color: Colors.grey.withOpacity(0.5),
+                      strokeWidth: 1.5,
+                      dashPattern: const [6, 4],
+                      borderType: BorderType.RRect,
+                      radius: const Radius.circular(12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 130,
+                          height: 130,
+                          color: Colors.grey.withOpacity(0.05),
+                          child: selectedImage != null
+                              ? Image.file(
+                                  File(selectedImage!.path),
+                                  fit: BoxFit.cover,
+                                  width: 130,
+                                  height: 130,
+                                )
+                              : widget.service?.image != null
+                              ? CachedNetworkImage(
+                                  imageUrl: widget.service?.image ?? "",
+                                  fit: BoxFit.cover,
+                                  width: 130,
+                                  height: 130,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                )
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate_outlined,
+                                      size: 32,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      AppLocalizations.of(context)?.pickImage ??
+                                          'Pick Image',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -18,7 +18,6 @@ if (envFile.exists()) {
     envFile.inputStream().use { envProperties.load(it) }
 }
 
-val kotlin_version: String by project
 android {
     namespace = "com.aboglumbo.cPanel"
     compileSdk = 36

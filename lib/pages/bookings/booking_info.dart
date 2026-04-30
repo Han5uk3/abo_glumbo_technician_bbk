@@ -29,6 +29,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:collection/collection.dart';
+import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
+
 
 class BookingInfo extends StatefulWidget {
   final BookingModel booking;
@@ -2695,6 +2697,25 @@ class _BookingInfoState extends State<BookingInfo> {
                     color: colorScheme.onSurface,
                   ),
                 ),
+                const Spacer(),
+                if (widget.booking.bookingStatusCode.toLowerCase() == 'completed' || 
+                    widget.booking.bookingStatusCode.toLowerCase() == 'c')
+                  IconButton(
+                    onPressed: () => InvoiceService.generateAndShowInvoice(widget.booking),
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.download_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    tooltip: "Download Invoice",
+                  ),
               ],
             ),
             const SizedBox(height: 12),

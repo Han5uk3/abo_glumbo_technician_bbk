@@ -1389,7 +1389,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteService => 'Delete Service';
 
   @override
-  String get serviceDeletedSuccessfully => 'Service deleted successfully';
+  String get serviceCompletedDescription =>
+      'Work was done and service provided';
+
+  @override
+  String get paymentThroughApp => 'Payment Through App';
+
+  @override
+  String get paymentOutsideApp => 'Payment Outside App';
+
+  @override
+  String get paymentThroughAppDesc => 'Customer will pay through the app.';
+
+  @override
+  String get paymentOutsideAppDesc => 'Collect cash or external payment.';
 
   @override
   String get deleteServiceConfirmation =>
@@ -1419,10 +1432,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qty => 'Qty';
-
-  @override
-  String get serviceCompletedDescription =>
-      'Work was done and service provided';
 
   @override
   String get inspectionOnlyDescription =>
@@ -1622,11 +1631,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseAddAtleastOneServiceItem =>
-      'Please add at least one service item.';
+      'Please add atleast one service item';
 
   @override
   String get pleaseFillAllServiceItemFields =>
-      'Please fill all service item fields.';
+      'Please fill all service item fields';
+
+  @override
+  String get workingDays => 'Working Days';
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
 
   @override
   String get locationServiceRequired => 'Location service is required';
@@ -1654,6 +1687,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stopTracking => 'Stop Tracking';
+
+  @override
+  String get arrivedAtLocation => 'Arrived at location';
 
   @override
   String get youHaveActiveBooking => 'You have an active booking';

@@ -30,6 +30,8 @@ class _AddAdminPageState extends State<AddAdminPage> {
   }
 
   Future<void> _addAdmin() async {
+    if (_isLoading) return;
+
     // Check if the current user is the Core Admin
     final currentUser = LocalStore.getCachedUserData();
     if (currentUser?.phone != '+966501234567') {

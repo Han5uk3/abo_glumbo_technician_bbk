@@ -227,8 +227,9 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                               ? () => _showStopTrackingBottomSheet(context)
                               : () => _showStartTrackingBottomSheet(context),
                           label: isThisBookingTracked
-                              ? AppLocalizations.of(context)!.stopTracking
+                              ? AppLocalizations.of(context)!.arrivedAtLocation
                               : AppLocalizations.of(context)!.startTracking,
+                          fontSize: isThisBookingTracked ? 14 : 12,
                           color: isThisBookingTracked
                               ? Colors.orange
                               : AppColors.blue1,
@@ -290,6 +291,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
     required Color color,
     bool isOutlined = false,
     bool isLoading = false,
+    double fontSize = 12,
   }) {
     final isDisabled = onPressed == null;
     final baseColor = isDisabled ? Colors.grey : color;
@@ -319,7 +321,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                   : Text(
                       label,
                       style: DMSansFont.textStyle(
-                        fontSize: 12,
+                        fontSize: fontSize,
                         fontWeight: FontWeight.w600,
                         color: baseColor,
                       ),
@@ -348,7 +350,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                   : Text(
                       label,
                       style: DMSansFont.textStyle(
-                        fontSize: 12,
+                        fontSize: fontSize,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),

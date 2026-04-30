@@ -66,6 +66,10 @@ class _AddFaqPageState extends State<AddFaqPage> {
                 return IconButton(
                   icon: const Icon(Icons.save),
                   onPressed: () {
+                    final isLoading =
+                        state is AddingFaq || state is UpdatingFaq;
+                    if (isLoading) return;
+
                     if (widget.isEdit) {
                       if (_formKey.currentState!.validate()) {
                         final faqEntry = FaqModel(

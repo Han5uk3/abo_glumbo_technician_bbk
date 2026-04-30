@@ -249,7 +249,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                 ? () => _showStopTrackingBottomSheet(context)
                                 : () => _showStartTrackingBottomSheet(context),
                             label: isThisBookingTracked
-                                ? AppLocalizations.of(context)!.stopTracking
+                                ? AppLocalizations.of(context)!.arrivedAtLocation
                                 : AppLocalizations.of(context)!.startTracking,
                             color: isThisBookingTracked
                                 ? Colors.orange.shade50

@@ -4057,14 +4057,23 @@ exports.autoAssignTechnician = onDocumentWritten(
 
     const isNew = !change.before.exists;
     const isReassigned = change.before.exists && oldBooking?.agent && !booking.agent;
+    const isReady = booking.autoAssignmentStatus === "ready_to_assign";
     
-    if (!isNew && !isReassigned) {
+    // If it's a new booking, check if it has a scheduled time in the future
+    if (isNew && booking.assignmentScheduledTime) {
+      if (Date.now() < booking.assignmentScheduledTime.toDate().getTime()) {
+        logger.info(`[${bookingId}] New booking, but assignment scheduled for later. Ignoring for now.`);
+        return null;
+      }
+    }
+
+    if (!isNew && !isReassigned && !isReady) {
       // Avoid triggers for other field updates if it's already an empty P
       if (change.before.exists && oldBooking?.bookingStatusCode === "P" && !oldBooking?.agent && !booking.agent) return null;
     }
 
-    // Trust the isOnHour flag set by the app. 
-    if (booking.isOnHour !== true) {
+    // Trust the isOnHour flag set by the app. (Only auto-assign for off-hours)
+    if (booking.isOnHour === true) {
       return null;
     }
 
@@ -4279,3 +4288,35 @@ exports.autoAssignTechnician = onDocumentWritten(
     return null;
   }
 );
+
+/**
+ * Scheduled function that runs every 5 minutes.
+ * Finds bookings that are within 3 hours of appointment time, 
+ * off-hours, pending, and haven't been picked up by the assignment system yet.
+ * It updates them to trigger the main autoAssignTechnician function.
+ */
+exports.triggerScheduledAssignments = onSchedule("every 5 minutes", async (event) => {
+  const now = admin.firestore.Timestamp.now();
+  const snapshot = await db.collection("bookings")
+    .where("bookingStatusCode", "==", "P")
+    .where("isOnHour", "==", false)
+    .where("assignmentScheduledTime", "<=", now)
+    .get();
+
+  const batch = db.batch();
+  let count = 0;
+  
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    // If it hasn't been picked up yet (agent is null, status is not already searching or accepted)
+    if (data.autoAssignmentStatus !== "searching" && data.autoAssignmentStatus !== "ready_to_assign" && data.autoAssignmentStatus !== "accepted" && !data.agent) {
+      batch.update(doc.ref, { autoAssignmentStatus: "ready_to_assign", updatedAt: FieldValue.serverTimestamp() });
+      count++;
+    }
+  });
+
+  if (count > 0) {
+    await batch.commit();
+    logger.info(`Triggered scheduled assignment for ${count} bookings.`);
+  }
+});

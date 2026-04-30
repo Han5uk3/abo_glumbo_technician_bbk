@@ -172,6 +172,11 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
   }
 
   void _saveCategory() async {
+    final isLoading =
+        context.read<ManageAppBloc>().state is AddingCategory ||
+        context.read<ManageAppBloc>().state is UpdatingCategory;
+    if (isLoading) return;
+
     final hasImage =
         selectedImage != null ||
         (widget.category?.svg != null && !shouldRemoveExistingImage);

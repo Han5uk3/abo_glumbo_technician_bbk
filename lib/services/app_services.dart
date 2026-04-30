@@ -1163,6 +1163,7 @@ class AppServices {
     required List<Map<String, dynamic>> serviceItems,
     required double totalCost,
     required double inspectionFee,
+    bool paymentThroughApp = false,
   }) async {
     try {
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
@@ -1170,7 +1171,7 @@ class AppServices {
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'paymentCompleted': (mode == 0 || totalCost <= 0),
+        'paymentCompleted': (mode == 0 || totalCost <= 0) ? !paymentThroughApp : false,
         'completionData': {
           'fileUrls': fileUrls, // Changed from imageUrls
           'serviceCost': serviceCost,

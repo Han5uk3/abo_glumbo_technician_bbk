@@ -211,6 +211,10 @@ class _AddBannerState extends State<AddBanner> {
                   onPressed: (state is AddingBanner || state is UpdatingBanner)
                       ? null
                       : () {
+                          final isLoading =
+                              state is AddingBanner || state is UpdatingBanner;
+                          if (isLoading) return;
+
                           if (formKey.currentState!.validate()) {
                             // Check if image is mandatory for new banners
                             if (widget.banner == null &&

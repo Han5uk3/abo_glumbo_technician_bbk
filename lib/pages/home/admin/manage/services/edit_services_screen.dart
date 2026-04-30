@@ -58,6 +58,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   CategoryModel? selectedCategory;
   List<SelectedCity> selectedCities = [];
   List<Map<String, dynamic>> mapSelectedLocations = [];
+  List<int> workingDays = [1, 2, 3, 4, 6, 7]; // Default: all days except Friday (5)
 
   final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
        \u0750-\u077F
@@ -76,6 +77,27 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeData();
     });
+  }
+
+  String _getDayName(int day, BuildContext context) {
+    switch (day) {
+      case 1:
+        return AppLocalizations.of(context)?.monday ?? 'Monday';
+      case 2:
+        return AppLocalizations.of(context)?.tuesday ?? 'Tuesday';
+      case 3:
+        return AppLocalizations.of(context)?.wednesday ?? 'Wednesday';
+      case 4:
+        return AppLocalizations.of(context)?.thursday ?? 'Thursday';
+      case 5:
+        return AppLocalizations.of(context)?.friday ?? 'Friday';
+      case 6:
+        return AppLocalizations.of(context)?.saturday ?? 'Saturday';
+      case 7:
+        return AppLocalizations.of(context)?.sunday ?? 'Sunday';
+      default:
+        return '';
+    }
   }
 
   Future<void> _initializeData() async {
@@ -150,12 +172,13 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       isActive = widget.service!.isActive;
       discountPercentageController.text =
           widget.service!.discountPercentage?.toString() ?? '0';
+      workingDays = widget.service!.workingDays ?? [1, 2, 3, 4, 6, 7];
 
       // Restore hierarchical location data
       // Support both old district-based and new city-based formats
-      if (widget.service!.locations.isNotEmpty) {
+      if (widget.service!.locations?.isNotEmpty == true) {
         selectedCities = [];
-        for (final locationJsonStr in widget.service!.locations) {
+        for (final locationJsonStr in widget.service!.locations!) {
           if (locationJsonStr == null || locationJsonStr.isEmpty) continue;
           try {
             final locationMap =
@@ -259,6 +282,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   }
 
   Future saveContent() async {
+    if (isSaving) return;
+
     if (_formKey.currentState!.validate()) {
       setState(() => isSaving = true);
       try {
@@ -276,6 +301,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
           ),
           workStartTime: workStartTimeController.text.trim(),
           workEndTime: workEndTimeController.text.trim(),
+          workingDays: workingDays,
           category: selectedCategory?.id,
           locations: selectedCities.isNotEmpty
               ? selectedCities
@@ -311,11 +337,13 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
           );
           final uploadTask = ref.putFile(File(selectedImage!.path));
           uploadTask.snapshotEvents.listen((event) {
-            setState(() {
-              imageUploadProgress =
-                  event.bytesTransferred.toDouble() /
-                  event.totalBytes.toDouble();
-            });
+            if (mounted) {
+              setState(() {
+                final total = event.totalBytes.toDouble();
+                imageUploadProgress =
+                    total > 0 ? event.bytesTransferred.toDouble() / total : 0;
+              });
+            }
           });
 
           await uploadTask;
@@ -344,7 +372,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
             );
           }
 
-          await docRef.update(service.toEditJson(previous: widget.service!));
+          final updateData = service.toEditJson(previous: widget.service!);
+          if (updateData.isNotEmpty) {
+            await docRef.update(updateData);
+          }
           await saveMapLocations(widget.service!.id!);
         }
 
@@ -400,6 +431,8 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                 'priority': l['priority'],
                 'en_name': l['en_name'],
                 'ar_name': l['ar_name'],
+                'lat': l['lat'],
+                'lng': l['lng'],
               },
             )
             .toList(),
@@ -436,7 +469,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               : AppLocalizations.of(context)!.editService,
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.save), onPressed: saveContent),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: isSaving ? null : saveContent,
+          ),
         ],
       ),
       body: SavingStackWidget(
@@ -745,6 +781,38 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context)?.workingDays ?? 'Working Days',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [1, 2, 3, 4, 5, 6, 7].map((day) {
+                  final isSelected = workingDays.contains(day);
+                  return FilterChip(
+                    label: Text(
+                      _getDayName(day, context),
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: AppColors.primary,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        if (selected) {
+                          workingDays.add(day);
+                        } else {
+                          workingDays.remove(day);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(

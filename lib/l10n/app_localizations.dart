@@ -2768,11 +2768,35 @@ abstract class AppLocalizations {
   /// **'Delete Service'**
   String get deleteService;
 
-  /// No description provided for @serviceDeletedSuccessfully.
+  /// No description provided for @serviceCompletedDescription.
   ///
   /// In en, this message translates to:
-  /// **'Service deleted successfully'**
-  String get serviceDeletedSuccessfully;
+  /// **'Work was done and service provided'**
+  String get serviceCompletedDescription;
+
+  /// No description provided for @paymentThroughApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Through App'**
+  String get paymentThroughApp;
+
+  /// No description provided for @paymentOutsideApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Outside App'**
+  String get paymentOutsideApp;
+
+  /// No description provided for @paymentThroughAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer will pay through the app.'**
+  String get paymentThroughAppDesc;
+
+  /// No description provided for @paymentOutsideAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect cash or external payment.'**
+  String get paymentOutsideAppDesc;
 
   /// No description provided for @deleteServiceConfirmation.
   ///
@@ -2827,12 +2851,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Qty'**
   String get qty;
-
-  /// No description provided for @serviceCompletedDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Work was done and service provided'**
-  String get serviceCompletedDescription;
 
   /// No description provided for @inspectionOnlyDescription.
   ///
@@ -3221,14 +3239,62 @@ abstract class AppLocalizations {
   /// No description provided for @pleaseAddAtleastOneServiceItem.
   ///
   /// In en, this message translates to:
-  /// **'Please add at least one service item.'**
+  /// **'Please add atleast one service item'**
   String get pleaseAddAtleastOneServiceItem;
 
   /// No description provided for @pleaseFillAllServiceItemFields.
   ///
   /// In en, this message translates to:
-  /// **'Please fill all service item fields.'**
+  /// **'Please fill all service item fields'**
   String get pleaseFillAllServiceItemFields;
+
+  /// No description provided for @workingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Days'**
+  String get workingDays;
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
 
   /// No description provided for @locationServiceRequired.
   ///
@@ -3283,6 +3349,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop Tracking'**
   String get stopTracking;
+
+  /// No description provided for @arrivedAtLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived at location'**
+  String get arrivedAtLocation;
 
   /// No description provided for @youHaveActiveBooking.
   ///

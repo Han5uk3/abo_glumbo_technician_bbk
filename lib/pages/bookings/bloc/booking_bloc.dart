@@ -76,6 +76,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         serviceItems: serviceItemsData,
         totalCost: event.totalCost,
         inspectionFee: event.inspectionFee,
+        paymentThroughApp: event.paymentThroughApp,
       );
 
       if (isSuccess) {

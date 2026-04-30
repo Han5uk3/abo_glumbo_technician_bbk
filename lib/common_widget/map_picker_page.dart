@@ -64,6 +64,19 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   final int _priority = 0;
   final GlobalKey<FormState> _dialogFormKey = GlobalKey<FormState>();
 
+  static const List<Color> _regionColors = [
+    Colors.blue,
+    Colors.green,
+    Colors.red,
+    Colors.purple,
+    Colors.orange,
+    Colors.teal,
+    Colors.pink,
+    Colors.indigo,
+    Colors.amber,
+    Colors.cyan,
+  ];
+
   final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
        \u0750-\u077F
        \u08A0-\u08FF
@@ -139,6 +152,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     for (var i = 0; i < _selectedLocations.length; i++) {
       var loc = _selectedLocations[i];
       LatLng pos = loc['location'];
+      Color regionColor = _regionColors[i % _regionColors.length];
 
       updatedMarkers.add(
         Marker(
@@ -150,9 +164,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                 '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            i == 0
-                ? BitmapDescriptor.hueBlue
-                : BitmapDescriptor.hueGreen + (i * 10).toDouble(),
+            (i * 35.0) % 360.0,
           ),
           draggable: false,
         ),
@@ -174,8 +186,8 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           Polygon(
             polygonId: PolygonId('p_$i'),
             points: points,
-            fillColor: Colors.blue.withOpacity(0.1),
-            strokeColor: i == 0 ? Colors.blue : Colors.green,
+            fillColor: regionColor.withOpacity(0.2),
+            strokeColor: regionColor,
             strokeWidth: 2,
           ),
         );
@@ -192,6 +204,16 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           strokeWidth: 2,
         ),
       );
+      
+      for (var j = 0; j < _currentPolygonPoints.length; j++) {
+        updatedMarkers.add(
+          Marker(
+            markerId: MarkerId('current_p_$j'),
+            position: _currentPolygonPoints[j],
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+          ),
+        );
+      }
     }
 
     setState(() {
@@ -406,13 +428,6 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       if (locations.isNotEmpty && mounted) {
         final latLng = LatLng(locations[0].latitude, locations[0].longitude);
         await _moveCameraToLocation(latLng);
-        setState(() {
-          _selectedLocation = latLng;
-        });
-        await _getAddressFromLatLng(latLng);
-
-        // Show add confirmation dialog
-        _showLocationDetailsDialog();
       } else {
         _showSnackBar(
           AppLocalizations.of(context)!.locationNotFound,
@@ -666,15 +681,21 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _showLocationDetailsDialog(),
+                    onPressed: () {
+                      if (_currentPolygonPoints.length < 4) {
+                        _showSnackBar('A region must have at least 4 points to be completed.', Colors.orange);
+                        return;
+                      }
+                      _showLocationDetailsDialog();
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: _currentPolygonPoints.length >= 4 ? Colors.orange : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: Text(
-                      'Complete Region',
+                      'Complete Region (${_currentPolygonPoints.length} pts)',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -1044,6 +1065,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
+                            if (_isLoading) return;
                             if (widget.onLocationSelected != null) {
                               widget.onLocationSelected!({
                                 'locations': _selectedLocations,

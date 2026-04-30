@@ -113,6 +113,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
   }
 
   Future saveContent() async {
+    if (isSaving) return;
     if (_formKey.currentState!.validate()) {
       if (selectedServices.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -171,9 +172,12 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
             service.toJson(),
           );
         } else {
-          await AppFirestore.highlightedServicesCollectionRef
-              .doc(widget.service!.id)
-              .update(service.toEditJson(previous: widget.service!));
+          final updateData = service.toEditJson(previous: widget.service!);
+          if (updateData.isNotEmpty) {
+            await AppFirestore.highlightedServicesCollectionRef
+                .doc(widget.service!.id)
+                .update(updateData);
+          }
         }
 
         if (mounted) {
@@ -330,7 +334,10 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
               : AppLocalizations.of(context)!.editHighlightedService,
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.save), onPressed: saveContent),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: isSaving ? null : saveContent,
+          ),
         ],
       ),
       body: SavingStackWidget(

@@ -28,6 +28,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   List<File> selectedFiles = [];
   String? _fileError;
   bool _serviceCompleted = false;
+  bool _paymentThroughApp = false;
 
   double get _totalCost {
     if (!_serviceCompleted) {
@@ -595,6 +596,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
             : 0,
         serviceItems: items,
         totalCost: _totalCost,
+        paymentThroughApp: _paymentThroughApp,
       ),
     );
   }
@@ -710,6 +712,73 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                             selectedFiles.clear();
                             _fileError = null;
                           }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Payment Method Toggle
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.purple.withOpacity(0.1),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _paymentThroughApp ? Icons.phone_iphone : Icons.money,
+                        color: Colors.purple,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _paymentThroughApp
+                                ? AppLocalizations.of(context)?.paymentThroughApp ?? 'Payment Through App'
+                                : AppLocalizations.of(context)?.paymentOutsideApp ?? 'Payment Outside App',
+                            style: DMSansFont.textStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _paymentThroughApp
+                                ? AppLocalizations.of(context)?.paymentThroughAppDesc ?? 'Customer will pay through the app.'
+                                : AppLocalizations.of(context)?.paymentOutsideAppDesc ?? 'Collect cash or external payment.',
+                            style: DMSansFont.textStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch.adaptive(
+                      value: _paymentThroughApp,
+                      activeColor: Colors.purple,
+                      onChanged: (value) {
+                        setState(() {
+                          _paymentThroughApp = value;
                         });
                       },
                     ),

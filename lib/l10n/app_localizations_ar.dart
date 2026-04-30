@@ -1377,7 +1377,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteService => 'حذف الخدمة';
 
   @override
-  String get serviceDeletedSuccessfully => 'تم حذف الخدمة بنجاح';
+  String get serviceCompletedDescription => 'تم القيام بالعمل وتقديم الخدمة';
+
+  @override
+  String get paymentThroughApp => 'الدفع عبر التطبيق';
+
+  @override
+  String get paymentOutsideApp => 'الدفع خارج التطبيق';
+
+  @override
+  String get paymentThroughAppDesc => 'سيدفع العميل من خلال التطبيق.';
+
+  @override
+  String get paymentOutsideAppDesc => 'استلام نقدي أو دفع خارجي.';
 
   @override
   String get deleteServiceConfirmation => 'هل أنت متأكد من حذف الخدمة؟';
@@ -1405,9 +1417,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qty => 'الكمية';
-
-  @override
-  String get serviceCompletedDescription => 'تم القيام بالعمل وتقديم الخدمة';
 
   @override
   String get inspectionOnlyDescription =>
@@ -1611,6 +1620,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseFillAllServiceItemFields => 'يرجى ملء جميع حقول العنصر';
 
   @override
+  String get workingDays => 'أيام العمل';
+
+  @override
+  String get monday => 'الإثنين';
+
+  @override
+  String get tuesday => 'الثلاثاء';
+
+  @override
+  String get wednesday => 'الأربعاء';
+
+  @override
+  String get thursday => 'الخميس';
+
+  @override
+  String get friday => 'الجمعة';
+
+  @override
+  String get saturday => 'السبت';
+
+  @override
+  String get sunday => 'الأحد';
+
+  @override
   String get locationServiceRequired => 'خدمة الموقع مطلوبة';
 
   @override
@@ -1636,6 +1669,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stopTracking => 'إيقاف التتبع';
+
+  @override
+  String get arrivedAtLocation => 'تم الوصول للموقع';
 
   @override
   String get youHaveActiveBooking => 'لديك حجز نشط';

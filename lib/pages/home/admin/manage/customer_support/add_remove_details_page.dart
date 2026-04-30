@@ -600,6 +600,11 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                           ? SizedBox(width: 70, height: 20, child: Loader())
                           : eButton(
                               onPressed: () {
+                                final isLoadingState =
+                                    state is AddingCustomerSupport ||
+                                    state is UpdatingCustomerSupport;
+                                if (isLoadingState) return;
+
                                 if (formKey.currentState!.validate()) {
                                   // If adding and no contacts exist, set as primary automatically
                                   final shouldBePrimary =

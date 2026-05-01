@@ -85,3 +85,12 @@ class StopWorkingOnBooking extends BookingEvent {
   @override
   List<Object> get props => [bookingId];
 }
+
+class PauseWorkingOnBooking extends BookingEvent {
+  final String bookingId;
+
+  const PauseWorkingOnBooking({required this.bookingId});
+
+  @override
+  List<Object> get props => [bookingId];
+}

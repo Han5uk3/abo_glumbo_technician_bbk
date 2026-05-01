@@ -1979,8 +1979,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to start tracking this booking?';
 
   @override
+  String get areYouSureYouWantToPauseTrackingThisBooking =>
+      'Are you sure you want to pause tracking this booking?';
+
+  @override
   String get areYouSureYouWantToStopTrackingThisBooking =>
       'Are you sure you want to stop tracking this booking?';
+
+  @override
+  String get pauseTracking => 'Pause Tracking';
+
+  @override
+  String get resumeTracking => 'Resume Tracking';
+
+  @override
+  String get trackingPausedSuccessfully => 'Tracking paused successfully';
 
   @override
   String get areYouSureYouWantToCompleteThisWork =>
@@ -3686,9 +3699,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get acceptWarrantyClaimMessage =>
       'Do you want to accept this warranty claim?';
-
-  @override
-  String get pauseTracking => 'Pause Tracking';
 
   @override
   String get completeWorkMessage =>

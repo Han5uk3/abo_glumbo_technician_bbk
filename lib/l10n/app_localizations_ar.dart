@@ -1954,8 +1954,21 @@ class AppLocalizationsAr extends AppLocalizations {
       'هل أنت متأكد أنك تريد بدء تتبع هذا الحجز؟';
 
   @override
+  String get areYouSureYouWantToPauseTrackingThisBooking =>
+      'هل أنت متأكد أنك تريد إيقاف تتبع هذا الحجز مؤقتًا؟';
+
+  @override
   String get areYouSureYouWantToStopTrackingThisBooking =>
       'هل أنت متأكد أنك تريد إيقاف تتبع هذا الحجز؟';
+
+  @override
+  String get pauseTracking => 'إيقاف مؤقت للتتبع';
+
+  @override
+  String get resumeTracking => 'استئناف التتبع';
+
+  @override
+  String get trackingPausedSuccessfully => 'تم إيقاف التتبع مؤقتًا بنجاح';
 
   @override
   String get areYouSureYouWantToCompleteThisWork =>
@@ -3633,9 +3646,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get acceptWarrantyClaimMessage =>
       'هل أنت متأكد من رغبتك في قبول هذا الطلب؟';
-
-  @override
-  String get pauseTracking => 'إيقاف تتبع';
 
   @override
   String get completeWorkMessage => 'هل أنت متأكد من رغبتك في إكمال هذا العمل؟';

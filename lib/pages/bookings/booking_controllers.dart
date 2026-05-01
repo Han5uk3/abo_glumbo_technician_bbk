@@ -155,6 +155,20 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
           log("stop tracking error: ${state.error}");
+        } else if (state is BookingPauseWorkingSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.trackingPausedSuccessfully,
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state is BookingPauseWorkingFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+          );
+          log("pause tracking error: ${state.error}");
         }
       },
       builder: (context, state) {
@@ -162,126 +176,183 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
         final isCompleteLoading = state is BookingCompleteLoading;
         final isStartWorkingLoading = state is BookingStartWorkingLoading;
         final isStopWorkingLoading = state is BookingStopWorkingLoading;
+        final isPauseWorkingLoading = state is BookingPauseWorkingLoading;
 
         return ValueListenableBuilder<bool>(
           valueListenable: BookingControlsWidget._trackerService.isTracking,
           builder: (context, serviceIsTracking, child) {
-            final actualIsTracking = serviceIsTracking;
-            final currentTrackingBookingId =
-                BookingControlsWidget._trackerService.currentBookingId;
-            final isThisBookingTracked =
-                actualIsTracking &&
-                currentTrackingBookingId == widget.booking.id;
+            return ValueListenableBuilder<bool>(
+              valueListenable: BookingControlsWidget._trackerService.isPaused,
+              builder: (context, serviceIsPaused, child) {
+                final currentTrackingBookingId =
+                    BookingControlsWidget._trackerService.currentBookingId;
+                final isThisBookingActive =
+                    (serviceIsTracking || serviceIsPaused) &&
+                    currentTrackingBookingId == widget.booking.id;
 
-            final shouldBlockCancel = actualIsTracking;
+                final isThisBookingTracked =
+                    serviceIsTracking &&
+                    currentTrackingBookingId == widget.booking.id;
 
-            return Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black.withOpacity(0.06)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildActionButton(
-                          onPressed:
-                              shouldBlockCancel ||
-                                  isCancelLoading ||
-                                  isCompleteLoading ||
-                                  isStartWorkingLoading ||
-                                  isStopWorkingLoading
-                              ? null
-                              : () => _showCancelBottomSheet(context),
-                          label: AppLocalizations.of(context)!.cancelBooking,
-                          color: Colors.red,
-                          isOutlined: true,
-                          isLoading: isCancelLoading,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildActionButton(
-                          onPressed:
-                              (isStartWorkingLoading ||
-                                  isStopWorkingLoading ||
-                                  isCancelLoading ||
-                                  isCompleteLoading ||
-                                  (actualIsTracking &&
-                                      BookingControlsWidget
-                                              ._trackerService
-                                              .currentBookingId !=
-                                          widget.booking.id))
-                              ? null
-                              : isThisBookingTracked
-                              ? () => _showStopTrackingBottomSheet(context)
-                              : () => _showStartTrackingBottomSheet(context),
-                          label: isThisBookingTracked
-                              ? AppLocalizations.of(context)!.arrivedAtLocation
-                              : AppLocalizations.of(context)!.startTracking,
-                          fontSize: isThisBookingTracked ? 14 : 12,
-                          color: isThisBookingTracked
-                              ? Colors.orange
-                              : AppColors.blue1,
-                          isOutlined: true,
-                          isLoading:
-                              isStartWorkingLoading || isStopWorkingLoading,
-                        ),
+                final isThisBookingPaused =
+                    serviceIsPaused &&
+                    currentTrackingBookingId == widget.booking.id;
+
+                final shouldBlockCancel = serviceIsTracking || serviceIsPaused;
+
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.black.withOpacity(0.06)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 15,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed:
-                          (
-                          isCompleteLoading ||
-                          widget.booking.trackingStoppedAt == null)
-                          ? null
-                          :
-                          () => _showCompleteWorkBottomSheet(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: isCompleteLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
+                  child: Column(
+                    children: [
+                      if (widget.booking.trackingStoppedAt == null)
+                        Row(
+                          children: [
+                            if (!isThisBookingActive)
+                              Expanded(
+                                child: _buildActionButton(
+                                  onPressed:
+                                      shouldBlockCancel ||
+                                          isCancelLoading ||
+                                          isCompleteLoading ||
+                                          isStartWorkingLoading ||
+                                          isStopWorkingLoading ||
+                                          isPauseWorkingLoading
+                                      ? null
+                                      : () => _showCancelBottomSheet(context),
+                                  label:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.cancelBooking,
+                                  color: Colors.red,
+                                  isOutlined: true,
+                                  isLoading: isCancelLoading,
+                                ),
                               ),
-                            )
-                          : Text(
-                              AppLocalizations.of(context)!.completeWork,
-                              style: DMSansFont.textStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                            if (!isThisBookingActive) const SizedBox(width: 12),
+                            if (isThisBookingActive)
+                              Expanded(
+                                child: _buildActionButton(
+                                  onPressed:
+                                      (isStartWorkingLoading ||
+                                          isStopWorkingLoading ||
+                                          isPauseWorkingLoading ||
+                                          isCancelLoading ||
+                                          isCompleteLoading)
+                                      ? null
+                                      : isThisBookingTracked
+                                      ? () =>
+                                          _showPauseTrackingBottomSheet(context)
+                                      : () =>
+                                          _showResumeTrackingBottomSheet(
+                                            context,
+                                          ),
+                                  label:
+                                      isThisBookingTracked
+                                          ? AppLocalizations.of(
+                                            context,
+                                          )!.pauseTracking
+                                          : AppLocalizations.of(
+                                            context,
+                                          )!.resumeTracking,
+                                  color: Colors.orange,
+                                  isOutlined: true,
+                                  isLoading: isPauseWorkingLoading,
+                                ),
+                              ),
+                            if (isThisBookingActive) const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildActionButton(
+                                onPressed:
+                                    (isStartWorkingLoading ||
+                                        isStopWorkingLoading ||
+                                        isPauseWorkingLoading ||
+                                        isCancelLoading ||
+                                        isCompleteLoading ||
+                                        ((serviceIsTracking ||
+                                                serviceIsPaused) &&
+                                            BookingControlsWidget
+                                                    ._trackerService
+                                                    .currentBookingId !=
+                                                widget.booking.id))
+                                    ? null
+                                    : isThisBookingActive
+                                    ? () =>
+                                        _showStopTrackingBottomSheet(context)
+                                    : () =>
+                                        _showStartTrackingBottomSheet(context),
+                                label:
+                                    isThisBookingActive
+                                        ? AppLocalizations.of(
+                                          context,
+                                        )!.arrivedAtLocation
+                                        : AppLocalizations.of(
+                                          context,
+                                        )!.startTracking,
+                                fontSize: isThisBookingActive ? 12 : 12,
+                                color:
+                                    isThisBookingActive
+                                        ? Colors.green
+                                        : AppColors.blue1,
+                                isOutlined: true,
+                                isLoading:
+                                    isStartWorkingLoading ||
+                                    isStopWorkingLoading,
                               ),
                             ),
-                    ),
+                          ],
+                        ),
+                      if (widget.booking.trackingStoppedAt != null)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed:
+                                (isCompleteLoading)
+                                ? null
+                                : () => _showCompleteWorkBottomSheet(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: isCompleteLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Text(
+                                    AppLocalizations.of(context)!.completeWork,
+                                    style: DMSansFont.textStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -420,8 +491,8 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
   void _showStopTrackingBottomSheet(BuildContext context) {
     _showAppBottomSheet(
       context: context,
-      icon: Icons.pause_circle_outline,
-      iconColor: Colors.orange,
+      icon: Icons.check_circle_outline,
+      iconColor: Colors.green,
       title: AppLocalizations.of(context)!.arrivedAtLocation,
       message: AppLocalizations.of(
         context,
@@ -431,6 +502,50 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
         Navigator.of(context).pop();
         context.read<BookingBloc>().add(
           StopWorkingOnBooking(bookingId: widget.booking.id),
+        );
+      },
+      secondaryActionLabel: AppLocalizations.of(context)!.no,
+    );
+  }
+
+  void _showPauseTrackingBottomSheet(BuildContext context) {
+    _showAppBottomSheet(
+      context: context,
+      icon: Icons.pause_circle_outline,
+      iconColor: Colors.orange,
+      title: AppLocalizations.of(context)!.pauseTracking,
+      message: AppLocalizations.of(
+        context,
+      )!.areYouSureYouWantToPauseTrackingThisBooking,
+      primaryActionLabel: AppLocalizations.of(context)!.yes,
+      primaryAction: () {
+        Navigator.of(context).pop();
+        context.read<BookingBloc>().add(
+          PauseWorkingOnBooking(bookingId: widget.booking.id),
+        );
+      },
+      secondaryActionLabel: AppLocalizations.of(context)!.no,
+    );
+  }
+
+  void _showResumeTrackingBottomSheet(BuildContext context) {
+    _showAppBottomSheet(
+      context: context,
+      icon: Icons.play_circle_outline,
+      iconColor: AppColors.blue1,
+      title: AppLocalizations.of(context)!.resumeTracking,
+      message: AppLocalizations.of(
+        context,
+      )!.areYouSureYouWantToStartTrackingThisBooking,
+      primaryActionLabel: AppLocalizations.of(context)!.yes,
+      primaryAction: () {
+        Navigator.of(context).pop();
+        context.read<BookingBloc>().add(
+          StartWorkingOnBooking(
+            bookingId: widget.booking.id,
+            uid: widget.booking.agent?.uid ?? '',
+            context: context,
+          ),
         );
       },
       secondaryActionLabel: AppLocalizations.of(context)!.no,

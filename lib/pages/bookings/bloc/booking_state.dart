@@ -57,3 +57,15 @@ final class BookingStopWorkingFailure extends BookingState {
   @override
   List<Object> get props => [error];
 }
+
+final class BookingPauseWorkingLoading extends BookingState {}
+
+final class BookingPauseWorkingSuccess extends BookingState {}
+
+final class BookingPauseWorkingFailure extends BookingState {
+  final String error;
+
+  const BookingPauseWorkingFailure({required this.error});
+  @override
+  List<Object> get props => [error];
+}

@@ -46,6 +46,7 @@ class BookingTrackerService {
   }
 
   final ValueNotifier<bool> isTracking = ValueNotifier(false);
+  final ValueNotifier<bool> isPaused = ValueNotifier(false);
   StreamSubscription<Position>? _positionStream;
   String? _bookingId;
   Timer? _backgroundLocationTimer;
@@ -55,7 +56,7 @@ class BookingTrackerService {
   String? get currentBookingId => _bookingId;
 
   bool isTrackingBooking(String bookingId) {
-    return isTracking.value && _bookingId == bookingId;
+    return (isTracking.value || isPaused.value) && _bookingId == bookingId;
   }
 
   void _initializeBackgroundAppState() {
@@ -65,7 +66,7 @@ class BookingTrackerService {
 
   void _onAppEnterBackground() {
     _isAppInBackground = true;
-    if (isTracking.value && _bookingId != null) {
+    if (isTracking.value && _bookingId != null && !isPaused.value) {
       _startBackgroundLocationTimer();
     }
   }
@@ -73,7 +74,7 @@ class BookingTrackerService {
   void _onAppEnterForeground() {
     _isAppInBackground = false;
     _stopBackgroundLocationTimer();
-    if (isTracking.value && _bookingId != null) {
+    if (isTracking.value && _bookingId != null && !isPaused.value) {
       _restoreLocationTracking();
     }
   }
@@ -86,7 +87,7 @@ class BookingTrackerService {
     _backgroundLocationTimer = Timer.periodic(Duration(seconds: interval), (
       timer,
     ) async {
-      if (!isTracking.value || _bookingId == null) {
+      if (!isTracking.value || _bookingId == null || isPaused.value) {
         timer.cancel();
         return;
       }
@@ -142,12 +143,18 @@ class BookingTrackerService {
           final bookingData = bookingDoc.data() as Map<String, dynamic>?;
           final isStarted = bookingData?['isStarted'] ?? false;
           final isStartTracking = bookingData?['isStartTracking'] ?? false;
+          final isPausedVal = bookingData?['isTrackingPaused'] ?? false;
 
-          if (isStarted && isStartTracking) {
-            isTracking.value = true;
+          if (isStarted && (isStartTracking || isPausedVal)) {
             _bookingId = activeBookingId;
-
-            _restoreLocationTracking();
+            if (isPausedVal) {
+              isPaused.value = true;
+              isTracking.value = false;
+            } else {
+              isTracking.value = true;
+              isPaused.value = false;
+              _restoreLocationTracking();
+            }
           } else {
             LocalStore.setActiveBookingId('');
           }
@@ -158,6 +165,7 @@ class BookingTrackerService {
     } catch (e) {
       LocalStore.setActiveBookingId('');
       isTracking.value = false;
+      isPaused.value = false;
     }
   }
 
@@ -284,11 +292,14 @@ class BookingTrackerService {
     await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
       'isStarted': true,
       'isStartTracking': true,
+      'isTrackingPaused': false,
       'trackingStartedAt': FieldValue.serverTimestamp(),
+      'trackingStoppedAt': null,
     });
 
     LocalStore.setActiveBookingId(bookingId);
     _bookingId = bookingId;
+    isPaused.value = false;
 
     LocationSettings settings = _getLocationSettings(context: context);
 
@@ -524,8 +535,32 @@ class BookingTrackerService {
     }
   }
 
+  Future<void> pauseTracking() async {
+    isTracking.value = false;
+    isPaused.value = true;
+
+    _positionStream?.cancel();
+    _positionStream = null;
+
+    _stopBackgroundLocationTimer();
+
+    if (_bookingId != null) {
+      try {
+        await AppFirestore.bookingsCollectionRef.doc(_bookingId).update({
+          'isStartTracking': false,
+          'isTrackingPaused': true,
+        });
+      } catch (e) {
+        debugPrint('Error updating booking status for pause: $e');
+      }
+    }
+
+    debugPrint('Location tracking paused');
+  }
+
   Future<void> stopTracking() async {
     isTracking.value = false;
+    isPaused.value = false;
 
     _positionStream?.cancel();
     _positionStream = null;
@@ -543,6 +578,7 @@ class BookingTrackerService {
         await AppFirestore.bookingsCollectionRef.doc(_bookingId).update({
           'isStarted': false,
           'isStartTracking': false,
+          'isTrackingPaused': false,
           'trackingStoppedAt': FieldValue.serverTimestamp(),
         });
       } catch (e) {
@@ -566,8 +602,33 @@ class BookingTrackerService {
   }
 
 
+  Future<void> pauseTrackingWarranty() async {
+    isTracking.value = false;
+    isPaused.value = true;
+
+    _positionStream?.cancel();
+    _positionStream = null;
+
+    _stopBackgroundLocationTimer();
+
+    if (_bookingId != null) {
+      try {
+        await AppFirestore.bookingsCollectionRef.doc(_bookingId).update({
+          'isStartTracking': false,
+          'isTrackingPaused': true,
+          'warranty.isTracking': false
+        });
+      } catch (e) {
+        debugPrint('Error updating booking status for pause warranty: $e');
+      }
+    }
+
+    debugPrint('Location tracking paused for warranty');
+  }
+
   Future<void> stopTrackingWarranty() async {
     isTracking.value = false;
+    isPaused.value = false;
 
     _positionStream?.cancel();
     _positionStream = null;
@@ -585,6 +646,7 @@ class BookingTrackerService {
         await AppFirestore.bookingsCollectionRef.doc(_bookingId).update({
           'isStarted': false,
           'isStartTracking': false,
+          'isTrackingPaused': false,
           'trackingStoppedAt': FieldValue.serverTimestamp(),
           'warranty.isTracking': false
         });
@@ -646,12 +708,15 @@ class BookingTrackerService {
     await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
       'isStarted': true,
       'isStartTracking': true,
+      'isTrackingPaused': false,
       'trackingStartedAt': FieldValue.serverTimestamp(),
-      'warranty.isTracking': true
+      'trackingStoppedAt': null,
+      'warranty.isTracking': true,
     });
 
     LocalStore.setActiveBookingId(bookingId);
     _bookingId = bookingId;
+    isPaused.value = false;
 
     LocationSettings settings = _getLocationSettings(context: context);
 

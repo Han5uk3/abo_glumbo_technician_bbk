@@ -24,6 +24,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
     on<CompleteWarranty>(_onCompleteWarranty);
     on<StartWorkingOnWarranty>(_onStartWorkingOnWarranty);
     on<StopWorkingOnWarranty>(_onStopWorkingOnWarranty);
+    on<PauseWorkingOnWarranty>(_onPauseWorkingOnWarranty);
   }
 
   Future<void> _onAcceptWarranty(
@@ -207,6 +208,19 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       emit(WarrantyStopWorkingSuccess());
     } catch (e) {
       emit(WarrantyStopWorkingFailure(error: e.toString()));
+    }
+  }
+
+  Future<void> _onPauseWorkingOnWarranty(
+    PauseWorkingOnWarranty event,
+    Emitter<WarrantyState> emit,
+  ) async {
+    emit(WarrantyPauseWorkingLoading());
+    try {
+      await tracker.pauseTrackingWarranty();
+      emit(WarrantyPauseWorkingSuccess());
+    } catch (e) {
+      emit(WarrantyPauseWorkingFailure(error: e.toString()));
     }
   }
 }

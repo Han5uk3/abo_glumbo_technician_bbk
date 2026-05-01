@@ -3904,11 +3904,35 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to start tracking this booking?'**
   String get areYouSureYouWantToStartTrackingThisBooking;
 
+  /// No description provided for @areYouSureYouWantToPauseTrackingThisBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to pause tracking this booking?'**
+  String get areYouSureYouWantToPauseTrackingThisBooking;
+
   /// No description provided for @areYouSureYouWantToStopTrackingThisBooking.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to stop tracking this booking?'**
   String get areYouSureYouWantToStopTrackingThisBooking;
+
+  /// No description provided for @pauseTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause Tracking'**
+  String get pauseTracking;
+
+  /// No description provided for @resumeTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Tracking'**
+  String get resumeTracking;
+
+  /// No description provided for @trackingPausedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking paused successfully'**
+  String get trackingPausedSuccessfully;
 
   /// No description provided for @areYouSureYouWantToCompleteThisWork.
   ///
@@ -7036,12 +7060,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Do you want to accept this warranty claim?'**
   String get acceptWarrantyClaimMessage;
-
-  /// No description provided for @pauseTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause Tracking'**
-  String get pauseTracking;
 
   /// No description provided for @completeWorkMessage.
   ///

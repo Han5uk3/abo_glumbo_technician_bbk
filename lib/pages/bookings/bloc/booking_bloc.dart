@@ -22,6 +22,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     on<CompleteBooking>(_completeBookingWorker);
     on<StartWorkingOnBooking>(_startBookingWorker);
     on<StopWorkingOnBooking>(_stopWorkingOnBookingWorker);
+    on<PauseWorkingOnBooking>(_pauseWorkingOnBookingWorker);
   }
 
   Future<void> _cancelBookingWorker(
@@ -199,6 +200,19 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       emit(BookingStopWorkingSuccess());
     } catch (e) {
       emit(BookingStopWorkingFailure(error: e.toString()));
+    }
+  }
+
+  Future<void> _pauseWorkingOnBookingWorker(
+    PauseWorkingOnBooking event,
+    Emitter<BookingState> emit,
+  ) async {
+    emit(BookingPauseWorkingLoading());
+    try {
+      await tracker.pauseTracking();
+      emit(BookingPauseWorkingSuccess());
+    } catch (e) {
+      emit(BookingPauseWorkingFailure(error: e.toString()));
     }
   }
 }

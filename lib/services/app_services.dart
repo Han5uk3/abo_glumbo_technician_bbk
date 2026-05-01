@@ -1191,6 +1191,11 @@ class AppServices {
             'assignedTechnicianId': technicianId,
             'createdAt': FieldValue.serverTimestamp(),
             'updatedAt': FieldValue.serverTimestamp(),
+            'expiredOn': paymentCompleted
+                ? Timestamp.fromDate(
+                    DateTime.now().add(const Duration(days: 7)),
+                  )
+                : null,
             'rejectedTechnicians': [],
           },
         },

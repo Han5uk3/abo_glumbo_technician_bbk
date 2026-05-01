@@ -1989,8 +1989,21 @@ class AppLocalizationsUr extends AppLocalizations {
       'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ شروع کرنا چاہتے ہیں؟';
 
   @override
+  String get areYouSureYouWantToPauseTrackingThisBooking =>
+      'کیا آپ واقعی اس بکنگ کی ٹریکنگ معطل کرنا چاہتے ہیں؟';
+
+  @override
   String get areYouSureYouWantToStopTrackingThisBooking =>
       'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ روکنا چاہتے ہیں؟';
+
+  @override
+  String get pauseTracking => 'ٹریکنگ روک دیں';
+
+  @override
+  String get resumeTracking => 'ٹریکنگ بحال کریں';
+
+  @override
+  String get trackingPausedSuccessfully => 'ٹریکنگ کامیابی سے معطل کر دی گئی';
 
   @override
   String get areYouSureYouWantToCompleteThisWork =>
@@ -3697,9 +3710,6 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get acceptWarrantyClaimMessage =>
       'کیا آپ یہ وارنٹی کلیم قبول کرنا چاہتے ہیں؟';
-
-  @override
-  String get pauseTracking => 'ٹریکنگ روک دیں';
 
   @override
   String get completeWorkMessage =>

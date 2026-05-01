@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Renamed to BookingListTileWidget to match customer side standardized naming
 class BookingListTileWidget extends StatelessWidget {
@@ -419,28 +420,38 @@ class BookingListTileWidget extends StatelessWidget {
     Color color = Colors.grey;
 
     if (isWarranty) {
-      final status = booking.warranty!.warrantyStatusCode;
-      switch (status) {
-        case 'C':
-          label = localization.completed;
-          color = Colors.green;
-          break;
-        case 'X':
-          label = localization.rejected;
-          color = Colors.red;
-          break;
-        case 'E':
-          label = localization.expired;
-          color = Colors.grey;
-          break;
-        case 'S':
-          label = localization.accepted;
-          color = Colors.green;
-          break;
-        case 'A':
-          label = localization.requested;
-          color = AppColors.blue1;
-          break;
+      final status = booking.warranty!.warrantyStatusCode.toUpperCase();
+      
+      // Client-side expiration check for Active or Rejected
+      final bool isExpired = (status == 'A' || status == 'X') && 
+                             _calculateDaysLeft(booking) <= 0;
+
+      if (isExpired) {
+        label = localization.expired;
+        color = Colors.grey;
+      } else {
+        switch (status) {
+          case 'C':
+            label = localization.completed;
+            color = Colors.green;
+            break;
+          case 'X':
+            label = localization.rejected;
+            color = Colors.red;
+            break;
+          case 'E':
+            label = localization.expired;
+            color = Colors.grey;
+            break;
+          case 'S':
+            label = localization.accepted;
+            color = Colors.green;
+            break;
+          case 'A':
+            label = localization.requested;
+            color = AppColors.blue1;
+            break;
+        }
       }
     } else {
       switch (booking.bookingStatusCode) {
@@ -500,6 +511,18 @@ class BookingListTileWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  int _calculateDaysLeft(BookingModel booking) {
+    final warranty = booking.warranty;
+    if (warranty == null || warranty.createdAt == null) return 0;
+
+    final expiryDate = warranty.expiredOn?.toDate() ??
+        warranty.createdAt!.toDate().add(const Duration(days: 7));
+    final now = DateTime.now();
+    final difference = expiryDate.difference(now).inDays;
+
+    return difference < 0 ? 0 : difference;
   }
 
   Widget _buildTimestamp(BuildContext context) {

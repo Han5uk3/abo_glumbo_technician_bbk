@@ -93,6 +93,20 @@ class WarrantyStopWorkingFailure extends WarrantyState {
   List<Object> get props => [error];
 }
 
+// Pause Working on Warranty States
+class WarrantyPauseWorkingLoading extends WarrantyState {}
+
+class WarrantyPauseWorkingSuccess extends WarrantyState {}
+
+class WarrantyPauseWorkingFailure extends WarrantyState {
+  final String error;
+
+  const WarrantyPauseWorkingFailure({required this.error});
+
+  @override
+  List<Object> get props => [error];
+}
+
 // Assign Warranty Technician States
 class WarrantyAssignLoading extends WarrantyState {}
 

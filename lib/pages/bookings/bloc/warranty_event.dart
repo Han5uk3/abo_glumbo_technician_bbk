@@ -83,6 +83,15 @@ class StopWorkingOnWarranty extends WarrantyEvent {
   List<Object> get props => [bookingId];
 }
 
+class PauseWorkingOnWarranty extends WarrantyEvent {
+  final String bookingId;
+
+  const PauseWorkingOnWarranty({required this.bookingId});
+
+  @override
+  List<Object> get props => [bookingId];
+}
+
 class AssignWarrantyTechnician extends WarrantyEvent {
   final String bookingId;
   final UserModel technician;

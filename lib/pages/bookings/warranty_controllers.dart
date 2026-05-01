@@ -162,6 +162,20 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
           log("stop tracking error: ${state.error}");
+        } else if (state is WarrantyPauseWorkingSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.trackingPausedSuccessfully,
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state is WarrantyPauseWorkingFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+          );
+          log("pause tracking error: ${state.error}");
         }
       },
       builder: (context, state) {
@@ -169,146 +183,207 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
         final isCompleteLoading = state is WarrantyCompleteLoading;
         final isStartWorkingLoading = state is WarrantyStartWorkingLoading;
         final isStopWorkingLoading = state is WarrantyStopWorkingLoading;
+        final isPauseWorkingLoading = state is WarrantyPauseWorkingLoading;
 
         return ValueListenableBuilder<bool>(
           valueListenable: WarrantyControlsWidget._trackerService.isTracking,
           builder: (context, serviceIsTracking, child) {
-            final actualIsTracking = serviceIsTracking;
-            final currentTrackingBookingId =
-                WarrantyControlsWidget._trackerService.currentBookingId;
-            final isThisBookingTracked =
-                actualIsTracking &&
-                currentTrackingBookingId == widget.booking.id;
+            return ValueListenableBuilder<bool>(
+              valueListenable: WarrantyControlsWidget._trackerService.isPaused,
+              builder: (context, serviceIsPaused, child) {
+                final currentTrackingBookingId =
+                    WarrantyControlsWidget._trackerService.currentBookingId;
+                final isThisBookingActive =
+                    (serviceIsTracking || serviceIsPaused) &&
+                    currentTrackingBookingId == widget.booking.id;
 
-            final shouldBlockCancel = actualIsTracking;
+                final isThisBookingTracked =
+                    serviceIsTracking &&
+                    currentTrackingBookingId == widget.booking.id;
 
-            // Check warranty status
-            final warrantyStatus =
-                widget.booking.warranty?.warrantyStatusCode ?? '';
-            final isWarrantyStarted = warrantyStatus == 'S';
+                final shouldBlockCancel = serviceIsTracking || serviceIsPaused;
 
-            return Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                // Check warranty status
+                final warrantyStatus =
+                    widget.booking.warranty?.warrantyStatusCode ?? '';
+                final isWarrantyStarted = warrantyStatus == 'S';
+
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Only show tracking and cancel buttons if warranty is started
-                  if (isWarrantyStarted) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildButton(
-                            onPressed:
-                                shouldBlockCancel ||
-                                    isCancelLoading ||
-                                    isCompleteLoading ||
-                                    isStartWorkingLoading ||
-                                    isStopWorkingLoading
-                                ? null
-                                : () => _showCancelBottomSheet(context),
-                            label: AppLocalizations.of(context)!.cancel,
-                            color: shouldBlockCancel
-                                ? Colors.grey
-                                : Colors.red.shade50,
-                            textColor: shouldBlockCancel
-                                ? Colors.grey.shade700
-                                : Colors.red.shade700,
-                            borderColor: shouldBlockCancel
-                                ? Colors.grey.shade200
-                                : Colors.red.shade200,
-                            isLoading: isCancelLoading,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildButton(
-                            onPressed:
-                                (isStartWorkingLoading ||
-                                    isStopWorkingLoading ||
-                                    isCancelLoading ||
-                                    isCompleteLoading ||
-                                    (actualIsTracking &&
-                                        WarrantyControlsWidget
-                                                ._trackerService
-                                                .currentBookingId !=
-                                            widget.booking.id))
-                                ? null
-                                : isThisBookingTracked
-                                ? () => _showStopTrackingBottomSheet(context)
-                                : () => _showStartTrackingBottomSheet(context),
-                            label: isThisBookingTracked
-                                ? AppLocalizations.of(context)!.arrivedAtLocation
-                                : AppLocalizations.of(context)!.startTracking,
-                            color: isThisBookingTracked
-                                ? Colors.orange.shade50
-                                : Colors.blue.shade50,
-                            textColor: isThisBookingTracked
-                                ? Colors.orange.shade700
-                                : Colors.blue.shade700,
-                            borderColor: isThisBookingTracked
-                                ? Colors.orange.shade200
-                                : Colors.blue.shade200,
-                            isLoading:
-                                isStartWorkingLoading || isStopWorkingLoading,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  // Complete work button (free for warranty)
-                  if (isWarrantyStarted)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: (isCompleteLoading ||
-                                widget.booking.trackingStoppedAt == null)
-                            ? null
-                            : () => _showCompleteWarrantyBottomSheet(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: isCompleteLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.completeWarrantyRepair,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                  child: Column(
+                    children: [
+                      // Only show tracking and cancel buttons if warranty is started
+                      if (isWarrantyStarted &&
+                          widget.booking.trackingStoppedAt == null) ...[
+                        Row(
+                          children: [
+                            if (!isThisBookingActive)
+                              Expanded(
+                                child: _buildButton(
+                                  onPressed:
+                                      shouldBlockCancel ||
+                                          isCancelLoading ||
+                                          isCompleteLoading ||
+                                          isStartWorkingLoading ||
+                                          isStopWorkingLoading ||
+                                          isPauseWorkingLoading
+                                      ? null
+                                      : () => _showCancelBottomSheet(context),
+                                  label: AppLocalizations.of(context)!.cancel,
+                                  color:
+                                      shouldBlockCancel
+                                          ? Colors.grey
+                                          : Colors.red.shade50,
+                                  textColor:
+                                      shouldBlockCancel
+                                          ? Colors.grey.shade700
+                                          : Colors.red.shade700,
+                                  borderColor:
+                                      shouldBlockCancel
+                                          ? Colors.grey.shade200
+                                          : Colors.red.shade200,
+                                  isLoading: isCancelLoading,
                                 ),
                               ),
-                      ),
-                    ),
-                ],
-              ),
+                            if (!isThisBookingActive) const SizedBox(width: 12),
+                            if (isThisBookingActive)
+                              Expanded(
+                                child: _buildButton(
+                                  onPressed:
+                                      (isStartWorkingLoading ||
+                                          isStopWorkingLoading ||
+                                          isPauseWorkingLoading ||
+                                          isCancelLoading ||
+                                          isCompleteLoading)
+                                      ? null
+                                      : isThisBookingTracked
+                                      ? () =>
+                                          _showPauseTrackingBottomSheet(context)
+                                      : () =>
+                                          _showResumeTrackingBottomSheet(
+                                            context,
+                                          ),
+                                  label:
+                                      isThisBookingTracked
+                                          ? AppLocalizations.of(
+                                            context,
+                                          )!.pauseTracking
+                                          : AppLocalizations.of(
+                                            context,
+                                          )!.resumeTracking,
+                                  color: Colors.orange.shade50,
+                                  textColor: Colors.orange.shade700,
+                                  borderColor: Colors.orange.shade200,
+                                  isLoading: isPauseWorkingLoading,
+                                ),
+                              ),
+                            if (isThisBookingActive) const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildButton(
+                                onPressed:
+                                    (isStartWorkingLoading ||
+                                        isStopWorkingLoading ||
+                                        isPauseWorkingLoading ||
+                                        isCancelLoading ||
+                                        isCompleteLoading ||
+                                        ((serviceIsTracking ||
+                                                serviceIsPaused) &&
+                                            WarrantyControlsWidget
+                                                    ._trackerService
+                                                    .currentBookingId !=
+                                                widget.booking.id))
+                                    ? null
+                                    : isThisBookingActive
+                                    ? () =>
+                                        _showStopTrackingBottomSheet(context)
+                                    : () =>
+                                        _showStartTrackingBottomSheet(context),
+                                label:
+                                    isThisBookingActive
+                                        ? AppLocalizations.of(
+                                          context,
+                                        )!.arrivedAtLocation
+                                        : AppLocalizations.of(
+                                          context,
+                                        )!.startTracking,
+                                color:
+                                    isThisBookingActive
+                                        ? Colors.green.shade50
+                                        : Colors.blue.shade50,
+                                textColor:
+                                    isThisBookingActive
+                                        ? Colors.green.shade700
+                                        : Colors.blue.shade700,
+                                borderColor:
+                                    isThisBookingActive
+                                        ? Colors.green.shade200
+                                        : Colors.blue.shade200,
+                                isLoading:
+                                    isStartWorkingLoading ||
+                                    isStopWorkingLoading,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Complete work button (free for warranty)
+                      if (isWarrantyStarted &&
+                          widget.booking.trackingStoppedAt != null)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: (isCompleteLoading)
+                                ? null
+                                : () =>
+                                    _showCompleteWarrantyBottomSheet(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: isCompleteLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.completeWarrantyRepair,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         );
@@ -742,9 +817,9 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                 ),
               ),
               const Icon(
-                Icons.stop_circle_outlined,
+                Icons.check_circle_outline,
                 size: 60,
-                color: Colors.orange,
+                color: Colors.green,
               ),
               const SizedBox(height: 16),
               Text(
@@ -794,7 +869,212 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.yes,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showPauseTrackingBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Icon(
+                Icons.pause_circle_outline,
+                size: 60,
+                color: Colors.orange,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)!.pauseTracking,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.areYouSureYouWantToPauseTrackingThisBooking,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.no,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        context.read<WarrantyBloc>().add(
+                          PauseWorkingOnWarranty(bookingId: widget.booking.id),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.yes,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showResumeTrackingBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Icon(
+                Icons.play_circle_outline,
+                size: 60,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)!.resumeTracking,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.areYouSureYouWantToStartTrackingThisBooking,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.no,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        final uid = LocalStore.getUID();
+                        if (uid != null) {
+                          context.read<WarrantyBloc>().add(
+                            StartWorkingOnWarranty(
+                              context: context,
+                              bookingId: widget.booking.id,
+                              uid: uid,
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

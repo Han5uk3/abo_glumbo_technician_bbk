@@ -126,6 +126,13 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         'bookingStatusCode': 'C',
         'paymentCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
+        // Apply warranty for 1 week from completion date if it's full work (mode 1)
+        if (widget.booking.completionData?.mode == 1) ...{
+          'warranty.expiredOn': Timestamp.fromDate(
+            DateTime.now().add(const Duration(days: 7)),
+          ),
+          'warranty.updatedAt': FieldValue.serverTimestamp(),
+        },
       });
 
       // Update wallet amounts for lifetime earnings

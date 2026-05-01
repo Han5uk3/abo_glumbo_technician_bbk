@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -70,7 +71,25 @@ class InvoiceService {
                     pw.Text("BILL TO:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                     pw.Text(booking.customer.name ?? "Valued Customer"),
                     pw.Text(booking.customer.phone ?? ""),
-                    pw.Text(booking.customer.location?.fullAddress ?? ""),
+                    () {
+                      final address = booking.customer.addresses.firstWhere(
+                        (a) => a.isSelected == true,
+                        orElse: () => booking.customer.addresses.isNotEmpty 
+                            ? booking.customer.addresses.first 
+                            : AddressModel(id: '', fullName: '', buildingNumber: '', phoneNumber: ''),
+                      );
+                      
+                      return pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text("${address.buildingNumber}${address.streetName != null ? ', ${address.streetName}' : ''}"),
+                          if (booking.customer.districtName != null || booking.customer.cityName != null)
+                            pw.Text("${booking.customer.districtName ?? ''}${booking.customer.districtName != null && booking.customer.cityName != null ? ', ' : ''}${booking.customer.cityName ?? ''}"),
+                          if (booking.customer.location?.fullAddress != null && booking.customer.location!.fullAddress!.isNotEmpty)
+                            pw.Text(booking.customer.location!.fullAddress!),
+                        ],
+                      );
+                    }(),
                   ],
                 ),
               ),
@@ -83,6 +102,7 @@ class InvoiceService {
                     pw.Text("Completed At: $completedAtStr"),
                     pw.Text("Payment Mode: ${booking.paymentModeCode.toUpperCase()}"),
                     if (booking.transactionId != null) pw.Text("Transaction ID: ${booking.transactionId}"),
+                    pw.Text("Warranty: ${booking.warranty?.expiredOn != null && (booking.warranty?.createdAt != null || booking.completedAt != null) ? "${booking.warranty!.expiredOn!.toDate().difference((booking.warranty!.createdAt ?? booking.completedAt)!.toDate()).inDays} Days" : "7 Days"}"),
                   ],
                 ),
               ),

@@ -259,6 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 value: isOnline,
                 onChanged: _updateOnlineStatus,
                 activeColor: Colors.green,
+                activeThumbColor: Colors.white,
                 activeTrackColor: Colors.green,
               ),
             ),

@@ -16,6 +16,7 @@ import 'package:aboglumbo_bbk_panel/pages/account/payout_accounts.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/privacy_policy_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/terms_and_conditions_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/widgets/account_list_tile.dart';
+import 'package:aboglumbo_bbk_panel/pages/account/widgets/language_dialog.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/biometric_service.dart';
@@ -43,6 +44,7 @@ class _AccountPageState extends State<AccountPage> {
   List<LanguageModel> languages = [
     LanguageModel(code: 'en', name: 'English'),
     LanguageModel(code: 'ar', name: 'عربي'),
+    LanguageModel(code: 'ur', name: 'اردو'),
   ];
 
   bool isMainAdmin = false;
@@ -96,42 +98,46 @@ class _AccountPageState extends State<AccountPage> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.bgWhite,
-        body: CustomScrollView(
-          physics: const ClampingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              centerTitle: true,
-              floating: false,
-              backgroundColor: AppColors.primary,
-              elevation: 0,
-              pinned: true,
-              shape: Border.all(style: BorderStyle.none),
-              title: Text(
-                AppLocalizations.of(context)!.account,
-                style: GoogleFonts.dmSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+      child: BlocBuilder<AccountBloc, AccountState>(
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: AppColors.bgWhite,
+            body: CustomScrollView(
+              physics: const ClampingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  centerTitle: true,
+                  floating: false,
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  pinned: true,
+                  shape: Border.all(style: BorderStyle.none),
+                  title: Text(
+                    AppLocalizations.of(context)!.account,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
-              ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildProfileHeader(),
+                    _buildUserInfo(),
+                    _buildAccountSection(),
+                    _buildGeneralSettings(state),
+                    _buildSupportSection(),
+                    _buildLegalSection(),
+                    _buildDangerZone(),
+                    _buildAuthSection(),
+                    const SizedBox(height: 106),
+                  ]),
+                ),
+              ],
             ),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                _buildProfileHeader(),
-                _buildUserInfo(),
-                _buildAccountSection(),
-                _buildGeneralSettings(),
-                _buildSupportSection(),
-                _buildLegalSection(),
-                _buildDangerZone(),
-                _buildAuthSection(),
-                const SizedBox(height: 106),
-              ]),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -295,9 +301,13 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildGeneralSettings() {
-    final currentLanguage = LocalStore.getUserlanguage();
-    final displayLanguage = currentLanguage == 'ar' ? 'عربي' : 'English';
+  Widget _buildGeneralSettings(AccountState state) {
+    final currentLanguage = state.locale.languageCode;
+    final displayLanguage = currentLanguage == 'ar'
+        ? 'عربي'
+        : currentLanguage == 'ur'
+            ? 'اردو'
+            : 'English';
 
     final currentNotifLanguage = currentWorkerData?.lanCode ?? 'en';
     final displayNotifLanguage = currentNotifLanguage == 'ar'
@@ -451,54 +461,32 @@ class _AccountPageState extends State<AccountPage> {
         ? (currentWorkerData?.lanCode ?? 'en')
         : LocalStore.getUserlanguage();
 
-    await showDialog<LanguageModel>(
+    await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.bgWhite,
-          actionsAlignment: MainAxisAlignment.start,
-          title: Text(
-            AppLocalizations.of(context)?.selectLanguage ?? 'Select Language',
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: languages.map((language) {
-              final isSelected = language.code == currentLanguage;
-              return ListTile(
-                title: Text(language.name),
-                trailing: isSelected
-                    ? const Icon(Icons.check, color: Colors.green)
-                    : null,
-                onTap: () async {
-                  if (isForNotification) {
-                    context.read<AccountBloc>().add(
-                      UpdateWorkerNotificationLanguageEvent(
-                        language.code.toLowerCase(),
-                      ),
-                    );
-                  } else {
-                    context.read<AccountBloc>().add(
-                      ChangeLanguageEvent(language.code.toLowerCase()),
-                    );
-                  }
-
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            eButton(
-              onPressed: () => Navigator.pop(context),
-              text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
-              context: context,
-              textColor: Colors.black,
-              backgroundColor: AppColors.bgWhite,
-            ),
-          ],
+        return LanguageSelectionDialog(
+          title: AppLocalizations.of(context)?.selectLanguage ?? 'Select Language',
+          currentLanguageCode: currentLanguage,
+          onEnglishSelected: () => _updateLanguage('en', isForNotification),
+          onArabicSelected: () => _updateLanguage('ar', isForNotification),
+          onUrduSelected: isForNotification
+              ? null
+              : () => _updateLanguage('ur', isForNotification),
         );
       },
     );
+  }
+
+  void _updateLanguage(String code, bool isForNotification) {
+    if (isForNotification) {
+      context.read<AccountBloc>().add(
+            UpdateWorkerNotificationLanguageEvent(code),
+          );
+    } else {
+      context.read<AccountBloc>().add(
+            ChangeLanguageEvent(code),
+          );
+    }
   }
 
   Future<void> _showDeleteAccountConfirmation() async {

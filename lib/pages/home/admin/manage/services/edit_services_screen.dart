@@ -58,7 +58,14 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   CategoryModel? selectedCategory;
   List<SelectedCity> selectedCities = [];
   List<Map<String, dynamic>> mapSelectedLocations = [];
-  List<int> workingDays = [1, 2, 3, 4, 6, 7]; // Default: all days except Friday (5)
+  List<int> workingDays = [
+    1,
+    2,
+    3,
+    4,
+    6,
+    7,
+  ]; // Default: all days except Friday (5)
 
   final arabicFullRegex = RegExp(r'''^[\u0600-\u06FF
        \u0750-\u077F
@@ -340,8 +347,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
             if (mounted) {
               setState(() {
                 final total = event.totalBytes.toDouble();
-                imageUploadProgress =
-                    total > 0 ? event.bytesTransferred.toDouble() / total : 0;
+                imageUploadProgress = total > 0
+                    ? event.bytesTransferred.toDouble() / total
+                    : 0;
               });
             }
           });
@@ -784,7 +792,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(context)?.workingDays ?? 'Working Days',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -798,8 +806,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                         color: isSelected ? Colors.white : Colors.black87,
                       ),
                     ),
+                    
                     selected: isSelected,
                     selectedColor: AppColors.primary,
+                    checkmarkColor: Colors.white,
                     onSelected: (bool selected) {
                       setState(() {
                         if (selected) {

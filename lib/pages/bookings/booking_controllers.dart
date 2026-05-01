@@ -246,9 +246,13 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: isCompleteLoading
+                      onPressed:
+                          (
+                          isCompleteLoading ||
+                          widget.booking.trackingStoppedAt == null)
                           ? null
-                          : () => _showCompleteWorkBottomSheet(context),
+                          :
+                          () => _showCompleteWorkBottomSheet(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -418,7 +422,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
       context: context,
       icon: Icons.pause_circle_outline,
       iconColor: Colors.orange,
-      title: AppLocalizations.of(context)!.stopTracking,
+      title: AppLocalizations.of(context)!.arrivedAtLocation,
       message: AppLocalizations.of(
         context,
       )!.areYouSureYouWantToStopTrackingThisBooking,

@@ -12,16 +12,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'أبو جلمبو';
 
   @override
-  String get profileSentForVerification => 'لقد تم إرسال ملفك الشخصي للتحقق!';
-
-  @override
   String get onlineStatusOn => 'أنت الآن متصل';
 
   @override
   String get onlineStatusOff => 'أنت الآن غير متصل';
 
   @override
-  String get errorUpdatingStatus => 'حدث خطأ أثناء تحديث الحالة';
+  String get errorUpdatingStatus => 'خطأ في تحديث الحالة';
 
   @override
   String get appLoginCaption => 'التطبيق للعثور على محترفين مؤهلين.';
@@ -303,9 +300,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get technicianNotFound => 'لم يتم العثور على فني';
-
-  @override
-  String get verificationPending => 'قيد التحقق من الدفع';
 
   @override
   String get otpAutoVerified => 'تم التحقق التلقائي من رمز التحقق';
@@ -1430,6 +1424,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get newtext => 'جديد';
+
+  @override
+  String get waitingForPayment => 'في انتظار الدفع';
 
   @override
   String get totalCost => 'التكلفة الكلية';
@@ -4394,6 +4391,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectedLocations => 'المواقع المختارة';
 
   @override
+  String get profileSentForVerification => 'لقد تم إرسال ملفك الشخصي للتحقق!';
+
+  @override
+  String get verificationPending => 'في انتظار التوثيق';
+
+  @override
   String get waitingForTechnicianVerification =>
       'في انتظار تحقق الفني من الدفع';
 
@@ -4431,9 +4434,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectTime => 'اختر الوقت';
 
   @override
-  String get submitCounterOffer => 'إرسال الاقتراح البديل';
+  String get submitCounterOffer => 'قدم عرض مضاد';
 
   @override
-  String get pleaseSelectALaterTime =>
-      'يرجى اختيار وقت لاحق لموعد الحجز الحالي';
+  String get pleaseSelectALaterTime => 'يرجى اختيار وقت لاحق';
+
+  @override
+  String get listeningForSms => 'بانتظار الرسائل القصيرة...';
 }

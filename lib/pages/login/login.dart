@@ -339,25 +339,26 @@ class _LoginPageState extends State<LoginPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              const SizedBox(height: 20),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     AppLocalizations.of(context)!.login,
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 18,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
                                     ),
                                   ),
+                                  Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: LanguageSelectorCard(
+                                      isInLoginPage: true,
+                                    ),
+                                  ),
                                 ],
-                              ),
-                              const SizedBox(height: 20),
-                              Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: LanguageSelectorCard(
-                                  isInLoginPage: true,
-                                ),
                               ),
                               const SizedBox(height: 20),
                               Column(
@@ -585,7 +586,9 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: isLoading ? null : _onLoginPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: localcolor.AppColors.primary,
-          disabledBackgroundColor: localcolor.AppColors.primary.withOpacity(0.6),
+          disabledBackgroundColor: localcolor.AppColors.primary.withOpacity(
+            0.6,
+          ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: isLoading

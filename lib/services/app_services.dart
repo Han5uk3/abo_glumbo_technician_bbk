@@ -458,7 +458,7 @@ class AppServices {
         });
       } else if (bookingStatusCode == 'CP') {
         return AppFirestore.bookingsCollectionRef
-            .where('bookingStatusCode', isEqualTo: 'C')
+            .where('bookingStatusCode', whereIn: ['CP', 'VP'])
             .where('paymentCompleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
             .limit(50)
@@ -541,7 +541,7 @@ class AppServices {
       } else if (bookingStatusCode == 'CP') {
         return AppFirestore.bookingsCollectionRef
             .where('agent.uid', isEqualTo: workerId)
-            .where('bookingStatusCode', whereIn: ['C', 'VP'])
+            .where('bookingStatusCode', whereIn: ['CP', 'VP'])
             .where('paymentCompleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
             .limit(50)
@@ -727,8 +727,8 @@ class AppServices {
     }
     if (bookingStatusCode == 'CP') {
       return AppFirestore.bookingsCollectionRef
-          .where('bookingStatusCode', isEqualTo: 'c')
-          .where('paymentCompleted', isEqualTo: true)
+          .where('bookingStatusCode', whereIn: ['CP', 'VP'])
+          .where('paymentCompleted', isEqualTo: false)
           .snapshots()
           .map(
             (snapshot) => snapshot.docs
@@ -1166,12 +1166,14 @@ class AppServices {
     bool paymentThroughApp = false,
   }) async {
     try {
+      final bool paymentCompleted = (mode == 1 ? totalCost : inspectionFee) <= 0;
+      String status = paymentCompleted ? 'C' : 'CP';
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
-        'bookingStatusCode': 'C',
+        'bookingStatusCode': status,
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'paymentCompleted': (mode == 0 || totalCost <= 0) ? !paymentThroughApp : false,
+        'paymentCompleted': paymentCompleted,
         'completionData': {
           'fileUrls': fileUrls, // Changed from imageUrls
           'serviceCost': serviceCost,

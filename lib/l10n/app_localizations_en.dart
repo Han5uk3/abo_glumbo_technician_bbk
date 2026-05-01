@@ -12,10 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Abo Glumbo';
 
   @override
-  String get profileSentForVerification =>
-      'Your Profile has been sent for Verification!';
-
-  @override
   String get onlineStatusOn => 'You are now Online';
 
   @override
@@ -307,9 +303,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get technicianNotFound => 'Technician Not Found';
-
-  @override
-  String get verificationPending => 'Verification Pending';
 
   @override
   String get otpAutoVerified => 'OTP Auto Verified';
@@ -1390,7 +1383,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceCompletedDescription =>
-      'Work was done and service provided';
+      'Service has been completed successfully.';
 
   @override
   String get paymentThroughApp => 'Payment Through App';
@@ -1445,6 +1438,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newtext => 'New';
+
+  @override
+  String get waitingForPayment => 'Waiting for payment';
 
   @override
   String get totalCost => 'Total Cost';
@@ -4458,6 +4454,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectedLocations => 'Selected Locations';
 
   @override
+  String get profileSentForVerification =>
+      'Your Profile has been sent for Verification!';
+
+  @override
+  String get verificationPending => 'Verification Pending';
+
+  @override
   String get waitingForTechnicianVerification =>
       'Waiting for technician to verify payment';
 
@@ -4500,4 +4503,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pleaseSelectALaterTime =>
       'Please select a time later than the current booking time';
+
+  @override
+  String get listeningForSms => 'Listening for SMS...';
 }

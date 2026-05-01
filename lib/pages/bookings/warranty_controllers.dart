@@ -275,7 +275,8 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: isCompleteLoading
+                        onPressed: (isCompleteLoading ||
+                                widget.booking.trackingStoppedAt == null)
                             ? null
                             : () => _showCompleteWarrantyBottomSheet(context),
                         style: ElevatedButton.styleFrom(
@@ -747,7 +748,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
               ),
               const SizedBox(height: 16),
               Text(
-                AppLocalizations.of(context)!.stopTracking,
+                AppLocalizations.of(context)!.arrivedAtLocation,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

@@ -1046,6 +1046,10 @@
       }
     }
   },
+  "waitingForPayment": "في انتظار الدفع",
+  "selectTime": "اختر الوقت",
+  "submitCounterOffer": "قدم عرض مضاد",
+  "pleaseSelectALaterTime": "يرجى اختيار وقت لاحق",
   "technicianSelected": "{count, plural, =0{لم يتم اختيار أي فني} =1{تم اختيار فني واحد} =2{تم اختيار فنيين} other{تم اختيار {count} فنيين}}",
   "@technicianSelected": {
     "description": "Message showing number of technicians selected with plural forms",
@@ -1183,7 +1187,6 @@
   "availabilityStatus": "حالة التوافر",
   "youAreNowOnline": "أنت الآن متاح",
   "youAreNowOffline": "أنت الآن غير متاح",
-  "errorUpdatingStatus": "حدث خطأ أثناء تحديث الحالة",
   "phoneNumberFormatHint": "يجب أن يبدأ رقم الهاتف بـ 05",
   "files": "الملفات",
   "phoneNumberAlreadyUpdated": "رقم الهاتف تم تحديثه مسبقاً",
@@ -1453,7 +1456,6 @@
   "km": "كم",
   "tapOnMapOrSearchToAddLocations": "اضغط على الخريطة أو ابحث لإضافة مواقع",
   "selectedLocations": "المواقع المختارة",
-  "verificationPending": "قيد التحقق من الدفع",
   "waitingForTechnicianVerification": "في انتظار تحقق الفني من الدفع",
   "verifyPayment": "التحقق من الدفع",
   "confirmPaymentReceipt": "تأكيد استلام الدفع",
@@ -1462,5 +1464,6 @@
   "selectFiles": "اختر الملفات",
   "pleaseSelectAtLeastOneFile": "يرجى اختيار ملف واحد على الأقل",
   "errorUploading": "خطأ أثناء الرفع",
-  "warranty": "ضمان"
-  ,"selectTime": "اختر الوقت", "submitCounterOffer": "إرسال الاقتراح البديل"   ,"pleaseSelectALaterTime": "يرجى اختيار وقت لاحق لموعد الحجز الحالي" }
+  "warranty": "ضمان",
+  "listeningForSms": "بانتظار الرسائل القصيرة..."
+}

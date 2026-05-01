@@ -34,7 +34,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     if (!_serviceCompleted) {
       return 0;
     }
-    
+
     if (_serviceItems.isNotEmpty) {
       double itemsTotal = _serviceItems.fold(
         0,
@@ -176,7 +176,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
 
           if (size > 5 * 1024 * 1024) {
             if (mounted) {
-              _showSnackBar('${image.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}', Colors.red);
+              _showSnackBar(
+                '${image.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
+                Colors.red,
+              );
             }
             return;
           }
@@ -197,7 +200,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
           for (var file in result.files) {
             if (file.size > 5 * 1024 * 1024) {
               if (mounted) {
-                _showSnackBar('${file.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}', Colors.red);
+                _showSnackBar(
+                  '${file.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
+                  Colors.red,
+                );
               }
               return;
             }
@@ -217,7 +223,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: DMSansFont.textStyle(color: Colors.white)),
+        content: Text(
+          message,
+          style: DMSansFont.textStyle(color: Colors.white),
+        ),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -226,7 +235,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   }
 
   void _removeFile(int index) {
-     _showAppDialog(
+    _showAppDialog(
       title: AppLocalizations.of(context)!.removeFile,
       message: AppLocalizations.of(context)!.removeFileConfirmation,
       icon: Icons.delete_outline,
@@ -252,9 +261,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 8,
+          ),
           actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
           title: Row(
             children: [
@@ -307,12 +321,20 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 backgroundColor: iconColor,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: Text(
                 primaryLabel,
-                style: DMSansFont.textStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                style: DMSansFont.textStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -349,21 +371,24 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               ),
               title: Text(
                 file.path.split('/').last,
-                style: DMSansFont.textStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.normal),
+                style: DMSansFont.textStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ),
-            body: Center(
-              child: InteractiveViewer(
-                child: Image.file(file),
-              ),
-            ),
+            body: Center(child: InteractiveViewer(child: Image.file(file))),
           ),
         ),
       );
     } else {
       OpenFilex.open(file.path).then((result) {
         if (result.type != ResultType.done) {
-          _showSnackBar('${AppLocalizations.of(context)!.couldNotOpenFile}: ${file.path.split('/').last}', Colors.red);
+          _showSnackBar(
+            '${AppLocalizations.of(context)!.couldNotOpenFile}: ${file.path.split('/').last}',
+            Colors.red,
+          );
         }
       });
     }
@@ -376,7 +401,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   }
 
   void _removeServiceItem(int index) {
-      _showAppDialog(
+    _showAppDialog(
       title: AppLocalizations.of(context)!.removeItem,
       message: AppLocalizations.of(context)!.removeItemConfirmation,
       icon: Icons.delete_outline,
@@ -410,7 +435,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     if (_serviceCompleted && _serviceItems.isNotEmpty) {
       for (var item in _serviceItems) {
         if (!item.isValid()) {
-          _showSnackBar(AppLocalizations.of(context)!.pleaseFillAllServiceItemFields, Colors.red);
+          _showSnackBar(
+            AppLocalizations.of(context)!.pleaseFillAllServiceItemFields,
+            Colors.red,
+          );
           isValid = false;
           break;
         }
@@ -431,13 +459,18 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
       context: context,
       builder: (BuildContext context) {
         final total = _totalCost;
-        
+
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 8,
+          ),
           actionsPadding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           title: Row(
             children: [
@@ -447,13 +480,20 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                   color: AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.check_circle_outline, color: AppColors.primary, size: 24),
+                child: Icon(
+                  Icons.check_circle_outline,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   AppLocalizations.of(context)!.confirmCompletion,
-                  style: DMSansFont.textStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: DMSansFont.textStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -465,15 +505,25 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.confirmCompletionMessage,
-                  style: DMSansFont.textStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
+                  style: DMSansFont.textStyle(
+                    fontSize: 15,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _serviceCompleted ? Colors.green.withOpacity(0.05) : Colors.blue.withOpacity(0.05),
+                    color: _serviceCompleted
+                        ? Colors.green.withOpacity(0.05)
+                        : Colors.blue.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _serviceCompleted ? Colors.green.withOpacity(0.12) : Colors.blue.withOpacity(0.12)),
+                    border: Border.all(
+                      color: _serviceCompleted
+                          ? Colors.green.withOpacity(0.12)
+                          : Colors.blue.withOpacity(0.12),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -484,19 +534,24 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _serviceCompleted ? AppLocalizations.of(context)!.serviceCompleted : AppLocalizations.of(context)!.inspectionOnly,
-                        style: DMSansFont.textStyle(fontWeight: FontWeight.bold, color: _serviceCompleted ? Colors.green : Colors.blue),
+                        _serviceCompleted
+                            ? AppLocalizations.of(context)!.serviceCompleted
+                            : AppLocalizations.of(context)!.inspectionOnly,
+                        style: DMSansFont.textStyle(
+                          fontWeight: FontWeight.bold,
+                          color: _serviceCompleted ? Colors.green : Colors.blue,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 if (_serviceCompleted && total > 0) ...[
-                   const SizedBox(height: 20),
-                   _buildCostRow(
+                  const SizedBox(height: 20),
+                  _buildCostRow(
                     label: AppLocalizations.of(context)!.totalCost,
                     amount: total,
                     isTotal: true,
-                   ),
+                  ),
                 ],
               ],
             ),
@@ -510,11 +565,16 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(50),
                       side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       AppLocalizations.of(context)!.cancel,
-                      style: DMSansFont.textStyle(fontWeight: FontWeight.w600, color: Colors.grey[700]),
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
                 ),
@@ -530,11 +590,16 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       AppLocalizations.of(context)!.confirm,
-                      style: DMSansFont.textStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      style: DMSansFont.textStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -546,13 +611,19 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     );
   }
 
-  Widget _buildCostRow({required String label, required double amount, bool isTotal = false}) {
+  Widget _buildCostRow({
+    required String label,
+    required double amount,
+    bool isTotal = false,
+  }) {
     return Container(
       padding: isTotal ? const EdgeInsets.all(12) : EdgeInsets.zero,
-      decoration: isTotal ? BoxDecoration(
-        color: AppColors.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-      ) : null,
+      decoration: isTotal
+          ? BoxDecoration(
+              color: AppColors.primary.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(8),
+            )
+          : null,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -651,7 +722,8 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       : Colors.blue.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: (_serviceCompleted ? Colors.green : Colors.blue).withOpacity(0.1),
+                    color: (_serviceCompleted ? Colors.green : Colors.blue)
+                        .withOpacity(0.1),
                     width: 1.5,
                   ),
                 ),
@@ -660,11 +732,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: (_serviceCompleted ? Colors.green : Colors.blue).withOpacity(0.1),
+                        color: (_serviceCompleted ? Colors.green : Colors.blue)
+                            .withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _serviceCompleted ? Icons.check_circle_outlined : Icons.search,
+                        _serviceCompleted
+                            ? Icons.check_circle_outlined
+                            : Icons.search,
                         color: _serviceCompleted ? Colors.green : Colors.blue,
                         size: 24,
                       ),
@@ -687,8 +762,12 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                           const SizedBox(height: 2),
                           Text(
                             _serviceCompleted
-                                ? AppLocalizations.of(context)!.serviceCompletedDescription
-                                : AppLocalizations.of(context)!.inspectionOnlyDescription,
+                                ? AppLocalizations.of(
+                                    context,
+                                  )!.serviceCompletedDescription
+                                : AppLocalizations.of(
+                                    context,
+                                  )!.inspectionOnlyDescription,
                             style: DMSansFont.textStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -752,8 +831,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                         children: [
                           Text(
                             _paymentThroughApp
-                                ? AppLocalizations.of(context)?.paymentThroughApp ?? 'Payment Through App'
-                                : AppLocalizations.of(context)?.paymentOutsideApp ?? 'Payment Outside App',
+                                ? AppLocalizations.of(
+                                        context,
+                                      )?.paymentThroughApp ??
+                                      'Payment Through App'
+                                : AppLocalizations.of(
+                                        context,
+                                      )?.paymentOutsideApp ??
+                                      'Payment Outside App',
                             style: DMSansFont.textStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -763,8 +848,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                           const SizedBox(height: 2),
                           Text(
                             _paymentThroughApp
-                                ? AppLocalizations.of(context)?.paymentThroughAppDesc ?? 'Customer will pay through the app.'
-                                : AppLocalizations.of(context)?.paymentOutsideAppDesc ?? 'Collect cash or external payment.',
+                                ? AppLocalizations.of(
+                                        context,
+                                      )?.paymentThroughAppDesc ??
+                                      'Customer will pay through the app.'
+                                : AppLocalizations.of(
+                                        context,
+                                      )?.paymentOutsideAppDesc ??
+                                      'Collect cash or external payment.',
                             style: DMSansFont.textStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -791,14 +882,21 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 // Attachments Title
                 Row(
                   children: [
-                    const Icon(Icons.attachment_outlined, size: 20, color: Colors.black87),
+                    const Icon(
+                      Icons.attachment_outlined,
+                      size: 20,
+                      color: Colors.black87,
+                    ),
                     const SizedBox(width: 8),
-                    Text(
-                      '${AppLocalizations.of(context)!.uploadFilesTitle}*',
-                      style: DMSansFont.textStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    Flexible(
+                      child: Text(
+                        maxLines: 2,
+                        '${AppLocalizations.of(context)!.uploadFilesTitle}*',
+                        style: DMSansFont.textStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ],
@@ -830,13 +928,21 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(_getFileIcon(file.path), color: AppColors.primary, size: 32),
+                                    Icon(
+                                      _getFileIcon(file.path),
+                                      color: AppColors.primary,
+                                      size: 32,
+                                    ),
                                     const SizedBox(height: 8),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       child: Text(
                                         file.path.split('/').last,
-                                        style: DMSansFont.textStyle(fontSize: 10),
+                                        style: DMSansFont.textStyle(
+                                          fontSize: 10,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -856,7 +962,11 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                     color: Colors.red,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
                                 ),
                               ),
                             ),
@@ -879,7 +989,9 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       color: AppColors.primary.withOpacity(0.03),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: _fileError != null ? Colors.red : AppColors.primary.withOpacity(0.12),
+                        color: _fileError != null
+                            ? Colors.red
+                            : AppColors.primary.withOpacity(0.12),
                         width: 2,
                         style: BorderStyle.solid,
                       ),
@@ -887,7 +999,11 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.cloud_upload_outlined, color: AppColors.primary, size: 32),
+                        Icon(
+                          Icons.cloud_upload_outlined,
+                          color: AppColors.primary,
+                          size: 32,
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           selectedFiles.isEmpty
@@ -906,7 +1022,13 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 if (_fileError != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8, left: 4),
-                    child: Text(_fileError!, style: DMSansFont.textStyle(color: Colors.red, fontSize: 12)),
+                    child: Text(
+                      _fileError!,
+                      style: DMSansFont.textStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 const SizedBox(height: 24),
 
@@ -914,7 +1036,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 if (_serviceItems.isEmpty) ...[
                   Text(
                     '${AppLocalizations.of(context)!.serviceCost} *',
-                    style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: DMSansFont.textStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -922,10 +1047,20 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     keyboardType: TextInputType.number,
                     onChanged: (_) => setState(() {}),
                     validator: (value) {
-                      if (!_serviceCompleted || _serviceItems.isNotEmpty) return null;
-                      if (value == null || value.isEmpty) return AppLocalizations.of(context)!.pleaseEnterServiceCost;
-                      if (double.tryParse(value) == null) return AppLocalizations.of(context)!.pleaseEnterValidNumber;
-                      if (double.parse(value) <= 0) return AppLocalizations.of(context)!.serviceCostMustBeGreaterThanZero;
+                      if (!_serviceCompleted || _serviceItems.isNotEmpty)
+                        return null;
+                      if (value == null || value.isEmpty)
+                        return AppLocalizations.of(
+                          context,
+                        )!.pleaseEnterServiceCost;
+                      if (double.tryParse(value) == null)
+                        return AppLocalizations.of(
+                          context,
+                        )!.pleaseEnterValidNumber;
+                      if (double.parse(value) <= 0)
+                        return AppLocalizations.of(
+                          context,
+                        )!.serviceCostMustBeGreaterThanZero;
                       return null;
                     },
                     decoration: _premiumInputDecoration(
@@ -943,7 +1078,10 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.serviceItems,
-                        style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: DMSansFont.textStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       TextButton.icon(
                         onPressed: _addServiceItem,
@@ -951,15 +1089,20 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                         label: Text(AppLocalizations.of(context)!.addItem),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           backgroundColor: AppColors.primary.withOpacity(0.08),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  if (_serviceItems.isEmpty) 
+                  if (_serviceItems.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(20),
                       width: double.infinity,
@@ -970,11 +1113,20 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       ),
                       child: Column(
                         children: [
-                          Icon(Icons.inventory_2_outlined, color: Colors.grey[400], size: 40),
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            color: Colors.grey[400],
+                            size: 40,
+                          ),
                           const SizedBox(height: 12),
                           Text(
-                            AppLocalizations.of(context)!.pleaseAddAtleastOneServiceItem,
-                            style: DMSansFont.textStyle(color: Colors.grey[500], fontSize: 13),
+                            AppLocalizations.of(
+                              context,
+                            )!.pleaseAddAtleastOneServiceItem,
+                            style: DMSansFont.textStyle(
+                              color: Colors.grey[500],
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ),
@@ -993,7 +1145,11 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: Colors.grey[200]!),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
                           ),
                           child: Column(
@@ -1003,19 +1159,38 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                   Expanded(
                                     flex: 3,
                                     child: TextFormField(
-                                      controller: _serviceItems[index].nameController,
+                                      controller:
+                                          _serviceItems[index].nameController,
                                       decoration: _premiumInputDecoration(
-                                        hint: AppLocalizations.of(context)!.item,
-                                        label: "${AppLocalizations.of(context)!.item} ${index + 1}",
+                                        hint: AppLocalizations.of(
+                                          context,
+                                        )!.item,
+                                        label:
+                                            "${AppLocalizations.of(context)!.item} ${index + 1}",
                                       ),
-                                      validator: (v) => (!_serviceCompleted || _serviceItems.isEmpty) ? null : (v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null),
+                                      validator: (v) =>
+                                          (!_serviceCompleted ||
+                                              _serviceItems.isEmpty)
+                                          ? null
+                                          : (v == null || v.isEmpty
+                                                ? AppLocalizations.of(
+                                                    context,
+                                                  )!.required
+                                                : null),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   IconButton(
                                     onPressed: () => _removeServiceItem(index),
-                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                    style: IconButton.styleFrom(backgroundColor: Colors.red.withOpacity(0.05)),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                    ),
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: Colors.red.withOpacity(
+                                        0.05,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1024,12 +1199,15 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                 children: [
                                   Expanded(
                                     child: TextFormField(
-                                      controller: _serviceItems[index].quantityController,
+                                      controller: _serviceItems[index]
+                                          .quantityController,
                                       keyboardType: TextInputType.number,
                                       onChanged: (_) => setState(() {}),
                                       decoration: _premiumInputDecoration(
                                         hint: AppLocalizations.of(context)!.qty,
-                                        label: AppLocalizations.of(context)!.qty,
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.qty,
                                       ),
                                       validator: (v) => _validateNumberField(v),
                                     ),
@@ -1037,12 +1215,17 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: TextFormField(
-                                      controller: _serviceItems[index].priceController,
+                                      controller:
+                                          _serviceItems[index].priceController,
                                       keyboardType: TextInputType.number,
                                       onChanged: (_) => setState(() {}),
                                       decoration: _premiumInputDecoration(
-                                        hint: AppLocalizations.of(context)!.price,
-                                        label: AppLocalizations.of(context)!.price,
+                                        hint: AppLocalizations.of(
+                                          context,
+                                        )!.price,
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.price,
                                       ),
                                       validator: (v) => _validateNumberField(v),
                                     ),
@@ -1067,11 +1250,17 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(56),
                         side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.cancel,
-                        style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                        style: DMSansFont.textStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
                       ),
                     ),
                   ),
@@ -1084,11 +1273,17 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.complete,
-                        style: DMSansFont.textStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: DMSansFont.textStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -1104,26 +1299,46 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
 
   String? _validateNumberField(String? value) {
     if (!_serviceCompleted || _serviceItems.isEmpty) return null;
-    if (value == null || value.isEmpty) return AppLocalizations.of(context)!.required;
+    if (value == null || value.isEmpty)
+      return AppLocalizations.of(context)!.required;
     final numValue = double.tryParse(value);
     if (numValue == null) return AppLocalizations.of(context)!.invalid;
-    if (numValue <= 0) return AppLocalizations.of(context)!.serviceCostMustBeGreaterThanZero;
+    if (numValue <= 0)
+      return AppLocalizations.of(context)!.serviceCostMustBeGreaterThanZero;
     return null;
   }
 
-  InputDecoration _premiumInputDecoration({required String hint, String? label, IconData? icon}) {
+  InputDecoration _premiumInputDecoration({
+    required String hint,
+    String? label,
+    IconData? icon,
+  }) {
     return InputDecoration(
       hintText: hint,
       labelText: label,
       labelStyle: DMSansFont.textStyle(color: Colors.grey[500], fontSize: 13),
       hintStyle: DMSansFont.textStyle(color: Colors.grey[400], fontSize: 14),
-      prefixIcon: icon != null ? Icon(icon, color: AppColors.primary, size: 20) : null,
+      prefixIcon: icon != null
+          ? Icon(icon, color: AppColors.primary, size: 20)
+          : null,
       filled: true,
       fillColor: Colors.grey[50],
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[100]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.primary.withOpacity(0.5))),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[100]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red),
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }

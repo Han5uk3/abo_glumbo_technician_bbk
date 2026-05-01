@@ -1,6 +1,5 @@
 {
   "appName": "Abo Glumbo",
-  "profileSentForVerification": "Your Profile has been sent for Verification!",
   "onlineStatusOn": "You are now Online",
   "onlineStatusOff": "You are now Offline",
   "errorUpdatingStatus": "Error updating status",
@@ -95,7 +94,6 @@
   "unknown": "Unknown",
   "timedOut": "Timed Out",
   "technicianNotFound": "Technician Not Found",
-  "verificationPending": "Verification Pending",
   "otpAutoVerified": "OTP Auto Verified",
   "somethingWentWrongTryAgain": "Something Went Wrong, Try Again",
   "otpSent": "OTP Sent",
@@ -458,11 +456,11 @@
   "completeWork": "Complete Work",
   "gallery": "Gallery",
   "qty": "Qty",
-  "serviceCompletedDescription": "Work was done and service provided",
   "inspectionOnlyDescription": "Only inspection done, no service provided",
   "required": "Required",
   "requests": "Requests",
   "newtext": "New",
+  "waitingForPayment": "Waiting for payment",
   "totalCost": "Total Cost",
   "inspectionOnly": "Inspection Only",
   "support": "Support",
@@ -1226,7 +1224,6 @@
   "availabilityStatus": "Availability Status",
   "youAreNowOnline": "You are now online",
   "youAreNowOffline": "You are now offline",
-  "errorUpdatingStatus": "Error updating status",
   "youAreCurrentlyUnavailable": "You are currently unavailable for requests",
   "youAreAvailableForRequests": "You are available for requests",
   "files": "Files",
@@ -1489,5 +1486,6 @@
   "bookingIdCopied": "Booking ID Copied",
   "selectTime": "Select Time",
   "submitCounterOffer": "Submit Counter Offer",
-  "pleaseSelectALaterTime": "Please select a time later than the current booking time"
+  "pleaseSelectALaterTime": "Please select a time later than the current booking time",
+  "listeningForSms": "Listening for SMS..."
 }

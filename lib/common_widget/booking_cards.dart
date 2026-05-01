@@ -397,7 +397,7 @@ class BookingListTileWidget extends StatelessWidget {
   ) {
     if (booking.bookingStatusCode == 'VP') {
       return _statusBadge(
-        localization.verificationPending.toUpperCase(),
+        localization.paymentPending.toUpperCase(),
         Colors.orange,
       );
     }
@@ -445,8 +445,17 @@ class BookingListTileWidget extends StatelessWidget {
     } else {
       switch (booking.bookingStatusCode) {
         case 'C':
-          label = localization.completed;
-          color = Colors.green;
+          if (booking.paymentCompleted == false) {
+            label = localization.paymentPending;
+            color = Colors.orange;
+          } else {
+            label = localization.completed;
+            color = Colors.green;
+          }
+          break;
+        case 'CP':
+          label = localization.paymentPending;
+          color = Colors.orange;
           break;
         case 'X':
         case 'XC':

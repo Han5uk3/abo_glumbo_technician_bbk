@@ -1094,7 +1094,7 @@ class _BookingInfoState extends State<BookingInfo> {
                           // Verification Controls
                           if (!widget.isWarranty &&
                               !widget.isAdmin &&
-                              statusCode == 'VP')
+                              (statusCode == 'VP' || statusCode == 'CP'))
                             VerifyPaymentControls(booking: currentBooking),
 
                           // Warranty controls (Warranty)
@@ -4113,7 +4113,10 @@ class _BookingInfoState extends State<BookingInfo> {
         "${AppLocalizations.of(context)!.acceptedAt} : ${formatBookingDateTime(booking.acceptedAt!.toDate(), locale)}",
       );
     }
-    if (booking.completedAt != null && booking.bookingStatusCode == "C") {
+    if (booking.completedAt != null &&
+        (booking.bookingStatusCode == "C" ||
+            booking.bookingStatusCode == "CP" ||
+            booking.bookingStatusCode == "VP")) {
       return _timestampText(
         "${AppLocalizations.of(context)!.completedOn} : ${formatBookingDateTime(booking.completedAt!.toDate(), locale)}",
       );
@@ -4199,7 +4202,9 @@ class VerifyPaymentControls extends StatelessWidget {
               Icon(Icons.payment_rounded, color: AppColors.white),
               const SizedBox(width: 12),
               Text(
-                AppLocalizations.of(context)!.verificationPending,
+                booking.bookingStatusCode == 'CP'
+                    ? AppLocalizations.of(context)!.paymentPending
+                    : AppLocalizations.of(context)!.verificationPending,
                 style: DMSansFont.textStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -4210,7 +4215,9 @@ class VerifyPaymentControls extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            AppLocalizations.of(context)!.waitingForTechnicianVerification,
+            booking.bookingStatusCode == 'CP'
+                ? AppLocalizations.of(context)!.waitingForPayment
+                : AppLocalizations.of(context)!.waitingForTechnicianVerification,
             style: DMSansFont.textStyle(fontSize: 13, color: AppColors.white),
           ),
           const SizedBox(height: 20),

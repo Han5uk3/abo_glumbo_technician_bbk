@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_ur.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +97,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
     Locale('en'),
+    Locale('ur'),
   ];
 
   /// No description provided for @appName.
@@ -103,12 +105,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Abo Glumbo'**
   String get appName;
-
-  /// No description provided for @profileSentForVerification.
-  ///
-  /// In en, this message translates to:
-  /// **'Your Profile has been sent for Verification!'**
-  String get profileSentForVerification;
 
   /// No description provided for @onlineStatusOn.
   ///
@@ -673,12 +669,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Technician Not Found'**
   String get technicianNotFound;
-
-  /// No description provided for @verificationPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Verification Pending'**
-  String get verificationPending;
 
   /// No description provided for @otpAutoVerified.
   ///
@@ -2771,7 +2761,7 @@ abstract class AppLocalizations {
   /// No description provided for @serviceCompletedDescription.
   ///
   /// In en, this message translates to:
-  /// **'Work was done and service provided'**
+  /// **'Service has been completed successfully.'**
   String get serviceCompletedDescription;
 
   /// No description provided for @paymentThroughApp.
@@ -2875,6 +2865,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New'**
   String get newtext;
+
+  /// No description provided for @waitingForPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment'**
+  String get waitingForPayment;
 
   /// No description provided for @totalCost.
   ///
@@ -8397,6 +8393,18 @@ abstract class AppLocalizations {
   /// **'Selected Locations'**
   String get selectedLocations;
 
+  /// No description provided for @profileSentForVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile has been sent for Verification!'**
+  String get profileSentForVerification;
+
+  /// No description provided for @verificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Pending'**
+  String get verificationPending;
+
   /// No description provided for @waitingForTechnicianVerification.
   ///
   /// In en, this message translates to:
@@ -8480,6 +8488,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a time later than the current booking time'**
   String get pleaseSelectALaterTime;
+
+  /// No description provided for @listeningForSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for SMS...'**
+  String get listeningForSms;
 }
 
 class _AppLocalizationsDelegate
@@ -8493,7 +8507,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+      <String>['ar', 'en', 'ur'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -8506,6 +8520,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
+    case 'ur':
+      return AppLocalizationsUr();
   }
 
   throw FlutterError(

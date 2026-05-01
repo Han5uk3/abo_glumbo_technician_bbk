@@ -163,9 +163,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             snippet:
                 '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            (i * 35.0) % 360.0,
-          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue((i * 35.0) % 360.0),
           draggable: false,
         ),
       );
@@ -204,13 +202,15 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           strokeWidth: 2,
         ),
       );
-      
+
       for (var j = 0; j < _currentPolygonPoints.length; j++) {
         updatedMarkers.add(
           Marker(
             markerId: MarkerId('current_p_$j'),
             position: _currentPolygonPoints[j],
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueCyan,
+            ),
           ),
         );
       }
@@ -683,13 +683,18 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_currentPolygonPoints.length < 4) {
-                        _showSnackBar('A region must have at least 4 points to be completed.', Colors.orange);
+                        _showSnackBar(
+                          'A region must have at least 4 points to be completed.',
+                          Colors.orange,
+                        );
                         return;
                       }
                       _showLocationDetailsDialog();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentPolygonPoints.length >= 4 ? Colors.orange : Colors.grey,
+                      backgroundColor: _currentPolygonPoints.length >= 4
+                          ? Colors.orange
+                          : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -801,35 +806,34 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                   onTap: () => _showLocationDetailsDialog(editIndex: i),
-                  trailing: IconButton(
-                    icon: Icon(Icons.close, size: 16, color: Colors.red),
-                    onPressed: () => _removeLocation(i),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.edit,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () =>
+                            _showLocationDetailsDialog(editIndex: i),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 16, color: Colors.red),
+                        onPressed: () => _removeLocation(i),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ),
-          if (_selectedLocation != null)
-            Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: ElevatedButton.icon(
-                onPressed: () => _showLocationDetailsDialog(),
-                icon: Icon(Icons.add, size: 16, color: Colors.white),
-                label: Text(
-                  AppLocalizations.of(context)!.addCurrentLocation,
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: Size(double.infinity, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -848,6 +852,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             onPressed: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
+                backgroundColor: Colors.white,
                 title: Text(AppLocalizations.of(context)!.howToUse),
                 content: Text(
                   AppLocalizations.of(context)!.mapPickerInstructions,

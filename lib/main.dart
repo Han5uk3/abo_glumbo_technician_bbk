@@ -201,6 +201,7 @@ class MyApp extends StatelessWidget {
           return MultiBlocProvider(
             providers: providers,
             child: MaterialApp(
+              key: ValueKey(state.locale.languageCode),
               navigatorKey: navigatorKey,
               title: 'Abo Glumbo - Technician',
               debugShowCheckedModeBanner: false,
@@ -219,14 +220,9 @@ class MyApp extends StatelessWidget {
                 );
               },
 
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
               locale: state.locale,
-              supportedLocales: const [Locale('en'), Locale('ar')],
+              supportedLocales: AppLocalizations.supportedLocales,
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
                 scaffoldBackgroundColor: AppColors.bgWhite,

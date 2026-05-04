@@ -1371,7 +1371,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteService => 'حذف الخدمة';
 
   @override
-  String get serviceCompletedDescription => 'تم القيام بالعمل وتقديم الخدمة';
+  String get serviceCompletedDescription =>
+      'تم القيام بالعمل وتقديم الخدمة. سيتم تطبيق ضمان لمدة أسبوع.';
 
   @override
   String get paymentThroughApp => 'الدفع عبر التطبيق';

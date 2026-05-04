@@ -1392,7 +1392,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get deleteService => 'خدمت حذف کریں';
 
   @override
-  String get serviceCompletedDescription => 'خدمت کامیابی سے مکمل ہو گئی ہے۔';
+  String get serviceCompletedDescription =>
+      'سروس کامیابی کے ساتھ مکمل ہو گئی ہے۔ 1 ہفتے کی وارنٹی لاگو ہوگی۔';
 
   @override
   String get paymentThroughApp => 'ایپ کے ذریعے ادائیگی';

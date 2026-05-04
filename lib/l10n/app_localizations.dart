@@ -2761,7 +2761,7 @@ abstract class AppLocalizations {
   /// No description provided for @serviceCompletedDescription.
   ///
   /// In en, this message translates to:
-  /// **'Service has been completed successfully.'**
+  /// **'Service has been completed successfully. A 1-week warranty will be applied.'**
   String get serviceCompletedDescription;
 
   /// No description provided for @paymentThroughApp.

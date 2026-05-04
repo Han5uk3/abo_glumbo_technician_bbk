@@ -123,7 +123,7 @@ async function getAllAdminUsers() {
     adminsSnapshot.forEach((doc) => {
       const data = doc.data();
       const level = data.accessLevel;
-      
+
       // Per USER request: Only access level 1 or 2 needs to get notifications.
       // Those with level 0 should not get notifications.
       if (level === 1 || level === 2) {
@@ -4021,7 +4021,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 /**
  * Automatically assigns technicians to a new booking based on proximity and service role.
- * Progressively expands search radius (5, 10, 20, 30, 40 km) every 2 minutes.
+ * Progressively expands search radius (5, 10, 20, 30, 40 km) every 90 seconds.
  */
 exports.autoAssignTechnician = onDocumentWritten(
   {
@@ -4058,7 +4058,7 @@ exports.autoAssignTechnician = onDocumentWritten(
     const isNew = !change.before.exists;
     const isReassigned = change.before.exists && oldBooking?.agent && !booking.agent;
     const isReady = booking.autoAssignmentStatus === "ready_to_assign";
-    
+
     // If it's a new booking, check if it has a scheduled time in the future
     if (isNew && booking.assignmentScheduledTime) {
       if (Date.now() < booking.assignmentScheduledTime.toDate().getTime()) {
@@ -4113,11 +4113,11 @@ exports.autoAssignTechnician = onDocumentWritten(
 
     const addresses = booking.customer?.addresses || [];
     const selectedAddress = addresses.find(a => a.isSelected === true) || (addresses.length > 0 ? addresses[0] : null);
-    
+
     // Support multiple coordinate field names and handle potential string values
     const custLat = parseFloat(selectedAddress?.lat || booking.location?.lat || booking.lat || booking.latitude);
     const custLon = parseFloat(selectedAddress?.lon || booking.location?.lon || booking.lon || booking.longitude);
-    
+
     const serviceCategoryId = booking.service?.category;
     const cancelledWorkerUids = new Set(booking.cancelledWorkerUids || []);
 
@@ -4133,6 +4133,10 @@ exports.autoAssignTechnician = onDocumentWritten(
 
     if (!serviceCategoryId) {
       logger.error(`[${bookingId}] Service category ID is missing.`);
+      await db.collection("bookings").doc(bookingId).update({
+        autoAssignmentStatus: "technicianNotFound",
+        updatedAt: FieldValue.serverTimestamp(),
+      });
       return null;
     }
 
@@ -4159,7 +4163,7 @@ exports.autoAssignTechnician = onDocumentWritten(
 
       // Fetch potential technicians
       logger.info(`[${bookingId}] Searching for technicians. Category required: ${serviceCategoryId}`);
-      
+
       const techQuery = await db.collection("users")
         .where("isOnline", "==", true)
         .where("isVerified", "==", true)
@@ -4170,10 +4174,10 @@ exports.autoAssignTechnician = onDocumentWritten(
         const hasRole = d.jobRoles && d.jobRoles.includes(serviceCategoryId);
         const notAdmin = d.isAdmin !== true;
         const isTechRole = d.role === 'technician';
-        
+
         // Log details for Riyadh technician to help debug matching issues
         if (d.name && d.name.includes("Riyadh")) {
-           logger.info(`[${bookingId}] Debug Riyadh Tech ${doc.id}: hasRole=${hasRole}, notAdmin=${notAdmin}, role=${d.role}, isOnline=${d.isOnline}, isVerified=${d.isVerified}`);
+          logger.info(`[${bookingId}] Debug Riyadh Tech ${doc.id}: hasRole=${hasRole}, notAdmin=${notAdmin}, role=${d.role}, isOnline=${d.isOnline}, isVerified=${d.isVerified}`);
         }
 
         // Must have the required job role and be a technician (either by role or not being admin)
@@ -4194,7 +4198,7 @@ exports.autoAssignTechnician = onDocumentWritten(
 
         const techData = doc.data();
         const techLoc = techData.liveLocation || techData.location;
-        
+
         if (!techLoc) {
           logger.info(`[${bookingId}] Technician ${techId} has no location data. Skipping.`);
           continue;
@@ -4243,7 +4247,7 @@ exports.autoAssignTechnician = onDocumentWritten(
           };
 
           offerPromises.push(db.collection("job_offers").add(offerPayload));
-          
+
           // Send push notification
           offerPromises.push(sendAndStoreNotification({
             targetRole: "technician",
@@ -4264,15 +4268,15 @@ exports.autoAssignTechnician = onDocumentWritten(
         await Promise.all(offerPromises);
       }
 
-      // Wait 2 minutes before expanding radius, unless it's the last step
+      // Wait 90 seconds before expanding radius, unless it's the last step
       if (i < radii.length - 1) {
-        console.log(`[${bookingId}] Waiting 2 minutes for next expansion...`);
-        await new Promise(resolve => setTimeout(resolve, 120 * 1000));
+        console.log(`[${bookingId}] Waiting 90 seconds for next expansion...`);
+        await new Promise(resolve => setTimeout(resolve, 90 * 1000));
       }
     }
 
     console.log(`[${bookingId}] Radius escalation reached limit (40km). Ending search.`);
-    
+
     if (notifiedTechnicians.size === 0) {
       await db.collection("bookings").doc(bookingId).update({
         autoAssignmentStatus: "technicianNotFound",
@@ -4305,7 +4309,7 @@ exports.triggerScheduledAssignments = onSchedule("every 5 minutes", async (event
 
   const batch = db.batch();
   let count = 0;
-  
+
   snapshot.forEach(doc => {
     const data = doc.data();
     // If it hasn't been picked up yet (agent is null, status is not already searching or accepted)

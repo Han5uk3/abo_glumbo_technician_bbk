@@ -1166,7 +1166,8 @@ class AppServices {
     bool paymentThroughApp = false,
   }) async {
     try {
-      final bool paymentCompleted = (mode == 1 ? totalCost : inspectionFee) <= 0;
+      final bool paymentCompleted =
+          (mode == 1 ? totalCost : inspectionFee) <= 0;
       String status = paymentCompleted ? 'C' : 'CP';
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
         'bookingStatusCode': status,
@@ -2436,7 +2437,8 @@ class AppServices {
         }
 
         for (var booking in bookings) {
-          final date = booking.paymentCompletedAt?.toDate() ??
+          final date =
+              booking.paymentCompletedAt?.toDate() ??
               booking.completedAt?.toDate();
           if (date != null) {
             final monthStr = DateFormat('MMM yyyy').format(date);
@@ -2695,20 +2697,26 @@ class AppServices {
   static Stream<List<JobOfferWithBooking>> getJobOffersStream() {
     final userId = LocalStore.getUID();
     if (userId == null || userId.isEmpty) return Stream.value([]);
-    
+
     final firestoreStream = AppFirestore.jobOffersCollectionRef
         .where('technicianId', isEqualTo: userId)
         .where('status', isEqualTo: 'pending')
         .snapshots();
-        
+
     // Combine with a periodic timer to force re-evaluation of 'expiresAt' every 10s
     // Added .startWith(0) to ensure the stream emits immediately on subscription
-    final timerStream = Stream.periodic(const Duration(seconds: 10), (i) => i).startWith(0);
+    final timerStream = Stream.periodic(
+      const Duration(seconds: 10),
+      (i) => i,
+    ).startWith(0);
 
-    return Rx.combineLatest2(firestoreStream, timerStream, (snapshot, _) => snapshot)
-        .asyncMap((snapshot) async {
+    return Rx.combineLatest2(
+      firestoreStream,
+      timerStream,
+      (snapshot, _) => snapshot,
+    ).asyncMap((snapshot) async {
       final now = DateTime.now();
-      
+
       // 1. Filter active offers and identify booking IDs
       final activeOffers = snapshot.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -2720,19 +2728,18 @@ class AppServices {
 
       // 2. Fetch all related bookings in parallel (Concurrently)
       // This is much faster than sequential 'await' in a for-loop
-      final List<Future<JobOfferWithBooking?>> fetchFutures = activeOffers.map((doc) async {
+      final List<Future<JobOfferWithBooking?>> fetchFutures = activeOffers.map((
+        doc,
+      ) async {
         try {
           final data = doc.data() as Map<String, dynamic>;
           final bookingId = data['bookingId'];
           if (bookingId == null) return null;
-          
+
           final booking = await getBookingById(bookingId);
           // Only show 'Pending' bookings that haven't been assigned yet
           if (booking != null && booking.bookingStatusCode == 'P') {
-            return JobOfferWithBooking(
-              offerId: doc.id,
-              booking: booking,
-            );
+            return JobOfferWithBooking(offerId: doc.id, booking: booking);
           }
         } catch (e) {
           debugPrint('Error fetching booking for offer ${doc.id}: $e');
@@ -2741,7 +2748,7 @@ class AppServices {
       }).toList();
 
       final results = await Future.wait(fetchFutures);
-      
+
       // Filter out nulls and return valid offers
       return results.whereType<JobOfferWithBooking>().toList();
     });
@@ -2769,6 +2776,12 @@ class AppServices {
         throw Exception('Booking is already assigned or cancelled');
       }
 
+      if (bookingData['agent'] != null &&
+          bookingData['agent']['uid'] != null &&
+          (bookingData['agent']['uid'] as String).isNotEmpty) {
+        throw Exception('Booking is already assigned to another technician');
+      }
+
       if (offerData['status'] != 'pending') {
         throw Exception('Offer is no longer available');
       }
@@ -2780,7 +2793,7 @@ class AppServices {
 
       // Update Booking
       transaction.update(bookingRef, {
-        'bookingStatusCode': 'P',
+        'bookingStatusCode': 'A',
         'agent': {
           'uid': technician.uid,
           'name': technician.name,

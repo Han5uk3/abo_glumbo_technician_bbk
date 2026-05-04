@@ -1383,7 +1383,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceCompletedDescription =>
-      'Service has been completed successfully.';
+      'Service has been completed successfully. A 1-week warranty will be applied.';
 
   @override
   String get paymentThroughApp => 'Payment Through App';

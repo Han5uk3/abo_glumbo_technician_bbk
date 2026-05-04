@@ -4531,4 +4531,13 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get listeningForSms => 'ایس ایم ایس کا انتظار ہے...';
+
+  @override
+  String get earningsInfoOnly => 'صرف معلوماتی مقاصد کے لیے';
+
+  @override
+  String get throughApp => 'ایپ کے ذریعے';
+
+  @override
+  String get outsideApp => 'ایپ سے باہر';
 }

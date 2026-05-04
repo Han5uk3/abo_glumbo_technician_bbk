@@ -135,13 +135,14 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         },
       });
 
-      // Update wallet amounts for lifetime earnings
+      // Update wallet with outside-app earnings for lifetime tracking
+      // Only for full service (mode 1) — inspection fees are excluded
       if (widget.booking.agent?.uid != null &&
           widget.booking.completionData != null &&
           widget.booking.completionData!.mode == 1) {
         await UnifiedPayoutServices.updateWalletAmounts(
           workerId: widget.booking.agent!.uid!,
-          completionAmountIncrement:
+          outsideAppEarningsIncrement:
               widget.booking.completionData?.totalCost ?? 0.0,
         );
       }

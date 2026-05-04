@@ -8,6 +8,12 @@ import 'package:image_picker/image_picker.dart';
 
 /// Unified Payout Services
 /// Handles all payout-related operations for earnings, tips, and bonus
+///
+/// PAYOUT RULES:
+/// - totalAvailableBalance = cardTips + availableBonus (ONLY these are payoutable)
+/// - In-app service payments (mode 1) are tracked for lifetime totals, NOT payoutable
+/// - Outside-app payments (mode 1, cash/manual) are tracked for lifetime totals, NOT payoutable
+/// - Inspection fees (mode 0) are NEVER tracked in the wallet
 class UnifiedPayoutServices {
   /// Get or create unified wallet for a worker
   static Future<UnifiedWalletModel> getUnifiedWallet(String workerId) async {
@@ -29,6 +35,8 @@ class UnifiedPayoutServices {
           totalBonus: 0.0,
           paidBonus: 0.0,
           availableBonus: 0.0,
+          inAppEarnings: 0.0,
+          outsideAppEarnings: 0.0,
           totalCompletionAmount: 0.0,
           totalAvailableBalance: 0.0,
           lifetimeTotal: 0.0,
@@ -68,12 +76,15 @@ class UnifiedPayoutServices {
   }
 
   /// Update wallet amounts (called when tips/bonus/earnings are added)
-  /// NOTE: Earnings are tracked for lifetime totals - service payments handled outside app
+  /// NOTE: Earnings (completionAmountIncrement / outsideAppEarningsIncrement)
+  /// are tracked for lifetime totals ONLY — they are NOT added to totalAvailableBalance.
+  /// Only cardTips and bonus are payoutable.
   static Future<void> updateWalletAmounts({
     required String workerId,
     double? tipsIncrement,
     double? bonusIncrement,
-    double? completionAmountIncrement, // For bonus calculation
+    double? completionAmountIncrement, // For bonus calculation (legacy, treated as outside-app)
+    double? outsideAppEarningsIncrement, // Outside-app payment (cash/manual)
     bool? isCashTip,
   }) async {
     try {
@@ -112,18 +123,25 @@ class UnifiedPayoutServices {
         );
       }
 
-      // Update completion amount (for bonus calculation)
-      if (completionAmountIncrement != null && completionAmountIncrement > 0) {
+      // Update outside-app earnings (cash/manual payment verified by technician)
+      // These are for informational/lifetime purposes only, NOT payoutable
+      final earningsToAdd = (outsideAppEarningsIncrement ?? 0.0) +
+          (completionAmountIncrement ?? 0.0);
+      if (earningsToAdd > 0) {
         wallet = wallet.copyWith(
+          outsideAppEarnings:
+              (wallet.outsideAppEarnings ?? 0.0) + earningsToAdd,
           totalCompletionAmount:
-              (wallet.totalCompletionAmount ?? 0.0) + completionAmountIncrement,
+              (wallet.totalCompletionAmount ?? 0.0) + earningsToAdd,
         );
       }
 
-      // Calculate totals (only card tips + bonus available for payout)
+      // Calculate totals
+      // PAYOUT-REQUESTABLE: ONLY card tips + available bonus
       final totalAvailable =
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
 
+      // LIFETIME TOTAL: All earnings + tips + bonus (display only)
       final lifetimeTotal =
           (wallet.totalTips ?? 0.0) +
           (wallet.totalBonus ?? 0.0) +
@@ -139,7 +157,8 @@ class UnifiedPayoutServices {
 
       if (kDebugMode) {
         print('✅ Wallet updated for worker $workerId');
-        print('   Available Balance: ${wallet.totalAvailableBalance}');
+        print('   Payout-Requestable Balance: ${wallet.totalAvailableBalance} (tips + bonus only)');
+        print('   Lifetime Total: ${wallet.lifetimeTotal}');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -549,7 +568,8 @@ class UnifiedPayoutServices {
   }
 
   /// Sync existing data to unified wallet (migration helper)
-  /// NOTE: Now also migrates booking earnings for lifetime totals
+  /// NOTE: Also migrates booking earnings for lifetime totals
+  /// In-app earnings are tracked by customer app; outside-app are from technician verification
   static Future<void> syncExistingDataToUnifiedWallet(String workerId) async {
     try {
       // Get existing data
@@ -562,15 +582,30 @@ class UnifiedPayoutServices {
           .where('bookingStatusCode', isEqualTo: 'C')
           .get();
 
-      double totalEarningsFromBookings = 0.0;
+      double inAppEarnings = 0.0;
+      double outsideAppEarnings = 0.0;
       for (var doc in bookingsQuery.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final completionData = data['completionData'];
         if (completionData != null && completionData['mode'] == 1) {
-          totalEarningsFromBookings +=
+          final amount =
               (completionData['totalCost'] as num?)?.toDouble() ?? 0.0;
+          // Check if payment was through app (has orderId/transactionId)
+          // or outside app (technician payment proof)
+          final hasOrderId = data['orderId'] != null &&
+              (data['orderId'] as String).isNotEmpty;
+          final hasTechProof = data['technicianPaymentProof'] != null &&
+              (data['technicianPaymentProof'] as List).isNotEmpty;
+
+          if (hasOrderId && !hasTechProof) {
+            inAppEarnings += amount;
+          } else {
+            outsideAppEarnings += amount;
+          }
         }
       }
+
+      final totalEarnings = inAppEarnings + outsideAppEarnings;
 
       // Create/update unified wallet
       final wallet = UnifiedWalletModel(
@@ -582,14 +617,18 @@ class UnifiedPayoutServices {
         totalBonus: bonusAmount,
         paidBonus: 0.0,
         availableBonus: bonusAmount,
-        totalCompletionAmount: totalEarningsFromBookings,
+        inAppEarnings: inAppEarnings,
+        outsideAppEarnings: outsideAppEarnings,
+        totalCompletionAmount: totalEarnings,
         payoutRequested: tippingData.payoutRequested ?? false,
         lastUpdated: Timestamp.now(),
       );
 
       // Calculate totals
+      // PAYOUT-REQUESTABLE: ONLY card tips + bonus
       final totalAvailable =
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
+      // LIFETIME: Everything combined
       final lifetimeTotal = (wallet.totalTips ?? 0.0) +
           (wallet.totalBonus ?? 0.0) +
           (wallet.totalCompletionAmount ?? 0.0);
@@ -605,8 +644,10 @@ class UnifiedPayoutServices {
 
       if (kDebugMode) {
         print('✅ Synced existing data to unified wallet for worker $workerId');
-        print('   Total Available: $totalAvailable (tips + bonus only)');
-        print('   Lifetime Total: $lifetimeTotal (includes $totalEarningsFromBookings earnings)');
+        print('   Payout-Requestable: $totalAvailable (card tips + bonus only)');
+        print('   In-App Earnings: $inAppEarnings (display only)');
+        print('   Outside-App Earnings: $outsideAppEarnings (display only)');
+        print('   Lifetime Total: $lifetimeTotal');
       }
     } catch (e) {
       if (kDebugMode) {

@@ -8512,6 +8512,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Listening for SMS...'**
   String get listeningForSms;
+
+  /// No description provided for @earningsInfoOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'For informational purposes only'**
+  String get earningsInfoOnly;
+
+  /// No description provided for @throughApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Through App'**
+  String get throughApp;
+
+  /// No description provided for @outsideApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside App'**
+  String get outsideApp;
 }
 
 class _AppLocalizationsDelegate

@@ -1469,5 +1469,8 @@
   "pleaseSelectAtLeastOneFile": "يرجى اختيار ملف واحد على الأقل",
   "errorUploading": "خطأ أثناء الرفع",
   "warranty": "ضمان",
-  "listeningForSms": "بانتظار الرسائل القصيرة..."
+  "listeningForSms": "بانتظار الرسائل القصيرة...",
+  "earningsInfoOnly": "لأغراض إعلامية فقط",
+  "throughApp": "عبر التطبيق",
+  "outsideApp": "خارج التطبيق"
 }

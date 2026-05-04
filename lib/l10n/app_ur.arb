@@ -1402,5 +1402,8 @@
   "selectTime": "وقت منتخب کریں",
   "submitCounterOffer": "جوابی پیشکش جمع کرائیں",
   "pleaseSelectALaterTime": "براہ کرم موجودہ بکنگ کے وقت سے بعد کا وقت منتخب کریں", 
-  "listeningForSms": "ایس ایم ایس کا انتظار ہے..."
+  "listeningForSms": "ایس ایم ایس کا انتظار ہے...",
+  "earningsInfoOnly": "صرف معلوماتی مقاصد کے لیے",
+  "throughApp": "ایپ کے ذریعے",
+  "outsideApp": "ایپ سے باہر"
 }

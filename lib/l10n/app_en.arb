@@ -1491,5 +1491,8 @@
   "selectTime": "Select Time",
   "submitCounterOffer": "Submit Counter Offer",
   "pleaseSelectALaterTime": "Please select a time later than the current booking time",
-  "listeningForSms": "Listening for SMS..."
+  "listeningForSms": "Listening for SMS...",
+  "earningsInfoOnly": "For informational purposes only",
+  "throughApp": "Through App",
+  "outsideApp": "Outside App"
 }

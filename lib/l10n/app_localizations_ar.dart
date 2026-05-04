@@ -4452,4 +4452,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listeningForSms => 'بانتظار الرسائل القصيرة...';
+
+  @override
+  String get earningsInfoOnly => 'لأغراض إعلامية فقط';
+
+  @override
+  String get throughApp => 'عبر التطبيق';
+
+  @override
+  String get outsideApp => 'خارج التطبيق';
 }

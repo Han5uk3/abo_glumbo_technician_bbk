@@ -4516,4 +4516,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listeningForSms => 'Listening for SMS...';
+
+  @override
+  String get earningsInfoOnly => 'For informational purposes only';
+
+  @override
+  String get throughApp => 'Through App';
+
+  @override
+  String get outsideApp => 'Outside App';
 }

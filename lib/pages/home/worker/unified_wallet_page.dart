@@ -290,7 +290,100 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           icon: Icons.card_giftcard_rounded,
           color: Colors.green,
         ),
+        const SizedBox(height: 16),
+        // Earnings info card (display only, not payoutable)
+        _buildEarningsInfoCard(wallet),
       ],
+    );
+  }
+
+  /// Builds an informational card showing earnings breakdown (in-app vs outside-app)
+  /// These are NOT included in the payout-requestable balance
+  Widget _buildEarningsInfoCard(UnifiedWalletModel wallet) {
+    final inApp = wallet.inAppEarnings ?? 0.0;
+    final outsideApp = wallet.outsideAppEarnings ?? 0.0;
+    final totalEarnings = wallet.totalCompletionAmount ?? 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.account_balance_rounded,
+                  color: Colors.blue,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.totalEarnings,
+                      style: DMSansFont.textStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      AppLocalizations.of(context)!.earningsInfoOnly,
+                      style: DMSansFont.textStyle(
+                        fontSize: 11,
+                        color: Colors.black38,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildAmountColumn(
+                label: AppLocalizations.of(context)!.throughApp,
+                amount: inApp,
+                color: Colors.blue,
+              ),
+              _buildAmountColumn(
+                label: AppLocalizations.of(context)!.outsideApp,
+                amount: outsideApp,
+                color: Colors.teal,
+              ),
+              _buildAmountColumn(
+                label: AppLocalizations.of(context)!.total,
+                amount: totalEarnings,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

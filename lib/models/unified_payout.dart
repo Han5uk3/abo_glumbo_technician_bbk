@@ -1,6 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Unified Wallet Model that consolidates earnings, tips, and bonus
+///
+/// PAYOUT RULES:
+/// - totalAvailableBalance = cardTips + availableBonus (ONLY these are payoutable)
+/// - In-app/outside-app earnings are tracked for informational/lifetime purposes
+/// - Inspection fees (mode 0) are NEVER tracked in the wallet
 class UnifiedWalletModel {
   String? workerId;
   String? workerName;
@@ -17,12 +22,14 @@ class UnifiedWalletModel {
   double? paidBonus; // Already paid out bonus
   double? availableBonus; // Available bonus for payout
 
-  // Completion amounts (for bonus calculation)
-  double? totalCompletionAmount; // Sum of all paidAmount from bookings
+  // Earnings breakdown (mode 1 full-service only, NOT payoutable)
+  double? inAppEarnings; // Paid via Telr/Apple Pay in customer app
+  double? outsideAppEarnings; // Cash/manual payment verified by technician
+  double? totalCompletionAmount; // inAppEarnings + outsideAppEarnings
 
   // Aggregated amounts
-  double? totalAvailableBalance; // cardTips + availableBonus only
-  double? lifetimeTotal; // Total of all tips and bonus
+  double? totalAvailableBalance; // cardTips + availableBonus ONLY (payoutable)
+  double? lifetimeTotal; // Total of all earnings + tips + bonus (display only)
 
   // Payout request status
   bool? payoutRequested;
@@ -42,6 +49,8 @@ class UnifiedWalletModel {
     this.totalBonus,
     this.paidBonus,
     this.availableBonus,
+    this.inAppEarnings,
+    this.outsideAppEarnings,
     this.totalCompletionAmount,
     this.totalAvailableBalance,
     this.lifetimeTotal,
@@ -77,6 +86,8 @@ class UnifiedWalletModel {
       totalBonus: (json['totalBonus'] as num?)?.toDouble(),
       paidBonus: (json['paidBonus'] as num?)?.toDouble(),
       availableBonus: (json['availableBonus'] as num?)?.toDouble(),
+      inAppEarnings: (json['inAppEarnings'] as num?)?.toDouble(),
+      outsideAppEarnings: (json['outsideAppEarnings'] as num?)?.toDouble(),
       totalCompletionAmount: (json['totalCompletionAmount'] as num?)
           ?.toDouble(),
       totalAvailableBalance: (json['totalAvailableBalance'] as num?)
@@ -102,6 +113,8 @@ class UnifiedWalletModel {
       'totalBonus': totalBonus ?? 0.0,
       'paidBonus': paidBonus ?? 0.0,
       'availableBonus': availableBonus ?? 0.0,
+      'inAppEarnings': inAppEarnings ?? 0.0,
+      'outsideAppEarnings': outsideAppEarnings ?? 0.0,
       'totalCompletionAmount': totalCompletionAmount ?? 0.0,
       'totalAvailableBalance': totalAvailableBalance ?? 0.0,
       'lifetimeTotal': lifetimeTotal ?? 0.0,
@@ -130,6 +143,8 @@ class UnifiedWalletModel {
     double? totalBonus,
     double? paidBonus,
     double? availableBonus,
+    double? inAppEarnings,
+    double? outsideAppEarnings,
     double? totalCompletionAmount,
     double? totalAvailableBalance,
     double? lifetimeTotal,
@@ -150,6 +165,9 @@ class UnifiedWalletModel {
       totalBonus: totalBonus ?? this.totalBonus,
       paidBonus: paidBonus ?? this.paidBonus,
       availableBonus: availableBonus ?? this.availableBonus,
+      inAppEarnings: inAppEarnings ?? this.inAppEarnings,
+      outsideAppEarnings:
+          outsideAppEarnings ?? this.outsideAppEarnings,
       totalCompletionAmount:
           totalCompletionAmount ?? this.totalCompletionAmount,
       totalAvailableBalance:

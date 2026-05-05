@@ -229,8 +229,9 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
     // Even if multiple offer documents were created, we only want one card per booking.
     final Map<String, dynamic> uniqueMap = {};
     for (var item in data) {
-      if (item is JobOfferWithBooking) {
-        uniqueMap[item.booking.id] = item;
+      if (item is JobOfferContainer) {
+        final id = item.booking?.id ?? item.requestId ?? item.offerId;
+        uniqueMap[id] = item;
       } else if (item is BookingModel) {
         uniqueMap[item.id] = item;
       }
@@ -245,8 +246,8 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
       String id = '';
       if (item is BookingModel) {
         id = item.id.toLowerCase();
-      } else if (item is JobOfferWithBooking) {
-        id = item.booking.id.toLowerCase();
+      } else if (item is JobOfferContainer) {
+        id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
       }
       return id.contains(widget.searchQuery);
     }).toList();
@@ -284,7 +285,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final item = filteredData[index];
-            if (item is JobOfferWithBooking) {
+            if (item is JobOfferContainer) {
               return JobOfferTileWidget(
                 key: ValueKey(item.offerId),
                 offer: item,

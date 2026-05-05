@@ -10,8 +10,9 @@ import 'package:intl/intl.dart';
 
 class CounterProposeSheet extends StatefulWidget {
   final BookingModel booking;
+  final String? offerId;
 
-  const CounterProposeSheet({super.key, required this.booking});
+  const CounterProposeSheet({super.key, required this.booking, this.offerId});
 
   @override
   State<CounterProposeSheet> createState() => _CounterProposeSheetState();
@@ -226,6 +227,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
 
     final bool success = await AppServices.sendCounterOffer(
       bookingId: widget.booking.id,
+      offerId: widget.offerId,
       proposedBy: 'technician',
       proposedByUid: LocalStore.getUID() ?? '',
       proposedByName: LocalStore.getCachedUserData()?.name ?? 'Technician',

@@ -489,7 +489,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBookingsFound => 'No bookings found.';
 
   @override
-  String get searchServices => 'Search services';
+  String get searchServices => 'Search services...';
 
   @override
   String get noServicesInYourWishlist => 'No services in your wishlist';
@@ -886,7 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get applePay => 'Apple Pay';
 
   @override
-  String get cashOnHands => 'Cash payment';
+  String get cashOnHands => 'Outside App';
 
   @override
   String get ext => 'Ext';
@@ -1386,16 +1386,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Service has been completed successfully. A 1-week warranty will be applied.';
 
   @override
-  String get paymentThroughApp => 'Payment Through App';
+  String get paymentThroughApp => 'Inside App';
 
   @override
-  String get paymentOutsideApp => 'Payment Outside App';
+  String get paymentOutsideApp => 'Outside App';
 
   @override
   String get paymentThroughAppDesc => 'Customer will pay through the app.';
 
   @override
-  String get paymentOutsideAppDesc => 'Collect cash or external payment.';
+  String get paymentOutsideAppDesc => 'Collect payment outside of the app.';
 
   @override
   String get deleteServiceConfirmation =>
@@ -2017,7 +2017,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Stop tracking booking successfully';
 
   @override
-  String get cards => 'Cards';
+  String get cards => 'Inside App';
+
+  @override
+  String get insideApp => 'Inside App';
+
+  @override
+  String get outsideApp => 'Outside App';
 
   @override
   String get goToLogin => 'Go to Login';
@@ -4570,5 +4576,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get throughApp => 'Through App';
 
   @override
-  String get outsideApp => 'Outside App';
+  String get rebookTechnician => 'Rebook Technician';
+
+  @override
+  String get selectService => 'Select Service';
+
+  @override
+  String get rejectionProfessionalMessage =>
+      'If you are unavailable at the requested time, please propose an alternative date and time to the customer instead of canceling the appointment.';
+
+  @override
+  String get proposeAlternativeTime => 'Propose Alternative Time';
+
+  @override
+  String get areYouSure => 'Are you sure?';
 }

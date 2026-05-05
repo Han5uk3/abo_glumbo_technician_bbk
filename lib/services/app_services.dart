@@ -1166,22 +1166,28 @@ class AppServices {
     bool paymentThroughApp = false,
   }) async {
     try {
-      final bool paymentCompleted =
-          (mode == 1 ? totalCost : inspectionFee) <= 0;
-      String status = paymentCompleted ? 'C' : 'CP';
+      // If payment is through app, it's pending (CP). If outside, it's completed (C)
+      // unless the cost is 0 (which shouldn't happen for mode 1 usually)
+      final bool paymentCompleted = !paymentThroughApp || (mode == 1 ? totalCost : inspectionFee) <= 0;
+      final String status = paymentCompleted ? 'C' : 'CP';
+      final String paymentModeCode = paymentThroughApp ? 'C' : 'O';
+
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
         'bookingStatusCode': status,
+        'paymentModeCode': paymentModeCode,
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
         'paymentCompleted': paymentCompleted,
+        if (paymentCompleted) 'paymentCompletedAt': FieldValue.serverTimestamp(),
         'completionData': {
-          'fileUrls': fileUrls, // Changed from imageUrls
+          'fileUrls': fileUrls,
           'serviceCost': serviceCost,
           'serviceItems': serviceItems,
           'totalCost': totalCost,
           'mode': mode,
           'inspectionFee': inspectionFee,
+          'paymentMethod': paymentThroughApp ? 'Inside App' : 'Outside App',
         },
 
         if (mode == 1) ...{
@@ -2518,6 +2524,7 @@ class AppServices {
 
   static Future<bool> sendCounterOffer({
     required String bookingId,
+    String? offerId,
     required String proposedBy,
     required String proposedByUid,
     required String proposedByName,
@@ -2525,52 +2532,34 @@ class AppServices {
     required String customerId,
   }) async {
     try {
-      final docRef = AppFirestore.counterOffersCollectionRef.doc();
-      final counterOffer = CounterOfferModel(
-        id: docRef.id,
-        bookingId: bookingId,
-        proposedBy: proposedBy,
-        proposedByUid: proposedByUid,
-        proposedByName: proposedByName,
-        proposedTime: proposedTime,
-        status: 'pending',
-        createdAt: Timestamp.now(),
-      );
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
-        final bookingSnapshot = await transaction.get(bookingRef);
-
-        Map<String, dynamic> updateData = {
-          'activeCounterOffer': counterOffer.toMap(),
+      if (offerId != null) {
+        // Update Job Offer with counter proposal
+        await AppFirestore.jobOffersCollectionRef.doc(offerId).update({
+          'proposedTime': proposedTime,
+          'status': 'counter_offered',
+          'counterOfferedBy': proposedBy,
           'updatedAt': FieldValue.serverTimestamp(),
-        };
+        });
+      }
 
-        // Set startedAt if not already set (first counter proposal session)
-        if (bookingSnapshot.exists) {
-          final data = bookingSnapshot.data() as Map<String, dynamic>;
-          if (data['counterProposalStartedAt'] == null) {
-            updateData['counterProposalStartedAt'] =
-                FieldValue.serverTimestamp();
-          }
-        }
-
-        // Create counter offer
-        transaction.set(docRef, counterOffer.toMap());
-
-        // Update booking
-        transaction.update(bookingRef, updateData);
+      // We still update the booking to notify the customer app and record the process
+      await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
+        'updatedAt': FieldValue.serverTimestamp(),
+        // We'll keep a reference in the booking for easier customer-side lookup if needed,
+        // but the main data now lives in the offer or the booking itself as flat fields
+        'proposedTime': proposedTime,
+        'counterOfferedBy': proposedBy,
       });
 
       // Send notification to customer
       await _recordCustomerNotification(
         customerId: customerId,
-        titleEn: 'New Counter Offer',
+        titleEn: 'New Time Proposed',
         titleAr: 'اقتراح موعد جديد',
         bodyEn: 'Technician has proposed a new time for your booking.',
         bodyAr: 'اقترح الفني موعداً جديداً لحجزك.',
         type: 'counter_offer',
-        data: {'bookingId': bookingId},
+        data: {'bookingId': bookingId, 'offerId': offerId},
       );
 
       return true;
@@ -2694,7 +2683,7 @@ class AppServices {
         });
   }
 
-  static Stream<List<JobOfferWithBooking>> getJobOffersStream() {
+  static Stream<List<JobOfferContainer>> getJobOffersStream() {
     final userId = LocalStore.getUID();
     if (userId == null || userId.isEmpty) return Stream.value([]);
 
@@ -2717,7 +2706,6 @@ class AppServices {
     ).asyncMap((snapshot) async {
       final now = DateTime.now();
 
-      // 1. Filter active offers and identify booking IDs
       final activeOffers = snapshot.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
         final expiresAt = data['expiresAt'] as Timestamp?;
@@ -2726,41 +2714,64 @@ class AppServices {
 
       if (activeOffers.isEmpty) return [];
 
-      // 2. Fetch all related bookings in parallel (Concurrently)
-      // This is much faster than sequential 'await' in a for-loop
-      final List<Future<JobOfferWithBooking?>> fetchFutures = activeOffers.map((
+      final List<Future<JobOfferContainer?>> fetchFutures = activeOffers.map((
         doc,
       ) async {
         try {
           final data = doc.data() as Map<String, dynamic>;
           final bookingId = data['bookingId'];
-          if (bookingId == null) return null;
+          final requestId = data['requestId'];
 
-          final booking = await getBookingById(bookingId);
-          // Only show 'Pending' bookings that haven't been assigned yet
-          if (booking != null && booking.bookingStatusCode == 'P') {
-            return JobOfferWithBooking(offerId: doc.id, booking: booking);
+          if (bookingId != null) {
+            final booking = await getBookingById(bookingId);
+            if (booking != null && booking.bookingStatusCode == 'P') {
+              return JobOfferContainer(
+                offerId: doc.id,
+                booking: booking,
+                offerData: data,
+              );
+            }
+          } else if (requestId != null) {
+            // For broadcast requests, we can either fetch JobRequest or use offerData
+            // User requested showing customer name, location, distance.
+            // These are in offerData.
+            return JobOfferContainer(
+              offerId: doc.id,
+              requestId: requestId,
+              offerData: data,
+            );
           }
         } catch (e) {
-          debugPrint('Error fetching booking for offer ${doc.id}: $e');
+          debugPrint('Error fetching data for offer ${doc.id}: $e');
         }
         return null;
       }).toList();
 
       final results = await Future.wait(fetchFutures);
-
-      // Filter out nulls and return valid offers
-      return results.whereType<JobOfferWithBooking>().toList();
+      return results.whereType<JobOfferContainer>().toList();
     });
   }
 
   static Future<void> acceptJobOffer({
-    required String bookingId,
+    String? bookingId,
+    String? requestId,
     required String offerId,
     required UserModel technician,
   }) async {
-    final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
     final offerRef = AppFirestore.jobOffersCollectionRef.doc(offerId);
+
+    if (requestId != null) {
+      // It's a broadcast request - just signify interest
+      await offerRef.update({
+        'status': 'accepted_by_technician',
+        'acceptedAt': FieldValue.serverTimestamp(),
+      });
+      return;
+    }
+
+    if (bookingId == null) throw Exception('No booking or request ID provided');
+
+    final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final bookingSnapshot = await transaction.get(bookingRef);
@@ -2786,29 +2797,33 @@ class AppServices {
         throw Exception('Offer is no longer available');
       }
 
-      final expiresAt = offerData['expiresAt'] as Timestamp;
-      if (expiresAt.toDate().isBefore(DateTime.now())) {
-        throw Exception('Offer has expired');
+      final bool isAutoAssignment = bookingData['autoAssignmentStatus'] != null;
+      
+      if (isAutoAssignment) {
+        // Auto-assignment booking: Assign technician immediately
+        transaction.update(bookingRef, {
+          'bookingStatusCode': 'A',
+          'agent': {
+            'uid': technician.uid,
+            'name': technician.name,
+            'phone': technician.phone,
+            'profileUrl': technician.profileUrl,
+          },
+          'assignedAt': FieldValue.serverTimestamp(),
+          'autoAssignmentStatus': 'accepted',
+        });
+
+        transaction.update(offerRef, {
+          'status': 'accepted',
+          'acceptedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        // Not an auto-assignment booking: Just record acceptance
+        transaction.update(offerRef, {
+          'status': 'accepted_by_technician',
+          'acceptedAt': FieldValue.serverTimestamp(),
+        });
       }
-
-      // Update Booking
-      transaction.update(bookingRef, {
-        'bookingStatusCode': 'A',
-        'agent': {
-          'uid': technician.uid,
-          'name': technician.name,
-          'phone': technician.phone,
-          'profileUrl': technician.profileUrl,
-        },
-        'assignedAt': FieldValue.serverTimestamp(),
-        'autoAssignmentStatus': 'accepted',
-      });
-
-      // Update Offer
-      transaction.update(offerRef, {
-        'status': 'accepted',
-        'acceptedAt': FieldValue.serverTimestamp(),
-      });
     });
   }
 
@@ -2840,10 +2855,18 @@ class AppServices {
   }
 }
 
-class JobOfferWithBooking {
+class JobOfferContainer {
   final String offerId;
-  final BookingModel booking;
-  JobOfferWithBooking({required this.offerId, required this.booking});
+  final String? requestId;
+  final BookingModel? booking;
+  final Map<String, dynamic> offerData;
+
+  JobOfferContainer({
+    required this.offerId,
+    this.requestId,
+    this.booking,
+    required this.offerData,
+  });
 }
 
 class DashboardDataStream {

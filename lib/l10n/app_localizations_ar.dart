@@ -485,7 +485,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noBookingsFound => 'لا يوجد طلبات';
 
   @override
-  String get searchServices => 'ابحث عن الخدمات';
+  String get searchServices => 'ابحث عن الخدمات...';
 
   @override
   String get noServicesInYourWishlist =>
@@ -880,7 +880,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get applePay => 'Apple Pay';
 
   @override
-  String get cashOnHands => 'الدفع نقدا';
+  String get cashOnHands => 'خارج التطبيق';
 
   @override
   String get ext => 'الامتداد البريدي';
@@ -1375,16 +1375,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم القيام بالعمل وتقديم الخدمة. سيتم تطبيق ضمان لمدة أسبوع.';
 
   @override
-  String get paymentThroughApp => 'الدفع عبر التطبيق';
+  String get paymentThroughApp => 'داخل التطبيق';
 
   @override
-  String get paymentOutsideApp => 'الدفع خارج التطبيق';
+  String get paymentOutsideApp => 'خارج التطبيق';
 
   @override
   String get paymentThroughAppDesc => 'سيدفع العميل من خلال التطبيق.';
 
   @override
-  String get paymentOutsideAppDesc => 'استلام نقدي أو دفع خارجي.';
+  String get paymentOutsideAppDesc => 'استلام الدفع خارج التطبيق.';
 
   @override
   String get deleteServiceConfirmation => 'هل أنت متأكد من حذف الخدمة؟';
@@ -1991,7 +1991,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stopTrackingBookingSuccessfully => 'إيقاف تتبع الحجز بنجاح';
 
   @override
-  String get cards => 'البطاقات';
+  String get cards => 'داخل التطبيق';
+
+  @override
+  String get insideApp => 'داخل التطبيق';
+
+  @override
+  String get outsideApp => 'خارج التطبيق';
 
   @override
   String get goToLogin => 'الذهاب إلى تسجيل الدخول';
@@ -4505,5 +4511,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get throughApp => 'عبر التطبيق';
 
   @override
-  String get outsideApp => 'خارج التطبيق';
+  String get rebookTechnician => 'إعادة حجز الفني';
+
+  @override
+  String get selectService => 'اختر الخدمة';
+
+  @override
+  String get rejectionProfessionalMessage =>
+      'هل أنت غير متاح حالياً لهذا الموعد؟ بدلاً من الرفض، يمكنك اقتراح وقت أكثر ملاءمة للعميل.';
+
+  @override
+  String get proposeAlternativeTime => 'اقتراح وقت بديل';
+
+  @override
+  String get areYouSure => 'هل أنت متأكد؟';
 }

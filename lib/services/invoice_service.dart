@@ -100,7 +100,7 @@ class InvoiceService {
                     pw.Text("BOOKING DETAILS:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                     pw.Text("Service: ${booking.service.name}"),
                     pw.Text("Completed At: $completedAtStr"),
-                    pw.Text("Payment Mode: ${booking.paymentModeCode.toUpperCase()}"),
+                    pw.Text("Payment Mode: ${booking.paymentModeCode.toUpperCase() == 'C' ? 'Inside App' : booking.paymentModeCode.toUpperCase() == 'A' ? 'Apple Pay' : 'Outside App'}"),
                     if (booking.transactionId != null) pw.Text("Transaction ID: ${booking.transactionId}"),
                     pw.Text("Warranty: ${booking.warranty?.expiredOn != null && (booking.warranty?.createdAt != null || booking.completedAt != null) ? "${booking.warranty!.expiredOn!.toDate().difference((booking.warranty!.createdAt ?? booking.completedAt)!.toDate()).inDays} Days" : "7 Days"}"),
                   ],

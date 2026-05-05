@@ -495,7 +495,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get noBookingsFound => 'کوئی بکنگ نہیں ملی۔';
 
   @override
-  String get searchServices => 'خدمات تلاش کریں';
+  String get searchServices => 'سروسز تلاش کریں...';
 
   @override
   String get noServicesInYourWishlist =>
@@ -895,7 +895,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get applePay => 'ایپل پے';
 
   @override
-  String get cashOnHands => 'نقد ادائیگی';
+  String get cashOnHands => 'ایپ سے باہر';
 
   @override
   String get ext => 'ایکسٹینشن';
@@ -1396,10 +1396,10 @@ class AppLocalizationsUr extends AppLocalizations {
       'سروس کامیابی کے ساتھ مکمل ہو گئی ہے۔ 1 ہفتے کی وارنٹی لاگو ہوگی۔';
 
   @override
-  String get paymentThroughApp => 'ایپ کے ذریعے ادائیگی';
+  String get paymentThroughApp => 'ایپ کے اندر';
 
   @override
-  String get paymentOutsideApp => 'ایپ سے باہر ادائیگی';
+  String get paymentOutsideApp => 'ایپ سے باہر';
 
   @override
   String get paymentThroughAppDesc => 'صارف ایپ کے ذریعے ادائیگی کرے گا۔';
@@ -2028,7 +2028,13 @@ class AppLocalizationsUr extends AppLocalizations {
       'بکنگ کی ٹریکنگ کامیابی سے روک دی گئی';
 
   @override
-  String get cards => 'کارڈز';
+  String get cards => 'ایپ کے اندر';
+
+  @override
+  String get insideApp => 'ایپ کے اندر';
+
+  @override
+  String get outsideApp => 'ایپ سے باہر';
 
   @override
   String get goToLogin => 'لاگ ان پر جائیں';
@@ -4585,5 +4591,18 @@ class AppLocalizationsUr extends AppLocalizations {
   String get throughApp => 'ایپ کے ذریعے';
 
   @override
-  String get outsideApp => 'ایپ سے باہر';
+  String get rebookTechnician => 'ٹیکنیشن کو دوبارہ بک کریں';
+
+  @override
+  String get selectService => 'سروس منتخب کریں';
+
+  @override
+  String get rejectionProfessionalMessage =>
+      'کیا آپ اس اپوائنٹمنٹ کے لیے دستیاب نہیں ہیں؟ مسترد کرنے کے بجائے، آپ کسٹمر کے لیے زیادہ مناسب وقت تجویز کر سکتے ہیں۔';
+
+  @override
+  String get proposeAlternativeTime => 'متبادل وقت تجویز کریں';
+
+  @override
+  String get areYouSure => 'کیا آپ کو یقین ہے؟';
 }

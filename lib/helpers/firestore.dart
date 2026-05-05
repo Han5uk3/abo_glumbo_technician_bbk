@@ -71,16 +71,23 @@ class AppFirestore {
       .collection('admins');
 
   // Pending admins collection
-  static CollectionReference pendingAdminsCollectionRef = FirebaseFirestore.instance
+  static CollectionReference pendingAdminsCollectionRef = FirebaseFirestore
+      .instance
       .collection('pending_admins');
 
-  // counter_offers collection
-  static CollectionReference counterOffersCollectionRef =
-      FirebaseFirestore.instance.collection('counter_offers');
-
   // job_offers collection
-  static CollectionReference jobOffersCollectionRef =
-      FirebaseFirestore.instance.collection('job_offers');
+  static CollectionReference jobOffersCollectionRef = FirebaseFirestore.instance
+      .collection('job_offers');
+
+  // counter_offers collection
+  static CollectionReference counterOffersCollectionRef = FirebaseFirestore
+      .instance
+      .collection('counter_offers');
+
+  // job_requests collection
+  static CollectionReference jobRequestsCollectionRef = FirebaseFirestore
+      .instance
+      .collection('job_requests');
 }
 
 class AppFireStorage {

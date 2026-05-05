@@ -855,7 +855,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                 : AppLocalizations.of(
                                         context,
                                       )?.paymentOutsideAppDesc ??
-                                      'Collect cash or external payment.',
+                                      'Collect payment outside of the app.',
                             style: DMSansFont.textStyle(
                               fontSize: 12,
                               color: Colors.grey[600],

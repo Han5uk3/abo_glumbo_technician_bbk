@@ -12,6 +12,7 @@ import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
+import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/verify_payment_sheet.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
@@ -23,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
-import 'package:aboglumbo_bbk_panel/utils/counter_offer_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +31,6 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:collection/collection.dart';
 import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
-
 
 class BookingInfo extends StatefulWidget {
   final BookingModel booking;
@@ -283,8 +282,8 @@ class _BookingInfoState extends State<BookingInfo> {
             Localizations.localeOf(context).languageCode == 'ar'
                 ? 'انتهت صلاحية العرض'
                 : Localizations.localeOf(context).languageCode == 'ur'
-                    ? 'آفر کی مدت ختم ہو گئی'
-                    : 'Offer has expired',
+                ? 'آفر کی مدت ختم ہو گئی'
+                : 'Offer has expired',
           ),
           backgroundColor: Colors.orange,
         ),
@@ -373,6 +372,71 @@ class _BookingInfoState extends State<BookingInfo> {
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
     }
+  }
+
+  Future<void> _showProfessionalRejectionDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          l10n.areYouSure,
+          style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l10n.rejectionProfessionalMessage,
+          style: DMSansFont.textStyle(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _declineJobOffer();
+            },
+            child: Text(
+              l10n.rejectOffer,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showCounterOfferPicker();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              l10n.proposeAlternativeTime,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCounterOfferPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          CounterProposeSheet(booking: widget.booking, offerId: _offerId),
+    );
+  }
+
+  void _showCounterOfferDatePicker(BookingModel booking, [String? offerId]) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          CounterProposeSheet(booking: booking, offerId: offerId),
+    );
   }
 
   Future<void> _declineJobOffer() async {
@@ -2780,10 +2844,12 @@ class _BookingInfoState extends State<BookingInfo> {
                   ),
                 ),
                 const Spacer(),
-                if (widget.booking.bookingStatusCode.toLowerCase() == 'completed' || 
+                if (widget.booking.bookingStatusCode.toLowerCase() ==
+                        'completed' ||
                     widget.booking.bookingStatusCode.toLowerCase() == 'c')
                   IconButton(
-                    onPressed: () => InvoiceService.generateAndShowInvoice(widget.booking),
+                    onPressed: () =>
+                        InvoiceService.generateAndShowInvoice(widget.booking),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -2946,21 +3012,23 @@ class _BookingInfoState extends State<BookingInfo> {
             ],
 
             // Payment Mode (before total)
-            // if (widget.booking.bookingStatusCode.toLowerCase() == 'c' &&
-            //     widget.booking.paymentCompleted) ...[
-            //   const SizedBox(height: 16),
-            //   _buildInfoRow(
-            //     context,
-            //     label: AppLocalizations.of(context)!.paymentMode,
-            //     value: widget.booking.paymentModeCode.toLowerCase() == 'c'
-            //         ? AppLocalizations.of(context)!.card
-            //         : widget.booking.paymentModeCode.toLowerCase() == 'a'
-            //         ? AppLocalizations.of(context)!.applePay
-            //         : AppLocalizations.of(context)!.cashInHand,
-            //     textTheme: textTheme,
-            //     colorScheme: colorScheme,
-            //   ),
-            // ],
+            if ((widget.booking.bookingStatusCode.toLowerCase() == 'c' ||
+                    widget.booking.bookingStatusCode.toLowerCase() == 'vp' ||
+                    widget.booking.bookingStatusCode.toLowerCase() == 'p') &&
+                widget.booking.paymentModeCode.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildInfoRow(
+                context,
+                label: AppLocalizations.of(context)!.paymentMode,
+                value: widget.booking.paymentModeCode.toLowerCase() == 'c'
+                    ? AppLocalizations.of(context)!.insideApp
+                    : widget.booking.paymentModeCode.toLowerCase() == 'a'
+                    ? AppLocalizations.of(context)!.applePay
+                    : AppLocalizations.of(context)!.outsideApp,
+                textTheme: textTheme,
+                colorScheme: colorScheme,
+              ),
+            ],
 
             // Total Cost
             const SizedBox(height: 12),
@@ -3269,9 +3337,9 @@ class _BookingInfoState extends State<BookingInfo> {
                 context,
                 label: AppLocalizations.of(context)!.paymentMode,
                 value: review.paymentType?.toLowerCase() == 'cash'
-                    ? AppLocalizations.of(context)!.cashInHand
+                    ? AppLocalizations.of(context)!.outsideApp
                     : review.paymentType?.toLowerCase() == 'card'
-                    ? AppLocalizations.of(context)!.card
+                    ? AppLocalizations.of(context)!.insideApp
                     : AppLocalizations.of(context)!.unknown,
                 textTheme: textTheme,
                 colorScheme: colorScheme,
@@ -3496,11 +3564,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () =>
-                        CounterOfferUtils.showCounterOfferDatePicker(
-                          context,
-                          booking,
-                        ),
+                    onPressed: () => _showCounterOfferDatePicker(booking),
                     icon: const Icon(Icons.history_toggle_off, size: 18),
                     label: Text(l10n.proposeNewTime),
                     style: ElevatedButton.styleFrom(
@@ -3540,10 +3604,7 @@ class _BookingInfoState extends State<BookingInfo> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-              onPressed: () => CounterOfferUtils.showCounterOfferDatePicker(
-                context,
-                booking,
-              ),
+              onPressed: () => _showCounterOfferDatePicker(booking),
               icon: const Icon(Icons.history_toggle_off, size: 20),
               label: Text(l10n.proposeNewTime),
               style: ElevatedButton.styleFrom(
@@ -3868,7 +3929,8 @@ class _BookingInfoState extends State<BookingInfo> {
     final l10n = AppLocalizations.of(context)!;
     final minutes = _offerSecondsRemaining ~/ 60;
     final seconds = _offerSecondsRemaining % 60;
-    final timerText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timerText =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     final timerProgress = _offerSecondsRemaining / 120; // 2 min = 120 seconds
     final isUrgent = _offerSecondsRemaining <= 30;
     final timerColor = isUrgent ? Colors.red : AppColors.primary;
@@ -3886,7 +3948,9 @@ class _BookingInfoState extends State<BookingInfo> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isUrgent ? Colors.red : AppColors.primary).withOpacity(0.05),
+            color: (isUrgent ? Colors.red : AppColors.primary).withOpacity(
+              0.05,
+            ),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -3920,11 +3984,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 16,
-                        color: timerColor,
-                      ),
+                      Icon(Icons.timer_outlined, size: 16, color: timerColor),
                       const SizedBox(height: 2),
                       Text(
                         timerText,
@@ -3945,8 +4005,8 @@ class _BookingInfoState extends State<BookingInfo> {
             Localizations.localeOf(context).languageCode == 'ar'
                 ? 'وقت الرد'
                 : Localizations.localeOf(context).languageCode == 'ur'
-                    ? 'جواب دینے کا وقت'
-                    : 'Time to respond',
+                ? 'جواب دینے کا وقت'
+                : 'Time to respond',
             style: DMSansFont.textStyle(
               fontSize: 12,
               color: Colors.grey.shade600,
@@ -3959,7 +4019,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 child: SizedBox(
                   height: 48,
                   child: OutlinedButton(
-                    onPressed: _declineJobOffer,
+                    onPressed: _showProfessionalRejectionDialog,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red, width: 1.5),
@@ -4123,35 +4183,6 @@ class _BookingInfoState extends State<BookingInfo> {
                       style: DMSansFont.textStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      CounterOfferUtils.showCounterOfferDatePicker(
-                        context,
-                        booking,
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: AppColors.primary.withOpacity(0.5),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.proposeNewTime,
-                      style: DMSansFont.textStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -4360,7 +4391,9 @@ class VerifyPaymentControls extends StatelessWidget {
           Text(
             booking.bookingStatusCode == 'CP'
                 ? AppLocalizations.of(context)!.waitingForPayment
-                : AppLocalizations.of(context)!.waitingForTechnicianVerification,
+                : AppLocalizations.of(
+                    context,
+                  )!.waitingForTechnicianVerification,
             style: DMSansFont.textStyle(fontSize: 13, color: AppColors.white),
           ),
           const SizedBox(height: 20),

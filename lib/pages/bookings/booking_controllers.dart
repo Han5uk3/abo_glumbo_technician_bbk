@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/counter_offer_utils.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -194,10 +193,6 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                     serviceIsTracking &&
                     currentTrackingBookingId == widget.booking.id;
 
-                final isThisBookingPaused =
-                    serviceIsPaused &&
-                    currentTrackingBookingId == widget.booking.id;
-
                 final shouldBlockCancel = serviceIsTracking || serviceIsPaused;
 
                 return Container(
@@ -231,10 +226,9 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                                           isPauseWorkingLoading
                                       ? null
                                       : () => _showCancelBottomSheet(context),
-                                  label:
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.cancelBooking,
+                                  label: AppLocalizations.of(
+                                    context,
+                                  )!.cancelBooking,
                                   color: Colors.red,
                                   isOutlined: true,
                                   isLoading: isCancelLoading,
@@ -252,20 +246,19 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                                           isCompleteLoading)
                                       ? null
                                       : isThisBookingTracked
-                                      ? () =>
-                                          _showPauseTrackingBottomSheet(context)
-                                      : () =>
-                                          _showResumeTrackingBottomSheet(
-                                            context,
-                                          ),
-                                  label:
-                                      isThisBookingTracked
-                                          ? AppLocalizations.of(
-                                            context,
-                                          )!.pauseTracking
-                                          : AppLocalizations.of(
-                                            context,
-                                          )!.resumeTracking,
+                                      ? () => _showPauseTrackingBottomSheet(
+                                          context,
+                                        )
+                                      : () => _showResumeTrackingBottomSheet(
+                                          context,
+                                        ),
+                                  label: isThisBookingTracked
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.pauseTracking
+                                      : AppLocalizations.of(
+                                          context,
+                                        )!.resumeTracking,
                                   color: Colors.orange,
                                   isOutlined: true,
                                   isLoading: isPauseWorkingLoading,
@@ -289,22 +282,21 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                                     ? null
                                     : isThisBookingActive
                                     ? () =>
-                                        _showStopTrackingBottomSheet(context)
-                                    : () =>
-                                        _showStartTrackingBottomSheet(context),
-                                label:
-                                    isThisBookingActive
-                                        ? AppLocalizations.of(
-                                          context,
-                                        )!.arrivedAtLocation
-                                        : AppLocalizations.of(
-                                          context,
-                                        )!.startTracking,
+                                          _showStopTrackingBottomSheet(context)
+                                    : () => _showStartTrackingBottomSheet(
+                                        context,
+                                      ),
+                                label: isThisBookingActive
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.arrivedAtLocation
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.startTracking,
                                 fontSize: isThisBookingActive ? 12 : 12,
-                                color:
-                                    isThisBookingActive
-                                        ? Colors.green
-                                        : AppColors.blue1,
+                                color: isThisBookingActive
+                                    ? Colors.green
+                                    : AppColors.blue1,
                                 isOutlined: true,
                                 isLoading:
                                     isStartWorkingLoading ||
@@ -318,8 +310,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                           width: double.infinity,
                           height: 52,
                           child: ElevatedButton(
-                            onPressed:
-                                (isCompleteLoading)
+                            onPressed: (isCompleteLoading)
                                 ? null
                                 : () => _showCompleteWorkBottomSheet(context),
                             style: ElevatedButton.styleFrom(
@@ -456,11 +447,6 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
         );
       },
       secondaryActionLabel: AppLocalizations.of(context)!.no,
-      additionalActionLabel: AppLocalizations.of(context)!.proposeNewTime,
-      additionalAction: () {
-        Navigator.of(context).pop();
-        CounterOfferUtils.showCounterOfferDatePicker(context, widget.booking);
-      },
     );
   }
 

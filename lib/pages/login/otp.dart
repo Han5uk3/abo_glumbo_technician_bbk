@@ -340,6 +340,7 @@ class _OtpPageState extends State<OtpPage> {
       }
     }
   }
+
   void verifyOtp() async {
     if (isLoading) return;
 
@@ -392,7 +393,7 @@ class _OtpPageState extends State<OtpPage> {
       if (widget.isFromProfile == true) {
         final String oldUid = LocalStore.getUID() ?? '';
         final String newUid = userCredential.user?.uid ?? '';
-        if (oldUid != null && newUid != null && oldUid != newUid) {
+        if (oldUid.isNotEmpty && newUid.isNotEmpty && oldUid != newUid) {
           await migrateUserData(
             oldUid,
             newUid,
@@ -597,10 +598,7 @@ class _OtpPageState extends State<OtpPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppColors.secondary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: AppColors.secondary, width: 2),
           ),
           fillColor: Colors.white,
           filled: true,

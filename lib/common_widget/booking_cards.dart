@@ -5,7 +5,9 @@ import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+import 'package:aboglumbo_bbk_panel/pages/bookings/broadcast_offer_info.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
@@ -588,7 +590,7 @@ class BookingListTileWidget extends StatelessWidget {
 }
 
 class JobOfferTileWidget extends StatefulWidget {
-  final JobOfferWithBooking offer;
+  final JobOfferContainer offer;
 
   const JobOfferTileWidget({super.key, required this.offer});
 
@@ -600,11 +602,13 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   bool _isLoading = false;
   Timer? _countdownTimer;
   int _secondsRemaining = 0;
+  double? _distance;
 
   @override
   void initState() {
     super.initState();
     _startCountdown();
+    _calculateDistance();
   }
 
   @override
@@ -613,43 +617,56 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     super.dispose();
   }
 
-  void _startCountdown() {
-    // Get expiresAt from the offer's booking data through Firestore
-    _loadExpiryAndStartTimer();
+  Future<void> _calculateDistance() async {
+    try {
+      final serviceLoc = widget.offer.offerData['serviceLocation'];
+      if (serviceLoc == null) return;
+
+      final destLat = serviceLoc['lat'] as double?;
+      final destLon = serviceLoc['lon'] as double?;
+      if (destLat == null || destLon == null) return;
+
+      final position = await Geolocator.getCurrentPosition();
+      final dist = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        destLat,
+        destLon,
+      );
+
+      if (mounted) {
+        setState(() {
+          _distance = dist / 1000; // Convert to km
+        });
+      }
+    } catch (e) {
+      debugPrint('Error calculating distance: $e');
+    }
   }
 
-  Future<void> _loadExpiryAndStartTimer() async {
-    try {
-      final doc = await AppFirestore.jobOffersCollectionRef
-          .doc(widget.offer.offerId)
-          .get();
-      if (!doc.exists || !mounted) return;
-      final data = doc.data() as Map<String, dynamic>?;
-      final expiresAt = data?['expiresAt'] as Timestamp?;
-      if (expiresAt == null) return;
+  void _startCountdown() {
+    final expiresAt = widget.offer.offerData['expiresAt'] as Timestamp?;
+    if (expiresAt == null) return;
 
-      final remaining = expiresAt.toDate().difference(DateTime.now()).inSeconds;
-      if (remaining <= 0) {
-        _declineOffer(context);
+    final remaining = expiresAt.toDate().difference(DateTime.now()).inSeconds;
+    if (remaining <= 0) {
+      _declineOffer(context);
+      return;
+    }
+
+    setState(() => _secondsRemaining = remaining);
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
         return;
       }
-
-      if (mounted) setState(() => _secondsRemaining = remaining);
-
-      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
-        setState(() => _secondsRemaining--);
-        if (_secondsRemaining <= 0) {
-          timer.cancel();
-          _declineOffer(context);
-        }
-      });
-    } catch (e) {
-      debugPrint('Error loading offer expiry: $e');
-    }
+      setState(() => _secondsRemaining--);
+      if (_secondsRemaining <= 0) {
+        timer.cancel();
+        _declineOffer(context);
+      }
+    });
   }
 
   Future<void> _acceptOffer(BuildContext context) async {
@@ -659,7 +676,8 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       if (technician == null) throw Exception('Technician data not found');
 
       await AppServices.acceptJobOffer(
-        bookingId: widget.offer.booking.id,
+        bookingId: widget.offer.booking?.id,
+        requestId: widget.offer.requestId,
         offerId: widget.offer.offerId,
         technician: technician,
       );
@@ -697,55 +715,88 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).languageCode;
+    final data = widget.offer.offerData;
+
+    final customerName = data['customerName'] ?? 'Customer';
+    final serviceName = locale == 'en' ? (data['serviceName'] ?? '') : (data['serviceNameAr'] ?? data['serviceName'] ?? '');
+    final address = data['serviceLocation']?['fullAddress'] ?? data['serviceLocation']?['streetName'] ?? 'N/A';
+
     final minutes = _secondsRemaining ~/ 60;
     final seconds = _secondsRemaining % 60;
-    final timerText =
-        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timerText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     final isUrgent = _secondsRemaining <= 30;
     final timerColor = isUrgent ? Colors.red : AppColors.primary;
 
-    return BookingListTileWidget(
-      booking: widget.offer.booking,
-      offerId: widget.offer.offerId,
-      isFromOffersTab: true,
-      actionOverride: _isLoading
-          ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: Padding(
-                padding: EdgeInsets.all(4.0),
-                child: CircularProgressIndicator(strokeWidth: 2),
+    return GestureDetector(
+      onTap: () {
+        if (widget.offer.booking != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookingInfo(
+                booking: widget.offer.booking!,
+                isAdmin: false,
+                offerId: widget.offer.offerId,
+                isFromOffersTab: true,
               ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
+            ),
+          );
+        } else {
+          // Navigate to a simplified info page for broadcast offers
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BroadcastOfferInfo(offer: widget.offer),
+            ),
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Compact countdown timer
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 4,
+                Expanded(
+                  child: Text(
+                    serviceName,
+                    style: DMSansFont.textStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
                   ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: timerColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: timerColor.withOpacity(0.3),
-                    ),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 12,
-                        color: timerColor,
-                      ),
-                      const SizedBox(width: 3),
+                      Icon(Icons.timer_outlined, size: 14, color: timerColor),
+                      const SizedBox(width: 4),
                       Text(
                         timerText,
                         style: DMSansFont.textStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: timerColor,
                         ),
@@ -753,14 +804,34 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 6),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildDetailRow(Icons.person_outline, customerName),
+            const SizedBox(height: 8),
+            _buildDetailRow(Icons.location_on_outlined, address),
+            if (_distance != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.directions_car_outlined,
+                "${_distance!.toStringAsFixed(1)} km away",
+                color: AppColors.primary,
+              ),
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
                 _buildSmallButton(
                   label: localization.reject,
                   color: Colors.red,
                   onPressed: () => _declineOffer(context),
                   isOutlined: true,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 _buildSmallButton(
                   label: localization.accept,
                   color: AppColors.primary,
@@ -768,6 +839,29 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text, {Color? color}) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color ?? Colors.grey[600]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: DMSansFont.textStyle(
+              fontSize: 13,
+              color: color ?? Colors.grey[700],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 
@@ -778,45 +872,25 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     bool isOutlined = false,
   }) {
     return SizedBox(
-      height: 32,
+      height: 36,
       child: isOutlined
           ? OutlinedButton(
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: color.withOpacity(0.5)),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                side: BorderSide(color: color),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: Text(
-                label,
-                style: DMSansFont.textStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
+              child: Text(label, style: DMSansFont.textStyle(color: color, fontWeight: FontWeight.bold)),
             )
           : ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
-              child: Text(
-                label,
-                style: DMSansFont.textStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: Text(label, style: DMSansFont.textStyle(fontWeight: FontWeight.bold)),
             ),
     );
   }

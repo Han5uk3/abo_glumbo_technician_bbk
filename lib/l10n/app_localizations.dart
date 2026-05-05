@@ -1033,7 +1033,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchServices.
   ///
   /// In en, this message translates to:
-  /// **'Search services'**
+  /// **'Search services...'**
   String get searchServices;
 
   /// No description provided for @noServicesInYourWishlist.
@@ -1807,7 +1807,7 @@ abstract class AppLocalizations {
   /// No description provided for @cashOnHands.
   ///
   /// In en, this message translates to:
-  /// **'Cash payment'**
+  /// **'Outside App'**
   String get cashOnHands;
 
   /// No description provided for @ext.
@@ -2767,13 +2767,13 @@ abstract class AppLocalizations {
   /// No description provided for @paymentThroughApp.
   ///
   /// In en, this message translates to:
-  /// **'Payment Through App'**
+  /// **'Inside App'**
   String get paymentThroughApp;
 
   /// No description provided for @paymentOutsideApp.
   ///
   /// In en, this message translates to:
-  /// **'Payment Outside App'**
+  /// **'Outside App'**
   String get paymentOutsideApp;
 
   /// No description provided for @paymentThroughAppDesc.
@@ -2785,7 +2785,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentOutsideAppDesc.
   ///
   /// In en, this message translates to:
-  /// **'Collect cash or external payment.'**
+  /// **'Collect payment outside of the app.'**
   String get paymentOutsideAppDesc;
 
   /// No description provided for @deleteServiceConfirmation.
@@ -3973,8 +3973,20 @@ abstract class AppLocalizations {
   /// No description provided for @cards.
   ///
   /// In en, this message translates to:
-  /// **'Cards'**
+  /// **'Inside App'**
   String get cards;
+
+  /// No description provided for @insideApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside App'**
+  String get insideApp;
+
+  /// No description provided for @outsideApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside App'**
+  String get outsideApp;
 
   /// No description provided for @goToLogin.
   ///
@@ -8591,11 +8603,35 @@ abstract class AppLocalizations {
   /// **'Through App'**
   String get throughApp;
 
-  /// No description provided for @outsideApp.
+  /// No description provided for @rebookTechnician.
   ///
   /// In en, this message translates to:
-  /// **'Outside App'**
-  String get outsideApp;
+  /// **'Rebook Technician'**
+  String get rebookTechnician;
+
+  /// No description provided for @selectService.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Service'**
+  String get selectService;
+
+  /// No description provided for @rejectionProfessionalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are unavailable at the requested time, please propose an alternative date and time to the customer instead of canceling the appointment.'**
+  String get rejectionProfessionalMessage;
+
+  /// No description provided for @proposeAlternativeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose Alternative Time'**
+  String get proposeAlternativeTime;
+
+  /// No description provided for @areYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get areYouSure;
 }
 
 class _AppLocalizationsDelegate

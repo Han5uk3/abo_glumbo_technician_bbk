@@ -657,20 +657,6 @@ class _AgentInfoState extends State<AgentInfo> {
     }
   }
 
-  String _getFileNameFromUrl(String url) {
-    try {
-      final uri = Uri.parse(url);
-      final segments = uri.pathSegments;
-      if (segments.isNotEmpty) {
-        String fileName = Uri.decodeComponent(segments.last);
-        if (fileName.length > 40)
-          fileName = fileName.substring(fileName.length - 40);
-        return fileName;
-      }
-    } catch (_) {}
-    return 'Document';
-  }
-
   String _getLocalizedJobCategory(String jobKey, String locale) {
     if (jobCategories.containsKey(jobKey)) {
       return jobCategories[jobKey]![locale] ?? jobKey;

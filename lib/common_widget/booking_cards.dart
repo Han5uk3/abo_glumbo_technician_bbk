@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -596,6 +598,59 @@ class JobOfferTileWidget extends StatefulWidget {
 
 class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   bool _isLoading = false;
+  Timer? _countdownTimer;
+  int _secondsRemaining = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    // Get expiresAt from the offer's booking data through Firestore
+    _loadExpiryAndStartTimer();
+  }
+
+  Future<void> _loadExpiryAndStartTimer() async {
+    try {
+      final doc = await AppFirestore.jobOffersCollectionRef
+          .doc(widget.offer.offerId)
+          .get();
+      if (!doc.exists || !mounted) return;
+      final data = doc.data() as Map<String, dynamic>?;
+      final expiresAt = data?['expiresAt'] as Timestamp?;
+      if (expiresAt == null) return;
+
+      final remaining = expiresAt.toDate().difference(DateTime.now()).inSeconds;
+      if (remaining <= 0) {
+        _declineOffer(context);
+        return;
+      }
+
+      if (mounted) setState(() => _secondsRemaining = remaining);
+
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+        setState(() => _secondsRemaining--);
+        if (_secondsRemaining <= 0) {
+          timer.cancel();
+          _declineOffer(context);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading offer expiry: $e');
+    }
+  }
 
   Future<void> _acceptOffer(BuildContext context) async {
     setState(() => _isLoading = true);
@@ -642,6 +697,12 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
+    final minutes = _secondsRemaining ~/ 60;
+    final seconds = _secondsRemaining % 60;
+    final timerText =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final isUrgent = _secondsRemaining <= 30;
+    final timerColor = isUrgent ? Colors.red : AppColors.primary;
 
     return BookingListTileWidget(
       booking: widget.offer.booking,
@@ -659,6 +720,40 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
           : Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Compact countdown timer
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: timerColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: timerColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 12,
+                        color: timerColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        timerText,
+                        style: DMSansFont.textStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: timerColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
                 _buildSmallButton(
                   label: localization.reject,
                   color: Colors.red,

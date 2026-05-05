@@ -4234,7 +4234,7 @@ exports.autoAssignTechnician = onDocumentWritten(
 
       if (newOffers.length > 0) {
         console.log(`[${bookingId}] Creating ${newOffers.length} offers for radius ${radius}km.`);
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minute timeout
+        const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minute acceptance window
 
         for (const tech of newOffers) {
           const offerPayload = {

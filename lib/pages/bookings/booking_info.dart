@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/common_widget/cached_video_player.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -57,6 +58,9 @@ class _BookingInfoState extends State<BookingInfo> {
   bool _isCheckingOffer = true;
   String? _offerId;
   bool _isOfferLoading = false;
+  Timer? _offerTimer;
+  int _offerSecondsRemaining = 0;
+  DateTime? _offerExpiresAt;
   Future<void> handleChatButton() async {
     if (isInitiatingChat) return;
 
@@ -231,6 +235,63 @@ class _BookingInfoState extends State<BookingInfo> {
     _checkJobOffer();
   }
 
+  @override
+  void dispose() {
+    _stopOfferTimer();
+    super.dispose();
+  }
+
+  void _startOfferTimer() {
+    _stopOfferTimer();
+    if (_offerExpiresAt == null) return;
+
+    final remaining = _offerExpiresAt!.difference(DateTime.now()).inSeconds;
+    if (remaining <= 0) {
+      // Already expired — auto-decline
+      _autoDeclineExpiredOffer();
+      return;
+    }
+
+    _offerSecondsRemaining = remaining;
+    _offerTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _offerSecondsRemaining--;
+      });
+      if (_offerSecondsRemaining <= 0) {
+        timer.cancel();
+        _autoDeclineExpiredOffer();
+      }
+    });
+  }
+
+  void _stopOfferTimer() {
+    _offerTimer?.cancel();
+    _offerTimer = null;
+  }
+
+  void _autoDeclineExpiredOffer() {
+    if (_offerId == null) return;
+    _declineJobOffer();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? 'انتهت صلاحية العرض'
+                : Localizations.localeOf(context).languageCode == 'ur'
+                    ? 'آفر کی مدت ختم ہو گئی'
+                    : 'Offer has expired',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
   Future<void> _checkJobOffer() async {
     // Skip check for Warranty, Admin, or bookings coming from non-offer tabs
     if (widget.isWarranty || widget.isAdmin || !widget.isFromOffersTab) {
@@ -240,11 +301,13 @@ class _BookingInfoState extends State<BookingInfo> {
 
     // If we already have the offer ID from the caller, use it immediately
     if (widget.offerId != null) {
+      await _loadOfferExpiry(widget.offerId!);
       if (mounted) {
         setState(() {
           _offerId = widget.offerId;
           _isCheckingOffer = false;
         });
+        _startOfferTimer();
       }
       return;
     }
@@ -256,11 +319,30 @@ class _BookingInfoState extends State<BookingInfo> {
     }
 
     final offerId = await AppServices.getPendingJobOfferId(widget.booking.id);
+    if (offerId != null) {
+      await _loadOfferExpiry(offerId);
+    }
     if (mounted) {
       setState(() {
         _offerId = offerId;
         _isCheckingOffer = false;
       });
+      if (offerId != null) _startOfferTimer();
+    }
+  }
+
+  Future<void> _loadOfferExpiry(String offerId) async {
+    try {
+      final doc = await AppFirestore.jobOffersCollectionRef.doc(offerId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        final expiresAt = data?['expiresAt'] as Timestamp?;
+        if (expiresAt != null) {
+          _offerExpiresAt = expiresAt.toDate();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading offer expiry: $e');
     }
   }
 
@@ -3784,16 +3866,27 @@ class _BookingInfoState extends State<BookingInfo> {
       );
     }
     final l10n = AppLocalizations.of(context)!;
+    final minutes = _offerSecondsRemaining ~/ 60;
+    final seconds = _offerSecondsRemaining % 60;
+    final timerText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timerProgress = _offerSecondsRemaining / 120; // 2 min = 120 seconds
+    final isUrgent = _offerSecondsRemaining <= 30;
+    final timerColor = isUrgent ? Colors.red : AppColors.primary;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+        border: Border.all(
+          color: isUrgent
+              ? Colors.red.withOpacity(0.3)
+              : AppColors.primary.withOpacity(0.1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.05),
+            color: (isUrgent ? Colors.red : AppColors.primary).withOpacity(0.05),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -3807,6 +3900,56 @@ class _BookingInfoState extends State<BookingInfo> {
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Countdown timer
+          SizedBox(
+            width: 80,
+            height: 80,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CircularProgressIndicator(
+                  value: timerProgress.clamp(0.0, 1.0),
+                  strokeWidth: 5,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(timerColor),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 16,
+                        color: timerColor,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        timerText,
+                        style: DMSansFont.textStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: timerColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? 'وقت الرد'
+                : Localizations.localeOf(context).languageCode == 'ur'
+                    ? 'جواب دینے کا وقت'
+                    : 'Time to respond',
+            style: DMSansFont.textStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
             ),
           ),
           const SizedBox(height: 16),

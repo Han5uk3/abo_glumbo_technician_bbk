@@ -8222,8 +8222,74 @@ abstract class AppLocalizations {
   /// No description provided for @mapPickerInstructions.
   ///
   /// In en, this message translates to:
-  /// **'• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations'**
+  /// **'• Click \'Add Region\' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click \'Complete Region\' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area'**
   String get mapPickerInstructions;
+
+  /// No description provided for @tapOnMapToDrawPolygonPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap on the map to draw polygon points'**
+  String get tapOnMapToDrawPolygonPoints;
+
+  /// No description provided for @addRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Region'**
+  String get addRegion;
+
+  /// No description provided for @regionMustHaveAtLeast4Points.
+  ///
+  /// In en, this message translates to:
+  /// **'A region must have at least 4 points to be completed.'**
+  String get regionMustHaveAtLeast4Points;
+
+  /// No description provided for @completeRegionWithPts.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Region ({count} pts)'**
+  String completeRegionWithPts(int count);
+
+  /// No description provided for @clearDrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Drawing'**
+  String get clearDrawing;
+
+  /// No description provided for @pleaseDrawPolygonFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please draw a polygon first'**
+  String get pleaseDrawPolygonFirst;
+
+  /// No description provided for @pleaseDrawPolygonAreaFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please draw a polygon area on the map first'**
+  String get pleaseDrawPolygonAreaFirst;
+
+  /// No description provided for @priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// No description provided for @enterPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter priority'**
+  String get enterPriority;
+
+  /// No description provided for @pleaseEnterPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter priority'**
+  String get pleaseEnterPriority;
+
+  /// No description provided for @pointsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 point} other{{count} points}}'**
+  String pointsCount(int count);
 
   /// No description provided for @locationsSelectedCount.
   ///

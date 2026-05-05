@@ -1435,7 +1435,32 @@
     }
   },
   "selectedLocation": "Selected Location",
-  "mapPickerInstructions": "• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations",
+  "mapPickerInstructions": "• Click 'Add Region' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click 'Complete Region' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area",
+  "tapOnMapToDrawPolygonPoints": "Tap on the map to draw polygon points",
+  "addRegion": "Add Region",
+  "regionMustHaveAtLeast4Points": "A region must have at least 4 points to be completed.",
+  "completeRegionWithPts": "Complete Region ({count} pts)",
+  "@completeRegionWithPts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearDrawing": "Clear Drawing",
+  "pleaseDrawPolygonFirst": "Please draw a polygon first",
+  "pleaseDrawPolygonAreaFirst": "Please draw a polygon area on the map first",
+  "priority": "Priority",
+  "enterPriority": "Enter priority",
+  "pleaseEnterPriority": "Please enter priority",
+  "pointsCount": "{count, plural, =1{1 point} other{{count} points}}",
+  "@pointsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "locationsSelectedCount": "{count, plural, one {{count} location selected} other {{count} locations selected}}",
   "@locationsSelectedCount": {
     "placeholders": {

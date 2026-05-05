@@ -1428,7 +1428,32 @@
   "viewOnlyAccessToCustomersTechniciansAndSupport": "صلاحية عرض فقط للعملاء والفنيين والدعم",
   "locationNumber": "موقع {number}",
   "selectedLocation": "الموقع المختار",
-  "mapPickerInstructions": "• اضغط على الخريطة لاختيار موقع\n• استخدم البحث للعثور على الأماكن\n• أضف عدة مواقع إلى القائمة\n• اضبط نصف القطر - يتم تطبيقه على جميع المواقع\n• قم بإزالة المواقع الفردية باستخدام X\n• قم بالتأكيد لحفظ جميع المواقع المختارة",
+  "mapPickerInstructions": "• انقر على 'إضافة منطقة' لبدء رسم منطقة جديدة\n• اضغط على الخريطة لإضافة نقاط الحدود (مطلوب 4 نقاط على الأقل)\n• انقر على 'إكمال المنطقة' عند الانتهاء\n• أدخل تفاصيل الموقع وقم بالتأكيد\n• استخدم أيقونة التعديل لتحديث التفاصيل أو علامة X الحمراء لإزالة منطقة",
+  "tapOnMapToDrawPolygonPoints": "اضغط على الخريطة لرسم نقاط المضلع",
+  "addRegion": "إضافة منطقة",
+  "regionMustHaveAtLeast4Points": "يجب أن تحتوي المنطقة على 4 نقاط على الأقل لتكتمل.",
+  "completeRegionWithPts": "إكمال المنطقة ({count} نقاط)",
+  "@completeRegionWithPts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearDrawing": "مسح الرسم",
+  "pleaseDrawPolygonFirst": "يرجى رسم مضلع أولاً",
+  "pleaseDrawPolygonAreaFirst": "يرجى رسم منطقة مضلعة على الخريطة أولاً",
+  "priority": "الأولوية",
+  "enterPriority": "أدخل الأولوية",
+  "pleaseEnterPriority": "يرجى إدخال الأولوية",
+  "pointsCount": "{count, plural, =1{نقطة واحدة} other{{count} نقاط}}",
+  "@pointsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "locationsSelectedCount": "{count, plural, one {موقع واحد مختار} other {{count} مواقع مختارة}}",
   "addCurrentLocation": "إضافة الموقع الحالي",
   "howToUse": "كيفية الاستخدام",

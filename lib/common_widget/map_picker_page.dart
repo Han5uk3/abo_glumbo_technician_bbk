@@ -41,6 +41,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   List<String> _predictions = [];
   bool _isLoading = false;
   bool _mapReady = false;
+  bool _hasLocationPermission = false;
   Timer? _debounceTimer;
 
   final _buildingNameController = TextEditingController();
@@ -52,9 +53,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   String _locationTitle = '';
   String _locationSubtitle = '';
 
-  // Multiple location selection - Polygon based
   final List<LatLng> _currentPolygonPoints = [];
   Set<Polygon> _polygons = {};
+  bool _isDrawingPolygon = false;
 
   final TextEditingController _nameEnController = TextEditingController();
   final TextEditingController _nameArController = TextEditingController();
@@ -96,7 +97,21 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   @override
   void initState() {
     super.initState();
+    _checkLocationPermission();
     _initializeLocation();
+  }
+
+  Future<void> _checkLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      setState(() {
+        _hasLocationPermission = true;
+      });
+    }
   }
 
   void _initializeLocation() {
@@ -159,7 +174,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           markerId: MarkerId('m_$i'),
           position: pos,
           infoWindow: InfoWindow(
-            title: loc['address'] ?? 'Location ${i + 1}',
+            title: loc['address'] ?? AppLocalizations.of(context)!.locationNumber(i + 1),
             snippet:
                 '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
           ),
@@ -180,15 +195,17 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             )
             .toList();
 
-        updatedPolygons.add(
-          Polygon(
-            polygonId: PolygonId('p_$i'),
-            points: points,
-            fillColor: regionColor.withOpacity(0.2),
-            strokeColor: regionColor,
-            strokeWidth: 2,
-          ),
-        );
+        if (points.isNotEmpty) {
+          updatedPolygons.add(
+            Polygon(
+              polygonId: PolygonId('p_$i'),
+              points: points,
+              fillColor: regionColor.withOpacity(0.2),
+              strokeColor: regionColor,
+              strokeWidth: 2,
+            ),
+          );
+        }
       }
     }
 
@@ -252,9 +269,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         'location': _selectedLocation,
         'en_name': nameEn,
         'ar_name': nameAr,
-        'polygon': _currentPolygonPoints
-            .map((p) => {'lat': p.latitude, 'lng': p.longitude})
-            .toList(),
+        'polygon': _currentPolygonPoints.isNotEmpty
+            ? _currentPolygonPoints
+                .map((p) => {'lat': p.latitude, 'lng': p.longitude})
+                .toList()
+            : (editIndex != null ? _selectedLocations[editIndex]['polygon'] ?? [] : []),
         'priority': priority,
         'lat': _selectedLocation!.latitude,
         'lng': _selectedLocation!.longitude,
@@ -329,6 +348,12 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           return;
         }
       }
+      
+      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+        setState(() {
+          _hasLocationPermission = true;
+        });
+      }
 
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -340,9 +365,6 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
       await _moveCameraToLocation(currentLocation);
       await _getAddressFromLatLng(currentLocation);
-
-      // Always ask to add in multi-select mode
-      _showLocationDetailsDialog();
     } catch (e) {
       _showSnackBar(AppLocalizations.of(context)!.locationError, Colors.red);
     } finally {
@@ -461,6 +483,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
         title: Text(
@@ -547,9 +570,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   controller: _priorityController,
                   style: GoogleFonts.poppins(fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: 'Priority',
+                    labelText: AppLocalizations.of(context)!.priority,
                     labelStyle: TextStyle(color: Colors.grey[700]),
-                    hintText: 'Enter priority',
+                    hintText: AppLocalizations.of(context)!.enterPriority,
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -565,7 +588,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter priority';
+                      return AppLocalizations.of(context)!.pleaseEnterPriority;
                     }
                     if (int.tryParse(value) == null) {
                       return AppLocalizations.of(
@@ -581,7 +604,13 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentPolygonPoints.clear();
+                _updateMapElements();
+              });
+            },
             child: Text(
               AppLocalizations.of(context)!.cancel,
               style: GoogleFonts.poppins(
@@ -593,6 +622,21 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           ElevatedButton(
             onPressed: () {
               if (_dialogFormKey.currentState!.validate()) {
+                bool hasExistingPolygon = editIndex != null && 
+                    _selectedLocations[editIndex]['polygon'] != null && 
+                    (_selectedLocations[editIndex]['polygon'] as List).isNotEmpty;
+                
+                bool hasDrawnPolygon = _currentPolygonPoints.isNotEmpty;
+                
+                if (!hasExistingPolygon && !hasDrawnPolygon) {
+                  Navigator.pop(context);
+                  _showSnackBar(
+                    AppLocalizations.of(context)!.pleaseDrawPolygonAreaFirst,
+                    Colors.red,
+                  );
+                  return;
+                }
+
                 final nameEn = _nameEnController.text.trim();
                 final nameAr = _nameArController.text.trim();
                 final priority =
@@ -637,10 +681,37 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     }
   }
 
+  Future<void> _moveCameraToRegion(List<LatLng> points) async {
+    if (mapController == null || points.isEmpty) return;
+
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (var p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    final bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+
+    // Padding of 50 pixels around the region
+    final update = CameraUpdate.newLatLngBounds(bounds, 50.0);
+    await mapController!.animateCamera(update);
+  }
+
   void _onMapTap(LatLng latLng) {
     setState(() {
       _selectedLocation = latLng;
-      _currentPolygonPoints.add(latLng);
+      if (_isDrawingPolygon) {
+        _currentPolygonPoints.add(latLng);
+      }
       _predictions.clear();
       _locationTitle = AppLocalizations.of(context)!.gettingAddress;
       _updateMapElements();
@@ -674,53 +745,85 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   }
 
   Widget _buildRadiusControl() {
-    return _currentPolygonPoints.isNotEmpty
-        ? SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_currentPolygonPoints.length < 4) {
-                        _showSnackBar(
-                          'A region must have at least 4 points to be completed.',
-                          Colors.orange,
-                        );
-                        return;
-                      }
-                      _showLocationDetailsDialog();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentPolygonPoints.length >= 4
-                          ? Colors.orange
-                          : Colors.grey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Complete Region (${_currentPolygonPoints.length} pts)',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+    if (!_isDrawingPolygon) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            setState(() {
+              _isDrawingPolygon = true;
+              _currentPolygonPoints.clear();
+              _updateMapElements();
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.tapOnMapToDrawPolygonPoints),
+                backgroundColor: Colors.blue,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+          icon: Icon(Icons.add_location_alt, color: Colors.white),
+          label: Text(AppLocalizations.of(context)!.addRegion, style: TextStyle(color: Colors.white)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                if (_currentPolygonPoints.length < 4) {
+                  _showSnackBar(
+                    AppLocalizations.of(context)!.regionMustHaveAtLeast4Points,
+                    Colors.orange,
+                  );
+                  return;
+                }
+                setState(() {
+                  _isDrawingPolygon = false;
+                });
+                _showLocationDetailsDialog();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _currentPolygonPoints.length >= 4
+                    ? Colors.orange
+                    : Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                SizedBox(width: 8),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentPolygonPoints.clear();
-                      _updateMapElements();
-                    });
-                  },
-                  icon: Icon(Icons.clear, color: Colors.red),
-                  tooltip: 'Clear Drawing',
-                ),
-              ],
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.completeRegionWithPts(_currentPolygonPoints.length),
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-          )
-        : SizedBox.shrink();
+          ),
+          SizedBox(width: 8),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isDrawingPolygon = false;
+                _currentPolygonPoints.clear();
+                _updateMapElements();
+              });
+            },
+            icon: Icon(Icons.clear, color: Colors.red),
+            tooltip: AppLocalizations.of(context)!.clearDrawing,
+          ),
+        ],
+      ),
+    );
   }
+
 
   Widget _buildLocationsList() {
     if (_selectedLocations.isEmpty) {
@@ -802,10 +905,29 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    'Priority: ${loc['priority']} | ${loc['polygon'].length} points',
+                    '${AppLocalizations.of(context)!.priority}: ${loc['priority']} | ${AppLocalizations.of(context)!.pointsCount((loc['polygon'] as List).length)}',
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
-                  onTap: () => _showLocationDetailsDialog(editIndex: i),
+                  onTap: () {
+                    if (loc['polygon'] != null && (loc['polygon'] as List).isNotEmpty) {
+                      List<LatLng> points = (loc['polygon'] as List)
+                          .where((p) => p['lat'] != null && p['lng'] != null)
+                          .map(
+                            (p) => LatLng(
+                              (p['lat'] as num).toDouble(),
+                              (p['lng'] as num).toDouble(),
+                            ),
+                          )
+                          .toList();
+                      if (points.isNotEmpty) {
+                        _moveCameraToRegion(points);
+                        return;
+                      }
+                    }
+                    if (loc['location'] != null) {
+                      _moveCameraToLocation(loc['location']);
+                    }
+                  },
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -860,7 +982,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('OK'),
+                    child: Text(AppLocalizations.of(context)!.ok),
                   ),
                 ],
               ),
@@ -886,7 +1008,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                   onTap: _onMapTap,
                   markers: _markers,
                   polygons: _polygons,
-                  myLocationEnabled: true,
+                  myLocationEnabled: _hasLocationPermission,
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                   compassEnabled: true,

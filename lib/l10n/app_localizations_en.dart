@@ -4359,7 +4359,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapPickerInstructions =>
-      '• Tap map to select a location\n• Use search to find places\n• Add multiple locations to the list\n• Adjust radius - applies to all locations\n• Remove individual locations with X\n• Confirm to save all selected locations';
+      '• Click \'Add Region\' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click \'Complete Region\' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area';
+
+  @override
+  String get tapOnMapToDrawPolygonPoints =>
+      'Tap on the map to draw polygon points';
+
+  @override
+  String get addRegion => 'Add Region';
+
+  @override
+  String get regionMustHaveAtLeast4Points =>
+      'A region must have at least 4 points to be completed.';
+
+  @override
+  String completeRegionWithPts(int count) {
+    return 'Complete Region ($count pts)';
+  }
+
+  @override
+  String get clearDrawing => 'Clear Drawing';
+
+  @override
+  String get pleaseDrawPolygonFirst => 'Please draw a polygon first';
+
+  @override
+  String get pleaseDrawPolygonAreaFirst =>
+      'Please draw a polygon area on the map first';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get enterPriority => 'Enter priority';
+
+  @override
+  String get pleaseEnterPriority => 'Please enter priority';
+
+  @override
+  String pointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '1 point',
+    );
+    return '$_temp0';
+  }
 
   @override
   String locationsSelectedCount(int count) {

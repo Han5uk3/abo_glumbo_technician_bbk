@@ -4297,7 +4297,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mapPickerInstructions =>
-      '• اضغط على الخريطة لاختيار موقع\n• استخدم البحث للعثور على الأماكن\n• أضف عدة مواقع إلى القائمة\n• اضبط نصف القطر - يتم تطبيقه على جميع المواقع\n• قم بإزالة المواقع الفردية باستخدام X\n• قم بالتأكيد لحفظ جميع المواقع المختارة';
+      '• انقر على \'إضافة منطقة\' لبدء رسم منطقة جديدة\n• اضغط على الخريطة لإضافة نقاط الحدود (مطلوب 4 نقاط على الأقل)\n• انقر على \'إكمال المنطقة\' عند الانتهاء\n• أدخل تفاصيل الموقع وقم بالتأكيد\n• استخدم أيقونة التعديل لتحديث التفاصيل أو علامة X الحمراء لإزالة منطقة';
+
+  @override
+  String get tapOnMapToDrawPolygonPoints => 'اضغط على الخريطة لرسم نقاط المضلع';
+
+  @override
+  String get addRegion => 'إضافة منطقة';
+
+  @override
+  String get regionMustHaveAtLeast4Points =>
+      'يجب أن تحتوي المنطقة على 4 نقاط على الأقل لتكتمل.';
+
+  @override
+  String completeRegionWithPts(int count) {
+    return 'إكمال المنطقة ($count نقاط)';
+  }
+
+  @override
+  String get clearDrawing => 'مسح الرسم';
+
+  @override
+  String get pleaseDrawPolygonFirst => 'يرجى رسم مضلع أولاً';
+
+  @override
+  String get pleaseDrawPolygonAreaFirst =>
+      'يرجى رسم منطقة مضلعة على الخريطة أولاً';
+
+  @override
+  String get priority => 'الأولوية';
+
+  @override
+  String get enterPriority => 'أدخل الأولوية';
+
+  @override
+  String get pleaseEnterPriority => 'يرجى إدخال الأولوية';
+
+  @override
+  String pointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نقاط',
+      one: 'نقطة واحدة',
+    );
+    return '$_temp0';
+  }
 
   @override
   String locationsSelectedCount(int count) {

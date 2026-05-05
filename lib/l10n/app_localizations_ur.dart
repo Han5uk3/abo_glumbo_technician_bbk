@@ -4371,7 +4371,53 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get mapPickerInstructions =>
-      '• مقام منتخب کرنے کے لیے نقشے پر تھپتھپائیں\n• مقامات تلاش کرنے کے لیے سرچ استعمال کریں\n• فہرست میں متعدد مقامات شامل کریں\n• ریڈیئس ایڈجسٹ کریں - یہ تمام مقامات پر لاگو ہوتا ہے\n• انفرادی مقامات کو X کے ساتھ حذف کریں\n• تمام منتخب مقامات کو محفوظ کرنے کے لیے تصدیق کریں';
+      '• نیا علاقہ بنانے کے لیے \'علاقہ شامل کریں\' پر کلک کریں\n• باؤنڈری پوائنٹس شامل کرنے کے لیے نقشے پر تھپتھپائیں (کم از کم 4 پوائنٹس درکار ہیں)\n• مکمل ہونے پر \'علاقہ مکمل کریں\' پر کلک کریں\n• مقام کی تفصیلات درج کریں اور تصدیق کریں\n• تفصیلات کو اپ ڈیٹ کرنے کے لیے ترمیم آئیکن کا استعمال کریں یا علاقے کو ہٹانے کے لیے سرخ X کا استعمال کریں';
+
+  @override
+  String get tapOnMapToDrawPolygonPoints =>
+      'پولی گون پوائنٹس کھینچنے کے لیے نقشے پر تھپتھپائیں';
+
+  @override
+  String get addRegion => 'علاقہ شامل کریں';
+
+  @override
+  String get regionMustHaveAtLeast4Points =>
+      'ایک علاقے کو مکمل ہونے کے لیے کم از کم 4 پوائنٹس کا ہونا ضروری ہے۔';
+
+  @override
+  String completeRegionWithPts(int count) {
+    return 'علاقہ مکمل کریں ($count پوائنٹس)';
+  }
+
+  @override
+  String get clearDrawing => 'ڈرائنگ صاف کریں';
+
+  @override
+  String get pleaseDrawPolygonFirst => 'براہ کرم پہلے پولی گون کھینچیں';
+
+  @override
+  String get pleaseDrawPolygonAreaFirst =>
+      'براہ کرم پہلے نقشے پر پولی گون کا علاقہ کھینچیں';
+
+  @override
+  String get priority => 'ترجیح';
+
+  @override
+  String get enterPriority => 'ترجیح درج کریں';
+
+  @override
+  String get pleaseEnterPriority => 'براہ کرم ترجیح درج کریں';
+
+  @override
+  String pointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count پوائنٹس',
+      one: '1 پوائنٹ',
+    );
+    return '$_temp0';
+  }
 
   @override
   String locationsSelectedCount(int count) {

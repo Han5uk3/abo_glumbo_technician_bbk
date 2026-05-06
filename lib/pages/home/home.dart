@@ -44,7 +44,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   int currentIndex = 0;
-  String selectedBookingStatus = 'O';
+  String selectedBookingStatus = 'P';
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (widget.selectedFilter != null) {
       selectedBookingStatus = widget.selectedFilter!;
     } else {
-      selectedBookingStatus = 'O';
+      selectedBookingStatus = 'P';
     }
 
     // Add observer for app lifecycle
@@ -64,15 +64,20 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     // Initialize notifications and background services
     Future.delayed(Duration.zero, () async {
+      // 1. Update location immediately on app startup
+      if (mounted) {
+        debugPrint('🚀 Initializing location update on Home launch');
+        await TechnicianLocationUpdateService.updateLocationNow(context: context);
+        if (mounted) {
+          context.read<LoginBloc>().add(RefreshUserData());
+        }
+      }
+
+      // 2. Initialize other services
       await NotificationServices.initializeNotifications();
       await NotificationServices.setupFCMListeners();
       await NotificationServices.checkForInitialMessage();
-
-      // Initialize background location updates for technicians
       await TechnicianLocationUpdateService.initializeBackgroundLocationUpdates();
-
-      // Update location immediately on app startup
-      await TechnicianLocationUpdateService.updateLocationNow();
     });
 
     if (widget.byPassUid != null && widget.byPassUid!.isNotEmpty) {
@@ -97,7 +102,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.resumed) {
       debugPrint('🔄 App resumed - updating location');
-      TechnicianLocationUpdateService.updateLocationNow();
+      TechnicianLocationUpdateService.updateLocationNow(context: context).then((_) {
+        if (mounted) {
+          context.read<LoginBloc>().add(RefreshUserData());
+        }
+      });
       TechnicianLocationUpdateService.startBackgroundLocationUpdates();
     }
   }
@@ -193,7 +202,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   setState(() {
                     currentIndex = index;
                     if (index == 1) {
-                      selectedBookingStatus = 'O';
+                      selectedBookingStatus = 'P';
                     }
                   });
                 }

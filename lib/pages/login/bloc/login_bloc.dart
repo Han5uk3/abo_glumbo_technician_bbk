@@ -252,14 +252,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     try {
-      // First try to get cached user data
-      UserModel? cachedUser = LocalStore.getCachedUserData();
-      if (cachedUser != null) {
-        emit(LoginLoadWorkerData(user: cachedUser));
-        return;
-      }
-
-      // If no cached data, fetch from Firebase
+      // Always fetch fresh data from Firebase for refresh events
       final uid = event.uid ?? LocalStore.getUID()!;
       UserModel? user = await _checkWorkerUser(uid);
 

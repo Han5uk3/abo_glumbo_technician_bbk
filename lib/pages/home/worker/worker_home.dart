@@ -20,7 +20,7 @@ class WorkerHome extends StatefulWidget {
 
 class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
   static const List<Map<String, String>> _bookingStatuses = [
-    {'code': 'O', 'name': 'Offers'},
+
     {'code': 'P', 'name': 'Pending'},
     {'code': 'A', 'name': 'Accepted'},
     {'code': 'CP', 'name': 'Payment Pending'},
@@ -39,7 +39,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
     super.initState();
 
     final initialIndex = _bookingStatuses.indexWhere(
-      (e) => e['code'] == (widget.selectedIndex ?? 'O'),
+      (e) => e['code'] == (widget.selectedIndex ?? 'P'),
     );
     _tabController = TabController(
       length: _bookingStatuses.length,
@@ -219,9 +219,7 @@ class _BookingListTabState extends State<_BookingListTab>
   @override
   void initState() {
     super.initState();
-    if (widget.bookingStatusCode == 'O') {
-      _bookingsStream = AppServices.getJobOffersStream().cast<List<dynamic>>();
-    } else if (widget.bookingStatusCode == 'P') {
+    if (widget.bookingStatusCode == 'P') {
       // Combine job offers and pending bookings for the 'Pending' tab
       final offers = AppServices.getJobOffersStream();
       final bookings = AppServices.getBookingsStream(
@@ -310,7 +308,8 @@ class _BookingListTabState extends State<_BookingListTab>
               return BookingListTileWidget(
                 key: ValueKey(item.id),
                 booking: item,
-                isFromOffersTab: widget.bookingStatusCode == 'O',
+                isWarranty: item.warranty != null,
+                isFromOffersTab: widget.bookingStatusCode == 'P',
               );
             }
             return const SizedBox.shrink();

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -7,12 +6,13 @@ import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/broadcast_offer_info.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
+import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -211,12 +211,11 @@ class BookingListTileWidget extends StatelessWidget {
                           isWarranty
                               ? "0.0" // Warranty repairs are free
                               : (booking.bookingStatusCode == "C" ||
-                                      booking.bookingStatusCode == "VP")
-                                  ? ((booking.completionData?.totalCost ?? 0) +
-                                          (booking.service.price ?? 0))
-                                      .toStringAsFixed(1)
-                                  : (booking.service.price ?? 0)
-                                      .toStringAsFixed(1),
+                                    booking.bookingStatusCode == "VP")
+                              ? ((booking.completionData?.totalCost ?? 0) +
+                                        (booking.service.price ?? 0))
+                                    .toStringAsFixed(1)
+                              : (booking.service.price ?? 0).toStringAsFixed(1),
                           style: DMSansFont.textStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -254,14 +253,24 @@ class BookingListTileWidget extends StatelessWidget {
               color: Colors.grey[600],
             ),
 
-            if (isAdmin && !isWarranty && booking.agent != null) ...[
-              const SizedBox(height: 8),
-              _buildDetailTile(
-                Icons.handyman_outlined,
-                booking.agent?.name ?? '',
-                prefix: "${localization.technicianName}: ",
-                color: Colors.grey[600],
-              ),
+            if (isAdmin && !isWarranty) ...[
+              if (booking.agent != null) ...[
+                const SizedBox(height: 8),
+                _buildDetailTile(
+                  Icons.handyman_outlined,
+                  booking.agent?.name ?? '',
+                  prefix: "${localization.technicianName}: ",
+                  color: Colors.grey[600],
+                ),
+              ] else if (booking.bookingStatusCode == 'P') ...[
+                const SizedBox(height: 8),
+                _buildDetailTile(
+                  Icons.warning_amber_rounded,
+                  localization.noTechnicianAssigned,
+                  color: Colors.orange[700],
+                  isBold: true,
+                ),
+              ],
             ],
 
             const Padding(
@@ -278,14 +287,21 @@ class BookingListTileWidget extends StatelessWidget {
                 if (actionOverride != null)
                   actionOverride!
                 else if (isAdmin &&
-                    ((!isWarranty &&
-                            onAssign != null &&
-                            booking.bookingStatusCode == 'P') ||
+                    onAssign != null &&
+                    (booking.bookingStatusCode == 'P' ||
+                        booking.bookingStatusCode == 'A' ||
                         (isWarranty &&
-                            booking.warranty!.warrantyStatusCode == 'R')) &&
+                            (booking.warranty!.warrantyStatusCode == 'R' ||
+                                booking.warranty!.warrantyStatusCode ==
+                                    'S'))) &&
                     (LocalStore.getCachedAdminData()?.accessLevel != 1))
                   _buildActionButton(
-                    label: localization.assign,
+                    label:
+                        (booking.bookingStatusCode == 'A' ||
+                            (isWarranty &&
+                                booking.warranty?.warrantyStatusCode == 'S'))
+                        ? localization.change
+                        : localization.assign,
                     color: AppColors.primary,
                     onPressed: onAssign!,
                   )
@@ -426,10 +442,10 @@ class BookingListTileWidget extends StatelessWidget {
 
     if (isWarranty) {
       final status = booking.warranty!.warrantyStatusCode.toUpperCase();
-      
+
       // Client-side expiration check for Active or Rejected
-      final bool isExpired = (status == 'A' || status == 'X') && 
-                             _calculateDaysLeft(booking) <= 0;
+      final bool isExpired =
+          (status == 'A' || status == 'X') && _calculateDaysLeft(booking) <= 0;
 
       if (isExpired) {
         label = localization.expired;
@@ -522,7 +538,8 @@ class BookingListTileWidget extends StatelessWidget {
     final warranty = booking.warranty;
     if (warranty == null || warranty.createdAt == null) return 0;
 
-    final expiryDate = warranty.expiredOn?.toDate() ??
+    final expiryDate =
+        warranty.expiredOn?.toDate() ??
         warranty.createdAt!.toDate().add(const Duration(days: 7));
     final now = DateTime.now();
     final difference = expiryDate.difference(now).inDays;
@@ -537,34 +554,64 @@ class BookingListTileWidget extends StatelessWidget {
       if (warranty != null) {
         final statusCode = warranty.warrantyStatusCode;
         if (statusCode == 'R' && warranty.requestedOn != null) {
-          text = LocalizationHelper().formatDateTimeCompact(warranty.requestedOn!.toDate(), context);
+          text = LocalizationHelper().formatDateTimeCompact(
+            warranty.requestedOn!.toDate(),
+            context,
+          );
         } else if (statusCode == 'S' && warranty.acceptedAt != null) {
-          text = LocalizationHelper().formatDateTimeCompact(warranty.acceptedAt!.toDate(), context);
+          text = LocalizationHelper().formatDateTimeCompact(
+            warranty.acceptedAt!.toDate(),
+            context,
+          );
         } else if (statusCode == 'C' && warranty.completedAt != null) {
-          text = LocalizationHelper().formatDateTimeCompact(warranty.completedAt!.toDate(), context);
+          text = LocalizationHelper().formatDateTimeCompact(
+            warranty.completedAt!.toDate(),
+            context,
+          );
         } else if (statusCode == 'X' && warranty.rejectedAt != null) {
-          text = LocalizationHelper().formatDateTimeCompact(warranty.rejectedAt!.toDate(), context);
+          text = LocalizationHelper().formatDateTimeCompact(
+            warranty.rejectedAt!.toDate(),
+            context,
+          );
         } else if (warranty.createdAt != null) {
-          text = LocalizationHelper().formatDateTimeCompact(warranty.createdAt!.toDate(), context);
+          text = LocalizationHelper().formatDateTimeCompact(
+            warranty.createdAt!.toDate(),
+            context,
+          );
         }
       }
     } else {
       if (booking.bookingStatusCode == 'P' && booking.createdAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(booking.createdAt!.toDate(), context);
+        text = LocalizationHelper().formatDateTimeCompact(
+          booking.createdAt!.toDate(),
+          context,
+        );
       } else if (booking.bookingStatusCode == 'A' &&
           booking.acceptedAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(booking.acceptedAt!.toDate(), context);
+        text = LocalizationHelper().formatDateTimeCompact(
+          booking.acceptedAt!.toDate(),
+          context,
+        );
       } else if (booking.bookingStatusCode == 'C' &&
           booking.completedAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(booking.completedAt!.toDate(), context);
+        text = LocalizationHelper().formatDateTimeCompact(
+          booking.completedAt!.toDate(),
+          context,
+        );
       } else if ((booking.bookingStatusCode == 'X' ||
               booking.bookingStatusCode == 'XC' ||
               booking.bookingStatusCode == 'R') &&
           booking.cancelledAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(booking.cancelledAt!.toDate(), context);
+        text = LocalizationHelper().formatDateTimeCompact(
+          booking.cancelledAt!.toDate(),
+          context,
+        );
       } else if (booking.bookingStatusCode == 'VP' &&
           booking.paymentCompletedAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(booking.paymentCompletedAt!.toDate(), context);
+        text = LocalizationHelper().formatDateTimeCompact(
+          booking.paymentCompletedAt!.toDate(),
+          context,
+        );
       }
     }
 
@@ -592,8 +639,15 @@ class BookingListTileWidget extends StatelessWidget {
 
 class JobOfferTileWidget extends StatefulWidget {
   final JobOfferContainer offer;
+  final bool isAdmin;
+  final VoidCallback? onAssign;
 
-  const JobOfferTileWidget({super.key, required this.offer});
+  const JobOfferTileWidget({
+    super.key,
+    required this.offer,
+    this.isAdmin = false,
+    this.onAssign,
+  });
 
   @override
   State<JobOfferTileWidget> createState() => _JobOfferTileWidgetState();
@@ -617,6 +671,57 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   void dispose() {
     _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+    bool isOutlined = false,
+  }) {
+    return SizedBox(
+      height: 36,
+      child: isOutlined
+          ? OutlinedButton(
+              onPressed: onPressed,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: color.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            )
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+    );
   }
 
   Future<void> _calculateDistance() async {
@@ -702,9 +807,9 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -717,9 +822,9 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       await AppServices.declineJobOffer(widget.offer.offerId);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -733,12 +838,18 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     final data = widget.offer.offerData;
 
     final customerName = data['customerName'] ?? 'Customer';
-    final serviceName = locale == 'en' ? (data['serviceName'] ?? '') : (data['serviceNameAr'] ?? data['serviceName'] ?? '');
-    final address = data['serviceLocation']?['fullAddress'] ?? data['serviceLocation']?['streetName'] ?? 'N/A';
+    final serviceName = locale == 'en'
+        ? (data['serviceName'] ?? '')
+        : (data['serviceNameAr'] ?? data['serviceName'] ?? '');
+    final address =
+        data['serviceLocation']?['fullAddress'] ??
+        data['serviceLocation']?['streetName'] ??
+        'N/A';
 
     final minutes = _secondsRemaining ~/ 60;
     final seconds = _secondsRemaining % 60;
-    final timerText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timerText =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     final isUrgent = _secondsRemaining <= 30;
     final timerColor = isUrgent ? Colors.red : AppColors.primary;
 
@@ -750,7 +861,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
             MaterialPageRoute(
               builder: (context) => BookingInfo(
                 booking: widget.offer.booking!,
-                isAdmin: false,
+                isAdmin: widget.isAdmin,
                 offerId: widget.offer.offerId,
                 isFromOffersTab: true,
               ),
@@ -798,7 +909,10 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: timerColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -824,12 +938,15 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
             _buildDetailRow(Icons.person_outline, customerName),
             const SizedBox(height: 8),
             _buildDetailRow(Icons.location_on_outlined, address),
-            if (data['bookingDateTime'] != null || widget.offer.booking?.bookingDateTime != null) ...[
+            if (data['bookingDateTime'] != null ||
+                widget.offer.booking?.bookingDateTime != null) ...[
               const SizedBox(height: 8),
               _buildDetailRow(
                 Icons.calendar_today_outlined,
                 DateFormat('EEE, d MMM • hh:mm a').format(
-                  ((data['bookingDateTime'] as Timestamp?) ?? widget.offer.booking!.bookingDateTime!).toDate(),
+                  ((data['bookingDateTime'] as Timestamp?) ??
+                          widget.offer.booking!.bookingDateTime)
+                      .toDate(),
                 ),
               ),
             ],
@@ -848,29 +965,117 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                 color: Colors.grey[500],
               ),
             ],
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _buildSmallButton(
-                  label: localization.reject,
-                  color: Colors.red,
-                  onPressed: () => _declineOffer(context),
-                  isOutlined: true,
-                ),
-                const SizedBox(width: 12),
-                _buildSmallButton(
-                  label: localization.accept,
-                  color: AppColors.primary,
-                  onPressed: () => _acceptOffer(context),
-                ),
-              ],
-            ),
+            if (widget.isAdmin) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                    child: Text(
+                      localization.viewOnly.toUpperCase(),
+                      style: DMSansFont.textStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  if (widget.onAssign != null) ...[
+                    const SizedBox(width: 8),
+                    _buildActionButton(
+                      label: localization.assign,
+                      color: AppColors.primary,
+                      onPressed: widget.onAssign!,
+                    ),
+                  ],
+                ],
+              ),
+            ] else if (data['status'] == 'accepted_by_technician' ||
+                data['status'] == 'counter_offered') ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.2),
+                      ),
+                    ),
+                    child: Text(
+                      localization.awaitingCustomerAction,
+                      style: DMSansFont.textStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (data['isRebook'] == true) ...[
+                    _buildSmallButton(
+                      label: localization.proposeNewTime,
+                      color: AppColors.secondary,
+                      onPressed: () => _proposeNewTime(context),
+                      isOutlined: true,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  _buildSmallButton(
+                    label: localization.accept,
+                    color: AppColors.primary,
+                    onPressed: () => _acceptOffer(context),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _proposeNewTime(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CounterProposeSheet(
+        offerId: widget.offer.offerId,
+        requestId: widget.offer.requestId,
+        customerId: widget.offer.offerData['customerId'],
+        currentBookingTime:
+            (widget.offer.offerData['bookingDateTime'] as Timestamp).toDate(),
       ),
     );
   }
@@ -908,19 +1113,32 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: color),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              child: Text(label, style: DMSansFont.textStyle(color: color, fontWeight: FontWeight.bold)),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             )
           : ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 elevation: 0,
               ),
-              child: Text(label, style: DMSansFont.textStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                label,
+                style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+              ),
             ),
     );
   }

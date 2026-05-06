@@ -1,15 +1,1 @@
-{
-  "ur": [
-    "technicianArrived",
-    "paymentRequested",
-    "reassignedAt",
-    "newTechnicianAssigned",
-    "technicianStartedTracking",
-    "technicianArrivedAtLocation",
-    "inspectionCompleted",
-    "fullServiceCompleted",
-    "paymentCompleted",
-    "paymentSuccessfullyCompleted",
-    "bookingCancelledByAdmin"
-  ]
-}
+{}

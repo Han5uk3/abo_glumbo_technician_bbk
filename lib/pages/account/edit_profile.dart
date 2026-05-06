@@ -20,6 +20,8 @@ import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aboglumbo_bbk_panel/helpers/geohash_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -398,6 +400,14 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+  @override
+  void didUpdateWidget(covariant EditProfile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.workerData != oldWidget.workerData) {
+      fillContent();
+    }
+  }
+
   void fillContent() {
     if (widget.workerData != null) {
       // Set text controllers and simple fields (no setState needed)
@@ -408,6 +418,22 @@ class _EditProfileState extends State<EditProfile> {
           "0${widget.workerData!.phone.toString().substring(4)}";
       selectedJobRoles = widget.workerData!.jobRoles ?? [];
       selectedCertifications = widget.workerData!.certifications ?? [];
+
+      // Initialize current position from last known location if available
+      if (widget.workerData!.lastKnownLocation != null) {
+        _currentPosition = Position(
+          latitude: widget.workerData!.lastKnownLocation!.latitude,
+          longitude: widget.workerData!.lastKnownLocation!.longitude,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          altitudeAccuracy: 0,
+          heading: 0,
+          headingAccuracy: 0,
+          speed: 0,
+          speedAccuracy: 0,
+        );
+      }
     }
   }
 
@@ -1307,54 +1333,9 @@ class _EditProfileState extends State<EditProfile> {
                                   ),
                                 ),
                               ),
-                              if (_currentPosition != null) ...[
-                                const SizedBox(height: 16),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.05),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.green.withOpacity(0.1),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            if (_placeMark != null)
-                                              Text(
-                                                "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
-                                                style: DMSansFont.textStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.green.shade900,
-                                                ),
-                                              ),
-                                            Text(
-                                              "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
-                                              style: DMSansFont.textStyle(
-                                                fontSize: 12,
-                                                color: Colors.green.shade700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ] else if (widget.workerData?.location !=
-                                  null) ...[
+
+                              // 2. Show saved address if available
+                              if (widget.workerData?.location != null) ...[
                                 const SizedBox(height: 16),
                                 Container(
                                   padding: const EdgeInsets.all(12),
@@ -1383,22 +1364,20 @@ class _EditProfileState extends State<EditProfile> {
                                                       .workerData
                                                       ?.location
                                                       ?.displayName ??
-                                                  'Location saved',
+                                                  locale.locationSaved,
                                               style: DMSansFont.textStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 color: Colors.black87,
                                               ),
                                             ),
-                                            if (widget.workerData?.location !=
-                                                null)
-                                              Text(
-                                                "Lat: ${widget.workerData!.location!.lat?.toStringAsFixed(4)}, Lon: ${widget.workerData!.location!.lon?.toStringAsFixed(4)}",
-                                                style: DMSansFont.textStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
+                                            Text(
+                                              "${locale.latitudeLabel}: ${widget.workerData!.location!.lat?.toStringAsFixed(4)}, ${locale.longitudeLabel}: ${widget.workerData!.location!.lon?.toStringAsFixed(4)}",
+                                              style: DMSansFont.textStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade600,
                                               ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -1940,6 +1919,18 @@ class _EditProfileState extends State<EditProfile> {
                     email: emailController.text,
                     phone: phoneController.text,
                     location: newLocation,
+                    lastKnownLocation: _currentPosition != null
+                        ? GeoPoint(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          )
+                        : widget.workerData?.lastKnownLocation,
+                    geohash: _currentPosition != null
+                        ? GeohashHelper.encode(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          )
+                        : widget.workerData?.geohash,
                     jobRoles: selectedJobRoles,
                     profileUrl: profileImageUrl,
                     lanCode: widget.workerData?.lanCode,
@@ -1950,7 +1941,12 @@ class _EditProfileState extends State<EditProfile> {
                     isVerified: widget.workerData?.isVerified,
                     docUrl: widget.workerData?.docUrl,
                     fcmToken: widget.workerData?.fcmToken,
-                    liveLocation: widget.workerData?.liveLocation,
+                    liveLocation: _currentPosition != null
+                        ? LiveLocation(
+                            latitude: _currentPosition!.latitude,
+                            longitude: _currentPosition!.longitude,
+                          )
+                        : widget.workerData?.liveLocation,
                     certifications: widget.workerData!.certifications,
                   ),
                   selectedIqamaImage: selectedImage,

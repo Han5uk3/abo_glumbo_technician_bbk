@@ -9,10 +9,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CounterProposeSheet extends StatefulWidget {
-  final BookingModel booking;
+  final BookingModel? booking;
+  final String? requestId;
   final String? offerId;
+  final String? customerId;
+  final DateTime currentBookingTime;
 
-  const CounterProposeSheet({super.key, required this.booking, this.offerId});
+  const CounterProposeSheet({
+    super.key,
+    this.booking,
+    this.requestId,
+    this.offerId,
+    this.customerId,
+    required this.currentBookingTime,
+  });
 
   @override
   State<CounterProposeSheet> createState() => _CounterProposeSheetState();
@@ -27,7 +37,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final originalDateTime = widget.booking.bookingDateTime.toDate();
+    final originalDateTime = widget.currentBookingTime;
     
     // Start with the later of now or original booking time
     DateTime baseTime = now.isAfter(originalDateTime) ? now : originalDateTime;
@@ -146,7 +156,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                                      _selectedTime?.minute == slot.minute;
                     
                     // Check if slot is valid (after original booking time)
-                    final bookingDate = widget.booking.bookingDateTime.toDate();
+                    final bookingDate = widget.currentBookingTime;
                     final selectedSlotDateTime = DateTime(
                       _selectedDate!.year,
                       _selectedDate!.month,
@@ -211,7 +221,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       _selectedTime!.minute,
     );
 
-    final originalDateTime = widget.booking.bookingDateTime.toDate();
+    final originalDateTime = widget.currentBookingTime;
 
     if (!selectedDateTime.isAfter(originalDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -226,13 +236,13 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
     setState(() => _isLoading = true);
 
     final bool success = await AppServices.sendCounterOffer(
-      bookingId: widget.booking.id,
+      bookingId: widget.booking?.id ?? widget.requestId ?? '',
       offerId: widget.offerId,
       proposedBy: 'technician',
       proposedByUid: LocalStore.getUID() ?? '',
       proposedByName: LocalStore.getCachedUserData()?.name ?? 'Technician',
       proposedTime: Timestamp.fromDate(selectedDateTime),
-      customerId: widget.booking.customer.uid,
+      customerId: widget.booking?.customer.uid ?? widget.customerId ?? '',
     );
 
     if (mounted) {

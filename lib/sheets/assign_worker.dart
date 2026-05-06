@@ -210,6 +210,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         return;
       }
 
+      // Allow admins to reassign/change technician even if already assigned
+      // (The check below is removed to support "Change Technician" flow)
+      /*
       final currentDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
       if (currentDoc.exists) {
         final data = currentDoc.data() as Map<String, dynamic>;
@@ -221,6 +224,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           return;
         }
       }
+      */
 
       _conflictService.trackAssignment(userId, widget.booking.bookingDateTime.toDate());
       _conflictService.invalidateCache();

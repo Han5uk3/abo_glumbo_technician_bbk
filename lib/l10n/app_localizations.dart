@@ -100,11 +100,47 @@ abstract class AppLocalizations {
     Locale('ur'),
   ];
 
+  /// No description provided for @assign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign'**
+  String get assign;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// No description provided for @viewOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'View Only'**
+  String get viewOnly;
+
+  /// No description provided for @noTechnicianAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No technician assigned'**
+  String get noTechnicianAssigned;
+
   /// No description provided for @calculatingDistance.
   ///
   /// In en, this message translates to:
   /// **'Calculating distance...'**
   String get calculatingDistance;
+
+  /// No description provided for @awaitingCustomerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting Customer Action'**
+  String get awaitingCustomerAction;
 
   /// No description provided for @kmAway.
   ///
@@ -640,6 +676,54 @@ abstract class AppLocalizations {
   /// **'Location Permissions Are Permanently Denied'**
   String get locationPermissionsArePermanentlyDenied;
 
+  /// No description provided for @locationPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permission Required'**
+  String get locationPermissionRequired;
+
+  /// No description provided for @locationPermissionPermanentlyDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permissions are permanently denied. Please enable them in app settings to receive job offers.'**
+  String get locationPermissionPermanentlyDeniedMessage;
+
+  /// No description provided for @pleaseEnableLocationServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services'**
+  String get pleaseEnableLocationServices;
+
+  /// No description provided for @fetching.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching...'**
+  String get fetching;
+
+  /// No description provided for @currentGeopoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Geopoint'**
+  String get currentGeopoint;
+
+  /// No description provided for @latitudeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lat'**
+  String get latitudeLabel;
+
+  /// No description provided for @longitudeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lon'**
+  String get longitudeLabel;
+
+  /// No description provided for @locationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Location saved'**
+  String get locationSaved;
+
   /// No description provided for @errorDetectingLocation.
   ///
   /// In en, this message translates to:
@@ -735,12 +819,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter The OTP Sent To The Number '**
   String get enterTheOtpSentToTheNumber;
-
-  /// No description provided for @change.
-  ///
-  /// In en, this message translates to:
-  /// **'Change'**
-  String get change;
 
   /// No description provided for @enterOtp.
   ///
@@ -895,7 +973,7 @@ abstract class AppLocalizations {
   /// No description provided for @emailIsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Email Is Aequired'**
+  /// **'Email Is Required'**
   String get emailIsRequired;
 
   /// No description provided for @enterAValidEmail.
@@ -3760,12 +3838,6 @@ abstract class AppLocalizations {
   /// **'Error updating category'**
   String get errorUpdatingCategory;
 
-  /// No description provided for @assign.
-  ///
-  /// In en, this message translates to:
-  /// **'Assign'**
-  String get assign;
-
   /// No description provided for @customerSubmittedBookingRequest.
   ///
   /// In en, this message translates to:
@@ -6628,12 +6700,6 @@ abstract class AppLocalizations {
   /// **'Battery Optimization'**
   String get batteryOptimization;
 
-  /// No description provided for @later.
-  ///
-  /// In en, this message translates to:
-  /// **'Later'**
-  String get later;
-
   /// No description provided for @locationError.
   ///
   /// In en, this message translates to:
@@ -6981,12 +7047,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter reason for cancellation'**
   String get enterReasonForCancel;
-
-  /// No description provided for @noTechnicianAssigned.
-  ///
-  /// In en, this message translates to:
-  /// **'No technician assigned'**
-  String get noTechnicianAssigned;
 
   /// No description provided for @enterReasonForReject.
   ///
@@ -8446,12 +8506,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location added to list'**
   String get locationAddedToList;
-
-  /// No description provided for @pleaseEnableLocationServices.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enable location services'**
-  String get pleaseEnableLocationServices;
 
   /// No description provided for @locationNotFound.
   ///

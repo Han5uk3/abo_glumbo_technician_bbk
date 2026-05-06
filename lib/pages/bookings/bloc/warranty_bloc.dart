@@ -57,6 +57,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
         'warranty.assignedTechnician': null,
         'warranty.warrantyStatusCode': 'X',
+        'warranty.availability': false,
         'warranty.rejectedAt': Timestamp.now(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
@@ -94,17 +95,123 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         ),
       );
 
-      await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
-        'warranty.assignedTechnician': null,
-        'warranty.warrantyStatusCode': 'R',
-        'warranty.rejectedTechnicians': rejectedTechs
-            .map((e) => e.toJson())
-            .toList(),
-        'warranty.updatedAt': Timestamp.now(),
-        'updatedAt': Timestamp.now(),
-        // Clear chatroom when canceling warranty
-        'chatroomId': FieldValue.delete(),
-      });
+      final rejectedTechsList = rejectedTechs
+          .map((e) => e.toJson())
+          .toList();
+
+      // Check if warranty period is still valid
+      final expiredOn = booking.warranty?.expiredOn;
+      final isWarrantyExpired = expiredOn != null &&
+          expiredOn.toDate().isBefore(DateTime.now());
+
+      if (isWarrantyExpired) {
+        // Warranty has expired — close the claim
+        await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
+          'warranty.assignedTechnician': null,
+          'warranty.assignedTechnicianId': '',
+          'warranty.warrantyStatusCode': 'E',
+          'warranty.availability': false,
+          'warranty.rejectedTechnicians': rejectedTechsList,
+          'warranty.updatedAt': Timestamp.now(),
+          'updatedAt': Timestamp.now(),
+          'chatroomId': FieldValue.delete(),
+        });
+        emit(WarrantyCancelSuccess());
+        return;
+      }
+
+      // Warranty is still valid — try to auto-assign another technician
+      final rejectedUids = rejectedTechs
+          .map((e) => e.uid)
+          .where((uid) => uid != null)
+          .toSet();
+
+      UserModel? nextTechnician;
+      final categoryId = booking.service.category;
+
+      if (categoryId != null && categoryId.isNotEmpty) {
+        // Get the category to find its ID for jobRoles matching
+        final catDoc = await AppFirestore.categoriesCollectionRef
+            .doc(categoryId)
+            .get();
+        
+        if (catDoc.exists) {
+          final catData = catDoc.data() as Map<String, dynamic>?;
+          final catId = catData?['id'] ?? '';
+
+          if (catId.isNotEmpty) {
+            // Query verified, online technicians in this category
+            final techSnapshot = await AppFirestore.usersCollectionRef
+                .where('isVerified', isEqualTo: true)
+                .where('isAdmin', isNotEqualTo: true)
+                .where('jobRoles', arrayContains: catId)
+                .get();
+
+            // Check each eligible technician for availability on the preferred date
+            final preferredDate = booking.warranty?.preferredDateTime?.toDate() ?? DateTime.now();
+            final startOfDay = DateTime(preferredDate.year, preferredDate.month, preferredDate.day);
+            final endOfDay = startOfDay.add(const Duration(days: 1));
+
+            for (final doc in techSnapshot.docs) {
+              final tech = UserModel.fromJson(
+                doc.data() as Map<String, dynamic>,
+              );
+
+              // Skip rejected technicians
+              if (tech.uid == null || rejectedUids.contains(tech.uid)) continue;
+
+              // Skip offline technicians
+              if (tech.isOnline != true) continue;
+
+              // Check for booking conflicts on today
+              final conflictQuery = await AppFirestore.bookingsCollectionRef
+                  .where('agent.uid', isEqualTo: tech.uid)
+                  .where('bookingStatusCode', whereIn: ['P', 'A'])
+                  .get();
+
+              final hasConflict = conflictQuery.docs.any((bDoc) {
+                final bData = bDoc.data() as Map<String, dynamic>;
+                final bookingDt = bData['bookingDateTime'] as Timestamp?;
+                if (bookingDt == null) return false;
+                final dt = bookingDt.toDate();
+                return dt.isAfter(startOfDay) && dt.isBefore(endOfDay);
+              });
+
+              if (!hasConflict) {
+                nextTechnician = tech;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (nextTechnician != null) {
+        // Auto-assign the next eligible technician
+        await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
+          'warranty.assignedTechnician': nextTechnician.toJson(),
+          'warranty.assignedTechnicianId': nextTechnician.uid,
+          'warranty.warrantyStatusCode': 'S',
+          'warranty.availability': false,
+          'warranty.acceptedAt': Timestamp.now(),
+          'warranty.rejectedTechnicians': rejectedTechsList,
+          'warranty.updatedAt': Timestamp.now(),
+          'updatedAt': Timestamp.now(),
+          'chatroomId': FieldValue.delete(),
+        });
+      } else {
+        // No eligible technician found — set back to Requested for admin
+        await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
+          'warranty.assignedTechnician': null,
+          'warranty.assignedTechnicianId': '',
+          'warranty.warrantyStatusCode': 'R',
+          'warranty.availability': true,
+          'warranty.rejectedTechnicians': rejectedTechsList,
+          'warranty.updatedAt': Timestamp.now(),
+          'updatedAt': Timestamp.now(),
+          'chatroomId': FieldValue.delete(),
+        });
+      }
 
       emit(WarrantyCancelSuccess());
     } catch (e) {
@@ -121,10 +228,14 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
 
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
         'warranty.warrantyStatusCode': 'C',
-        'warranty.availability': Timestamp.now(),
+        'warranty.availability': false,
         'warranty.completedAt': Timestamp.now(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
+        // Zero-fee enforcement for warranty repairs
+        'warranty.totalCost': 0,
+        'warranty.serviceCost': 0,
+        'warranty.inspectionFee': 0,
       });
 
       emit(WarrantyCompleteSuccess());
@@ -184,7 +295,9 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       // Store the entire technician UserModel instead of just the UID
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
         'warranty.assignedTechnician': event.technician.toJson(),
+        'warranty.assignedTechnicianId': event.technician.uid,
         'warranty.warrantyStatusCode': 'S',
+        'warranty.availability': false,
         'warranty.acceptedAt': Timestamp.now(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),

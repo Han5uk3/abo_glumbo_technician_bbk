@@ -9,7 +9,25 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get assign => 'تعيين';
+
+  @override
+  String get later => 'لاحقًا';
+
+  @override
+  String get change => 'تغيير';
+
+  @override
+  String get viewOnly => 'للمعاينة فقط';
+
+  @override
+  String get noTechnicianAssigned => 'لم يتم تعيين فنّي';
+
+  @override
   String get calculatingDistance => 'جاري حساب المسافة...';
+
+  @override
+  String get awaitingCustomerAction => 'في انتظار إجراء العميل';
 
   @override
   String kmAway(Object distance) {
@@ -288,6 +306,31 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم رفض أذونات الموقع نهائياً';
 
   @override
+  String get locationPermissionRequired => 'إذن الموقع مطلوب';
+
+  @override
+  String get locationPermissionPermanentlyDeniedMessage =>
+      'أذونات الموقع مرفوضة بشكل دائم. يرجى تمكينها في إعدادات التطبيق لتلقي عروض العمل.';
+
+  @override
+  String get pleaseEnableLocationServices => 'يرجى تفعيل خدمات الموقع';
+
+  @override
+  String get fetching => 'جاري التحميل...';
+
+  @override
+  String get currentGeopoint => 'الموقع الجغرافي الحالي';
+
+  @override
+  String get latitudeLabel => 'خط العرض';
+
+  @override
+  String get longitudeLabel => 'خط الطول';
+
+  @override
+  String get locationSaved => 'تم حفظ الموقع';
+
+  @override
   String get errorDetectingLocation => 'خطأ في تحديد الموقع';
 
   @override
@@ -336,9 +379,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterTheOtpSentToTheNumber => 'أدخل رمز التحقق المرسل إلى الرقم';
-
-  @override
-  String get change => 'تغيير';
 
   @override
   String get enterOtp => 'أدخل رمز التحقق';
@@ -1883,9 +1923,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorUpdatingCategory => 'خطأ في تحديث القسم';
 
   @override
-  String get assign => 'تعيين';
-
-  @override
   String get customerSubmittedBookingRequest => 'تم إرسال طلب الحجز من العميل';
 
   @override
@@ -3414,9 +3451,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get batteryOptimization => 'تحسينات البطارية';
 
   @override
-  String get later => 'لاحقًا';
-
-  @override
   String get locationError => 'خطأ في الموقع';
 
   @override
@@ -3598,9 +3632,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterReasonForCancel => 'الرجاء ادخال سبب الإلغاء';
-
-  @override
-  String get noTechnicianAssigned => 'لم يتم تعيين فنّي';
 
   @override
   String get enterReasonForReject => 'الرجاء ادخال سبب الرفض';
@@ -4431,9 +4462,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationAddedToList => 'تم إضافة الموقع إلى القائمة';
-
-  @override
-  String get pleaseEnableLocationServices => 'يرجى تفعيل خدمات الموقع';
 
   @override
   String get locationNotFound => 'لم يتم العثور على الموقع';

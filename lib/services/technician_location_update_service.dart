@@ -4,7 +4,11 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 
 /// Service for automatically updating technician's current location
 /// - Auto-fetches on app startup
@@ -98,79 +102,187 @@ class TechnicianLocationUpdateService {
         return;
       }
 
-      // Get current position
-      final position = await Geolocator.getCurrentPosition(
+      // Try to get last known position first for faster update
+      Position? position = await Geolocator.getLastKnownPosition();
+      if (position != null) {
+        debugPrint('📍 Found last known position: ${position.latitude}, ${position.longitude}');
+        await _updateFirestoreLocation(uid, position);
+      }
+
+      // Then get fresh position
+      debugPrint('🛰️ Requesting fresh position...');
+      position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 30),
+        timeLimit: const Duration(seconds: 15),
       );
 
       debugPrint(
-        '✅ Got position: ${position.latitude}, ${position.longitude}',
+        '✅ Got fresh position: ${position.latitude}, ${position.longitude}',
       );
 
-      // Reverse geocode to get place name
-      String? placeName;
-      try {
-        final placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-
-        if (placemarks.isNotEmpty) {
-          final place = placemarks.first;
-          final parts = <String>[];
-
-          if (place.subLocality != null && place.subLocality!.isNotEmpty) {
-            parts.add(place.subLocality!);
-          }
-          if (place.locality != null && place.locality!.isNotEmpty) {
-            parts.add(place.locality!);
-          }
-          if (place.administrativeArea != null &&
-              place.administrativeArea!.isNotEmpty) {
-            parts.add(place.administrativeArea!);
-          }
-
-          placeName = parts.join(', ');
-          debugPrint('📍 Place name: $placeName');
-        }
-      } catch (e) {
-        debugPrint('⚠️ Reverse geocoding failed: $e');
-      }
-
-      // Get formatted place name
-
-
-      // Update user document with live location and last known location
-      await _firestore.collection('users').doc(uid).update({
-        'liveLocation': {
-          'latitude': position.latitude,
-          'longitude': position.longitude,
-          'timestamp': FieldValue.serverTimestamp(),
-          'accuracy': position.accuracy,
-          'altitude': position.altitude,
-          'heading': position.heading,
-          'speed': position.speed,
-        },
-        'last_known_location': GeoPoint(position.latitude, position.longitude),
-        'geohash': GeohashHelper.encode(position.latitude, position.longitude),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      debugPrint('✅ Location updated in Firestore');
+      await _updateFirestoreLocation(uid, position);
     } catch (e) {
       debugPrint('❌ Error updating location: $e');
     }
   }
 
+  static Future<void> _updateFirestoreLocation(String uid, Position position) async {
+    Map<String, dynamic> updateData = {
+      'liveLocation': {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'timestamp': FieldValue.serverTimestamp(),
+        'accuracy': position.accuracy,
+        'altitude': position.altitude,
+        'heading': position.heading,
+        'speed': position.speed,
+      },
+      'last_known_location': GeoPoint(position.latitude, position.longitude),
+      'geohash': GeohashHelper.encode(position.latitude, position.longitude),
+      'location.lat': position.latitude,
+      'location.lon': position.longitude,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    // Try to get address details via reverse geocoding
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      ).timeout(const Duration(seconds: 5));
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        updateData['location.city'] = place.locality;
+        updateData['location.province'] = place.administrativeArea;
+        updateData['location.street'] = place.subLocality ?? place.thoroughfare;
+        
+        final parts = <String>[];
+        if (place.subLocality != null && place.subLocality!.isNotEmpty) parts.add(place.subLocality!);
+        if (place.locality != null && place.locality!.isNotEmpty) parts.add(place.locality!);
+        if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) parts.add(place.administrativeArea!);
+        
+        if (parts.isNotEmpty) {
+          updateData['location.fullAddress'] = parts.join(', ');
+        }
+        debugPrint('📍 Address updated: ${updateData['location.fullAddress']}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Reverse geocoding failed or timed out: $e');
+    }
+
+    await _firestore.collection('users').doc(uid).update(updateData);
+    debugPrint('✅ Firestore updated for UID: $uid');
+  }
+
   /// Manually trigger location update (call this when app comes to foreground)
-  static Future<void> updateLocationNow() async {
+  /// If [context] is provided, it will prompt the user if permissions are missing
+  static Future<void> updateLocationNow({BuildContext? context}) async {
     try {
       debugPrint('🔄 Manually updating location...');
-      await _updateTechnicianLocation();
+      if (context != null) {
+        await ensureLocationPermissionAndFetch(context);
+      } else {
+        await _updateTechnicianLocation();
+      }
     } catch (e) {
       debugPrint('❌ Failed to update location: $e');
     }
+  }
+
+  /// Ensures location permissions are granted and fetches the location
+  /// Prompts the user to enable permissions if denied
+  static Future<void> ensureLocationPermissionAndFetch(
+    BuildContext context,
+  ) async {
+    final locale = AppLocalizations.of(context);
+
+    // 1. Check if services are enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (context.mounted) {
+        _showPermissionDialog(
+          context,
+          title: locale?.locationServicesDisabled ?? 'Location Services Disabled',
+          message:
+              locale?.pleaseEnableLocationServices ??
+              'Please enable location services to continue using the app as a technician.',
+          onOpenSettings: () => Geolocator.openLocationSettings(),
+        );
+      }
+      return;
+    }
+
+    // 2. Check permission
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Still denied
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (context.mounted) {
+        _showPermissionDialog(
+          context,
+          title: locale?.locationPermissionRequired ?? 'Location Permission Required',
+          message:
+              locale?.locationPermissionPermanentlyDeniedMessage ??
+              'Location permissions are permanently denied. Please enable them in app settings to receive job offers.',
+          onOpenSettings: () => Geolocator.openAppSettings(),
+        );
+      }
+      return;
+    }
+
+    // 3. Permission granted, update location
+    await _updateTechnicianLocation();
+  }
+
+  static void _showPermissionDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required VoidCallback onOpenSettings,
+  }) {
+    final locale = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.location_off_rounded, color: Colors.red),
+            const SizedBox(width: 12),
+            Expanded(child: Text(title, style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 18))),
+          ],
+        ),
+        content: Text(message, style: GoogleFonts.dmSans(fontSize: 14, color: Colors.grey[700])),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(locale?.later ?? 'Later', style: const TextStyle(color: Colors.grey)),
+          ),
+          const SizedBox(width: 8),
+          eButton(
+            context: context,
+            text: locale?.openSettings ?? 'Open Settings',
+            onPressed: () {
+              Navigator.pop(context);
+              onOpenSettings();
+            },
+            backgroundColor: AppColors.primary,
+            textColor: Colors.white,
+          ),
+        ],
+      ),
+    );
   }
 
   /// Stop background location updates

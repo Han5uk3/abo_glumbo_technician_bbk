@@ -168,8 +168,10 @@ class AppServices {
           'districtName': user.districtName,
           'jobRoles': user.jobRoles,
           'updatedAt': Timestamp.now(),
-          'location': user.location
-              ?.toJson(), // ✅ Ensure detailedLocation is updated
+          'location': user.location?.toJson(),
+          'last_known_location': user.lastKnownLocation,
+          'geohash': user.geohash,
+          'liveLocation': user.liveLocation?.toJson(),
         };
 
         // Only add image URLs if they were actually updated
@@ -2365,8 +2367,10 @@ class AppServices {
     };
 
     await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
+      'warranty.assignedTechnician': null,
       'warranty.assignedTechnicianId': "",
-      'warranty.claimStatus': false,
+      'warranty.warrantyStatusCode': 'R',
+      'warranty.availability': true,
       'warranty.rejectedTechnicians': FieldValue.arrayUnion([rejectedTech]),
       "warranty.updatedAt": FieldValue.serverTimestamp(),
     });
@@ -2690,14 +2694,28 @@ class AppServices {
         });
   }
 
-  static Stream<List<JobOfferContainer>> getJobOffersStream({String? uid}) {
+  static Stream<List<JobOfferContainer>> getJobOffersStream({
+    String? uid,
+    bool isAdmin = false,
+  }) {
     final userId = uid ?? LocalStore.getUID();
-    if (userId == null || userId.isEmpty) return Stream.value([]);
+    if (!isAdmin && (userId == null || userId.isEmpty)) return Stream.value([]);
 
-    final firestoreStream = AppFirestore.jobOffersCollectionRef
-        .where('technicianId', isEqualTo: userId)
-        .where('status', whereIn: ['pending', 'counter_offered', 'customer_counter_offered'])
-        .snapshots();
+    var query = AppFirestore.jobOffersCollectionRef.where(
+      'status',
+      whereIn: [
+        'pending',
+        'counter_offered',
+        'customer_counter_offered',
+        'accepted_by_technician',
+      ],
+    );
+
+    if (!isAdmin) {
+      query = query.where('technicianId', isEqualTo: userId);
+    }
+
+    final firestoreStream = query.snapshots();
 
     // Combine with a periodic timer to force re-evaluation of 'expiresAt' every 10s
     // Added .startWith(0) to ensure the stream emits immediately on subscription
@@ -2731,7 +2749,12 @@ class AppServices {
 
           if (bookingId != null) {
             final booking = await getBookingById(bookingId);
-            if (booking != null && booking.bookingStatusCode == 'P') {
+            if (booking != null && (booking.bookingStatusCode == 'P' || booking.bookingStatusCode == 'A')) {
+              // If booking is 'A' (Assigned), it should only show for the assigned technician
+              if (booking.bookingStatusCode == 'A' && booking.agent?.uid != userId) {
+                return null;
+              }
+
               return JobOfferContainer(
                 offerId: doc.id,
                 booking: booking,

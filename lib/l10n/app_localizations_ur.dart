@@ -9,7 +9,25 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String get assign => 'تفویض کریں';
+
+  @override
+  String get later => 'بعد میں';
+
+  @override
+  String get change => 'تبدیل کریں';
+
+  @override
+  String get viewOnly => 'صرف دیکھنے کے لیے';
+
+  @override
+  String get noTechnicianAssigned => 'کوئی ٹیکنیشن تفویض نہیں کیا گیا';
+
+  @override
   String get calculatingDistance => 'فاصلہ کا حساب لگایا جا رہا ہے...';
+
+  @override
+  String get awaitingCustomerAction => 'گاہک کے اگلے اقدامات کا انتظار ہے';
 
   @override
   String kmAway(Object distance) {
@@ -293,6 +311,31 @@ class AppLocalizationsUr extends AppLocalizations {
       'مقام کی اجازت مستقل طور پر مسترد کر دی گئی ہے';
 
   @override
+  String get locationPermissionRequired => 'مقام کی اجازت درکار ہے';
+
+  @override
+  String get locationPermissionPermanentlyDeniedMessage =>
+      'مقام کی اجازت مستقل طور پر مسترد کر دی گئی ہے۔ نوکری کی پیشکشیں حاصل کرنے کے لیے براہ کرم انہیں ایپ کی ترتیبات میں فعال کریں۔';
+
+  @override
+  String get pleaseEnableLocationServices => 'براہ کرم مقام کی خدمات فعال کریں';
+
+  @override
+  String get fetching => 'حاصل کیا جا رہا ہے...';
+
+  @override
+  String get currentGeopoint => 'موجودہ جیو پوائنٹ';
+
+  @override
+  String get latitudeLabel => 'عرض بلد';
+
+  @override
+  String get longitudeLabel => 'طول بلد';
+
+  @override
+  String get locationSaved => 'مقام محفوظ کر لیا گیا';
+
+  @override
   String get errorDetectingLocation => 'مقام کا پتہ لگانے میں خرابی';
 
   @override
@@ -344,9 +387,6 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get enterTheOtpSentToTheNumber =>
       'نمبر پر بھیجا گیا او ٹی پی درج کریں ';
-
-  @override
-  String get change => 'تبدیل کریں';
 
   @override
   String get enterOtp => 'او ٹی پی درج کریں';
@@ -1910,9 +1950,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get errorUpdatingCategory => 'زمرہ اپ ڈیٹ کرنے میں خرابی';
 
   @override
-  String get assign => 'تفویض کریں';
-
-  @override
   String get customerSubmittedBookingRequest =>
       'صارف نے بکنگ کی درخواست جمع کرائی';
 
@@ -2550,41 +2587,40 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get technicianArrived => 'Technician Arrived';
+  String get technicianArrived => 'ٹیکنیشن پہنچ گیا';
 
   @override
-  String get paymentRequested => 'Payment Requested';
+  String get paymentRequested => 'ادائیگی کی درخواست';
 
   @override
-  String get reassignedAt => 'Reassigned At';
+  String get reassignedAt => 'ری-اسائنڈ';
 
   @override
-  String get newTechnicianAssigned => 'New Technician Assigned';
+  String get newTechnicianAssigned => 'نئے ٹیکنیشن کی تعیناتی';
 
   @override
-  String get technicianStartedTracking => 'Technician is on the way';
+  String get technicianStartedTracking => 'ٹیکنیشن نے ٹریکنگ شروع کی';
 
   @override
-  String get technicianArrivedAtLocation => 'Technician arrived at location';
+  String get technicianArrivedAtLocation => 'ٹیکنیشن مقام پر پہنچ گیا';
 
   @override
-  String get inspectionCompleted => 'Inspection Completed';
+  String get inspectionCompleted => 'معائنہ مکمل';
 
   @override
-  String get fullServiceCompleted => 'Full Service Completed';
+  String get fullServiceCompleted => 'مکمل سروس مکمل';
 
   @override
   String get cancelledByAdmin => 'ایڈمن کی طرف سے منسوخ شدہ';
 
   @override
-  String get paymentCompleted => 'Payment Completed';
+  String get paymentCompleted => 'ادائیگی مکمل';
 
   @override
-  String get paymentSuccessfullyCompleted =>
-      'Payment has been successfully completed';
+  String get paymentSuccessfullyCompleted => 'ادائیگی کامیابی سے مکمل';
 
   @override
-  String get bookingCancelledByAdmin => 'Booking was cancelled by admin';
+  String get bookingCancelledByAdmin => 'ایڈمن کی جانب سے بکنگ منسوخ';
 
   @override
   String get addFaq => 'سوال شامل کریں';
@@ -3478,9 +3514,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get batteryOptimization => 'بیٹری آپٹیمائزیشن';
 
   @override
-  String get later => 'بعد میں';
-
-  @override
   String get locationError => 'مقام کی خرابی';
 
   @override
@@ -3663,9 +3696,6 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get enterReasonForCancel => 'منسوخی کی وجہ درج کریں';
-
-  @override
-  String get noTechnicianAssigned => 'کوئی ٹیکنیشن تفویض نہیں کیا گیا';
 
   @override
   String get enterReasonForReject => 'مسترد کرنے کی وجہ درج کریں';
@@ -4508,9 +4538,6 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get locationAddedToList => 'مقام فہرست میں شامل کر دیا گیا';
-
-  @override
-  String get pleaseEnableLocationServices => 'براہ کرم مقام کی خدمات فعال کریں';
 
   @override
   String get locationNotFound => 'مقام نہیں ملا';

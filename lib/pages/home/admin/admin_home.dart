@@ -11,9 +11,11 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/bloc/admin_bloc.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:rxdart/rxdart.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -371,30 +373,51 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     );
   }
 
-  // Filter bookings based on search query and date range
-  List<BookingModel> _filterBookings(List<BookingModel> bookings) {
-    var filtered = bookings;
+  // Filter data based on search query, date range, and remove duplicates
+  List<dynamic> _filterData(List<dynamic> data) {
+    // 1. Remove duplicates by Booking ID to avoid UI ghosting
+    final Map<String, dynamic> uniqueMap = {};
+    for (var item in data) {
+      if (item is JobOfferContainer) {
+        final id = item.booking?.id ?? item.requestId ?? item.offerId;
+        uniqueMap[id] = item;
+      } else if (item is BookingModel) {
+        uniqueMap[item.id] = item;
+      }
+    }
+    var filtered = uniqueMap.values.toList();
 
-    // Date filter
+    // 2. Date filter
     if (_startDate != null && _endDate != null) {
-      filtered = filtered.where((booking) {
-        if (booking.createdAt == null) return false;
-        final createdAt = booking.createdAt!.toDate();
-        // Compare dates: start date inclusive, end date inclusive (up to end of day)
+      filtered = filtered.where((item) {
+        DateTime? createdAt;
+        if (item is BookingModel) {
+          createdAt = item.createdAt?.toDate();
+        } else if (item is JobOfferContainer) {
+          final data = item.offerData;
+          createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        }
+
+        if (createdAt == null) return false;
         final endDateTime = _endDate!.add(const Duration(days: 1));
         return createdAt.compareTo(_startDate!) >= 0 &&
             createdAt.isBefore(endDateTime);
       }).toList();
     }
 
+    // 3. Search filter
     if (_searchQuery.isEmpty) {
       return filtered;
     }
 
-    return filtered.where((booking) {
-      final bookingId = booking.id.toLowerCase();
-
-      return bookingId.contains(_searchQuery);
+    return filtered.where((item) {
+      String id = '';
+      if (item is BookingModel) {
+        id = item.id.toLowerCase();
+      } else if (item is JobOfferContainer) {
+        id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
+      }
+      return id.contains(_searchQuery);
     }).toList();
   }
 
@@ -402,11 +425,27 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     BuildContext context, {
     required String selectedBookingStatus,
   }) {
-    return StreamBuilder<List<BookingModel>>(
-      stream: AppServices.getBookingsStream(
+    Stream<List<dynamic>> stream;
+    if (selectedBookingStatus == 'P') {
+      final offers = AppServices.getJobOffersStream(isAdmin: true);
+      final bookings = AppServices.getBookingsStream(
+        bookingStatusCode: 'P',
+        isAdmin: true,
+      );
+      stream = Rx.combineLatest2(
+        offers,
+        bookings,
+        (List<JobOfferContainer> o, List<BookingModel> b) => [...o, ...b],
+      ).cast<List<dynamic>>();
+    } else {
+      stream = AppServices.getBookingsStream(
         bookingStatusCode: selectedBookingStatus,
         isAdmin: true,
-      ),
+      ).cast<List<dynamic>>();
+    }
+
+    return StreamBuilder<List<dynamic>>(
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
@@ -427,10 +466,10 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           );
         }
 
-        final allBookings = snapshot.data ?? [];
-        final filteredBookings = _filterBookings(allBookings);
+        final allData = snapshot.data ?? [];
+        final filteredData = _filterData(allData);
 
-        if (filteredBookings.isEmpty) {
+        if (filteredData.isEmpty) {
           return _buildEmptyState(
             context,
             selectedBookingStatus,
@@ -440,18 +479,31 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
 
         return ListView.separated(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: filteredBookings.length,
+          itemCount: filteredData.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
-            final booking = filteredBookings[index];
-            return BookingListTileWidget(
-              key: ValueKey(booking.id),
-              booking: booking,
-              isAdmin: true,
-              onAssign: () {
-                showAssignToUserBottomSheet(booking);
-              },
-            );
+            final item = filteredData[index];
+            if (item is JobOfferContainer) {
+              return JobOfferTileWidget(
+                key: ValueKey(item.offerId),
+                offer: item,
+                isAdmin: true,
+                onAssign: item.booking != null
+                    ? () => showAssignToUserBottomSheet(item.booking!)
+                    : null,
+              );
+            } else if (item is BookingModel) {
+              return BookingListTileWidget(
+                key: ValueKey(item.id),
+                booking: item,
+                isAdmin: true,
+                isWarranty: item.warranty != null,
+                onAssign: () {
+                  showAssignToUserBottomSheet(item);
+                },
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },

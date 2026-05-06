@@ -42,12 +42,19 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     emit(RejectingOrder());
 
     try {
-      await AppFirestore.bookingsCollectionRef.doc(event.booking.id).update({
+      final Map<String, dynamic> updateData = {
         'bookingStatusCode': 'R',
         'rejectedBy': "Admin",
         'rejectedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      };
+
+      if (event.booking.warranty != null) {
+        updateData['warranty.warrantyStatusCode'] = 'X';
+        updateData['warranty.rejectedAt'] = FieldValue.serverTimestamp();
+      }
+
+      await AppFirestore.bookingsCollectionRef.doc(event.booking.id).update(updateData);
 
       emit(OrderRejected(true));
     } catch (e) {

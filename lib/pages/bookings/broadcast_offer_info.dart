@@ -71,6 +71,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
       if (technician == null) throw Exception('Technician data not found');
 
       await AppServices.acceptJobOffer(
+        bookingId: widget.offer.booking?.id,
         requestId: widget.offer.requestId,
         offerId: widget.offer.offerId,
         technician: technician,
@@ -138,15 +139,21 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
   }
 
   void _showCounterOfferPicker() {
+    final data = widget.offer.offerData;
+    final booking = widget.offer.booking;
+    final bookingDateTime = data['bookingDateTime'] as Timestamp? ??
+        booking?.bookingDateTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => CounterProposeSheet(
-        booking: widget
-            .offer
-            .booking!, // Assuming booking is available in offer container
+        booking: booking,
+        requestId: widget.offer.requestId,
         offerId: widget.offer.offerId,
+        customerId: data['customerId'] ?? booking?.customer.uid,
+        currentBookingTime: bookingDateTime?.toDate() ?? DateTime.now(),
       ),
     );
   }
@@ -473,8 +480,41 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
   }
 
   Widget _buildDistanceRow(Map<String, dynamic> loc) {
+    final technician = LocalStore.getCachedUserData();
+    double? techLat;
+    double? techLon;
+
+    // Try to get tech location from cache
+    if (technician?.liveLocation?.latitude != null) {
+      techLat = technician!.liveLocation!.latitude;
+      techLon = technician.liveLocation!.longitude;
+    } else if (technician?.lastKnownLocation != null) {
+      techLat = technician!.lastKnownLocation!.latitude;
+      techLon = technician.lastKnownLocation!.longitude;
+    } else if (technician?.location?.lat != null) {
+      techLat = technician!.location!.lat;
+      techLon = technician.location!.lon;
+    }
+
+    if (techLat != null && techLon != null) {
+      final dist = Geolocator.distanceBetween(
+        techLat,
+        techLon,
+        loc['lat'],
+        loc['lon'],
+      );
+      return _buildDetailRow(
+        "Distance",
+        "${(dist / 1000).toStringAsFixed(1)} km away",
+      );
+    }
+
+    // Fallback to real-time GPS if cache is empty
     return FutureBuilder(
-      future: Geolocator.getCurrentPosition(),
+      future: Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 5),
+      ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         final dist = Geolocator.distanceBetween(

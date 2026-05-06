@@ -424,8 +424,11 @@ class _BookingInfoState extends State<BookingInfo> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          CounterProposeSheet(booking: widget.booking, offerId: _offerId),
+      builder: (context) => CounterProposeSheet(
+        booking: widget.booking,
+        offerId: _offerId,
+        currentBookingTime: widget.booking.bookingDateTime.toDate(),
+      ),
     );
   }
 
@@ -434,8 +437,11 @@ class _BookingInfoState extends State<BookingInfo> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          CounterProposeSheet(booking: booking, offerId: offerId),
+      builder: (context) => CounterProposeSheet(
+        booking: booking,
+        offerId: offerId,
+        currentBookingTime: booking.bookingDateTime.toDate(),
+      ),
     );
   }
 
@@ -3658,8 +3664,12 @@ class _BookingInfoState extends State<BookingInfo> {
       final isAssigned = booking.agent?.uid == LocalStore.getUID();
       final isUnassigned = booking.agent == null;
 
-      if ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
-          (statusCode == 'A' && isAssigned)) {
+      // Only show "Propose New Time" for rebookings assigned to the current technician
+      final isRebookForMe = booking.rebookTechnicianId != null && 
+                           booking.rebookTechnicianId == LocalStore.getUID();
+
+      if (isRebookForMe && ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
+          (statusCode == 'A' && isAssigned))) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           child: SizedBox(

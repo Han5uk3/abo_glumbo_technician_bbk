@@ -9,7 +9,25 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get assign => 'Assign';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get viewOnly => 'View Only';
+
+  @override
+  String get noTechnicianAssigned => 'No technician assigned';
+
+  @override
   String get calculatingDistance => 'Calculating distance...';
+
+  @override
+  String get awaitingCustomerAction => 'Awaiting Customer Action';
 
   @override
   String kmAway(Object distance) {
@@ -291,6 +309,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location Permissions Are Permanently Denied';
 
   @override
+  String get locationPermissionRequired => 'Location Permission Required';
+
+  @override
+  String get locationPermissionPermanentlyDeniedMessage =>
+      'Location permissions are permanently denied. Please enable them in app settings to receive job offers.';
+
+  @override
+  String get pleaseEnableLocationServices => 'Please enable location services';
+
+  @override
+  String get fetching => 'Fetching...';
+
+  @override
+  String get currentGeopoint => 'Current Geopoint';
+
+  @override
+  String get latitudeLabel => 'Lat';
+
+  @override
+  String get longitudeLabel => 'Lon';
+
+  @override
+  String get locationSaved => 'Location saved';
+
+  @override
   String get errorDetectingLocation => 'Error Detecting Location';
 
   @override
@@ -340,9 +383,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterTheOtpSentToTheNumber => 'Enter The OTP Sent To The Number ';
-
-  @override
-  String get change => 'Change';
 
   @override
   String get enterOtp => 'Enter OTP';
@@ -420,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailAddress => 'Email Address';
 
   @override
-  String get emailIsRequired => 'Email Is Aequired';
+  String get emailIsRequired => 'Email Is Required';
 
   @override
   String get enterAValidEmail => 'Enter A Valid Email';
@@ -1897,9 +1937,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUpdatingCategory => 'Error updating category';
-
-  @override
-  String get assign => 'Assign';
 
   @override
   String get customerSubmittedBookingRequest =>
@@ -3465,9 +3502,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get batteryOptimization => 'Battery Optimization';
 
   @override
-  String get later => 'Later';
-
-  @override
   String get locationError => 'Location Error';
 
   @override
@@ -3650,9 +3684,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterReasonForCancel => 'Enter reason for cancellation';
-
-  @override
-  String get noTechnicianAssigned => 'No technician assigned';
 
   @override
   String get enterReasonForReject => 'Enter reason for rejection';
@@ -4495,9 +4526,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationAddedToList => 'Location added to list';
-
-  @override
-  String get pleaseEnableLocationServices => 'Please enable location services';
 
   @override
   String get locationNotFound => 'Location not found';

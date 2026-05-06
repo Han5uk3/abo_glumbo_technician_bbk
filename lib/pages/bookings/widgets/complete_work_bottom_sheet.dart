@@ -28,7 +28,6 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   List<File> selectedFiles = [];
   String? _fileError;
   bool _serviceCompleted = false;
-  bool _paymentThroughApp = false;
 
   double get _totalCost {
     if (!_serviceCompleted) {
@@ -667,7 +666,6 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
             : 0,
         serviceItems: items,
         totalCost: _totalCost,
-        paymentThroughApp: _paymentThroughApp,
       ),
     );
   }
@@ -800,82 +798,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               const SizedBox(height: 24),
 
               // Payment Method Toggle
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.purple.withOpacity(0.1),
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _paymentThroughApp ? Icons.phone_iphone : Icons.money,
-                        color: Colors.purple,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _paymentThroughApp
-                                ? AppLocalizations.of(
-                                        context,
-                                      )?.paymentThroughApp ??
-                                      'Payment Through App'
-                                : AppLocalizations.of(
-                                        context,
-                                      )?.paymentOutsideApp ??
-                                      'Payment Outside App',
-                            style: DMSansFont.textStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _paymentThroughApp
-                                ? AppLocalizations.of(
-                                        context,
-                                      )?.paymentThroughAppDesc ??
-                                      'Customer will pay through the app.'
-                                : AppLocalizations.of(
-                                        context,
-                                      )?.paymentOutsideAppDesc ??
-                                      'Collect payment outside of the app.',
-                            style: DMSansFont.textStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Switch.adaptive(
-                      value: _paymentThroughApp,
-                      activeColor: Colors.purple,
-                      onChanged: (value) {
-                        setState(() {
-                          _paymentThroughApp = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
+             
               const SizedBox(height: 24),
 
               if (_serviceCompleted) ...[
@@ -1047,20 +970,24 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     keyboardType: TextInputType.number,
                     onChanged: (_) => setState(() {}),
                     validator: (value) {
-                      if (!_serviceCompleted || _serviceItems.isNotEmpty)
+                      if (!_serviceCompleted || _serviceItems.isNotEmpty) {
                         return null;
-                      if (value == null || value.isEmpty)
+                      }
+                      if (value == null || value.isEmpty) {
                         return AppLocalizations.of(
                           context,
                         )!.pleaseEnterServiceCost;
-                      if (double.tryParse(value) == null)
+                      }
+                      if (double.tryParse(value) == null) {
                         return AppLocalizations.of(
                           context,
                         )!.pleaseEnterValidNumber;
-                      if (double.parse(value) <= 0)
+                      }
+                      if (double.parse(value) <= 0) {
                         return AppLocalizations.of(
                           context,
                         )!.serviceCostMustBeGreaterThanZero;
+                      }
                       return null;
                     },
                     decoration: _premiumInputDecoration(
@@ -1299,12 +1226,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
 
   String? _validateNumberField(String? value) {
     if (!_serviceCompleted || _serviceItems.isEmpty) return null;
-    if (value == null || value.isEmpty)
+    if (value == null || value.isEmpty) {
       return AppLocalizations.of(context)!.required;
+    }
     final numValue = double.tryParse(value);
     if (numValue == null) return AppLocalizations.of(context)!.invalid;
-    if (numValue <= 0)
+    if (numValue <= 0) {
       return AppLocalizations.of(context)!.serviceCostMustBeGreaterThanZero;
+    }
     return null;
   }
 

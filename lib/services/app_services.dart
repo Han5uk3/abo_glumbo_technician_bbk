@@ -1162,25 +1162,20 @@ class AppServices {
     required List<Map<String, dynamic>> serviceItems,
     required double totalCost,
     required double inspectionFee,
-    bool paymentThroughApp = false,
+ 
   }) async {
     try {
-      // If payment is through app, it's pending (CP). If outside, it's completed (C)
-      // unless the cost is 0 (which shouldn't happen for mode 1 usually)
-      final bool paymentCompleted = !paymentThroughApp || (mode == 1 ? totalCost : inspectionFee) <= 0;
-      final String status = paymentCompleted ? 'C' : 'CP';
-      final String paymentModeCode = paymentThroughApp ? 'C' : 'O';
+      
+
+      final String status = 'CP';
 
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
         'bookingStatusCode': status,
-        'paymentModeCode': paymentModeCode,
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'paymentCompleted': paymentCompleted,
-        if (paymentCompleted) 'paymentCompletedAt': FieldValue.serverTimestamp(),
-        if (!paymentCompleted && status == 'CP')
-          'paymentRequestedAt': FieldValue.serverTimestamp(),
+        'paymentCompleted': false,
+        'paymentRequestedAt': FieldValue.serverTimestamp(),
         'completionData': {
           'fileUrls': fileUrls,
           'serviceCost': serviceCost,
@@ -1188,7 +1183,7 @@ class AppServices {
           'totalCost': totalCost,
           'mode': mode,
           'inspectionFee': inspectionFee,
-          'paymentMethod': paymentThroughApp ? 'Inside App' : 'Outside App',
+          
         },
 
         if (mode == 1) ...{
@@ -1199,11 +1194,9 @@ class AppServices {
             'assignedTechnicianId': technicianId,
             'createdAt': FieldValue.serverTimestamp(),
             'updatedAt': FieldValue.serverTimestamp(),
-            'expiredOn': paymentCompleted
-                ? Timestamp.fromDate(
+            'expiredOn': Timestamp.fromDate(
                     DateTime.now().add(const Duration(days: 7)),
-                  )
-                : null,
+                  ),
             'rejectedTechnicians': [],
           },
         },

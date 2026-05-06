@@ -33,6 +33,12 @@ class BookingModel {
   Timestamp? trackingStartedAt;
   Timestamp? trackingStoppedAt;
   Timestamp? cancelledAt;
+  Timestamp? arrivedAt; // ✅ Added
+  Timestamp? paymentRequestedAt; // ✅ Added
+  Timestamp? assignedAt; // ✅ Added
+  Timestamp? reassignedAt; // ✅ Added
+  Timestamp? technicianSelectedAt; // ✅ Added
+  String? cancelledBy; // ✅ Added (Customer, Technician, Admin)
   String? cancellationReason;
   String? rejectedBy;
   String? orderId;
@@ -50,6 +56,7 @@ class BookingModel {
   bool? isOnHour; // ✅ Added
   String? autoAssignmentStatus; // ✅ Added
   Timestamp? assignmentScheduledTime;
+  String? rebookTechnicianId; // ✅ Added
 
   /// The polygon service zone matched when the customer validated their address.
   /// Written by the customer app; read here by the technician/admin app.
@@ -80,6 +87,12 @@ class BookingModel {
     this.trackingStartedAt,
     this.trackingStoppedAt,
     this.cancelledAt,
+    this.arrivedAt, // ✅ Added
+    this.paymentRequestedAt, // ✅ Added
+    this.assignedAt, // ✅ Added
+    this.reassignedAt, // ✅ Added
+    this.technicianSelectedAt, // ✅ Added
+    this.cancelledBy, // ✅ Added
     this.cancellationReason,
     this.rejectedBy,
     this.orderId,
@@ -95,6 +108,7 @@ class BookingModel {
     this.assignmentScheduledTime,
     this.counterProposalAcceptedAt,
     this.counterProposalStartedAt,
+    this.rebookTechnicianId, // ✅ Added
   });
 
   BookingModel.fromMap(Map<String, dynamic> data)
@@ -154,9 +168,16 @@ class BookingModel {
       technicianPaymentProof = data['technicianPaymentProof'] != null
           ? List<String>.from(data['technicianPaymentProof'])
           : null,
+      arrivedAt = data['arrivedAt'] as Timestamp?, // ✅ Added
+      paymentRequestedAt = data['paymentRequestedAt'] as Timestamp?, // ✅ Added
+      assignedAt = data['assignedAt'] as Timestamp?, // ✅ Added
+      reassignedAt = data['reassignedAt'] as Timestamp?, // ✅ Added
+      technicianSelectedAt = data['technicianSelectedAt'] as Timestamp?, // ✅ Added
+      cancelledBy = data['cancelledBy'] as String?, // ✅ Added
       cancelledAt = data['cancelledAt'] as Timestamp?,
       counterProposalAcceptedAt = data['counterProposalAcceptedAt'] as Timestamp?,
-      counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?;
+      counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?,
+      rebookTechnicianId = data['rebookTechnicianId'] as String?; // ✅ Added
 
   factory BookingModel.fromQueryDocumentSnapshot(
     QueryDocumentSnapshot snapshot,
@@ -195,6 +216,12 @@ class BookingModel {
       'trackingStoppedAt': trackingStoppedAt,
       'cancelledWorkerUids': cancelledWorkerUids,
       'cancelledAt': cancelledAt,
+      'arrivedAt': arrivedAt, // ✅ Added
+      'paymentRequestedAt': paymentRequestedAt, // ✅ Added
+      'assignedAt': assignedAt, // ✅ Added
+      'reassignedAt': reassignedAt, // ✅ Added
+      'technicianSelectedAt': technicianSelectedAt, // ✅ Added
+      'cancelledBy': cancelledBy, // ✅ Added
       'cancellationReason': cancellationReason,
       'rejectedBy': rejectedBy,
       'paymentCompleted': paymentCompleted,
@@ -203,6 +230,7 @@ class BookingModel {
       'isOnHour': isOnHour, // ✅ Added
       'autoAssignmentStatus': autoAssignmentStatus, // ✅ Added
       'assignmentScheduledTime': assignmentScheduledTime,
+      'rebookTechnicianId': rebookTechnicianId, // ✅ Added
     };
 
     map['id'] = id;

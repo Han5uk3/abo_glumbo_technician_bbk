@@ -436,7 +436,7 @@ class _AccountPageState extends State<AccountPage> {
       }
     }
 
-    await LocalStore.putlogoutStatus(true);
+    // This handles clearing UID, cached data, and setting logout status to true
     await LocalStore.clearAllAuthData();
 
     try {
@@ -699,6 +699,9 @@ class _AccountPageState extends State<AccountPage> {
       await LocalStore.clearRememberedPhone();
       await LocalStore.clearUID();
       await LocalStore.clearCachedUserData();
+      await LocalStore.clearBiometricAuthEnabled(user.uid);
+      await LocalStore.clearLastValidUID();
+
 
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();

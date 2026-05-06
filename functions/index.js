@@ -32,12 +32,20 @@ async function sendAndStoreNotification({
     collectionName = "customers";
   }
 
-  // Check for duplicate notification
-  const query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications").where("titleEn", "==", titleEn).where("bodyEn", "==", bodyEn);
+  // Check for duplicate notification - only if requestId is not provided or different
+  const requestId = data?.requestId || data?.offerId;
+  let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
+    .where("titleEn", "==", titleEn)
+    .where("bodyEn", "==", bodyEn);
+    
+  if (requestId) {
+    query = query.where("data.requestId", "==", requestId);
+  }
+
   try {
     const existing = await query.get();
     if (!existing.empty) {
-      console.log(`Duplicate notification detected for ${targetRole} ${targetId}, skipping`);
+      console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
       return null;
     }
   } catch (error) {
@@ -4244,26 +4252,12 @@ exports.autoAssignTechnician = onDocumentWritten(
             radius: radius,
             createdAt: FieldValue.serverTimestamp(),
             expiresAt: expiresAt,
+            serviceName: booking.service?.name || "Service",
+            serviceNameAr: booking.service?.name_ar || booking.service?.name || "Service",
+            customerName: booking.customer?.name || "A customer",
           };
 
           offerPromises.push(db.collection("job_offers").add(offerPayload));
-
-          // Send push notification
-          offerPromises.push(sendAndStoreNotification({
-            targetRole: "technician",
-            targetId: tech.id,
-            titleEn: "New Job Request Nearby!",
-            titleAr: "طلب عمل جديد قريب منك!",
-            bodyEn: `A new ${booking.service.name || 'service'} request is within ${radius}km.`,
-            bodyAr: `هناك طلب ${booking.service.name_ar || booking.service.name || 'خدمة'} جديد على بعد ${radius}كم.`,
-            data: {
-              bookingId: bookingId,
-              category: "job_offer",
-              click_action: "FLUTTER_NOTIFICATION_CLICK"
-            },
-            fcmToken: tech.fcmToken,
-            lanCode: tech.lanCode || "en"
-          }));
         }
         await Promise.all(offerPromises);
       }
@@ -4324,3 +4318,96 @@ exports.triggerScheduledAssignments = onSchedule("every 5 minutes", async (event
     logger.info(`Triggered scheduled assignment for ${count} bookings.`);
   }
 });
+
+/**
+ * Scheduled function that runs every minute.
+ * Finds job offers that are pending and have passed their expiresAt timestamp.
+ * Updates their status to 'declined' to ensure they are cleaned up even if the technician app is closed.
+ */
+exports.expireJobOffers = onSchedule("every 1 minutes", async (event) => {
+  const now = admin.firestore.Timestamp.now();
+  
+  try {
+    const snapshot = await db.collection("job_offers")
+      .where("status", "==", "pending")
+      .where("expiresAt", "<=", now)
+      .get();
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      batch.update(doc.ref, {
+        status: "declined",
+        declinedAt: now,
+        updatedAt: now,
+        expiryReason: "timeout"
+      });
+    });
+
+    await batch.commit();
+    logger.info(`Expired ${snapshot.size} job offers.`);
+  } catch (e) {
+    logger.error("Error expiring job offers:", e);
+  }
+  return null;
+});
+
+exports.notifyTechnicianOnNewJobOffer = onDocumentCreated(
+  "job_offers/{offerId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return null;
+    const offer = snap.data();
+    const offerId = event.params.offerId;
+    const technicianId = offer.technicianId;
+
+    if (!technicianId) {
+      console.log(`[${offerId}] Missing technicianId in job_offer`);
+      return null;
+    }
+
+    try {
+      const techDoc = await admin.firestore().collection("users").doc(technicianId).get();
+      if (!techDoc.exists) {
+        console.log(`[${offerId}] Technician document not found: ${technicianId}`);
+        return null;
+      }
+      const techData = techDoc.data();
+
+      const serviceName = offer.serviceName || "Service";
+      const serviceNameAr = offer.serviceNameAr || serviceName;
+      const isRebook = offer.isRebook === true;
+
+      await sendAndStoreNotification({
+        targetRole: "technician",
+        targetId: technicianId,
+        titleEn: isRebook ? "New Rebooking Offer" : "New Job Offer!",
+        titleAr: isRebook ? "عرض إعادة حجز جديد" : "عرض عمل جديد!",
+        bodyEn: isRebook 
+          ? "A customer has requested to rebook you for a service!"
+          : `A new service request for ${serviceName} is available nearby. Tap to view and accept.`,
+        bodyAr: isRebook
+          ? "لقد طلب عميل إعادة حجزك لخدمة!"
+          : `يوجد طلب خدمة جديد لـ ${serviceNameAr} متاح بالقرب منك. اضغط للعرض والقبول.`,
+        data: {
+          targetRole: "technician",
+          category: "job_offer",
+          requestId: offer.requestId || "",
+          bookingId: offer.bookingId || "",
+          offerId: offerId,
+          type: "job_offer"
+        },
+        fcmToken: techData.fcmToken,
+        lanCode: techData.lanCode || "en"
+      });
+
+      console.log(`[${offerId}] Job offer notification processed for technician ${technicianId}`);
+    } catch (e) {
+      console.error(`[${offerId}] Error processing job offer notification:`, e);
+    }
+    return null;
+  }
+);

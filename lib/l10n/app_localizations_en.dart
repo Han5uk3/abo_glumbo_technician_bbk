@@ -9,6 +9,14 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get calculatingDistance => 'Calculating distance...';
+
+  @override
+  String kmAway(Object distance) {
+    return '$distance km away';
+  }
+
+  @override
   String get appName => 'Abo Glumbo';
 
   @override
@@ -850,7 +858,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rejected => 'Rejected';
 
   @override
-  String get accepted => 'Accepted';
+  String get accepted => 'Confirmed';
 
   @override
   String get cancelled => 'Canceled';
@@ -865,7 +873,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentsAvailable => 'Technicians Available';
 
   @override
-  String get acceptedAt => 'Accepted At';
+  String get acceptedAt => 'Confirmed At';
 
   @override
   String get rejectedAt => 'Rejected At';
@@ -1061,11 +1069,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageCategories => 'Manage Categories';
 
   @override
-  String get bookingAccepted => 'Booking Accepted';
+  String get bookingAccepted => 'Booking Confirmed';
 
   @override
   String get yourBookingRequestHasBeenAccepted =>
-      'Your booking request has been accepted! Our team will contact you shortly.';
+      'Your booking request has been confirmed! Our team will contact you shortly.';
 
   @override
   String get bookingRejected => 'Booking Rejected';
@@ -1195,13 +1203,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counterProposalStarted => 'Counter proposal started';
 
   @override
-  String get counterProposalAccepted => 'Counter proposal accepted';
+  String get counterProposalAccepted => 'Counter proposal confirmed';
 
   @override
   String get proposalRejected => 'Proposal Rejected';
 
   @override
-  String get proposalAccepted => 'Proposal Accepted';
+  String get proposalAccepted => 'Proposal Confirmed';
 
   @override
   String get customerRejectedProposal => 'Customer rejected your proposal.';
@@ -1962,7 +1970,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updatedOn => 'Updated On';
 
   @override
-  String get approvedOn => 'Approved On';
+  String get approvedOn => 'Confirmed On';
 
   @override
   String get confirmRejectMessage =>
@@ -2356,10 +2364,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Customer requested repair under warranty';
 
   @override
-  String get warrantyRepairAccepted => 'Warranty Repair Accepted';
+  String get warrantyRepairAccepted => 'Warranty Repair Confirmed';
 
   @override
-  String get technicianAcceptedTheRequest => 'Technician accepted the request';
+  String get technicianAcceptedTheRequest => 'Technician confirmed the request';
 
   @override
   String get warrantyRepairCompleted => 'Warranty Repair Completed';
@@ -2519,6 +2527,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get managefaq => 'Manage FAQ';
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count technicians selected',
+      one: '1 technician selected',
+      zero: 'No technicians selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get technicianArrived => 'Technician Arrived';
+
+  @override
+  String get paymentRequested => 'Payment Requested';
+
+  @override
+  String get reassignedAt => 'Reassigned At';
+
+  @override
+  String get newTechnicianAssigned => 'New Technician Assigned';
+
+  @override
+  String get technicianStartedTracking => 'Technician is on the way';
+
+  @override
+  String get technicianArrivedAtLocation => 'Technician arrived at location';
+
+  @override
+  String get inspectionCompleted => 'Inspection Completed';
+
+  @override
+  String get fullServiceCompleted => 'Full Service Completed';
+
+  @override
+  String get cancelledByAdmin => 'Cancelled by Admin';
+
+  @override
+  String get paymentCompleted => 'Payment Completed';
+
+  @override
+  String get paymentSuccessfullyCompleted =>
+      'Payment has been successfully completed';
+
+  @override
+  String get bookingCancelledByAdmin => 'Booking was cancelled by admin';
 
   @override
   String get addFaq => 'Add FAQ';
@@ -2848,9 +2905,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get areYouSureYouWantToRejectThisBooking =>
       'Are you sure you want to reject this booking?';
-
-  @override
-  String get cancelledByAdmin => 'Cancelled by Admin';
 
   @override
   String get acceptBooking => 'Accept Booking';
@@ -3274,10 +3328,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rejectedOn => 'Rejected on';
 
   @override
-  String get acceptedOn => 'Accepted on';
+  String get acceptedOn => 'Confirmed on';
 
   @override
-  String get acceptedBy => 'Accepted by';
+  String get acceptedBy => 'Confirmed by';
 
   @override
   String get completedOn => 'Completed on';
@@ -3387,18 +3441,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'Done ($count selected)';
-  }
-
-  @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count technicians selected',
-      one: '1 technician selected',
-      zero: 'No technicians selected',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -4590,4 +4632,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get areYouSure => 'Are you sure?';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get appointmentDetails => 'Appointment Details';
 }

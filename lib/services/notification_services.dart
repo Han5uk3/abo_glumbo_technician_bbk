@@ -135,8 +135,7 @@ class NotificationServices {
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
           debugPrint('👆 Message opened from background: ${message.messageId}');
           if (message.notification != null) {
-            // Only handle chat navigation, do NOT store notification again
-            _handleChatNotificationTap(message);
+            _handleGenericNotificationTap(message);
           }
         });
 
@@ -358,13 +357,12 @@ class NotificationServices {
       RemoteMessage? initialMessage = await FirebaseMessaging.instance
           .getInitialMessage();
 
-      if (initialMessage != null) {
-        debugPrint('📬 Initial message found: ${initialMessage.messageId}');
-        if (initialMessage.notification != null) {
-          // Only handle chat navigation, do NOT store notification again
-          _handleChatNotificationTap(initialMessage);
+        if (initialMessage != null) {
+          debugPrint('📬 Initial message found: ${initialMessage.messageId}');
+          if (initialMessage.notification != null) {
+            _handleGenericNotificationTap(initialMessage);
+          }
         }
-      }
 
       // Note: onMessageOpenedApp listener is already set up in setupFCMListeners()
       // No need to add it here again to avoid duplicate navigation
@@ -446,8 +444,24 @@ class NotificationServices {
         } else {
           debugPrint('⚠️ Chat ID is missing in notification payload');
         }
-      } else {
-        debugPrint('ℹ️ Not a chat notification, ignoring');
+      } 
+      // Check if this is a job offer notification
+      else if (type == 'job_offer' || data['category'] == 'job_offer') {
+        debugPrint('📋 Job offer notification detected!');
+        if (navigatorKey?.currentState != null) {
+          navigatorKey!.currentState!.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const Home(
+                newIndex: 1, // Orders tab
+                selectedFilter: 'O', // Offers filter
+              ),
+            ),
+            (route) => false,
+          );
+        }
+      }
+      else {
+        debugPrint('ℹ️ Not a recognized notification type, ignoring');
       }
     } catch (e) {
       debugPrint('❌ Error handling notification tap: $e');
@@ -514,6 +528,34 @@ class NotificationServices {
       }
     } catch (e) {
       debugPrint('❌ Error handling chat notification tap: $e');
+    }
+  }
+
+  /// Handle generic notification tap from background (extracted for reuse)
+  static void _handleGenericNotificationTap(RemoteMessage message) {
+    try {
+      final data = message.data;
+      final type = data['type'] as String?;
+      final category = data['category'] as String?;
+
+      if (type == 'chat' || data['chatId'] != null) {
+        _handleChatNotificationTap(message);
+      } else if (type == 'job_offer' || category == 'job_offer') {
+        debugPrint('📋 Job offer notification detected from background!');
+        if (navigatorKey?.currentState != null) {
+          navigatorKey!.currentState!.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const Home(
+                newIndex: 1,
+                selectedFilter: 'O',
+              ),
+            ),
+            (route) => false,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error handling background notification tap: $e');
     }
   }
 

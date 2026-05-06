@@ -580,6 +580,7 @@ class BookingTrackerService {
           'isStartTracking': false,
           'isTrackingPaused': false,
           'trackingStoppedAt': FieldValue.serverTimestamp(),
+          'arrivedAt': FieldValue.serverTimestamp(),
         });
       } catch (e) {
          debugPrint('Error updating booking status: $e');
@@ -648,6 +649,7 @@ class BookingTrackerService {
           'isStartTracking': false,
           'isTrackingPaused': false,
           'trackingStoppedAt': FieldValue.serverTimestamp(),
+          'arrivedAt': FieldValue.serverTimestamp(),
           'warranty.isTracking': false
         });
       } catch (e) {

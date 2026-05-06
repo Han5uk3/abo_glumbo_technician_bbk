@@ -28,6 +28,10 @@ class LocalStore {
     return MyApp.box.delete('uid');
   }
 
+  static Future<void> clearLastValidUID() {
+    return MyApp.box.delete('last_valid_uid');
+  }
+
   // ============================================
   // Logout Status
   // ============================================
@@ -108,6 +112,11 @@ class LocalStore {
     return MyApp.box.get('biometric_auth_enabled_$uid', defaultValue: false) ??
         false;
   }
+
+  static Future<void> clearBiometricAuthEnabled(String uid) async {
+    await MyApp.box.delete('biometric_auth_enabled_$uid');
+  }
+
 
   // ============================================
   // Active Booking Tracking
@@ -349,10 +358,12 @@ class LocalStore {
   // Utility: Clear All Auth Data on Logout
   // ============================================
   static Future<void> clearAllAuthData() async {
+    await putlogoutStatus(true);
     await clearUID();
     await clearCachedUserData();
     await clearCachedAdminData();
     await clearActiveBookingId();
+    // await clearLastValidUID(); // Keep last valid UID for biometric re-login after logout
 
     // ✅ FIXED: Only clear phone if Remember Me is disabled
     if (!getRememberMe()) {

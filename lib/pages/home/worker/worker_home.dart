@@ -7,6 +7,7 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shimmer/shimmer.dart';
 
 class WorkerHome extends StatefulWidget {
@@ -25,6 +26,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
     {'code': 'CP', 'name': 'Payment Pending'},
     {'code': 'C', 'name': 'Completed'},
     {'code': 'X', 'name': 'Cancelled'},
+    {'code': 'R', 'name': 'Rejected'},
   ];
   late TabController _tabController;
 
@@ -68,7 +70,8 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(covariant WorkerHome oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedIndex != oldWidget.selectedIndex && widget.selectedIndex != null) {
+    if (widget.selectedIndex != oldWidget.selectedIndex &&
+        widget.selectedIndex != null) {
       final newIndex = _bookingStatuses.indexWhere(
         (e) => e['code'] == widget.selectedIndex,
       );
@@ -157,7 +160,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
           fontWeight: FontWeight.w500,
         ),
       ),
-      shape:  Border.all(style: BorderStyle.none),
+      shape: Border.all(style: BorderStyle.none),
     );
   }
 
@@ -206,7 +209,8 @@ class _BookingListTab extends StatefulWidget {
   State<_BookingListTab> createState() => _BookingListTabState();
 }
 
-class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliveClientMixin {
+class _BookingListTabState extends State<_BookingListTab>
+    with AutomaticKeepAliveClientMixin {
   late Stream<List<dynamic>> _bookingsStream;
 
   @override
@@ -217,6 +221,18 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
     super.initState();
     if (widget.bookingStatusCode == 'O') {
       _bookingsStream = AppServices.getJobOffersStream().cast<List<dynamic>>();
+    } else if (widget.bookingStatusCode == 'P') {
+      // Combine job offers and pending bookings for the 'Pending' tab
+      final offers = AppServices.getJobOffersStream();
+      final bookings = AppServices.getBookingsStream(
+        bookingStatusCode: 'P',
+      );
+
+      _bookingsStream = Rx.combineLatest2(
+        offers,
+        bookings,
+        (List<JobOfferContainer> o, List<BookingModel> b) => [...o, ...b],
+      ).cast<List<dynamic>>();
     } else {
       _bookingsStream = AppServices.getBookingsStream(
         bookingStatusCode: widget.bookingStatusCode,
@@ -280,7 +296,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
           itemCount: filteredData.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
@@ -327,11 +343,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.search_off,
-                size: 100,
-                color: Colors.grey,
-              ),
+              Icon(Icons.search_off, size: 100, color: Colors.grey),
               const SizedBox(height: 12),
               Text(
                 localizations?.noBookingsFound ?? 'No results found',
@@ -365,11 +377,7 @@ class _BookingListTabState extends State<_BookingListTab> with AutomaticKeepAliv
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.hourglass_empty,
-              size: 100,
-              color: Colors.grey,
-            ),
+            Icon(Icons.hourglass_empty, size: 100, color: Colors.grey),
             const SizedBox(height: 12),
             Text(localizations!.noBookings, textAlign: TextAlign.center),
           ],

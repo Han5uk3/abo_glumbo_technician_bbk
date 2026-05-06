@@ -26,7 +26,6 @@ import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/models/tipping.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
-import 'package:aboglumbo_bbk_panel/models/counter_offer.dart';
 import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
 import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1180,6 +1179,8 @@ class AppServices {
         'updatedAt': FieldValue.serverTimestamp(),
         'paymentCompleted': paymentCompleted,
         if (paymentCompleted) 'paymentCompletedAt': FieldValue.serverTimestamp(),
+        if (!paymentCompleted && status == 'CP')
+          'paymentRequestedAt': FieldValue.serverTimestamp(),
         'completionData': {
           'fileUrls': fileUrls,
           'serviceCost': serviceCost,
@@ -2013,11 +2014,24 @@ class AppServices {
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
 
-    final latest = AppFirestore.bookingsCollectionRef
-        .where('agent.uid', isEqualTo: uid)
-        .where('bookingStatusCode', isEqualTo: 'P')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+    final latest = Rx.combineLatest2(
+      AppFirestore.bookingsCollectionRef
+          .where('agent.uid', isEqualTo: uid)
+          .where('bookingStatusCode', isEqualTo: 'P')
+          .snapshots(),
+      getJobOffersStream(uid: uid),
+      (QuerySnapshot bookingsSnapshot, List<JobOfferContainer> offers) {
+        final Map<String, bool> uniqueMap = {};
+        for (var doc in bookingsSnapshot.docs) {
+          uniqueMap[doc.id] = true;
+        }
+        for (var offer in offers) {
+          final id = offer.booking?.id ?? offer.requestId ?? offer.offerId;
+          uniqueMap[id] = true;
+        }
+        return uniqueMap.length;
+      },
+    );
 
     final accepted = AppFirestore.bookingsCollectionRef
         .where('agent.uid', isEqualTo: uid)
@@ -2683,13 +2697,13 @@ class AppServices {
         });
   }
 
-  static Stream<List<JobOfferContainer>> getJobOffersStream() {
-    final userId = LocalStore.getUID();
+  static Stream<List<JobOfferContainer>> getJobOffersStream({String? uid}) {
+    final userId = uid ?? LocalStore.getUID();
     if (userId == null || userId.isEmpty) return Stream.value([]);
 
     final firestoreStream = AppFirestore.jobOffersCollectionRef
         .where('technicianId', isEqualTo: userId)
-        .where('status', isEqualTo: 'pending')
+        .where('status', whereIn: ['pending', 'counter_offered', 'customer_counter_offered'])
         .snapshots();
 
     // Combine with a periodic timer to force re-evaluation of 'expiresAt' every 10s
@@ -2828,10 +2842,36 @@ class AppServices {
   }
 
   static Future<void> declineJobOffer(String offerId) async {
-    await AppFirestore.jobOffersCollectionRef.doc(offerId).update({
-      'status': 'declined',
-      'declinedAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      final offerDoc =
+          await AppFirestore.jobOffersCollectionRef.doc(offerId).get();
+      if (!offerDoc.exists) return;
+
+      final data = offerDoc.data() as Map<String, dynamic>;
+      final bool isRebook = data['isRebook'] == true;
+      final String? bookingId = data['bookingId'];
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      batch.update(AppFirestore.jobOffersCollectionRef.doc(offerId), {
+        'status': 'declined',
+        'declinedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (isRebook && bookingId != null) {
+        batch.update(AppFirestore.bookingsCollectionRef.doc(bookingId), {
+          'rebookTechnicianId': null,
+          'agent': null,
+          'bookingStatusCode': 'P',
+          'autoAssignmentStatus': null,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      debugPrint('Error declining job offer: $e');
+    }
   }
 
   static Future<String?> getPendingJobOfferId(String bookingId) async {

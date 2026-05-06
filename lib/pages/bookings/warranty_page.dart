@@ -202,6 +202,7 @@ class _WarrantyPageState extends State<WarrantyPage>
       case 'requested':
         return AppLocalizations.of(context)!.requested;
       case 'accepted':
+      case 'confirmed':
         return AppLocalizations.of(context)!.accepted;
       case 'completed':
         return AppLocalizations.of(context)!.completed;

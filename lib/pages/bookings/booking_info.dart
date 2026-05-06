@@ -2323,26 +2323,45 @@ class _BookingInfoState extends State<BookingInfo> {
         });
       }
 
-      // Accepted
-      if (widget.booking.acceptedAt != null) {
+      // Technician Selected
+      if (widget.booking.technicianSelectedAt != null) {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.technicianSelected,
+          'time': _formatDateLocalized(widget.booking.technicianSelectedAt!.toDate(), context),
+          'description': AppLocalizations.of(context)!.serviceProviderConfirmedAppointment,
+          'status': 'completed',
+          'date': widget.booking.technicianSelectedAt!.toDate(),
+        });
+      }
+
+      // Confirmed / Assigned
+      if (widget.booking.assignedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.acceptedAt,
-          'time': _formatDateLocalized(
-            widget.booking.acceptedAt!.toDate(),
-            context,
-          ),
+          'time': _formatDateLocalized(widget.booking.assignedAt!.toDate(), context),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
-          'date': widget.booking.acceptedAt!.toDate(),
+          'date': widget.booking.assignedAt!.toDate(),
+        });
+      }
+
+      // New Technician Assigned (Reassigned)
+      if (widget.booking.reassignedAt != null) {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.newTechnicianAssigned,
+          'time': _formatDateLocalized(widget.booking.reassignedAt!.toDate(), context),
+          'description': AppLocalizations.of(context)!.serviceProviderConfirmedAppointment,
+          'status': 'completed',
+          'date': widget.booking.reassignedAt!.toDate(),
         });
       }
 
       // Tracking started
       if (widget.booking.trackingStartedAt != null) {
         timelineItems.add({
-          'title': AppLocalizations.of(context)!.trackingStartedAt,
+          'title': AppLocalizations.of(context)!.technicianStartedTracking,
           'time': _formatDateLocalized(
             widget.booking.trackingStartedAt!.toDate(),
             context,
@@ -2353,24 +2372,27 @@ class _BookingInfoState extends State<BookingInfo> {
         });
       }
 
-      // Tracking stopped
-      if (widget.booking.trackingStoppedAt != null) {
+      // Arrived at location
+      if (widget.booking.arrivedAt != null) {
         timelineItems.add({
-          'title': AppLocalizations.of(context)!.trackingStoppedAt,
+          'title': AppLocalizations.of(context)!.technicianArrived,
           'time': _formatDateLocalized(
-            widget.booking.trackingStoppedAt!.toDate(),
+            widget.booking.arrivedAt!.toDate(),
             context,
           ),
-          'description': AppLocalizations.of(context)!.serviceTrackingStopped,
+          'description': AppLocalizations.of(context)!.technicianArrivedAtLocation,
           'status': 'completed',
-          'date': widget.booking.trackingStoppedAt!.toDate(),
+          'date': widget.booking.arrivedAt!.toDate(),
         });
       }
 
       // Completed
       if (widget.booking.completedAt != null) {
+        bool isInspection = widget.booking.completionData?.mode == 0;
         timelineItems.add({
-          'title': AppLocalizations.of(context)!.completedAt,
+          'title': isInspection 
+              ? AppLocalizations.of(context)!.inspectionCompleted
+              : AppLocalizations.of(context)!.fullServiceCompleted,
           'time': _formatDateLocalized(
             widget.booking.completedAt!.toDate(),
             context,
@@ -2383,25 +2405,65 @@ class _BookingInfoState extends State<BookingInfo> {
         });
       }
 
-      // Rejected
-      if (widget.booking.bookingStatusCode.toLowerCase() == 'r') {
-        final isAdminRejection = widget.booking.rejectedBy == "Admin";
-
+      // Payment Requested
+      if (widget.booking.paymentRequestedAt != null) {
         timelineItems.add({
-          'title': isAdminRejection
-              ? AppLocalizations.of(context)!.cancelledByAdmin
-              : AppLocalizations.of(context)!.rejectedAt,
+          'title': AppLocalizations.of(context)!.paymentRequested,
+          'time': _formatDateLocalized(widget.booking.paymentRequestedAt!.toDate(), context),
+          'description': AppLocalizations.of(context)!.waitingForPayment,
+          'status': 'completed',
+          'date': widget.booking.paymentRequestedAt!.toDate(),
+        });
+      }
+
+      // Payment status (Legacy verification pending)
+      if (widget.booking.paymentCompletedAt != null) {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.paymentStatus,
+          'time': _formatDateLocalized(widget.booking.paymentCompletedAt!.toDate(), context),
+          'description': AppLocalizations.of(context)!.waitingForPayment,
+          'status': 'completed',
+          'date': widget.booking.paymentCompletedAt!.toDate(),
+        });
+      }
+
+      // Payment Completed
+      if (widget.booking.paymentCompleted == true) {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.paymentCompleted,
           'time': _formatDateLocalized(
-            widget.booking.rejectedAt!.toDate(),
-            context,
+            widget.booking.paymentCompletedAt?.toDate() ?? 
+            widget.booking.completedAt?.toDate() ?? 
+            DateTime.now(), 
+            context
           ),
-          'description': isAdminRejection
-              ? '${AppLocalizations.of(context)!.cancelledBy}: ${AppLocalizations.of(context)!.admin}'
-              : AppLocalizations.of(
-                  context,
-                )!.bookingWasRejectedByServiceProvider,
+          'description': AppLocalizations.of(context)!.paymentSuccessfullyCompleted ?? "Payment successfully completed",
+          'status': 'completed',
+          'date': widget.booking.paymentCompletedAt?.toDate() ??
+              widget.booking.completedAt?.toDate() ??
+              DateTime.now(),
+        });
+      }
+
+      // Reviewed
+      if (widget.booking.review != null && widget.booking.review!.createdAt != null) {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.review,
+          'time': _formatDateLocalized(widget.booking.review!.createdAt!.toDate(), context),
+          'description': AppLocalizations.of(context)!.reviewSubmittedSuccessfully,
+          'status': 'completed',
+          'date': widget.booking.review!.createdAt!.toDate(),
+        });
+      }
+
+      // Rejected by Admin
+      if (widget.booking.bookingStatusCode.toLowerCase() == 'r') {
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.cancelledByAdmin,
+          'time': _formatDateLocalized(widget.booking.rejectedAt?.toDate() ?? widget.booking.updatedAt?.toDate() ?? DateTime.now(), context),
+          'description': AppLocalizations.of(context)!.bookingCancelledByAdmin,
           'status': 'rejected',
-          'date': widget.booking.rejectedAt!.toDate(),
+          'date': widget.booking.rejectedAt?.toDate() ?? widget.booking.updatedAt?.toDate() ?? DateTime.now(),
         });
       }
 
@@ -2410,14 +2472,14 @@ class _BookingInfoState extends State<BookingInfo> {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.cancelledByCustomer,
           'time': _formatDateLocalized(
-            widget.booking.cancelledAt!.toDate(),
+            widget.booking.cancelledAt?.toDate() ?? DateTime.now(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.bookingWasCancelledByCustomer,
           'status': 'rejected',
-          'date': widget.booking.cancelledAt!.toDate(),
+          'date': widget.booking.cancelledAt?.toDate() ?? DateTime.now(),
         });
       }
 
@@ -2469,13 +2531,13 @@ class _BookingInfoState extends State<BookingInfo> {
       final aDate = a['date'];
       final bDate = b['date'];
 
-      // Convert Timestamp to DateTime if needed
-      final aDateTime = aDate is DateTime
-          ? aDate
-          : (aDate as Timestamp).toDate();
-      final bDateTime = bDate is DateTime
-          ? bDate
-          : (bDate as Timestamp).toDate();
+      // Convert Timestamp/DateTime to DateTime, default to epoch if null to avoid crash
+      final aDateTime = aDate == null
+          ? DateTime.fromMillisecondsSinceEpoch(0)
+          : (aDate is DateTime ? aDate : (aDate as Timestamp).toDate());
+      final bDateTime = bDate == null
+          ? DateTime.fromMillisecondsSinceEpoch(0)
+          : (bDate is DateTime ? bDate : (bDate as Timestamp).toDate());
 
       return aDateTime.compareTo(bDateTime);
     });

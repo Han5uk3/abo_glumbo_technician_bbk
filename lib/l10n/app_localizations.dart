@@ -100,6 +100,18 @@ abstract class AppLocalizations {
     Locale('ur'),
   ];
 
+  /// No description provided for @calculatingDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating distance...'**
+  String get calculatingDistance;
+
+  /// No description provided for @kmAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} km away'**
+  String kmAway(Object distance);
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
@@ -1735,7 +1747,7 @@ abstract class AppLocalizations {
   /// No description provided for @accepted.
   ///
   /// In en, this message translates to:
-  /// **'Accepted'**
+  /// **'Confirmed'**
   String get accepted;
 
   /// No description provided for @cancelled.
@@ -1765,7 +1777,7 @@ abstract class AppLocalizations {
   /// No description provided for @acceptedAt.
   ///
   /// In en, this message translates to:
-  /// **'Accepted At'**
+  /// **'Confirmed At'**
   String get acceptedAt;
 
   /// No description provided for @rejectedAt.
@@ -2143,13 +2155,13 @@ abstract class AppLocalizations {
   /// No description provided for @bookingAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Booking Accepted'**
+  /// **'Booking Confirmed'**
   String get bookingAccepted;
 
   /// No description provided for @yourBookingRequestHasBeenAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Your booking request has been accepted! Our team will contact you shortly.'**
+  /// **'Your booking request has been confirmed! Our team will contact you shortly.'**
   String get yourBookingRequestHasBeenAccepted;
 
   /// No description provided for @bookingRejected.
@@ -2395,7 +2407,7 @@ abstract class AppLocalizations {
   /// No description provided for @counterProposalAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Counter proposal accepted'**
+  /// **'Counter proposal confirmed'**
   String get counterProposalAccepted;
 
   /// No description provided for @proposalRejected.
@@ -2407,7 +2419,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposalAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Proposal Accepted'**
+  /// **'Proposal Confirmed'**
   String get proposalAccepted;
 
   /// No description provided for @customerRejectedProposal.
@@ -3877,7 +3889,7 @@ abstract class AppLocalizations {
   /// No description provided for @approvedOn.
   ///
   /// In en, this message translates to:
-  /// **'Approved On'**
+  /// **'Confirmed On'**
   String get approvedOn;
 
   /// No description provided for @confirmRejectMessage.
@@ -4585,13 +4597,13 @@ abstract class AppLocalizations {
   /// No description provided for @warrantyRepairAccepted.
   ///
   /// In en, this message translates to:
-  /// **'Warranty Repair Accepted'**
+  /// **'Warranty Repair Confirmed'**
   String get warrantyRepairAccepted;
 
   /// No description provided for @technicianAcceptedTheRequest.
   ///
   /// In en, this message translates to:
-  /// **'Technician accepted the request'**
+  /// **'Technician confirmed the request'**
   String get technicianAcceptedTheRequest;
 
   /// No description provided for @warrantyRepairCompleted.
@@ -4881,6 +4893,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage FAQ'**
   String get managefaq;
+
+  /// Message showing number of technicians selected with plural forms
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No technicians selected} =1{1 technician selected} other{{count} technicians selected}}'**
+  String technicianSelected(int count);
+
+  /// No description provided for @technicianArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Arrived'**
+  String get technicianArrived;
+
+  /// No description provided for @paymentRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Requested'**
+  String get paymentRequested;
+
+  /// No description provided for @reassignedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Reassigned At'**
+  String get reassignedAt;
+
+  /// No description provided for @newTechnicianAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'New Technician Assigned'**
+  String get newTechnicianAssigned;
+
+  /// No description provided for @technicianStartedTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician is on the way'**
+  String get technicianStartedTracking;
+
+  /// No description provided for @technicianArrivedAtLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician arrived at location'**
+  String get technicianArrivedAtLocation;
+
+  /// No description provided for @inspectionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection Completed'**
+  String get inspectionCompleted;
+
+  /// No description provided for @fullServiceCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Service Completed'**
+  String get fullServiceCompleted;
+
+  /// No description provided for @cancelledByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by Admin'**
+  String get cancelledByAdmin;
+
+  /// No description provided for @paymentCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Completed'**
+  String get paymentCompleted;
+
+  /// No description provided for @paymentSuccessfullyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment has been successfully completed'**
+  String get paymentSuccessfullyCompleted;
+
+  /// No description provided for @bookingCancelledByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking was cancelled by admin'**
+  String get bookingCancelledByAdmin;
 
   /// No description provided for @addFaq.
   ///
@@ -5505,12 +5595,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to reject this booking?'**
   String get areYouSureYouWantToRejectThisBooking;
-
-  /// No description provided for @cancelledByAdmin.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled by Admin'**
-  String get cancelledByAdmin;
 
   /// No description provided for @acceptBooking.
   ///
@@ -6307,13 +6391,13 @@ abstract class AppLocalizations {
   /// No description provided for @acceptedOn.
   ///
   /// In en, this message translates to:
-  /// **'Accepted on'**
+  /// **'Confirmed on'**
   String get acceptedOn;
 
   /// No description provided for @acceptedBy.
   ///
   /// In en, this message translates to:
-  /// **'Accepted by'**
+  /// **'Confirmed by'**
   String get acceptedBy;
 
   /// No description provided for @completedOn.
@@ -6513,12 +6597,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done ({count} selected)'**
   String doneSelectedCount(int count);
-
-  /// Message showing number of technicians selected with plural forms
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No technicians selected} =1{1 technician selected} other{{count} technicians selected}}'**
-  String technicianSelected(int count);
 
   /// Message indicating payout request is successful
   ///
@@ -8632,6 +8710,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure?'**
   String get areYouSure;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @appointmentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Details'**
+  String get appointmentDetails;
 }
 
 class _AppLocalizationsDelegate

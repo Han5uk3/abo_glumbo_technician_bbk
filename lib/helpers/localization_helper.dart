@@ -13,6 +13,7 @@ class LocalizationHelper {
       case 'pending':
         return AppLocalizations.of(context)!.pending;
       case 'accepted':
+      case 'confirmed':
         return AppLocalizations.of(context)!.accepted;
       case 'rejected':
         return AppLocalizations.of(context)!.rejected;
@@ -64,12 +65,25 @@ class LocalizationHelper {
   /// Formats date time as dd/MM/yy, hh:mm AM/PM (localized AM/PM)
   String formatDateTimeCompact(DateTime date, BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
-    String formatted =
-        intl.DateFormat('dd/MM/yy, hh:mm a', locale).format(date);
+    String formatted = intl.DateFormat(
+      'dd/MM/yy, hh:mm a',
+      locale,
+    ).format(date);
 
     if (locale == 'ar') {
       formatted = formatted.replaceAllMapped(RegExp(r'[0-9]'), (match) {
-        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        const arabicNumbers = [
+          '٠',
+          '١',
+          '٢',
+          '٣',
+          '٤',
+          '٥',
+          '٦',
+          '٧',
+          '٨',
+          '٩',
+        ];
         return arabicNumbers[int.parse(match.group(0)!)];
       });
     }

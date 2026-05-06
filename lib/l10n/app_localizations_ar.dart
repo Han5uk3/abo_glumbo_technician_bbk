@@ -9,6 +9,14 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get calculatingDistance => 'جاري حساب المسافة...';
+
+  @override
+  String kmAway(Object distance) {
+    return 'على بعد $distance كم';
+  }
+
+  @override
   String get appName => 'أبو جلمبو';
 
   @override
@@ -844,7 +852,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejected => 'مرفوض';
 
   @override
-  String get accepted => 'مقبول';
+  String get accepted => 'مؤكد';
 
   @override
   String get cancelled => 'ملغي';
@@ -859,7 +867,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get agentsAvailable => 'الفنيين المتاحين';
 
   @override
-  String get acceptedAt => 'مقبول في';
+  String get acceptedAt => 'مؤكد في';
 
   @override
   String get rejectedAt => 'مرفوض في';
@@ -1055,11 +1063,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get manageCategories => 'إدارة الاقسام';
 
   @override
-  String get bookingAccepted => 'تم قبول الحجز';
+  String get bookingAccepted => 'تم تأكيد الحجز';
 
   @override
   String get yourBookingRequestHasBeenAccepted =>
-      'تم قبول طلب الحجز الخاص بك! سيتواصل معك فريقنا قريباً.';
+      'تم تأكيد طلب الحجز الخاص بك! سيتواصل معك فريقنا قريباً.';
 
   @override
   String get bookingRejected => 'تم رفض الحجز';
@@ -1186,13 +1194,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get counterProposalStarted => 'بدء الاقتراح البديل';
 
   @override
-  String get counterProposalAccepted => 'قبول الاقتراح البديل';
+  String get counterProposalAccepted => 'تأكيد الاقتراح البديل';
 
   @override
   String get proposalRejected => 'تم رفض الاقتراح';
 
   @override
-  String get proposalAccepted => 'تم قبول الاقتراح';
+  String get proposalAccepted => 'تم تأكيد الاقتراح';
 
   @override
   String get customerRejectedProposal => 'رفض العميل اقتراحك.';
@@ -2325,10 +2333,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'العميل طلب إصلاحًا تحت الضمان';
 
   @override
-  String get warrantyRepairAccepted => 'تم قبول إصلاح الضمان';
+  String get warrantyRepairAccepted => 'تم تأكيد إصلاح الضمان';
 
   @override
-  String get technicianAcceptedTheRequest => 'قام الفنّي بقبول الطلب';
+  String get technicianAcceptedTheRequest => 'أكد الفني الطلب';
 
   @override
   String get warrantyRepairCompleted => 'تم إكمال إصلاح الضمان';
@@ -2483,6 +2491,55 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get managefaq => 'إدارة الأسئلة الشائعة';
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اختيار $count فنيين',
+      two: 'تم اختيار فنيين',
+      one: 'تم اختيار فني واحد',
+      zero: 'لم يتم اختيار أي فني',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get technicianArrived => 'وصل الفني';
+
+  @override
+  String get paymentRequested => 'تم طلب الدفع';
+
+  @override
+  String get reassignedAt => 'تمت إعادة التعيين في';
+
+  @override
+  String get newTechnicianAssigned => 'تم تعيين فني جديد';
+
+  @override
+  String get technicianStartedTracking => 'الفني في الطريق';
+
+  @override
+  String get technicianArrivedAtLocation => 'وصل الفني إلى الموقع';
+
+  @override
+  String get inspectionCompleted => 'اكتمل الفحص';
+
+  @override
+  String get fullServiceCompleted => 'اكتملت الخدمة بالكامل';
+
+  @override
+  String get cancelledByAdmin => 'تم الإلغاء بواسطة المسؤول';
+
+  @override
+  String get paymentCompleted => 'تم اكتمال الدفع';
+
+  @override
+  String get paymentSuccessfullyCompleted => 'تم اكتمال الدفع بنجاح';
+
+  @override
+  String get bookingCancelledByAdmin => 'تم إلغاء الطلب من قبل المسؤول';
 
   @override
   String get addFaq => 'إضافة سؤال شائع';
@@ -2807,9 +2864,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get areYouSureYouWantToRejectThisBooking =>
       'هل أنت متأكد أنك تريد رفض هذا الحجز؟';
-
-  @override
-  String get cancelledByAdmin => 'تم الإلغاء بواسطة المسؤول';
 
   @override
   String get acceptBooking => 'قبول الحجز';
@@ -3223,10 +3277,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejectedOn => 'تم الرفض في';
 
   @override
-  String get acceptedOn => 'تم القبول في';
+  String get acceptedOn => 'تم التأكيد في';
 
   @override
-  String get acceptedBy => 'تم القبول بواسطة';
+  String get acceptedBy => 'تم التأكيد بواسطة';
 
   @override
   String get completedOn => 'تم الاكتمال في';
@@ -3336,19 +3390,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'تم ($count محدد)';
-  }
-
-  @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'تم اختيار $count فنيين',
-      two: 'تم اختيار فنيين',
-      one: 'تم اختيار فني واحد',
-      zero: 'لم يتم اختيار أي فني',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -4525,4 +4566,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get areYouSure => 'هل أنت متأكد؟';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get time => 'الوقت';
+
+  @override
+  String get appointmentDetails => 'تفاصيل الموعد';
 }

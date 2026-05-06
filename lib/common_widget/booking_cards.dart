@@ -15,6 +15,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 // Renamed to BookingListTileWidget to match customer side standardized naming
 class BookingListTileWidget extends StatelessWidget {
@@ -603,6 +604,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   Timer? _countdownTimer;
   int _secondsRemaining = 0;
   double? _distance;
+  bool _isCalculatingDistance = false;
 
   @override
   void initState() {
@@ -626,6 +628,12 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       final destLon = serviceLoc['lon'] as double?;
       if (destLat == null || destLon == null) return;
 
+      if (mounted) {
+        setState(() {
+          _isCalculatingDistance = true;
+        });
+      }
+
       final position = await Geolocator.getCurrentPosition();
       final dist = Geolocator.distanceBetween(
         position.latitude,
@@ -637,10 +645,16 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       if (mounted) {
         setState(() {
           _distance = dist / 1000; // Convert to km
+          _isCalculatingDistance = false;
         });
       }
     } catch (e) {
       debugPrint('Error calculating distance: $e');
+      if (mounted) {
+        setState(() {
+          _isCalculatingDistance = false;
+        });
+      }
     }
   }
 
@@ -810,12 +824,28 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
             _buildDetailRow(Icons.person_outline, customerName),
             const SizedBox(height: 8),
             _buildDetailRow(Icons.location_on_outlined, address),
+            if (data['bookingDateTime'] != null || widget.offer.booking?.bookingDateTime != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.calendar_today_outlined,
+                DateFormat('EEE, d MMM • hh:mm a').format(
+                  ((data['bookingDateTime'] as Timestamp?) ?? widget.offer.booking!.bookingDateTime!).toDate(),
+                ),
+              ),
+            ],
             if (_distance != null) ...[
               const SizedBox(height: 8),
               _buildDetailRow(
                 Icons.directions_car_outlined,
-                "${_distance!.toStringAsFixed(1)} km away",
+                localization.kmAway(_distance!.toStringAsFixed(1)),
                 color: AppColors.primary,
+              ),
+            ] else if (_isCalculatingDistance) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.directions_car_outlined,
+                localization.calculatingDistance,
+                color: Colors.grey[500],
               ),
             ],
             const Padding(

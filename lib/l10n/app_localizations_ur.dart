@@ -9,6 +9,14 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String get calculatingDistance => 'فاصلہ کا حساب لگایا جا رہا ہے...';
+
+  @override
+  String kmAway(Object distance) {
+    return '$distance کلومیٹر دور';
+  }
+
+  @override
   String get appName => 'ابو جلمبو';
 
   @override
@@ -859,7 +867,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get rejected => 'مسترد شدہ';
 
   @override
-  String get accepted => 'قبول شدہ';
+  String get accepted => 'تصدیق شدہ';
 
   @override
   String get cancelled => 'منسوخ شدہ';
@@ -874,7 +882,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get agentsAvailable => 'ٹیکنیشنز دستیاب ہیں';
 
   @override
-  String get acceptedAt => 'قبول کیا گیا بروز';
+  String get acceptedAt => 'تصدیق کیا گیا بروز';
 
   @override
   String get rejectedAt => 'مسترد کیا گیا بروز';
@@ -1071,11 +1079,11 @@ class AppLocalizationsUr extends AppLocalizations {
   String get manageCategories => 'زمروں کا انتظام کریں';
 
   @override
-  String get bookingAccepted => 'بکنگ قبول کر لی گئی';
+  String get bookingAccepted => 'بکنگ کی تصدیق ہو گئی';
 
   @override
   String get yourBookingRequestHasBeenAccepted =>
-      'آپ کی بکنگ کی درخواست قبول کر لی گئی ہے! ہماری ٹیم جلد ہی آپ سے رابطہ کرے گی۔';
+      'آپ کی بکنگ کی درخواست کی تصدیق ہو گئی ہے! ہماری ٹیم جلد ہی آپ سے رابطہ کرے گی۔';
 
   @override
   String get bookingRejected => 'بکنگ مسترد کر دی گئی';
@@ -1205,13 +1213,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get counterProposalStarted => 'جوابی تجویز شروع ہو گئی';
 
   @override
-  String get counterProposalAccepted => 'جوابی تجویز قبول کر لی گئی';
+  String get counterProposalAccepted => 'جوابی تجویز کی تصدیق ہو گئی';
 
   @override
   String get proposalRejected => 'تجویز مسترد کر دی گئی';
 
   @override
-  String get proposalAccepted => 'تجویز قبول کر لی گئی';
+  String get proposalAccepted => 'تجویز کی تصدیق ہو گئی';
 
   @override
   String get customerRejectedProposal => 'صارف نے آپ کی تجویز مسترد کر دی۔';
@@ -2366,10 +2374,11 @@ class AppLocalizationsUr extends AppLocalizations {
       'صارف نے وارنٹی کے تحت مرمت کی درخواست کی';
 
   @override
-  String get warrantyRepairAccepted => 'وارنٹی مرمت قبول کر لی گئی';
+  String get warrantyRepairAccepted => 'وارنٹی مرمت کی تصدیق ہو گئی';
 
   @override
-  String get technicianAcceptedTheRequest => 'ٹیکنیشن نے درخواست قبول کر لی';
+  String get technicianAcceptedTheRequest =>
+      'ٹیکنیشن نے درخواست کی تصدیق کر دی';
 
   @override
   String get warrantyRepairCompleted => 'وارنٹی مرمت مکمل ہو گئی';
@@ -2527,6 +2536,55 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get managefaq => 'سوالات کا انتظام کریں';
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ٹیکنیشنز منتخب کیے گئے',
+      one: '1 ٹیکنیشن منتخب کیا گیا',
+      zero: 'کوئی ٹیکنیشن منتخب نہیں کیا گیا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get technicianArrived => 'Technician Arrived';
+
+  @override
+  String get paymentRequested => 'Payment Requested';
+
+  @override
+  String get reassignedAt => 'Reassigned At';
+
+  @override
+  String get newTechnicianAssigned => 'New Technician Assigned';
+
+  @override
+  String get technicianStartedTracking => 'Technician is on the way';
+
+  @override
+  String get technicianArrivedAtLocation => 'Technician arrived at location';
+
+  @override
+  String get inspectionCompleted => 'Inspection Completed';
+
+  @override
+  String get fullServiceCompleted => 'Full Service Completed';
+
+  @override
+  String get cancelledByAdmin => 'ایڈمن کی طرف سے منسوخ شدہ';
+
+  @override
+  String get paymentCompleted => 'Payment Completed';
+
+  @override
+  String get paymentSuccessfullyCompleted =>
+      'Payment has been successfully completed';
+
+  @override
+  String get bookingCancelledByAdmin => 'Booking was cancelled by admin';
 
   @override
   String get addFaq => 'سوال شامل کریں';
@@ -2858,9 +2916,6 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get areYouSureYouWantToRejectThisBooking =>
       'کیا آپ واقعی اس بکنگ کو مسترد کرنا چاہتے ہیں؟';
-
-  @override
-  String get cancelledByAdmin => 'ایڈمن کی طرف سے منسوخ شدہ';
 
   @override
   String get acceptBooking => 'بکنگ قبول کریں';
@@ -3286,10 +3341,10 @@ class AppLocalizationsUr extends AppLocalizations {
   String get rejectedOn => 'مسترد ہوا بروز';
 
   @override
-  String get acceptedOn => 'قبول ہوا بروز';
+  String get acceptedOn => 'تصدیق شدہ بروز';
 
   @override
-  String get acceptedBy => 'قبول شدہ بذریعہ';
+  String get acceptedBy => 'تصدیق شدہ بذریعہ';
 
   @override
   String get completedOn => 'مکمل ہوا بروز';
@@ -3399,18 +3454,6 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'ہو گیا ($count منتخب)';
-  }
-
-  @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ٹیکنیشنز منتخب کیے گئے',
-      one: '1 ٹیکنیشن منتخب کیا گیا',
-      zero: 'کوئی ٹیکنیشن منتخب نہیں کیا گیا',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -4605,4 +4648,13 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get areYouSure => 'کیا آپ کو یقین ہے؟';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get time => 'وقت';
+
+  @override
+  String get appointmentDetails => 'تقرری کی تفصیلات';
 }

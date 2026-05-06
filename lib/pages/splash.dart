@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/services/technician_location_update_service.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
@@ -92,8 +93,12 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _initializeApp() async {
     if (mounted) {
-      if (LocalStore.getUID() != null && !_isUserLogout) {
-        context.read<LoginBloc>().add(LoadWorkerData(uid: LocalStore.getUID()));
+      final String? localUid = LocalStore.getUID();
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+
+      // Only autologin if we have a local UID, a valid Firebase session, and the user hasn't logged out
+      if (localUid != null && currentUser != null && !_isUserLogout) {
+        context.read<LoginBloc>().add(LoadWorkerData(uid: localUid));
         final loginBloc = context.read<LoginBloc>();
         await for (final state in loginBloc.stream) {
           if (state is LoginSuccess || state is LoginLoadWorkerData) {
@@ -101,12 +106,17 @@ class _SplashScreenState extends State<SplashScreen>
             _navigateWithFadeOut(() => const Home());
             break;
           } else if (state is LoginLoadWorkerDataFailure) {
-            _navigateWithFadeOut(() => LoginPage());
+            _navigateWithFadeOut(() => const LoginPage());
             break;
           }
         }
       } else {
-        _navigateWithFadeOut(() => LoginPage());
+        // If Firebase session is gone but we still have a local UID, clear it
+        if (currentUser == null && localUid != null) {
+          await LocalStore.clearUID();
+          await LocalStore.clearCachedUserData();
+        }
+        _navigateWithFadeOut(() => const LoginPage());
       }
     }
   }

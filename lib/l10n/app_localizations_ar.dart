@@ -3036,10 +3036,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يوجد كافية لطلب سحب الإكرامية';
 
   @override
-  String get cashTips => 'نقاط الإكراميات النقدية';
+  String get cashTips => 'إكراميات خارج التطبيق';
 
   @override
-  String get cardTips => 'نقاط الإكراميات بالبطاقة';
+  String get cardTips => 'إكراميات داخل التطبيق';
 
   @override
   String get am => 'صباحًا';
@@ -4230,10 +4230,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'لتبدأ في استقبال طلبات الحجز، يرجى تفعيل حالة الجاهزية في لوحة القيادة.';
+      'يسعدنا انضمامك لفريق أبو جلمبو.\n\n• ضمان لمدة أسبوع لكل خدمة\n• التقييمات الأعلى تزيد من فرص الاختيار مستقبلاً\n• مكافآت خاصة للفنيين المتميزين';
 
   @override
-  String get welcomeToAboGlumboTechnician => 'مرحباً بك في أبو جلمبو فني!';
+  String welcomeToAboGlumboTechnician(String name) {
+    return 'مرحباً $name';
+  }
 
   @override
   String get onlyMainAdminCanManageAdminAccess =>

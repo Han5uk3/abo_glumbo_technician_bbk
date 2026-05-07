@@ -958,8 +958,8 @@
   "smsRetrievalTimedOut": "ایس ایم ایس کی وصولی کا وقت ختم ہو گیا۔ براہ کرم چیک کریں کہ آیا آپ کو کوڈ موصول ہوا ہے یا دوبارہ کوشش کریں۔",
   "payoutRequirement": "ٹپ کی ادائیگی کی درخواست کرنے کے لیے، آپ کو ادائیگی کے لیے کم از کم 10 سعودی ریال دستیاب ہونے چاہئیں۔",
   "notEnoughBalanceforRequestingTipPayout": "ٹپ کی ادائیگی کی درخواست کرنے کے لیے کافی بیلنس نہیں ہے",
-  "cashTips": "نقد ٹپس",
-  "cardTips": "کارڈ ٹپس",
+  "cashTips": "ایپ کے باہر ٹپس",
+  "cardTips": "ایپ کے اندر ٹپس",
   "am": "صبح",
   "pm": "شام",
   "inHand": "پاس موجود",
@@ -1322,8 +1322,15 @@
   "alreadyInHand": "پہلے سے پاس موجود ہے",
   "minimumPayoutAmount": "ادائیگی کی کم از کم رقم 10 سعودی ریال ہے",
   "enableAvailability": "دستیابی فعال کریں",
-  "welcomeDescription": "بکنگ کی درخواستیں وصول کرنا شروع کرنے کے لیے، براہ کرم ڈیش بورڈ پر اپنی دستیابی کی صورتحال فعال کریں۔",
-  "welcomeToAboGlumboTechnician": "ابو جلمبو ٹیکنیشن میں خوش آمدید!",
+  "welcomeToAboGlumboTechnician": "خوش آمدید {name}",
+  "@welcomeToAboGlumboTechnician": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeDescription": "ہمیں آپ کو ابو جلمبو ٹیم میں شامل کرنے پر خوشی ہے۔\n\n• ہر سروس کے لیے ایک ہفتے کی وارنٹی\n• اعلی درجہ بندی مستقبل میں انتخاب کے امکانات کو بڑھاتی ہے\n• اعلی کارکردگی دکھانے والے ٹیکنیشنز کے لیے خصوصی انعامات",
   "onlyMainAdminCanManageAdminAccess": "صرف مین ایڈمن ہی ایڈمن رسائی کا انتظام کر سکتا ہے",
   "cannotModifyMainAdminAccount": "مین ایڈمن اکاؤنٹ میں ترمیم نہیں کی جا سکتی",
   "adminAccessRevokedFor": "ایڈمن رسائی منسوخ کر دی گئی برائے",

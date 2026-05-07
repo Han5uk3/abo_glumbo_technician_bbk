@@ -104,33 +104,40 @@ class _AgentInfoState extends State<AgentInfo> {
       children: [
         Hero(
           tag: 'agent_${agent.uid}',
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey.shade100,
-              image: agent.profileUrl != null
-                  ? DecorationImage(
-                      image: CachedNetworkImageProvider(agent.profileUrl!),
-                      fit: BoxFit.cover,
+          child: GestureDetector(
+            onTap: () {
+              if (agent.profileUrl != null) {
+                _showFullScreenImage(agent.profileUrl!, context);
+              }
+            },
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade100,
+                image: agent.profileUrl != null
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(agent.profileUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: agent.profileUrl == null
+                  ? Center(
+                      child: Text(
+                        agent.name?.isNotEmpty == true
+                            ? agent.name![0].toUpperCase()
+                            : 'A',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
                     )
                   : null,
             ),
-            child: agent.profileUrl == null
-                ? Center(
-                    child: Text(
-                      agent.name?.isNotEmpty == true
-                          ? agent.name![0].toUpperCase()
-                          : 'A',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  )
-                : null,
           ),
         ),
         const SizedBox(height: 16),
@@ -315,6 +322,7 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildDocumentsSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
       title: 'ID & Documents',
@@ -323,10 +331,32 @@ class _AgentInfoState extends State<AgentInfo> {
       children: [
         if (agent.docUrl != null)
           _buildDocumentItem(
-            label: '${AppLocalizations.of(context)!.document} 1',
+            label: '${l10n.document} 1',
             onTap: () => _showFullScreenImage(agent.docUrl!, context),
-          )
-        else
+          ),
+        if (agent.residenceIdUrl != null)
+          _buildDocumentItem(
+            label: l10n.residenceIDImage,
+            onTap: () => _showFullScreenImage(agent.residenceIdUrl!, context),
+          ),
+        if (agent.sponsorWorkPermitUrl != null)
+          _buildDocumentItem(
+            label: l10n.sponsorWorkPermit,
+            onTap: () =>
+                _showFullScreenImage(agent.sponsorWorkPermitUrl!, context),
+          ),
+        if (agent.chamberOfCommerceApprovalUrl != null)
+          _buildDocumentItem(
+            label: l10n.chamberOfCommerceApproval,
+            onTap: () => _showFullScreenImage(
+              agent.chamberOfCommerceApprovalUrl!,
+              context,
+            ),
+          ),
+        if (agent.docUrl == null &&
+            agent.residenceIdUrl == null &&
+            agent.sponsorWorkPermitUrl == null &&
+            agent.chamberOfCommerceApprovalUrl == null)
           const Text(
             'No documents uploaded',
             style: TextStyle(fontSize: 14, color: Colors.grey),
@@ -569,29 +599,147 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: OutlinedButton(
-        onPressed: () {
-          // Disapprove action
-        },
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.red),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    if (!widget.isMainAdmin) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        if (agent.isVerified != true) ...[
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: () => _handleApproveReject(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                l10n.approveAgent,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton(
+            onPressed: () => _handleApproveReject(false),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red, width: 1.5),
+              foregroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              agent.isVerified == true
+                  ? l10n.disapproveAgent
+                  : l10n.reject,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
-        child: const Text(
-          'Disapprove',
-          style: TextStyle(
-            color: Colors.red,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+      ],
+    );
+  }
+
+  Future<void> _handleApproveReject(bool isVerified) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          isVerified ? l10n.approveAgent : l10n.disapproveAgent,
+          style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
         ),
+        content: Text(
+          isVerified
+              ? l10n.areYouSureYouWantToApproveThisAgent
+              : l10n.areYouSureYouWantToDisapproveThisAgent,
+          style: DMSansFont.textStyle(),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              l10n.cancel,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              isVerified ? l10n.approve : l10n.reject,
+              style: TextStyle(
+                color: isVerified ? AppColors.primary : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: Loader()),
+      );
+
+      try {
+        final success =
+            await AppServices.approveOrRejectAgent(agent.uid!, isVerified);
+
+        if (mounted) Navigator.pop(context); // Close loader
+
+        if (success) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isVerified ? l10n.agentApproved : l10n.agentDisapproved,
+                ),
+                backgroundColor: isVerified ? Colors.green : Colors.red,
+              ),
+            );
+            Navigator.pop(context, true); // Go back with success flag
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to update technician status'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _showFullScreenImage(

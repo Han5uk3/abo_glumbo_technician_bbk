@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 /// Handles all payout-related operations for earnings, tips, and bonus
 ///
 /// PAYOUT RULES:
-/// - totalAvailableBalance = cardTips + availableBonus (ONLY these are payoutable)
+/// - totalAvailableBalance = insideAppTips + availableBonus (ONLY these are payoutable)
 /// - In-app service payments (mode 1) are tracked for lifetime totals, NOT payoutable
 /// - Outside-app payments (mode 1, cash/manual) are tracked for lifetime totals, NOT payoutable
 /// - Inspection fees (mode 0) are NEVER tracked in the wallet
@@ -78,7 +78,7 @@ class UnifiedPayoutServices {
   /// Update wallet amounts (called when tips/bonus/earnings are added)
   /// NOTE: Earnings (completionAmountIncrement / outsideAppEarningsIncrement)
   /// are tracked for lifetime totals ONLY — they are NOT added to totalAvailableBalance.
-  /// Only cardTips and bonus are payoutable.
+  /// Only Inside App tips (cardTips) and bonus are payoutable.
   static Future<void> updateWalletAmounts({
     required String workerId,
     double? tipsIncrement,
@@ -137,7 +137,7 @@ class UnifiedPayoutServices {
       }
 
       // Calculate totals
-      // PAYOUT-REQUESTABLE: ONLY card tips + available bonus
+      // PAYOUT-REQUESTABLE: ONLY Inside App (card) tips + available bonus
       final totalAvailable =
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
 
@@ -168,7 +168,7 @@ class UnifiedPayoutServices {
     }
   }
 
-  /// Request a unified payout (card tips + bonus only)
+  /// Request a unified payout (Inside App tips + bonus only)
   static Future<String> requestUnifiedPayout({
     required String workerId,
     required double tipsAmount,
@@ -317,7 +317,7 @@ class UnifiedPayoutServices {
 
       final wallet = UnifiedWalletModel.fromSnapshot(walletDoc);
 
-      // Calculate new values (only tips and bonus)
+      // Calculate new values (only Inside App tips and bonus)
       final newCardTips =
           (wallet.cardTips ?? 0.0) - (request.tipsAmount ?? 0.0);
       final newAvailableBonus =
@@ -625,7 +625,7 @@ class UnifiedPayoutServices {
       );
 
       // Calculate totals
-      // PAYOUT-REQUESTABLE: ONLY card tips + bonus
+      // PAYOUT-REQUESTABLE: ONLY Inside App (card) tips + bonus
       final totalAvailable =
           (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
       // LIFETIME: Everything combined

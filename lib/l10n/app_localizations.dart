@@ -5941,13 +5941,13 @@ abstract class AppLocalizations {
   /// No description provided for @cashTips.
   ///
   /// In en, this message translates to:
-  /// **'Cash Tips'**
+  /// **'Outside App Tips'**
   String get cashTips;
 
   /// No description provided for @cardTips.
   ///
   /// In en, this message translates to:
-  /// **'Card Tips'**
+  /// **'Inside App Tips'**
   String get cardTips;
 
   /// No description provided for @am.
@@ -8114,14 +8114,14 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeDescription.
   ///
   /// In en, this message translates to:
-  /// **'To start receiving booking requests, please enable your Availability Status on the Dashboard.'**
+  /// **'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians'**
   String get welcomeDescription;
 
   /// No description provided for @welcomeToAboGlumboTechnician.
   ///
   /// In en, this message translates to:
-  /// **'Welcome To Abo Glumbo Technician!'**
-  String get welcomeToAboGlumboTechnician;
+  /// **'Welcome {name}'**
+  String welcomeToAboGlumboTechnician(String name);
 
   /// No description provided for @onlyMainAdminCanManageAdminAccess.
   ///

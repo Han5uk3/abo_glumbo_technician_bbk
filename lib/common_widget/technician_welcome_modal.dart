@@ -5,9 +5,14 @@ import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 
 /// Welcome modal for technicians with availability disabled
 class TechnicianWelcomeModal extends StatelessWidget {
+  final String technicianName;
   final VoidCallback onEnableAvailability;
 
-  const TechnicianWelcomeModal({super.key, required this.onEnableAvailability});
+  const TechnicianWelcomeModal({
+    super.key,
+    required this.technicianName,
+    required this.onEnableAvailability,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +53,7 @@ class TechnicianWelcomeModal extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.welcomeToAboGlumboTechnician,
+                    AppLocalizations.of(context)!.welcomeToAboGlumboTechnician(technicianName),
                     style: DMSansFont.textStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -56,8 +61,6 @@ class TechnicianWelcomeModal extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-
-                  // English Title
                 ],
               ),
             ),
@@ -67,7 +70,6 @@ class TechnicianWelcomeModal extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  // Arabic Description
                   Text(
                     AppLocalizations.of(context)!.welcomeDescription,
                     style: DMSansFont.textStyle(
@@ -76,7 +78,7 @@ class TechnicianWelcomeModal extends StatelessWidget {
                       color: Colors.grey[800],
                       height: 1.6,
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.start,
                   ),
 
                   const SizedBox(height: 32),
@@ -121,13 +123,16 @@ class TechnicianWelcomeModal extends StatelessWidget {
   /// Show the technician welcome modal
   static Future<void> show(
     BuildContext context, {
+    required String technicianName,
     required VoidCallback onEnableAvailability,
   }) async {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          TechnicianWelcomeModal(onEnableAvailability: onEnableAvailability),
+      builder: (context) => TechnicianWelcomeModal(
+        technicianName: technicianName,
+        onEnableAvailability: onEnableAvailability,
+      ),
     );
   }
 }

@@ -150,6 +150,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             TechnicianWelcomeModal.show(
               context,
+              technicianName: userData.name ?? '',
               onEnableAvailability: () {
                 Navigator.of(context).pop();
                 setState(() => currentIndex = 0);

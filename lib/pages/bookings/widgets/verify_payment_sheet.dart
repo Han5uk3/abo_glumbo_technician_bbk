@@ -75,17 +75,8 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
   }
 
   Future<void> _submitVerification() async {
-    if (_selectedFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.pleaseSelectAtLeastOneFile,
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // Payment proof files are now optional
+    // if (_selectedFiles.isEmpty) { ... }
 
     setState(() {
       _isUploading = true;

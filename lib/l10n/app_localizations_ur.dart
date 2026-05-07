@@ -3092,10 +3092,10 @@ class AppLocalizationsUr extends AppLocalizations {
       'ٹپ کی ادائیگی کی درخواست کرنے کے لیے کافی بیلنس نہیں ہے';
 
   @override
-  String get cashTips => 'نقد ٹپس';
+  String get cashTips => 'ایپ کے باہر ٹپس';
 
   @override
-  String get cardTips => 'کارڈ ٹپس';
+  String get cardTips => 'ایپ کے اندر ٹپس';
 
   @override
   String get am => 'صبح';
@@ -4304,10 +4304,12 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'بکنگ کی درخواستیں وصول کرنا شروع کرنے کے لیے، براہ کرم ڈیش بورڈ پر اپنی دستیابی کی صورتحال فعال کریں۔';
+      'ہمیں آپ کو ابو جلمبو ٹیم میں شامل کرنے پر خوشی ہے۔\n\n• ہر سروس کے لیے ایک ہفتے کی وارنٹی\n• اعلی درجہ بندی مستقبل میں انتخاب کے امکانات کو بڑھاتی ہے\n• اعلی کارکردگی دکھانے والے ٹیکنیشنز کے لیے خصوصی انعامات';
 
   @override
-  String get welcomeToAboGlumboTechnician => 'ابو جلمبو ٹیکنیشن میں خوش آمدید!';
+  String welcomeToAboGlumboTechnician(String name) {
+    return 'خوش آمدید $name';
+  }
 
   @override
   String get onlyMainAdminCanManageAdminAccess =>

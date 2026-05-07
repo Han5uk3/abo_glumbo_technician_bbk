@@ -3083,10 +3083,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not enough balance to request a tip payout';
 
   @override
-  String get cashTips => 'Cash Tips';
+  String get cashTips => 'Outside App Tips';
 
   @override
-  String get cardTips => 'Card Tips';
+  String get cardTips => 'Inside App Tips';
 
   @override
   String get am => 'AM';
@@ -4293,11 +4293,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'To start receiving booking requests, please enable your Availability Status on the Dashboard.';
+      'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians';
 
   @override
-  String get welcomeToAboGlumboTechnician =>
-      'Welcome To Abo Glumbo Technician!';
+  String welcomeToAboGlumboTechnician(String name) {
+    return 'Welcome $name';
+  }
 
   @override
   String get onlyMainAdminCanManageAdminAccess =>

@@ -972,8 +972,8 @@
   "smsRetrievalTimedOut": "SMS retrieval timed out. Please check if you received the code or try again.",
   "payoutRequirement": "To request a tip payout, you'll need at least 10 SAR available for payout.",
   "notEnoughBalanceforRequestingTipPayout": "Not enough balance to request a tip payout",
-  "cashTips": "Cash Tips",
-  "cardTips": "Card Tips",
+  "cashTips": "Outside App Tips",
+  "cardTips": "Inside App Tips",
   "am": "AM",
   "pm": "PM",
   "inHand": "In Hand",
@@ -1408,8 +1408,15 @@
   "alreadyInHand": "already in hand",
   "minimumPayoutAmount": "Minimum payout amount is 10 SAR",
   "enableAvailability": "Enable Availability",
-  "welcomeDescription": "To start receiving booking requests, please enable your Availability Status on the Dashboard.",
-  "welcomeToAboGlumboTechnician": "Welcome To Abo Glumbo Technician!",
+  "welcomeDescription": "We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians",
+  "welcomeToAboGlumboTechnician": "Welcome {name}",
+  "@welcomeToAboGlumboTechnician": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "onlyMainAdminCanManageAdminAccess": "Only the main admin can manage admin access",
   "cannotModifyMainAdminAccount": "Cannot modify main admin account",
   "adminAccessRevokedFor": "Admin access revoked for",

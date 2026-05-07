@@ -457,7 +457,9 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final total = _totalCost;
+        final serviceCost = _totalCost;
+        final inspectionFee = widget.booking.effectiveInspectionFee;
+        final total = serviceCost + inspectionFee;
 
         return AlertDialog(
           backgroundColor: Colors.white,
@@ -544,11 +546,28 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     ],
                   ),
                 ),
-                if (_serviceCompleted && total > 0) ...[
-                  const SizedBox(height: 20),
+                if (_serviceCompleted) ...[
+                  const SizedBox(height: 16),
+                  _buildCostRow(
+                    label: AppLocalizations.of(context)!.serviceCost,
+                    amount: serviceCost,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildCostRow(
+                    label: AppLocalizations.of(context)!.inspectionFee,
+                    amount: inspectionFee,
+                  ),
+                  const SizedBox(height: 16),
                   _buildCostRow(
                     label: AppLocalizations.of(context)!.totalCost,
                     amount: total,
+                    isTotal: true,
+                  ),
+                ] else ...[
+                  const SizedBox(height: 16),
+                  _buildCostRow(
+                    label: AppLocalizations.of(context)!.inspectionFee,
+                    amount: inspectionFee,
                     isTotal: true,
                   ),
                 ],
@@ -655,7 +674,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     Navigator.of(context).pop();
     context.read<BookingBloc>().add(
       CompleteBooking(
-        inspectionFee: widget.booking.service.price ?? 0.0,
+        inspectionFee: widget.booking.effectiveInspectionFee,
         customerId: widget.booking.customer.uid,
         technicianId: widget.booking.agent?.uid ?? "",
         mode: _serviceCompleted ? 1 : 0,

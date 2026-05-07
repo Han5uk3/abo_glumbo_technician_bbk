@@ -23,6 +23,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
+import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
@@ -486,6 +487,7 @@ class _BookingInfoState extends State<BookingInfo> {
     required IconData icon,
     required List<Widget> children,
     required bool hasChat,
+    String? whatsappPhone,
   }) {
     return Container(
       width: double.infinity,
@@ -546,6 +548,28 @@ class _BookingInfoState extends State<BookingInfo> {
                         Icons.chat_bubble_outline,
                         color: AppColors.primary,
                         size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              if (whatsappPhone != null && whatsappPhone.isNotEmpty) ...[
+                if (!hasChat) const Spacer(),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => WhatsAppUtils.launchWhatsApp(whatsappPhone),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.green.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/whatsapp.png',
+                        width: 16,
+                        height: 16,
                       ),
                     ),
                   ),
@@ -1908,6 +1932,27 @@ class _BookingInfoState extends State<BookingInfo> {
                   ),
                 ),
               ),
+              if (widget.booking.customer.phone != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => WhatsAppUtils.launchWhatsApp(
+                    widget.booking.customer.phone!,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset(
+                      'assets/images/whatsapp.png',
+                      width: 16,
+                      height: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(width: 8),
             ],
             if (widget.booking.bookingStatusCode != 'C' && !widget.isAdmin)
@@ -2003,6 +2048,24 @@ class _BookingInfoState extends State<BookingInfo> {
                 ],
               ),
             ),
+            if (agent.phone != null) ...[
+              GestureDetector(
+                onTap: () => WhatsAppUtils.launchWhatsApp(agent.phone!),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/images/whatsapp.png',
+                    width: 16,
+                    height: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             GestureDetector(
               onTap: () async {
                 final phone = (agent.phone ?? "").replaceAll(
@@ -3078,6 +3141,14 @@ class _BookingInfoState extends State<BookingInfo> {
                 colorScheme: colorScheme,
               ),
             ],
+            
+            const SizedBox(height: 12),
+            _buildCostRow(
+              context,
+              label: AppLocalizations.of(context)!.inspectionFee,
+              amount: widget.booking.effectiveInspectionFee,
+              colorScheme: colorScheme,
+            ),
 
             // Payment Mode (before total)
             if ((widget.booking.bookingStatusCode.toLowerCase() == 'c' ||
@@ -3121,7 +3192,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                   ),
                   Text(
-                    '${AppLocalizations.of(context)!.sar} ${completionData.totalCost.toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context)!.sar} ${(completionData.totalCost + widget.booking.effectiveInspectionFee).toStringAsFixed(2)}',
                     style: DMSansFont.textStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,

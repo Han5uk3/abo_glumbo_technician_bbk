@@ -62,6 +62,15 @@ class BookingModel {
   /// Written by the customer app; read here by the technician/admin app.
   BookingServiceLocation? serviceLocation;
 
+  /// Returns the correct inspection fee based on the on-hour/off-hour status
+  double get effectiveInspectionFee {
+    if (isOnHour == true) {
+      return service.onWorkHourPrice ?? service.price ?? 0.0;
+    } else {
+      return service.offWorkHourPrice ?? service.price ?? 0.0;
+    }
+  }
+
   BookingModel({
     required this.id,
     required this.paymentCompletedAt,

@@ -156,7 +156,11 @@ class AppServices {
     bool updateProfileUrl = false,
     bool updateDocUrl = false,
     bool updateCertifications = false,
+    bool updateResidenceId = false,
+    bool updateSponsorPermit = false,
+    bool updateChamberApproval = false,
   }) async {
+
     try {
       String userId = user.uid ?? '';
 
@@ -186,6 +190,19 @@ class AppServices {
         if (updateCertifications && user.certifications != null) {
           userData['certifications'] = user.certifications;
         }
+
+        if (updateResidenceId && user.residenceIdUrl != null) {
+          userData['residenceIdUrl'] = user.residenceIdUrl;
+        }
+
+        if (updateSponsorPermit && user.sponsorWorkPermitUrl != null) {
+          userData['sponsorWorkPermitUrl'] = user.sponsorWorkPermitUrl;
+        }
+
+        if (updateChamberApproval && user.chamberOfCommerceApprovalUrl != null) {
+          userData['chamberOfCommerceApprovalUrl'] = user.chamberOfCommerceApprovalUrl;
+        }
+
 
         await AppFirestore.usersCollectionRef.doc(userId).update(userData);
       }

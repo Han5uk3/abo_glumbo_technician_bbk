@@ -44,6 +44,10 @@ class UserModel {
   GeoPoint? lastKnownLocation;
   String? geohash;
   String role;
+  String? residenceIdUrl;
+  String? sponsorWorkPermitUrl;
+  String? chamberOfCommerceApprovalUrl;
+
 
   UserModel({
     this.uid,
@@ -86,7 +90,11 @@ class UserModel {
     this.geohash,
     required this.role,
     this.paidoutTips,
+    this.residenceIdUrl,
+    this.sponsorWorkPermitUrl,
+    this.chamberOfCommerceApprovalUrl,
   });
+
 
   UserModel copyWith({
     String? uid,
@@ -128,7 +136,11 @@ class UserModel {
     int? adminAccessLevel,
     Timestamp? grantedAdminAt,
     String role = 'technician',
+    String? residenceIdUrl,
+    String? sponsorWorkPermitUrl,
+    String? chamberOfCommerceApprovalUrl,
   }) {
+
     return UserModel(
       uid: uid ?? this.uid,
       name: name ?? this.name,
@@ -170,7 +182,11 @@ class UserModel {
       role: role,
       certifications: certifications ?? this.certifications,
       isOnline: isOnline ?? this.isOnline,
+      residenceIdUrl: residenceIdUrl ?? this.residenceIdUrl,
+      sponsorWorkPermitUrl: sponsorWorkPermitUrl ?? this.sponsorWorkPermitUrl,
+      chamberOfCommerceApprovalUrl: chamberOfCommerceApprovalUrl ?? this.chamberOfCommerceApprovalUrl,
     );
+
   }
 
   factory UserModel.fromDocumentSnapshot(DocumentSnapshot doc) {
@@ -242,7 +258,11 @@ class UserModel {
       grantedAdminAt: json['grantedAdminAt'],
       lastKnownLocation: json['last_known_location'],
       geohash: json['geohash'],
+      residenceIdUrl: json['residenceIdUrl'],
+      sponsorWorkPermitUrl: json['sponsorWorkPermitUrl'],
+      chamberOfCommerceApprovalUrl: json['chamberOfCommerceApprovalUrl'],
     );
+
   }
 
   Map<String, dynamic> toJson() {
@@ -296,7 +316,11 @@ class UserModel {
       'grantedAdminAt': grantedAdminAt,
       'last_known_location': lastKnownLocation,
       'geohash': geohash,
+      'residenceIdUrl': residenceIdUrl,
+      'sponsorWorkPermitUrl': sponsorWorkPermitUrl,
+      'chamberOfCommerceApprovalUrl': chamberOfCommerceApprovalUrl,
     };
+
   }
 
   Map<String, dynamic> toFirestore() {
@@ -348,7 +372,11 @@ class UserModel {
       'isGrantedAdminByMain': isGrantedAdminByMain ?? false,
       'adminAccessLevel': adminAccessLevel,
       'grantedAdminAt': grantedAdminAt,
+      'residenceIdUrl': residenceIdUrl,
+      'sponsorWorkPermitUrl': sponsorWorkPermitUrl,
+      'chamberOfCommerceApprovalUrl': chamberOfCommerceApprovalUrl,
     };
+
   }
 
   Map<String, dynamic> toEditJson({required UserModel previous}) {

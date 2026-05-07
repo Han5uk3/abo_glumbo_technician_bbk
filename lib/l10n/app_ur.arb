@@ -767,6 +767,10 @@
   "warrantyRequestWasRejectedByTechnician": "وارنٹی کی درخواست ٹیکنیشن نے مسترد کر دی تھی",
   "technicianCompletedTheRequest": "ٹیکنیشن نے درخواست مکمل کر لی",
   "warrantyExpired": "وارنٹی ختم ہو گئی",
+  "enterYourFullName":"اپنا پورا نام درج کریں",
+  "pleaseEnterYourFullName":"براہ کرم اپنا پورا نام درج کریں",
+  "fullNameIsRequired":"پورا نام ضروری ہے",
+  "enterYourEmail":"اپنا ای میل درج کریں",
   "warrantyPeriodHasExpired": "وارنٹی کی مدت ختم ہو چکی ہے",
   "trackingStoppedAt": "ٹریکنگ روک دی گئی",
   "serviceTrackingStopped": "سروس ٹریکنگ روک دی گئی ہے",
@@ -1460,5 +1464,12 @@
   "fullServiceCompleted": "مکمل سروس مکمل",
   "paymentCompleted": "ادائیگی مکمل",
   "paymentSuccessfullyCompleted": "ادائیگی کامیابی سے مکمل",
-  "bookingCancelledByAdmin": "ایڈمن کی جانب سے بکنگ منسوخ"
+  "bookingCancelledByAdmin": "ایڈمن کی جانب سے بکنگ منسوخ",
+  "residenceIDImage": "رہائشی شناختی کارڈ کی تصویر",
+  "sponsorWorkPermit": "سپانسر ورک پرمٹ",
+  "chamberOfCommerceApproval": "چیمبر آف کامرس کی منظوری",
+  "certificatesOrTrainingCoursesOptional": "سرٹیفکیٹ یا تربیتی کورسز (اختیاری)",
+  "uploadCertificates": "سرٹیفکیٹ اپ لوڈ کریں",
+  "refreshLocation": "مقام کو ریفریش کریں",
+  "selectJobRolesDescription": "وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔"
 } 

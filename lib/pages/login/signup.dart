@@ -1,14 +1,12 @@
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/location.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
-import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/firestorage.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
@@ -17,12 +15,9 @@ import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -36,24 +31,20 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  final emailRegex = RegExp(
-    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-  );
-  bool isCreatingAccount = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController emailController =
-      TextEditingController(); // ✅ Add email field
+  final TextEditingController emailController = TextEditingController();
 
   XFile? profileImage;
-  XFile? idImage;
+  XFile? residenceIdImage;
+  PlatformFile? sponsorWorkPermitFile;
+  PlatformFile? chamberOfCommerceFile;
   List<PlatformFile> certifications = [];
 
   Position? _currentPosition;
   Placemark? _placeMark;
   bool _isFetchingLocation = false;
-  String? _locationError;
 
   List<Map<String, dynamic>> jobCategories = [];
   List<String> selectedJobRoles = [];
@@ -64,16 +55,13 @@ class _SignupState extends State<Signup> {
     super.initState();
     phoneController.text = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
     _loadJobCategories();
-    // _loadLocations removed
+    _getCurrentLocation();
   }
 
-  // ✅ FIXED: Proper conversion from AppServices return type
   Future<void> _loadJobCategories() async {
     setState(() => isLoadingCategories = true);
     try {
       final categoriesMap = await AppServices.fetchJobCategories();
-
-      // Convert Map<String, Map<String, String>> to List<Map<String, dynamic>>
       jobCategories = categoriesMap.entries.map((entry) {
         return <String, dynamic>{
           'id': entry.key,
@@ -82,19 +70,7 @@ class _SignupState extends State<Signup> {
         };
       }).toList();
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading job categories: $e');
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.failedToLoadCategories ??
-                  'Failed to load job categories',
-            ),
-          ),
-        );
-      }
+      debugPrint('Error loading job categories: $e');
     } finally {
       if (mounted) {
         setState(() => isLoadingCategories = false);
@@ -105,7 +81,6 @@ class _SignupState extends State<Signup> {
   Future<void> _getCurrentLocation() async {
     setState(() {
       _isFetchingLocation = true;
-      _locationError = null;
     });
 
     try {
@@ -127,7 +102,6 @@ class _SignupState extends State<Signup> {
       }
 
       final position = await Geolocator.getCurrentPosition();
-
       List<Placemark> placemarks = [];
       try {
         placemarks = await placemarkFromCoordinates(
@@ -149,13 +123,15 @@ class _SignupState extends State<Signup> {
       if (mounted) {
         setState(() {
           _isFetchingLocation = false;
-          _locationError = e.toString();
         });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error fetching location: $e')));
       }
     }
   }
 
-  Future<void> _pickProfileImage() async {
+  Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -163,606 +139,325 @@ class _SignupState extends State<Signup> {
         imageQuality: 80,
       );
 
-      if (image != null) {
+      if (image != null && crop) {
         final croppedFile = await ImageCropper().cropImage(
           sourcePath: image.path,
-          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+          aspectRatio: square
+              ? const CropAspectRatio(ratioX: 1, ratioY: 1)
+              : null,
           compressQuality: 80,
           maxWidth: 1024,
           maxHeight: 1024,
           uiSettings: [
             AndroidUiSettings(
-              toolbarTitle:
-                  AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
+              toolbarTitle: 'Crop Image',
               toolbarColor: AppColors.primary,
               toolbarWidgetColor: Colors.white,
-              initAspectRatio: CropAspectRatioPreset.square,
-              lockAspectRatio: true,
+              initAspectRatio: square
+                  ? CropAspectRatioPreset.square
+                  : CropAspectRatioPreset.original,
+              lockAspectRatio: square,
             ),
-            IOSUiSettings(
-              title: AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-              aspectRatioLockEnabled: true,
-            ),
+            IOSUiSettings(title: 'Crop Image', aspectRatioLockEnabled: square),
           ],
         );
 
         if (croppedFile != null) {
-          final fileSize = await File(croppedFile.path).length();
-          if (fileSize > 10 * 1024 * 1024) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(context)?.fileTooLarge ??
-                        'File is too large (max 20MB)',
-                  ),
-                ),
-              );
-            }
-            return;
-          }
-
-          setState(() {
-            profileImage = XFile(croppedFile.path);
-          });
+          return XFile(croppedFile.path);
         }
       }
+      return image;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error picking profile image: $e');
-      }
+      debugPrint('Error picking image: $e');
+      return null;
     }
   }
 
-  Future<int?> _showSourceSelector() async {
-    return showModalBottomSheet<int>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+  Future<PlatformFile?> _pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+      );
+      if (result != null && result.files.isNotEmpty) {
+        return result.files.first;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error picking file: $e');
+      return null;
+    }
+  }
+
+  Future<void> _pickCertifications() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        allowMultiple: true,
+      );
+
+      if (result != null) {
+        setState(() {
+          certifications.addAll(result.files);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking certifications: $e');
+    }
+  }
+
+  Widget _buildSectionTitle(String title, {bool mandatory = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, top: 16.0),
+      child: RichText(
+        text: TextSpan(
+          text: title,
+          style: DMSansFont.textStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                AppLocalizations.of(context)?.selectSource ?? 'Select Source',
-                style: GoogleFonts.dmSans(
-                  fontSize: 18,
+            if (mandatory)
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
-              onTap: () => Navigator.pop(context, 0),
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder),
-              title: Text(AppLocalizations.of(context)?.files ?? 'Files'),
-              onTap: () => Navigator.pop(context, 1),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Future<void> _removeIdImage() async {
-    final confirm = await _showDeleteConfirmation();
-    if (confirm) {
-      setState(() {
-        idImage = null;
-      });
-    }
-  }
+  Widget _buildFileOrImagePickerTile({
+    required String title,
+    required dynamic fileOrImage, // Can be XFile or PlatformFile
+    required VoidCallback onTap,
+    required VoidCallback onClear,
+    bool mandatory = false,
+  }) {
+    bool hasFile = fileOrImage != null;
+    bool isImage = false;
+    String? path;
+    String? fileName;
 
-  Future<void> _pickIdImage() async {
-    final source = await _showSourceSelector();
-    if (source == null) return;
-
-    try {
-      XFile? image;
-      bool isImage = true;
-
-      if (source == 0) {
-        // Camera
-        final ImagePicker picker = ImagePicker();
-        image = await picker.pickImage(
-          source: ImageSource.camera,
-          imageQuality: 80,
-        );
-      } else {
-        // Files
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-        );
-        if (result != null && result.files.isNotEmpty) {
-          final file = result.files.first;
-          if (file.path != null) {
-            image = XFile(file.path!);
-            final ext = file.extension?.toLowerCase();
-            isImage = ['jpg', 'jpeg', 'png'].contains(ext);
-          }
-        }
-      }
-
-      if (image != null) {
-        if (isImage) {
-          final croppedFile = await ImageCropper().cropImage(
-            sourcePath: image.path,
-            compressQuality: 80,
-            maxWidth: 2048,
-            maxHeight: 2048,
-            uiSettings: [
-              AndroidUiSettings(
-                toolbarTitle:
-                    AppLocalizations.of(context)?.cropDocument ??
-                    'Crop Document',
-                toolbarColor: AppColors.primary,
-                toolbarWidgetColor: Colors.white,
-                statusBarColor: AppColors.primary,
-              ),
-              IOSUiSettings(
-                title:
-                    AppLocalizations.of(context)?.cropDocument ??
-                    'Crop Document',
-              ),
-            ],
-          );
-
-          if (croppedFile != null) {
-            setState(() {
-              idImage = XFile(croppedFile.path);
-            });
-          }
-        } else {
-          setState(() {
-            idImage = image;
-          });
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error picking ID image: $e');
+    if (hasFile) {
+      if (fileOrImage is XFile) {
+        path = fileOrImage.path;
+        fileName = fileOrImage.name;
+        isImage = [
+          'jpg',
+          'jpeg',
+          'png',
+        ].contains(path.split('.').last.toLowerCase());
+      } else if (fileOrImage is PlatformFile) {
+        path = fileOrImage.path;
+        fileName = fileOrImage.name;
+        isImage = [
+          'jpg',
+          'jpeg',
+          'png',
+        ].contains(fileOrImage.extension?.toLowerCase() ?? '');
       }
     }
-  }
 
-  Future<void> _pickCertifications() async {
-    final source = await _showSourceSelector();
-    if (source == null) return;
-
-    try {
-      if (source == 0) {
-        // Camera
-        final ImagePicker picker = ImagePicker();
-        final XFile? image = await picker.pickImage(
-          source: ImageSource.camera,
-          imageQuality: 80,
-        );
-
-        if (image != null) {
-          final file = File(image.path);
-          final size = await file.length();
-
-          // Validate size
-          if (size > 5 * 1024 * 1024) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${image.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
-                  ),
-                ),
-              );
-            }
-            return;
-          }
-
-          setState(() {
-            certifications.add(
-              PlatformFile(name: image.name, path: image.path, size: size),
-            );
-          });
-        }
-      } else {
-        // Files
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-          allowMultiple: true,
-        );
-
-        if (result != null) {
-          // Validate file sizes
-          for (var file in result.files) {
-            if (file.size > 5 * 1024 * 1024) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${file.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
-                    ),
-                  ),
-                );
-              }
-              return;
-            }
-          }
-
-          setState(() {
-            certifications.addAll(result.files);
-          });
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error picking certifications: $e');
-      }
-    }
-  }
-
-  Future<void> _removeCertification(int index) async {
-    final confirm = await _showDeleteConfirmation();
-    if (confirm) {
-      setState(() {
-        certifications.removeAt(index);
-      });
-    }
-  }
-
-  Future<bool> _showDeleteConfirmation() async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppColors.bgWhite,
-            actionsAlignment: MainAxisAlignment.start,
-            title: Text(AppLocalizations.of(context)?.delete ?? 'Delete'),
-            content: Text(
-              AppLocalizations.of(context)?.areYouSureYouWantToDeleteThisFile ??
-                  'Are you sure you want to remove this file?',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(title, mandatory: mandatory),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1.5),
             ),
-            actions: [
-              eButton(
-                backgroundColor: Colors.red,
-                context: context,
-                onPressed: () => Navigator.pop(context, true),
-                text: AppLocalizations.of(context)?.yes ?? 'Yes',
-                textColor: Colors.white,
-              ),
-              const SizedBox(width: 8),
-              eButton(
-                backgroundColor: Colors.grey,
-                context: context,
-                onPressed: () => Navigator.pop(context, false),
-                text: AppLocalizations.of(context)?.no ?? 'No',
-                textColor: Colors.black,
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
-
-  void _showFullScreenImage(XFile file, BuildContext context) async {
-    final ext = file.path.split('.').last.toLowerCase();
-    if (['jpg', 'jpeg', 'png'].contains(ext)) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => Scaffold(
-            backgroundColor: Colors.black,
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              leading: IconButton(
-                iconSize: 18,
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              title: Text(
-                AppLocalizations.of(context)!.idDocument,
-                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
-              ),
-            ),
-            body: Center(
-              child: InteractiveViewer(
-                panEnabled: true,
-                boundaryMargin: EdgeInsets.all(20),
-                minScale: 0.5,
-                maxScale: 4.0,
-                child: Image.file(File(file.path)),
-              ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      final result = await OpenFilex.open(file.path);
-      if (result.type != ResultType.done) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${file.path}')),
-          );
-        }
-      }
-    }
-  }
-
-  void _viewCertification(PlatformFile file) async {
-    if (file.path == null) return;
-    final ext = file.extension?.toLowerCase();
-    if (['jpg', 'jpeg', 'png'].contains(ext)) {
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppBar(
-                title: Text(file.name),
-                leading: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-              InteractiveViewer(child: Image.file(File(file.path!))),
-            ],
-          ),
-        ),
-      );
-    } else {
-      final result = await OpenFilex.open(file.path!);
-      if (result.type != ResultType.done) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${file.path}')),
-          );
-        }
-      }
-    }
-  }
-
-  Future<void> _selectJobRoles() async {
-    if (jobCategories.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.noJobCategoriesAvailable ??
-                'No job categories available',
-          ),
-        ),
-      );
-      return;
-    }
-
-    final selectedRoles = await showModalBottomSheet<List<String>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.7,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: !hasFile
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                        Icons.upload_file_outlined,
+                        color: AppColors.primary,
+                        size: 32,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context)?.selectJobRoles ??
-                            'Select Job Roles',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        'Upload File or Image',
+                        style: DMSansFont.textStyle(
+                          color: Colors.grey[500],
+                          fontSize: 13,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context, selectedJobRoles),
-                        child: Text(
-                          AppLocalizations.of(context)?.done ?? 'Done',
+                    ],
+                  )
+                : Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: (isImage && path != null)
+                            ? Image.file(
+                                File(path),
+                                width: double.infinity,
+                                height: 140,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                color: AppColors.primary.withOpacity(0.05),
+                                alignment: Alignment.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.description_outlined,
+                                      color: AppColors.primary,
+                                      size: 40,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0,
+                                      ),
+                                      child: Text(
+                                        fileName ?? 'File Selected',
+                                        style: DMSansFont.textStyle(
+                                          fontSize: 12,
+                                          color: AppColors.primary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                      ),
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: GestureDetector(
+                          onTap: onClear,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const Divider(),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: jobCategories.length,
-                      itemBuilder: (context, index) {
-                        final category = jobCategories[index];
-                        final categoryName =
-                            LocalStore.getUserlanguage() == 'ar'
-                            ? (category['nameAr'] ?? category['name'])
-                            : category['name'];
-                        final categoryId = category['id'];
-
-                        final isSelected = selectedJobRoles.contains(
-                          categoryId,
-                        );
-
-                        return CheckboxListTile(
-                          title: Text(categoryName),
-                          value: isSelected,
-                          onChanged: (value) {
-                            setModalState(() {
-                              if (value == true) {
-                                selectedJobRoles.add(categoryId);
-                              } else {
-                                selectedJobRoles.remove(categoryId);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+          ),
+        ),
+      ],
     );
-
-    if (selectedRoles != null) {
-      setState(() {
-        selectedJobRoles = selectedRoles;
-      });
-    }
-  }
-
-  String _getJobRoleNames() {
-    if (selectedJobRoles.isEmpty) return '';
-
-    return selectedJobRoles
-        .map((roleId) {
-          final category = jobCategories.firstWhere(
-            (cat) => cat['id'] == roleId,
-            orElse: () => {'name': roleId, 'nameAr': roleId},
-          );
-          return LocalStore.getUserlanguage() == 'ar'
-              ? (category['nameAr'] ?? category['name'])
-              : category['name'];
-        })
-        .join(', ');
   }
 
   Future<void> _submitSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // ✅ Validate all location fields are selected
-    // ✅ Validate location
     if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please fetch your current location'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('Please fetch your current location')),
       );
       return;
     }
 
     if (selectedJobRoles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.pleaseSelectAtLeastOneJobRole ??
-                'Please select at least one job role',
-          ),
-        ),
+        const SnackBar(content: Text('Please select at least one job role')),
       );
       return;
     }
 
-    if (idImage == null) {
+    if (residenceIdImage == null ||
+        sponsorWorkPermitFile == null ||
+        chamberOfCommerceFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.pleaseUploadIdDocument ??
-                'Please upload ID document',
-          ),
-        ),
+        const SnackBar(content: Text('Please upload all mandatory documents')),
       );
       return;
     }
 
-    // ✅ Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return PopScope(
-          canPop: false,
-          child: AlertDialog(
-            backgroundColor: AppColors.bgWhite,
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 24, child: Loader(color: AppColors.primary)),
-                const SizedBox(height: 16),
-                Text(
-                  AppLocalizations.of(dialogContext)?.creatingAccount ??
-                      'Creating your account...',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  AppLocalizations.of(dialogContext)?.pleaseWait ??
-                      'Please wait, this may take a moment',
-                  style: GoogleFonts.dmSans(fontSize: 12, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (context) => const Center(child: Loader()),
     );
 
     try {
-      String? profileImageUrl;
-      String? idImageUrl;
-      List<String>? certificationUrls;
+      String? profileUrl;
+      String? residenceIdUrl;
+      String? sponsorWorkPermitUrl;
+      String? chamberOfCommerceUrl;
+      List<String> certUrls = [];
 
-      // Upload profile image
       if (profileImage != null) {
-        try {
-          profileImageUrl = await UploadToFireStorage().uploadFile(
-            profileImage!,
-            'agents/profiles',
+        profileUrl = await UploadToFireStorage().uploadFile(
+          profileImage!,
+          'agents/profiles',
+        );
+      }
+      residenceIdUrl = await UploadToFireStorage().uploadFile(
+        residenceIdImage!,
+        'agents/documents',
+      );
+
+      // Upload Sponsor Work Permit
+      if (sponsorWorkPermitFile!.path != null) {
+        final ext = sponsorWorkPermitFile!.extension?.toLowerCase() ?? '';
+        if (['jpg', 'jpeg', 'png'].contains(ext)) {
+          sponsorWorkPermitUrl = await UploadToFireStorage().uploadFile(
+            XFile(sponsorWorkPermitFile!.path!),
+            'agents/documents',
           );
-        } catch (e) {
-          if (kDebugMode) print('Profile upload failed: $e');
+        } else {
+          final fileRef = AppFireStorage.agentDocStorageRef.child(
+            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${sponsorWorkPermitFile!.name}',
+          );
+          await fileRef.putFile(File(sponsorWorkPermitFile!.path!));
+          sponsorWorkPermitUrl = await fileRef.getDownloadURL();
         }
       }
 
-      // Upload ID image
-      if (idImage != null) {
-        try {
-          final ext = idImage!.path.split('.').last.toLowerCase();
-          if (['jpg', 'jpeg', 'png'].contains(ext)) {
-            idImageUrl = await UploadToFireStorage().uploadFile(
-              idImage!,
-              'agents/documents',
-            );
-          } else {
-            final fileRef = AppFireStorage.agentDocStorageRef.child(
-              'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${idImage!.name}',
-            );
-            final uploadTask = fileRef.putFile(File(idImage!.path));
-            final snapshot = await uploadTask;
-            idImageUrl = await snapshot.ref.getDownloadURL();
-          }
-        } catch (e) {
-          if (kDebugMode) print('ID upload failed: $e');
+      // Upload Chamber of Commerce Approval
+      if (chamberOfCommerceFile!.path != null) {
+        final ext = chamberOfCommerceFile!.extension?.toLowerCase() ?? '';
+        if (['jpg', 'jpeg', 'png'].contains(ext)) {
+          chamberOfCommerceUrl = await UploadToFireStorage().uploadFile(
+            XFile(chamberOfCommerceFile!.path!),
+            'agents/documents',
+          );
+        } else {
+          final fileRef = AppFireStorage.agentDocStorageRef.child(
+            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${chamberOfCommerceFile!.name}',
+          );
+          await fileRef.putFile(File(chamberOfCommerceFile!.path!));
+          chamberOfCommerceUrl = await fileRef.getDownloadURL();
         }
       }
 
-      // Upload certifications
-      if (certifications.isNotEmpty) {
-        certificationUrls = [];
-        for (var cert in certifications) {
-          try {
-            if (cert.path != null) {
-              final fileRef = AppFireStorage.agentDocStorageRef.child(
-                'agents/certifications/${DateTime.now().millisecondsSinceEpoch}_${cert.name}',
-              );
-              final uploadTask = fileRef.putFile(File(cert.path!));
-              final snapshot = await uploadTask;
-              final downloadUrl = await snapshot.ref.getDownloadURL();
-              certificationUrls.add(downloadUrl);
-            }
-          } catch (e) {
-            if (kDebugMode) print('Cert upload failed: $e');
-          }
+      for (var cert in certifications) {
+        if (cert.path != null) {
+          final url = await UploadToFireStorage().uploadFile(
+            XFile(cert.path!),
+            'agents/certifications',
+          );
+          if (url != null) certUrls.add(url);
         }
       }
 
@@ -772,8 +467,7 @@ class _SignupState extends State<Signup> {
         placemark: _placeMark,
       );
 
-      // Create user document
-      final userModel = UserModel(
+      final user = UserModel(
         role: "technician",
         uid: widget.uid,
         name: nameController.text.trim(),
@@ -784,9 +478,11 @@ class _SignupState extends State<Signup> {
         country: "SA",
         location: location,
         jobRoles: selectedJobRoles,
-        profileUrl: profileImageUrl,
-        docUrl: idImageUrl,
-        certifications: certificationUrls,
+        profileUrl: profileUrl,
+        residenceIdUrl: residenceIdUrl,
+        sponsorWorkPermitUrl: sponsorWorkPermitUrl,
+        chamberOfCommerceApprovalUrl: chamberOfCommerceUrl,
+        certifications: certUrls,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         isVerified: false,
@@ -794,606 +490,566 @@ class _SignupState extends State<Signup> {
         isOnline: false,
       );
 
-      await AppFirestore.usersCollectionRef
-          .doc(widget.uid)
-          .set(userModel.toJson());
-
-      // Save UID to local storage
+      await AppFirestore.usersCollectionRef.doc(widget.uid).set(user.toJson());
       await LocalStore.putUID(widget.uid);
+      await LocalStore.storeUserData(user);
 
-      // Refresh FCM token after account creation
-      await NotificationServices.refreshFCMToken();
-
-      // ✅ Close loading dialog
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
+      try {
+        final fcmToken = await NotificationServices.getCurrentFCMToken();
+        if (fcmToken != null) {
+          await AppServices.updateFCMToken(fcmToken);
+        }
+      } catch (e) {
+        debugPrint('FCM Token error: $e');
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.accountCreatedSuccessfully ??
-                  'Account created successfully!',
-            ),
-            backgroundColor: Colors.green,
-          ),
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+          (route) => false,
         );
-
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Home(isNewRegistration: true),
-            ),
-            (route) => false,
-          );
-        }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Signup error: $e');
-      }
-
-      // ✅ Close loading dialog on error
       if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.failedToCreateAccount ??
-                  'Failed to create account',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Navigator.pop(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Registration failed: $e')));
       }
     }
   }
 
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: DMSansFont.textStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade100),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context)!;
 
-  Widget _buildFileItem({
-    required String label,
-    required VoidCallback onTap,
-    VoidCallback? onRemove,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          localization.createAccount,
+          style: DMSansFont.textStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           children: [
-            const Icon(Icons.description_outlined, size: 20, color: Colors.grey),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: DMSansFont.textStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey[100],
+                    backgroundImage: profileImage != null
+                        ? FileImage(File(profileImage!.path))
+                        : null,
+                    child: profileImage == null
+                        ? Icon(
+                            Icons.person_outline,
+                            size: 50,
+                            color: Colors.grey[400],
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () async {
+                        final img = await _pickImage();
+                        if (img != null) setState(() => profileImage = img);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Icon(Icons.open_in_new, size: 16, color: Colors.grey),
-            if (onRemove != null) ...[
-              const SizedBox(width: 12),
-              GestureDetector(
-                onTap: onRemove,
-                child: const Icon(Icons.delete_outline, color: Colors.red),
+
+            const SizedBox(height: 32),
+
+            _buildSectionTitle(
+              localization.fullName ,
+              mandatory: true,
+            ),
+            TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: localization.enterYourFullName,
+                hintStyle: DMSansFont.textStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
               ),
-            ],
+              style: DMSansFont.textStyle(fontSize: 16),
+              validator: (v) => v!.isEmpty ? localization.pleaseEnterYourFullName : null,
+            ),
+
+            _buildSectionTitle(
+              localization.phoneNumber,
+              mandatory: true,
+            ),
+            TextFormField(
+              controller: phoneController,
+              enabled: false,
+              readOnly: true,
+              decoration: InputDecoration(
+                hintText: localization.phoneNumber,
+                prefixIcon: const Icon(Icons.phone_android, size: 18),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                fillColor: Colors.grey[50],
+                filled: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+              ),
+              style: DMSansFont.textStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+
+            _buildSectionTitle(localization.email ),
+            TextFormField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: localization.enterYourEmail,
+                hintStyle: DMSansFont.textStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+              ),
+              style: DMSansFont.textStyle(fontSize: 16),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32.0),
+              child: Divider(),
+            ),
+
+            _buildFileOrImagePickerTile(
+              title: localization.residenceIDImage,
+              fileOrImage: residenceIdImage,
+              mandatory: true,
+              onTap: () async {
+                final img = await _pickImage(square: false);
+                if (img != null) setState(() => residenceIdImage = img);
+              },
+              onClear: () => setState(() => residenceIdImage = null),
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildFileOrImagePickerTile(
+              title: localization.sponsorWorkPermit,
+              fileOrImage: sponsorWorkPermitFile,
+              mandatory: true,
+              onTap: () async {
+                final file = await _pickFile();
+                if (file != null) setState(() => sponsorWorkPermitFile = file);
+              },
+              onClear: () => setState(() => sponsorWorkPermitFile = null),
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildFileOrImagePickerTile(
+              title: localization.chamberOfCommerceApproval,
+              fileOrImage: chamberOfCommerceFile,
+              mandatory: true,
+              onTap: () async {
+                final file = await _pickFile();
+                if (file != null) setState(() => chamberOfCommerceFile = file);
+              },
+              onClear: () => setState(() => chamberOfCommerceFile = null),
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle(localization.certificatesOrTrainingCoursesOptional),
+            GestureDetector(
+              onTap: _pickCertifications,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.file_present_rounded, color: AppColors.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        certifications.isEmpty
+                            ? localization.uploadCertificates
+                            : '${certifications.length} ${localization.filesSelected}',
+                        style: DMSansFont.textStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (certifications.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Wrap(
+                  spacing: 8,
+                  children: certifications.asMap().entries.map((entry) {
+                    return Chip(
+                      label: Text(
+                        entry.value.name,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      onDeleted: () =>
+                          setState(() => certifications.removeAt(entry.key)),
+                      deleteIcon: const Icon(Icons.close, size: 14),
+                      backgroundColor: Colors.grey[100],
+                    );
+                  }).toList(),
+                ),
+              ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32.0),
+              child: Divider(),
+            ),
+
+            _buildSectionTitle(
+              localization.location,
+              mandatory: true,
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey[100]!),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.location_on,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _placeMark != null
+                              ? '${_placeMark!.street}, ${_placeMark!.locality}'
+                              : localization.fetching,
+                          style: DMSansFont.textStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (_placeMark != null)
+                          Text(
+                            '${_placeMark!.subAdministrativeArea}, ${_placeMark!.country}',
+                            style: DMSansFont.textStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (_isFetchingLocation)
+                    const Loader(size: 16)
+                  else
+                    IconButton(
+                      onPressed: _getCurrentLocation,
+                      icon: Icon(
+                        Icons.my_location,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      tooltip: localization.refreshLocation,
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle(
+              localization.jobRoles,
+              mandatory: true,
+            ),
+            GestureDetector(
+              onTap: _showJobRoleSelector,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.work_outline,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        selectedJobRoles.isEmpty
+                            ? localization.selectJobRoles
+                            : _getJobRoleNames(),
+                        style: DMSansFont.textStyle(
+                          color: selectedJobRoles.isEmpty
+                              ? Colors.grey[400]
+                              : Colors.black87,
+                          fontWeight: selectedJobRoles.isEmpty
+                              ? FontWeight.normal
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 48),
+
+            eButton(
+              context: context,
+              onPressed: _submitSignup,
+              text: localization.createAccount,
+              backgroundColor: AppColors.primary,
+              textColor: Colors.white,
+            ),
+
+            const SizedBox(height: 48),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfilePicker() {
-    return Center(
-      child: Stack(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
-            ),
-            child: CircleAvatar(
-              radius: 56,
-              backgroundColor: Colors.grey.shade100,
-              backgroundImage: profileImage != null
-                  ? FileImage(File(profileImage!.path))
-                  : null,
-              child: profileImage == null
-                  ? Icon(Icons.person_outline, size: 48, color: Colors.grey.shade400)
-                  : null,
-            ),
-          ),
-          Positioned(
-            bottom: 4,
-            right: 4,
-            child: GestureDetector(
-              onTap: _pickProfileImage,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-            ),
-          ),
-        ],
+  void _showJobRoleSelector() {
+    final localization = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context)!;
-    final safePadding = MediaQuery.of(context).padding;
-
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          await _handleCancelRegistration();
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.bgWhite,
-        appBar: AppBar(
-          backgroundColor: AppColors.bgWhite,
-          elevation: 0,
-          surfaceTintColor: AppColors.bgWhite,
-          centerTitle: true,
-          title: Text(
-            locale.completeRegistration,
-            style: DMSansFont.textStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
-          ),
-          leading: IconButton(
-            iconSize: 18,
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: _handleCancelRegistration,
-          ),
-        ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, safePadding.bottom + 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (isLoadingCategories) 
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: LinearProgressIndicator(),
-                  ),
-
-                _buildProfilePicker(),
-                const SizedBox(height: 32),
-
-                _buildSection(
-                  title: locale.personalInformation,
-                  icon: Icons.person_outline,
-                  children: [
-                    TextFormWidget(
-                      controller: nameController,
-                      label: locale.fullName,
-                      keyboardType: TextInputType.name,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return locale.pleaseEnterYourName;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormWidget(
-                      controller: phoneController,
-                      label: locale.phoneNumber,
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormWidget(
-                      controller: emailController,
-                      label: '${locale.email} (${locale.optional})',
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (!emailRegex.hasMatch(value)) {
-                            return locale.pleaseEnterValidEmail;
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
-
-                _buildSection(
-                  title: locale.location,
-                  icon: Icons.location_on_outlined,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                        icon: _isFetchingLocation
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.my_location, size: 18),
-                        label: Text(
-                          _isFetchingLocation ? '...' : locale.useCurrentLocation,
-                          style: DMSansFont.textStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        localization.selectJobRoles,
+                        style: DMSansFont.textStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    if (_currentPosition != null) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.green.withOpacity(0.1)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (_placeMark != null)
-                                    Text(
-                                      "${_placeMark!.locality ?? ''}, ${_placeMark!.administrativeArea ?? ''}",
-                                      style: DMSansFont.textStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.green.shade900,
-                                      ),
-                                    ),
-                                  Text(
-                                    "Lat: ${_currentPosition!.latitude.toStringAsFixed(4)}, Lon: ${_currentPosition!.longitude.toStringAsFixed(4)}",
-                                    style: DMSansFont.textStyle(
-                                      fontSize: 12,
-                                      color: Colors.green.shade700,
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    localization.selectJobRolesDescription,
+                    style: DMSansFont.textStyle(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: isLoadingCategories
+                        ? const Center(child: Loader())
+                        : ListView.separated(
+                            itemCount: jobCategories.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final cat = jobCategories[index];
+                              final isSelected = selectedJobRoles.contains(
+                                cat['id'],
+                              );
+                              return GestureDetector(
+                                onTap: () {
+                                  setModalState(() {
+                                    if (isSelected)
+                                      selectedJobRoles.remove(cat['id']);
+                                    else
+                                      selectedJobRoles.add(cat['id']);
+                                  });
+                                  setState(() {});
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.primary.withOpacity(0.05)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : Colors.grey[200]!,
+                                      width: 1.5,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    if (_locationError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _locationError!,
-                        style: DMSansFont.textStyle(color: Colors.red, fontSize: 12),
-                      ),
-                    ],
-                  ],
-                ),
-
-                _buildSection(
-                  title: locale.jobRoles,
-                  icon: Icons.engineering_outlined,
-                  children: [
-                    InkWell(
-                      onTap: isLoadingCategories ? null : _selectJobRoles,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                selectedJobRoles.isEmpty
-                                    ? locale.selectJobRoles
-                                    : _getJobRoleNames(),
-                                style: DMSansFont.textStyle(
-                                  color: selectedJobRoles.isEmpty
-                                      ? Colors.grey
-                                      : Colors.black,
-                                  fontSize: 14,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          LocalStore.getUserlanguage() == 'ar'
+                                              ? cat['nameAr']
+                                              : cat['name'],
+                                          style: DMSansFont.textStyle(
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            color: isSelected
+                                                ? AppColors.primary
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      if (isSelected)
+                                        Icon(
+                                          Icons.check_circle,
+                                          color: AppColors.primary,
+                                        )
+                                      else
+                                        Icon(
+                                          Icons.circle_outlined,
+                                          color: Colors.grey[300],
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                _buildSection(
-                  title: locale.documents,
-                  icon: Icons.file_present_outlined,
-                  children: [
-                    Text(
-                      locale.idDocument,
-                      style: DMSansFont.textStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (idImage != null)
-                      _buildFileItem(
-                        label: locale.idDocument,
-                        onTap: () => _showFullScreenImage(idImage!, context),
-                        onRemove: _removeIdImage,
-                      )
-                    else
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: _pickIdImage,
-                          icon: const Icon(Icons.add_photo_alternate_outlined, size: 20),
-                          label: Text(locale.uploadIdDocument),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: BorderSide(color: AppColors.primary),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                              );
+                            },
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: 20),
-                    Text(
-                      '${locale.certifications} (${locale.optional})',
-                      style: DMSansFont.textStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...certifications.asMap().entries.map((entry) {
-                      return _buildFileItem(
-                        label: entry.value.name,
-                        onTap: () => _viewCertification(entry.value),
-                        onRemove: () => _removeCertification(entry.key),
-                      );
-                    }),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _pickCertifications,
-                        icon: const Icon(Icons.add_circle_outline, size: 20),
-                        label: Text(locale.uploadCertifications),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.grey.shade700,
-                          side: BorderSide(color: Colors.grey.shade300),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + safePadding.bottom),
-          decoration: BoxDecoration(
-            color: AppColors.bgWhite,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
+                  ),
+                  const SizedBox(height: 24),
+                  eButton(
+                    context: context,
+                    onPressed: () => Navigator.pop(context),
+                    text: localization.done,
+                    backgroundColor: AppColors.primary,
+                    textColor: Colors.white,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: SizedBox(
-            height: 55,
-            child: ElevatedButton(
-              onPressed: isCreatingAccount ? null : _submitSignup,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.black,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: isCreatingAccount
-                  ? Loader(color: Colors.white, size: 24)
-                  : Text(
-                      locale.createAccount,
-                      style: DMSansFont.textStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.dispose();
-  }
-
-  Future<bool> _handleCancelRegistration() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgWhite,
-        actionsAlignment: MainAxisAlignment.start,
-        title: Text(AppLocalizations.of(context)!.cancelRegistration),
-        content: Text(
-          AppLocalizations.of(context)!.cancelRegistrationConfirmation,
-        ),
-        actions: [
-          eButton(
-            backgroundColor: AppColors.bgWhite,
-            context: context,
-            onPressed: () => Navigator.pop(context, false),
-            text: AppLocalizations.of(context)!.no,
-            textColor: Colors.black,
-          ),
-          eButton(
-            backgroundColor: Colors.red,
-            context: context,
-            onPressed: () => Navigator.pop(context, true),
-            text: AppLocalizations.of(context)!.yes,
-            textColor: Colors.white,
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return false;
-    if (!mounted) return false;
-
-    try {
-      await FirebaseAuth.instance.currentUser?.delete();
-    } catch (_) {
-      await FirebaseAuth.instance.signOut();
-    }
-
-    await LocalStore.clearUID();
-    await LocalStore.putlogoutStatus(true);
-
-    if (!mounted) return false;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (route) => false,
-    );
-
-    return false; // ✅ allow pop after handling
+  String _getJobRoleNames() {
+    return selectedJobRoles
+        .map((id) {
+          final cat = jobCategories.firstWhere(
+            (element) => element['id'] == id,
+            orElse: () => {},
+          );
+          return LocalStore.getUserlanguage() == 'ar'
+              ? (cat['nameAr'] ?? id)
+              : (cat['name'] ?? id);
+        })
+        .join(', ');
   }
 }

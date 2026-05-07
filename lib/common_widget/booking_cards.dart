@@ -816,6 +816,144 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     }
   }
 
+  Future<void> _showProfessionalRejectionDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final bool isRebook = widget.offer.offerData['isRebook'] == true;
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: EdgeInsets.zero,
+        title: Column(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+              child: Text(
+                l10n.areYouSure,
+                style: DMSansFont.textStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n.rejectionProfessionalMessage,
+          style: DMSansFont.textStyle(color: Colors.grey[600], fontSize: 14),
+          textAlign: TextAlign.center,
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        actions: [
+          if (isRebook) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _declineOffer(context);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      l10n.rejectOffer,
+                      style: DMSansFont.textStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _proposeNewTime(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n.proposeAlternativeTime,
+                      style: DMSansFont.textStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      l10n.cancel,
+                      style: DMSansFont.textStyle(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _declineOffer(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n.rejectOffer,
+                      style: DMSansFont.textStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Future<void> _declineOffer(BuildContext context) async {
     setState(() => _isLoading = true);
     try {
@@ -1042,15 +1180,13 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (data['isRebook'] == true) ...[
-                    _buildSmallButton(
-                      label: localization.proposeNewTime,
-                      color: AppColors.secondary,
-                      onPressed: () => _proposeNewTime(context),
-                      isOutlined: true,
-                    ),
-                    const SizedBox(width: 12),
-                  ],
+                  _buildSmallButton(
+                    label: localization.reject,
+                    color: Colors.red,
+                    onPressed: () => _showProfessionalRejectionDialog(context),
+                    isOutlined: true,
+                  ),
+                  const SizedBox(width: 12),
                   _buildSmallButton(
                     label: localization.accept,
                     color: AppColors.primary,

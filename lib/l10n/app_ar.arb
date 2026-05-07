@@ -939,8 +939,12 @@
   "payoutRejectedSuccessfully": "تم رفض الدفعة بنجاح",
   "payoutRejected": "رفض الدفعة",
   "rejectConfirmation": "هل أنت متأكد أنك تريد رفض طلب الدفعة؟",
+  "pleaseEnterYourFullName":"يرجى إدخال اسمك الكامل",
   "reason": "السبب",
+  "enterYourEmail":"أدخل بريدك الإلكتروني",
+  "enterYourFullName":"أدخل اسمك الكامل",
   "enterTheReason": "أدخل سبب رفض طلب الدفعة",
+  "fullNameIsRequired":"الاسم الكامل مطلوب",
   "payoutRequests": "طلبات الدفع",
   "status": "الحالة",
   "noPayoutRequestsFound": "لم يتم العثور على طلبات دفع",
@@ -1527,6 +1531,12 @@
   "areYouSure": "هل أنت متأكد؟",
   "notes": "ملاحظات",
   "time": "الوقت",
-  "appointmentDetails": "تفاصيل الموعد"
-  
+  "appointmentDetails": "تفاصيل الموعد",
+  "residenceIDImage": "صورة الإقامة",
+  "sponsorWorkPermit": "تصريح عمل الكفيل",
+  "chamberOfCommerceApproval": "موافقة الغرفة التجارية",
+  "certificatesOrTrainingCoursesOptional": "الشهادات أو الدورات التدريبية (اختياري)",
+  "uploadCertificates": "تحميل الشهادات",
+  "refreshLocation": "تحديث الموقع",
+  "selectJobRolesDescription": "اختر الخدمات التي أنت مؤهل لتقديمها."
 }

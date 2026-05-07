@@ -38,7 +38,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'أبو جلمبو';
 
   @override
+  String get enterYourFullName => 'أدخل اسمك الكامل';
+
+  @override
+  String get pleaseEnterYourFullName => 'يرجى إدخال اسمك الكامل';
+
+  @override
   String get onlineStatusOn => 'أنت الآن متصل';
+
+  @override
+  String get fullNameIsRequired => 'الاسم الكامل مطلوب';
+
+  @override
+  String get enterYourEmail => 'أدخل بريدك الإلكتروني';
 
   @override
   String get onlineStatusOff => 'أنت الآن غير متصل';
@@ -2178,6 +2190,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inspection => 'فحص';
 
   @override
+  String get inspectionFee => 'رسوم الفحص';
+
+  @override
   String get bookingId => 'رقم الحجز';
 
   @override
@@ -2530,19 +2545,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get managefaq => 'إدارة الأسئلة الشائعة';
 
   @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'تم اختيار $count فنيين',
-      two: 'تم اختيار فنيين',
-      one: 'تم اختيار فني واحد',
-      zero: 'لم يتم اختيار أي فني',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get technicianArrived => 'وصل الفني';
 
   @override
@@ -2873,9 +2875,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectAll => 'اختر الكل';
-
-  @override
-  String get inspectionFee => 'رسوم الفحص';
 
   @override
   String get cancelledBy => 'تم الإلغاء بواسطة';
@@ -3427,6 +3426,19 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'تم ($count محدد)';
+  }
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اختيار $count فنيين',
+      two: 'تم اختيار فنيين',
+      one: 'تم اختيار فني واحد',
+      zero: 'لم يتم اختيار أي فني',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4603,4 +4615,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appointmentDetails => 'تفاصيل الموعد';
+
+  @override
+  String get residenceIDImage => 'صورة الإقامة';
+
+  @override
+  String get sponsorWorkPermit => 'تصريح عمل الكفيل';
+
+  @override
+  String get chamberOfCommerceApproval => 'موافقة الغرفة التجارية';
+
+  @override
+  String get certificatesOrTrainingCoursesOptional =>
+      'الشهادات أو الدورات التدريبية (اختياري)';
+
+  @override
+  String get uploadCertificates => 'تحميل الشهادات';
+
+  @override
+  String get refreshLocation => 'تحديث الموقع';
+
+  @override
+  String get selectJobRolesDescription =>
+      'اختر الخدمات التي أنت مؤهل لتقديمها.';
 }

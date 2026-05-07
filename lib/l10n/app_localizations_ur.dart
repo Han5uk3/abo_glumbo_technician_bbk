@@ -38,7 +38,19 @@ class AppLocalizationsUr extends AppLocalizations {
   String get appName => 'ابو جلمبو';
 
   @override
+  String get enterYourFullName => 'اپنا پورا نام درج کریں';
+
+  @override
+  String get pleaseEnterYourFullName => 'براہ کرم اپنا پورا نام درج کریں';
+
+  @override
   String get onlineStatusOn => 'اب آپ آن لائن ہیں';
+
+  @override
+  String get fullNameIsRequired => 'پورا نام ضروری ہے';
+
+  @override
+  String get enterYourEmail => 'اپنا ای میل درج کریں';
 
   @override
   String get onlineStatusOff => 'اب آپ آف لائن ہیں';
@@ -318,7 +330,8 @@ class AppLocalizationsUr extends AppLocalizations {
       'مقام کی اجازت مستقل طور پر مسترد کر دی گئی ہے۔ نوکری کی پیشکشیں حاصل کرنے کے لیے براہ کرم انہیں ایپ کی ترتیبات میں فعال کریں۔';
 
   @override
-  String get pleaseEnableLocationServices => 'براہ کرم مقام کی خدمات فعال کریں';
+  String get pleaseEnableLocationServices =>
+      'ٹیکنیشن کے طور پر ایپ کا استعمال جاری رکھنے کے لیے براہ کرم لوکیشن سروسز کو فعال کریں۔';
 
   @override
   String get fetching => 'حاصل کیا جا رہا ہے...';
@@ -2217,6 +2230,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get inspection => 'معائنہ';
 
   @override
+  String get inspectionFee => 'معائنہ فیس';
+
+  @override
   String get bookingId => 'بکنگ آئی ڈی';
 
   @override
@@ -2575,18 +2591,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get managefaq => 'سوالات کا انتظام کریں';
 
   @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ٹیکنیشنز منتخب کیے گئے',
-      one: '1 ٹیکنیشن منتخب کیا گیا',
-      zero: 'کوئی ٹیکنیشن منتخب نہیں کیا گیا',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get technicianArrived => 'ٹیکنیشن پہنچ گیا';
 
   @override
@@ -2923,9 +2927,6 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get selectAll => 'سب منتخب کریں';
-
-  @override
-  String get inspectionFee => 'معائنہ فیس';
 
   @override
   String get cancelledBy => 'منسوخ شدہ بذریعہ';
@@ -3490,6 +3491,18 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'ہو گیا ($count منتخب)';
+  }
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ٹیکنیشنز منتخب کیے گئے',
+      one: '1 ٹیکنیشن منتخب کیا گیا',
+      zero: 'کوئی ٹیکنیشن منتخب نہیں کیا گیا',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4684,4 +4697,27 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get appointmentDetails => 'تقرری کی تفصیلات';
+
+  @override
+  String get residenceIDImage => 'رہائشی شناختی کارڈ کی تصویر';
+
+  @override
+  String get sponsorWorkPermit => 'سپانسر ورک پرمٹ';
+
+  @override
+  String get chamberOfCommerceApproval => 'چیمبر آف کامرس کی منظوری';
+
+  @override
+  String get certificatesOrTrainingCoursesOptional =>
+      'سرٹیفکیٹ یا تربیتی کورسز (اختیاری)';
+
+  @override
+  String get uploadCertificates => 'سرٹیفکیٹ اپ لوڈ کریں';
+
+  @override
+  String get refreshLocation => 'مقام کو ریفریش کریں';
+
+  @override
+  String get selectJobRolesDescription =>
+      'وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔';
 }

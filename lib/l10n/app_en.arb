@@ -8,7 +8,11 @@
   "awaitingCustomerAction": "Awaiting Customer Action",
   "kmAway": "{distance} km away",
   "appName": "Abo Glumbo",
+  "enterYourFullName": "Enter Your Full Name",
+  "pleaseEnterYourFullName":"Please Enter Your Full Name",
   "onlineStatusOn": "You are now Online",
+  "fullNameIsRequired":"Full Name is required",
+  "enterYourEmail":"Enter Your Email",
   "onlineStatusOff": "You are now Offline",
   "errorUpdatingStatus": "Error updating status",
   "appLoginCaption": "Your go-to app for finding qualified professionals.",
@@ -1549,5 +1553,12 @@
   "areYouSure": "Are you sure?",
   "notes": "Notes",
   "time": "Time",
-  "appointmentDetails": "Appointment Details"
+  "appointmentDetails": "Appointment Details",
+  "residenceIDImage": "Residence ID Image",
+  "sponsorWorkPermit": "Sponsor Work Permit",
+  "chamberOfCommerceApproval": "Chamber of Commerce Approval",
+  "certificatesOrTrainingCoursesOptional": "Certificates or Training Courses (Optional)",
+  "uploadCertificates": "Upload Certificates",
+  "refreshLocation": "Refresh Location",
+  "selectJobRolesDescription": "Choose the services you are qualified to provide."
 }

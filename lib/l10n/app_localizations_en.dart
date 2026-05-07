@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewOnly => 'View Only';
 
   @override
-  String get noTechnicianAssigned => 'No technician assigned';
+  String get noTechnicianAssigned => 'No Technician Assigned';
 
   @override
   String get calculatingDistance => 'Calculating distance...';
@@ -38,7 +38,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Abo Glumbo';
 
   @override
+  String get enterYourFullName => 'Enter Your Full Name';
+
+  @override
+  String get pleaseEnterYourFullName => 'Please Enter Your Full Name';
+
+  @override
   String get onlineStatusOn => 'You are now Online';
+
+  @override
+  String get fullNameIsRequired => 'Full Name is required';
+
+  @override
+  String get enterYourEmail => 'Enter Your Email';
 
   @override
   String get onlineStatusOff => 'You are now Offline';
@@ -316,7 +328,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location permissions are permanently denied. Please enable them in app settings to receive job offers.';
 
   @override
-  String get pleaseEnableLocationServices => 'Please enable location services';
+  String get pleaseEnableLocationServices =>
+      'Please enable location services to continue using the app as a technician.';
 
   @override
   String get fetching => 'Fetching...';
@@ -537,7 +550,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBookingsFound => 'No bookings found.';
 
   @override
-  String get searchServices => 'Search services...';
+  String get searchServices => 'Search services';
 
   @override
   String get noServicesInYourWishlist => 'No services in your wishlist';
@@ -2207,6 +2220,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inspection => 'Inspection';
 
   @override
+  String get inspectionFee => 'Inspection Fee';
+
+  @override
   String get bookingId => 'Booking ID';
 
   @override
@@ -2566,18 +2582,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get managefaq => 'Manage FAQ';
 
   @override
-  String technicianSelected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count technicians selected',
-      one: '1 technician selected',
-      zero: 'No technicians selected',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get technicianArrived => 'Technician Arrived';
 
   @override
@@ -2913,9 +2917,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectAll => 'Select All';
-
-  @override
-  String get inspectionFee => 'Inspection Fee';
 
   @override
   String get cancelledBy => 'Cancelled By';
@@ -3478,6 +3479,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String doneSelectedCount(int count) {
     return 'Done ($count selected)';
+  }
+
+  @override
+  String technicianSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count technicians selected',
+      one: '1 technician selected',
+      zero: 'No technicians selected',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4669,4 +4682,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appointmentDetails => 'Appointment Details';
+
+  @override
+  String get residenceIDImage => 'Residence ID Image';
+
+  @override
+  String get sponsorWorkPermit => 'Sponsor Work Permit';
+
+  @override
+  String get chamberOfCommerceApproval => 'Chamber of Commerce Approval';
+
+  @override
+  String get certificatesOrTrainingCoursesOptional =>
+      'Certificates or Training Courses (Optional)';
+
+  @override
+  String get uploadCertificates => 'Upload Certificates';
+
+  @override
+  String get refreshLocation => 'Refresh Location';
+
+  @override
+  String get selectJobRolesDescription =>
+      'Choose the services you are qualified to provide.';
 }

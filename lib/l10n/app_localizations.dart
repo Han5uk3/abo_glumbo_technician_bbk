@@ -127,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @noTechnicianAssigned.
   ///
   /// In en, this message translates to:
-  /// **'No technician assigned'**
+  /// **'No Technician Assigned'**
   String get noTechnicianAssigned;
 
   /// No description provided for @calculatingDistance.
@@ -154,11 +154,35 @@ abstract class AppLocalizations {
   /// **'Abo Glumbo'**
   String get appName;
 
+  /// No description provided for @enterYourFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Your Full Name'**
+  String get enterYourFullName;
+
+  /// No description provided for @pleaseEnterYourFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Your Full Name'**
+  String get pleaseEnterYourFullName;
+
   /// No description provided for @onlineStatusOn.
   ///
   /// In en, this message translates to:
   /// **'You are now Online'**
   String get onlineStatusOn;
+
+  /// No description provided for @fullNameIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name is required'**
+  String get fullNameIsRequired;
+
+  /// No description provided for @enterYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Your Email'**
+  String get enterYourEmail;
 
   /// No description provided for @onlineStatusOff.
   ///
@@ -691,7 +715,7 @@ abstract class AppLocalizations {
   /// No description provided for @pleaseEnableLocationServices.
   ///
   /// In en, this message translates to:
-  /// **'Please enable location services'**
+  /// **'Please enable location services to continue using the app as a technician.'**
   String get pleaseEnableLocationServices;
 
   /// No description provided for @fetching.
@@ -1123,7 +1147,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchServices.
   ///
   /// In en, this message translates to:
-  /// **'Search services...'**
+  /// **'Search services'**
   String get searchServices;
 
   /// No description provided for @noServicesInYourWishlist.
@@ -4330,6 +4354,12 @@ abstract class AppLocalizations {
   /// **'Inspection'**
   String get inspection;
 
+  /// No description provided for @inspectionFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection Fee'**
+  String get inspectionFee;
+
   /// No description provided for @bookingId.
   ///
   /// In en, this message translates to:
@@ -4965,12 +4995,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage FAQ'**
   String get managefaq;
-
-  /// Message showing number of technicians selected with plural forms
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No technicians selected} =1{1 technician selected} other{{count} technicians selected}}'**
-  String technicianSelected(int count);
 
   /// No description provided for @technicianArrived.
   ///
@@ -5613,12 +5637,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select All'**
   String get selectAll;
-
-  /// No description provided for @inspectionFee.
-  ///
-  /// In en, this message translates to:
-  /// **'Inspection Fee'**
-  String get inspectionFee;
 
   /// No description provided for @cancelledBy.
   ///
@@ -6669,6 +6687,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done ({count} selected)'**
   String doneSelectedCount(int count);
+
+  /// Message showing number of technicians selected with plural forms
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No technicians selected} =1{1 technician selected} other{{count} technicians selected}}'**
+  String technicianSelected(int count);
 
   /// Message indicating payout request is successful
   ///
@@ -8782,6 +8806,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Appointment Details'**
   String get appointmentDetails;
+
+  /// No description provided for @residenceIDImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Residence ID Image'**
+  String get residenceIDImage;
+
+  /// No description provided for @sponsorWorkPermit.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsor Work Permit'**
+  String get sponsorWorkPermit;
+
+  /// No description provided for @chamberOfCommerceApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Chamber of Commerce Approval'**
+  String get chamberOfCommerceApproval;
+
+  /// No description provided for @certificatesOrTrainingCoursesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates or Training Courses (Optional)'**
+  String get certificatesOrTrainingCoursesOptional;
+
+  /// No description provided for @uploadCertificates.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Certificates'**
+  String get uploadCertificates;
+
+  /// No description provided for @refreshLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Location'**
+  String get refreshLocation;
+
+  /// No description provided for @selectJobRolesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the services you are qualified to provide.'**
+  String get selectJobRolesDescription;
 }
 
 class _AppLocalizationsDelegate

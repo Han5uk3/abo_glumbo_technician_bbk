@@ -11,12 +11,16 @@ class UpdateProfileEvent extends AccountEvent {
   final XFile? selectedIqamaImage;
   final XFile? selectedProfileImage;
   final List<PlatformFile>? newCertifications;
+  final PlatformFile? selectedSponsorWorkPermitFile;
+  final PlatformFile? selectedChamberOfCommerceFile;
 
   UpdateProfileEvent({
     required this.user,
     this.selectedIqamaImage,
     this.selectedProfileImage,
     this.newCertifications,
+    this.selectedSponsorWorkPermitFile,
+    this.selectedChamberOfCommerceFile,
   });
   @override
   List<Object?> get props => [
@@ -24,6 +28,8 @@ class UpdateProfileEvent extends AccountEvent {
     selectedIqamaImage,
     selectedProfileImage,
     newCertifications,
+    selectedSponsorWorkPermitFile,
+    selectedChamberOfCommerceFile,
   ];
 }
 

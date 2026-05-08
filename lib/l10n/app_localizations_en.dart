@@ -1125,6 +1125,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingAccepted => 'Booking Confirmed';
 
   @override
+  String get bookingAssignedToYou => 'You have been assigned to a booking.';
+
+  @override
   String get yourBookingRequestHasBeenAccepted =>
       'Your booking request has been confirmed! Our team will contact you shortly.';
 
@@ -3842,6 +3845,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get certifications => 'Certifications';
 
   @override
+  String get certificate => 'Certificate';
+
+  @override
   String get idDocumentUploaded => 'ID document uploaded';
 
   @override
@@ -4706,4 +4712,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get selectJobRolesDescription =>
       'Choose the services you are qualified to provide.';
+
+  @override
+  String get updateDocuments => 'Update Documents';
+
+  @override
+  String get pleaseSelectAtLeastOneDocumentToUpdate =>
+      'Please remove and select new file for atleast one of the documents to re-upload';
+
+  @override
+  String reuploadFailed(String error) {
+    return 'Re-upload failed: $error';
+  }
+
+  @override
+  String get selectFile => 'Select File';
+
+  @override
+  String get accountBlocked => 'Account Blocked';
+
+  @override
+  String get accountBlockedMessage =>
+      'Your account has been blocked by the admin. Please contact support for more information.';
+
+  @override
+  String get contactSupport => 'Contact Support';
+
+  @override
+  String get applicationRejected => 'Application Rejected';
+
+  @override
+  String get applicationRejectedMessage =>
+      'Unfortunately, your application has been rejected after review. You can see the reason below and update your documents to try again.';
+
+  @override
+  String get reasonForRejection => 'Reason for rejection:';
+
+  @override
+  String get noReasonProvided => 'No reason provided';
 }

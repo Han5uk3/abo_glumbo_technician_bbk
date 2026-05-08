@@ -286,8 +286,8 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
               targetId: agent.uid,
               titleEn: `New Booking Assigned: ${serviceName}`,
               titleAr: `تم تعيين حجز جديد: ${serviceNameAr}`,
-              bodyEn: `You have accepted a new booking for "${serviceName}"`,
-              bodyAr: `لقد قبلت حجزاً جديداً لخدمة "${serviceNameAr}"`,
+              bodyEn: "You have been assigned to a booking.",
+              bodyAr: "لقد تم تعيينك في حجز جديد.",
               data: {
                 targetRole: "technician",
                 category: "booking",
@@ -461,10 +461,13 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
     const bookingStatus = afterData.bookingStatusCode;
     const isPaymentCompleted = afterData.paymentCompleted;
 
+    const agentNameEn = afterData.agent?.name || "a technician";
+    const agentNameAr = afterData.agent?.name || "فني";
+
     const statusMessages = {
       A: {
-        en: "Your booking has been accepted.",
-        ar: "تم قبول حجزك.",
+        en: `Technician ${agentNameEn} has been booked successfully.`,
+        ar: `تم حجز الفني ${agentNameAr} بنجاح.`,
       },
       R: {
         en: "Your booking has been rejected.",
@@ -4408,6 +4411,71 @@ exports.notifyTechnicianOnNewJobOffer = onDocumentCreated(
     } catch (e) {
       console.error(`[${offerId}] Error processing job offer notification:`, e);
     }
+    return null;
+  }
+);
+
+exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
+  "users/{userId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return null;
+    const userData = snap.data();
+    const userId = event.params.userId;
+
+    // Only notify if the new user is a technician
+    if (userData.role !== "technician") {
+      console.log(`[${userId}] New user is not a technician, skipping notification.`);
+      return null;
+    }
+
+    const techName = userData.name || "New Technician";
+
+    try {
+      const adminUsersDocs = await getAllAdminUsers();
+
+      const adminTokens = adminUsersDocs
+        .map((doc) => {
+          const data = doc.data();
+          return data.fcmToken && data.fcmToken.trim() !== ""
+            ? {
+                uid: doc.id,
+                token: data.fcmToken,
+                lanCode: data.lanCode || "en",
+              }
+            : null;
+        })
+        .filter(Boolean);
+
+      if (adminTokens.length === 0) {
+        console.log(`[${userId}] No admin tokens found for registration notification.`);
+        return null;
+      }
+
+      for (const { uid, token, lanCode } of adminTokens) {
+        await sendAndStoreNotification({
+          targetRole: "admin",
+          targetId: uid,
+          titleEn: "New Technician Registered",
+          titleAr: "فني جديد مسجل",
+          bodyEn: `A new technician "${techName}" has registered and is pending review.`,
+          bodyAr: `تم تسجيل فني جديد باسم "${techName}" وهو بانتظار المراجعة.`,
+          data: {
+            targetRole: "admin",
+            category: "technician_registration",
+            technicianId: userId,
+            technicianName: techName,
+            isAdmin: "true",
+          },
+          fcmToken: token,
+          lanCode: lanCode,
+        });
+      }
+      console.log(`[${userId}] Admin notifications sent for new technician registration.`);
+    } catch (error) {
+      console.error(`[${userId}] Error sending admin notifications for technician registration:`, error);
+    }
+
     return null;
   }
 );

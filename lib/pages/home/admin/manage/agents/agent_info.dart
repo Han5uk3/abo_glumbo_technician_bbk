@@ -605,13 +605,88 @@ class _AgentInfoState extends State<AgentInfo> {
     return Column(
       children: [
         if (agent.isVerified != true) ...[
+          if (agent.isDocsPendingReview == true) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: () => _handleApproveReject(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  l10n.approveAgent,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: OutlinedButton(
+                onPressed: () => _handleApproveReject(false),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red, width: 1.5),
+                  foregroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  l10n.reject,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.hourglass_empty, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      agent.rejectionReason != null
+                          ? "Waiting for technician to re-upload documents"
+                          : "Waiting for technician to complete registration",
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ] else ...[
           SizedBox(
             width: double.infinity,
             height: 54,
             child: ElevatedButton(
-              onPressed: () => _handleApproveReject(true),
+              onPressed: () => _handleBlockUnblock(!(agent.isBlocked ?? false)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor:
+                    agent.isBlocked == true ? Colors.green : Colors.red,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -619,7 +694,7 @@ class _AgentInfoState extends State<AgentInfo> {
                 elevation: 0,
               ),
               child: Text(
-                l10n.approveAgent,
+                agent.isBlocked == true ? l10n.unblock : l10n.block,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -627,69 +702,29 @@ class _AgentInfoState extends State<AgentInfo> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
         ],
-        SizedBox(
-          width: double.infinity,
-          height: 54,
-          child: OutlinedButton(
-            onPressed: () => _handleApproveReject(false),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red, width: 1.5),
-              foregroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              agent.isVerified == true
-                  ? l10n.disapproveAgent
-                  : l10n.reject,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
 
-  Future<void> _handleApproveReject(bool isVerified) async {
-    final l10n = AppLocalizations.of(context)!;
-
+  Future<void> _handleBlockUnblock(bool isBlocked) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          isVerified ? l10n.approveAgent : l10n.disapproveAgent,
-          style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(isBlocked ? "Block Technician" : "Unblock Technician"),
         content: Text(
-          isVerified
-              ? l10n.areYouSureYouWantToApproveThisAgent
-              : l10n.areYouSureYouWantToDisapproveThisAgent,
-          style: DMSansFont.textStyle(),
+          isBlocked
+              ? "Are you sure you want to block this technician?"
+              : "Are you sure you want to unblock this technician?",
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              l10n.cancel,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              isVerified ? l10n.approve : l10n.reject,
-              style: TextStyle(
-                color: isVerified ? AppColors.primary : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(isBlocked ? "Block" : "Unblock"),
           ),
         ],
       ),
@@ -704,31 +739,18 @@ class _AgentInfoState extends State<AgentInfo> {
       );
 
       try {
-        final success =
-            await AppServices.approveOrRejectAgent(agent.uid!, isVerified);
-
+        final success = await AppServices.blockOrUnblockAgent(agent.uid!, isBlocked);
         if (mounted) Navigator.pop(context); // Close loader
 
         if (success) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  isVerified ? l10n.agentApproved : l10n.agentDisapproved,
-                ),
-                backgroundColor: isVerified ? Colors.green : Colors.red,
+                content: Text(isBlocked ? "Technician Blocked" : "Technician Unblocked"),
+                backgroundColor: isBlocked ? Colors.red : Colors.green,
               ),
             );
-            Navigator.pop(context, true); // Go back with success flag
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to update technician status'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            Navigator.pop(context, true);
           }
         }
       } catch (e) {
@@ -742,42 +764,204 @@ class _AgentInfoState extends State<AgentInfo> {
     }
   }
 
+  Future<void> _handleApproveReject(bool isVerified) async {
+    final l10n = AppLocalizations.of(context)!;
+    String? rejectionReason;
+
+    if (!isVerified) {
+      rejectionReason = await showDialog<String>(
+        context: context,
+        builder: (context) {
+          final controller = TextEditingController();
+          return AlertDialog(
+            title: const Text("Rejection Reason"),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: "Enter reason for rejection",
+              ),
+              maxLines: 3,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (controller.text.trim().isNotEmpty) {
+                    Navigator.pop(context, controller.text.trim());
+                  }
+                },
+                child: Text(l10n.reject),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (rejectionReason == null) return;
+    } else {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            l10n.approveAgent,
+            style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            l10n.areYouSureYouWantToApproveThisAgent,
+            style: DMSansFont.textStyle(),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                l10n.cancel,
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                l10n.approve,
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: Loader()),
+    );
+
+    try {
+      final success = await AppServices.approveOrRejectAgent(
+        agent.uid!,
+        isVerified,
+        rejectionReason: rejectionReason,
+      );
+
+      if (mounted) Navigator.pop(context); // Close loader
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isVerified ? l10n.agentApproved : l10n.agentDisapproved,
+              ),
+              backgroundColor: isVerified ? Colors.green : Colors.red,
+            ),
+          );
+          Navigator.pop(context, true); // Go back with success flag
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to update technician status'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   Future<void> _showFullScreenImage(
     String imageUrl,
     BuildContext context,
   ) async {
     final ext = imageUrl.split('.').last.split('?').first.toLowerCase();
-    final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
+    final isImageExtension = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
 
-    if (isImage) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => Scaffold(
-            backgroundColor: Colors.black,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
+    if (!isImageExtension) {
+      await _openDocument(imageUrl, context);
+      return;
+    }
+
+    // Even if it has an image extension, it might be a document (e.g. PDF) 
+    // due to previous upload issues where metadata was set incorrectly.
+    // We check the actual file content by peeking at the first few bytes.
+    try {
+      final response = await http.get(Uri.parse(imageUrl), headers: {'Range': 'bytes=0-10'});
+      if (response.statusCode == 200 || response.statusCode == 206) {
+        final bytes = response.bodyBytes;
+        // Check for PDF magic number: %PDF (0x25 0x50 0x44 0x46)
+        if (bytes.length >= 4 && 
+            bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46) {
+          await _openDocument(imageUrl, context);
+          return;
+        }
+        // Check for ZIP/DOCX magic number: PK.. (0x50 0x4B 0x03 0x04)
+        if (bytes.length >= 2 && bytes[0] == 0x50 && bytes[1] == 0x4B) {
+          await _openDocument(imageUrl, context);
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error peeking file content: $e');
+    }
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            body: Center(
-              child: InteractiveViewer(
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.contain,
-                  placeholder: (context, url) =>
-                      const Loader(color: Colors.white),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+                placeholder: (context, url) =>
+                    const Loader(color: Colors.white),
+                errorWidget: (context, url, error) => const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.white, size: 48),
+                      SizedBox(height: 16),
+                      Text(
+                        "Failed to load image",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      );
-    } else {
-      await _openDocument(imageUrl, context);
-    }
+      ),
+    );
   }
 
   Future<void> _openDocument(String url, BuildContext context) async {
@@ -788,10 +972,31 @@ class _AgentInfoState extends State<AgentInfo> {
         builder: (context) => const Center(child: Loader(color: Colors.white)),
       );
 
-      final response = await http.get(Uri.parse(url));
+        final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final dir = await getTemporaryDirectory();
-        final fileName = url.split('/').last.split('?').first;
+        final bytes = response.bodyBytes;
+        
+        // Determine extension by peeking at the actual downloaded bytes
+        String ext = url.split('.').last.split('?').first.toLowerCase();
+        
+        if (bytes.length >= 4 && 
+            bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46) {
+          ext = 'pdf';
+        } else if (bytes.length >= 2 && bytes[0] == 0x50 && bytes[1] == 0x4B) {
+          ext = 'docx';
+        } else {
+          final contentType = response.headers['content-type'] ?? '';
+          if (contentType.contains('pdf')) {
+            ext = 'pdf';
+          } else if (contentType.contains('msword')) {
+            ext = 'doc';
+          } else if (contentType.contains('officedocument')) {
+            ext = 'docx';
+          }
+        }
+
+        final fileName = 'doc_${DateTime.now().millisecondsSinceEpoch}.$ext';
         final file = File('${dir.path}/$fileName');
         await file.writeAsBytes(response.bodyBytes);
 
@@ -802,6 +1007,7 @@ class _AgentInfoState extends State<AgentInfo> {
       }
     } catch (e) {
       if (context.mounted) Navigator.of(context).pop();
+      debugPrint('Error opening document: $e');
     }
   }
 

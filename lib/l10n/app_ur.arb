@@ -354,6 +354,7 @@
   "editCategory": "زمرہ میں ترمیم کریں",
   "manageCategories": "زمروں کا انتظام کریں",
   "bookingAccepted": "بکنگ کی تصدیق ہو گئی",
+  "bookingAssignedToYou": "آپ کو ایک نئی بکنگ تفویض کر دی گئی ہے۔",
   "yourBookingRequestHasBeenAccepted": "آپ کی بکنگ کی درخواست کی تصدیق ہو گئی ہے! ہماری ٹیم جلد ہی آپ سے رابطہ کرے گی۔",
   "bookingRejected": "بکنگ مسترد کر دی گئی",
   "yourBookingRequestHasBeenRejected": "بدقسمتی سے، آپ کی بکنگ کی درخواست مسترد کر دی گئی ہے۔ براہ کرم دوبارہ کوشش کریں یا سپورٹ سے رابطہ کریں۔",
@@ -1191,6 +1192,7 @@
   "pleaseEnterYourName": "براہ کرم اپنا نام درج کریں",
   "uploadCertifications": "سرٹیفیکیشنز اپ لوڈ کریں",
   "certifications": "سرٹیفیکیشنز",
+  "certificate": "سرٹیفکیٹ",
   "idDocumentUploaded": "شناختی دستاویز اپ لوڈ کر دی گئی",
   "uploadIdDocument": "شناختی دستاویز اپ لوڈ کریں",
   "idDocument": "شناختی دستاویز",
@@ -1478,5 +1480,23 @@
   "certificatesOrTrainingCoursesOptional": "سرٹیفکیٹ یا تربیتی کورسز (اختیاری)",
   "uploadCertificates": "سرٹیفکیٹ اپ لوڈ کریں",
   "refreshLocation": "مقام کو ریفریش کریں",
-  "selectJobRolesDescription": "وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔"
-} 
+  "selectJobRolesDescription": "وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔",
+  "updateDocuments": "دستاویزات اپ ڈیٹ کریں",
+  "pleaseSelectAtLeastOneDocumentToUpdate": "براہ کرم دوبارہ اپ لوڈ کرنے کے لیے کم از کم ایک دستاویز کو ہٹائیں اور نئی فائل منتخب کریں",
+  "reuploadFailed": "دوبارہ اپ لوڈ کرنے میں ناکامی: {error}",
+  "@reuploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectFile": "فائل منتخب کریں",
+  "accountBlocked": "اکاؤنٹ بلاک کر دیا گیا ہے",
+  "accountBlockedMessage": "آپ کے اکاؤنٹ کو ایڈمن نے بلاک کر دیا ہے۔ مزید معلومات کے لیے براہ کرم سپورٹ سے رابطہ کریں۔",
+  "contactSupport": "سپورٹ سے رابطہ کریں",
+  "applicationRejected": "درخواست مسترد کر دی گئی",
+  "applicationRejectedMessage": "بدقسمتی سے، آپ کی درخواست جائزہ لینے کے بعد مسترد کر دی گئی ہے۔ آپ نیچے وجہ دیکھ سکتے ہیں اور دوبارہ کوشش کرنے کے لیے اپنی دستاویزات کو اپ ڈیٹ کر سکتے ہیں۔",
+  "reasonForRejection": "مسترد کرنے کی وجہ:",
+  "noReasonProvided": "کوئی وجہ فراہم نہیں کی گئی"
+}

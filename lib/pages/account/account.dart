@@ -52,12 +52,8 @@ class _AccountPageState extends State<AccountPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.workerData?.isAdmin == true &&
-        widget.workerData?.isGrantedAdminByMain == false) {
-      isMainAdmin = true;
-    } else {
-      isMainAdmin = false;
-    }
+    final adminData = LocalStore.getCachedAdminData();
+    isMainAdmin = adminData?.isCoreAdmin == true;
 
     final cachedUser = LocalStore.getCachedUserData();
     currentWorkerData = cachedUser ?? widget.workerData;

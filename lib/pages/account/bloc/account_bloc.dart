@@ -148,6 +148,49 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         event.user.docUrl = iqamaImageUrl;
       }
 
+      // Handle Residence ID
+      String? residenceIdUrl;
+      bool residenceIdUpdated = false;
+      if (event.selectedIqamaImage != null) {
+        residenceIdUrl = iqamaImageUrl; // Already uploaded above as iqamaImageUrl
+        residenceIdUpdated = true;
+        event.user.residenceIdUrl = residenceIdUrl;
+      }
+
+      // Handle Sponsor Work Permit
+      String? sponsorUrl;
+      bool sponsorUpdated = false;
+      if (event.selectedSponsorWorkPermitFile != null && event.selectedSponsorWorkPermitFile!.path != null) {
+        try {
+          final fileRef = AppFireStorage.agentDocStorageRef.child(
+            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${event.selectedSponsorWorkPermitFile!.name}',
+          );
+          await fileRef.putFile(File(event.selectedSponsorWorkPermitFile!.path!));
+          sponsorUrl = await fileRef.getDownloadURL();
+          event.user.sponsorWorkPermitUrl = sponsorUrl;
+          sponsorUpdated = true;
+        } catch (e) {
+          debugPrint('Failed to upload sponsor permit: $e');
+        }
+      }
+
+      // Handle Chamber of Commerce Approval
+      String? chamberUrl;
+      bool chamberUpdated = false;
+      if (event.selectedChamberOfCommerceFile != null && event.selectedChamberOfCommerceFile!.path != null) {
+        try {
+          final fileRef = AppFireStorage.agentDocStorageRef.child(
+            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${event.selectedChamberOfCommerceFile!.name}',
+          );
+          await fileRef.putFile(File(event.selectedChamberOfCommerceFile!.path!));
+          chamberUrl = await fileRef.getDownloadURL();
+          event.user.chamberOfCommerceApprovalUrl = chamberUrl;
+          chamberUpdated = true;
+        } catch (e) {
+          debugPrint('Failed to upload chamber approval: $e');
+        }
+      }
+
       // Handle Certifications Upload
       bool certificationsUpdated = false;
       if (event.newCertifications != null &&
@@ -157,16 +200,18 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         for (var cert in event.newCertifications!) {
           if (cert.path != null) {
             try {
-              final fileRef = AppFireStorage.agentDocStorageRef.child(
-                'agents/certifications/${DateTime.now().millisecondsSinceEpoch}_${cert.name}',
+              final downloadUrl = await UploadToFireStorage().uploadFile(
+                XFile(cert.path!),
+                'agents/certifications',
               );
-              final uploadTask = fileRef.putFile(File(cert.path!));
-              final snapshot = await uploadTask;
-              final downloadUrl = await snapshot.ref.getDownloadURL();
-              currentCertifications.add(downloadUrl);
-              certificationsUpdated = true;
+              if (downloadUrl != null) {
+                currentCertifications.add(downloadUrl);
+                certificationsUpdated = true;
+              }
             } catch (e) {
-              debugPrint('Failed to upload certification: ${cert.name}, error: $e');
+              debugPrint(
+                'Failed to upload certification: ${cert.name}, error: $e',
+              );
             }
           }
         }
@@ -180,6 +225,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         updateProfileUrl: profileUrlUpdated,
         updateDocUrl: docUrlUpdated,
         updateCertifications: certificationsUpdated,
+        updateResidenceId: residenceIdUpdated,
+        updateSponsorPermit: sponsorUpdated,
+        updateChamberApproval: chamberUpdated,
       );
 
       emit(

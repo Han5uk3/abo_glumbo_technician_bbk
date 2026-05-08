@@ -47,6 +47,10 @@ class UserModel {
   String? residenceIdUrl;
   String? sponsorWorkPermitUrl;
   String? chamberOfCommerceApprovalUrl;
+  bool? isBlocked;
+  String? rejectionReason;
+  bool? isDocsPendingReview; // Flag to indicate docs are ready for admin review
+  bool? isRegistrationComplete; // Flag for initial registration completion
 
 
   UserModel({
@@ -93,6 +97,10 @@ class UserModel {
     this.residenceIdUrl,
     this.sponsorWorkPermitUrl,
     this.chamberOfCommerceApprovalUrl,
+    this.isBlocked,
+    this.rejectionReason,
+    this.isDocsPendingReview,
+    this.isRegistrationComplete,
   });
 
 
@@ -139,6 +147,10 @@ class UserModel {
     String? residenceIdUrl,
     String? sponsorWorkPermitUrl,
     String? chamberOfCommerceApprovalUrl,
+    bool? isBlocked,
+    String? rejectionReason,
+    bool? isDocsPendingReview,
+    bool? isRegistrationComplete,
   }) {
 
     return UserModel(
@@ -185,6 +197,10 @@ class UserModel {
       residenceIdUrl: residenceIdUrl ?? this.residenceIdUrl,
       sponsorWorkPermitUrl: sponsorWorkPermitUrl ?? this.sponsorWorkPermitUrl,
       chamberOfCommerceApprovalUrl: chamberOfCommerceApprovalUrl ?? this.chamberOfCommerceApprovalUrl,
+      isBlocked: isBlocked ?? this.isBlocked,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
+      isDocsPendingReview: isDocsPendingReview ?? this.isDocsPendingReview,
+      isRegistrationComplete: isRegistrationComplete ?? this.isRegistrationComplete,
     );
 
   }
@@ -261,6 +277,10 @@ class UserModel {
       residenceIdUrl: json['residenceIdUrl'],
       sponsorWorkPermitUrl: json['sponsorWorkPermitUrl'],
       chamberOfCommerceApprovalUrl: json['chamberOfCommerceApprovalUrl'],
+      isBlocked: json['isBlocked'],
+      rejectionReason: json['rejectionReason'],
+      isDocsPendingReview: json['isDocsPendingReview'],
+      isRegistrationComplete: json['isRegistrationComplete'],
     );
 
   }
@@ -285,7 +305,7 @@ class UserModel {
       'location': location?.toJson(),
       'updatedAt': updatedAt,
       'isAdmin': isAdmin ?? false,
-      'isVerified': isVerified ?? false,
+      'isVerified': isVerified,
       'districtName': districtName,
       'jobRoles': jobRoles,
       'docUrl': docUrl,
@@ -319,6 +339,10 @@ class UserModel {
       'residenceIdUrl': residenceIdUrl,
       'sponsorWorkPermitUrl': sponsorWorkPermitUrl,
       'chamberOfCommerceApprovalUrl': chamberOfCommerceApprovalUrl,
+      'isBlocked': isBlocked,
+      'rejectionReason': rejectionReason,
+      'isDocsPendingReview': isDocsPendingReview,
+      'isRegistrationComplete': isRegistrationComplete,
     };
 
   }
@@ -343,7 +367,7 @@ class UserModel {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'isAdmin': isAdmin ?? false,
-      'isVerified': isVerified ?? false,
+      'isVerified': isVerified,
       'districtName': districtName,
       'jobRoles': jobRoles,
       'docUrl': docUrl,
@@ -375,6 +399,10 @@ class UserModel {
       'residenceIdUrl': residenceIdUrl,
       'sponsorWorkPermitUrl': sponsorWorkPermitUrl,
       'chamberOfCommerceApprovalUrl': chamberOfCommerceApprovalUrl,
+      'isBlocked': isBlocked,
+      'rejectionReason': rejectionReason,
+      'isDocsPendingReview': isDocsPendingReview,
+      'isRegistrationComplete': isRegistrationComplete,
     };
 
   }

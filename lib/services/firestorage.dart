@@ -8,7 +8,13 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 class UploadToFireStorage {
   Future<XFile?> compressImage(XFile file) async {
     try {
-      final fileSize = await File(file.path).length();
+      final fileToCompress = File(file.path);
+      if (!await fileToCompress.exists()) {
+        debugPrint('Source file for compression does not exist: ${file.path}');
+        return file;
+      }
+
+      final fileSize = await fileToCompress.length();
 
       int quality = 85;
       int maxWidth = 1024;
@@ -27,8 +33,11 @@ class UploadToFireStorage {
       }
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final lastDotIndex = file.path.lastIndexOf('.');
+      if (lastDotIndex == -1) return file;
+
       final compressedPath =
-          '${file.path.substring(0, file.path.lastIndexOf('.'))}_compressed_$timestamp.jpg';
+          '${file.path.substring(0, lastDotIndex)}_compressed_$timestamp.jpg';
 
       final compressedFile = await FlutterImageCompress.compressAndGetFile(
         file.path,
@@ -41,7 +50,7 @@ class UploadToFireStorage {
         autoCorrectionAngle: true,
       );
 
-      if (compressedFile != null) {
+      if (compressedFile != null && await File(compressedFile.path).exists()) {
         return compressedFile;
       }
       return file;
@@ -53,9 +62,15 @@ class UploadToFireStorage {
 
   Future<XFile?> compressToPng(XFile file) async {
     try {
+      final fileToCompress = File(file.path);
+      if (!await fileToCompress.exists()) return file;
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final lastDotIndex = file.path.lastIndexOf('.');
+      if (lastDotIndex == -1) return file;
+
       final pngPath =
-          '${file.path.substring(0, file.path.lastIndexOf('.'))}_fallback_$timestamp.png';
+          '${file.path.substring(0, lastDotIndex)}_fallback_$timestamp.png';
 
       final compressedFile = await FlutterImageCompress.compressAndGetFile(
         file.path,
@@ -67,7 +82,7 @@ class UploadToFireStorage {
         keepExif: false,
       );
 
-      if (compressedFile != null) {
+      if (compressedFile != null && await File(compressedFile.path).exists()) {
         final compressedSize = await File(compressedFile.path).length();
         debugPrint('PNG compressed file size: $compressedSize bytes');
         return compressedFile;
@@ -81,40 +96,52 @@ class UploadToFireStorage {
   }
 
   Future<String?> uploadFile(XFile file, String storagePath) async {
+    final ext = file.path.split('.').last.split('?').first.toLowerCase();
+    final isImage = ['jpg', 'jpeg', 'png', 'webp'].contains(ext);
+
+    if (!isImage) {
+      // For non-images (PDF, Doc, etc.), skip compression and upload directly
+      return _performUpload(
+        file,
+        storagePath,
+        null,
+        extension: ext,
+        contentType: _getContentType(ext),
+      );
+    }
+
+    XFile? compressedFile;
     try {
-      final compressedFile = await compressImage(file);
+      compressedFile = await compressImage(file);
       final finalFile = compressedFile ?? file;
-      final fileSize = await File(finalFile.path).length();
-      if (fileSize > 2 * 1024 * 1024) {
-        throw Exception(
-          'File is too large even after compression. Please select a smaller image or try a different image format.',
+      final finalExt = finalFile.path.split('.').last.split('?').first.toLowerCase();
+
+      final fileToUpload = File(finalFile.path);
+      if (!await fileToUpload.exists()) {
+        debugPrint(
+          'Upload error: Target file not found at ${finalFile.path}. Falling back to original.',
+        );
+        final originalFile = File(file.path);
+        if (!await originalFile.exists()) {
+          throw Exception('The selected file could not be found.');
+        }
+        final origExt = file.path.split('.').last.split('?').first.toLowerCase();
+        return _performUpload(
+          file,
+          storagePath,
+          null,
+          extension: origExt,
+          contentType: _getContentType(origExt),
         );
       }
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final randomSuffix = (timestamp % 10000).toString();
-      final fileName = 'img_${timestamp}_$randomSuffix.jpg';
-      final ref = AppFireStorage.agentDocStorageRef
-          .child(storagePath)
-          .child(fileName);
 
-      final metadata = SettableMetadata(
-        contentType: 'image/jpeg',
-        cacheControl: 'public, max-age=31536000',
+      return _performUpload(
+        finalFile,
+        storagePath,
+        compressedFile,
+        extension: finalExt,
+        contentType: _getContentType(finalExt),
       );
-      final uploadTask = ref.putFile(File(finalFile.path), metadata);
-      const timeoutDuration = Duration(minutes: 3);
-
-      final snapshot = await uploadTask.timeout(timeoutDuration);
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-      try {
-        if (compressedFile != null && compressedFile.path != file.path) {
-          await File(compressedFile.path).delete();
-        }
-      } catch (e) {
-        debugPrint('Error deleting temporary file: $e');
-      }
-
-      return downloadUrl;
     } on FirebaseException catch (e) {
       debugPrint('Firebase error: ${e.code} - ${e.message}');
 
@@ -162,5 +189,75 @@ class UploadToFireStorage {
       );
     }
   }
-  
+
+  String _getContentType(String ext) {
+    switch (ext) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<String?> _performUpload(
+    XFile finalFile,
+    String storagePath,
+    XFile? compressedFile, {
+    String? extension,
+    String? contentType,
+  }) async {
+    final file = File(finalFile.path);
+    final fileSize = await file.length();
+
+    // Only enforce size limit for images that we try to compress
+    // For PDFs or other docs, we might want to allow slightly larger files if needed,
+    // but 2MB is a reasonable general limit for now.
+    if (fileSize > 5 * 1024 * 1024) {
+      throw Exception(
+        'File is too large (${(fileSize / (1024 * 1024)).toStringAsFixed(1)}MB). Please select a file smaller than 5MB.',
+      );
+    }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final randomSuffix = (timestamp % 10000).toString();
+    final ext = extension ?? 'jpg';
+    final fileName = 'file_${timestamp}_$randomSuffix.$ext';
+    final ref = AppFireStorage.agentDocStorageRef
+        .child(storagePath)
+        .child(fileName);
+
+    final metadata = SettableMetadata(
+      contentType: contentType ?? 'image/jpeg',
+      cacheControl: 'public, max-age=31536000',
+    );
+    final uploadTask = ref.putFile(file, metadata);
+    const timeoutDuration = Duration(minutes: 3);
+
+    final snapshot = await uploadTask.timeout(timeoutDuration);
+    final downloadUrl = await snapshot.ref.getDownloadURL();
+
+    try {
+      if (compressedFile != null && compressedFile.path != finalFile.path) {
+        if (await File(compressedFile.path).exists()) {
+          await File(compressedFile.path).delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting temporary file: $e');
+    }
+
+    return downloadUrl;
+  }
 }
+

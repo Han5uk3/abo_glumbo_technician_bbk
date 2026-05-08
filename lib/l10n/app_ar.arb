@@ -84,6 +84,7 @@
   "rememberMe": "تذكرني",
   "manageOrders": "إدارة الطلبات",
   "bookingAccepted": "تم تأكيد الحجز",
+  "bookingAssignedToYou": "لقد تم تعيينك في حجز جديد.",
   "yourBookingRequestHasBeenAccepted": "تم تأكيد طلب الحجز الخاص بك! سيتواصل معك فريقنا قريباً.",
   "bookingRejected": "تم رفض الحجز",
   "yourBookingRequestHasBeenRejected": "للأسف، تم رفض طلب الحجز الخاص بك. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.",
@@ -1189,6 +1190,7 @@
   "pleaseEnterYourName": "يرجى إدخال اسمك",
   "uploadCertifications": "تحميل الشهادات",
   "certifications": "الشهادات",
+  "certificate": "الشهادة",
   "idDocumentUploaded": "تم تحميل الوثيقة الشخصية",
   "selectCity": "اختر المدينة",
   "rejectionHistory": "تاريخ الرفض",
@@ -1545,5 +1547,23 @@
   "certificatesOrTrainingCoursesOptional": "الشهادات أو الدورات التدريبية (اختياري)",
   "uploadCertificates": "تحميل الشهادات",
   "refreshLocation": "تحديث الموقع",
-  "selectJobRolesDescription": "اختر الخدمات التي أنت مؤهل لتقديمها."
+  "selectJobRolesDescription": "اختر الخدمات التي أنت مؤهل لتقديمها.",
+  "updateDocuments": "تحديث المستندات",
+  "pleaseSelectAtLeastOneDocumentToUpdate": "يرجى إزالة واختيار ملف جديد لمستند واحد على الأقل لإعادة التحميل",
+  "reuploadFailed": "فشل إعادة التحميل: {error}",
+  "@reuploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectFile": "اختر ملف",
+  "accountBlocked": "تم حظر الحساب",
+  "accountBlockedMessage": "تم حظر حسابك من قبل المسؤول. يرجى التواصل مع الدعم لمزيد من المعلومات.",
+  "contactSupport": "اتصل بالدعم",
+  "applicationRejected": "تم رفض الطلب",
+  "applicationRejectedMessage": "للأسف ، تم رفض طلبك بعد المراجعة. يمكنك رؤية السبب أدناه وتحديث مستنداتك للمحاولة مرة أخرى.",
+  "reasonForRejection": "سبب الرفض:",
+  "noReasonProvided": "لم يتم تقديم سبب"
 }

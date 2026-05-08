@@ -523,14 +523,27 @@ class _ManageAgentsState extends State<ManageAgents>
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            (isVerified
-                                    ? AppLocalizations.of(context)!.verified
-                                    : AppLocalizations.of(context)!.pending)
+                            (() {
+                              if (isVerified) return AppLocalizations.of(context)!.verified;
+                              if (agent.rejectionReason != null && agent.rejectionReason!.isNotEmpty && agent.isDocsPendingReview != true) {
+                                return "REJECTED";
+                              }
+                              if (agent.isDocsPendingReview == true) {
+                                return "PENDING REVIEW";
+                              }
+                              return AppLocalizations.of(context)!.pending;
+                            })()
                                 .toUpperCase(),
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: isVerified ? Colors.green : Colors.orange,
+                              color: isVerified
+                                  ? Colors.green
+                                  : (agent.rejectionReason != null &&
+                                          agent.rejectionReason!.isNotEmpty &&
+                                          agent.isDocsPendingReview != true
+                                      ? Colors.red
+                                      : Colors.orange),
                             ),
                           ),
                         ),

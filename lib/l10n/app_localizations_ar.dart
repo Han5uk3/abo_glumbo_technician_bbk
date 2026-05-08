@@ -1118,6 +1118,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookingAccepted => 'تم تأكيد الحجز';
 
   @override
+  String get bookingAssignedToYou => 'لقد تم تعيينك في حجز جديد.';
+
+  @override
   String get yourBookingRequestHasBeenAccepted =>
       'تم تأكيد طلب الحجز الخاص بك! سيتواصل معك فريقنا قريباً.';
 
@@ -3785,6 +3788,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get certifications => 'الشهادات';
 
   @override
+  String get certificate => 'الشهادة';
+
+  @override
   String get idDocumentUploaded => 'تم تحميل الوثيقة الشخصية';
 
   @override
@@ -4640,4 +4646,42 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get selectJobRolesDescription =>
       'اختر الخدمات التي أنت مؤهل لتقديمها.';
+
+  @override
+  String get updateDocuments => 'تحديث المستندات';
+
+  @override
+  String get pleaseSelectAtLeastOneDocumentToUpdate =>
+      'يرجى إزالة واختيار ملف جديد لمستند واحد على الأقل لإعادة التحميل';
+
+  @override
+  String reuploadFailed(String error) {
+    return 'فشل إعادة التحميل: $error';
+  }
+
+  @override
+  String get selectFile => 'اختر ملف';
+
+  @override
+  String get accountBlocked => 'تم حظر الحساب';
+
+  @override
+  String get accountBlockedMessage =>
+      'تم حظر حسابك من قبل المسؤول. يرجى التواصل مع الدعم لمزيد من المعلومات.';
+
+  @override
+  String get contactSupport => 'اتصل بالدعم';
+
+  @override
+  String get applicationRejected => 'تم رفض الطلب';
+
+  @override
+  String get applicationRejectedMessage =>
+      'للأسف ، تم رفض طلبك بعد المراجعة. يمكنك رؤية السبب أدناه وتحديث مستنداتك للمحاولة مرة أخرى.';
+
+  @override
+  String get reasonForRejection => 'سبب الرفض:';
+
+  @override
+  String get noReasonProvided => 'لم يتم تقديم سبب';
 }

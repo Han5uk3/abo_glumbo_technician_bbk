@@ -359,6 +359,7 @@
   "editCategory": "Edit Category",
   "manageCategories": "Manage Categories",
   "bookingAccepted": "Booking Confirmed",
+  "bookingAssignedToYou": "You have been assigned to a booking.",
   "yourBookingRequestHasBeenAccepted": "Your booking request has been confirmed! Our team will contact you shortly.",
   "bookingRejected": "Booking Rejected",
   "yourBookingRequestHasBeenRejected": "Unfortunately, your booking request has been rejected. Please try again or contact support.",
@@ -1245,6 +1246,7 @@
   "pleaseEnterYourName": "Please enter your name",
   "uploadCertifications": "Upload Certifications",
   "certifications": "Certifications",
+  "certificate": "Certificate",
   "idDocumentUploaded": "ID document uploaded",
   "uploadIdDocument": "Upload ID document",
   "idDocument": "ID Document",
@@ -1567,5 +1569,23 @@
   "certificatesOrTrainingCoursesOptional": "Certificates or Training Courses (Optional)",
   "uploadCertificates": "Upload Certificates",
   "refreshLocation": "Refresh Location",
-  "selectJobRolesDescription": "Choose the services you are qualified to provide."
+  "selectJobRolesDescription": "Choose the services you are qualified to provide.",
+  "updateDocuments": "Update Documents",
+  "pleaseSelectAtLeastOneDocumentToUpdate": "Please remove and select new file for atleast one of the documents to re-upload",
+  "reuploadFailed": "Re-upload failed: {error}",
+  "@reuploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectFile": "Select File",
+  "accountBlocked": "Account Blocked",
+  "accountBlockedMessage": "Your account has been blocked by the admin. Please contact support for more information.",
+  "contactSupport": "Contact Support",
+  "applicationRejected": "Application Rejected",
+  "applicationRejectedMessage": "Unfortunately, your application has been rejected after review. You can see the reason below and update your documents to try again.",
+  "reasonForRejection": "Reason for rejection:",
+  "noReasonProvided": "No reason provided"
 }

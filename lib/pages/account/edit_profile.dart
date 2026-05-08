@@ -63,6 +63,8 @@ class _EditProfileState extends State<EditProfile> {
 
   XFile? selectedImage;
   XFile? selectedProfileImage;
+  PlatformFile? selectedSponsorWorkPermitFile;
+  PlatformFile? selectedChamberOfCommerceFile;
   List<String> selectedCertifications = [];
   List<PlatformFile> certifications = [];
 
@@ -106,6 +108,80 @@ class _EditProfileState extends State<EditProfile> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickSponsorWorkPermit() async {
+    final source = await _showSourceSelector();
+    if (source == null) return;
+
+    try {
+      PlatformFile? file;
+      if (source == 0) {
+        final ImagePicker picker = ImagePicker();
+        final XFile? image = await picker.pickImage(source: ImageSource.camera);
+        if (image != null) {
+          file = PlatformFile(name: image.name, path: image.path, size: await File(image.path).length());
+        }
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        );
+        if (result != null) file = result.files.first;
+      }
+
+      if (file != null) {
+        setState(() => selectedSponsorWorkPermitFile = file);
+      }
+    } catch (e) {
+      debugPrint('Error picking sponsor permit: $e');
+    }
+  }
+
+  Future<void> _pickChamberOfCommerce() async {
+    final source = await _showSourceSelector();
+    if (source == null) return;
+
+    try {
+      PlatformFile? file;
+      if (source == 0) {
+        final ImagePicker picker = ImagePicker();
+        final XFile? image = await picker.pickImage(source: ImageSource.camera);
+        if (image != null) {
+          file = PlatformFile(name: image.name, path: image.path, size: await File(image.path).length());
+        }
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        );
+        if (result != null) file = result.files.first;
+      }
+
+      if (file != null) {
+        setState(() => selectedChamberOfCommerceFile = file);
+      }
+    } catch (e) {
+      debugPrint('Error picking chamber approval: $e');
+    }
+  }
+
+  void _viewPlatformFile(PlatformFile file) async {
+    if (file.path == null) return;
+    final ext = file.extension?.toLowerCase();
+    if (['jpg', 'jpeg', 'png'].contains(ext)) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            backgroundColor: Colors.black,
+            appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
+            body: Center(child: InteractiveViewer(child: Image.file(File(file.path!)))),
+          ),
+        ),
+      );
+    } else {
+      await OpenFilex.open(file.path!);
+    }
   }
 
   Future<void> _pickIdImage() async {
@@ -1546,27 +1622,63 @@ class _EditProfileState extends State<EditProfile> {
                                   ),
                                   onRemove: _removeIdImage,
                                 )
-                              else if (widget.workerData?.docUrl != null)
+                              else if (widget.workerData?.residenceIdUrl != null)
                                 _buildFileItem(
                                   label: locale.idDocument,
                                   onTap: () async {
-                                    try {
-                                      final url = Uri.parse(
-                                        widget.workerData!.docUrl!,
-                                      );
-                                      if (await canLaunchUrl(url)) {
-                                        await launchUrl(
-                                          url,
-                                          mode: LaunchMode.externalApplication,
-                                        );
-                                      }
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        _showSnackBar(
-                                          '${locale.error}: $e',
-                                          backgroundColor: AppColors.red,
-                                        );
-                                      }
+                                    final url = Uri.parse(widget.workerData!.residenceIdUrl!);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                ),
+                              const SizedBox(height: 20),
+                              _buildDocumentUpload(
+                                title: '${locale.sponsorWorkPermit} *',
+                                isUploaded: selectedSponsorWorkPermitFile != null || widget.workerData?.sponsorWorkPermitUrl != null,
+                                onUpload: _pickSponsorWorkPermit,
+                                buttonLabel: selectedSponsorWorkPermitFile == null && widget.workerData?.sponsorWorkPermitUrl == null
+                                    ? "Upload Sponsor Permit"
+                                    : "Change Sponsor Permit",
+                              ),
+                              if (selectedSponsorWorkPermitFile != null)
+                                _buildFileItem(
+                                  label: selectedSponsorWorkPermitFile!.name,
+                                  onTap: () => _viewPlatformFile(selectedSponsorWorkPermitFile!),
+                                  onRemove: () => setState(() => selectedSponsorWorkPermitFile = null),
+                                )
+                              else if (widget.workerData?.sponsorWorkPermitUrl != null)
+                                _buildFileItem(
+                                  label: locale.sponsorWorkPermit,
+                                  onTap: () async {
+                                    final url = Uri.parse(widget.workerData!.sponsorWorkPermitUrl!);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                ),
+                              const SizedBox(height: 20),
+                              _buildDocumentUpload(
+                                title: '${locale.chamberOfCommerceApproval} *',
+                                isUploaded: selectedChamberOfCommerceFile != null || widget.workerData?.chamberOfCommerceApprovalUrl != null,
+                                onUpload: _pickChamberOfCommerce,
+                                buttonLabel: selectedChamberOfCommerceFile == null && widget.workerData?.chamberOfCommerceApprovalUrl == null
+                                    ? "Upload Chamber Approval"
+                                    : "Change Chamber Approval",
+                              ),
+                              if (selectedChamberOfCommerceFile != null)
+                                _buildFileItem(
+                                  label: selectedChamberOfCommerceFile!.name,
+                                  onTap: () => _viewPlatformFile(selectedChamberOfCommerceFile!),
+                                  onRemove: () => setState(() => selectedChamberOfCommerceFile = null),
+                                )
+                              else if (widget.workerData?.chamberOfCommerceApprovalUrl != null)
+                                _buildFileItem(
+                                  label: locale.chamberOfCommerceApproval,
+                                  onTap: () async {
+                                    final url = Uri.parse(widget.workerData!.chamberOfCommerceApprovalUrl!);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
                                     }
                                   },
                                 ),
@@ -1948,10 +2060,15 @@ class _EditProfileState extends State<EditProfile> {
                           )
                         : widget.workerData?.liveLocation,
                     certifications: widget.workerData!.certifications,
+                    residenceIdUrl: widget.workerData?.residenceIdUrl,
+                    sponsorWorkPermitUrl: widget.workerData?.sponsorWorkPermitUrl,
+                    chamberOfCommerceApprovalUrl: widget.workerData?.chamberOfCommerceApprovalUrl,
                   ),
                   selectedIqamaImage: selectedImage,
                   selectedProfileImage: selectedProfileImage,
                   newCertifications: certifications,
+                  selectedSponsorWorkPermitFile: selectedSponsorWorkPermitFile,
+                  selectedChamberOfCommerceFile: selectedChamberOfCommerceFile,
                 ),
               );
             }

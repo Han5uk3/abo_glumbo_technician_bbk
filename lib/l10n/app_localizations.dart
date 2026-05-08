@@ -2260,6 +2260,12 @@ abstract class AppLocalizations {
   /// **'Booking Confirmed'**
   String get bookingAccepted;
 
+  /// No description provided for @bookingAssignedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been assigned to a booking.'**
+  String get bookingAssignedToYou;
+
   /// No description provided for @yourBookingRequestHasBeenAccepted.
   ///
   /// In en, this message translates to:
@@ -7325,6 +7331,12 @@ abstract class AppLocalizations {
   /// **'Certifications'**
   String get certifications;
 
+  /// No description provided for @certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificate;
+
   /// No description provided for @idDocumentUploaded.
   ///
   /// In en, this message translates to:
@@ -8848,6 +8860,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose the services you are qualified to provide.'**
   String get selectJobRolesDescription;
+
+  /// No description provided for @updateDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Documents'**
+  String get updateDocuments;
+
+  /// No description provided for @pleaseSelectAtLeastOneDocumentToUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Please remove and select new file for atleast one of the documents to re-upload'**
+  String get pleaseSelectAtLeastOneDocumentToUpdate;
+
+  /// No description provided for @reuploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-upload failed: {error}'**
+  String reuploadFailed(String error);
+
+  /// No description provided for @selectFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get selectFile;
+
+  /// No description provided for @accountBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Blocked'**
+  String get accountBlocked;
+
+  /// No description provided for @accountBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been blocked by the admin. Please contact support for more information.'**
+  String get accountBlockedMessage;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Support'**
+  String get contactSupport;
+
+  /// No description provided for @applicationRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Rejected'**
+  String get applicationRejected;
+
+  /// No description provided for @applicationRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfortunately, your application has been rejected after review. You can see the reason below and update your documents to try again.'**
+  String get applicationRejectedMessage;
+
+  /// No description provided for @reasonForRejection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for rejection:'**
+  String get reasonForRejection;
+
+  /// No description provided for @noReasonProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason provided'**
+  String get noReasonProvided;
 }
 
 class _AppLocalizationsDelegate

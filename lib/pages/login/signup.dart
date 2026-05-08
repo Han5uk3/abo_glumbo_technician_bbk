@@ -20,6 +20,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:open_filex/open_filex.dart';
 
 class Signup extends StatefulWidget {
   final String uid;
@@ -243,12 +244,9 @@ class _SignupState extends State<Signup> {
     bool hasFile = fileOrImage != null;
     bool isImage = false;
     String? path;
-    String? fileName;
-
     if (hasFile) {
       if (fileOrImage is XFile) {
         path = fileOrImage.path;
-        fileName = fileOrImage.name;
         isImage = [
           'jpg',
           'jpeg',
@@ -256,7 +254,6 @@ class _SignupState extends State<Signup> {
         ].contains(path.split('.').last.toLowerCase());
       } else if (fileOrImage is PlatformFile) {
         path = fileOrImage.path;
-        fileName = fileOrImage.name;
         isImage = [
           'jpg',
           'jpeg',
@@ -270,14 +267,19 @@ class _SignupState extends State<Signup> {
       children: [
         _buildSectionTitle(title, mandatory: mandatory),
         GestureDetector(
-          onTap: onTap,
+          onTap: hasFile ? () => _previewFile(path, isImage) : onTap,
           child: Container(
             width: double.infinity,
-            height: 140,
+            height: hasFile ? 70 : 140,
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: hasFile ? Colors.white : Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1.5),
+              border: Border.all(
+                color: hasFile
+                    ? AppColors.primary.withOpacity(0.2)
+                    : Colors.grey[200]!,
+                width: 1.5,
+              ),
             ),
             child: !hasFile
                 ? Column(
@@ -298,68 +300,55 @@ class _SignupState extends State<Signup> {
                       ),
                     ],
                   )
-                : Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: (isImage && path != null)
-                            ? Image.file(
-                                File(path),
-                                width: double.infinity,
-                                height: 140,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                color: AppColors.primary.withOpacity(0.05),
-                                alignment: Alignment.center,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.description_outlined,
-                                      color: AppColors.primary,
-                                      size: 40,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0,
-                                      ),
-                                      child: Text(
-                                        fileName ?? 'File Selected',
-                                        style: DMSansFont.textStyle(
-                                          fontSize: 12,
-                                          color: AppColors.primary,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                      ),
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: GestureDetector(
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            isImage
+                                ? Icons.image_outlined
+                                : Icons.description_outlined,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: DMSansFont.textStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
                           onTap: onClear,
                           child: Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.close,
-                              color: Colors.white,
-                              size: 16,
+                              color: Colors.red,
+                              size: 18,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
           ),
         ),
@@ -367,10 +356,40 @@ class _SignupState extends State<Signup> {
     );
   }
 
+  void _previewFile(String? path, bool isImage) {
+    if (path == null) return;
+
+    if (isImage) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            backgroundColor: Colors.black,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: Center(
+              child: InteractiveViewer(
+                child: Image.file(File(path), fit: BoxFit.contain),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      OpenFilex.open(path);
+    }
+  }
+
   Future<void> _submitSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_currentPosition == null) {
+      debugPrint('Signup Error: Current position is null');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fetch your current location')),
       );
@@ -378,6 +397,7 @@ class _SignupState extends State<Signup> {
     }
 
     if (selectedJobRoles.isEmpty) {
+      debugPrint('Signup Error: No job roles selected');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one job role')),
       );
@@ -387,6 +407,7 @@ class _SignupState extends State<Signup> {
     if (residenceIdImage == null ||
         sponsorWorkPermitFile == null ||
         chamberOfCommerceFile == null) {
+      debugPrint('Signup Error: Missing mandatory documents');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please upload all mandatory documents')),
       );
@@ -418,37 +439,19 @@ class _SignupState extends State<Signup> {
       );
 
       // Upload Sponsor Work Permit
-      if (sponsorWorkPermitFile!.path != null) {
-        final ext = sponsorWorkPermitFile!.extension?.toLowerCase() ?? '';
-        if (['jpg', 'jpeg', 'png'].contains(ext)) {
-          sponsorWorkPermitUrl = await UploadToFireStorage().uploadFile(
-            XFile(sponsorWorkPermitFile!.path!),
-            'agents/documents',
-          );
-        } else {
-          final fileRef = AppFireStorage.agentDocStorageRef.child(
-            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${sponsorWorkPermitFile!.name}',
-          );
-          await fileRef.putFile(File(sponsorWorkPermitFile!.path!));
-          sponsorWorkPermitUrl = await fileRef.getDownloadURL();
-        }
+      if (sponsorWorkPermitFile?.path != null) {
+        sponsorWorkPermitUrl = await UploadToFireStorage().uploadFile(
+          XFile(sponsorWorkPermitFile!.path!),
+          'agents/documents',
+        );
       }
 
       // Upload Chamber of Commerce Approval
-      if (chamberOfCommerceFile!.path != null) {
-        final ext = chamberOfCommerceFile!.extension?.toLowerCase() ?? '';
-        if (['jpg', 'jpeg', 'png'].contains(ext)) {
-          chamberOfCommerceUrl = await UploadToFireStorage().uploadFile(
-            XFile(chamberOfCommerceFile!.path!),
-            'agents/documents',
-          );
-        } else {
-          final fileRef = AppFireStorage.agentDocStorageRef.child(
-            'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${chamberOfCommerceFile!.name}',
-          );
-          await fileRef.putFile(File(chamberOfCommerceFile!.path!));
-          chamberOfCommerceUrl = await fileRef.getDownloadURL();
-        }
+      if (chamberOfCommerceFile?.path != null) {
+        chamberOfCommerceUrl = await UploadToFireStorage().uploadFile(
+          XFile(chamberOfCommerceFile!.path!),
+          'agents/documents',
+        );
       }
 
       for (var cert in certifications) {
@@ -488,6 +491,8 @@ class _SignupState extends State<Signup> {
         isVerified: false,
         isAdmin: false,
         isOnline: false,
+        isRegistrationComplete: true,
+        isDocsPendingReview: true,
       );
 
       await AppFirestore.usersCollectionRef.doc(widget.uid).set(user.toJson());
@@ -512,6 +517,7 @@ class _SignupState extends State<Signup> {
         );
       }
     } catch (e) {
+      debugPrint('Signup Exception: $e');
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(
@@ -590,10 +596,7 @@ class _SignupState extends State<Signup> {
 
             const SizedBox(height: 32),
 
-            _buildSectionTitle(
-              localization.fullName ,
-              mandatory: true,
-            ),
+            _buildSectionTitle(localization.fullName, mandatory: true),
             TextFormField(
               controller: nameController,
               decoration: InputDecoration(
@@ -617,13 +620,11 @@ class _SignupState extends State<Signup> {
                 ),
               ),
               style: DMSansFont.textStyle(fontSize: 16),
-              validator: (v) => v!.isEmpty ? localization.pleaseEnterYourFullName : null,
+              validator: (v) =>
+                  v!.isEmpty ? localization.pleaseEnterYourFullName : null,
             ),
 
-            _buildSectionTitle(
-              localization.phoneNumber,
-              mandatory: true,
-            ),
+            _buildSectionTitle(localization.phoneNumber, mandatory: true),
             TextFormField(
               controller: phoneController,
               enabled: false,
@@ -652,7 +653,7 @@ class _SignupState extends State<Signup> {
               ),
             ),
 
-            _buildSectionTitle(localization.email ),
+            _buildSectionTitle(localization.email),
             TextFormField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -723,7 +724,9 @@ class _SignupState extends State<Signup> {
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle(localization.certificatesOrTrainingCoursesOptional),
+            _buildSectionTitle(
+              localization.certificatesOrTrainingCoursesOptional,
+            ),
             GestureDetector(
               onTap: _pickCertifications,
               child: Container(
@@ -782,10 +785,7 @@ class _SignupState extends State<Signup> {
               child: Divider(),
             ),
 
-            _buildSectionTitle(
-              localization.location,
-              mandatory: true,
-            ),
+            _buildSectionTitle(localization.location, mandatory: true),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -850,10 +850,7 @@ class _SignupState extends State<Signup> {
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle(
-              localization.jobRoles,
-              mandatory: true,
-            ),
+            _buildSectionTitle(localization.jobRoles, mandatory: true),
             GestureDetector(
               onTap: _showJobRoleSelector,
               child: Container(
@@ -967,10 +964,11 @@ class _SignupState extends State<Signup> {
                               return GestureDetector(
                                 onTap: () {
                                   setModalState(() {
-                                    if (isSelected)
+                                    if (isSelected) {
                                       selectedJobRoles.remove(cat['id']);
-                                    else
+                                    } else {
                                       selectedJobRoles.add(cat['id']);
+                                    }
                                   });
                                   setState(() {});
                                 },

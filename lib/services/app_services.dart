@@ -1049,17 +1049,42 @@ class AppServices {
 
   static Future<bool> approveOrRejectAgent(
     String agentId,
-    bool isApproved,
-  ) async {
+    bool isApproved, {
+    String? rejectionReason,
+  }) async {
+    try {
+      Map<String, dynamic> updateData = {
+        'isVerified': isApproved,
+        'isDocsPendingReview': false, // Decision made, pending state cleared
+        'updatedAt': Timestamp.now(),
+      };
+
+      if (!isApproved && rejectionReason != null) {
+        updateData['rejectionReason'] = rejectionReason;
+      } else if (isApproved) {
+        updateData['rejectionReason'] = FieldValue.delete();
+      }
+
+      await AppFirestore.usersCollectionRef.doc(agentId).update(updateData);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error approving/rejecting agent: $e');
+      }
+      return false;
+    }
+  }
+
+  static Future<bool> blockOrUnblockAgent(String agentId, bool isBlocked) async {
     try {
       await AppFirestore.usersCollectionRef.doc(agentId).update({
-        'isVerified': isApproved,
+        'isBlocked': isBlocked,
         'updatedAt': Timestamp.now(),
       });
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error approving/rejecting agent: $e');
+        print('❌ Error blocking/unblocking agent: $e');
       }
       return false;
     }

@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/technician_welcome_modal.dart';
@@ -16,13 +16,15 @@ import 'package:aboglumbo_bbk_panel/pages/home/worker/worker_home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
+import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
+import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/technician_location_update_service.dart';
-
+import 'package:aboglumbo_bbk_panel/pages/account/reupload_docs.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/animated_expanding_nav_bar.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/styles/icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
 class Home extends StatefulWidget {
@@ -67,7 +69,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // 1. Update location immediately on app startup
       if (mounted) {
         debugPrint('🚀 Initializing location update on Home launch');
-        await TechnicianLocationUpdateService.updateLocationNow(context: context);
+        await TechnicianLocationUpdateService.updateLocationNow(
+          context: context,
+        );
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
         }
@@ -102,7 +106,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.resumed) {
       debugPrint('🔄 App resumed - updating location');
-      TechnicianLocationUpdateService.updateLocationNow(context: context).then((_) {
+      TechnicianLocationUpdateService.updateLocationNow(context: context).then((
+        _,
+      ) {
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
         }
@@ -136,9 +142,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           );
         }
 
-        // Handle verification pending state
-        if (userData.isVerified != true && userData.isAdmin != true) {
-          return _buildVerificationPendingState(context, locale);
+        // Handle verification pending, blocked, or rejected states
+        if (userData.isAdmin != true) {
+          if (userData.isBlocked == true) {
+            return _buildBlockedState(context, userData, locale);
+          }
+          if (userData.isVerified != true) {
+            // Case 1: Rejected and haven't re-uploaded yet
+            if (userData.rejectionReason != null &&
+                userData.rejectionReason!.isNotEmpty &&
+                userData.isDocsPendingReview != true) {
+              return _buildRejectedState(context, userData, locale);
+            }
+            // Case 2: Just registered OR just re-uploaded (waiting for admin)
+            return _buildVerificationPendingState(context, locale);
+          }
         }
 
         // Show welcome modal for technicians
@@ -290,8 +308,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       appBar: AppBar(
         backgroundColor: AppColors.bgWhite,
         surfaceTintColor: AppColors.bgWhite,
-        title: Text(locale?.account ?? 'Account'),
+        title: const Text(""),
         centerTitle: true,
+        actions: const [
+          LanguageSelectorCard(isInLoginPage: false),
+          SizedBox(width: 16),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -342,6 +364,302 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  Widget _buildBlockedState(
+    BuildContext context,
+    UserModel userData,
+    AppLocalizations? locale,
+  ) {
+    return Scaffold(
+      backgroundColor: AppColors.bgWhite,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgWhite,
+        surfaceTintColor: AppColors.bgWhite,
+        title: const Text(""),
+        centerTitle: true,
+        actions: const [
+          LanguageSelectorCard(isInLoginPage: false),
+          SizedBox(width: 16),
+        ],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.block, size: 80, color: Colors.red),
+              const SizedBox(height: 24),
+              Text(
+                locale?.accountBlocked ?? "Account Blocked",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                locale?.accountBlockedMessage ??
+                    "Your account has been blocked by the admin. Please contact support for more information.",
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _showSupportOptions(context, locale),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    locale?.contactSupport ?? "Contact Support",
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => _handleLogout(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    locale?.logout ?? "Logout",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRejectedState(
+    BuildContext context,
+    UserModel userData,
+    AppLocalizations? locale,
+  ) {
+    return Scaffold(
+      backgroundColor: AppColors.bgWhite,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgWhite,
+        surfaceTintColor: AppColors.bgWhite,
+        title: const Text(""),
+        centerTitle: true,
+        actions: const [
+          LanguageSelectorCard(isInLoginPage: false),
+          SizedBox(width: 16),
+        ],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.cancel, size: 80, color: Colors.red),
+              const SizedBox(height: 24),
+              Text(
+                locale?.applicationRejected ?? "Application Rejected",
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade100),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      locale?.reasonForRejection ?? "Reason for rejection:",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      userData.rejectionReason ??
+                          locale?.noReasonProvided ??
+                          "No reason provided",
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final updated = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ReuploadDocsPage(workerData: userData),
+                      ),
+                    );
+                    if (updated == true && context.mounted) {
+                      context.read<LoginBloc>().add(RefreshUserData());
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    locale?.updateDocuments ?? "Update Documents",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => _handleLogout(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    locale?.logout ?? "Logout",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSupportOptions(BuildContext context, AppLocalizations? locale) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StreamBuilder(
+          stream: AppServices.getCustomerSupportdata(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: Loader());
+            }
+            final contacts = snapshot.data!;
+            return SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      locale?.contactSupport ?? "Contact Support",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...contacts.where((c) => c.isActive == true).map((contact) {
+                    IconData icon;
+                    String action;
+                    if (contact.type == 'whatsapp') {
+                      icon = Icons.chat;
+                      action = locale?.whatsapp ?? "WhatsApp";
+                    } else if (contact.type == 'phone') {
+                      icon = Icons.phone;
+                      action = locale?.call ?? "Call";
+                    } else {
+                      icon = Icons.email;
+                      action = locale?.email ?? "Email";
+                    }
+                    return ListTile(
+                      leading: Icon(icon, color: AppColors.primary),
+                      title: Text(contact.name),
+                      subtitle: Text(contact.detail),
+                      trailing: Text(
+                        action,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () async {
+                        Uri uri;
+                        if (contact.type == 'whatsapp') {
+                          final phone = contact.detail.replaceAll(
+                            RegExp(r'\D'),
+                            '',
+                          );
+                          uri = Uri.parse("https://wa.me/$phone");
+                        } else if (contact.type == 'phone') {
+                          uri = Uri.parse("tel:${contact.detail}");
+                        } else {
+                          uri = Uri.parse("mailto:${contact.detail}");
+                        }
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    await LocalStore.clearUID();
+    await LocalStore.clearCachedUserData();
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (route) => false,
+      );
+    }
   }
 
   void _showExitDialog(BuildContext context, AppLocalizations? locale) {

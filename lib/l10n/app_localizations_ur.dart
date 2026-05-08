@@ -1135,6 +1135,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get bookingAccepted => 'بکنگ کی تصدیق ہو گئی';
 
   @override
+  String get bookingAssignedToYou => 'آپ کو ایک نئی بکنگ تفویض کر دی گئی ہے۔';
+
+  @override
   String get yourBookingRequestHasBeenAccepted =>
       'آپ کی بکنگ کی درخواست کی تصدیق ہو گئی ہے! ہماری ٹیم جلد ہی آپ سے رابطہ کرے گی۔';
 
@@ -3854,6 +3857,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get certifications => 'سرٹیفیکیشنز';
 
   @override
+  String get certificate => 'سرٹیفکیٹ';
+
+  @override
   String get idDocumentUploaded => 'شناختی دستاویز اپ لوڈ کر دی گئی';
 
   @override
@@ -4722,4 +4728,42 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get selectJobRolesDescription =>
       'وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔';
+
+  @override
+  String get updateDocuments => 'دستاویزات اپ ڈیٹ کریں';
+
+  @override
+  String get pleaseSelectAtLeastOneDocumentToUpdate =>
+      'براہ کرم دوبارہ اپ لوڈ کرنے کے لیے کم از کم ایک دستاویز کو ہٹائیں اور نئی فائل منتخب کریں';
+
+  @override
+  String reuploadFailed(String error) {
+    return 'دوبارہ اپ لوڈ کرنے میں ناکامی: $error';
+  }
+
+  @override
+  String get selectFile => 'فائل منتخب کریں';
+
+  @override
+  String get accountBlocked => 'اکاؤنٹ بلاک کر دیا گیا ہے';
+
+  @override
+  String get accountBlockedMessage =>
+      'آپ کے اکاؤنٹ کو ایڈمن نے بلاک کر دیا ہے۔ مزید معلومات کے لیے براہ کرم سپورٹ سے رابطہ کریں۔';
+
+  @override
+  String get contactSupport => 'سپورٹ سے رابطہ کریں';
+
+  @override
+  String get applicationRejected => 'درخواست مسترد کر دی گئی';
+
+  @override
+  String get applicationRejectedMessage =>
+      'بدقسمتی سے، آپ کی درخواست جائزہ لینے کے بعد مسترد کر دی گئی ہے۔ آپ نیچے وجہ دیکھ سکتے ہیں اور دوبارہ کوشش کرنے کے لیے اپنی دستاویزات کو اپ ڈیٹ کر سکتے ہیں۔';
+
+  @override
+  String get reasonForRejection => 'مسترد کرنے کی وجہ:';
+
+  @override
+  String get noReasonProvided => 'کوئی وجہ فراہم نہیں کی گئی';
 }

@@ -90,7 +90,7 @@ class LanguageSelectorCard extends StatelessWidget {
                 Text(
                   label,
                   style: GoogleFonts.dmSans(
-                    color: AppColors.primary,
+                    color: AppColors.black1,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -99,7 +99,7 @@ class LanguageSelectorCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.black1,
                   size: 18,
                 ),
               ],

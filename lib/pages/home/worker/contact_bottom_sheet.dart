@@ -6,24 +6,65 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactService {
-  static Future<void> launchEmail(String email) async {
-    await launchUrlString("mailto:$email");
+  static Future<void> launchEmail(BuildContext context, String email) async {
+    final url = "mailto:$email";
+    log('Attempting to launch email: $url');
+    if (await canLaunchUrlString(url)) {
+      final success = await launchUrlString(url);
+      log('Email launch result: $success');
+    } else {
+      log('Cannot launch email: $url');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch email client')),
+        );
+      }
+    }
   }
 
-  static Future<void> launchWhatsApp(String phoneNumber) async {
-    final whatsappUrl = 'https://wa.me/$phoneNumber';
-    await launchUrlString(whatsappUrl);
+  static Future<void> launchWhatsApp(BuildContext context, String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
+    final whatsappUrl = 'https://wa.me/$cleanPhone';
+    log('Attempting to launch WhatsApp: $whatsappUrl');
+    if (await canLaunchUrlString(whatsappUrl)) {
+      final success = await launchUrlString(whatsappUrl, mode: LaunchMode.externalApplication);
+      log('WhatsApp launch result: $success');
+    } else {
+      log('Cannot launch WhatsApp: $whatsappUrl');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch WhatsApp')),
+        );
+      }
+    }
   }
 
-  static Future<void> launchPhone(String phoneNumber) async {
-    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
-
-    if (!await launchUrl(launchUri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $launchUri');
+  static Future<void> launchPhone(BuildContext context, String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
+    final url = "tel:$cleanPhone";
+    log('Attempting to launch phone: $url');
+    try {
+      if (await canLaunchUrlString(url)) {
+        log('Url can be launched: $url');
+        final success = await launchUrlString(url, mode: LaunchMode.externalNonBrowserApplication);
+        log('Phone launch result: $success');
+      } else {
+        log('canLaunchUrlString returned false for: $url');
+        // Try direct launch as fallback for some devices where canLaunch fails
+        log('Attempting direct launch without canLaunch check...');
+        final success = await launchUrlString(url, mode: LaunchMode.externalNonBrowserApplication);
+        log('Direct phone launch result: $success');
+      }
+    } catch (e) {
+      log('Error launching phone: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
   }
 }
@@ -34,7 +75,7 @@ class ContactBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.3,
+      height: MediaQuery.of(context).size.height * 0.4,
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: StreamBuilder(
         stream: AppServices.getCustomerSupportdata(),
@@ -59,7 +100,7 @@ class ContactBottomSheet extends StatelessWidget {
           }
           final data = asyncSnapshot.data!;
 
-          log(data.toString());
+          log('Customer support data: ${data.map((e) => "${e.type}: ${e.detail}").toList()}');
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -93,7 +134,7 @@ class ContactBottomSheet extends StatelessWidget {
                       icon: getIcon(type),
                       iconColor: getColor(type),
                       title: getTitle(type, context),
-                      onTap: getOnTap(type, content),
+                      onTap: getOnTap(type, content, context),
                     );
                   },
                 ),
@@ -145,19 +186,19 @@ String getTitle(String type, BuildContext context) {
   }
 }
 
-getOnTap(String type, String content) {
+getOnTap(String type, String content, BuildContext context) {
   switch (type) {
     case "Email":
       return () async {
-        await ContactService.launchEmail(content);
+        await ContactService.launchEmail(context, content);
       };
     case "WhatsApp":
       return () async {
-        await ContactService.launchWhatsApp(content);
+        await ContactService.launchWhatsApp(context, content);
       };
     case "Phone":
       return () async {
-        await ContactService.launchPhone(content);
+        await ContactService.launchPhone(context, content);
       };
     default:
       return () {};

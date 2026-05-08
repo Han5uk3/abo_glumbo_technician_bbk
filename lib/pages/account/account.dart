@@ -17,6 +17,7 @@ import 'package:aboglumbo_bbk_panel/pages/account/privacy_policy_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/terms_and_conditions_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/widgets/account_list_tile.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/widgets/language_dialog.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/worker/contact_bottom_sheet.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/biometric_service.dart';
@@ -355,12 +356,21 @@ class _AccountPageState extends State<AccountPage> {
   Widget _buildSupportSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: AccountListTile.withArrow(
-        leading: const Icon(Icons.info_outline),
-        title: AppLocalizations.of(context)?.aboutUs ?? '',
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const AboutUsPage())),
+      child: Column(
+        children: [
+          AccountListTile.withArrow(
+            leading: const Icon(Icons.info_outline),
+            title: AppLocalizations.of(context)?.aboutUs ?? '',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => const AboutUsPage())),
+          ),
+          AccountListTile.withArrow(
+            leading: const Icon(Icons.support_agent),
+            title: AppLocalizations.of(context)?.contactSupport ?? 'Contact Support',
+            onTap: _showSupportBottomSheet,
+          ),
+        ],
       ),
     );
   }
@@ -450,6 +460,18 @@ class _AccountPageState extends State<AccountPage> {
         (route) => false,
       );
     }
+  }
+
+  void _showSupportBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return const ContactBottomSheet();
+      },
+    );
   }
 
   Future _showLanguageDialog(bool isForNotification) async {

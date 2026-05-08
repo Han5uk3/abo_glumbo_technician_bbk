@@ -17,10 +17,9 @@ import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
-import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/worker/contact_bottom_sheet.dart';
 import 'package:aboglumbo_bbk_panel/services/technician_location_update_service.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/reupload_docs.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/animated_expanding_nav_bar.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/styles/icons.dart';
@@ -573,79 +572,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void _showSupportOptions(BuildContext context, AppLocalizations? locale) {
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return StreamBuilder(
-          stream: AppServices.getCustomerSupportdata(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: Loader());
-            }
-            final contacts = snapshot.data!;
-            return SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      locale?.contactSupport ?? "Contact Support",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  ...contacts.where((c) => c.isActive == true).map((contact) {
-                    IconData icon;
-                    String action;
-                    if (contact.type == 'whatsapp') {
-                      icon = Icons.chat;
-                      action = locale?.whatsapp ?? "WhatsApp";
-                    } else if (contact.type == 'phone') {
-                      icon = Icons.phone;
-                      action = locale?.call ?? "Call";
-                    } else {
-                      icon = Icons.email;
-                      action = locale?.email ?? "Email";
-                    }
-                    return ListTile(
-                      leading: Icon(icon, color: AppColors.primary),
-                      title: Text(contact.name),
-                      subtitle: Text(contact.detail),
-                      trailing: Text(
-                        action,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onTap: () async {
-                        Uri uri;
-                        if (contact.type == 'whatsapp') {
-                          final phone = contact.detail.replaceAll(
-                            RegExp(r'\D'),
-                            '',
-                          );
-                          uri = Uri.parse("https://wa.me/$phone");
-                        } else if (contact.type == 'phone') {
-                          uri = Uri.parse("tel:${contact.detail}");
-                        } else {
-                          uri = Uri.parse("mailto:${contact.detail}");
-                        }
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        }
-                      },
-                    );
-                  }),
-                ],
-              ),
-            );
-          },
-        );
+        return const ContactBottomSheet();
       },
     );
   }

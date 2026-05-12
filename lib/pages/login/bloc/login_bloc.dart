@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -110,14 +111,42 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           print('✅ OTP verified. UID: ${userCredential.user!.uid}');
         }
 
-        // Check if user exists in WORKERS collection
+        // Check if user exists in WORKERS collection with role "technician"
         UserModel? user = await _checkWorkerUser(userCredential.user!.uid);
 
-        // If user not found in workers OR they have no name (placeholder), check admin
+        // If user not found as technician, check admin by UID
         if (user == null || (user.name == null || user.name!.isEmpty)) {
           UserModel? admin = await _checkAdminUser(userCredential.user!.uid);
           if (admin != null) {
             user = admin;
+          }
+        }
+
+        // If still not found, check admins collection by phone number
+        if (user == null || (user.name == null || user.name!.isEmpty)) {
+          final phone = userCredential.user!.phoneNumber;
+          if (phone != null && phone.isNotEmpty) {
+            UserModel? adminByPhone = await _checkAdminByPhone(
+              userCredential.user!.uid,
+              phone,
+            );
+            if (adminByPhone != null) {
+              user = adminByPhone;
+            }
+          }
+        }
+
+        // If still not found, check users collection by phone (prevents duplicate accounts)
+        if (user == null || (user.name == null || user.name!.isEmpty)) {
+          final phone = userCredential.user!.phoneNumber;
+          if (phone != null && phone.isNotEmpty) {
+            UserModel? techByPhone = await _checkWorkerByPhone(
+              userCredential.user!.uid,
+              phone,
+            );
+            if (techByPhone != null) {
+              user = techByPhone;
+            }
           }
         }
 
@@ -127,9 +156,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           emit(LoginSuccess(user: user));
         } else {
           if (kDebugMode) {
-            print('❌ User not found in collections or record is incomplete');
+            print('📝 User not found in any collection — redirecting to signup');
           }
-          emit(LoginFailure(error: "user-not-found"));
+          // No account found → redirect to create account page
+          emit(OTPVerifiedForRegistration(uid: userCredential.user!.uid));
         }
       } else {
         if (kDebugMode) {
@@ -294,27 +324,36 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  // Helper method: Check if user exists in workers collection
+  // Helper method: Check if user exists in workers collection with role "technician"
   Future<UserModel?> _checkWorkerUser(String uid) async {
     try {
       final userDoc = await AppFirestore.usersCollectionRef.doc(uid).get();
 
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>?;
-        LocalStore.putUID(userData?['uid'] ?? uid);
-        LocalStore.putlogoutStatus(false);
-
-        if (kDebugMode) {
-          print('✅ Worker user found: ${userData?['name']}');
-        }
-
         final data = userData ?? {};
         if (data['uid'] == null) {
           data['uid'] = uid;
         }
 
         final user = UserModel.fromJson(data);
-        
+        final userRole = user.role.toLowerCase();
+
+        // Only accept users with role "technician"
+        if (userRole != 'technician') {
+          if (kDebugMode) {
+            print('❌ User found but role is "$userRole", not "technician". Skipping.');
+          }
+          return null;
+        }
+
+        LocalStore.putUID(userData?['uid'] ?? uid);
+        LocalStore.putlogoutStatus(false);
+
+        if (kDebugMode) {
+          print('✅ Worker user found with role "technician": ${userData?['name']}');
+        }
+
         // Caching for local access
         LocalStore.storeUserData(user);
         
@@ -371,6 +410,114 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (e) {
        if (kDebugMode) {
         print('❌ Error fetching admin user: $e');
+      }
+      return null;
+    }
+  }
+
+  // Helper method: Check if phone belongs to a technician (by phone number query)
+  // Prevents duplicate accounts when Firebase Auth assigns a new UID
+  Future<UserModel?> _checkWorkerByPhone(String uid, String phone) async {
+    try {
+      final techByPhoneQuery = await AppFirestore.usersCollectionRef
+          .where('phone', isEqualTo: phone)
+          .limit(1)
+          .get();
+
+      if (techByPhoneQuery.docs.isNotEmpty) {
+        final oldData = techByPhoneQuery.docs.first.data() as Map<String, dynamic>;
+        final oldDocId = techByPhoneQuery.docs.first.id;
+
+        if (kDebugMode) {
+          print('✅ Technician found by phone: $phone (old UID: $oldDocId)');
+        }
+
+        // Migrate doc to new UID
+        oldData['uid'] = uid;
+        oldData['updatedAt'] = Timestamp.now();
+        await AppFirestore.usersCollectionRef.doc(uid).set(oldData);
+
+        // Delete old document
+        if (oldDocId != uid) {
+          await AppFirestore.usersCollectionRef.doc(oldDocId).delete();
+          if (kDebugMode) {
+            print('🔄 Technician doc migrated from $oldDocId to $uid');
+          }
+        }
+
+        final user = UserModel.fromJson(oldData);
+
+        LocalStore.putUID(uid);
+        LocalStore.putlogoutStatus(false);
+        LocalStore.storeUserData(user);
+
+        return user;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error checking technician by phone: $e');
+      }
+      return null;
+    }
+  }
+
+  // Helper method: Check if phone belongs to an admin (by phone number query)
+  Future<UserModel?> _checkAdminByPhone(String uid, String phone) async {
+    try {
+      final adminByPhoneQuery = await AppFirestore.adminsCollectionRef
+          .where('phoneNumber', isEqualTo: phone)
+          .limit(1)
+          .get();
+
+      if (adminByPhoneQuery.docs.isNotEmpty) {
+        final adminData = adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
+        final oldDocId = adminByPhoneQuery.docs.first.id;
+
+        if (kDebugMode) {
+          print('✅ Admin found by phone: $phone, accessLevel: ${adminData?['accessLevel']}');
+        }
+
+        // Create admin model
+        final adminModel = AdminModel.fromJson(adminData ?? {}, id: oldDocId);
+
+        // If the admin doc UID differs from current UID, migrate admin doc
+        if (oldDocId != uid) {
+          await AppFirestore.adminsCollectionRef.doc(uid).set(
+            adminModel.copyWith(uid: uid).toJson(),
+          );
+          await AppFirestore.adminsCollectionRef.doc(oldDocId).delete();
+          if (kDebugMode) {
+            print('🔄 Admin doc migrated from $oldDocId to $uid');
+          }
+        }
+
+        // Map AdminModel fields to UserModel structure for Home compatibility
+        final user = UserModel(
+          uid: uid,
+          name: adminData?['name'] ?? 'Admin',
+          email: adminData?['email'],
+          phone: adminData?['phoneNumber'],
+          isAdmin: true,
+          isVerified: true,
+          role: 'admin',
+          adminAccessLevel: adminData?['accessLevel'],
+          createdAt: adminData?['createdAt'],
+        );
+
+        LocalStore.putUID(uid);
+        LocalStore.putlogoutStatus(false);
+
+        // Store both in local storage
+        LocalStore.storeUserData(user);
+        LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+
+        return user;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error checking admin by phone: $e');
       }
       return null;
     }

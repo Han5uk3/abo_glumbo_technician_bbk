@@ -7,6 +7,7 @@ import 'package:aboglumbo_bbk_panel/pages/account/terms_and_conditions_page.dart
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
+import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
@@ -266,6 +267,15 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else if (state is OTPSentFailure) {
           _showSnackBar(state.error, Colors.red);
+        } else if (state is OTPVerifiedForRegistration) {
+          // No account found → navigate to create account page
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Signup(uid: state.uid),
+            ),
+            (route) => false,
+          );
         } else if (state is LoginFailure) {
           String errorMessage;
           switch (state.error) {

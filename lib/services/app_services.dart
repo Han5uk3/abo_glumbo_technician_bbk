@@ -2607,8 +2607,8 @@ class AppServices {
       // Send notification to customer
       await _recordCustomerNotification(
         customerId: customerId,
-        titleEn: 'New Time Proposed',
-        titleAr: 'اقتراح موعد جديد',
+        titleEn: 'Update Regarding Your Request',
+        titleAr: 'تحديث بخصوص طلبك',
         bodyEn: 'Technician has proposed a new time for your booking.',
         bodyAr: 'اقترح الفني موعداً جديداً لحجزك.',
         type: 'counter_offer',

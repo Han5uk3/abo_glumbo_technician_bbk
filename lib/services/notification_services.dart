@@ -453,7 +453,23 @@ class NotificationServices {
             MaterialPageRoute(
               builder: (context) => const Home(
                 newIndex: 1, // Orders tab
-                selectedFilter: 'O', // Offers filter
+                selectedFilter: 'P', // Pending filter (which shows job offers)
+              ),
+            ),
+            (route) => false,
+          );
+        }
+      }
+      // Check if this is a booking notification
+      else if (type == 'booking' || data['category'] == 'booking') {
+        debugPrint('📋 Booking notification detected!');
+        if (navigatorKey?.currentState != null) {
+          final isAdmin = data['isAdmin'] == 'true';
+          navigatorKey!.currentState!.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => Home(
+                newIndex: 1, // Orders tab
+                selectedFilter: isAdmin ? 'P' : 'A', // Pending for admin, Accepted for technician
               ),
             ),
             (route) => false,
@@ -547,7 +563,21 @@ class NotificationServices {
             MaterialPageRoute(
               builder: (context) => const Home(
                 newIndex: 1,
-                selectedFilter: 'O',
+                selectedFilter: 'P', // Pending filter
+              ),
+            ),
+            (route) => false,
+          );
+        }
+      } else if (type == 'booking' || category == 'booking') {
+        debugPrint('📋 Booking notification detected from background!');
+        if (navigatorKey?.currentState != null) {
+          final isAdmin = data['isAdmin'] == 'true';
+          navigatorKey!.currentState!.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => Home(
+                newIndex: 1, // Orders tab
+                selectedFilter: isAdmin ? 'P' : 'A', // Pending for admin, Accepted for technician
               ),
             ),
             (route) => false,

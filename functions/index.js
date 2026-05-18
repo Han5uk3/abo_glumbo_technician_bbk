@@ -4031,6 +4031,47 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 /**
+ * Ray-casting point-in-polygon algorithm to check if point (lat, lon) is inside polygon
+ */
+function isPointInPolygon(lat, lon, polygon) {
+  if (!polygon || polygon.length < 3) return false;
+
+  let inside = false;
+  let j = polygon.length - 1;
+
+  for (let i = 0; i < polygon.length; i++) {
+    const xi = parseFloat(polygon[i].lat);
+    const yi = parseFloat(polygon[i].lng || polygon[i].lon || polygon[i].longitude);
+    const xj = parseFloat(polygon[j].lat);
+    const yj = parseFloat(polygon[j].lng || polygon[j].lon || polygon[j].longitude);
+
+    const intersect =
+        ((yi > lon) !== (yj > lon)) &&
+        (lat < (xj - xi) * (lon - yi) / (yj - yi) + xi);
+
+    if (intersect) inside = !inside;
+    j = i;
+  }
+
+  return inside;
+}
+
+/**
+ * Check if a location (lat, lon) falls inside any of the service location zones
+ */
+function isAddressInServiceZones(lat, lon, serviceLocations) {
+  for (const zone of serviceLocations) {
+    const polygon = zone.polygon;
+    if (!polygon || polygon.length === 0) continue;
+
+    if (isPointInPolygon(lat, lon, polygon)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Automatically assigns technicians to a new booking based on proximity and service role.
  * Progressively expands search radius (5, 10, 20, 30, 40 km) every 90 seconds.
  */
@@ -4151,6 +4192,23 @@ exports.autoAssignTechnician = onDocumentWritten(
       return null;
     }
 
+    // Fetch service locations/zones for this service
+    let serviceLocations = [];
+    const serviceId = booking.service?.id;
+    if (serviceId) {
+      try {
+        const serviceLocationsQuery = await db.collection("locations")
+          .where("service_id", "==", serviceId)
+          .get();
+        if (!serviceLocationsQuery.empty) {
+          const data = serviceLocationsQuery.docs[0].data();
+          serviceLocations = data.locations || [];
+        }
+      } catch (e) {
+        logger.error(`[${bookingId}] Error fetching service locations:`, e);
+      }
+    }
+
     const radii = [5, 10, 20, 30, 40];
     const notifiedTechnicians = new Set();
 
@@ -4227,6 +4285,13 @@ exports.autoAssignTechnician = onDocumentWritten(
         logger.info(`[${bookingId}] Tech ${techId} (${doc.data().name}) distance: ${distance.toFixed(2)}km. Target: ${radius}km`);
 
         if (distance <= radius) {
+          // Check if technician is within the service zone set for the service
+          const isWithinZone = isAddressInServiceZones(techLat, techLon, serviceLocations);
+          if (!isWithinZone) {
+            logger.info(`[${bookingId}] Technician ${techId} is not within any service zone set for the service. Skipping.`);
+            continue;
+          }
+
           const activeJobs = await db.collection("bookings")
             .where("agent.uid", "==", techId)
             .where("bookingStatusCode", "==", "A")

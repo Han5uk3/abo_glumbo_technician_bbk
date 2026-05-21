@@ -12,11 +12,11 @@ class ContactService {
   static Future<void> launchEmail(BuildContext context, String email) async {
     final url = "mailto:$email";
     log('Attempting to launch email: $url');
-    if (await canLaunchUrlString(url)) {
+    try {
       final success = await launchUrlString(url);
       log('Email launch result: $success');
-    } else {
-      log('Cannot launch email: $url');
+    } catch (e) {
+      log('Cannot launch email: $url; Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not launch email client')),
@@ -29,15 +29,23 @@ class ContactService {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
     final whatsappUrl = 'https://wa.me/$cleanPhone';
     log('Attempting to launch WhatsApp: $whatsappUrl');
-    if (await canLaunchUrlString(whatsappUrl)) {
+    try {
       final success = await launchUrlString(whatsappUrl, mode: LaunchMode.externalApplication);
-      log('WhatsApp launch result: $success');
-    } else {
-      log('Cannot launch WhatsApp: $whatsappUrl');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch WhatsApp')),
-        );
+      if (!success) {
+        log('canLaunchUrlString returned false or failed; attempting fallback launch...');
+        await launchUrlString(whatsappUrl);
+      }
+    } catch (e) {
+      log('WhatsApp launch failed; attempting direct launch fallback... Error: $e');
+      try {
+        await launchUrlString(whatsappUrl);
+      } catch (err) {
+        log('All WhatsApp launch attempts failed: $err');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not launch WhatsApp')),
+          );
+        }
       }
     }
   }

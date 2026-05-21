@@ -1,5 +1,6 @@
 import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -599,7 +600,8 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    if (!widget.isMainAdmin) return const SizedBox.shrink();
+    final accessLevel = LocalStore.getCachedAdminData()?.accessLevel;
+    if (accessLevel == 1) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
 
     return Column(

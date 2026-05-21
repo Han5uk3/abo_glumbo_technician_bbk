@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
 import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
@@ -532,7 +533,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                   ),
                 ],
               ),
-              if (request.status == 'P') ...[
+              if (request.status == 'P' && LocalStore.getCachedAdminData()?.accessLevel != 1) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [

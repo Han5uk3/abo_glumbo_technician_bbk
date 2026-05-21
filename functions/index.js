@@ -4124,11 +4124,6 @@ exports.autoAssignTechnician = onDocumentWritten(
       if (change.before.exists && oldBooking?.bookingStatusCode === "P" && !oldBooking?.agent && !booking.agent) return null;
     }
 
-    // Trust the isOnHour flag set by the app. (Only auto-assign for off-hours)
-    if (booking.isOnHour === true) {
-      return null;
-    }
-
     logger.info(`[${bookingId}] Function triggered. isNew: ${isNew}, isReassigned: ${isReassigned}`);
 
     // Use a transaction to perform a check-and-set "lock" to prevent race conditions
@@ -4365,7 +4360,6 @@ exports.triggerScheduledAssignments = onSchedule("every 5 minutes", async (event
   const now = admin.firestore.Timestamp.now();
   const snapshot = await db.collection("bookings")
     .where("bookingStatusCode", "==", "P")
-    .where("isOnHour", "==", false)
     .where("assignmentScheduledTime", "<=", now)
     .get();
 

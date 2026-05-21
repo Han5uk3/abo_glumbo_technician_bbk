@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -582,35 +583,36 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                 ),
               ),
               const SizedBox(width: 12),
-              IconButton(
-                onPressed: () async {
-                  final confirmed = await _showConfirmationDialog(
-                    context: context,
-                    title: isBlocked
-                        ? AppLocalizations.of(context)!.unblockCustomer
-                        : AppLocalizations.of(context)!.blockCustomer,
-                    message: isBlocked
-                        ? AppLocalizations.of(context)!
-                            .areYouSureYouWantToUnBlockThisCustomer
-                        : AppLocalizations.of(context)!
-                            .areYouSureYouWantToBlockThisCustomer,
-                    isBlocking: !isBlocked,
-                  );
+              if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+                IconButton(
+                  onPressed: () async {
+                    final confirmed = await _showConfirmationDialog(
+                      context: context,
+                      title: isBlocked
+                          ? AppLocalizations.of(context)!.unblockCustomer
+                          : AppLocalizations.of(context)!.blockCustomer,
+                      message: isBlocked
+                          ? AppLocalizations.of(context)!
+                              .areYouSureYouWantToUnBlockThisCustomer
+                          : AppLocalizations.of(context)!
+                              .areYouSureYouWantToBlockThisCustomer,
+                      isBlocking: !isBlocked,
+                    );
 
-                  if (confirmed == true && context.mounted) {
-                    context.read<ManageAppBloc>().add(
-                          CustomerBlockUnblockEvent(
-                            customer.uid,
-                            !isBlocked,
-                          ),
-                        );
-                  }
-                },
-                icon: Icon(
-                  isBlocked ? Icons.check_circle_outline : Icons.block_rounded,
-                  color: isBlocked ? Colors.green : Colors.red,
+                    if (confirmed == true && context.mounted) {
+                      context.read<ManageAppBloc>().add(
+                            CustomerBlockUnblockEvent(
+                              customer.uid,
+                              !isBlocked,
+                            ),
+                          );
+                    }
+                  },
+                  icon: Icon(
+                    isBlocked ? Icons.check_circle_outline : Icons.block_rounded,
+                    color: isBlocked ? Colors.green : Colors.red,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

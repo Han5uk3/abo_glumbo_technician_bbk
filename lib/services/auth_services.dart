@@ -490,7 +490,11 @@ class AuthServices {
           final oldData = oldDoc.data() as Map<String, dynamic>;
           final oldDocId = oldDoc.id;
 
-          debugPrint("✅ [TECH AUTH] Existing technician found by phone (old UID: $oldDocId), migrating to new UID: $uid");
+          final userRole = oldData['role']?.toString().toLowerCase() ?? 'technician';
+          if (userRole != 'technician') {
+            debugPrint("❌ [TECH AUTH] User found by phone but role is '$userRole', not 'technician'. Skipping.");
+          } else {
+            debugPrint("✅ [TECH AUTH] Existing technician found by phone (old UID: $oldDocId), migrating to new UID: $uid");
 
           // Migrate doc to new UID
           oldData['uid'] = uid;
@@ -503,14 +507,15 @@ class AuthServices {
             debugPrint("🗑️ [TECH AUTH] Old technician doc ($oldDocId) deleted");
           }
 
-          LocalStore.putUID(uid);
-          LocalStore.putlogoutStatus(false);
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const Home()),
-            (route) => false,
-          );
-          return;
+            LocalStore.putUID(uid);
+            LocalStore.putlogoutStatus(false);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+              (route) => false,
+            );
+            return;
+          }
         }
       }
 

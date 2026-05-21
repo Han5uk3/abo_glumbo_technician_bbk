@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/customer_support.dart';
@@ -97,10 +98,11 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
               appBar: AppBar(
                 title: Text(getAppBarTitles()[widget.index]),
                 actions: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.add, color: Colors.white),
-                  ),
+                  if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.add, color: Colors.white),
+                    ),
                 ],
               ),
               body: Center(
@@ -134,12 +136,13 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
             appBar: AppBar(
               title: Text(getAppBarTitles()[widget.index]),
               actions: [
-                IconButton(
-                  onPressed: () {
-                    detailDialog(false, allContacts: snapshot.data!);
-                  },
-                  icon: Icon(Icons.add, color: Colors.white),
-                ),
+                if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+                  IconButton(
+                    onPressed: () {
+                      detailDialog(false, allContacts: snapshot.data!);
+                    },
+                    icon: Icon(Icons.add, color: Colors.white),
+                  ),
               ],
             ),
             body: Column(
@@ -260,84 +263,86 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
-                              const Divider(height: 1, thickness: 1),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  BlocBuilder<ManageAppBloc, ManageAppState>(
-                                    builder: (context, state) {
-                                      final isDeleting =
-                                          state is DeletingCustomerSupport;
-                                      final isLastItem =
-                                          (snapshot.data?.length ?? 0) <= 1;
-                                      return OutlinedButton.icon(
-                                        onPressed: (isDeleting || isLastItem)
-                                            ? null
-                                            : () => _showDeleteConfirmation(
-                                                context,
-                                                snapshot.data![index],
-                                              ),
-                                        icon: Icon(
-                                          Icons.delete_outline_rounded,
-                                          size: 18,
-                                        ),
-                                        label: Text(
-                                          AppLocalizations.of(context)!.delete,
-                                        ),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: isLastItem
-                                              ? Colors.grey
-                                              : AppColors.red,
-                                          side: BorderSide(
-                                            color: isLastItem
-                                                ? Colors.grey.withOpacity(0.5)
-                                                : AppColors.red.withOpacity(
-                                                    0.5,
-                                                  ),
+                              if (LocalStore.getCachedAdminData()?.accessLevel != 1) ...[
+                                const SizedBox(height: 12),
+                                const Divider(height: 1, thickness: 1),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    BlocBuilder<ManageAppBloc, ManageAppState>(
+                                      builder: (context, state) {
+                                        final isDeleting =
+                                            state is DeletingCustomerSupport;
+                                        final isLastItem =
+                                            (snapshot.data?.length ?? 0) <= 1;
+                                        return OutlinedButton.icon(
+                                          onPressed: (isDeleting || isLastItem)
+                                              ? null
+                                              : () => _showDeleteConfirmation(
+                                                  context,
+                                                  snapshot.data![index],
+                                                ),
+                                          icon: Icon(
+                                            Icons.delete_outline_rounded,
+                                            size: 18,
                                           ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
+                                          label: Text(
+                                            AppLocalizations.of(context)!.delete,
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: isLastItem
+                                                ? Colors.grey
+                                                : AppColors.red,
+                                            side: BorderSide(
+                                              color: isLastItem
+                                                  ? Colors.grey.withOpacity(0.5)
+                                                  : AppColors.red.withOpacity(
+                                                      0.5,
+                                                    ),
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                8,
+                                              ),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
                                             ),
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 10,
-                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        detailDialog(
+                                          true,
+                                          contact: snapshot.data?[index],
+                                          allContacts: snapshot.data!,
+                                        );
+                                      },
+                                      icon: Icon(Icons.edit_outlined, size: 18),
+                                      label: Text(
+                                        AppLocalizations.of(context)!.edit,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      detailDialog(
-                                        true,
-                                        contact: snapshot.data?[index],
-                                        allContacts: snapshot.data!,
-                                      );
-                                    },
-                                    icon: Icon(Icons.edit_outlined, size: 18),
-                                    label: Text(
-                                      AppLocalizations.of(context)!.edit,
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 10,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 10,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),

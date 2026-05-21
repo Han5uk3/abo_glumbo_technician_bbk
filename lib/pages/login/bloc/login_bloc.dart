@@ -428,6 +428,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final oldData = techByPhoneQuery.docs.first.data() as Map<String, dynamic>;
         final oldDocId = techByPhoneQuery.docs.first.id;
 
+        final userRole = oldData['role']?.toString().toLowerCase() ?? 'technician';
+        if (userRole != 'technician') {
+          if (kDebugMode) {
+            print('❌ User found by phone but role is "$userRole", not "technician". Skipping.');
+          }
+          return null;
+        }
+
         if (kDebugMode) {
           print('✅ Technician found by phone: $phone (old UID: $oldDocId)');
         }
@@ -513,6 +521,61 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
 
         return user;
+      } else {
+        // If not found in active admins, check in pendingAdminsCollectionRef
+        if (kDebugMode) {
+          print('🔍 Checking pending admins for phone: $phone');
+        }
+        final pendingAdminQuery = await AppFirestore.pendingAdminsCollectionRef
+            .where('phoneNumber', isEqualTo: phone)
+            .limit(1)
+            .get();
+
+        if (pendingAdminQuery.docs.isNotEmpty) {
+          final pendingData = pendingAdminQuery.docs.first.data() as Map<String, dynamic>;
+          final pendingDocId = pendingAdminQuery.docs.first.id;
+
+          if (kDebugMode) {
+            print('✅ Pending admin found by phone: $phone, promoting to active admin');
+          }
+
+          // Create admin model using the pending data and the pending doc ID
+          final pendingAdminModel = AdminModel.fromJson(pendingData, id: pendingDocId);
+
+          // Promote to active admin: set document in admins collection keyed by user auth uid
+          await AppFirestore.adminsCollectionRef.doc(uid).set(
+            pendingAdminModel.copyWith(uid: uid).toJson(),
+          );
+
+          // Delete from pending collection
+          await AppFirestore.pendingAdminsCollectionRef.doc(pendingDocId).delete();
+
+          if (kDebugMode) {
+            print('🔄 Pending admin $pendingDocId promoted to active admin under UID: $uid');
+          }
+
+          // Map to UserModel structure for Home compatibility
+          final user = UserModel(
+            uid: uid,
+            name: pendingData['name'] ?? 'Admin',
+            email: pendingData['email'],
+            phone: pendingData['phoneNumber'],
+            isAdmin: true,
+            isVerified: true,
+            role: 'admin',
+            adminAccessLevel: pendingData['accessLevel'],
+            createdAt: pendingData['createdAt'],
+          );
+
+          LocalStore.putUID(uid);
+          LocalStore.putlogoutStatus(false);
+
+          // Store both in local storage
+          LocalStore.storeUserData(user);
+          LocalStore.storeAdminData(AdminModel.fromJson(pendingData, id: uid));
+
+          return user;
+        }
       }
       return null;
     } catch (e) {

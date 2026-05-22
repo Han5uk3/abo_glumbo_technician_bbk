@@ -473,6 +473,14 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
         en: "Your booking has been rejected.",
         ar: "تم رفض حجزك.",
       },
+      CP: {
+        en: "Your service is complete! Payment is pending.",
+        ar: "خدمتك مكتملة! الدفع معلق.",
+      },
+      VP: {
+        en: "Your payment verification is pending.",
+        ar: "التحقق من الدفع الخاص بك معلق.",
+      },
       C: {
         // Service complete
         en: "Your service is complete!\nWe hope you had a great experience.",
@@ -1019,86 +1027,6 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
   }
 );
 
-exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
-  "tipping/{walletId}",
-  async (event) => {
-    const beforeData = event.data?.before?.data();
-    const afterData = event.data?.after?.data();
-    const walletId = event.params.walletId;
-
-    if (!afterData) {
-      console.log("Document deleted, skipping...");
-      return;
-    }
-
-    // Check if payoutRequested changed from false to true
-    const wasRequested = beforeData?.payoutRequested === true;
-    const isRequestedNow = afterData.payoutRequested === true;
-
-    if (!isRequestedNow || wasRequested) {
-      console.log("No new payout request detected, skipping...");
-      return;
-    }
-
-    const agentName = afterData.agentName || "A worker";
-    const agentId = afterData.agentId;
-    const totalTip = afterData.totalTip || 0;
-
-    // Fetch all admin users
-    try {
-      const adminUsersDocs = await getAllAdminUsers();
-
-      const tokensWithLanguage = [];
-      adminUsersSnapshot.forEach((doc) => {
-        const user = doc.data();
-        if (user.fcmToken && user.fcmToken.trim() !== "") {
-          tokensWithLanguage.push({
-            uid: doc.id,
-            token: user.fcmToken,
-            lanCode: user.lanCode || "en",
-          });
-        }
-      });
-
-      if (tokensWithLanguage.length === 0) {
-        console.log("No admin tokens found.");
-        return null;
-      }
-
-      // Send notification to each admin
-      const results = [];
-      for (const { uid, token, lanCode } of tokensWithLanguage) {
-        await sendAndStoreNotification({
-          targetRole: "admin",
-          targetId: uid,
-          titleEn: "Tip Payout Request",
-          titleAr: "طلب سحب إكرامية",
-          bodyEn: `${agentName} requested a tip payout of ₹${totalTip}. Please review and approve.`,
-          bodyAr: `${agentName} طلب سحب إكرامية بمبلغ ${totalTip}. يرجى المراجعة والموافقة.`,
-          data: {
-            targetRole: "admin",
-            category: "tip_payout",
-            walletId: walletId,
-            agentId: agentId,
-            agentName: agentName,
-            amount: totalTip.toString(),
-            isAdmin: "true",
-          },
-          fcmToken: token,
-          lanCode: lanCode,
-        });
-      }
-
-      console.log(
-        `Notified ${results.filter((r) => r.success).length
-        } admins about tip payout request.`
-      );
-    } catch (error) {
-      console.error("Error sending admin notifications:", error);
-      return null;
-    }
-  }
-);
 
 exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
   "tipping/{walletId}",
@@ -1788,7 +1716,7 @@ exports.notifyAdminsOnNewWorkerSignup = onDocumentCreated(
       const adminUsersDocs = await getAllAdminUsers();
 
       const tokensWithLanguage = [];
-      adminUsersSnapshot.forEach((doc) => {
+      adminUsersDocs.forEach((doc) => {
         const user = doc.data();
         if (user.fcmToken && user.fcmToken.trim() !== "") {
           tokensWithLanguage.push({
@@ -2050,7 +1978,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      adminTokens = adminSnapshot.docs
+      adminTokens = adminUsersDocs
         .map((doc) => {
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
@@ -2283,7 +2211,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      adminTokens = adminSnapshot.docs
+      adminTokens = adminUsersDocs
         .map((doc) => {
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
@@ -3550,13 +3478,13 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      if (adminSnapshot.empty) {
+      if (!adminUsersDocs || adminUsersDocs.length === 0) {
         console.log(`[${payoutId}] No admin users found`);
         return;
       }
 
       // Send notification to each admin
-      for (const adminDoc of adminSnapshot.docs) {
+      for (const adminDoc of adminUsersDocs) {
         const adminData = adminDoc.data();
         const adminFcmToken = adminData?.fcmToken;
         const adminLanCode = adminData?.lanCode || "en";
@@ -3639,13 +3567,13 @@ exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      if (adminSnapshot.empty) {
+      if (!adminUsersDocs || adminUsersDocs.length === 0) {
         console.log(`[${agentId}] No admin users found`);
         return;
       }
 
       // Send notification to each admin
-      for (const adminDoc of adminSnapshot.docs) {
+      for (const adminDoc of adminUsersDocs) {
         const adminData = adminDoc.data();
         const adminFcmToken = adminData?.fcmToken;
         const adminLanCode = adminData?.lanCode || "en";

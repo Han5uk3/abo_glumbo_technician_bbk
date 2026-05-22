@@ -17,9 +17,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key, required this.workerData});
-
   final UserModel workerData;
+  final Function(int tabIndex, {String? bookingStatus})? onNavigate;
+
+  const DashboardScreen({
+    super.key,
+    required this.workerData,
+    this.onNavigate,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -533,44 +538,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
           data['latest']?.toString() ?? '0',
           const Color(0xFFFF5C8E),
           Icons.calendar_today_rounded,
-          () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => Home(newIndex: 1)),
-            (_) => false,
-          ),
+          () {
+            if (widget.onNavigate != null) {
+              widget.onNavigate!(1, bookingStatus: 'P');
+            } else {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => Home(newIndex: 1)),
+                (_) => false,
+              );
+            }
+          },
         ),
         _buildCompactStatCard(
           l10n.accepted,
           data['accepted']?.toString() ?? '0',
           const Color(0xFFFFA03D),
           Icons.settings_suggest_rounded,
-          () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => Home(newIndex: 1, selectedFilter: "A"),
-            ),
-            (_) => false,
-          ),
+          () {
+            if (widget.onNavigate != null) {
+              widget.onNavigate!(1, bookingStatus: 'A');
+            } else {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => Home(newIndex: 1, selectedFilter: "A"),
+                ),
+                (_) => false,
+              );
+            }
+          },
         ),
         _buildCompactStatCard(
           l10n.paymentPending,
           data['paymentPending']?.toString() ?? '0',
           const Color(0xFF4AC367),
           Icons.attach_money_rounded,
-          () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => Home(newIndex: 1, selectedFilter: "CP"),
-            ),
-            (_) => false,
-          ),
+          () {
+            if (widget.onNavigate != null) {
+              widget.onNavigate!(1, bookingStatus: 'CP');
+            } else {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => Home(newIndex: 1, selectedFilter: "CP"),
+                ),
+                (_) => false,
+              );
+            }
+          },
         ),
         _buildCompactStatCard(
           l10n.warrantyClaims,
           data['warrantyClaims']?.toString() ?? '0',
           const Color(0xFF4DBFFF),
           Icons.lightbulb_outline_rounded,
-          () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => Home(newIndex: 2)),
-            (_) => false,
-          ),
+          () {
+            if (widget.onNavigate != null) {
+              widget.onNavigate!(2);
+            } else {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => Home(newIndex: 2)),
+                (_) => false,
+              );
+            }
+          },
         ),
       ]),
     );

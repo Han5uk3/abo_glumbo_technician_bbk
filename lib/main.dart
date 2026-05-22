@@ -36,6 +36,12 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   }
 
   try {
+    if (LocalStore.isCurrentUserAdmin()) {
+      debugPrint('ℹ️ Headless background fetch: User is admin, skipping background location update');
+      BackgroundFetch.finish(taskId);
+      return;
+    }
+
     final String? bookingId = LocalStore.getActiveBookingId();
     final String? uid = LocalStore.getUID();
 

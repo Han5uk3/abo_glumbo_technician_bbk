@@ -18,7 +18,8 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:rxdart/rxdart.dart';
 
 class AdminHome extends StatefulWidget {
-  const AdminHome({super.key});
+  final String? initialStatus;
+  const AdminHome({super.key, this.initialStatus});
 
   @override
   State<AdminHome> createState() => _AdminHomeState();
@@ -77,6 +78,27 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     );
   }
 
+  int _getInitialIndex() {
+    if (widget.initialStatus != null) {
+      final index = bookingStatus.indexWhere((status) => status['code'] == widget.initialStatus);
+      if (index != -1) {
+        return index;
+      }
+    }
+    return 0;
+  }
+
+  @override
+  void didUpdateWidget(covariant AdminHome oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialStatus != oldWidget.initialStatus && widget.initialStatus != null) {
+      final targetIndex = bookingStatus.indexWhere((status) => status['code'] == widget.initialStatus);
+      if (targetIndex != -1 && targetIndex != _tabController.index) {
+        _tabController.animateTo(targetIndex);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +106,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     _tabController = TabController(
       length: bookingStatus.length,
       vsync: this,
-      initialIndex: 0,
+      initialIndex: _getInitialIndex(),
     );
 
     // Add listener to rebuild on tab change

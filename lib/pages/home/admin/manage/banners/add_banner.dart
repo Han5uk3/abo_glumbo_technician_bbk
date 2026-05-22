@@ -256,9 +256,9 @@ class _AddBannerState extends State<AddBanner> {
                                 ? context.read<ManageAppBloc>().add(
                                     AddBannerEvent(
                                       BannerModel(
-                                        url: urlController.text,
+                                        url: urlController.text.trim(),
                                         image: selectedImage?.path ?? '',
-                                        label: labelController.text,
+                                        label: labelController.text.trim(),
                                         active: isActive,
                                         section: setction,
                                       ),
@@ -267,7 +267,12 @@ class _AddBannerState extends State<AddBanner> {
                                   )
                                 : context.read<ManageAppBloc>().add(
                                     UpdateBannerEvent(
-                                      widget.banner!,
+                                      widget.banner!.copyWith(
+                                        url: urlController.text.trim(),
+                                        label: labelController.text.trim(),
+                                        active: isActive,
+                                        section: setction,
+                                      ),
                                       imageFile: selectedImage,
                                     ),
                                   );
@@ -332,10 +337,10 @@ class _AddBannerState extends State<AddBanner> {
                   labelText: AppLocalizations.of(context)?.url ?? 'URL',
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.urlIsRequired;
+                  if (value == null || value.trim().isEmpty) {
+                    return null;
                   }
-                  if (!Regex.urlRegex.hasMatch(value)) {
+                  if (!Regex.urlRegex.hasMatch(value.trim())) {
                     return AppLocalizations.of(context)!.invalidUrl;
                   }
                   return null;

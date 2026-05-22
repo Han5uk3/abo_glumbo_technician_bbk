@@ -67,10 +67,14 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     Future.delayed(Duration.zero, () async {
       // 1. Update location immediately on app startup
       if (mounted) {
-        debugPrint('🚀 Initializing location update on Home launch');
-        await TechnicianLocationUpdateService.updateLocationNow(
-          context: context,
-        );
+        if (!LocalStore.isCurrentUserAdmin()) {
+          debugPrint('🚀 Initializing location update on Home launch');
+          await TechnicianLocationUpdateService.updateLocationNow(
+            context: context,
+          );
+        } else {
+          debugPrint('ℹ️ User is admin, skipping location update on Home launch');
+        }
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
         }
@@ -80,7 +84,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       await NotificationServices.initializeNotifications();
       await NotificationServices.setupFCMListeners();
       await NotificationServices.checkForInitialMessage();
-      await TechnicianLocationUpdateService.initializeBackgroundLocationUpdates();
+      if (!LocalStore.isCurrentUserAdmin()) {
+        await TechnicianLocationUpdateService.initializeBackgroundLocationUpdates();
+      }
     });
 
     if (widget.byPassUid != null && widget.byPassUid!.isNotEmpty) {
@@ -104,15 +110,22 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      debugPrint('🔄 App resumed - updating location');
-      TechnicianLocationUpdateService.updateLocationNow(context: context).then((
-        _,
-      ) {
+      if (!LocalStore.isCurrentUserAdmin()) {
+        debugPrint('🔄 App resumed - updating location');
+        TechnicianLocationUpdateService.updateLocationNow(context: context).then((
+          _,
+        ) {
+          if (mounted) {
+            context.read<LoginBloc>().add(RefreshUserData());
+          }
+        });
+        TechnicianLocationUpdateService.startBackgroundLocationUpdates();
+      } else {
+        debugPrint('ℹ️ App resumed - user is admin, refreshing user data only');
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
         }
-      });
-      TechnicianLocationUpdateService.startBackgroundLocationUpdates();
+      }
     }
   }
 
@@ -179,14 +192,33 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         // Setup pages based on fixed role
         final List<Widget> pages = userData.isAdmin == true
             ? [
-                const AdminDashboardPage(),
-                const AdminHome(),
+                AdminDashboardPage(
+                  onNavigate: (index, {bookingStatus}) {
+                    setState(() {
+                      currentIndex = index;
+                      if (bookingStatus != null) {
+                        selectedBookingStatus = bookingStatus;
+                      }
+                    });
+                  },
+                ),
+                AdminHome(initialStatus: selectedBookingStatus),
                 ManageApp(userData: userData),
                 WarrantyPage(workerData: userData, isTechnicianView: false),
                 AccountPage(workerData: userData),
               ]
             : [
-                DashboardScreen(workerData: userData),
+                DashboardScreen(
+                  workerData: userData,
+                  onNavigate: (index, {bookingStatus}) {
+                    setState(() {
+                      currentIndex = index;
+                      if (bookingStatus != null) {
+                        selectedBookingStatus = bookingStatus;
+                      }
+                    });
+                  },
+                ),
                 WorkerHome(selectedIndex: selectedBookingStatus),
                 WarrantyPage(workerData: userData, isTechnicianView: true),
                 AccountPage(workerData: userData),

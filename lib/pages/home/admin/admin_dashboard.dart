@@ -9,9 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:intl/intl.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/customers/manage_customers.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/agents/manage_agents.dart';
 
 class AdminDashboardPage extends StatefulWidget {
-  const AdminDashboardPage({super.key});
+  final Function(int tabIndex, {String? bookingStatus})? onNavigate;
+
+  const AdminDashboardPage({super.key, this.onNavigate});
 
   @override
   State<AdminDashboardPage> createState() => _AdminDashboardPageState();
@@ -203,36 +208,56 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           value: data.pendingCount.toString(),
           icon: Icons.hourglass_empty,
           color: Colors.orange,
+          onTap: () => widget.onNavigate?.call(1, bookingStatus: 'P'),
         ),
         DashboardStatCard(
           label: l10n.accepted,
           value: data.assignedCount.toString(),
           icon: Icons.assignment_ind_outlined,
           color: Colors.blue,
+          onTap: () => widget.onNavigate?.call(1, bookingStatus: 'A'),
         ),
         DashboardStatCard(
           label: l10n.completed,
           value: data.completedCount.toString(),
           icon: Icons.check_circle_outline,
           color: Colors.green,
+          onTap: () => widget.onNavigate?.call(1, bookingStatus: 'C'),
         ),
         DashboardStatCard(
           label: l10n.warrantyClaims,
           value: data.warrantyClaimsCount.toString(),
           icon: Icons.verified_user_outlined,
           color: Colors.purple,
+          onTap: () => widget.onNavigate?.call(3),
         ),
         DashboardStatCard(
           label: l10n.customers,
           value: data.customerCount.toString(),
           icon: Icons.people_outline,
           color: Colors.teal,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ManageCustomersPage()),
+            );
+          },
         ),
         DashboardStatCard(
           label: l10n.technicians,
           value: data.technicianCount.toString(),
           icon: Icons.engineering_outlined,
           color: Colors.indigo,
+          onTap: () {
+            final adminData = LocalStore.getCachedAdminData();
+            final isCoreAdmin = adminData?.isCoreAdmin ?? false;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ManageAgents(isMainAdmin: isCoreAdmin),
+              ),
+            );
+          },
         ),
       ],
     );

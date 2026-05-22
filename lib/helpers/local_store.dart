@@ -155,6 +155,16 @@ class LocalStore {
     await MyApp.box.flush();
   }
 
+  /// Check if the currently logged-in user is an admin
+  static bool isCurrentUserAdmin() {
+    final user = getCachedUserData();
+    if (user != null) {
+      return user.isAdmin == true || user.role == 'admin';
+    }
+    return getCachedAdminData() != null;
+  }
+
+
   // ============================================
   // Welcome Modal Tracking
   // ============================================

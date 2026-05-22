@@ -24,6 +24,10 @@ class TechnicianLocationUpdateService {
   /// Should be called once on app startup
   static Future<void> initializeBackgroundLocationUpdates() async
   {
+    if (LocalStore.isCurrentUserAdmin()) {
+      debugPrint('ℹ️ User is admin, skipping background location service initialization');
+      return;
+    }
 
     try {
       // Configure background fetch
@@ -72,6 +76,10 @@ class TechnicianLocationUpdateService {
   /// Call this on app startup and during background tasks
   static Future<void> _updateTechnicianLocation() async {
     try {
+      if (LocalStore.isCurrentUserAdmin()) {
+        debugPrint('ℹ️ User is admin, skipping background location update');
+        return;
+      }
       final uid = LocalStore.getUID();
       if (uid == null || uid.isEmpty) {
         debugPrint('⚠️ No user UID found');
@@ -179,6 +187,10 @@ class TechnicianLocationUpdateService {
   /// If [context] is provided, it will prompt the user if permissions are missing
   static Future<void> updateLocationNow({BuildContext? context}) async {
     try {
+      if (LocalStore.isCurrentUserAdmin()) {
+        debugPrint('ℹ️ User is admin, skipping manual location update');
+        return;
+      }
       debugPrint('🔄 Manually updating location...');
       if (context != null) {
         await ensureLocationPermissionAndFetch(context);
@@ -297,6 +309,10 @@ class TechnicianLocationUpdateService {
 
   /// Start background location updates
   static Future<void> startBackgroundLocationUpdates() async {
+    if (LocalStore.isCurrentUserAdmin()) {
+      debugPrint('ℹ️ User is admin, skipping start background location updates');
+      return;
+    }
     try {
       await BackgroundFetch.start();
       debugPrint('✅ Background location updates started');

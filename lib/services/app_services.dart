@@ -2442,9 +2442,14 @@ class AppServices {
         .snapshots()
         .map((s) => s.docs.length);
 
-    final customers = AppFirestore.customersCollectionRef.snapshots().map(
-      (s) => s.docs.length,
-    );
+    final customers = AppFirestore.customersCollectionRef.snapshots().map((s) {
+      return s.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['role'] == 'customer' &&
+            data['uid'] != null &&
+            data['uid'].toString().isNotEmpty;
+      }).length;
+    });
 
     final technicians = AppFirestore.usersCollectionRef.snapshots().map((s) {
       return s.docs.where((doc) {

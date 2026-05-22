@@ -179,7 +179,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       isActive = widget.service!.isActive;
       discountPercentageController.text =
           widget.service!.discountPercentage?.toString() ?? '0';
-      workingDays = widget.service!.workingDays ?? [1, 2, 3, 4, 6, 7];
+      workingDays = List<int>.from(widget.service!.workingDays ?? [1, 2, 3, 4, 6, 7]);
 
       // Restore hierarchical location data
       // Support both old district-based and new city-based formats

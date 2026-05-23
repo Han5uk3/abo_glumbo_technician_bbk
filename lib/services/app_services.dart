@@ -873,7 +873,7 @@ class AppServices {
           return snapshot.docs
               .map((doc) {
                 try {
-                  return UserModel.fromJson(doc.data() as Map<String, dynamic>);
+                  return UserModel.fromDocumentSnapshot(doc);
                 } catch (e) {
                   if (kDebugMode) {
                     print('⚠️ Error parsing user document ${doc.id}: $e');
@@ -1140,7 +1140,7 @@ class AppServices {
 
     return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => UserModel.fromDocumentSnapshot(doc))
           .toList();
     });
   }

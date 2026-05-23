@@ -268,7 +268,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         .where('isVerified', isEqualTo: true)
         .where('isAdmin', isNotEqualTo: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromDocumentSnapshot(doc)).toList());
   }
 
   Stream<List<UserModel>> _getCategoryWiseWorkersStream(String categoryId) async* {
@@ -283,7 +283,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           .where('isAdmin', isNotEqualTo: true)
           .where('jobRoles', arrayContains: catId)
           .snapshots()
-          .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>)).toList());
+          .map((snapshot) => snapshot.docs.map((doc) => UserModel.fromDocumentSnapshot(doc)).toList());
     } catch (e) { yield []; }
   }
 

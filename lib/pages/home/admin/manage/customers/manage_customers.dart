@@ -583,7 +583,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                 ),
               ),
               const SizedBox(width: 12),
-              if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+              if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
                 IconButton(
                   onPressed: () async {
                     final confirmed = await _showConfirmationDialog(

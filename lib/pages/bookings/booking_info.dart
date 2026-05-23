@@ -360,7 +360,7 @@ class _BookingInfoState extends State<BookingInfo> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offer accepted successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
         );
         setState(() => _offerId = null); // Refresh UI
       }
@@ -2671,7 +2671,7 @@ class _BookingInfoState extends State<BookingInfo> {
             } else {
               // Initial state, waiting for technician to accept
               final isSearching =
-                  widget.booking.autoAssignmentStatus == 'searching';
+                  widget.booking.autoAssignmentStatus == 'ready_to_assign';
               timelineItems.add({
                 'title': isSearching
                     ? AppLocalizations.of(context)!.assigningTechnician
@@ -2716,7 +2716,7 @@ class _BookingInfoState extends State<BookingInfo> {
             });
           } else {
             final isSearching =
-                widget.booking.autoAssignmentStatus == 'searching';
+                widget.booking.autoAssignmentStatus == 'ready_to_assign';
             timelineItems.add({
               'title': isSearching
                   ? AppLocalizations.of(context)!.assigningTechnician
@@ -2980,7 +2980,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     widget.booking.bookingStatusCode.toLowerCase() == 'c')
                   IconButton(
                     onPressed: () =>
-                        InvoiceService.generateAndShowInvoice(widget.booking),
+                        InvoiceService.generateAndShowInvoice(context, widget.booking),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -4383,6 +4383,9 @@ class _BookingInfoState extends State<BookingInfo> {
       ),
     );
     if (confirm == true && mounted) {
+      if (response == 'accepted' && _offerId != null) {
+        await _acceptJobOffer(booking);
+      }
       await _handleCounterOfferResponse(context, booking, response);
     }
   }

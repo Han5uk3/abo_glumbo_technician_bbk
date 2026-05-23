@@ -29,10 +29,10 @@
   "noReview": "لا توجد مراجعات",
   "tip": "إكرامية",
   "bookingIdCopied": "تم نسخ رقم الحجز",
-  "bonusCardDesc":"المكافأة المكتسبة سيتم تضمينها في محفظتك للدفع.",
-  "availableToWork":"متاح للعمل",
-  "walletBalance":"رصيد المحفظة",
-  "notAvailableToWork":"غير متاح للعمل",
+  "bonusCardDesc": "المكافأة المكتسبة سيتم تضمينها في محفظتك للدفع.",
+  "availableToWork": "متاح للعمل",
+  "walletBalance": "رصيد المحفظة",
+  "notAvailableToWork": "غير متاح للعمل",
   "switchToAdmin": "التبديل إلى وضع المشرف",
   "grantAdminAccess": "منح صلاحيات المشرف",
   "adminAccessManagement": "إدارة صلاحيات المشرف",
@@ -940,12 +940,12 @@
   "payoutRejectedSuccessfully": "تم رفض الدفعة بنجاح",
   "payoutRejected": "رفض الدفعة",
   "rejectConfirmation": "هل أنت متأكد أنك تريد رفض طلب الدفعة؟",
-  "pleaseEnterYourFullName":"يرجى إدخال اسمك الكامل",
+  "pleaseEnterYourFullName": "يرجى إدخال اسمك الكامل",
   "reason": "السبب",
-  "enterYourEmail":"أدخل بريدك الإلكتروني",
-  "enterYourFullName":"أدخل اسمك الكامل",
+  "enterYourEmail": "أدخل بريدك الإلكتروني",
+  "enterYourFullName": "أدخل اسمك الكامل",
   "enterTheReason": "أدخل سبب رفض طلب الدفعة",
-  "fullNameIsRequired":"الاسم الكامل مطلوب",
+  "fullNameIsRequired": "الاسم الكامل مطلوب",
   "payoutRequests": "طلبات الدفع",
   "status": "الحالة",
   "noPayoutRequestsFound": "لم يتم العثور على طلبات دفع",
@@ -1565,5 +1565,96 @@
   "applicationRejected": "تم رفض الطلب",
   "applicationRejectedMessage": "للأسف ، تم رفض طلبك بعد المراجعة. يمكنك رؤية السبب أدناه وتحديث مستنداتك للمحاولة مرة أخرى.",
   "reasonForRejection": "سبب الرفض:",
-  "noReasonProvided": "لم يتم تقديم سبب"
+  "noReasonProvided": "لم يتم تقديم سبب",
+  "failedResendOtp": "[AR] Failed to resend OTP. Please try again.",
+  "verificationIdNotFound": "[AR] Verification ID not found. Please try again.",
+  "pleaseFetchLocation": "[AR] Please fetch your current location",
+  "pleaseSelectRole": "[AR] Please select at least one job role",
+  "pleaseUploadDocuments": "[AR] Please upload all mandatory documents",
+  "revokeAccess": "[AR] Revoke Access",
+  "coreAdminCannotRemove": "[AR] Core admin cannot be removed.",
+  "onlyCoreAdminCanAdd": "[AR] Only the core admin can add new admins.",
+  "adminAddedSuccessfully": "[AR] Admin added successfully to pending invites.",
+  "failedUpdateTechStatus": "[AR] Failed to update technician status",
+  "offerAcceptedSuccessfully": "[AR] Offer accepted successfully",
+  "failedToSendCounter": "[AR] Failed to send counter offer",
+  "couldNotLaunchEmail": "[AR] Could not launch email client",
+  "couldNotLaunchWhatsapp": "[AR] Could not launch WhatsApp",
+  "cancelLower": "[AR] Cancel",
+  "invited": "[AR] INVITED",
+  "accessLevelUpper": "[AR] ACCESS LEVEL",
+  "phoneUpper": "[AR] PHONE",
+  "invoiceTitle": "[AR] Service Booking Invoice",
+  "invoiceWord": "[AR] INVOICE",
+  "statusPaid": "[AR] Status: PAID",
+  "billTo": "[AR] BILL TO:",
+  "bookingDetailsInvoice": "[AR] BOOKING DETAILS:",
+  "subtotal": "[AR] Subtotal:",
+  "inspectionFeeLabel": "[AR] Inspection Fee:",
+  "totalLabel": "[AR] Total:",
+  "thankYouInvoice": "[AR] Thank you for choosing Abo Glumbo!",
+  "invoiceNumber": "رقم الفاتورة: {number}",
+  "@invoiceNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "dateString": "التاريخ: {date}",
+  "@dateString": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceLabel": "الخدمة: {name}",
+  "@serviceLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "completedAtLabel": "تاريخ الانتهاء: {date}",
+  "@completedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentModeLabel": "طريقة الدفع: {mode}",
+  "@paymentModeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionIdLabel": "رقم المعاملة: {id}",
+  "@transactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "warrantyLabel": "الضمان: {duration}",
+  "@warrantyLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sarAmount": "{amount} ر.س",
+  "@sarAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

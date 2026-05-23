@@ -6,6 +6,7 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/admins/add_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 
 class ManageAdmins extends StatefulWidget {
   const ManageAdmins({super.key});
@@ -54,12 +55,12 @@ class _ManageAdminsState extends State<ManageAdmins>
         return AlertDialog(
           backgroundColor: AppColors.bgWhite,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: const Text('Revoke Access'),
+          title: Text(AppLocalizations.of(context)?.revokeAccess ?? 'Revoke Access'),
           content: Text('Are you sure you want to remove admin access for $adminName?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: Text(AppLocalizations.of(context)?.cancelLower ?? 'Cancel', style: const TextStyle(color: Colors.grey)),
             ),
             eButton(
               text: 'Revoke',
@@ -75,9 +76,9 @@ class _ManageAdminsState extends State<ManageAdmins>
   }
 
   Future<void> _revokeAdminAccess(AdminModel admin) async {
-    if (admin.isCoreAdmin) {
+    if (admin.isSuperAdmin) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Core admin cannot be removed.'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)?.coreAdminCannotRemove ?? 'Core admin cannot be removed.'), backgroundColor: Colors.red),
       );
       return;
     }
@@ -221,7 +222,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No admins found.'));
+                  return Center(child: Text(AppLocalizations.of(context)?.noAdminsFound ?? 'No admins found.'));
                 }
 
                 final allAdmins = snapshot.data!.where((admin) {
@@ -230,8 +231,9 @@ class _ManageAdminsState extends State<ManageAdmins>
                           admin.phoneNumber.contains(_searchQuery) ||
                           admin.email.toLowerCase().contains(_searchQuery);
 
+                  final effectiveAccessLevel = admin.hasFullAccess ? 2 : 1;
                   final matchesFilter =
-                      _selectedFilter == 0 || admin.accessLevel == _selectedFilter;
+                      _selectedFilter == 0 || effectiveAccessLevel == _selectedFilter;
 
                   return matchesSearch && matchesFilter;
                 }).toList();
@@ -357,8 +359,8 @@ class _ManageAdminsState extends State<ManageAdmins>
                               decoration: BoxDecoration(
                                   color: Colors.orange.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(6)),
-                              child: const Text('INVITED',
-                                  style: TextStyle(
+                              child: Text(AppLocalizations.of(context)?.invited ?? 'INVITED',
+                                  style: const TextStyle(
                                       color: Colors.orange,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold)),
@@ -388,16 +390,16 @@ class _ManageAdminsState extends State<ManageAdmins>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('ACCESS LEVEL',
-                          style: TextStyle(
+                      Text(AppLocalizations.of(context)?.accessLevelUpper ?? 'ACCESS LEVEL',
+                          style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 10,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(
-                        admin.accessLevel == 2
-                            ? 'Full Admin'
-                            : 'Customer Service',
+                        admin.isSuperAdmin
+                            ? 'Core Admin'
+                            : (admin.hasFullAccess ? 'Full Admin' : 'Customer Service'),
                         style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w500),
                       ),
@@ -408,8 +410,8 @@ class _ManageAdminsState extends State<ManageAdmins>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('PHONE',
-                          style: TextStyle(
+                      Text(AppLocalizations.of(context)?.phoneUpper ?? 'PHONE',
+                          style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 10,
                               fontWeight: FontWeight.bold)),
@@ -422,7 +424,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                     ],
                   ),
                 ),
-                if (!admin.isCoreAdmin)
+                if (!admin.isSuperAdmin)
                   IconButton(
                     onPressed: () async {
                       final confirm = await _showRevokeConfirmationDialog(

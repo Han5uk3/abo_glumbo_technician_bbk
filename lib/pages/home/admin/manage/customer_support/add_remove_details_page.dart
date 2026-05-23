@@ -98,7 +98,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
               appBar: AppBar(
                 title: Text(getAppBarTitles()[widget.index]),
                 actions: [
-                  if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+                  if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
                     IconButton(
                       onPressed: () {},
                       icon: Icon(Icons.add, color: Colors.white),
@@ -136,7 +136,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
             appBar: AppBar(
               title: Text(getAppBarTitles()[widget.index]),
               actions: [
-                if (LocalStore.getCachedAdminData()?.accessLevel != 1)
+                if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
                   IconButton(
                     onPressed: () {
                       detailDialog(false, allContacts: snapshot.data!);
@@ -263,7 +263,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                   ),
                                 ],
                               ),
-                              if (LocalStore.getCachedAdminData()?.accessLevel != 1) ...[
+                              if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true) ...[
                                 const SizedBox(height: 12),
                                 const Divider(height: 1, thickness: 1),
                                 const SizedBox(height: 12),

@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/models/user.dart';
 class WarrantyModel {
   String? id;
   UserModel? assignedTechnician;
+  String? assignedTechnicianId;
   String warrantyStatusCode;
   bool? claimrequested;
   List<RejectedTechnicianModel>? rejectedTechnicians;
@@ -15,10 +16,12 @@ class WarrantyModel {
   Timestamp? rejectedAt;
   Timestamp? expiredOn;
   Timestamp? preferredDateTime;
+  bool? availability;
 
   WarrantyModel({
     this.id,
     this.assignedTechnician,
+    this.assignedTechnicianId,
     this.warrantyStatusCode = 'A',
     this.claimrequested,
     this.rejectedTechnicians = const [],
@@ -30,6 +33,7 @@ class WarrantyModel {
     this.rejectedAt,
     this.expiredOn,
     this.preferredDateTime,
+    this.availability,
   });
 
   factory WarrantyModel.fromJson(Map<String, dynamic> json) {
@@ -54,6 +58,7 @@ class WarrantyModel {
               json['assignedTechnician'] as Map<String, dynamic>,
             )
           : null,
+      assignedTechnicianId: json['assignedTechnicianId'],
       warrantyStatusCode: json['warrantyStatusCode']?.toString() ?? 'A',
       claimrequested: json['claimrequested'] as bool?,
       createdAt: parseTimestamp(json['createdAt']),
@@ -66,6 +71,7 @@ class WarrantyModel {
       rejectedAt: parseTimestamp(json['rejectedAt']),
       expiredOn: parseTimestamp(json['expiredOn']),
       preferredDateTime: parseTimestamp(json['preferredDateTime']),
+      availability: json['availability'] as bool?,
       rejectedTechnicians: (json['rejectedTechnicians'] is List)
           ? (json['rejectedTechnicians'] as List)
                 .map(
@@ -82,6 +88,7 @@ class WarrantyModel {
     return {
       'id': id,
       'assignedTechnician': assignedTechnician?.toJson(),
+      'assignedTechnicianId': assignedTechnicianId,
       'warrantyStatusCode': warrantyStatusCode,
       'claimrequested': claimrequested,
       'createdAt': createdAt,
@@ -92,6 +99,7 @@ class WarrantyModel {
       'rejectedAt': rejectedAt,
       'expiredOn': expiredOn,
       'preferredDateTime': preferredDateTime,
+      'availability': availability,
       'rejectedTechnicians': rejectedTechnicians
           ?.map((e) => e.toJson())
           .toList(),

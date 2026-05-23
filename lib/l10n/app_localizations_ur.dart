@@ -4766,4 +4766,130 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get noReasonProvided => 'کوئی وجہ فراہم نہیں کی گئی';
+
+  @override
+  String get failedResendOtp => '[UR] Failed to resend OTP. Please try again.';
+
+  @override
+  String get verificationIdNotFound =>
+      '[UR] Verification ID not found. Please try again.';
+
+  @override
+  String get pleaseFetchLocation => '[UR] Please fetch your current location';
+
+  @override
+  String get pleaseSelectRole => '[UR] Please select at least one job role';
+
+  @override
+  String get pleaseUploadDocuments =>
+      '[UR] Please upload all mandatory documents';
+
+  @override
+  String get revokeAccess => '[UR] Revoke Access';
+
+  @override
+  String get coreAdminCannotRemove => '[UR] Core admin cannot be removed.';
+
+  @override
+  String get onlyCoreAdminCanAdd =>
+      '[UR] Only the core admin can add new admins.';
+
+  @override
+  String get adminAddedSuccessfully =>
+      '[UR] Admin added successfully to pending invites.';
+
+  @override
+  String get failedUpdateTechStatus =>
+      '[UR] Failed to update technician status';
+
+  @override
+  String get offerAcceptedSuccessfully => '[UR] Offer accepted successfully';
+
+  @override
+  String get failedToSendCounter => '[UR] Failed to send counter offer';
+
+  @override
+  String get couldNotLaunchEmail => '[UR] Could not launch email client';
+
+  @override
+  String get couldNotLaunchWhatsapp => '[UR] Could not launch WhatsApp';
+
+  @override
+  String get cancelLower => '[UR] Cancel';
+
+  @override
+  String get invited => '[UR] INVITED';
+
+  @override
+  String get accessLevelUpper => '[UR] ACCESS LEVEL';
+
+  @override
+  String get phoneUpper => '[UR] PHONE';
+
+  @override
+  String get invoiceTitle => '[UR] Service Booking Invoice';
+
+  @override
+  String get invoiceWord => '[UR] INVOICE';
+
+  @override
+  String get statusPaid => '[UR] Status: PAID';
+
+  @override
+  String get billTo => '[UR] BILL TO:';
+
+  @override
+  String get bookingDetailsInvoice => '[UR] BOOKING DETAILS:';
+
+  @override
+  String get subtotal => '[UR] Subtotal:';
+
+  @override
+  String get inspectionFeeLabel => '[UR] Inspection Fee:';
+
+  @override
+  String get totalLabel => '[UR] Total:';
+
+  @override
+  String get thankYouInvoice => '[UR] Thank you for choosing Abo Glumbo!';
+
+  @override
+  String invoiceNumber(String number) {
+    return 'انوائس نمبر: $number';
+  }
+
+  @override
+  String dateString(String date) {
+    return 'تاریخ: $date';
+  }
+
+  @override
+  String serviceLabel(String name) {
+    return 'سروس: $name';
+  }
+
+  @override
+  String completedAtLabel(String date) {
+    return 'مکمل ہونے کی تاریخ: $date';
+  }
+
+  @override
+  String paymentModeLabel(String mode) {
+    return 'ادائیگی کا طریقہ: $mode';
+  }
+
+  @override
+  String transactionIdLabel(String id) {
+    return 'ٹرانزیکشن آئی ڈی: $id';
+  }
+
+  @override
+  String warrantyLabel(String duration) {
+    return 'وارنٹی: $duration';
+  }
+
+  @override
+  String sarAmount(String amount) {
+    return 'SAR $amount';
+  }
 }

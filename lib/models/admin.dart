@@ -9,6 +9,9 @@ class AdminModel {
   Timestamp? createdAt;
   bool isCoreAdmin;
 
+  bool get isSuperAdmin => isCoreAdmin || accessLevel == 0;
+  bool get hasFullAccess => isSuperAdmin || accessLevel == 2;
+
   AdminModel({
     this.uid,
     required this.name,

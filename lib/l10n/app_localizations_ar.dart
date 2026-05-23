@@ -4684,4 +4684,130 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noReasonProvided => 'لم يتم تقديم سبب';
+
+  @override
+  String get failedResendOtp => '[AR] Failed to resend OTP. Please try again.';
+
+  @override
+  String get verificationIdNotFound =>
+      '[AR] Verification ID not found. Please try again.';
+
+  @override
+  String get pleaseFetchLocation => '[AR] Please fetch your current location';
+
+  @override
+  String get pleaseSelectRole => '[AR] Please select at least one job role';
+
+  @override
+  String get pleaseUploadDocuments =>
+      '[AR] Please upload all mandatory documents';
+
+  @override
+  String get revokeAccess => '[AR] Revoke Access';
+
+  @override
+  String get coreAdminCannotRemove => '[AR] Core admin cannot be removed.';
+
+  @override
+  String get onlyCoreAdminCanAdd =>
+      '[AR] Only the core admin can add new admins.';
+
+  @override
+  String get adminAddedSuccessfully =>
+      '[AR] Admin added successfully to pending invites.';
+
+  @override
+  String get failedUpdateTechStatus =>
+      '[AR] Failed to update technician status';
+
+  @override
+  String get offerAcceptedSuccessfully => '[AR] Offer accepted successfully';
+
+  @override
+  String get failedToSendCounter => '[AR] Failed to send counter offer';
+
+  @override
+  String get couldNotLaunchEmail => '[AR] Could not launch email client';
+
+  @override
+  String get couldNotLaunchWhatsapp => '[AR] Could not launch WhatsApp';
+
+  @override
+  String get cancelLower => '[AR] Cancel';
+
+  @override
+  String get invited => '[AR] INVITED';
+
+  @override
+  String get accessLevelUpper => '[AR] ACCESS LEVEL';
+
+  @override
+  String get phoneUpper => '[AR] PHONE';
+
+  @override
+  String get invoiceTitle => '[AR] Service Booking Invoice';
+
+  @override
+  String get invoiceWord => '[AR] INVOICE';
+
+  @override
+  String get statusPaid => '[AR] Status: PAID';
+
+  @override
+  String get billTo => '[AR] BILL TO:';
+
+  @override
+  String get bookingDetailsInvoice => '[AR] BOOKING DETAILS:';
+
+  @override
+  String get subtotal => '[AR] Subtotal:';
+
+  @override
+  String get inspectionFeeLabel => '[AR] Inspection Fee:';
+
+  @override
+  String get totalLabel => '[AR] Total:';
+
+  @override
+  String get thankYouInvoice => '[AR] Thank you for choosing Abo Glumbo!';
+
+  @override
+  String invoiceNumber(String number) {
+    return 'رقم الفاتورة: $number';
+  }
+
+  @override
+  String dateString(String date) {
+    return 'التاريخ: $date';
+  }
+
+  @override
+  String serviceLabel(String name) {
+    return 'الخدمة: $name';
+  }
+
+  @override
+  String completedAtLabel(String date) {
+    return 'تاريخ الانتهاء: $date';
+  }
+
+  @override
+  String paymentModeLabel(String mode) {
+    return 'طريقة الدفع: $mode';
+  }
+
+  @override
+  String transactionIdLabel(String id) {
+    return 'رقم المعاملة: $id';
+  }
+
+  @override
+  String warrantyLabel(String duration) {
+    return 'الضمان: $duration';
+  }
+
+  @override
+  String sarAmount(String amount) {
+    return '$amount ر.س';
+  }
 }

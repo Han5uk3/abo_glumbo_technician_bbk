@@ -768,10 +768,10 @@
   "warrantyRequestWasRejectedByTechnician": "وارنٹی کی درخواست ٹیکنیشن نے مسترد کر دی تھی",
   "technicianCompletedTheRequest": "ٹیکنیشن نے درخواست مکمل کر لی",
   "warrantyExpired": "وارنٹی ختم ہو گئی",
-  "enterYourFullName":"اپنا پورا نام درج کریں",
-  "pleaseEnterYourFullName":"براہ کرم اپنا پورا نام درج کریں",
-  "fullNameIsRequired":"پورا نام ضروری ہے",
-  "enterYourEmail":"اپنا ای میل درج کریں",
+  "enterYourFullName": "اپنا پورا نام درج کریں",
+  "pleaseEnterYourFullName": "براہ کرم اپنا پورا نام درج کریں",
+  "fullNameIsRequired": "پورا نام ضروری ہے",
+  "enterYourEmail": "اپنا ای میل درج کریں",
   "warrantyPeriodHasExpired": "وارنٹی کی مدت ختم ہو چکی ہے",
   "trackingStoppedAt": "ٹریکنگ روک دی گئی",
   "serviceTrackingStopped": "سروس ٹریکنگ روک دی گئی ہے",
@@ -1448,7 +1448,7 @@
   "bookingIdCopied": "بکنگ آئی ڈی کاپی ہو گئی",
   "selectTime": "وقت منتخب کریں",
   "submitCounterOffer": "جوابی پیشکش جمع کرائیں",
-  "pleaseSelectALaterTime": "براہ کرم موجودہ بکنگ کے وقت سے بعد کا وقت منتخب کریں", 
+  "pleaseSelectALaterTime": "براہ کرم موجودہ بکنگ کے وقت سے بعد کا وقت منتخب کریں",
   "listeningForSms": "ایس ایم ایس کا انتظار ہے...",
   "earningsInfoOnly": "صرف معلوماتی مقاصد کے لیے",
   "throughApp": "ایپ کے ذریعے",
@@ -1498,5 +1498,96 @@
   "applicationRejected": "درخواست مسترد کر دی گئی",
   "applicationRejectedMessage": "بدقسمتی سے، آپ کی درخواست جائزہ لینے کے بعد مسترد کر دی گئی ہے۔ آپ نیچے وجہ دیکھ سکتے ہیں اور دوبارہ کوشش کرنے کے لیے اپنی دستاویزات کو اپ ڈیٹ کر سکتے ہیں۔",
   "reasonForRejection": "مسترد کرنے کی وجہ:",
-  "noReasonProvided": "کوئی وجہ فراہم نہیں کی گئی"
+  "noReasonProvided": "کوئی وجہ فراہم نہیں کی گئی",
+  "failedResendOtp": "[UR] Failed to resend OTP. Please try again.",
+  "verificationIdNotFound": "[UR] Verification ID not found. Please try again.",
+  "pleaseFetchLocation": "[UR] Please fetch your current location",
+  "pleaseSelectRole": "[UR] Please select at least one job role",
+  "pleaseUploadDocuments": "[UR] Please upload all mandatory documents",
+  "revokeAccess": "[UR] Revoke Access",
+  "coreAdminCannotRemove": "[UR] Core admin cannot be removed.",
+  "onlyCoreAdminCanAdd": "[UR] Only the core admin can add new admins.",
+  "adminAddedSuccessfully": "[UR] Admin added successfully to pending invites.",
+  "failedUpdateTechStatus": "[UR] Failed to update technician status",
+  "offerAcceptedSuccessfully": "[UR] Offer accepted successfully",
+  "failedToSendCounter": "[UR] Failed to send counter offer",
+  "couldNotLaunchEmail": "[UR] Could not launch email client",
+  "couldNotLaunchWhatsapp": "[UR] Could not launch WhatsApp",
+  "cancelLower": "[UR] Cancel",
+  "invited": "[UR] INVITED",
+  "accessLevelUpper": "[UR] ACCESS LEVEL",
+  "phoneUpper": "[UR] PHONE",
+  "invoiceTitle": "[UR] Service Booking Invoice",
+  "invoiceWord": "[UR] INVOICE",
+  "statusPaid": "[UR] Status: PAID",
+  "billTo": "[UR] BILL TO:",
+  "bookingDetailsInvoice": "[UR] BOOKING DETAILS:",
+  "subtotal": "[UR] Subtotal:",
+  "inspectionFeeLabel": "[UR] Inspection Fee:",
+  "totalLabel": "[UR] Total:",
+  "thankYouInvoice": "[UR] Thank you for choosing Abo Glumbo!",
+  "invoiceNumber": "انوائس نمبر: {number}",
+  "@invoiceNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "dateString": "تاریخ: {date}",
+  "@dateString": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceLabel": "سروس: {name}",
+  "@serviceLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "completedAtLabel": "مکمل ہونے کی تاریخ: {date}",
+  "@completedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentModeLabel": "ادائیگی کا طریقہ: {mode}",
+  "@paymentModeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionIdLabel": "ٹرانزیکشن آئی ڈی: {id}",
+  "@transactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "warrantyLabel": "وارنٹی: {duration}",
+  "@warrantyLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sarAmount": "SAR {amount}",
+  "@sarAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

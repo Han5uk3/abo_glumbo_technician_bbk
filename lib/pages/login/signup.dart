@@ -391,7 +391,7 @@ class _SignupState extends State<Signup> {
     if (_currentPosition == null) {
       debugPrint('Signup Error: Current position is null');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fetch your current location')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseFetchLocation ?? 'Please fetch your current location')),
       );
       return;
     }
@@ -399,7 +399,7 @@ class _SignupState extends State<Signup> {
     if (selectedJobRoles.isEmpty) {
       debugPrint('Signup Error: No job roles selected');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one job role')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseSelectRole ?? 'Please select at least one job role')),
       );
       return;
     }
@@ -409,7 +409,7 @@ class _SignupState extends State<Signup> {
         chamberOfCommerceFile == null) {
       debugPrint('Signup Error: Missing mandatory documents');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload all mandatory documents')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseUploadDocuments ?? 'Please upload all mandatory documents')),
       );
       return;
     }

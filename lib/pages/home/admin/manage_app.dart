@@ -36,11 +36,11 @@ class _ManageAppState extends State<ManageApp> {
     // Get admin data from cache
     final adminData = LocalStore.getCachedAdminData();
 
-    // Check if user is main/core admin
-    _isCoreAdmin = adminData?.isCoreAdmin ?? false;
+    // Check if user is main/core admin (level 0 or isCoreAdmin flag)
+    _isCoreAdmin = (adminData?.isCoreAdmin ?? false) || (adminData?.accessLevel == 0);
 
-    // Check if user is customer service (Level 1)
-    _isCustomerService = adminData?.accessLevel == 1;
+    // Check if user is customer service (restricted access)
+    _isCustomerService = !(adminData?.hasFullAccess ?? true);
 
     List<_TileInfo> allTiles = [
       // Only show Manage Admins to core admin
@@ -137,6 +137,7 @@ class _ManageAppState extends State<ManageApp> {
         return tile.key == 'manage_customers' ||
             tile.key == 'manage_agents' ||
             tile.key == 'manage_customer_support' ||
+            tile.key == 'manage_transactions' ||
             tile.key == 'manage_payouts';
       }).toList();
     } else {

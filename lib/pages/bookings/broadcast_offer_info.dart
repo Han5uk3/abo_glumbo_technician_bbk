@@ -78,7 +78,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offer accepted successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
         );
         Navigator.pop(context);
       }

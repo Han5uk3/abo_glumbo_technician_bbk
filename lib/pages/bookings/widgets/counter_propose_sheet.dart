@@ -257,8 +257,8 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send counter offer'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.failedToSendCounter ?? 'Failed to send counter offer'),
             backgroundColor: Colors.red,
           ),
         );

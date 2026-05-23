@@ -239,7 +239,7 @@ class _OtpPageState extends State<OtpPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to resend OTP. Please try again.'),
+            content: Text(AppLocalizations.of(context)?.failedResendOtp ?? 'Failed to resend OTP. Please try again.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
@@ -374,7 +374,7 @@ class _OtpPageState extends State<OtpPage> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Verification ID not found. Please try again.'),
+          content: Text(AppLocalizations.of(context)?.verificationIdNotFound ?? 'Verification ID not found. Please try again.'),
           backgroundColor: Colors.red,
         ),
       );

@@ -56,6 +56,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   bool _hasPreloadedConflicts = false;
   List<UserModel>? _lastPreloadedUsers;
+  List<String>? _cachedConflictUids;
 
   @override
   void initState() {
@@ -149,35 +150,38 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     try {
       final jobRoleIds = users.expand((u) => u.jobRoles ?? []).whereType<String>().toSet().toList();
       await _loadCategories(jobRoleIds);
-      List<String> conflictUids = [];
+      if (_cachedConflictUids == null) {
+        List<String> conflictUids = [];
 
-      if (widget.isWarranty) {
-        final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
-        if (currentBookingDoc.exists) {
-          final data = currentBookingDoc.data() as Map<String, dynamic>?;
-          final warrantyData = data?['warranty'] as Map<String, dynamic>?;
-          final rejectedTechnicians = warrantyData?['rejectedTechnicians'] as List?;
-          if (rejectedTechnicians != null) {
-            for (var tech in rejectedTechnicians) {
-              final uid = tech['uid'] as String?;
-              if (uid != null) conflictUids.add(uid);
+        if (widget.isWarranty) {
+          final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
+          if (currentBookingDoc.exists) {
+            final data = currentBookingDoc.data() as Map<String, dynamic>?;
+            final warrantyData = data?['warranty'] as Map<String, dynamic>?;
+            final rejectedTechnicians = warrantyData?['rejectedTechnicians'] as List?;
+            if (rejectedTechnicians != null) {
+              for (var tech in rejectedTechnicians) {
+                final uid = tech['uid'] as String?;
+                if (uid != null) conflictUids.add(uid);
+              }
             }
           }
+        } else {
+          final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
+          if (currentBookingDoc.exists) {
+            final data = currentBookingDoc.data() as Map<String, dynamic>?;
+            final uids = data?['cancelledWorkerUids'] as List?;
+            if (uids != null) conflictUids.addAll(uids.cast<String>());
+          }
         }
-      } else {
-        final currentBookingDoc = await AppFirestore.bookingsCollectionRef.doc(widget.booking.id).get();
-        if (currentBookingDoc.exists) {
-          final data = currentBookingDoc.data() as Map<String, dynamic>?;
-          final uids = data?['cancelledWorkerUids'] as List?;
-          if (uids != null) conflictUids.addAll(uids.cast<String>());
-        }
+        _cachedConflictUids = conflictUids;
       }
 
       final userIds = users.map((u) => u.uid).whereType<String>().toList();
       await _conflictService.batchCheckConflicts(
         userIds: userIds,
         booking: widget.booking,
-        cancelledWorkerUids: conflictUids,
+        cancelledWorkerUids: _cachedConflictUids!,
       );
     } catch (e) {
       log('Error preloading conflicts: $e');
@@ -203,7 +207,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     _isAssigning.value = true;
 
     try {
-      final conflicts = await _conflictService.batchCheckConflicts(userIds: [userId], booking: widget.booking, cancelledWorkerUids: []);
+      final conflicts = await _conflictService.batchCheckConflicts(userIds: [userId], booking: widget.booking, cancelledWorkerUids: _cachedConflictUids ?? []);
       final conflictData = conflicts[userId];
       if (conflictData?.hasConflict == true) {
         await _showConflictDialog(user, conflictData!);

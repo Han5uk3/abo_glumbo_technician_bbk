@@ -19,7 +19,7 @@ class ContactService {
       log('Cannot launch email: $url; Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch email client')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.couldNotLaunchEmail ?? 'Could not launch email client')),
         );
       }
     }
@@ -43,7 +43,7 @@ class ContactService {
         log('All WhatsApp launch attempts failed: $err');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not launch WhatsApp')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.couldNotLaunchWhatsapp ?? 'Could not launch WhatsApp')),
           );
         }
       }

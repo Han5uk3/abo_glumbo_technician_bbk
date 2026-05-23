@@ -4750,4 +4750,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noReasonProvided => 'No reason provided';
+
+  @override
+  String get failedResendOtp => 'Failed to resend OTP. Please try again.';
+
+  @override
+  String get verificationIdNotFound =>
+      'Verification ID not found. Please try again.';
+
+  @override
+  String get pleaseFetchLocation => 'Please fetch your current location';
+
+  @override
+  String get pleaseSelectRole => 'Please select at least one job role';
+
+  @override
+  String get pleaseUploadDocuments => 'Please upload all mandatory documents';
+
+  @override
+  String get revokeAccess => 'Revoke Access';
+
+  @override
+  String get coreAdminCannotRemove => 'Core admin cannot be removed.';
+
+  @override
+  String get onlyCoreAdminCanAdd => 'Only the core admin can add new admins.';
+
+  @override
+  String get adminAddedSuccessfully =>
+      'Admin added successfully to pending invites.';
+
+  @override
+  String get failedUpdateTechStatus => 'Failed to update technician status';
+
+  @override
+  String get offerAcceptedSuccessfully => 'Offer accepted successfully';
+
+  @override
+  String get failedToSendCounter => 'Failed to send counter offer';
+
+  @override
+  String get couldNotLaunchEmail => 'Could not launch email client';
+
+  @override
+  String get couldNotLaunchWhatsapp => 'Could not launch WhatsApp';
+
+  @override
+  String get cancelLower => 'Cancel';
+
+  @override
+  String get invited => 'INVITED';
+
+  @override
+  String get accessLevelUpper => 'ACCESS LEVEL';
+
+  @override
+  String get phoneUpper => 'PHONE';
+
+  @override
+  String get invoiceTitle => 'Service Booking Invoice';
+
+  @override
+  String get invoiceWord => 'INVOICE';
+
+  @override
+  String get statusPaid => 'Status: PAID';
+
+  @override
+  String get billTo => 'BILL TO:';
+
+  @override
+  String get bookingDetailsInvoice => 'BOOKING DETAILS:';
+
+  @override
+  String get subtotal => 'Subtotal:';
+
+  @override
+  String get inspectionFeeLabel => 'Inspection Fee:';
+
+  @override
+  String get totalLabel => 'Total:';
+
+  @override
+  String get thankYouInvoice => 'Thank you for choosing Abo Glumbo!';
+
+  @override
+  String invoiceNumber(String number) {
+    return 'Invoice #: $number';
+  }
+
+  @override
+  String dateString(String date) {
+    return 'Date: $date';
+  }
+
+  @override
+  String serviceLabel(String name) {
+    return 'Service: $name';
+  }
+
+  @override
+  String completedAtLabel(String date) {
+    return 'Completed At: $date';
+  }
+
+  @override
+  String paymentModeLabel(String mode) {
+    return 'Payment Mode: $mode';
+  }
+
+  @override
+  String transactionIdLabel(String id) {
+    return 'Transaction ID: $id';
+  }
+
+  @override
+  String warrantyLabel(String duration) {
+    return 'Warranty: $duration';
+  }
+
+  @override
+  String sarAmount(String amount) {
+    return 'SAR $amount';
+  }
 }

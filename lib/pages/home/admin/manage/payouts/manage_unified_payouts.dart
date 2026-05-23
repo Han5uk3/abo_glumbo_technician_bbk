@@ -533,7 +533,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                   ),
                 ],
               ),
-              if (request.status == 'P' && LocalStore.getCachedAdminData()?.accessLevel != 1) ...[
+              if (request.status == 'P' && (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [

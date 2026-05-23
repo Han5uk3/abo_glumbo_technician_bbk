@@ -571,7 +571,7 @@ class _ManageAgentsState extends State<ManageAgents>
               ),
               const SizedBox(width: 12),
               if (agent.uid != null &&
-                  (LocalStore.getCachedAdminData()?.accessLevel != 1))
+                  (LocalStore.getCachedAdminData()?.hasFullAccess ?? true))
                 IconButton(
                   onPressed: () async {
                     final confirmed = await _showConfirmationDialog(

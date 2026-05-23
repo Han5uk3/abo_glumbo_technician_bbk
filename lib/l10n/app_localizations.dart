@@ -8926,6 +8926,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No reason provided'**
   String get noReasonProvided;
+
+  /// No description provided for @failedResendOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resend OTP. Please try again.'**
+  String get failedResendOtp;
+
+  /// No description provided for @verificationIdNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification ID not found. Please try again.'**
+  String get verificationIdNotFound;
+
+  /// No description provided for @pleaseFetchLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fetch your current location'**
+  String get pleaseFetchLocation;
+
+  /// No description provided for @pleaseSelectRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one job role'**
+  String get pleaseSelectRole;
+
+  /// No description provided for @pleaseUploadDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload all mandatory documents'**
+  String get pleaseUploadDocuments;
+
+  /// No description provided for @revokeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Access'**
+  String get revokeAccess;
+
+  /// No description provided for @coreAdminCannotRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Core admin cannot be removed.'**
+  String get coreAdminCannotRemove;
+
+  /// No description provided for @onlyCoreAdminCanAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the core admin can add new admins.'**
+  String get onlyCoreAdminCanAdd;
+
+  /// No description provided for @adminAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin added successfully to pending invites.'**
+  String get adminAddedSuccessfully;
+
+  /// No description provided for @failedUpdateTechStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update technician status'**
+  String get failedUpdateTechStatus;
+
+  /// No description provided for @offerAcceptedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer accepted successfully'**
+  String get offerAcceptedSuccessfully;
+
+  /// No description provided for @failedToSendCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send counter offer'**
+  String get failedToSendCounter;
+
+  /// No description provided for @couldNotLaunchEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch email client'**
+  String get couldNotLaunchEmail;
+
+  /// No description provided for @couldNotLaunchWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch WhatsApp'**
+  String get couldNotLaunchWhatsapp;
+
+  /// No description provided for @cancelLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelLower;
+
+  /// No description provided for @invited.
+  ///
+  /// In en, this message translates to:
+  /// **'INVITED'**
+  String get invited;
+
+  /// No description provided for @accessLevelUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCESS LEVEL'**
+  String get accessLevelUpper;
+
+  /// No description provided for @phoneUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'PHONE'**
+  String get phoneUpper;
+
+  /// No description provided for @invoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Booking Invoice'**
+  String get invoiceTitle;
+
+  /// No description provided for @invoiceWord.
+  ///
+  /// In en, this message translates to:
+  /// **'INVOICE'**
+  String get invoiceWord;
+
+  /// No description provided for @statusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: PAID'**
+  String get statusPaid;
+
+  /// No description provided for @billTo.
+  ///
+  /// In en, this message translates to:
+  /// **'BILL TO:'**
+  String get billTo;
+
+  /// No description provided for @bookingDetailsInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'BOOKING DETAILS:'**
+  String get bookingDetailsInvoice;
+
+  /// No description provided for @subtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal:'**
+  String get subtotal;
+
+  /// No description provided for @inspectionFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection Fee:'**
+  String get inspectionFeeLabel;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total:'**
+  String get totalLabel;
+
+  /// No description provided for @thankYouInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for choosing Abo Glumbo!'**
+  String get thankYouInvoice;
+
+  /// No description provided for @invoiceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice #: {number}'**
+  String invoiceNumber(String number);
+
+  /// No description provided for @dateString.
+  ///
+  /// In en, this message translates to:
+  /// **'Date: {date}'**
+  String dateString(String date);
+
+  /// No description provided for @serviceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Service: {name}'**
+  String serviceLabel(String name);
+
+  /// No description provided for @completedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed At: {date}'**
+  String completedAtLabel(String date);
+
+  /// No description provided for @paymentModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Mode: {mode}'**
+  String paymentModeLabel(String mode);
+
+  /// No description provided for @transactionIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID: {id}'**
+  String transactionIdLabel(String id);
+
+  /// No description provided for @warrantyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: {duration}'**
+  String warrantyLabel(String duration);
+
+  /// No description provided for @sarAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'SAR {amount}'**
+  String sarAmount(String amount);
 }
 
 class _AppLocalizationsDelegate

@@ -9,10 +9,10 @@
   "kmAway": "{distance} km away",
   "appName": "Abo Glumbo",
   "enterYourFullName": "Enter Your Full Name",
-  "pleaseEnterYourFullName":"Please Enter Your Full Name",
+  "pleaseEnterYourFullName": "Please Enter Your Full Name",
   "onlineStatusOn": "You are now Online",
-  "fullNameIsRequired":"Full Name is required",
-  "enterYourEmail":"Enter Your Email",
+  "fullNameIsRequired": "Full Name is required",
+  "enterYourEmail": "Enter Your Email",
   "onlineStatusOff": "You are now Offline",
   "errorUpdatingStatus": "Error updating status",
   "appLoginCaption": "Your go-to app for finding qualified professionals.",
@@ -23,12 +23,12 @@
   "rememberMe": "Remember Me",
   "login": "Login",
   "monthlyRevenue": "Monthly Revenue",
-  "admins":"Admins",
-  "banners":"Banners",
-  "customers":"Customers",
-  "technicians":"Technicians",
-  "payouts":"Payouts",
-  "faqs":"FAQs",
+  "admins": "Admins",
+  "banners": "Banners",
+  "customers": "Customers",
+  "technicians": "Technicians",
+  "payouts": "Payouts",
+  "faqs": "FAQs",
   "totalPayoutAmount": "Total Payout Amount",
   "reviewPayoutDetails": "Review Payout Details",
   "manageOrders": "Manage Orders",
@@ -37,7 +37,7 @@
   "rejectOrder": "Reject Order",
   "areYouSureYouWantToRejectThisOrder": "Are you sure you want to reject this order?",
   "loadingAgents": "Loading Technicians...",
-  "bonusCardDesc":"Earned Bonus will be included in your wallet for Payout.",
+  "bonusCardDesc": "Earned Bonus will be included in your wallet for Payout.",
   "noReview": "No Review",
   "areYouSureYouWantToAcceptThisNewTime": "Are you sure you want to accept this new time?",
   "reject": "Reject",
@@ -1587,5 +1587,96 @@
   "applicationRejected": "Application Rejected",
   "applicationRejectedMessage": "Unfortunately, your application has been rejected after review. You can see the reason below and update your documents to try again.",
   "reasonForRejection": "Reason for rejection:",
-  "noReasonProvided": "No reason provided"
+  "noReasonProvided": "No reason provided",
+  "failedResendOtp": "Failed to resend OTP. Please try again.",
+  "verificationIdNotFound": "Verification ID not found. Please try again.",
+  "pleaseFetchLocation": "Please fetch your current location",
+  "pleaseSelectRole": "Please select at least one job role",
+  "pleaseUploadDocuments": "Please upload all mandatory documents",
+  "revokeAccess": "Revoke Access",
+  "coreAdminCannotRemove": "Core admin cannot be removed.",
+  "onlyCoreAdminCanAdd": "Only the core admin can add new admins.",
+  "adminAddedSuccessfully": "Admin added successfully to pending invites.",
+  "failedUpdateTechStatus": "Failed to update technician status",
+  "offerAcceptedSuccessfully": "Offer accepted successfully",
+  "failedToSendCounter": "Failed to send counter offer",
+  "couldNotLaunchEmail": "Could not launch email client",
+  "couldNotLaunchWhatsapp": "Could not launch WhatsApp",
+  "cancelLower": "Cancel",
+  "invited": "INVITED",
+  "accessLevelUpper": "ACCESS LEVEL",
+  "phoneUpper": "PHONE",
+  "invoiceTitle": "Service Booking Invoice",
+  "invoiceWord": "INVOICE",
+  "statusPaid": "Status: PAID",
+  "billTo": "BILL TO:",
+  "bookingDetailsInvoice": "BOOKING DETAILS:",
+  "subtotal": "Subtotal:",
+  "inspectionFeeLabel": "Inspection Fee:",
+  "totalLabel": "Total:",
+  "thankYouInvoice": "Thank you for choosing Abo Glumbo!",
+  "invoiceNumber": "Invoice #: {number}",
+  "@invoiceNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "dateString": "Date: {date}",
+  "@dateString": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceLabel": "Service: {name}",
+  "@serviceLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "completedAtLabel": "Completed At: {date}",
+  "@completedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentModeLabel": "Payment Mode: {mode}",
+  "@paymentModeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionIdLabel": "Transaction ID: {id}",
+  "@transactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "warrantyLabel": "Warranty: {duration}",
+  "@warrantyLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sarAmount": "SAR {amount}",
+  "@sarAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

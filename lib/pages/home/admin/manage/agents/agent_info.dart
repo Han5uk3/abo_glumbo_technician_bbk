@@ -600,8 +600,8 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    final accessLevel = LocalStore.getCachedAdminData()?.accessLevel;
-    if (accessLevel == 1) return const SizedBox.shrink();
+    final hasFullAccess = LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
+    if (!hasFullAccess) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
 
     return Column(
@@ -776,7 +776,7 @@ class _AgentInfoState extends State<AgentInfo> {
         builder: (context) {
           final controller = TextEditingController();
           return AlertDialog(
-            title: const Text("Rejection Reason"),
+            title: Text(l10n.rejectionReason ?? "Rejection Reason"),
             content: TextField(
               controller: controller,
               decoration: const InputDecoration(
@@ -872,8 +872,8 @@ class _AgentInfoState extends State<AgentInfo> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to update technician status'),
+            SnackBar(
+              content: Text(l10n.failedUpdateTechStatus ?? 'Failed to update technician status'),
               backgroundColor: Colors.red,
             ),
           );

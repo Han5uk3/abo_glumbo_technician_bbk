@@ -2,6 +2,7 @@ import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
+import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -33,11 +34,11 @@ class _AddAdminPageState extends State<AddAdminPage> {
     if (_isLoading) return;
 
     // Check if the current user is the Core Admin
-    final currentUser = LocalStore.getCachedUserData();
-    if (currentUser?.phone != '+966501234567') {
+    final isCoreAdmin = LocalStore.getCachedAdminData()?.isSuperAdmin ?? false;
+    if (!isCoreAdmin) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Only the core admin can add new admins.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.onlyCoreAdminCanAdd ?? 'Only the core admin can add new admins.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -90,8 +91,9 @@ class _AddAdminPageState extends State<AddAdminPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Admin added successfully to pending invites.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.adminAddedSuccessfully ?? 'Admin added successfully to pending invites.'),
+            backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context);

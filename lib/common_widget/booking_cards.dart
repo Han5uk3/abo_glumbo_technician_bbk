@@ -48,15 +48,24 @@ class BookingListTileWidget extends StatelessWidget {
         ? addresses.first
         : null;
 
-    final bool bookingCancelled = booking.cancelledWorkers.any(
-      (worker) => worker.uid == LocalStore.getUID(),
-    );
+    final bool isCurrentlyAssignedToMe = isWarranty
+        ? booking.warranty?.assignedTechnician?.uid == LocalStore.getUID()
+        : booking.agent?.uid == LocalStore.getUID();
+
+    final bool currentTechCancelled = isWarranty
+        ? (booking.warranty?.rejectedTechnicians?.any(
+                (worker) => worker.uid == LocalStore.getUID(),
+              ) ??
+              false)
+        : booking.cancelledWorkers.any(
+            (worker) => worker.uid == LocalStore.getUID(),
+          );
 
     final localization = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
 
     return GestureDetector(
-      onTap: bookingCancelled
+      onTap: (currentTechCancelled && !isCurrentlyAssignedToMe)
           ? null
           : () => Navigator.push(
               context,
@@ -294,7 +303,7 @@ class BookingListTileWidget extends StatelessWidget {
                             (booking.warranty!.warrantyStatusCode == 'R' ||
                                 booking.warranty!.warrantyStatusCode ==
                                     'S'))) &&
-                    (LocalStore.getCachedAdminData()?.accessLevel != 1))
+                    (LocalStore.getCachedAdminData()?.hasFullAccess ?? true))
                   _buildActionButton(
                     label:
                         (booking.bookingStatusCode == 'A' ||
@@ -306,7 +315,12 @@ class BookingListTileWidget extends StatelessWidget {
                     onPressed: onAssign!,
                   )
                 else
-                  _buildStatusBadge(context, localization),
+                  _buildStatusBadge(
+                    context,
+                    localization,
+                    currentTechCancelled,
+                    isCurrentlyAssignedToMe,
+                  ),
               ],
             ),
           ],
@@ -416,6 +430,8 @@ class BookingListTileWidget extends StatelessWidget {
   Widget _buildStatusBadge(
     BuildContext context,
     AppLocalizations localization,
+    bool currentTechCancelled,
+    bool isCurrentlyAssignedToMe,
   ) {
     if (booking.bookingStatusCode == 'VP') {
       return _statusBadge(
@@ -424,16 +440,7 @@ class BookingListTileWidget extends StatelessWidget {
       );
     }
 
-    final bool currentTechCancelled = isWarranty
-        ? (booking.warranty?.rejectedTechnicians?.any(
-                (worker) => worker.uid == LocalStore.getUID(),
-              ) ??
-              false)
-        : booking.cancelledWorkers.any(
-            (worker) => worker.uid == LocalStore.getUID(),
-          );
-
-    if (currentTechCancelled) {
+    if (currentTechCancelled && !isCurrentlyAssignedToMe) {
       return _statusBadge(localization.rejected.toUpperCase(), Colors.red);
     }
 
@@ -500,7 +507,7 @@ class BookingListTileWidget extends StatelessWidget {
           color = Colors.green;
           break;
         case 'P':
-          if (booking.autoAssignmentStatus == 'searching') {
+          if (booking.autoAssignmentStatus == 'ready_to_assign') {
             label = localization.assigningTechnician;
             color = AppColors.primary;
           } else {
@@ -802,7 +809,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offer accepted successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
         );
       }
     } catch (e) {

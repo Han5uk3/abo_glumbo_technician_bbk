@@ -23,7 +23,7 @@ class LocalizationHelper {
         return AppLocalizations.of(context)!.cancelled;
       case 'payment pending':
         return AppLocalizations.of(context)!.paymentPending;
-      case 'searching':
+      case 'ready_to_assign':
         return AppLocalizations.of(context)!.assigningTechnician;
       case 'timed_out':
         return AppLocalizations.of(context)!.timedOut;

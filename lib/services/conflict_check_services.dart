@@ -80,13 +80,13 @@ class ConflictCheckService {
         );
 
         final query = await AppFirestore.bookingsCollectionRef
-            .where('assignedTo', whereIn: batch)
+            .where('agent.uid', whereIn: batch)
             .where('bookingStatusCode', isEqualTo: status)
             .get();
 
         for (final doc in query.docs) {
           final data = doc.data() as Map<String, dynamic>;
-          final assignedTo = data['assignedTo'] as String?;
+          final assignedTo = (data['agent'] as Map<String, dynamic>?)?['uid'] as String?;
           if (assignedTo != null) {
             results[assignedTo] = [...(results[assignedTo] ?? []), doc];
           }

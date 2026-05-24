@@ -487,9 +487,7 @@ class _AccountPageState extends State<AccountPage> {
           currentLanguageCode: currentLanguage,
           onEnglishSelected: () => _updateLanguage('en', isForNotification),
           onArabicSelected: () => _updateLanguage('ar', isForNotification),
-          onUrduSelected: isForNotification
-              ? null
-              : () => _updateLanguage('ur', isForNotification),
+          onUrduSelected: () => _updateLanguage('ur', isForNotification),
         );
       },
     );

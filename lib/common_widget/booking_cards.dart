@@ -216,29 +216,47 @@ class BookingListTileWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          isWarranty
-                              ? "0.0" // Warranty repairs are free
-                              : (booking.bookingStatusCode == "C" ||
-                                    booking.bookingStatusCode == "VP")
-                              ? ((booking.completionData?.totalCost ?? 0) +
-                                        (booking.service.price ?? 0))
-                                    .toStringAsFixed(1)
-                              : (booking.service.price ?? 0).toStringAsFixed(1),
-                          style: DMSansFont.textStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                        if (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP")
+                          Text(
+                            isWarranty
+                                ? "0.0" // Warranty repairs are free
+                                : ((booking.completionData?.totalCost ?? 0) +
+                                          booking.service.getDiscountedPrice(booking.effectiveInspectionFee))
+                                      .toStringAsFixed(1),
+                            style: DMSansFont.textStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
-                        ),
-                        Text(
-                          localization.sar,
-                          style: DMSansFont.textStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
+                        if (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP")
+                          Text(
+                            localization.sar,
+                            style: DMSansFont.textStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
                           ),
-                        ),
+                        if (booking.isOnHour != null)
+                          Padding(
+                            padding: EdgeInsets.only(top: (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP") ? 4.0 : 0.0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: booking.isOnHour == true ? Colors.blue.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                booking.isOnHour == true ? localization.onHour : localization.offHour,
+                                style: DMSansFont.textStyle(
+                                  fontSize: 10,
+                                  color: booking.isOnHour == true ? Colors.blue : Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],

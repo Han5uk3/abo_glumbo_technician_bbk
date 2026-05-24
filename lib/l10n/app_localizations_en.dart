@@ -758,7 +758,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingStatus => 'Booking Status';
 
   @override
-  String get bookingNote => 'Booking Note';
+  String get bookingNote => 'Problem Description';
 
   @override
   String get bookedAt => 'Booked At';
@@ -4873,4 +4873,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String sarAmount(String amount) {
     return 'SAR $amount';
   }
+
+  @override
+  String get onHour => 'On-Hour';
+
+  @override
+  String get offHour => 'Off-Hour';
+
+  @override
+  String get onHourBooking => 'On-Hour Booking';
+
+  @override
+  String get offHourBooking => 'Off-Hour Booking';
 }

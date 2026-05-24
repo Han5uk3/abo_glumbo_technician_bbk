@@ -241,7 +241,7 @@
   "paymentMode": "Payment Mode",
   "paymentStatus": "Payment Status",
   "bookingStatus": "Booking Status",
-  "bookingNote": "Booking Note",
+  "bookingNote": "Problem Description",
   "bookedAt": "Booked At",
   "rating": "Rating",
   "review": "Review",
@@ -1678,5 +1678,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "onHour": "On-Hour",
+  "offHour": "Off-Hour",
+  "onHourBooking": "On-Hour Booking",
+  "offHourBooking": "Off-Hour Booking"
 }

@@ -352,7 +352,7 @@
   "bookings": "الحجوزات",
   "bookedOn": "حجز في",
   "agentsAvailable": "الفنيين المتاحين",
-  "bookingNote": "ملاحظة الحجز",
+  "bookingNote": "وصف المشكلة",
   "acceptedAt": "مؤكد في",
   "rejectedAt": "مرفوض في",
   "completedAt": "مكتمل في",
@@ -1656,5 +1656,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "onHour": "On-Hour",
+  "offHour": "Off-Hour",
+  "onHourBooking": "On-Hour Booking",
+  "offHourBooking": "Off-Hour Booking"
 }

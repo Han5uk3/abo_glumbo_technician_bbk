@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/services/technician_location_update_service.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
-import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/onboarding_page.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
@@ -103,7 +102,9 @@ class _SplashScreenState extends State<SplashScreen>
         final loginBloc = context.read<LoginBloc>();
         await for (final state in loginBloc.stream) {
           if (state is LoginSuccess || state is LoginLoadWorkerData) {
-            final user = state is LoginSuccess ? state.user : (state as LoginLoadWorkerData).user;
+            final user = state is LoginSuccess
+                ? state.user
+                : (state as LoginLoadWorkerData).user;
             if (user.isAdmin != true && user.role != 'admin') {
               TechnicianLocationUpdateService.updateLocationNow();
             }

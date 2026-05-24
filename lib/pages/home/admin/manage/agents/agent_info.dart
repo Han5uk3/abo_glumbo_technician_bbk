@@ -600,7 +600,8 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    final hasFullAccess = LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
+    final hasFullAccess =
+        LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
     if (!hasFullAccess) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
 
@@ -687,8 +688,9 @@ class _AgentInfoState extends State<AgentInfo> {
             child: ElevatedButton(
               onPressed: () => _handleBlockUnblock(!(agent.isBlocked ?? false)),
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    agent.isBlocked == true ? Colors.green : Colors.red,
+                backgroundColor: agent.isBlocked == true
+                    ? Colors.green
+                    : Colors.red,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -741,14 +743,19 @@ class _AgentInfoState extends State<AgentInfo> {
       );
 
       try {
-        final success = await AppServices.blockOrUnblockAgent(agent.uid!, isBlocked);
+        final success = await AppServices.blockOrUnblockAgent(
+          agent.uid!,
+          isBlocked,
+        );
         if (mounted) Navigator.pop(context); // Close loader
 
         if (success) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(isBlocked ? "Technician Blocked" : "Technician Unblocked"),
+                content: Text(
+                  isBlocked ? "Technician Blocked" : "Technician Unblocked",
+                ),
                 backgroundColor: isBlocked ? Colors.red : Colors.green,
               ),
             );
@@ -776,7 +783,7 @@ class _AgentInfoState extends State<AgentInfo> {
         builder: (context) {
           final controller = TextEditingController();
           return AlertDialog(
-            title: Text(l10n.rejectionReason ?? "Rejection Reason"),
+            title: Text(l10n.rejectionReason),
             content: TextField(
               controller: controller,
               decoration: const InputDecoration(
@@ -815,7 +822,9 @@ class _AgentInfoState extends State<AgentInfo> {
             l10n.areYouSureYouWantToApproveThisAgent,
             style: DMSansFont.textStyle(),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -873,7 +882,7 @@ class _AgentInfoState extends State<AgentInfo> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.failedUpdateTechStatus ?? 'Failed to update technician status'),
+              content: Text(l10n.failedUpdateTechStatus),
               backgroundColor: Colors.red,
             ),
           );
@@ -894,23 +903,35 @@ class _AgentInfoState extends State<AgentInfo> {
     BuildContext context,
   ) async {
     final ext = imageUrl.split('.').last.split('?').first.toLowerCase();
-    final isImageExtension = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
+    final isImageExtension = [
+      'jpg',
+      'jpeg',
+      'png',
+      'gif',
+      'webp',
+    ].contains(ext);
 
     if (!isImageExtension) {
       await _openDocument(imageUrl, context);
       return;
     }
 
-    // Even if it has an image extension, it might be a document (e.g. PDF) 
+    // Even if it has an image extension, it might be a document (e.g. PDF)
     // due to previous upload issues where metadata was set incorrectly.
     // We check the actual file content by peeking at the first few bytes.
     try {
-      final response = await http.get(Uri.parse(imageUrl), headers: {'Range': 'bytes=0-10'});
+      final response = await http.get(
+        Uri.parse(imageUrl),
+        headers: {'Range': 'bytes=0-10'},
+      );
       if (response.statusCode == 200 || response.statusCode == 206) {
         final bytes = response.bodyBytes;
         // Check for PDF magic number: %PDF (0x25 0x50 0x44 0x46)
-        if (bytes.length >= 4 && 
-            bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46) {
+        if (bytes.length >= 4 &&
+            bytes[0] == 0x25 &&
+            bytes[1] == 0x50 &&
+            bytes[2] == 0x44 &&
+            bytes[3] == 0x46) {
           await _openDocument(imageUrl, context);
           return;
         }
@@ -974,16 +995,19 @@ class _AgentInfoState extends State<AgentInfo> {
         builder: (context) => const Center(child: Loader(color: Colors.white)),
       );
 
-        final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final dir = await getTemporaryDirectory();
         final bytes = response.bodyBytes;
-        
+
         // Determine extension by peeking at the actual downloaded bytes
         String ext = url.split('.').last.split('?').first.toLowerCase();
-        
-        if (bytes.length >= 4 && 
-            bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46) {
+
+        if (bytes.length >= 4 &&
+            bytes[0] == 0x25 &&
+            bytes[1] == 0x50 &&
+            bytes[2] == 0x44 &&
+            bytes[3] == 0x46) {
           ext = 'pdf';
         } else if (bytes.length >= 2 && bytes[0] == 0x50 && bytes[1] == 0x4B) {
           ext = 'docx';
@@ -1015,10 +1039,14 @@ class _AgentInfoState extends State<AgentInfo> {
 
   String _getLocalizedJobCategory(String jobKey, String locale) {
     if (jobCategories.containsKey(jobKey)) {
-      return jobCategories[jobKey]![locale] ?? jobCategories[jobKey]!['en'] ?? jobKey;
+      return jobCategories[jobKey]![locale] ??
+          jobCategories[jobKey]!['en'] ??
+          jobKey;
     }
     for (var entry in jobCategories.entries) {
-      if (entry.value['en'] == jobKey || entry.value['ar'] == jobKey || entry.value['ur'] == jobKey) {
+      if (entry.value['en'] == jobKey ||
+          entry.value['ar'] == jobKey ||
+          entry.value['ur'] == jobKey) {
         return entry.value[locale] ?? entry.value['en'] ?? jobKey;
       }
     }

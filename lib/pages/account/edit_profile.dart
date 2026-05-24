@@ -120,7 +120,11 @@ class _EditProfileState extends State<EditProfile> {
         final ImagePicker picker = ImagePicker();
         final XFile? image = await picker.pickImage(source: ImageSource.camera);
         if (image != null) {
-          file = PlatformFile(name: image.name, path: image.path, size: await File(image.path).length());
+          file = PlatformFile(
+            name: image.name,
+            path: image.path,
+            size: await File(image.path).length(),
+          );
         }
       } else {
         FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -148,7 +152,11 @@ class _EditProfileState extends State<EditProfile> {
         final ImagePicker picker = ImagePicker();
         final XFile? image = await picker.pickImage(source: ImageSource.camera);
         if (image != null) {
-          file = PlatformFile(name: image.name, path: image.path, size: await File(image.path).length());
+          file = PlatformFile(
+            name: image.name,
+            path: image.path,
+            size: await File(image.path).length(),
+          );
         }
       } else {
         FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -175,7 +183,9 @@ class _EditProfileState extends State<EditProfile> {
           builder: (context) => Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
-            body: Center(child: InteractiveViewer(child: Image.file(File(file.path!)))),
+            body: Center(
+              child: InteractiveViewer(child: Image.file(File(file.path!))),
+            ),
           ),
         ),
       );
@@ -616,7 +626,10 @@ class _EditProfileState extends State<EditProfile> {
   String getJobCategoryDisplayName(String key) {
     final currentLanguage = AppLocalizations.of(context)?.localeName ?? 'en';
     if (currentLanguage == 'ur') {
-      return jobCategories[key]?['ur'] ?? jobCategories[key]?['ar'] ?? jobCategories[key]?['en'] ?? key;
+      return jobCategories[key]?['ur'] ??
+          jobCategories[key]?['ar'] ??
+          jobCategories[key]?['en'] ??
+          key;
     } else if (currentLanguage == 'ar') {
       return jobCategories[key]?['ar'] ?? jobCategories[key]?['en'] ?? key;
     }
@@ -646,7 +659,6 @@ class _EditProfileState extends State<EditProfile> {
           builder: (context, setModalState) {
             final currentLanguage =
                 AppLocalizations.of(context)?.localeName ?? 'en';
-            final isArabic = currentLanguage == 'ar';
 
             return Container(
               decoration: const BoxDecoration(
@@ -743,10 +755,15 @@ class _EditProfileState extends State<EditProfile> {
 
                             ...jobCategories.entries.map((entry) {
                               final displayName = currentLanguage == 'ur'
-                                  ? (entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '')
+                                  ? (entry.value['ur'] ??
+                                        entry.value['ar'] ??
+                                        entry.value['en'] ??
+                                        '')
                                   : (currentLanguage == 'ar'
-                                      ? (entry.value['ar'] ?? entry.value['en'] ?? '')
-                                      : (entry.value['en'] ?? ''));
+                                        ? (entry.value['ar'] ??
+                                              entry.value['en'] ??
+                                              '')
+                                        : (entry.value['en'] ?? ''));
                               final isSelected = tempSelectedJobRoles.contains(
                                 entry.key,
                               );
@@ -1628,63 +1645,113 @@ class _EditProfileState extends State<EditProfile> {
                                   ),
                                   onRemove: _removeIdImage,
                                 )
-                              else if (widget.workerData?.residenceIdUrl != null)
+                              else if (widget.workerData?.residenceIdUrl !=
+                                  null)
                                 _buildFileItem(
                                   label: locale.idDocument,
                                   onTap: () async {
-                                    final url = Uri.parse(widget.workerData!.residenceIdUrl!);
+                                    final url = Uri.parse(
+                                      widget.workerData!.residenceIdUrl!,
+                                    );
                                     if (await canLaunchUrl(url)) {
-                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      await launchUrl(
+                                        url,
+                                        mode: LaunchMode.externalApplication,
+                                      );
                                     }
                                   },
                                 ),
                               const SizedBox(height: 20),
                               _buildDocumentUpload(
                                 title: '${locale.sponsorWorkPermit} *',
-                                isUploaded: selectedSponsorWorkPermitFile != null || widget.workerData?.sponsorWorkPermitUrl != null,
+                                isUploaded:
+                                    selectedSponsorWorkPermitFile != null ||
+                                    widget.workerData?.sponsorWorkPermitUrl !=
+                                        null,
                                 onUpload: _pickSponsorWorkPermit,
-                                buttonLabel: selectedSponsorWorkPermitFile == null && widget.workerData?.sponsorWorkPermitUrl == null
+                                buttonLabel:
+                                    selectedSponsorWorkPermitFile == null &&
+                                        widget
+                                                .workerData
+                                                ?.sponsorWorkPermitUrl ==
+                                            null
                                     ? "Upload Sponsor Permit"
                                     : "Change Sponsor Permit",
                               ),
                               if (selectedSponsorWorkPermitFile != null)
                                 _buildFileItem(
                                   label: selectedSponsorWorkPermitFile!.name,
-                                  onTap: () => _viewPlatformFile(selectedSponsorWorkPermitFile!),
-                                  onRemove: () => setState(() => selectedSponsorWorkPermitFile = null),
+                                  onTap: () => _viewPlatformFile(
+                                    selectedSponsorWorkPermitFile!,
+                                  ),
+                                  onRemove: () => setState(
+                                    () => selectedSponsorWorkPermitFile = null,
+                                  ),
                                 )
-                              else if (widget.workerData?.sponsorWorkPermitUrl != null)
+                              else if (widget
+                                      .workerData
+                                      ?.sponsorWorkPermitUrl !=
+                                  null)
                                 _buildFileItem(
                                   label: locale.sponsorWorkPermit,
                                   onTap: () async {
-                                    final url = Uri.parse(widget.workerData!.sponsorWorkPermitUrl!);
+                                    final url = Uri.parse(
+                                      widget.workerData!.sponsorWorkPermitUrl!,
+                                    );
                                     if (await canLaunchUrl(url)) {
-                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      await launchUrl(
+                                        url,
+                                        mode: LaunchMode.externalApplication,
+                                      );
                                     }
                                   },
                                 ),
                               const SizedBox(height: 20),
                               _buildDocumentUpload(
                                 title: '${locale.chamberOfCommerceApproval} *',
-                                isUploaded: selectedChamberOfCommerceFile != null || widget.workerData?.chamberOfCommerceApprovalUrl != null,
+                                isUploaded:
+                                    selectedChamberOfCommerceFile != null ||
+                                    widget
+                                            .workerData
+                                            ?.chamberOfCommerceApprovalUrl !=
+                                        null,
                                 onUpload: _pickChamberOfCommerce,
-                                buttonLabel: selectedChamberOfCommerceFile == null && widget.workerData?.chamberOfCommerceApprovalUrl == null
+                                buttonLabel:
+                                    selectedChamberOfCommerceFile == null &&
+                                        widget
+                                                .workerData
+                                                ?.chamberOfCommerceApprovalUrl ==
+                                            null
                                     ? "Upload Chamber Approval"
                                     : "Change Chamber Approval",
                               ),
                               if (selectedChamberOfCommerceFile != null)
                                 _buildFileItem(
                                   label: selectedChamberOfCommerceFile!.name,
-                                  onTap: () => _viewPlatformFile(selectedChamberOfCommerceFile!),
-                                  onRemove: () => setState(() => selectedChamberOfCommerceFile = null),
+                                  onTap: () => _viewPlatformFile(
+                                    selectedChamberOfCommerceFile!,
+                                  ),
+                                  onRemove: () => setState(
+                                    () => selectedChamberOfCommerceFile = null,
+                                  ),
                                 )
-                              else if (widget.workerData?.chamberOfCommerceApprovalUrl != null)
+                              else if (widget
+                                      .workerData
+                                      ?.chamberOfCommerceApprovalUrl !=
+                                  null)
                                 _buildFileItem(
                                   label: locale.chamberOfCommerceApproval,
                                   onTap: () async {
-                                    final url = Uri.parse(widget.workerData!.chamberOfCommerceApprovalUrl!);
+                                    final url = Uri.parse(
+                                      widget
+                                          .workerData!
+                                          .chamberOfCommerceApprovalUrl!,
+                                    );
                                     if (await canLaunchUrl(url)) {
-                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      await launchUrl(
+                                        url,
+                                        mode: LaunchMode.externalApplication,
+                                      );
                                     }
                                   },
                                 ),
@@ -2067,8 +2134,10 @@ class _EditProfileState extends State<EditProfile> {
                         : widget.workerData?.liveLocation,
                     certifications: widget.workerData!.certifications,
                     residenceIdUrl: widget.workerData?.residenceIdUrl,
-                    sponsorWorkPermitUrl: widget.workerData?.sponsorWorkPermitUrl,
-                    chamberOfCommerceApprovalUrl: widget.workerData?.chamberOfCommerceApprovalUrl,
+                    sponsorWorkPermitUrl:
+                        widget.workerData?.sponsorWorkPermitUrl,
+                    chamberOfCommerceApprovalUrl:
+                        widget.workerData?.chamberOfCommerceApprovalUrl,
                   ),
                   selectedIqamaImage: selectedImage,
                   selectedProfileImage: selectedProfileImage,

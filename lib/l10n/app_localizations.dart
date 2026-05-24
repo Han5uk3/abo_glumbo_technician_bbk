@@ -1555,7 +1555,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookingNote.
   ///
   /// In en, this message translates to:
-  /// **'Booking Note'**
+  /// **'Problem Description'**
   String get bookingNote;
 
   /// No description provided for @bookedAt.
@@ -9136,6 +9136,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SAR {amount}'**
   String sarAmount(String amount);
+
+  /// No description provided for @onHour.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Hour'**
+  String get onHour;
+
+  /// No description provided for @offHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-Hour'**
+  String get offHour;
+
+  /// No description provided for @onHourBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Hour Booking'**
+  String get onHourBooking;
+
+  /// No description provided for @offHourBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-Hour Booking'**
+  String get offHourBooking;
 }
 
 class _AppLocalizationsDelegate

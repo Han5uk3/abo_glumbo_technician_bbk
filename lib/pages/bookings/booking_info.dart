@@ -360,7 +360,12 @@ class _BookingInfoState extends State<BookingInfo> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.offerAcceptedSuccessfully ??
+                  'Offer accepted successfully',
+            ),
+          ),
         );
         setState(() => _offerId = null); // Refresh UI
       }
@@ -559,8 +564,9 @@ class _BookingInfoState extends State<BookingInfo> {
                 GestureDetector(
                   onTap: () => WhatsAppUtils.launchWhatsApp(whatsappPhone),
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 40,
+                    height: 40,
+                    padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: AppColors.green.withOpacity(0.1),
                       shape: BoxShape.circle,
@@ -912,7 +918,9 @@ class _BookingInfoState extends State<BookingInfo> {
               widget.booking.service.nameLocalized(languageCode: locale) ??
                   widget.booking.service.name ??
                   '',
-              widget.booking.service.descriptionLocalized(languageCode: locale) ??
+              widget.booking.service.descriptionLocalized(
+                    languageCode: locale,
+                  ) ??
                   widget.booking.service.description ??
                   '',
               context,
@@ -936,6 +944,17 @@ class _BookingInfoState extends State<BookingInfo> {
                     locale,
                   ),
                 ),
+                if (!widget.isWarranty && widget.booking.isOnHour != null) ...[
+                  Divider(color: Colors.grey[200]),
+                  _buildDetailRow(
+                    widget.booking.isOnHour == true ? AppLocalizations.of(context)!.onHourBooking : AppLocalizations.of(context)!.offHourBooking,
+                    "",
+                  ),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.inspectionFee,
+                    '${widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                  ),
+                ],
               ],
             ),
             if ((widget.booking.issueImage != null &&
@@ -1928,7 +1947,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   child: Icon(
                     Icons.chat_bubble_rounded,
                     color: AppColors.white,
-                    size: 16,
+                    size: 22,
                   ),
                 ),
               ),
@@ -1939,16 +1958,15 @@ class _BookingInfoState extends State<BookingInfo> {
                     widget.booking.customer.phone!,
                   ),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: AppColors.green,
                       shape: BoxShape.circle,
+                      color: Colors.green.withAlpha(50),
                     ),
                     child: Image.asset(
                       'assets/images/whatsapp.png',
-                      width: 16,
-                      height: 16,
-                      color: Colors.white,
+                      width: 30,
+                      height: 30,
                     ),
                   ),
                 ),
@@ -1974,7 +1992,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   child: const Icon(
                     Icons.call_rounded,
                     color: Colors.green,
-                    size: 16,
+                    size: 22,
                   ),
                 ),
               ),
@@ -2395,9 +2413,14 @@ class _BookingInfoState extends State<BookingInfo> {
       // Technician Selected
       if (widget.booking.technicianSelectedAt != null) {
         timelineItems.add({
-          'title': AppLocalizations.of(context)!.technicianSelected,
-          'time': _formatDateLocalized(widget.booking.technicianSelectedAt!.toDate(), context),
-          'description': AppLocalizations.of(context)!.serviceProviderConfirmedAppointment,
+          'title': AppLocalizations.of(context)!.technicianSelected(1),
+          'time': _formatDateLocalized(
+            widget.booking.technicianSelectedAt!.toDate(),
+            context,
+          ),
+          'description': AppLocalizations.of(
+            context,
+          )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
           'date': widget.booking.technicianSelectedAt!.toDate(),
         });
@@ -2407,7 +2430,10 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.assignedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.acceptedAt,
-          'time': _formatDateLocalized(widget.booking.assignedAt!.toDate(), context),
+          'time': _formatDateLocalized(
+            widget.booking.assignedAt!.toDate(),
+            context,
+          ),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
@@ -2420,8 +2446,13 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.reassignedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.newTechnicianAssigned,
-          'time': _formatDateLocalized(widget.booking.reassignedAt!.toDate(), context),
-          'description': AppLocalizations.of(context)!.serviceProviderConfirmedAppointment,
+          'time': _formatDateLocalized(
+            widget.booking.reassignedAt!.toDate(),
+            context,
+          ),
+          'description': AppLocalizations.of(
+            context,
+          )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
           'date': widget.booking.reassignedAt!.toDate(),
         });
@@ -2449,7 +2480,9 @@ class _BookingInfoState extends State<BookingInfo> {
             widget.booking.arrivedAt!.toDate(),
             context,
           ),
-          'description': AppLocalizations.of(context)!.technicianArrivedAtLocation,
+          'description': AppLocalizations.of(
+            context,
+          )!.technicianArrivedAtLocation,
           'status': 'completed',
           'date': widget.booking.arrivedAt!.toDate(),
         });
@@ -2459,7 +2492,7 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.completedAt != null) {
         bool isInspection = widget.booking.completionData?.mode == 0;
         timelineItems.add({
-          'title': isInspection 
+          'title': isInspection
               ? AppLocalizations.of(context)!.inspectionCompleted
               : AppLocalizations.of(context)!.fullServiceCompleted,
           'time': _formatDateLocalized(
@@ -2478,7 +2511,10 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.paymentRequestedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentRequested,
-          'time': _formatDateLocalized(widget.booking.paymentRequestedAt!.toDate(), context),
+          'time': _formatDateLocalized(
+            widget.booking.paymentRequestedAt!.toDate(),
+            context,
+          ),
           'description': AppLocalizations.of(context)!.waitingForPayment,
           'status': 'completed',
           'date': widget.booking.paymentRequestedAt!.toDate(),
@@ -2489,7 +2525,10 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.paymentCompletedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentStatus,
-          'time': _formatDateLocalized(widget.booking.paymentCompletedAt!.toDate(), context),
+          'time': _formatDateLocalized(
+            widget.booking.paymentCompletedAt!.toDate(),
+            context,
+          ),
           'description': AppLocalizations.of(context)!.waitingForPayment,
           'status': 'completed',
           'date': widget.booking.paymentCompletedAt!.toDate(),
@@ -2501,25 +2540,34 @@ class _BookingInfoState extends State<BookingInfo> {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentCompleted,
           'time': _formatDateLocalized(
-            widget.booking.paymentCompletedAt?.toDate() ?? 
-            widget.booking.completedAt?.toDate() ?? 
-            DateTime.now(), 
-            context
+            widget.booking.paymentCompletedAt?.toDate() ??
+                widget.booking.completedAt?.toDate() ??
+                DateTime.now(),
+            context,
           ),
-          'description': AppLocalizations.of(context)!.paymentSuccessfullyCompleted ?? "Payment successfully completed",
+          'description': AppLocalizations.of(
+            context,
+          )!.paymentSuccessfullyCompleted,
           'status': 'completed',
-          'date': widget.booking.paymentCompletedAt?.toDate() ??
+          'date':
+              widget.booking.paymentCompletedAt?.toDate() ??
               widget.booking.completedAt?.toDate() ??
               DateTime.now(),
         });
       }
 
       // Reviewed
-      if (widget.booking.review != null && widget.booking.review!.createdAt != null) {
+      if (widget.booking.review != null &&
+          widget.booking.review!.createdAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.review,
-          'time': _formatDateLocalized(widget.booking.review!.createdAt!.toDate(), context),
-          'description': AppLocalizations.of(context)!.reviewSubmittedSuccessfully,
+          'time': _formatDateLocalized(
+            widget.booking.review!.createdAt!.toDate(),
+            context,
+          ),
+          'description': AppLocalizations.of(
+            context,
+          )!.reviewSubmittedSuccessfully,
           'status': 'completed',
           'date': widget.booking.review!.createdAt!.toDate(),
         });
@@ -2529,10 +2577,18 @@ class _BookingInfoState extends State<BookingInfo> {
       if (widget.booking.bookingStatusCode.toLowerCase() == 'r') {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.cancelledByAdmin,
-          'time': _formatDateLocalized(widget.booking.rejectedAt?.toDate() ?? widget.booking.updatedAt?.toDate() ?? DateTime.now(), context),
+          'time': _formatDateLocalized(
+            widget.booking.rejectedAt?.toDate() ??
+                widget.booking.updatedAt?.toDate() ??
+                DateTime.now(),
+            context,
+          ),
           'description': AppLocalizations.of(context)!.bookingCancelledByAdmin,
           'status': 'rejected',
-          'date': widget.booking.rejectedAt?.toDate() ?? widget.booking.updatedAt?.toDate() ?? DateTime.now(),
+          'date':
+              widget.booking.rejectedAt?.toDate() ??
+              widget.booking.updatedAt?.toDate() ??
+              DateTime.now(),
         });
       }
 
@@ -2704,7 +2760,8 @@ class _BookingInfoState extends State<BookingInfo> {
               'status': 'current',
               'date': DateTime.now(),
             });
-          } else if (widget.booking.acceptedAt != null) {
+          } else if (widget.booking.assignedAt != null ||
+              widget.booking.acceptedAt != null) {
             timelineItems.add({
               'title': AppLocalizations.of(context)!.waitingForServiceProvider,
               'time': AppLocalizations.of(context)!.pending,
@@ -2979,8 +3036,10 @@ class _BookingInfoState extends State<BookingInfo> {
                         'completed' ||
                     widget.booking.bookingStatusCode.toLowerCase() == 'c')
                   IconButton(
-                    onPressed: () =>
-                        InvoiceService.generateAndShowInvoice(context, widget.booking),
+                    onPressed: () => InvoiceService.generateAndShowInvoice(
+                      context,
+                      widget.booking,
+                    ),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -3141,7 +3200,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 colorScheme: colorScheme,
               ),
             ],
-            
+
             const SizedBox(height: 12),
             _buildCostRow(
               context,
@@ -3192,7 +3251,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                   ),
                   Text(
-                    '${AppLocalizations.of(context)!.sar} ${(completionData.totalCost + widget.booking.effectiveInspectionFee).toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context)!.sar} ${(completionData.totalCost + widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee)).toStringAsFixed(2)}',
                     style: DMSansFont.textStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -3736,11 +3795,13 @@ class _BookingInfoState extends State<BookingInfo> {
       final isUnassigned = booking.agent == null;
 
       // Only show "Propose New Time" for rebookings assigned to the current technician
-      final isRebookForMe = booking.rebookTechnicianId != null && 
-                           booking.rebookTechnicianId == LocalStore.getUID();
+      final isRebookForMe =
+          booking.rebookTechnicianId != null &&
+          booking.rebookTechnicianId == LocalStore.getUID();
 
-      if (isRebookForMe && ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
-          (statusCode == 'A' && isAssigned))) {
+      if (isRebookForMe &&
+          ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
+              (statusCode == 'A' && isAssigned))) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           child: SizedBox(

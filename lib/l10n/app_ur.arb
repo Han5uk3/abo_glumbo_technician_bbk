@@ -236,7 +236,7 @@
   "paymentMode": "ادائیگی کا طریقہ",
   "paymentStatus": "ادائیگی کی صورتحال",
   "bookingStatus": "بکنگ کی صورتحال",
-  "bookingNote": "بکنگ نوٹ",
+  "bookingNote": "مسئلے کی تفصیل",
   "bookedAt": "بک کیا گیا بروز",
   "rating": "درجہ بندی",
   "review": "تبصرہ",
@@ -1589,5 +1589,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "onHour": "On-Hour",
+  "offHour": "Off-Hour",
+  "onHourBooking": "On-Hour Booking",
+  "offHourBooking": "Off-Hour Booking"
 }

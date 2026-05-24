@@ -1935,6 +1935,7 @@ class AppServices {
         categories[category.id ?? doc.id] = {
           'en': category.name ?? '',
           'ar': category.name_ar ?? category.name ?? '',
+          'ur': category.name_ur ?? category.name_ar ?? category.name ?? '',
         };
       }
 

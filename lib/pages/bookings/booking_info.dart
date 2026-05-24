@@ -909,12 +909,12 @@ class _BookingInfoState extends State<BookingInfo> {
         child: Column(
           children: [
             _buildServiceInfoRow(
-              locale == 'en'
-                  ? (widget.booking.service.name ?? '')
-                  : (widget.booking.service.name_ar ?? ''),
-              locale == 'en'
-                  ? (widget.booking.service.description ?? '')
-                  : (widget.booking.service.description_ar ?? ''),
+              widget.booking.service.nameLocalized(languageCode: locale) ??
+                  widget.booking.service.name ??
+                  '',
+              widget.booking.service.descriptionLocalized(languageCode: locale) ??
+                  widget.booking.service.description ??
+                  '',
               context,
             ),
             _buildLocationCard(

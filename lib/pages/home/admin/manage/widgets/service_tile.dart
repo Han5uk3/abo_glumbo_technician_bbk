@@ -63,10 +63,14 @@ class ServiceTileDevWidget extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  Directionality.of(context) ==
-                                          TextDirection.rtl
-                                      ? service.name_ar ?? ""
-                                      : service.name ?? "",
+                                  service.nameLocalized(
+                                        languageCode:
+                                            AppLocalizations.of(context)
+                                                    ?.localeName ??
+                                                'en',
+                                      ) ??
+                                      service.name ??
+                                      "",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -77,10 +81,14 @@ class ServiceTileDevWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  Directionality.of(context) ==
-                                          TextDirection.rtl
-                                      ? service.description_ar ?? ""
-                                      : service.description ?? "",
+                                  service.descriptionLocalized(
+                                        languageCode:
+                                            AppLocalizations.of(context)
+                                                    ?.localeName ??
+                                                'en',
+                                      ) ??
+                                      service.description ??
+                                      "",
                                   style: const TextStyle(
                                     color: Colors.black45,
                                     fontSize: 11,

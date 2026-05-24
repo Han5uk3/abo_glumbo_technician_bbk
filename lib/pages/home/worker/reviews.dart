@@ -437,7 +437,7 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
         const Divider(height: 1, thickness: 0.5, color: Color(0xFFE2E8F0)),
         const SizedBox(height: 8),
         Text(
-          '${l10n.service}: ${Directionality.of(context) == TextDirection.ltr ? '${booking.service.name}' : booking.service.name_ar}',
+          '${l10n.service}: ${booking.service.nameLocalized(languageCode: l10n.localeName) ?? booking.service.name ?? ""}',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey[800],

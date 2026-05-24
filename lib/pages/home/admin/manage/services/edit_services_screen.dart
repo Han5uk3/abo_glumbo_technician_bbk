@@ -42,8 +42,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   bool isActive = false;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController nameArController = TextEditingController();
+  final TextEditingController nameUrController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController descriptionArController = TextEditingController();
+  final TextEditingController descriptionUrController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController onWorkHourPriceController =
       TextEditingController();
@@ -167,8 +169,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     if (widget.service != null) {
       nameController.text = widget.service!.name ?? '';
       nameArController.text = widget.service!.name_ar ?? '';
+      nameUrController.text = widget.service!.name_ur ?? '';
       descriptionController.text = widget.service!.description ?? '';
       descriptionArController.text = widget.service!.description_ar ?? '';
+      descriptionUrController.text = widget.service!.description_ur ?? '';
       priceController.text = widget.service!.price.toString();
       onWorkHourPriceController.text =
           widget.service!.onWorkHourPrice?.toString() ?? '0';
@@ -297,8 +301,10 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
         ServiceModel service = ServiceModel(
           name: nameController.text.trim(),
           name_ar: nameArController.text.trim(),
+          name_ur: nameUrController.text.trim(),
           description: descriptionController.text.trim(),
           description_ar: descriptionArController.text.trim(),
+          description_ur: descriptionUrController.text.trim(),
           price: double.tryParse(priceController.text.trim()),
           onWorkHourPrice: double.tryParse(
             onWorkHourPriceController.text.trim(),
@@ -524,9 +530,13 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     return DropdownMenuItem<CategoryModel>(
                       value: category,
                       child: Text(
-                        AppLocalizations.of(context)?.localeName == 'ar'
-                            ? category.name_ar ?? category.name ?? ''
-                            : category.name ?? '',
+                        category.nameLocalized(
+                              languageCode:
+                                  AppLocalizations.of(context)?.localeName ??
+                                      'en',
+                            ) ??
+                            category.name ??
+                            '',
                       ),
                     );
                   }).toList(),
@@ -613,6 +623,24 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                 ),
               ),
               Text(
+                "Name (Urdu)",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: NewTextField(
+                  controller: nameUrController,
+                  hintText: 'Name (Urdu)',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter name in Urdu';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Text(
                 AppLocalizations.of(context)!.description,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
               ),
@@ -655,6 +683,25 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                       )!.pleaseEnterDescriptionInArabic;
                     } else if (!arabicFullRegex.hasMatch(value)) {
                       return AppLocalizations.of(context)!.textMustBeInArabic;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Text(
+                "Description (Urdu)",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: NewTextField(
+                  controller: descriptionUrController,
+                  isDescription: true,
+                  hintText: 'Description (Urdu)',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter description in Urdu';
                     }
                     return null;
                   },

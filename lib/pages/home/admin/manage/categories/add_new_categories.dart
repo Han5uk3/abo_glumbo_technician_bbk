@@ -29,6 +29,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
   bool shouldRemoveExistingImage = false;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController nameArController = TextEditingController();
+  final TextEditingController nameUrController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController descriptionArController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -43,6 +44,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
     if (widget.category != null) {
       nameController.text = widget.category!.name ?? '';
       nameArController.text = widget.category!.name_ar ?? '';
+      nameUrController.text = widget.category!.name_ur ?? '';
       isActive = widget.category!.isActive ?? false;
     }
   }
@@ -212,6 +214,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
         id: widget.category?.id,
         name: nameController.text.trim(),
         name_ar: nameArController.text.trim(),
+        name_ur: nameUrController.text.trim(),
         isActive: isActive,
         icon: widget.category?.icon,
         svg: widget.category?.svg,
@@ -253,6 +256,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
   void dispose() {
     nameController.dispose();
     nameArController.dispose();
+    nameUrController.dispose();
     descriptionController.dispose();
     descriptionArController.dispose();
     priceController.dispose();
@@ -371,6 +375,22 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
                         return AppLocalizations.of(context)!.textMustBeInArabic;
                       }
 
+                      return null;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TextFormField(
+                    controller: nameUrController,
+                    enabled: !isLoading,
+                    decoration: const InputDecoration(
+                      labelText: 'Name (Urdu)',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter name in Urdu';
+                      }
                       return null;
                     },
                   ),

@@ -444,9 +444,12 @@ class _TransactionTileState extends State<TransactionTile> {
                           _buildDetailRow(
                             context,
                             AppLocalizations.of(context)!.bookingName,
-                            Directionality.of(context) == TextDirection.rtl
-                                ? booking.service.name_ar ?? ""
-                                : booking.service.name ?? "",
+                            booking.service.nameLocalized(
+                                  languageCode: Localizations.localeOf(context)
+                                      .languageCode,
+                                ) ??
+                                booking.service.name ??
+                                "",
                           ),
                           const SizedBox(height: 16),
                           _buildDetailRow(

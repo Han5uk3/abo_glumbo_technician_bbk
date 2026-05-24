@@ -18,8 +18,10 @@ async function sendAndStoreNotification({
   targetId,
   titleEn,
   titleAr,
+  titleUr,
   bodyEn,
   bodyAr,
+  bodyUr,
   data,
   fcmToken,
   lanCode,
@@ -63,8 +65,10 @@ async function sendAndStoreNotification({
       .add({
         titleEn,
         titleAr,
+        titleUr: titleUr || "",
         bodyEn,
         bodyAr,
+        bodyUr: bodyUr || "",
         data: data || {},
         read: false,
         createdAt: FieldValue.serverTimestamp(),
@@ -79,8 +83,16 @@ async function sendAndStoreNotification({
 
   // 3. Send FCM
   if (fcmToken && fcmToken.trim() !== "") {
-    const title = lanCode === "ar" ? titleAr : titleEn;
-    const body = lanCode === "ar" ? bodyAr : bodyEn;
+    const title = lanCode === "ar"
+      ? (titleAr || titleEn)
+      : lanCode === "ur"
+        ? (titleUr || titleAr || titleEn)
+        : titleEn;
+    const body = lanCode === "ar"
+      ? (bodyAr || bodyEn)
+      : lanCode === "ur"
+        ? (bodyUr || bodyAr || bodyEn)
+        : bodyEn;
 
     const message = {
       notification: { title, body },
@@ -163,6 +175,7 @@ exports.notifyAdminsOnNewBooking = onDocumentCreated(
 
     const serviceName = booking.service?.name || "Service";
     const serviceNameAr = booking.service?.name_ar || serviceName;
+    const serviceNameUr = booking.service?.name_ur || serviceNameAr || serviceName;
 
     try {
       const adminUsersDocs = await getAllAdminUsers();
@@ -192,14 +205,17 @@ exports.notifyAdminsOnNewBooking = onDocumentCreated(
           targetId: uid,
           titleEn: `New Booking Request: ${serviceName}`,
           titleAr: `طلب حجز جديد: ${serviceNameAr}`,
+          titleUr: `بکنگ کی نئی درخواست: ${serviceNameUr}`,
           bodyEn: `A new booking for ${serviceName} is pending approval.`,
           bodyAr: `هناك حجز جديد لـ ${serviceNameAr} بانتظار الموافقة.`,
+          bodyUr: `${serviceNameUr} کے لیے ایک نئی بکنگ منظوری کا انتظار کر رہی ہے۔`,
           data: {
             targetRole: "admin",
             category: "booking",
             bookingId: event.params.bookingId,
             serviceName: serviceName,
             serviceNameAr: serviceNameAr,
+            serviceNameUr: serviceNameUr,
             isAdmin: "true",
           },
           fcmToken: token,
@@ -227,6 +243,7 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
 
     const serviceName = afterData?.service?.name || "Service";
     const serviceNameAr = afterData?.service?.name_ar || serviceName;
+    const serviceNameUr = afterData?.service?.name_ur || serviceNameAr || serviceName;
 
     // --- Fetch admin users once ---
     let adminTokens = [];
@@ -286,14 +303,17 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
               targetId: agent.uid,
               titleEn: `New Booking Assigned: ${serviceName}`,
               titleAr: `تم تعيين حجز جديد: ${serviceNameAr}`,
+              titleUr: `نیا بکنگ تفویض کیا گیا: ${serviceNameUr}`,
               bodyEn: "You have been assigned to a booking.",
               bodyAr: "لقد تم تعيينك في حجز جديد.",
+              bodyUr: "آپ کو ایک بکنگ تفویض کی گئی ہے۔",
               data: {
                 targetRole: "technician",
                 category: "booking",
                 bookingId,
                 serviceName,
                 serviceNameAr: serviceNameAr,
+                serviceNameUr: serviceNameUr,
                 isAdmin: "false",
               },
               fcmToken: agentFcmToken,
@@ -316,14 +336,17 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
             targetId: uid,
             titleEn: `New Agent Assigned: ${serviceName}`,
             titleAr: `تم تعيين فني جديد: ${serviceNameAr}`,
+            titleUr: `ٹیکنیشن تفویض کر دیا گیا: ${serviceNameUr}`,
             bodyEn: `A technician has been assigned to a new booking for "${serviceName}".`,
             bodyAr: `تم تعيين فني لحجز جديد لخدمة "${serviceNameAr}".`,
+            bodyUr: `سروس "${serviceNameUr}" کے لیے ایک ٹیکنیشن تفویض کر دیا گیا ہے۔`,
             data: {
               targetRole: "admin",
               category: "booking",
               bookingId,
               serviceName,
               serviceNameAr: serviceNameAr,
+              serviceNameUr: serviceNameUr,
               isAdmin: "true",
             },
             fcmToken: token,
@@ -362,8 +385,10 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
               targetId: uid,
               titleEn: "Booking Cancelled by Technician",
               titleAr: "إلغاء الحجز من قبل الفني",
+              titleUr: "ٹیکنیشن کی طرف سے بکنگ منسوخ کر دی گئی",
               bodyEn: `The booking has been cancelled by Technician ${workerName}.`,
               bodyAr: `تم إلغاء الحجز من قبل الفني ${workerName}.`,
+              bodyUr: `ٹیکنیشن ${workerName} کی طرف سے بکنگ منسوخ کر دی گئی ہے۔`,
               data: {
                 targetRole: "admin",
                 category: "booking",
@@ -458,42 +483,51 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
     const service = afterData.service;
     const serviceName = service?.name || "Service";
     const serviceNameAr = service?.name_ar || serviceName;
+    const serviceNameUr = service?.name_ur || serviceNameAr || serviceName;
     const bookingStatus = afterData.bookingStatusCode;
     const isPaymentCompleted = afterData.paymentCompleted;
 
     const agentNameEn = afterData.agent?.name || "a technician";
     const agentNameAr = afterData.agent?.name || "فني";
+    const agentNameUr = afterData.agent?.name || "ٹیکنیشن";
 
     const statusMessages = {
       A: {
         en: `Technician ${agentNameEn} has been booked successfully.`,
         ar: `تم حجز الفني ${agentNameAr} بنجاح.`,
+        ur: `ٹیکنیشن ${agentNameUr} کو کامیابی کے ساتھ بک کر لیا گیا ہے۔`,
       },
       R: {
         en: "Your booking has been rejected.",
         ar: "تم رفض حجزك.",
+        ur: "آپ کی بکنگ مسترد کر دی گئی ہے۔",
       },
       CP: {
         en: "Your service is complete! Payment is pending.",
         ar: "خدمتك مكتملة! الدفع معلق.",
+        ur: "آپ کی سروس مکمل ہو گئی ہے! ادائیگی التواء میں ہے۔",
       },
       VP: {
         en: "Your payment verification is pending.",
         ar: "التحقق من الدفع الخاص بك معلق.",
+        ur: "آپ کی ادائیگی کی تصدیق التواء میں ہے۔",
       },
       C: {
         // Service complete
         en: "Your service is complete!\nWe hope you had a great experience.",
         ar: "تم الانتهاء من خدمتك!\nنأمل أن تكون قد قضيت وقتًا رائعًا.",
+        ur: "آپ کی سروس مکمل ہو گئی ہے!\nہم امید کرتے ہیں کہ آپ کا تجربہ بہترین رہا۔",
       },
       C_PAYMENT_COMPLETED: {
         // Service complete and payment received
         en: "Thank you! Your payment has been received.\nWe'd love to hear about your experience.\nPlease share your feedback by rating your service provider.\nYour reviews help us maintain the best service quality.\nIf you'd like, you can also leave a tip to show your appreciation.",
         ar: "شكراً لك! تم استلام دفعتك.\nنود أن نسمع عن تجربتك.\nيرجى مشاركة آرائك بتقييم مقدم الخدمة الخاص بك.\nتساعدنا تقييماتك في الحفاظ على أفضل جودة للخدمة.\nوإذا رغبت، يمكنك ترك إكرامية.",
+        ur: "شکریہ! آپ کی ادائیگی موصول ہو گئی ہے۔\nہمیں آپ کے تجربے کے بارے میں جان کر خوشی ہوگی۔\nبراہ کرم درجہ بندی دے کر اپنی رائے کا اظہار کریں۔\nآپ کے جائزے بہترین سروس کے معیار کو برقرار رکھنے میں ہماری مدد کرتے ہیں۔\nاگر آپ چاہیں تو، آپ تعریفی رقم بھی چھوڑ سکتے ہیں۔",
       },
       XC: {
         en: "Your booking has been canceled.",
         ar: "تم إلغاء حجزك.",
+        ur: "آپ کی بکنگ منسوخ کر دی گئی ہے۔",
       },
     };
 
@@ -509,14 +543,19 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
     const bodyAr =
       statusMessages[messageKey]?.["ar"] ||
       `تغيرت حالة حجزك إلى ${bookingStatus}`;
+    const bodyUr =
+      statusMessages[messageKey]?.["ur"] ||
+      `آپ کی بکنگ کی صورتحال تبدیل ہو گئی ہے: ${bookingStatus}`;
 
     await sendAndStoreNotification({
       targetRole: "customer",
       targetId: customerId,
       titleEn: "Booking Status Update",
       titleAr: "تحديث حالة الحجز",
+      titleUr: "بکنگ کی صورتحال کا اپ ڈیٹ",
       bodyEn: `${bodyEn} (${serviceName})`,
       bodyAr: `${bodyAr} (${serviceNameAr})`,
+      bodyUr: `${bodyUr} (${serviceNameUr})`,
       data: {
         customerId: customerId,
         targetRole: "customer",
@@ -524,6 +563,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
         status: bookingStatus,
         serviceName: serviceName,
         serviceNameAr: serviceNameAr,
+        serviceNameUr: serviceNameUr,
         paymentCompleted: isPaymentCompleted.toString(),
       },
       fcmToken: fcmToken,
@@ -621,6 +661,7 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 
     const serviceName = afterData.service?.name || "Service";
     const serviceNameAr = afterData.service?.name_ar || serviceName;
+    const serviceNameUr = afterData.service?.name_ur || serviceNameAr || serviceName;
     const customerName = afterData.customer?.name || "Customer";
 
     // Get payment amount from completionData
@@ -634,14 +675,17 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       targetId: agent.uid,
       titleEn: "Payment Received",
       titleAr: "تم استلام الدفع",
+      titleUr: "ادائیگی موصول ہو گئی",
       bodyEn: `${customerName} has completed payment of ${totalAmount} for ${serviceName}. The transaction is now complete.`,
       bodyAr: `قام ${customerName} بإكمال دفع ${totalAmount} مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
+      bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ${totalAmount} کی ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
       data: {
         targetRole: "technician",
         category: "payment",
         bookingId,
         serviceName,
         serviceNameAr: serviceNameAr,
+        serviceNameUr: serviceNameUr,
         customerName,
         amount: totalAmount.toString(),
         isAdmin: "false",
@@ -712,20 +756,32 @@ exports.customerTrackingNotification = onDocumentWritten(
     const isStartedNow = afterData.isStarted;
     if (wasStarted === isStartedNow) return;
 
-    // Determine titles and bodies for both languages
-    let titleEn, titleAr, bodyEn, bodyAr;
+    // Determine titles and bodies for languages
+    let titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr;
 
     if (!wasStarted && isStartedNow) {
-      titleEn = "Tracking Started";
-      titleAr = "بدء تتبع الحجز";
-      bodyEn =
-        "The Technician has started tracking your location for the booking.";
-      bodyAr = "يمكنك الآن تتبع حالة حجزك.";
+      titleEn = "Technician is on his way";
+      titleAr = "الفني في طريقه إليك";
+      titleUr = "ٹیکنیشن راستے میں ہے";
+      bodyEn = "The technician is on his way to your service location.";
+      bodyAr = "الفني في طريقه إلى موقع الخدمة الخاص بك.";
+      bodyUr = "ٹیکنیشن آپ کے سروس کے مقام پر آنے کے راستے میں ہے۔";
+
+      // Reset isNearbySent to false when technician starts tracking
+      try {
+        await db.collection("bookings").doc(event.params.bookingId).update({
+          isNearbySent: false
+        });
+      } catch (err) {
+        console.error("Error resetting isNearbySent:", err);
+      }
     } else if (wasStarted && !isStartedNow) {
-      titleEn = "Tracking Stopped";
-      titleAr = "إيقاف تتبع الحجز";
-      bodyEn = "Tracking has been stopped by the Technician.";
-      bodyAr = "تم إيقاف تتبع موقعك بواسطة الفني.";
+      titleEn = "Technician Arrived";
+      titleAr = "وصل الفني";
+      titleUr = "ٹیکنیشن پہنچ گیا";
+      bodyEn = "The technician has arrived at your service location.";
+      bodyAr = "لقد وصل الفني إلى موقع الخدمة الخاص بك.";
+      bodyUr = "ٹیکنیشن آپ کے سروس کے مقام پر پہنچ گیا ہے۔";
     }
 
     await sendAndStoreNotification({
@@ -733,8 +789,10 @@ exports.customerTrackingNotification = onDocumentWritten(
       targetId: customerId,
       titleEn,
       titleAr,
+      titleUr,
       bodyEn,
       bodyAr,
+      bodyUr,
       data: {},
       fcmToken: fcmToken,
       lanCode: lanCode,
@@ -973,6 +1031,7 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
     const workerId = agent.uid;
     const serviceName = booking.service?.name || "Service";
     const serviceNameAr = booking.service?.name_ar || serviceName;
+    const serviceNameUr = booking.service?.name_ur || serviceNameAr || serviceName;
     const customerName = booking.customer?.name || "A customer";
 
     // Fetch worker details from users collection
@@ -1008,14 +1067,17 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
       targetId: workerId,
       titleEn: "New Booking Request!",
       titleAr: "طلب حجز جديد!",
+      titleUr: "بکنگ کی نئی درخواست!",
       bodyEn: `A customer has requested ${serviceName}. Please review and accept the booking.`,
       bodyAr: `طلب عميل ${serviceNameAr}. يرجى المراجعة وقبول الحجز.`,
+      bodyUr: `ایک صارف نے ${serviceNameUr} کے لیے درخواست کی ہے۔ براہ کرم جائزہ لیں اور بکنگ قبول کریں۔`,
       data: {
         targetRole: "technician",
         category: "booking",
         bookingId: bookingId,
         serviceName: serviceName,
         serviceNameAr: serviceNameAr,
+        serviceNameUr: serviceNameUr,
         customerName: customerName,
         isAdmin: "false",
       },
@@ -1373,11 +1435,10 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
       }
 
       // Get service name from ServiceModel
-      const serviceData = afterData.service;
-      const serviceName =
-        customerData.lanCode === "ar"
-          ? serviceData.name_ar || serviceData.name
-          : serviceData.name;
+      const serviceData = afterData.service || {};
+      const serviceNameEn = serviceData.name || "Service";
+      const serviceNameAr = serviceData.name_ar || serviceNameEn;
+      const serviceNameUr = serviceData.name_ur || serviceNameAr || serviceNameEn;
 
       const customerLanCode = customerData.lanCode || "en";
 
@@ -1386,8 +1447,10 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         targetId: customerId,
         titleEn: "Booking Rejected",
         titleAr: "تم رفض الحجز",
-        bodyEn: `A Technician rejected your booking for ${serviceName}.`,
-        bodyAr: `لقد قام الفني برفض حجزك ل ${serviceName}.`,
+        titleUr: "ٹیکنیشن نے منسوخ کر دیا",
+        bodyEn: `A Technician rejected your booking for ${serviceNameEn}.`,
+        bodyAr: `لقد قام الفني برفض حجزك ل ${serviceNameAr}.`,
+        bodyUr: `بدقسمتی سے، ٹیکنیشن ${lastCancelledWorker.agentName} نے ${serviceNameUr} کے لیے آپ کی بکنگ منسوخ کر دی ہے۔`,
         data: {
           bookingId: afterData.id,
           bookingStatusCode: afterData.bookingStatusCode,
@@ -1525,9 +1588,10 @@ exports.notifyWorkersOnCustomerCancellation = onDocumentUpdated(
 
     try {
       // Get service name from ServiceModel
-      const serviceData = afterData.service;
-      const serviceName = serviceData.name;
-      const serviceNameAr = serviceData.name_ar || serviceData.name;
+      const serviceData = afterData.service || {};
+      const serviceName = serviceData.name || "Service";
+      const serviceNameAr = serviceData.name_ar || serviceName;
+      const serviceNameUr = serviceData.name_ur || serviceNameAr || serviceName;
 
       // Get customer name
       const customerName = afterData.customer.name;
@@ -1571,13 +1635,17 @@ exports.notifyWorkersOnCustomerCancellation = onDocumentUpdated(
           targetId: workerDoc.id,
           titleEn: "Booking Cancelled by Customer",
           titleAr: "تم إلغاء الحجز من قبل العميل",
+          titleUr: "بکنگ صارف کی طرف سے منسوخ کر دی گئی",
           bodyEn: `Customer ${customerName} cancelled their booking for ${serviceName}. You can no longer accept this booking.`,
           bodyAr: `العميل ${customerName} قام بإلغاء حجز ${serviceNameAr}. لن تتمكن من قبول هذا الحجز.`,
+          bodyUr: `صارف ${customerName} نے ${serviceNameUr} کے لیے بکنگ منسوخ کر دی ہے۔ اب آپ اس بکنگ کو قبول نہیں کر سکتے۔`,
           data: {
             bookingId: afterData.id,
             bookingStatusCode: afterData.bookingStatusCode,
             customerName: customerName,
             serviceName: serviceName,
+            serviceNameAr: serviceNameAr,
+            serviceNameUr: serviceNameUr,
             bookingDateTime: afterData.bookingDateTime.toDate().toISOString(),
             cancelledBy: "customer",
           },
@@ -1620,9 +1688,10 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
 
     try {
       // Get service name from ServiceModel
-      const serviceData = afterData.service;
-      const serviceName = serviceData.name;
-      const serviceNameAr = serviceData.name_ar || serviceData.name;
+      const serviceData = afterData.service || {};
+      const serviceName = serviceData.name || "Service";
+      const serviceNameAr = serviceData.name_ar || serviceName;
+      const serviceNameUr = serviceData.name_ur || serviceNameAr || serviceName;
 
       // Get customer name
       const customerName = afterData.customer.name;
@@ -1647,18 +1716,24 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
         const adminFcmToken = adminData.fcmToken;
         const adminLanCode = adminData.lanCode || "en";
 
+        const cancellationReasonUr = cancellationReason === "Not provided" ? "فراہم نہیں کی گئی" : cancellationReason;
+
         await sendAndStoreNotification({
           targetRole: "admin",
           targetId: adminDoc.id,
           titleEn: "Booking Cancelled by Customer",
           titleAr: "تم إلغاء الحجز من قبل العميل",
+          titleUr: "بکنگ صارف کی طرف سے منسوخ کر دی گئی",
           bodyEn: `Customer ${customerName} cancelled their booking for ${serviceName}. Reason: ${cancellationReason}`,
           bodyAr: `العميل ${customerName} قام بإلغاء حجز ${serviceNameAr}. السبب: ${cancellationReason}`,
+          bodyUr: `صارف ${customerName} نے ${serviceNameUr} کے لیے بکنگ منسوخ کر دی ہے۔ وجہ: ${cancellationReasonUr}`,
           data: {
             bookingId: afterData.id,
             bookingStatusCode: afterData.bookingStatusCode,
             customerName: customerName,
             serviceName: serviceName,
+            serviceNameAr: serviceNameAr,
+            serviceNameUr: serviceNameUr,
             bookingDateTime: afterData.bookingDateTime.toDate().toISOString(),
             cancellationReason: cancellationReason,
             cancelledBy: "customer",
@@ -2342,6 +2417,7 @@ exports.notifyOnCounterOfferCreated = onDocumentCreated(
 
       const serviceName = bookingData.service?.name || 'Service';
       const serviceNameAr = bookingData.service?.name_ar || serviceName;
+      const serviceNameUr = bookingData.service?.name_ur || serviceNameAr || serviceName;
       const proposedTime = offerData.proposedTime.toDate();
       const timeString = proposedTime.toLocaleString('en-US', {
         year: 'numeric',
@@ -2356,8 +2432,10 @@ exports.notifyOnCounterOfferCreated = onDocumentCreated(
         targetId,
         titleEn: 'New Counter Offer',
         titleAr: 'اقتراح موعد جديد',
+        titleUr: 'متبادل وقت کی تجویز',
         bodyEn: `${proposedByName} has proposed a new time: ${timeString} for ${serviceName}`,
         bodyAr: `اقترح ${proposedByName} وقتاً جديداً: ${timeString} لـ ${serviceNameAr}`,
+        bodyUr: `${proposedByName} نے ${serviceNameUr} کے لیے ایک نیا وقت تجویز کیا ہے: ${timeString}`,
         data: {
           targetRole: targetRole,
           category: 'counter_offer',
@@ -2368,6 +2446,7 @@ exports.notifyOnCounterOfferCreated = onDocumentCreated(
           proposedTime: timeString,
           serviceName,
           serviceNameAr,
+          serviceNameUr,
         },
         fcmToken,
         lanCode,
@@ -2785,24 +2864,29 @@ exports.notifyOnNewChatMessage = onValueCreated(
       // Prepare notification message
       let bodyEn = messageText;
       let bodyAr = messageText;
+      let bodyUr = messageText;
 
       // Handle media messages
       if (mediaType === "image") {
         bodyEn = "📷 Photo";
         bodyAr = "📷 صورة";
+        bodyUr = "📷 تصویر";
       } else if (mediaType === "video") {
         bodyEn = "🎥 Video";
         bodyAr = "🎥 فيديو";
+        bodyUr = "🎥 ویڈیو";
       }
 
       // Truncate long messages
       if (bodyEn.length > 100) {
         bodyEn = bodyEn.substring(0, 97) + "...";
         bodyAr = bodyAr.substring(0, 97) + "...";
+        bodyUr = bodyUr.substring(0, 97) + "...";
       }
 
       const titleEn = `New message from ${senderName}`;
       const titleAr = `رسالة جديدة من ${senderName}`;
+      const titleUr = `${senderName} کی طرف سے نیا پیغام`;
 
       // Get sender and receiver details for navigation
       let senderPhoto = "";
@@ -2859,8 +2943,10 @@ exports.notifyOnNewChatMessage = onValueCreated(
         targetId: receiverId,
         titleEn: titleEn,
         titleAr: titleAr,
+        titleUr: titleUr,
         bodyEn: bodyEn,
         bodyAr: bodyAr,
+        bodyUr: bodyUr,
         data: {
           type: "chat",
           chatId: chatId,
@@ -4369,6 +4455,7 @@ exports.notifyTechnicianOnNewJobOffer = onDocumentCreated(
 
       const serviceName = offer.serviceName || "Service";
       const serviceNameAr = offer.serviceNameAr || serviceName;
+      const serviceNameUr = offer.serviceNameUr || serviceNameAr || serviceName;
       const isRebook = offer.isRebook === true;
 
       await sendAndStoreNotification({
@@ -4376,19 +4463,24 @@ exports.notifyTechnicianOnNewJobOffer = onDocumentCreated(
         targetId: technicianId,
         titleEn: isRebook ? "New Rebooking Offer" : "New Job Offer!",
         titleAr: isRebook ? "عرض إعادة حجز جديد" : "عرض عمل جديد!",
+        titleUr: isRebook ? "دوبارہ بکنگ کی نئی پیشکش" : "کام کا نیا موقع!",
         bodyEn: isRebook 
           ? "A customer has requested to rebook you for a service!"
           : `A new service request for ${serviceName} is available nearby. Tap to view and accept.`,
         bodyAr: isRebook
           ? "لقد طلب عميل إعادة حجزك لخدمة!"
           : `يوجد طلب خدمة جديد لـ ${serviceNameAr} متاح بالقرب منك. اضغط للعرض والقبول.`,
+        bodyUr: isRebook
+          ? "صارف نے آپ کو دوبارہ سروس کے لیے بک کرنے کی درخواست کی ہے!"
+          : `${serviceNameUr} کے لیے ایک نیا سروس کا موقع قریب ہی دستیاب ہے۔ دیکھنے اور قبول کرنے کے لیے ٹیپ کریں۔`,
         data: {
           targetRole: "technician",
           category: "job_offer",
           requestId: offer.requestId || "",
           bookingId: offer.bookingId || "",
           offerId: offerId,
-          type: "job_offer"
+          type: "job_offer",
+          serviceNameUr: serviceNameUr
         },
         fcmToken: techData.fcmToken,
         lanCode: techData.lanCode || "en"
@@ -4463,6 +4555,120 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
       console.error(`[${userId}] Error sending admin notifications for technician registration:`, error);
     }
 
+    return null;
+  }
+);
+
+exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
+  "users/{userId}",
+  async (event) => {
+    const beforeData = event.data?.before?.data() || {};
+    const afterData = event.data?.after?.data() || {};
+    const userId = event.params.userId;
+
+    const beforeLoc = beforeData.liveLocation;
+    const afterLoc = afterData.liveLocation;
+
+    if (!afterLoc || !afterLoc.latitude || !afterLoc.longitude) {
+      return null;
+    }
+
+    // Only proceed if the location changed
+    if (beforeLoc && beforeLoc.latitude === afterLoc.latitude && beforeLoc.longitude === afterLoc.longitude) {
+      return null;
+    }
+
+    const techLat = parseFloat(afterLoc.latitude);
+    const techLon = parseFloat(afterLoc.longitude);
+
+    if (isNaN(techLat) || isNaN(techLon)) {
+      return null;
+    }
+
+    try {
+      // Find active bookings assigned to this technician that are currently started (on their way)
+      const activeBookingsSnapshot = await db.collection("bookings")
+        .where("agent.uid", "==", userId)
+        .where("bookingStatusCode", "==", "A")
+        .where("isStarted", "==", true)
+        .get();
+
+      if (activeBookingsSnapshot.empty) {
+        return null;
+      }
+
+      for (const bookingDoc of activeBookingsSnapshot.docs) {
+        const booking = bookingDoc.data();
+        const bookingId = bookingDoc.id;
+
+        // Skip if nearby notification is already sent for this booking
+        if (booking.isNearbySent === true) {
+          continue;
+        }
+
+        const addresses = booking.customer?.addresses || [];
+        const selectedAddress = addresses.find(a => a.isSelected === true) || (addresses.length > 0 ? addresses[0] : null);
+
+        const custLat = parseFloat(selectedAddress?.lat || booking.location?.lat || booking.lat || booking.latitude);
+        const custLon = parseFloat(selectedAddress?.lon || booking.location?.lon || booking.lon || booking.longitude);
+
+        if (isNaN(custLat) || isNaN(custLon)) {
+          continue;
+        }
+
+        // Calculate distance in kilometers
+        const distance = calculateDistance(custLat, custLon, techLat, techLon);
+        
+        // 50 meters is 0.05 km
+        if (distance <= 0.05) {
+          console.log(`[${bookingId}] Technician ${userId} is within ${distance * 1000} meters of service location! Sending nearby notification.`);
+
+          const customer = booking.customer;
+          const customerId = customer?.uid;
+
+          if (!customerId) continue;
+
+          // Fetch customer's FCM token and language preference
+          const customerDoc = await db.collection("customers").doc(customerId).get();
+          if (!customerDoc.exists) continue;
+
+          const customerData = customerDoc.data();
+          const fcmToken = customerData?.fcmToken;
+          const lanCode = customerData?.lanCode || "en";
+
+          if (!fcmToken || fcmToken.trim() === "") {
+            console.log(`[${bookingId}] Customer has no valid FCM token, skipping notification.`);
+            continue;
+          }
+
+          // Mark as sent first to prevent duplicate notifications from fast concurrent updates
+          await db.collection("bookings").doc(bookingId).update({
+            isNearbySent: true,
+            updatedAt: FieldValue.serverTimestamp()
+          });
+
+          await sendAndStoreNotification({
+            targetRole: "customer",
+            targetId: customerId,
+            titleEn: "Technician is nearby",
+            titleAr: "الفني بالقرب منك",
+            titleUr: "ٹیکنیشن قریب ہی ہے",
+            bodyEn: "Technician is nearby, estimated to arrive in 5 minutes.",
+            bodyAr: "الفني بالقرب منك، ومن المتوقع وصوله خلال 5 دقائق.",
+            bodyUr: "ٹیکنیشن قریب ہی ہے، 5 منٹ میں پہنچنے کی امید ہے۔",
+            data: {
+              bookingId: bookingId,
+              category: "tracking",
+              type: "nearby"
+            },
+            fcmToken: fcmToken,
+            lanCode: lanCode
+          });
+        }
+      }
+    } catch (e) {
+      console.error(`Error in notifyCustomerWhenTechnicianIsNearby for user ${userId}:`, e);
+    }
     return null;
   }
 );

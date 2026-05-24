@@ -32,7 +32,11 @@ class InvoiceService {
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final completedAtStr = booking.completedAt != null
         ? dateFormat.format(booking.completedAt!.toDate())
-        : 'N/A';
+        : ((loc.localeName == 'ar')
+            ? 'غير متوفر'
+            : (loc.localeName == 'ur')
+                ? 'دستیاب نہیں'
+                : 'N/A');
 
     final isArabic = loc.localeName == 'ar' || loc.localeName == 'ur';
     final ttf = await PdfGoogleFonts.cairoRegular();
@@ -84,7 +88,14 @@ class InvoiceService {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(loc.billTo, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                    pw.Text(booking.customer.name ?? "Valued Customer"),
+                    pw.Text(
+                      booking.customer.name ??
+                          ((loc.localeName == 'ar')
+                              ? 'عميلنا العزيز'
+                              : (loc.localeName == 'ur')
+                                  ? 'معزز صارف'
+                                  : 'Valued Customer'),
+                    ),
                     pw.Text(booking.customer.phone ?? ""),
                     () {
                       final address = booking.customer.addresses.firstWhere(
@@ -117,6 +128,12 @@ class InvoiceService {
                                   .fullAddress!
                                   .isNotEmpty)
                             pw.Text(booking.customer.location!.fullAddress!),
+                          if (booking.serviceLocation != null)
+                            pw.Text(
+                              booking.serviceLocation!.localizedName(
+                                loc.localeName,
+                              ),
+                            ),
                         ],
                       );
                     }(),
@@ -133,7 +150,23 @@ class InvoiceService {
                     pw.Text(loc.paymentModeLabel(booking.paymentModeCode.toUpperCase() == 'C' ? loc.insideApp : booking.paymentModeCode.toUpperCase() == 'A' ? loc.applePay : loc.outsideApp)),
                     if (booking.transactionId != null)
                       pw.Text(loc.transactionIdLabel(booking.transactionId!)),
-                    pw.Text(loc.warrantyLabel(booking.warranty?.expiredOn != null && (booking.warranty?.createdAt != null || booking.completedAt != null) ? "${booking.warranty!.expiredOn!.toDate().difference((booking.warranty!.createdAt ?? booking.completedAt)!.toDate()).inDays} Days" : "7 Days")),
+                    pw.Text(
+                      loc.warrantyLabel(
+                        () {
+                          final daysDiff = booking.warranty?.expiredOn != null &&
+                                  (booking.warranty?.createdAt != null ||
+                                      booking.completedAt != null)
+                              ? booking.warranty!.expiredOn!.toDate().difference((booking.warranty!.createdAt ?? booking.completedAt)!.toDate()).inDays
+                              : 7;
+
+                          return (loc.localeName == 'ar')
+                              ? "$daysDiff أيام"
+                              : (loc.localeName == 'ur')
+                                  ? "$daysDiff دن"
+                                  : "$daysDiff Days";
+                        }(),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -155,7 +188,11 @@ class InvoiceService {
               2: pw.Alignment.centerRight,
               3: pw.Alignment.centerRight,
             },
-            headers: ['Description', 'Quantity', 'Unit Price', 'Amount'],
+            headers: (loc.localeName == 'ar')
+                ? ['الوصف', 'الكمية', 'سعر الوحدة', 'المبلغ']
+                : (loc.localeName == 'ur')
+                    ? ['تفصیل', 'مقدار', 'فی اکائی قیمت', 'رقم']
+                    : ['Description', 'Quantity', 'Unit Price', 'Amount'],
             data: [
               ...data.serviceItems.map(
                 (item) => [

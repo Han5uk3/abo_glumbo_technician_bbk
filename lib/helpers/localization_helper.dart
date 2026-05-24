@@ -56,6 +56,9 @@ class LocalizationHelper {
         ];
         return arabicNumbers[int.parse(match.group(0)!)];
       });
+    } else if (locale == 'ur') {
+      // Use Urdu date format
+      formatted = intl.DateFormat('EEEE، d MMMM y - h:mm a', 'ur').format(date);
     } else {
       formatted = intl.DateFormat('EEE, MMM d, y - h:mm a').format(date);
     }

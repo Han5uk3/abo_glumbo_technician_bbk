@@ -131,13 +131,13 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     }
   }
 
-  String _getJobRoleNames(List<String>? jobRoleIds, bool isArabic) {
+  String _getJobRoleNames(List<String>? jobRoleIds, String languageCode) {
     if (jobRoleIds == null || jobRoleIds.isEmpty) return '';
     return jobRoleIds.map((id) {
           final category = _categoryCache[id];
           if (category == null) return null;
-          return isArabic ? category.name_ar : category.name;
-        }).where((name) => name != null).join(', ');
+          return category.nameLocalized(languageCode: languageCode);
+        }).where((name) => name != null).cast<String>().join(', ');
   }
 
   Future<void> _preloadConflictData(List<UserModel> users) async {
@@ -388,7 +388,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                   label: AppLocalizations.of(context)!.province,
                   value: tempRegion,
                   items: _regions,
-                  itemLabel: (r) => r.getName(LocalStore.getUserlanguage() == 'ar'),
+                  itemLabel: (r) => r.getName(LocalStore.getUserlanguage() == 'ar' || LocalStore.getUserlanguage() == 'ur'),
                   onChanged: (r) => setDialogState(() { tempRegion = r; tempCity = null; tempDistrict = null; }),
                   hint: AppLocalizations.of(context)!.typeProvinceNameToSearch,
                 ),
@@ -398,7 +398,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                     label: AppLocalizations.of(context)!.city,
                     value: tempCity,
                     items: tempRegion!.cities,
-                    itemLabel: (c) => c.getName(LocalStore.getUserlanguage() == 'ar'),
+                    itemLabel: (c) => c.getName(LocalStore.getUserlanguage() == 'ar' || LocalStore.getUserlanguage() == 'ur'),
                     onChanged: (c) => setDialogState(() { tempCity = c; tempDistrict = null; }),
                     hint: AppLocalizations.of(context)!.typeCityNameToSearch,
                   ),
@@ -409,7 +409,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                     label: AppLocalizations.of(context)!.neighborhood,
                     value: tempDistrict,
                     items: tempCity!.districts,
-                    itemLabel: (d) => d.getName(LocalStore.getUserlanguage() == 'ar'),
+                    itemLabel: (d) => d.getName(LocalStore.getUserlanguage() == 'ar' || LocalStore.getUserlanguage() == 'ur'),
                     onChanged: (d) => setDialogState(() { tempDistrict = d; }),
                     hint: AppLocalizations.of(context)!.typeNeighborhoodNameToSearch,
                   ),
@@ -473,7 +473,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   String _getSelectedLocationText() {
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
+    final isArabic = LocalStore.getUserlanguage() == 'ar' || LocalStore.getUserlanguage() == 'ur';
     final List<String> parts = [];
     if (_selectedDistrict != null) parts.add(_selectedDistrict!.getName(isArabic));
     if (_selectedCity != null) parts.add(_selectedCity!.getName(isArabic));
@@ -511,8 +511,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   Widget _buildHeader() {
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
-    final name = isArabic ? _categoryModel?.name_ar : _categoryModel?.name;
+    final lang = LocalStore.getUserlanguage();
+    final name = _categoryModel?.nameLocalized(languageCode: lang);
     
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
@@ -625,8 +625,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   Widget _buildWorkerTile(UserModel user) {
     final conflictData = _conflictService.getConflictData(user.uid ?? '');
-    final isArabic = LocalStore.getUserlanguage() == 'ar';
-    final roleNames = _getJobRoleNames(user.jobRoles, isArabic);
+    final lang = LocalStore.getUserlanguage();
+    final roleNames = _getJobRoleNames(user.jobRoles, lang);
     
     return InkWell(
       onTap: () => _handleAssignAgent(user),

@@ -43,7 +43,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
   final TextEditingController searchController = TextEditingController();
   List<ServiceLocationModel> filteredLocations = [];
   List<ServiceLocationModel> selectedLocations = [];
-  bool isArabic = false;
+  String languageCode = 'en';
   bool isAllSelected = false;
 
   @override
@@ -71,10 +71,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newIsArabic = AppLocalizations.of(context)?.localeName == 'ar';
-    if (isArabic != newIsArabic) {
-      isArabic = newIsArabic == true;
-    }
+    languageCode = AppLocalizations.of(context)?.localeName ?? 'en';
     filteredLocations = _removeDuplicates(widget.locations);
   }
 
@@ -112,7 +109,9 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
               location.name.toLowerCase().contains(query.toLowerCase());
           final nameArMatch =
               location.name_ar.toLowerCase().contains(query.toLowerCase());
-          return nameMatch || nameArMatch;
+          final nameUrMatch =
+              location.name_ur.toLowerCase().contains(query.toLowerCase());
+          return nameMatch || nameArMatch || nameUrMatch;
         }).toList();
       }
       isAllSelected =
@@ -125,9 +124,12 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
   }
 
   String _getLocationName(ServiceLocationModel location) {
-    return isArabic
-        ? (location.name_ar.isNotEmpty ? location.name_ar : location.name)
-        : location.name;
+    if (languageCode == 'ur') {
+      return location.name_ur.isNotEmpty ? location.name_ur : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+    } else if (languageCode == 'ar') {
+      return location.name_ar.isNotEmpty ? location.name_ar : location.name;
+    }
+    return location.name;
   }
 
   bool _isLocationSelected(ServiceLocationModel location) {
@@ -466,12 +468,15 @@ class LocationSelectorHelper {
 
   static List<String> getLocationNames(
     List<ServiceLocationModel> locations, {
-    bool isArabic = false,
+    String languageCode = 'en',
   }) {
     return locations.map((location) {
-      return isArabic
-          ? (location.name_ar.isNotEmpty ? location.name_ar : location.name)
-          : location.name;
+      if (languageCode == 'ur') {
+        return location.name_ur.isNotEmpty ? location.name_ur : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+      } else if (languageCode == 'ar') {
+        return location.name_ar.isNotEmpty ? location.name_ar : location.name;
+      }
+      return location.name;
     }).toList();
   }
 }

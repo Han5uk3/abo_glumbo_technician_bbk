@@ -198,9 +198,9 @@ class BookingListTileWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            locale == 'en'
-                                ? (booking.service.name ?? '')
-                                : (booking.service.name_ar ?? ''),
+                            booking.service.nameLocalized(languageCode: locale) ??
+                                booking.service.name ??
+                                '',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: DMSansFont.textStyle(

@@ -55,9 +55,12 @@ class CategoryTileDevWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? category.name_ar ?? ""
-                      : category.name ?? "",
+                  category.nameLocalized(
+                        languageCode:
+                            AppLocalizations.of(context)?.localeName ?? 'en',
+                      ) ??
+                      category.name ??
+                      "",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

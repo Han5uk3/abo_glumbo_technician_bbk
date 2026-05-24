@@ -182,13 +182,21 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
 
     final booking = widget.offer.booking;
 
-    final serviceName = locale == 'en'
-        ? (data['serviceName'] ?? booking?.service.name ?? '')
-        : (data['serviceNameAr'] ??
+    final serviceName = locale == 'ur'
+        ? (data['serviceNameUr'] ??
+              booking?.service.name_ur ??
+              data['serviceNameAr'] ??
               booking?.service.name_ar ??
               data['serviceName'] ??
               booking?.service.name ??
-              '');
+              '')
+        : locale == 'ar'
+            ? (data['serviceNameAr'] ??
+                  booking?.service.name_ar ??
+                  data['serviceName'] ??
+                  booking?.service.name ??
+                  '')
+            : (data['serviceName'] ?? booking?.service.name ?? '');
 
     final customerName =
         data['customerName'] ?? booking?.customer.name ?? 'Customer';

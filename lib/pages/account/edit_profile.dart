@@ -615,8 +615,12 @@ class _EditProfileState extends State<EditProfile> {
 
   String getJobCategoryDisplayName(String key) {
     final currentLanguage = AppLocalizations.of(context)?.localeName ?? 'en';
-    final isArabic = currentLanguage == 'ar';
-    return jobCategories[key]?[isArabic ? 'ar' : 'en'] ?? key;
+    if (currentLanguage == 'ur') {
+      return jobCategories[key]?['ur'] ?? jobCategories[key]?['ar'] ?? jobCategories[key]?['en'] ?? key;
+    } else if (currentLanguage == 'ar') {
+      return jobCategories[key]?['ar'] ?? jobCategories[key]?['en'] ?? key;
+    }
+    return jobCategories[key]?['en'] ?? key;
   }
 
   String getJobCategoryKey(String role) {
@@ -738,9 +742,11 @@ class _EditProfileState extends State<EditProfile> {
                             const SizedBox(height: 8),
 
                             ...jobCategories.entries.map((entry) {
-                              final displayName =
-                                  entry.value[isArabic ? 'ar' : 'en'] ??
-                                  entry.value['en']!;
+                              final displayName = currentLanguage == 'ur'
+                                  ? (entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '')
+                                  : (currentLanguage == 'ar'
+                                      ? (entry.value['ar'] ?? entry.value['en'] ?? '')
+                                      : (entry.value['en'] ?? ''));
                               final isSelected = tempSelectedJobRoles.contains(
                                 entry.key,
                               );

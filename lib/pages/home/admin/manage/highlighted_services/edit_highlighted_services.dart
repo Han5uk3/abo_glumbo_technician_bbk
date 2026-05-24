@@ -285,9 +285,14 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                               fit: BoxFit.cover,
                             ),
                             title: Text(
-                              Directionality.of(context) == TextDirection.rtl
-                                  ? service.name_ar ?? ""
-                                  : service.name ?? '',
+                              service.nameLocalized(
+                                    languageCode:
+                                        AppLocalizations.of(context)
+                                                ?.localeName ??
+                                            'en',
+                                  ) ??
+                                  service.name ??
+                                  '',
                             ),
                             value: tempSelectedServices.contains(service.id),
                             onChanged: (value) {
@@ -496,10 +501,14 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                                       : Alignment.bottomLeft,
                                   padding: const EdgeInsets.all(8),
                                   child: Text(
-                                    Directionality.of(context) ==
-                                            TextDirection.rtl
-                                        ? service.name_ar ?? ''
-                                        : service.name ?? '',
+                                    service.nameLocalized(
+                                          languageCode:
+                                              AppLocalizations.of(context)
+                                                      ?.localeName ??
+                                                  'en',
+                                        ) ??
+                                        service.name ??
+                                        '',
                                     style: GoogleFonts.dmSans(
                                       color: Colors.white,
                                       fontSize: 12,

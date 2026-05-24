@@ -120,9 +120,9 @@ class HighlightedServiceWidget extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                Directionality.of(context) == TextDirection.ltr
-                                    ? service.name ?? ""
-                                    : service.name_ar ?? "",
+                                service.nameLocalized(languageCode: currentLanguage) ??
+                                    service.name ??
+                                    "",
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,

@@ -1015,11 +1015,11 @@ class _AgentInfoState extends State<AgentInfo> {
 
   String _getLocalizedJobCategory(String jobKey, String locale) {
     if (jobCategories.containsKey(jobKey)) {
-      return jobCategories[jobKey]![locale] ?? jobKey;
+      return jobCategories[jobKey]![locale] ?? jobCategories[jobKey]!['en'] ?? jobKey;
     }
     for (var entry in jobCategories.entries) {
-      if (entry.value['en'] == jobKey || entry.value['ar'] == jobKey) {
-        return entry.value[locale] ?? jobKey;
+      if (entry.value['en'] == jobKey || entry.value['ar'] == jobKey || entry.value['ur'] == jobKey) {
+        return entry.value[locale] ?? entry.value['en'] ?? jobKey;
       }
     }
     return jobKey;

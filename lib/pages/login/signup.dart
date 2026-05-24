@@ -68,6 +68,7 @@ class _SignupState extends State<Signup> {
           'id': entry.key,
           'name': entry.value['en'] ?? '',
           'nameAr': entry.value['ar'] ?? '',
+          'nameUr': entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '',
         };
       }).toList();
     } catch (e) {
@@ -990,9 +991,11 @@ class _SignupState extends State<Signup> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          LocalStore.getUserlanguage() == 'ar'
-                                              ? cat['nameAr']
-                                              : cat['name'],
+                                          LocalStore.getUserlanguage() == 'ur'
+                                              ? (cat['nameUr'] ?? cat['nameAr'] ?? cat['name'] ?? '')
+                                              : (LocalStore.getUserlanguage() == 'ar'
+                                                  ? cat['nameAr']
+                                                  : cat['name']),
                                           style: DMSansFont.textStyle(
                                             fontWeight: isSelected
                                                 ? FontWeight.bold
@@ -1044,9 +1047,13 @@ class _SignupState extends State<Signup> {
             (element) => element['id'] == id,
             orElse: () => {},
           );
-          return LocalStore.getUserlanguage() == 'ar'
-              ? (cat['nameAr'] ?? id)
-              : (cat['name'] ?? id);
+          final lang = LocalStore.getUserlanguage();
+          if (lang == 'ur') {
+            return cat['nameUr'] ?? cat['nameAr'] ?? cat['name'] ?? id;
+          } else if (lang == 'ar') {
+            return cat['nameAr'] ?? id;
+          }
+          return cat['name'] ?? id;
         })
         .join(', ');
   }

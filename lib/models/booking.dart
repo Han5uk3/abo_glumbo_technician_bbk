@@ -267,11 +267,13 @@ class BookingModel {
 class BookingServiceLocation {
   final String nameEn;
   final String nameAr;
+  final String nameUr;
   final int priority;
 
   const BookingServiceLocation({
     required this.nameEn,
     required this.nameAr,
+    required this.nameUr,
     required this.priority,
   });
 
@@ -279,6 +281,7 @@ class BookingServiceLocation {
     return BookingServiceLocation(
       nameEn: json['nameEn'] as String? ?? json['en_name'] as String? ?? '',
       nameAr: json['nameAr'] as String? ?? json['ar_name'] as String? ?? '',
+      nameUr: json['nameUr'] as String? ?? json['ur_name'] as String? ?? json['nameAr'] as String? ?? json['nameEn'] as String? ?? '',
       priority: (json['priority'] as num?)?.toInt() ?? 0,
     );
   }
@@ -286,11 +289,12 @@ class BookingServiceLocation {
   Map<String, dynamic> toJson() => {
     'nameEn': nameEn,
     'nameAr': nameAr,
+    'nameUr': nameUr,
     'priority': priority,
   };
 
   String localizedName(String? locale) =>
-      locale == 'ar' ? nameAr : nameEn;
+      locale == 'ar' ? nameAr : locale == 'ur' ? nameUr : nameEn;
 }
 
 class ReviewModel {

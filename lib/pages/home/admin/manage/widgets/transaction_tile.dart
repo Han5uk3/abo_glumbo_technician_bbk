@@ -143,9 +143,9 @@ class _TransactionTileState extends State<TransactionTile> {
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                widget.transaction.paymentMethod.toLowerCase().contains('cash')
-                    ? AppLocalizations.of(context)!.cashOnHands
-                    : AppLocalizations.of(context)!.cards,
+                widget.transaction.paymentMethod.toLowerCase().contains('cash') || widget.transaction.paymentMethod.toLowerCase().contains('outside')
+                    ? AppLocalizations.of(context)!.outsideApp
+                    : AppLocalizations.of(context)!.inApp,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -545,13 +545,11 @@ class _TransactionTileState extends State<TransactionTile> {
   }
 
   String getPaymentMethodText(BuildContext context, String method) {
-    switch (method.toLowerCase()) {
-      case "cash on hands":
-        return AppLocalizations.of(context)!.cashOnHands;
-      case "cards":
-        return AppLocalizations.of(context)!.card;
-      default:
-        return AppLocalizations.of(context)!.unknown;
+    final lowerMethod = method.toLowerCase();
+    if (lowerMethod.contains('outside') || lowerMethod.contains('cash') || lowerMethod.contains('hand')) {
+      return AppLocalizations.of(context)!.outsideApp;
+    } else {
+      return AppLocalizations.of(context)!.inApp;
     }
   }
 

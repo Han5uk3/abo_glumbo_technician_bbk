@@ -1593,5 +1593,33 @@
   "onHour": "On-Hour",
   "offHour": "Off-Hour",
   "onHourBooking": "On-Hour Booking",
-  "offHourBooking": "Off-Hour Booking"
+  "offHourBooking": "Off-Hour Booking",
+  "inAppEarnings": "ان ایپ آمدنی",
+  "outsideAppEarnings": "خارج ایپ آمدنی",
+  "earningsPeriod": "آمدنی کا دورانیہ",
+  "selectPeriod": "دورانیہ منتخب کریں",
+  "selectMonth": "مہینہ منتخب کریں",
+  "customDateRange": "حسب ضرورت تاریخ کا انتخاب",
+  "thisMonth": "اس مہینے",
+  "inApp": "ان ایپ",
+  "outsideApp": "خارج ایپ",
+  "clearWalletBalances": "والٹ کا بیلنس صاف کریں",
+  "clearWalletConfirmation": "کیا آپ واقعی {name} کے والٹ بیلنس کو مکمل طور پر صاف اور دوبارہ ترتیب دینا چاہتے ہیں؟ یہ عمل ناقابل واپسی ہے۔",
+  "@clearWalletConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "clearWallet": "والٹ صاف کریں",
+  "walletClearedSuccessfully": "والٹ بیلنس کامیابی سے صاف کر دیا گیا",
+  "errorClearingWallet": "والٹ صاف کرنے میں خرابی: {error}",
+  "@errorClearingWallet": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

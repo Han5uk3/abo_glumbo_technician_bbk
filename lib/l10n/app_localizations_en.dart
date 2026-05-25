@@ -1871,7 +1871,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get video => 'Video';
 
   @override
-  String get walletClearedSuccessfully => 'Wallet cleared successfully';
+  String get walletClearedSuccessfully =>
+      'Wallet balances successfully cleared';
 
   @override
   String get biometricNotSupported => 'Biometric not supported';
@@ -2084,7 +2085,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insideApp => 'Inside App';
 
   @override
-  String get outsideApp => 'Outside App';
+  String get outsideApp => 'Outside-App';
 
   @override
   String get goToLogin => 'Go to Login';
@@ -4885,4 +4886,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offHourBooking => 'Off-Hour Booking';
+
+  @override
+  String get inAppEarnings => 'In-App Earnings';
+
+  @override
+  String get outsideAppEarnings => 'Outside-App Earnings';
+
+  @override
+  String get earningsPeriod => 'Earnings Period';
+
+  @override
+  String get selectPeriod => 'Select Period';
+
+  @override
+  String get selectMonth => 'Select Month';
+
+  @override
+  String get customDateRange => 'Custom Date Range';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get inApp => 'In-App';
+
+  @override
+  String get clearWalletBalances => 'Clear Wallet Balances';
+
+  @override
+  String clearWalletConfirmation(String name) {
+    return 'Are you sure you want to completely clear and reset the wallet balances for $name? This action is irreversible.';
+  }
+
+  @override
+  String errorClearingWallet(String error) {
+    return 'Error clearing wallet: $error';
+  }
 }

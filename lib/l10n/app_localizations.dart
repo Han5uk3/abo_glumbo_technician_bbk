@@ -3703,7 +3703,7 @@ abstract class AppLocalizations {
   /// No description provided for @walletClearedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Wallet cleared successfully'**
+  /// **'Wallet balances successfully cleared'**
   String get walletClearedSuccessfully;
 
   /// No description provided for @biometricNotSupported.
@@ -4099,7 +4099,7 @@ abstract class AppLocalizations {
   /// No description provided for @outsideApp.
   ///
   /// In en, this message translates to:
-  /// **'Outside App'**
+  /// **'Outside-App'**
   String get outsideApp;
 
   /// No description provided for @goToLogin.
@@ -9160,6 +9160,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off-Hour Booking'**
   String get offHourBooking;
+
+  /// No description provided for @inAppEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'In-App Earnings'**
+  String get inAppEarnings;
+
+  /// No description provided for @outsideAppEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside-App Earnings'**
+  String get outsideAppEarnings;
+
+  /// No description provided for @earningsPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings Period'**
+  String get earningsPeriod;
+
+  /// No description provided for @selectPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Period'**
+  String get selectPeriod;
+
+  /// No description provided for @selectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Month'**
+  String get selectMonth;
+
+  /// No description provided for @customDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Date Range'**
+  String get customDateRange;
+
+  /// No description provided for @allTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get allTime;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// No description provided for @inApp.
+  ///
+  /// In en, this message translates to:
+  /// **'In-App'**
+  String get inApp;
+
+  /// No description provided for @clearWalletBalances.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Wallet Balances'**
+  String get clearWalletBalances;
+
+  /// No description provided for @clearWalletConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to completely clear and reset the wallet balances for {name}? This action is irreversible.'**
+  String clearWalletConfirmation(String name);
+
+  /// No description provided for @errorClearingWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Error clearing wallet: {error}'**
+  String errorClearingWallet(String error);
 }
 
 class _AppLocalizationsDelegate

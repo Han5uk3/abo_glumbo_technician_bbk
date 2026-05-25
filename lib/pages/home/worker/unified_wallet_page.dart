@@ -854,6 +854,14 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   color: Colors.green,
                 ),
               ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildRequestAmountChip(
+                  label: AppLocalizations.of(context)!.inAppEarnings,
+                  amount: request.earningsAmount ?? 0.0,
+                  color: Colors.blue,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -957,7 +965,8 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
   void _showPayoutRequestDialog(UnifiedWalletModel wallet) {
     final tipsAmount = wallet.cardTips ?? 0.0;
     final bonusAmount = wallet.availableBonus ?? 0.0;
-    final totalAmount = tipsAmount + bonusAmount;
+    final earningsAmount = wallet.inAppEarnings ?? 0.0;
+    final totalAmount = tipsAmount + bonusAmount + earningsAmount;
 
     showModalBottomSheet(
       context: context,
@@ -1023,6 +1032,13 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                             amount: bonusAmount,
                             icon: Icons.card_giftcard_rounded,
                             color: Colors.green,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildDialogAmountCard(
+                            label: AppLocalizations.of(context)!.inAppEarnings,
+                            amount: earningsAmount,
+                            icon: Icons.account_balance_rounded,
+                            color: Colors.blue,
                           ),
                           const SizedBox(height: 20),
                           Container(
@@ -1125,6 +1141,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                               workerId: widget.workerId,
                                               tipsAmount: tipsAmount,
                                               bonusAmount: bonusAmount,
+                                              earningsAmount: earningsAmount,
                                             );
                                             success = true;
                                           } catch (e) {

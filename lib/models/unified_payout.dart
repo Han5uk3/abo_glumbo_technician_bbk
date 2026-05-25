@@ -190,10 +190,11 @@ class UnifiedPayoutRequestModel {
   String? workerId;
   String? workerName;
 
-  // Breakdown of requested amounts (NO earnings - handled outside app)
+  // Breakdown of requested amounts
   double? tipsAmount; // Card tips only
   double? bonusAmount;
-  double? totalAmount; // tipsAmount + bonusAmount
+  double? earningsAmount; // In-app earnings
+  double? totalAmount; // tipsAmount + bonusAmount + earningsAmount
 
   // Payout account details
   Map<String, dynamic>? payoutAccount;
@@ -216,6 +217,7 @@ class UnifiedPayoutRequestModel {
     this.workerName,
     this.tipsAmount,
     this.bonusAmount,
+    this.earningsAmount,
     this.totalAmount,
     this.payoutAccount,
     this.status,
@@ -248,6 +250,7 @@ class UnifiedPayoutRequestModel {
       workerName: json['workerName'] as String?,
       tipsAmount: (json['tipsAmount'] as num?)?.toDouble(),
       bonusAmount: (json['bonusAmount'] as num?)?.toDouble(),
+      earningsAmount: (json['earningsAmount'] as num?)?.toDouble(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble(),
       payoutAccount: json['payoutAccount'] as Map<String, dynamic>?,
       status: json['status'] as String?,
@@ -268,6 +271,7 @@ class UnifiedPayoutRequestModel {
       'workerName': workerName,
       'tipsAmount': tipsAmount ?? 0.0,
       'bonusAmount': bonusAmount ?? 0.0,
+      'earningsAmount': earningsAmount ?? 0.0,
       'totalAmount': totalAmount ?? 0.0,
       'payoutAccount': payoutAccount,
       'status': status ?? 'P',
@@ -295,6 +299,7 @@ class UnifiedPayoutRequestModel {
     String? workerName,
     double? tipsAmount,
     double? bonusAmount,
+    double? earningsAmount,
     double? totalAmount,
     Map<String, dynamic>? payoutAccount,
     String? status,
@@ -312,6 +317,7 @@ class UnifiedPayoutRequestModel {
       workerName: workerName ?? this.workerName,
       tipsAmount: tipsAmount ?? this.tipsAmount,
       bonusAmount: bonusAmount ?? this.bonusAmount,
+      earningsAmount: earningsAmount ?? this.earningsAmount,
       totalAmount: totalAmount ?? this.totalAmount,
       payoutAccount: payoutAccount ?? this.payoutAccount,
       status: status ?? this.status,
@@ -334,7 +340,8 @@ class PayoutHistoryModel {
 
   double? tipsAmount; // Card tips only
   double? bonusAmount;
-  double? totalAmount; // tipsAmount + bonusAmount
+  double? earningsAmount; // In-app earnings
+  double? totalAmount; // tipsAmount + bonusAmount + earningsAmount
 
   Timestamp? completedAt;
   String? transactionId;
@@ -347,6 +354,7 @@ class PayoutHistoryModel {
     this.workerName,
     this.tipsAmount,
     this.bonusAmount,
+    this.earningsAmount,
     this.totalAmount,
     this.completedAt,
     this.transactionId,
@@ -374,6 +382,7 @@ class PayoutHistoryModel {
       workerName: json['workerName'] as String?,
       tipsAmount: (json['tipsAmount'] as num?)?.toDouble(),
       bonusAmount: (json['bonusAmount'] as num?)?.toDouble(),
+      earningsAmount: (json['earningsAmount'] as num?)?.toDouble(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble(),
       completedAt: parseTimestamp(json['completedAt']),
       transactionId: json['transactionId'] as String?,
@@ -389,6 +398,7 @@ class PayoutHistoryModel {
       'workerName': workerName,
       'tipsAmount': tipsAmount ?? 0.0,
       'bonusAmount': bonusAmount ?? 0.0,
+      'earningsAmount': earningsAmount ?? 0.0,
       'totalAmount': totalAmount ?? 0.0,
       'completedAt': completedAt ?? Timestamp.now(),
       'transactionId': transactionId,

@@ -85,6 +85,7 @@ class UnifiedPayoutServices {
     double? bonusIncrement,
     double? completionAmountIncrement, // For bonus calculation (legacy, treated as outside-app)
     double? outsideAppEarningsIncrement, // Outside-app payment (cash/manual)
+    double? inAppEarningsIncrement, // In-app payment (Telr)
     bool? isCashTip,
   }) async {
     try {
@@ -136,10 +137,18 @@ class UnifiedPayoutServices {
         );
       }
 
+      // Update in-app earnings (paid via Telr/Apple Pay in customer app)
+      if (inAppEarningsIncrement != null && inAppEarningsIncrement > 0) {
+        wallet = wallet.copyWith(
+          inAppEarnings: (wallet.inAppEarnings ?? 0.0) + inAppEarningsIncrement,
+          totalCompletionAmount: (wallet.totalCompletionAmount ?? 0.0) + inAppEarningsIncrement,
+        );
+      }
+
       // Calculate totals
-      // PAYOUT-REQUESTABLE: ONLY Inside App (card) tips + available bonus
+      // PAYOUT-REQUESTABLE: Inside App (card) tips + available bonus + in-app earnings
       final totalAvailable =
-          (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
+          (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0) + (wallet.inAppEarnings ?? 0.0);
 
       // LIFETIME TOTAL: All earnings + tips + bonus (display only)
       final lifetimeTotal =
@@ -173,6 +182,7 @@ class UnifiedPayoutServices {
     required String workerId,
     required double tipsAmount,
     required double bonusAmount,
+    required double earningsAmount,
   }) async {
     try {
       // Get worker details
@@ -194,8 +204,11 @@ class UnifiedPayoutServices {
       if (bonusAmount > (wallet.availableBonus ?? 0.0)) {
         throw Exception('Insufficient bonus balance');
       }
+      if (earningsAmount > (wallet.inAppEarnings ?? 0.0)) {
+        throw Exception('Insufficient in-app earnings balance');
+      }
 
-      final totalAmount = tipsAmount + bonusAmount;
+      final totalAmount = tipsAmount + bonusAmount + earningsAmount;
       if (totalAmount <= 0) {
         throw Exception('Total amount must be greater than 0');
       }
@@ -210,6 +223,7 @@ class UnifiedPayoutServices {
         workerName: worker.name,
         tipsAmount: tipsAmount,
         bonusAmount: bonusAmount,
+        earningsAmount: earningsAmount,
         totalAmount: totalAmount,
         payoutAccount: payoutAccount.toJson(),
         status: 'P', // Pending
@@ -317,23 +331,26 @@ class UnifiedPayoutServices {
 
       final wallet = UnifiedWalletModel.fromSnapshot(walletDoc);
 
-      // Calculate new values (only Inside App tips and bonus)
+      // Calculate new values (Inside App tips, bonus, and in-app earnings)
       final newCardTips =
           (wallet.cardTips ?? 0.0) - (request.tipsAmount ?? 0.0);
       final newAvailableBonus =
           (wallet.availableBonus ?? 0.0) - (request.bonusAmount ?? 0.0);
+      final newInAppEarnings =
+          (wallet.inAppEarnings ?? 0.0) - (request.earningsAmount ?? 0.0);
 
       final newPaidTips =
           (wallet.paidTips ?? 0.0) + (request.tipsAmount ?? 0.0);
       final newPaidBonus =
           (wallet.paidBonus ?? 0.0) + (request.bonusAmount ?? 0.0);
 
-      final newTotalAvailable = newCardTips + newAvailableBonus;
+      final newTotalAvailable = newCardTips + newAvailableBonus + newInAppEarnings;
 
       // Update wallet
       await walletRef.update({
         'cardTips': newCardTips,
         'availableBonus': newAvailableBonus,
+        'inAppEarnings': newInAppEarnings,
         'paidTips': newPaidTips,
         'paidBonus': newPaidBonus,
         'totalAvailableBalance': newTotalAvailable,
@@ -362,6 +379,7 @@ class UnifiedPayoutServices {
         workerName: request.workerName,
         tipsAmount: request.tipsAmount,
         bonusAmount: request.bonusAmount,
+        earningsAmount: request.earningsAmount,
         totalAmount: request.totalAmount,
         completedAt: Timestamp.now(),
         transactionId: transactionId,
@@ -625,9 +643,9 @@ class UnifiedPayoutServices {
       );
 
       // Calculate totals
-      // PAYOUT-REQUESTABLE: ONLY Inside App (card) tips + bonus
+      // PAYOUT-REQUESTABLE: Inside App (card) tips + bonus + in-app earnings
       final totalAvailable =
-          (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0);
+          (wallet.cardTips ?? 0.0) + (wallet.availableBonus ?? 0.0) + (wallet.inAppEarnings ?? 0.0);
       // LIFETIME: Everything combined
       final lifetimeTotal = (wallet.totalTips ?? 0.0) +
           (wallet.totalBonus ?? 0.0) +
@@ -644,14 +662,51 @@ class UnifiedPayoutServices {
 
       if (kDebugMode) {
         print('✅ Synced existing data to unified wallet for worker $workerId');
-        print('   Payout-Requestable: $totalAvailable (card tips + bonus only)');
-        print('   In-App Earnings: $inAppEarnings (display only)');
-        print('   Outside-App Earnings: $outsideAppEarnings (display only)');
+        print('   Payout-Requestable: $totalAvailable (card tips + bonus + in-app earnings)');
+        print('   In-App Earnings: $inAppEarnings');
+        print('   Outside-App Earnings: $outsideAppEarnings');
         print('   Lifetime Total: $lifetimeTotal');
       }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error syncing data to unified wallet: $e');
+      }
+      rethrow;
+    }
+  }
+
+  /// Clear a worker's wallet balances completely (Admin only)
+  static Future<void> clearWallet(String workerId) async {
+    try {
+      final walletRef = AppFirestore.unifiedWalletCollectionRef.doc(workerId);
+      
+      final clearedWallet = UnifiedWalletModel(
+        workerId: workerId,
+        totalTips: 0.0,
+        cardTips: 0.0,
+        cashTips: 0.0,
+        paidTips: 0.0,
+        totalBonus: 0.0,
+        paidBonus: 0.0,
+        availableBonus: 0.0,
+        inAppEarnings: 0.0,
+        outsideAppEarnings: 0.0,
+        totalCompletionAmount: 0.0,
+        totalAvailableBalance: 0.0,
+        lifetimeTotal: 0.0,
+        payoutRequested: false,
+        requestedAmount: 0.0,
+        lastUpdated: Timestamp.now(),
+      );
+
+      await walletRef.set(clearedWallet.toJson());
+      
+      if (kDebugMode) {
+        print('✅ Wallet balances cleared successfully for worker: $workerId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error clearing wallet balances: $e');
       }
       rethrow;
     }

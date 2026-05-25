@@ -13,11 +13,25 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 
 class AgentInfo extends StatefulWidget {
   final UserModel agent;
   final bool isMainAdmin;
-  const AgentInfo({super.key, required this.agent, required this.isMainAdmin});
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final double? initialInAppEarnings;
+  final double? initialOutsideAppEarnings;
+
+  const AgentInfo({
+    super.key,
+    required this.agent,
+    required this.isMainAdmin,
+    this.startDate,
+    this.endDate,
+    this.initialInAppEarnings,
+    this.initialOutsideAppEarnings,
+  });
 
   @override
   State<AgentInfo> createState() => _AgentInfoState();
@@ -367,20 +381,69 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildEarningsSection(BuildContext context) {
+    final hasFilter = widget.startDate != null || widget.endDate != null;
+    final hasFullAccess = LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
     return _buildCard(
       context,
       title: 'Earnings Breakdown',
       icon: Icons.attach_money,
       iconColor: Colors.blue.shade700,
       children: [
+        if (hasFilter) ...[
+          if (widget.startDate != null && widget.endDate != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                "Filtered: ${DateFormat('dd/MM/yyyy').format(widget.startDate!)} - ${DateFormat('dd/MM/yyyy').format(widget.endDate!)}",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          _buildDetailRow(
+            'In-App Earnings',
+            'SAR ${(widget.initialInAppEarnings ?? 0.0).toStringAsFixed(2)}',
+          ),
+          _buildDetailRow(
+            'Outside-App Earnings',
+            'SAR ${(widget.initialOutsideAppEarnings ?? 0.0).toStringAsFixed(2)}',
+          ),
+          const Divider(height: 24),
+        ],
         _buildDetailRow(
-          'Service Earnings',
+          'Service Earnings (Total)',
           'SAR ${agent.paidAmounts ?? "0.00"}',
         ),
         _buildDetailRow(
           'Bonuses',
           'SAR ${agent.bonusAmount ?? agent.totalMonthlyBonus ?? "0.00"}',
         ),
+        if (hasFullAccess) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton.icon(
+              onPressed: () => _confirmClearWallet(context),
+              icon: const Icon(Icons.delete_sweep, size: 20),
+              label: Text(
+                AppLocalizations.of(context)!.clearWalletBalances,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade50,
+                foregroundColor: Colors.red.shade700,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.red.shade200),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1058,5 +1121,62 @@ class _AgentInfoState extends State<AgentInfo> {
     final date = timestamp.toDate();
     final locale = Localizations.localeOf(context).languageCode;
     return DateFormat('dd/MM/yyyy hh:mm a', locale).format(date);
+  }
+
+  Future<void> _confirmClearWallet(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.clearWalletBalances),
+        content: Text(
+          l10n.clearWalletConfirmation(agent.name ?? 'this technician'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.clearWallet),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: Loader()),
+      );
+
+      try {
+        await UnifiedPayoutServices.clearWallet(agent.uid!);
+        if (mounted) Navigator.pop(context); // Close loader
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.walletClearedSuccessfully),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) Navigator.pop(context); // Close loader
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.errorClearingWallet(e.toString())),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }

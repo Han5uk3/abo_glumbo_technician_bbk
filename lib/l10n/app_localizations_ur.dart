@@ -1881,7 +1881,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get video => 'ویڈیو';
 
   @override
-  String get walletClearedSuccessfully => 'والٹ کامیابی سے صاف ہو گیا';
+  String get walletClearedSuccessfully =>
+      'والٹ بیلنس کامیابی سے صاف کر دیا گیا';
 
   @override
   String get biometricNotSupported => 'بائیومیٹرک سپورٹ نہیں ہے';
@@ -2095,7 +2096,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get insideApp => 'ایپ کے اندر';
 
   @override
-  String get outsideApp => 'ایپ سے باہر';
+  String get outsideApp => 'خارج ایپ';
 
   @override
   String get goToLogin => 'لاگ ان پر جائیں';
@@ -4904,4 +4905,44 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get offHourBooking => 'Off-Hour Booking';
+
+  @override
+  String get inAppEarnings => 'ان ایپ آمدنی';
+
+  @override
+  String get outsideAppEarnings => 'خارج ایپ آمدنی';
+
+  @override
+  String get earningsPeriod => 'آمدنی کا دورانیہ';
+
+  @override
+  String get selectPeriod => 'دورانیہ منتخب کریں';
+
+  @override
+  String get selectMonth => 'مہینہ منتخب کریں';
+
+  @override
+  String get customDateRange => 'حسب ضرورت تاریخ کا انتخاب';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get thisMonth => 'اس مہینے';
+
+  @override
+  String get inApp => 'ان ایپ';
+
+  @override
+  String get clearWalletBalances => 'والٹ کا بیلنس صاف کریں';
+
+  @override
+  String clearWalletConfirmation(String name) {
+    return 'کیا آپ واقعی $name کے والٹ بیلنس کو مکمل طور پر صاف اور دوبارہ ترتیب دینا چاہتے ہیں؟ یہ عمل ناقابل واپسی ہے۔';
+  }
+
+  @override
+  String errorClearingWallet(String error) {
+    return 'والٹ صاف کرنے میں خرابی: $error';
+  }
 }

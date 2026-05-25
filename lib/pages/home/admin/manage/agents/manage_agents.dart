@@ -8,6 +8,10 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/models/transaction.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 class ManageAgents extends StatefulWidget {
   final bool isMainAdmin;
@@ -22,6 +26,16 @@ class _ManageAgentsState extends State<ManageAgents>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedFilter = 0;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String _periodLabel = 'All Time';
+
+  String get _displayPeriodLabel {
+    if (_startDate == null && _endDate == null) {
+      return AppLocalizations.of(context)?.allTime ?? 'All Time';
+    }
+    return _periodLabel;
+  }
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
 
@@ -140,6 +154,202 @@ class _ManageAgentsState extends State<ManageAgents>
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = DateTime(picked.start.year, picked.start.month, picked.start.day);
+        _endDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+        _periodLabel = "${DateFormat('dd/MM/yyyy').format(picked.start)} - ${DateFormat('dd/MM/yyyy').format(picked.end)}";
+      });
+    }
+  }
+
+  Future<void> _selectMonth(BuildContext context) async {
+    final now = DateTime.now();
+    final months = List.generate(12, (index) {
+      return DateTime(now.year, now.month - index, 1);
+    });
+
+    final selected = await showDialog<DateTime>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            AppLocalizations.of(context)?.selectMonth ?? "Select Month",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: months.length,
+              itemBuilder: (context, index) {
+                final monthDate = months[index];
+                final label = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(monthDate);
+                return ListTile(
+                  title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: () => Navigator.pop(context, monthDate),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _startDate = DateTime(selected.year, selected.month, 1);
+        _endDate = DateTime(selected.year, selected.month + 1, 0, 23, 59, 59);
+        _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(selected);
+      });
+    }
+  }
+
+  void _showPeriodSelectorSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)?.selectPeriod ?? "Select Period",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.all_inclusive_rounded, color: Colors.blue),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.allTime ?? "All Time",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  setState(() {
+                    _startDate = null;
+                    _endDate = null;
+                    _periodLabel = AppLocalizations.of(context)?.allTime ?? 'All Time';
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.today_rounded, color: Colors.green),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.thisMonth ?? "This Month",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  final now = DateTime.now();
+                  setState(() {
+                    _startDate = DateTime(now.year, now.month, 1);
+                    _endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+                    _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(now);
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.date_range_rounded, color: Colors.orange),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.selectMonth ?? "Select Month",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _selectMonth(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.calendar_month_rounded, color: Colors.purple),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.customDateRange ?? "Custom Date Range",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _selectDateRange(context);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
         );
       },
     );
@@ -318,10 +528,19 @@ class _ManageAgentsState extends State<ManageAgents>
               ),
             ),
 
-            // Agents List
+            // Agents List & Period Filter
             Expanded(
-              child: StreamBuilder(
-                stream: AppServices.getAllAgentsStream(),
+              child: StreamBuilder<Map<String, dynamic>>(
+                stream: Rx.combineLatest2(
+                  AppServices.getAllAgentsStream(),
+                  AppServices.getAllTransactionsStream(),
+                  (List<UserModel> agents, List<TransactionModel> transactions) {
+                    return {
+                      'agents': agents,
+                      'transactions': transactions,
+                    };
+                  },
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: Loader());
@@ -337,7 +556,7 @@ class _ManageAgentsState extends State<ManageAgents>
                     );
                   }
 
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  if (!snapshot.hasData || snapshot.data!['agents'] == null) {
                     return _buildEmptyState(
                       context: context,
                       icon: Icons.engineering_rounded,
@@ -347,7 +566,8 @@ class _ManageAgentsState extends State<ManageAgents>
                     );
                   }
 
-                  final allUsers = snapshot.data!;
+                  final allUsers = snapshot.data!['agents'] as List<UserModel>;
+                  final allTransactions = snapshot.data!['transactions'] as List<TransactionModel>? ?? [];
                   final agents =
                       allUsers.where((user) => user.isAdmin != true).toList();
 
@@ -373,33 +593,155 @@ class _ManageAgentsState extends State<ManageAgents>
                     return matchesSearch && matchesVerification;
                   }).toList();
 
-                  if (filteredAgents.isEmpty) {
-                    return _buildEmptyState(
-                      context: context,
-                      icon: Icons.search_off_rounded,
-                      title: AppLocalizations.of(context)!
-                          .noTechniciansMatchYourFilters,
-                      subtitle: AppLocalizations.of(context)!
-                          .tryAdjustingYourSearchCriteria,
-                      color: AppColors.primary,
-                    );
+                  // Calculate combined totals for the selected period
+                  double combinedInApp = 0.0;
+                  double combinedOutside = 0.0;
+                  for (var t in allTransactions) {
+                    final isCompleted = t.paymentStatus.toLowerCase() == 'completed' || t.paymentStatus.toLowerCase() == 'paid';
+                    if (!isCompleted) continue;
+
+                    final date = t.createdAt.toDate();
+                    if (_startDate != null && date.isBefore(_startDate!)) continue;
+                    if (_endDate != null && date.isAfter(_endDate!)) continue;
+
+                    final isOutside = t.paymentMethod.toLowerCase().contains('outside') || t.paymentMethod.toLowerCase().contains('cash') || t.paymentMethod.toLowerCase().contains('hand');
+                    if (isOutside) {
+                      combinedOutside += t.amount;
+                    } else {
+                      combinedInApp += t.amount;
+                    }
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(
-                      top: 4,
-                      bottom: 100,
-                      left: 16,
-                      right: 16,
-                    ),
-                    itemCount: filteredAgents.length,
-                    itemBuilder: (context, index) {
-                      return _buildAgentCard(
-                        context: context,
-                        agent: filteredAgents[index],
-                        index: index,
-                      );
-                    },
+                  return Column(
+                    children: [
+                      // Earnings Period Filter Card
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.primary.withOpacity(0.05), AppColors.primary.withOpacity(0.12)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)?.earningsPeriod ?? "Earnings Period",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _displayPeriodLabel,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                     Text(
+                                      "Total: SAR ${(combinedInApp + combinedOutside).toStringAsFixed(2)} (${AppLocalizations.of(context)?.inApp ?? "In-App"}: SAR ${combinedInApp.toStringAsFixed(2)} | ${AppLocalizations.of(context)?.outsideApp ?? "Outside-App"}: SAR ${combinedOutside.toStringAsFixed(2)})",
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () => _showPeriodSelectorSheet(context),
+                                icon: const Icon(Icons.tune_rounded, size: 16),
+                                label: Text(AppLocalizations.of(context)?.change ?? "Change"),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      if (filteredAgents.isEmpty)
+                        Expanded(
+                          child: _buildEmptyState(
+                            context: context,
+                            icon: Icons.search_off_rounded,
+                            title: AppLocalizations.of(context)!
+                                .noTechniciansMatchYourFilters,
+                            subtitle: AppLocalizations.of(context)!
+                                .tryAdjustingYourSearchCriteria,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.only(
+                              top: 4,
+                              bottom: 100,
+                              left: 16,
+                              right: 16,
+                            ),
+                            itemCount: filteredAgents.length,
+                            itemBuilder: (context, index) {
+                              final agent = filteredAgents[index];
+                              
+                              // Calculate earnings for this specific agent
+                              double inApp = 0.0;
+                              double outside = 0.0;
+                              for (var t in allTransactions) {
+                                if (t.workerId != agent.uid) continue;
+                                final isCompleted = t.paymentStatus.toLowerCase() == 'completed' || t.paymentStatus.toLowerCase() == 'paid';
+                                if (!isCompleted) continue;
+
+                                final date = t.createdAt.toDate();
+                                if (_startDate != null && date.isBefore(_startDate!)) continue;
+                                if (_endDate != null && date.isAfter(_endDate!)) continue;
+
+                                final isOutside = t.paymentMethod.toLowerCase().contains('outside') || t.paymentMethod.toLowerCase().contains('cash') || t.paymentMethod.toLowerCase().contains('hand');
+                                if (isOutside) {
+                                  outside += t.amount;
+                                } else {
+                                  inApp += t.amount;
+                                }
+                              }
+
+                              return _buildAgentCard(
+                                context: context,
+                                agent: agent,
+                                index: index,
+                                inAppEarnings: inApp,
+                                outsideAppEarnings: outside,
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
@@ -464,6 +806,8 @@ class _ManageAgentsState extends State<ManageAgents>
     required BuildContext context,
     required agent,
     required int index,
+    required double inAppEarnings,
+    required double outsideAppEarnings,
   }) {
     final isVerified = agent.isVerified ?? false;
 
@@ -485,124 +829,231 @@ class _ManageAgentsState extends State<ManageAgents>
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                AgentInfo(agent: agent, isMainAdmin: widget.isMainAdmin),
+            builder: (context) => AgentInfo(
+              agent: agent,
+              isMainAdmin: widget.isMainAdmin,
+              startDate: _startDate,
+              endDate: _endDate,
+              initialInAppEarnings: inAppEarnings,
+              initialOutsideAppEarnings: outsideAppEarnings,
+            ),
           ),
         ),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                agent.name ?? 'Unknown',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (isVerified ? Colors.green : Colors.orange)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                (() {
+                                  if (isVerified) return AppLocalizations.of(context)!.verified;
+                                  if (agent.rejectionReason != null && agent.rejectionReason!.isNotEmpty && agent.isDocsPendingReview != true) {
+                                    return "REJECTED";
+                                  }
+                                  if (agent.isDocsPendingReview == true) {
+                                    return "PENDING REVIEW";
+                                  }
+                                  return AppLocalizations.of(context)!.pending;
+                                })()
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isVerified
+                                      ? Colors.green
+                                      : (agent.rejectionReason != null &&
+                                              agent.rejectionReason!.isNotEmpty &&
+                                              agent.isDocsPendingReview != true
+                                          ? Colors.red
+                                          : Colors.orange),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (agent.email != null && agent.email!.isNotEmpty)
+                          _buildInfoRow(
+                            context: context,
+                            icon: Icons.email_outlined,
+                            text: agent.email!,
+                          ),
+                        if (agent.phone != null && agent.phone!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: _buildInfoRow(
+                              isPhone: true,
+                              context: context,
+                              icon: Icons.phone_outlined,
+                              text: agent.phone!,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  if (agent.uid != null &&
+                      (LocalStore.getCachedAdminData()?.hasFullAccess ?? true))
+                    IconButton(
+                      onPressed: () async {
+                        final confirmed = await _showConfirmationDialog(
+                          context: context,
+                          title: isVerified
+                              ? AppLocalizations.of(context)!.disapproveAgent
+                              : AppLocalizations.of(context)!.approveAgent,
+                          message: isVerified
+                              ? AppLocalizations.of(context)!
+                                  .areYouSureYouWantToDisapproveAgent
+                              : AppLocalizations.of(context)!
+                                  .areYouSureYouWantToApproveThisAgent,
+                          isApproval: !isVerified,
+                        );
+
+                        if (confirmed == true && context.mounted) {
+                          context.read<ManageAppBloc>().add(
+                                ApproveRejectAgentEvent(
+                                  agent.uid!,
+                                  !isVerified,
+                                ),
+                              );
+                        }
+                      },
+                      icon: Icon(
+                        isVerified
+                            ? Icons.block_rounded
+                            : Icons.check_circle_outline,
+                        color: isVerified ? Colors.red : Colors.green,
+                      ),
+                    ),
+                ],
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Dynamic Period Earnings Section
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black.withOpacity(0.04)),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Text(
-                            agent.name ?? 'Unknown',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          AppLocalizations.of(context)?.totalEarnings ?? "Total Earnings",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black54,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: (isVerified ? Colors.green : Colors.orange)
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            (() {
-                              if (isVerified) return AppLocalizations.of(context)!.verified;
-                              if (agent.rejectionReason != null && agent.rejectionReason!.isNotEmpty && agent.isDocsPendingReview != true) {
-                                return "REJECTED";
-                              }
-                              if (agent.isDocsPendingReview == true) {
-                                return "PENDING REVIEW";
-                              }
-                              return AppLocalizations.of(context)!.pending;
-                            })()
-                                .toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: isVerified
-                                  ? Colors.green
-                                  : (agent.rejectionReason != null &&
-                                          agent.rejectionReason!.isNotEmpty &&
-                                          agent.isDocsPendingReview != true
-                                      ? Colors.red
-                                      : Colors.orange),
-                            ),
+                        Text(
+                          "SAR ${(inAppEarnings + outsideAppEarnings).toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    if (agent.email != null && agent.email!.isNotEmpty)
-                      _buildInfoRow(
-                        context: context,
-                        icon: Icons.email_outlined,
-                        text: agent.email!,
-                      ),
-                    if (agent.phone != null && agent.phone!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: _buildInfoRow(
-                          isPhone: true,
-                          context: context,
-                          icon: Icons.phone_outlined,
-                          text: agent.phone!,
+                    const Divider(height: 16, thickness: 1),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)?.inApp ?? "In-App",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "SAR ${inAppEarnings.toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        Container(
+                          height: 24,
+                          width: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)?.outsideApp ?? "Outside-App",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "SAR ${outsideAppEarnings.toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              if (agent.uid != null &&
-                  (LocalStore.getCachedAdminData()?.hasFullAccess ?? true))
-                IconButton(
-                  onPressed: () async {
-                    final confirmed = await _showConfirmationDialog(
-                      context: context,
-                      title: isVerified
-                          ? AppLocalizations.of(context)!.disapproveAgent
-                          : AppLocalizations.of(context)!.approveAgent,
-                      message: isVerified
-                          ? AppLocalizations.of(context)!
-                              .areYouSureYouWantToDisapproveAgent
-                          : AppLocalizations.of(context)!
-                              .areYouSureYouWantToApproveThisAgent,
-                      isApproval: !isVerified,
-                    );
-
-                    if (confirmed == true && context.mounted) {
-                      context.read<ManageAppBloc>().add(
-                            ApproveRejectAgentEvent(
-                              agent.uid!,
-                              !isVerified,
-                            ),
-                          );
-                    }
-                  },
-                  icon: Icon(
-                    isVerified
-                        ? Icons.block_rounded
-                        : Icons.check_circle_outline,
-                    color: isVerified ? Colors.red : Colors.green,
-                  ),
-                ),
             ],
           ),
         ),

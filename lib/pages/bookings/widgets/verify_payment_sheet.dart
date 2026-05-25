@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+import 'package:aboglumbo_bbk_panel/models/transaction.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
@@ -116,6 +117,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         'technicianPaymentProof': uploadedUrls,
         'bookingStatusCode': 'C',
         'paymentCompleted': true,
+        'paymentCompletedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
         // Apply warranty for 1 week from completion date if it's full work (mode 1)
         if (widget.booking.completionData?.mode == 1) ...{
@@ -125,6 +127,35 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
           'warranty.updatedAt': FieldValue.serverTimestamp(),
         },
       });
+
+      // Save a transaction record to firestore transactions collection
+      final inspectionFee = widget.booking.completionData?.inspectionFee ?? 0.0;
+      final serviceCost = widget.booking.completionData?.totalCost ?? 0.0;
+      final totalAmount = widget.booking.completionData != null
+          ? (serviceCost + inspectionFee)
+          : (widget.booking.service.price ?? 0.0);
+
+      final orderId = widget.booking.orderId?.isNotEmpty == true
+          ? widget.booking.orderId!
+          : "ORDER_CASH_${widget.booking.id}";
+
+      final transaction = TransactionModel(
+        Timestamp.now(),
+        amount: totalAmount,
+        paymentStatus: "completed",
+        paymentMethod: widget.booking.completionData?.paymentMethod.isNotEmpty == true
+            ? widget.booking.completionData!.paymentMethod
+            : "Outside App - Cash",
+        createdAt: Timestamp.now(),
+        orderId: orderId,
+        customerId: widget.booking.customer.uid,
+        workerId: widget.booking.agent?.uid ?? "",
+        bookingId: widget.booking.id,
+      );
+
+      await AppFirestore.transactionsCollectionRef
+          .doc(orderId)
+          .set(transaction.toMap());
 
       // Update wallet with outside-app earnings for lifetime tracking
       // Only for full service (mode 1) — inspection fees are excluded

@@ -3218,10 +3218,9 @@ class _BookingInfoState extends State<BookingInfo> {
               _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.paymentMode,
-                value: widget.booking.paymentModeCode.toLowerCase() == 'c'
+                value: (widget.booking.paymentModeCode.toLowerCase() == 'c' ||
+                        widget.booking.paymentModeCode.toLowerCase() == 'a')
                     ? AppLocalizations.of(context)!.insideApp
-                    : widget.booking.paymentModeCode.toLowerCase() == 'a'
-                    ? AppLocalizations.of(context)!.applePay
                     : AppLocalizations.of(context)!.outsideApp,
                 textTheme: textTheme,
                 colorScheme: colorScheme,

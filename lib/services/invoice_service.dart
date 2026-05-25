@@ -147,7 +147,12 @@ class InvoiceService {
                     pw.Text(loc.bookingDetailsInvoice, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                     pw.Text(loc.serviceLabel(booking.service.nameLocalized(languageCode: loc.localeName) ?? '')),
                     pw.Text(loc.completedAtLabel(completedAtStr)),
-                    pw.Text(loc.paymentModeLabel(booking.paymentModeCode.toUpperCase() == 'C' ? loc.insideApp : booking.paymentModeCode.toUpperCase() == 'A' ? loc.applePay : loc.outsideApp)),
+                    pw.Text(loc.paymentModeLabel(
+                      (booking.paymentModeCode.toUpperCase() == 'C' ||
+                       booking.paymentModeCode.toUpperCase() == 'A')
+                          ? loc.insideApp
+                          : loc.outsideApp,
+                    )),
                     if (booking.transactionId != null)
                       pw.Text(loc.transactionIdLabel(booking.transactionId!)),
                     pw.Text(

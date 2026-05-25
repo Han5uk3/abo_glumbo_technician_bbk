@@ -1660,5 +1660,33 @@
   "onHour": "On-Hour",
   "offHour": "Off-Hour",
   "onHourBooking": "On-Hour Booking",
-  "offHourBooking": "Off-Hour Booking"
+  "offHourBooking": "Off-Hour Booking",
+  "inAppEarnings": "الأرباح داخل التطبيق",
+  "outsideAppEarnings": "الأرباح خارج التطبيق",
+  "earningsPeriod": "فترة الأرباح",
+  "selectPeriod": "اختر الفترة",
+  "selectMonth": "اختر الشهر",
+  "customDateRange": "نطاق تاريخ مخصص",
+  "thisMonth": "هذا الشهر",
+  "inApp": "داخل التطبيق",
+  "outsideApp": "خارج التطبيق",
+  "clearWalletBalances": "مسح أرصدة المحفظة",
+  "clearWalletConfirmation": "هل أنت متأكد من أنك تريد مسح وإعادة تعيين أرصدة المحفظة بالكامل لـ {name}؟ هذا الإجراء لا يمكن التراجع عنه.",
+  "@clearWalletConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "clearWallet": "مسح المحفظة",
+  "walletClearedSuccessfully": "تم مسح أرصدة المحفظة بنجاح",
+  "errorClearingWallet": "خطأ أثناء مسح المحفظة: {error}",
+  "@errorClearingWallet": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -3,8 +3,10 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/transaction_tile.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 class ManageTransactionsPage extends StatefulWidget {
   const ManageTransactionsPage({super.key});
@@ -14,9 +16,19 @@ class ManageTransactionsPage extends StatefulWidget {
 }
 
 class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
-  String _selectedFilter = 'all'; // all, cash, card
+  String _selectedFilter = 'all'; // all, inApp, outsideApp
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String _periodLabel = 'All Time';
+
+  String get _displayPeriodLabel {
+    if (_startDate == null && _endDate == null) {
+      return AppLocalizations.of(context)?.allTime ?? 'All Time';
+    }
+    return _periodLabel;
+  }
 
   @override
   void initState() {
@@ -32,6 +44,233 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = DateTime(picked.start.year, picked.start.month, picked.start.day);
+        _endDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+        _periodLabel = "${DateFormat('dd/MM/yyyy').format(picked.start)} - ${DateFormat('dd/MM/yyyy').format(picked.end)}";
+      });
+    }
+  }
+
+  Future<void> _selectMonth(BuildContext context) async {
+    final now = DateTime.now();
+    final months = List.generate(12, (index) {
+      return DateTime(now.year, now.month - index, 1);
+    });
+
+    final selected = await showDialog<DateTime>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            AppLocalizations.of(context)?.selectMonth ?? "Select Month",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: months.length,
+              itemBuilder: (context, index) {
+                final monthDate = months[index];
+                final label = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(monthDate);
+                return ListTile(
+                  title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: () => Navigator.pop(context, monthDate),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _startDate = DateTime(selected.year, selected.month, 1);
+        _endDate = DateTime(selected.year, selected.month + 1, 0, 23, 59, 59);
+        _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(selected);
+      });
+    }
+  }
+
+  void _showPeriodSelectorSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)?.selectPeriod ?? "Select Period",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.all_inclusive_rounded, color: Colors.blue),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.allTime ?? "All Time",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  setState(() {
+                    _startDate = null;
+                    _endDate = null;
+                    _periodLabel = AppLocalizations.of(context)?.allTime ?? 'All Time';
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.today_rounded, color: Colors.green),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.thisMonth ?? "This Month",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  final now = DateTime.now();
+                  setState(() {
+                    _startDate = DateTime(now.year, now.month, 1);
+                    _endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+                    _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(now);
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.date_range_rounded, color: Colors.orange),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.selectMonth ?? "Select Month",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _selectMonth(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.calendar_month_rounded, color: Colors.purple),
+                ),
+                title: Text(
+                  AppLocalizations.of(context)?.customDateRange ?? "Custom Date Range",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _selectDateRange(context);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<TransactionModel> _getFilteredTransactions(List<TransactionModel> allTransactions) {
+    return allTransactions.where((t) {
+      // 1. Payment Method Filter
+      if (_selectedFilter != 'all') {
+        final method = t.paymentMethod.toLowerCase();
+        final isOutside = method.contains('outside') || method.contains('cash') || method.contains('hand');
+        if (_selectedFilter == 'outsideApp') {
+          if (!isOutside) return false;
+        } else if (_selectedFilter == 'inApp') {
+          if (isOutside) return false;
+        }
+      }
+
+      // 2. Date Range Filter
+      final date = t.createdAt.toDate();
+      if (_startDate != null && date.isBefore(_startDate!)) return false;
+      if (_endDate != null && date.isAfter(_endDate!)) return false;
+
+      // 3. Search Filter
+      if (_searchQuery.isNotEmpty) {
+        final bookingId = t.bookingId.toLowerCase();
+        final orderId = t.orderId.toLowerCase();
+        if (!bookingId.contains(_searchQuery) && !orderId.contains(_searchQuery)) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
   }
 
   @override
@@ -62,13 +301,14 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
           // Stats Overview Section
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: StreamBuilder(
+            child: StreamBuilder<List<TransactionModel>>(
               stream: AppServices.getAllTransactionsStream(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final transactions = snapshot.data ?? [];
-                  final total = transactions.length;
-                  final totalAmount = transactions.fold<double>(
+                  final filtered = _getFilteredTransactions(transactions);
+                  final total = filtered.length;
+                  final totalAmount = filtered.fold<double>(
                     0.0,
                     (sum, t) => sum + t.amount,
                   );
@@ -220,22 +460,96 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   context,
-                  AppLocalizations.of(context)!.cashInHand,
-                  'cash',
+                  AppLocalizations.of(context)?.inApp ?? 'In-App',
+                  'inApp',
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   context,
-                  AppLocalizations.of(context)!.card,
-                  'card',
+                  AppLocalizations.of(context)?.outsideApp ?? 'Outside-App',
+                  'outsideApp',
                 ),
               ],
             ),
           ),
 
-          // Transactions List
+          // Period Filter Card
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.05),
+                    AppColors.primary.withOpacity(0.12),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.calendar_today_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)?.earningsPeriod ?? "Earnings Period",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _displayPeriodLabel,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showPeriodSelectorSheet(context),
+                    icon: const Icon(Icons.tune_rounded, size: 16),
+                    label: Text(
+                      AppLocalizations.of(context)?.change ?? "Change",
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<List<TransactionModel>>(
               stream: AppServices.getAllTransactionsStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -267,29 +581,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                 }
 
                 final allTransactions = snapshot.data ?? [];
-
-                // Apply payment method filter
-                var filteredTransactions = _selectedFilter == 'all'
-                    ? allTransactions
-                    : allTransactions.where((t) {
-                        final method = t.paymentMethod.toLowerCase();
-                        if (_selectedFilter == 'cash') {
-                          return method.contains('cash');
-                        } else if (_selectedFilter == 'card') {
-                          return method.contains('card');
-                        }
-                        return true;
-                      }).toList();
-
-                // Apply search filter
-                if (_searchQuery.isNotEmpty) {
-                  filteredTransactions = filteredTransactions.where((t) {
-                    final bookingId = t.bookingId.toLowerCase();
-                    final orderId = t.orderId.toLowerCase();
-                    return bookingId.contains(_searchQuery) ||
-                        orderId.contains(_searchQuery);
-                  }).toList();
-                }
+                final filteredTransactions = _getFilteredTransactions(allTransactions);
 
                 if (filteredTransactions.isEmpty) {
                   return Center(
@@ -349,10 +641,10 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
 
   String _getFilterLabel(String filter) {
     switch (filter) {
-      case 'cash':
-        return AppLocalizations.of(context)!.cashInHand;
-      case 'card':
-        return AppLocalizations.of(context)!.card;
+      case 'inApp':
+        return AppLocalizations.of(context)?.inApp ?? 'In-App';
+      case 'outsideApp':
+        return AppLocalizations.of(context)?.outsideApp ?? 'Outside-App';
       default:
         return filter;
     }

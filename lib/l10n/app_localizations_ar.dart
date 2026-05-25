@@ -1349,7 +1349,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendAndClearWallet => 'إرسال وتصفير المحفظة';
 
   @override
-  String get clearWallet => 'تصفير المحفظة';
+  String get clearWallet => 'مسح المحفظة';
 
   @override
   String get clearWalletWarning =>
@@ -1854,7 +1854,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get video => 'فيديو';
 
   @override
-  String get walletClearedSuccessfully => 'تم مسح المحفظة بنجاح';
+  String get walletClearedSuccessfully => 'تم مسح أرصدة المحفظة بنجاح';
 
   @override
   String get biometricNotSupported => 'ميزة البصمة غير مدعومة';
@@ -4822,4 +4822,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get offHourBooking => 'Off-Hour Booking';
+
+  @override
+  String get inAppEarnings => 'الأرباح داخل التطبيق';
+
+  @override
+  String get outsideAppEarnings => 'الأرباح خارج التطبيق';
+
+  @override
+  String get earningsPeriod => 'فترة الأرباح';
+
+  @override
+  String get selectPeriod => 'اختر الفترة';
+
+  @override
+  String get selectMonth => 'اختر الشهر';
+
+  @override
+  String get customDateRange => 'نطاق تاريخ مخصص';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get inApp => 'داخل التطبيق';
+
+  @override
+  String get clearWalletBalances => 'مسح أرصدة المحفظة';
+
+  @override
+  String clearWalletConfirmation(String name) {
+    return 'هل أنت متأكد من أنك تريد مسح وإعادة تعيين أرصدة المحفظة بالكامل لـ $name؟ هذا الإجراء لا يمكن التراجع عنه.';
+  }
+
+  @override
+  String errorClearingWallet(String error) {
+    return 'خطأ أثناء مسح المحفظة: $error';
+  }
 }

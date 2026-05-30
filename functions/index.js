@@ -4672,3 +4672,55 @@ exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
     return null;
   }
 );
+
+exports.notifyCustomerOnBroadcastAccepted = onDocumentUpdated(
+  "job_offers/{offerId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+
+    // Check if status changed to accepted_by_technician
+    if (beforeData.status !== "accepted_by_technician" && afterData.status === "accepted_by_technician") {
+      const customerId = afterData.customerId;
+      const technicianId = afterData.technicianId;
+      const offerId = event.params.offerId;
+
+      if (!customerId) return null;
+
+      // Fetch customer data for FCM token
+      const customerDoc = await admin.firestore().collection("users").doc(customerId).get();
+      if (!customerDoc.exists) return null;
+      const customerData = customerDoc.data();
+
+      if (!customerData.fcmToken) return null;
+
+      // Fetch technician data for name
+      const techDoc = await admin.firestore().collection("users").doc(technicianId).get();
+      const techName = techDoc.exists ? techDoc.data().name : "A technician";
+
+      const lanCode = customerData.lanCode || "en";
+
+      await sendAndStoreNotification({
+        targetRole: "customer",
+        targetId: customerId,
+        titleEn: "Technician Responded!",
+        titleAr: "الفني استجاب!",
+        titleUr: "ٹیکنیشن نے جواب دیا!",
+        bodyEn: `${techName} has accepted your service request. Tap to view and select them!`,
+        bodyAr: `لقد قبل ${techName} طلب الخدمة الخاص بك. اضغط للعرض والاختيار!`,
+        bodyUr: `${techName} نے آپ کی سروس کی درخواست قبول کر لی ہے۔ دیکھنے اور منتخب کرنے کے لیے ٹیپ کریں!`,
+        data: {
+          targetRole: "customer",
+          category: "broadcast_accepted",
+          requestId: afterData.requestId || "",
+          offerId: offerId,
+          type: "broadcast_accepted"
+        },
+        fcmToken: customerData.fcmToken,
+        lanCode: lanCode
+      });
+      console.log(`[${offerId}] Notification sent to customer ${customerId} for technician acceptance`);
+    }
+    return null;
+  }
+);

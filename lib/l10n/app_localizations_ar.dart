@@ -2489,6 +2489,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get understood => 'فهمت';
 
   @override
+  String get suspendAccount => 'إيقاف الحساب';
+
+  @override
+  String get unblockAccount => 'تفعيل الحساب';
+
+  @override
+  String get areYouSureYouWantToSuspendThisAccount =>
+      'هل أنت متأكد أنك تريد إيقاف هذا الحساب؟';
+
+  @override
+  String get areYouSureYouWantToUnblockThisAccount =>
+      'هل أنت متأكد أنك تريد تفعيل هذا الحساب؟';
+
+  @override
+  String get accountSuspended => 'تم إيقاف الحساب';
+
+  @override
+  String get accountUnblocked => 'تم تفعيل الحساب';
+
+  @override
   String get cancelledThisBooking => 'ألغى هذا الحجز';
 
   @override

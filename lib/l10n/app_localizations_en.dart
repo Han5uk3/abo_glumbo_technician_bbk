@@ -2526,6 +2526,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get understood => 'Understood';
 
   @override
+  String get suspendAccount => 'Suspend Account';
+
+  @override
+  String get unblockAccount => 'Unblock Account';
+
+  @override
+  String get areYouSureYouWantToSuspendThisAccount =>
+      'Are you sure you want to suspend this account?';
+
+  @override
+  String get areYouSureYouWantToUnblockThisAccount =>
+      'Are you sure you want to unblock this account?';
+
+  @override
+  String get accountSuspended => 'Account Suspended';
+
+  @override
+  String get accountUnblocked => 'Account Unblocked';
+
+  @override
   String get cancelledThisBooking => 'Cancelled This Booking';
 
   @override

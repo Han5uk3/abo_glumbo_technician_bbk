@@ -4894,6 +4894,42 @@ abstract class AppLocalizations {
   /// **'Understood'**
   String get understood;
 
+  /// No description provided for @suspendAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend Account'**
+  String get suspendAccount;
+
+  /// No description provided for @unblockAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock Account'**
+  String get unblockAccount;
+
+  /// No description provided for @areYouSureYouWantToSuspendThisAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to suspend this account?'**
+  String get areYouSureYouWantToSuspendThisAccount;
+
+  /// No description provided for @areYouSureYouWantToUnblockThisAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to unblock this account?'**
+  String get areYouSureYouWantToUnblockThisAccount;
+
+  /// No description provided for @accountSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Suspended'**
+  String get accountSuspended;
+
+  /// No description provided for @accountUnblocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Unblocked'**
+  String get accountUnblocked;
+
   /// No description provided for @cancelledThisBooking.
   ///
   /// In en, this message translates to:

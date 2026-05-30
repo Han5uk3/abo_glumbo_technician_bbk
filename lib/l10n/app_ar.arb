@@ -1695,5 +1695,11 @@
   "errorFetchingLocation": "خطأ في جلب الموقع: {error}",
   "confirmRemoveAdmin": "هل أنت متأكد أنك تريد إزالة وصول المسؤول لـ {name}؟",
   "adminAccessRevoked": "تم إبطال وصول المسؤول لـ {name}",
-  "inviteDeleted": "تم حذف دعوة {name}"
+  "inviteDeleted": "تم حذف دعوة {name}",
+  "suspendAccount": "إيقاف الحساب",
+  "unblockAccount": "تفعيل الحساب",
+  "areYouSureYouWantToSuspendThisAccount": "هل أنت متأكد أنك تريد إيقاف هذا الحساب؟",
+  "areYouSureYouWantToUnblockThisAccount": "هل أنت متأكد أنك تريد تفعيل هذا الحساب؟",
+  "accountSuspended": "تم إيقاف الحساب",
+  "accountUnblocked": "تم تفعيل الحساب"
 }

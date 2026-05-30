@@ -927,33 +927,90 @@ class _ManageAgentsState extends State<ManageAgents>
                       (LocalStore.getCachedAdminData()?.hasFullAccess ?? true))
                     IconButton(
                       onPressed: () async {
-                        final confirmed = await _showConfirmationDialog(
-                          context: context,
-                          title: isVerified
-                              ? AppLocalizations.of(context)!.disapproveAgent
-                              : AppLocalizations.of(context)!.approveAgent,
-                          message: isVerified
-                              ? AppLocalizations.of(context)!
-                                  .areYouSureYouWantToDisapproveAgent
-                              : AppLocalizations.of(context)!
-                                  .areYouSureYouWantToApproveThisAgent,
-                          isApproval: !isVerified,
-                        );
+                        if (!isVerified) {
+                          final confirmed = await _showConfirmationDialog(
+                            context: context,
+                            title: AppLocalizations.of(context)!.approveAgent,
+                            message: AppLocalizations.of(context)!
+                                .areYouSureYouWantToApproveThisAgent,
+                            isApproval: true,
+                          );
 
-                        if (confirmed == true && context.mounted) {
-                          context.read<ManageAppBloc>().add(
-                                ApproveRejectAgentEvent(
-                                  agent.uid!,
-                                  !isVerified,
+                          if (confirmed == true && context.mounted) {
+                            context.read<ManageAppBloc>().add(
+                                  ApproveRejectAgentEvent(
+                                    agent.uid!,
+                                    true,
+                                  ),
+                                );
+                          }
+                        } else {
+                          final isCurrentlyBlocked = agent.isBlocked ?? false;
+                          final l10n = AppLocalizations.of(context)!;
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(isCurrentlyBlocked ? l10n.unblockAccount : l10n.suspendAccount),
+                              content: Text(
+                                isCurrentlyBlocked
+                                    ? l10n.areYouSureYouWantToUnblockThisAccount
+                                    : l10n.areYouSureYouWantToSuspendThisAccount,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: Text(l10n.cancel),
                                 ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text(isCurrentlyBlocked ? l10n.unblock : l10n.suspendAccount),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirmed == true && context.mounted) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(child: Loader()),
+                            );
+                            try {
+                              final success = await AppServices.blockOrUnblockAgent(
+                                agent.uid!,
+                                !isCurrentlyBlocked,
                               );
+                              if (context.mounted) {
+                                Navigator.pop(context); // close loader
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        !isCurrentlyBlocked ? l10n.accountSuspended : l10n.accountUnblocked,
+                                      ),
+                                      backgroundColor: !isCurrentlyBlocked ? Colors.red : Colors.green,
+                                    ),
+                                  );
+                                }
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                Navigator.pop(context); // close loader
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                                );
+                              }
+                            }
+                          }
                         }
                       },
                       icon: Icon(
-                        isVerified
-                            ? Icons.block_rounded
-                            : Icons.check_circle_outline,
-                        color: isVerified ? Colors.red : Colors.green,
+                        !isVerified
+                            ? Icons.check_circle_outline
+                            : (agent.isBlocked == true ? Icons.lock_open_rounded : Icons.block_rounded),
+                        color: !isVerified
+                            ? Colors.green
+                            : (agent.isBlocked == true ? Colors.green : Colors.red),
                       ),
                     ),
                 ],

@@ -2535,6 +2535,26 @@ class AppLocalizationsUr extends AppLocalizations {
   String get understood => 'سمجھ گیا';
 
   @override
+  String get suspendAccount => 'اکاؤنٹ معطل کریں';
+
+  @override
+  String get unblockAccount => 'اکاؤنٹ بحال کریں';
+
+  @override
+  String get areYouSureYouWantToSuspendThisAccount =>
+      'کیا آپ واقعی اس اکاؤنٹ کو معطل کرنا چاہتے ہیں؟';
+
+  @override
+  String get areYouSureYouWantToUnblockThisAccount =>
+      'کیا آپ واقعی اس اکاؤنٹ کو بحال کرنا چاہتے ہیں؟';
+
+  @override
+  String get accountSuspended => 'اکاؤنٹ معطل کر دیا گیا';
+
+  @override
+  String get accountUnblocked => 'اکاؤنٹ بحال کر دیا گیا';
+
+  @override
   String get cancelledThisBooking => 'یہ بکنگ منسوخ کر دی';
 
   @override

@@ -1646,5 +1646,11 @@
   "errorFetchingLocation": "مقام لانے میں خرابی: {error}",
   "confirmRemoveAdmin": "کیا آپ واقعی {name} کی ایڈمن رسائی ختم کرنا چاہتے ہیں؟",
   "adminAccessRevoked": "{name} کی ایڈمن رسائی منسوخ کر دی گئی",
-  "inviteDeleted": "{name} کی دعوت حذف کر دی گئی"
+  "inviteDeleted": "{name} کی دعوت حذف کر دی گئی",
+  "suspendAccount": "اکاؤنٹ معطل کریں",
+  "unblockAccount": "اکاؤنٹ بحال کریں",
+  "areYouSureYouWantToSuspendThisAccount": "کیا آپ واقعی اس اکاؤنٹ کو معطل کرنا چاہتے ہیں؟",
+  "areYouSureYouWantToUnblockThisAccount": "کیا آپ واقعی اس اکاؤنٹ کو بحال کرنا چاہتے ہیں؟",
+  "accountSuspended": "اکاؤنٹ معطل کر دیا گیا",
+  "accountUnblocked": "اکاؤنٹ بحال کر دیا گیا"
 }

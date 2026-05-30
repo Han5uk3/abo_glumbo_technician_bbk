@@ -506,7 +506,7 @@
   "composeMessage": "إنشاء رسالة",
   "certificationsrelevantExperienceDocumentsOptional": "وثائق الخبرة والشهادات (اختياري)",
   "sendAndClearWallet": "إرسال وتصفير المحفظة",
-  "clearWallet": "تصفير المحفظة",
+  "clearWallet": "مسح المحفظة",
   "clearWalletWarning": "هذا الإجراء لا يمكن التراجع عنه. سيتم تحويل جميع المبالغ في محفظتك وتعيين الرصيد إلى صفر.",
   "areYouSureYouWantToSend": "هل أنت متأكد أنك تريد إرسال",
   "to": "إلى",
@@ -562,7 +562,7 @@
   "directions": "اتجاهات",
   "images": "صور",
   "video": "فيديو",
-  "walletClearedSuccessfully": "تم مسح المحفظة بنجاح",
+  "walletClearedSuccessfully": "تم مسح أرصدة المحفظة بنجاح",
   "pleaseAuthenticateToContinue": "يرجى التحقق من هويتك للمتابعة",
   "authenticationFailed": "فشل التحقق",
   "unexpectedErrorOccurred": "حدث خطأ غير متوقع",
@@ -1669,7 +1669,6 @@
   "customDateRange": "نطاق تاريخ مخصص",
   "thisMonth": "هذا الشهر",
   "inApp": "داخل التطبيق",
-  "outsideApp": "خارج التطبيق",
   "clearWalletBalances": "مسح أرصدة المحفظة",
   "clearWalletConfirmation": "هل أنت متأكد من أنك تريد مسح وإعادة تعيين أرصدة المحفظة بالكامل لـ {name}؟ هذا الإجراء لا يمكن التراجع عنه.",
   "@clearWalletConfirmation": {
@@ -1679,8 +1678,6 @@
       }
     }
   },
-  "clearWallet": "مسح المحفظة",
-  "walletClearedSuccessfully": "تم مسح أرصدة المحفظة بنجاح",
   "errorClearingWallet": "خطأ أثناء مسح المحفظة: {error}",
   "@errorClearingWallet": {
     "placeholders": {
@@ -1688,5 +1685,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "urdu": "أوردو",
+  "allTime": "كل الوقت",
+  "errorOccurred": "حدث خطأ: {error}",
+  "cannotOpenFile": "لا يمكن فتح الملف: {path}",
+  "failedToSendMessage": "فشل إرسال الرسالة: {error}",
+  "failedToRetryMessage": "فشل إعادة المحاولة: {error}",
+  "errorFetchingLocation": "خطأ في جلب الموقع: {error}",
+  "confirmRemoveAdmin": "هل أنت متأكد أنك تريد إزالة وصول المسؤول لـ {name}؟",
+  "adminAccessRevoked": "تم إبطال وصول المسؤول لـ {name}",
+  "inviteDeleted": "تم حذف دعوة {name}"
 }

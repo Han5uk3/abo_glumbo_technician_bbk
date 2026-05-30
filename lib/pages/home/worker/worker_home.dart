@@ -100,7 +100,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
             // Search bar removed for technician view as per request
             Container(
               height: 64,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               color: Colors.white,
               child: TabBar(
                 controller: _tabController,

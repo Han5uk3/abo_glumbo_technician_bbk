@@ -96,7 +96,7 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Location tracking stopped'),
+            content: Text(AppLocalizations.of(context)?.locationTrackingStopped ?? 'Location tracking stopped'),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
           ),

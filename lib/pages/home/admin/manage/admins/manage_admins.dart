@@ -56,7 +56,7 @@ class _ManageAdminsState extends State<ManageAdmins>
           backgroundColor: AppColors.bgWhite,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: Text(AppLocalizations.of(context)?.revokeAccess ?? 'Revoke Access'),
-          content: Text('Are you sure you want to remove admin access for $adminName?'),
+          content: Text(AppLocalizations.of(context)?.confirmRemoveAdmin(adminName) ?? 'Are you sure you want to remove admin access for $adminName?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -87,13 +87,13 @@ class _ManageAdminsState extends State<ManageAdmins>
       await AppFirestore.adminsCollectionRef.doc(admin.uid).delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Admin access revoked for ${admin.name}')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.adminAccessRevoked(admin.name) ?? 'Admin access revoked for ${admin.name}')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -104,13 +104,13 @@ class _ManageAdminsState extends State<ManageAdmins>
       await AppFirestore.pendingAdminsCollectionRef.doc(admin.uid).delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invite deleted for ${admin.name}')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.inviteDeleted(admin.name) ?? 'Invite deleted for ${admin.name}')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
         );
       }
     }

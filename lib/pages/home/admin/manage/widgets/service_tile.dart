@@ -31,7 +31,7 @@ class ServiceTileDevWidget extends StatelessWidget {
           ),
         ],
       ),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 12),
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -179,8 +179,8 @@ class ServiceTileDevWidget extends StatelessWidget {
                     return Transform.scale(
                       scale: 0.8,
                       alignment: Directionality.of(context) == TextDirection.rtl
-                          ? Alignment.centerLeft
-                          : Alignment.centerRight,
+                          ? AlignmentDirectional.centerStart
+                          : AlignmentDirectional.centerEnd,
                       child: Switch.adaptive(
                         activeColor: AppColors.primary,
                         value: service.isActive,

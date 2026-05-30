@@ -204,7 +204,7 @@ class _AddBannerState extends State<AddBanner> {
                 return IconButton(
                   icon: state is AddingBanner || state is UpdatingBanner
                       ? Padding(
-                          padding: EdgeInsets.only(right: 16, left: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Loader(size: 10, color: Colors.white),
                         )
                       : Icon(Icons.save),
@@ -286,9 +286,9 @@ class _AddBannerState extends State<AddBanner> {
         body: Form(
           key: formKey,
           child: ListView(
-            padding: EdgeInsets.only(
-              left: safePadding.left + 16,
-              right: safePadding.right + 16,
+            padding: EdgeInsetsDirectional.only(
+              start: safePadding.left + 16,
+              end: safePadding.right + 16,
               top: 16,
               bottom: safePadding.bottom + 70,
             ),
@@ -360,7 +360,7 @@ class _AddBannerState extends State<AddBanner> {
                 ),
               ),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: ClipRRect(

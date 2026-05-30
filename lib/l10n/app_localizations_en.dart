@@ -4926,4 +4926,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorClearingWallet(String error) {
     return 'Error clearing wallet: $error';
   }
+
+  @override
+  String get bookingDate => 'Booking Date';
+
+  @override
+  String get yourAccountIsBeingVerified =>
+      'Your account is being verified by the admin. Please check back later.';
+
+  @override
+  String get aboGlumboWorker => 'Abo Glumbo Technician';
+
+  @override
+  String get workerCannotBeAssignedMultipleTimes =>
+      'The same technician cannot be assigned to more than one booking at the same time. Please choose a different time or another technician.';
+
+  @override
+  String get unknownWorker => 'Unknown Technician';
+
+  @override
+  String get workerCancelled => 'Booking was cancelled by the technician';
+
+  @override
+  String get cancelledByWorker => 'Cancelled by Technician';
+
+  @override
+  String get workerPreviouslyCancelled => 'Technician previously cancelled';
+
+  @override
+  String get workerCancelledAtTime =>
+      'This technician previously cancelled a booking at the same time. It is recommended to assign another technician for better reliability.';
+
+  @override
+  String get workerRestrictedTitle => 'Technician Restricted';
+
+  @override
+  String get cannotAssignCancelledWorker =>
+      'Cannot assign a technician who previously cancelled';
+
+  @override
+  String get workerCancelledRestrictionMessage =>
+      'This technician previously cancelled a booking and is now restricted from new assignments. Please choose a different technician.';
+
+  @override
+  String get managefaqs => 'Manage FAQs';
+
+  @override
+  String get manageWorkers => 'Manage Technicians';
+
+  @override
+  String get noWorkersMatchYourFilters =>
+      'No technicians match your search criteria';
+
+  @override
+  String get workerInformation => 'Technician Information';
+
+  @override
+  String get loadingWorkers => 'Loading Technicians...';
+
+  @override
+  String get serviceDeletedSuccessfully => 'Service deleted successfully';
+
+  @override
+  String get netTechnicianror => 'An error occurred while loading technicians';
+
+  @override
+  String get urdu => 'Urdu';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String cannotOpenFile(String path) {
+    return 'Cannot open file: $path';
+  }
+
+  @override
+  String failedToSendMessage(String error) {
+    return 'Failed to send message: $error';
+  }
+
+  @override
+  String failedToRetryMessage(String error) {
+    return 'Failed to retry message: $error';
+  }
+
+  @override
+  String errorFetchingLocation(String error) {
+    return 'Error fetching location: $error';
+  }
+
+  @override
+  String confirmRemoveAdmin(String name) {
+    return 'Are you sure you want to remove admin access for $name?';
+  }
+
+  @override
+  String adminAccessRevoked(String name) {
+    return 'Admin access revoked for $name';
+  }
+
+  @override
+  String inviteDeleted(String name) {
+    return 'Invite deleted for $name';
+  }
 }

@@ -70,7 +70,7 @@ class ContactService {
       log('Error launching phone: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')),
         );
       }
     }

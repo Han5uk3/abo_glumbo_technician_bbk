@@ -787,7 +787,7 @@ class _AgentInfoState extends State<AgentInfo> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)?.cancelLower ?? 'Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -829,7 +829,7 @@ class _AgentInfoState extends State<AgentInfo> {
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+            SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
           );
         }
       }
@@ -955,7 +955,7 @@ class _AgentInfoState extends State<AgentInfo> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
         );
       }
     }

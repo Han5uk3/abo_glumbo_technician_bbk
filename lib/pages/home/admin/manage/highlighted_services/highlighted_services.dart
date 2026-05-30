@@ -51,7 +51,7 @@ class HighlightedServices extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)?.errorOccurred(snapshot.error.toString()) ?? 'Error: ${snapshot.error}'));
           }
 
           final highlightedServices = snapshot.data ?? [];

@@ -64,7 +64,7 @@ class RemovableImageWidget extends StatelessWidget {
                 child: _buildImageWidget(),
               ),
             ),
-            if (showRemoveButton && onRemove != null) _buildRemoveButton(),
+            if (showRemoveButton && onRemove != null) _buildRemoveButton(context),
           ],
         ),
       ),
@@ -116,10 +116,11 @@ class RemovableImageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRemoveButton() {
-    return Positioned(
+  Widget _buildRemoveButton(BuildContext context) {
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
       top: -10,
-      right: -10,
+      end: -10,
       child: InkWell(
         onTap: onRemove,
         borderRadius: BorderRadius.circular(20),
@@ -234,7 +235,7 @@ class RemovableImageWidgetEnhanced extends StatelessWidget {
                 ),
               ),
             ),
-            if (showRemoveButton && onRemove != null) _buildRemoveButton(),
+            if (showRemoveButton && onRemove != null) _buildRemoveButton(context),
           ],
         ),
       ),
@@ -290,7 +291,7 @@ class RemovableImageWidgetEnhanced extends StatelessWidget {
     );
   }
 
-  Widget _buildRemoveButton() {
+  Widget _buildRemoveButton(BuildContext context) {
     Widget button = InkWell(
       onTap: onRemove,
       borderRadius: BorderRadius.circular(20),
@@ -319,6 +320,11 @@ class RemovableImageWidgetEnhanced extends StatelessWidget {
       button = Tooltip(message: tooltip!, child: button);
     }
 
-    return Positioned(top: -10, right: -10, child: button);
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
+      top: -10,
+      end: -10,
+      child: button,
+    );
   }
 }

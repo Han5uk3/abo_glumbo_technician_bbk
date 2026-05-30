@@ -9232,6 +9232,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error clearing wallet: {error}'**
   String errorClearingWallet(String error);
+
+  /// No description provided for @bookingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Date'**
+  String get bookingDate;
+
+  /// No description provided for @yourAccountIsBeingVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is being verified by the admin. Please check back later.'**
+  String get yourAccountIsBeingVerified;
+
+  /// No description provided for @aboGlumboWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Abo Glumbo Technician'**
+  String get aboGlumboWorker;
+
+  /// No description provided for @workerCannotBeAssignedMultipleTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'The same technician cannot be assigned to more than one booking at the same time. Please choose a different time or another technician.'**
+  String get workerCannotBeAssignedMultipleTimes;
+
+  /// No description provided for @unknownWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Technician'**
+  String get unknownWorker;
+
+  /// No description provided for @workerCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking was cancelled by the technician'**
+  String get workerCancelled;
+
+  /// No description provided for @cancelledByWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by Technician'**
+  String get cancelledByWorker;
+
+  /// No description provided for @workerPreviouslyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician previously cancelled'**
+  String get workerPreviouslyCancelled;
+
+  /// No description provided for @workerCancelledAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'This technician previously cancelled a booking at the same time. It is recommended to assign another technician for better reliability.'**
+  String get workerCancelledAtTime;
+
+  /// No description provided for @workerRestrictedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Restricted'**
+  String get workerRestrictedTitle;
+
+  /// No description provided for @cannotAssignCancelledWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot assign a technician who previously cancelled'**
+  String get cannotAssignCancelledWorker;
+
+  /// No description provided for @workerCancelledRestrictionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This technician previously cancelled a booking and is now restricted from new assignments. Please choose a different technician.'**
+  String get workerCancelledRestrictionMessage;
+
+  /// No description provided for @managefaqs.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage FAQs'**
+  String get managefaqs;
+
+  /// No description provided for @manageWorkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Technicians'**
+  String get manageWorkers;
+
+  /// No description provided for @noWorkersMatchYourFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No technicians match your search criteria'**
+  String get noWorkersMatchYourFilters;
+
+  /// No description provided for @workerInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Information'**
+  String get workerInformation;
+
+  /// No description provided for @loadingWorkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Technicians...'**
+  String get loadingWorkers;
+
+  /// No description provided for @serviceDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Service deleted successfully'**
+  String get serviceDeletedSuccessfully;
+
+  /// No description provided for @netTechnicianror.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading technicians'**
+  String get netTechnicianror;
+
+  /// No description provided for @urdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Urdu'**
+  String get urdu;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorOccurred(String error);
+
+  /// No description provided for @cannotOpenFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open file: {path}'**
+  String cannotOpenFile(String path);
+
+  /// No description provided for @failedToSendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send message: {error}'**
+  String failedToSendMessage(String error);
+
+  /// No description provided for @failedToRetryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to retry message: {error}'**
+  String failedToRetryMessage(String error);
+
+  /// No description provided for @errorFetchingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error fetching location: {error}'**
+  String errorFetchingLocation(String error);
+
+  /// No description provided for @confirmRemoveAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove admin access for {name}?'**
+  String confirmRemoveAdmin(String name);
+
+  /// No description provided for @adminAccessRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access revoked for {name}'**
+  String adminAccessRevoked(String name);
+
+  /// No description provided for @inviteDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite deleted for {name}'**
+  String inviteDeleted(String name);
 }
 
 class _AppLocalizationsDelegate

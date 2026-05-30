@@ -599,7 +599,7 @@
   "directions": "Directions",
   "images": "Images",
   "video": "Video",
-  "walletClearedSuccessfully": "Wallet cleared successfully",
+  "walletClearedSuccessfully": "Wallet balances successfully cleared",
   "biometricNotSupported": "Biometric not supported",
   "pleaseAuthenticateToContinue": "Please authenticate to continue",
   "authenticationFailed": "Authentication failed",
@@ -665,7 +665,7 @@
   "stopTrackingBookingSuccessfully": "Stop tracking booking successfully",
   "cards": "Inside App",
   "insideApp": "Inside App",
-  "outsideApp": "Outside App",
+  "outsideApp": "Outside-App",
   "goToLogin": "Go to Login",
   "failedToSendNotification": "Failed to send notification to customer",
   "locationPermissionErrorIOS": "Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Abo Glumbo Technician and select 'Always' to enable background tracking.",
@@ -1692,7 +1692,6 @@
   "allTime": "All Time",
   "thisMonth": "This Month",
   "inApp": "In-App",
-  "outsideApp": "Outside-App",
   "clearWalletBalances": "Clear Wallet Balances",
   "clearWalletConfirmation": "Are you sure you want to completely clear and reset the wallet balances for {name}? This action is irreversible.",
   "@clearWalletConfirmation": {
@@ -1702,12 +1701,94 @@
       }
     }
   },
-  "clearWallet": "Clear Wallet",
-  "walletClearedSuccessfully": "Wallet balances successfully cleared",
   "errorClearingWallet": "Error clearing wallet: {error}",
   "@errorClearingWallet": {
     "placeholders": {
       "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingDate": "Booking Date",
+  "yourAccountIsBeingVerified": "Your account is being verified by the admin. Please check back later.",
+  "aboGlumboWorker": "Abo Glumbo Technician",
+  "workerCannotBeAssignedMultipleTimes": "The same technician cannot be assigned to more than one booking at the same time. Please choose a different time or another technician.",
+  "unknownWorker": "Unknown Technician",
+  "workerCancelled": "Booking was cancelled by the technician",
+  "cancelledByWorker": "Cancelled by Technician",
+  "workerPreviouslyCancelled": "Technician previously cancelled",
+  "workerCancelledAtTime": "This technician previously cancelled a booking at the same time. It is recommended to assign another technician for better reliability.",
+  "workerRestrictedTitle": "Technician Restricted",
+  "cannotAssignCancelledWorker": "Cannot assign a technician who previously cancelled",
+  "workerCancelledRestrictionMessage": "This technician previously cancelled a booking and is now restricted from new assignments. Please choose a different technician.",
+  "managefaqs": "Manage FAQs",
+  "manageWorkers": "Manage Technicians",
+  "noWorkersMatchYourFilters": "No technicians match your search criteria",
+  "workerInformation": "Technician Information",
+  "loadingWorkers": "Loading Technicians...",
+  "serviceDeletedSuccessfully": "Service deleted successfully",
+  "netTechnicianror": "An error occurred while loading technicians",
+  "urdu": "Urdu",
+  "errorOccurred": "Error: {error}",
+  "@errorOccurred": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotOpenFile": "Cannot open file: {path}",
+  "@cannotOpenFile": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSendMessage": "Failed to send message: {error}",
+  "@failedToSendMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToRetryMessage": "Failed to retry message: {error}",
+  "@failedToRetryMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFetchingLocation": "Error fetching location: {error}",
+  "@errorFetchingLocation": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveAdmin": "Are you sure you want to remove admin access for {name}?",
+  "@confirmRemoveAdmin": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAccessRevoked": "Admin access revoked for {name}",
+  "@adminAccessRevoked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteDeleted": "Invite deleted for {name}",
+  "@inviteDeleted": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }

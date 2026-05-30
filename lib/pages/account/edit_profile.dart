@@ -431,7 +431,7 @@ class _EditProfileState extends State<EditProfile> {
       if (result.type != ResultType.done) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${file.path}')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ?? 'Cannot open file: ${file.path}')),
           );
         }
       }
@@ -479,7 +479,7 @@ class _EditProfileState extends State<EditProfile> {
       if (result.type != ResultType.done) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cannot open file: ${file.path}')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ?? 'Cannot open file: ${file.path}')),
           );
         }
       }

@@ -593,7 +593,7 @@
   "directions": "راستہ دیکھیں",
   "images": "تصاویر",
   "video": "ویڈیو",
-  "walletClearedSuccessfully": "والٹ کامیابی سے صاف ہو گیا",
+  "walletClearedSuccessfully": "والٹ بیلنس کامیابی سے صاف کر دیا گیا",
   "biometricNotSupported": "بائیومیٹرک سپورٹ نہیں ہے",
   "pleaseAuthenticateToContinue": "جاری رکھنے کے لیے براہ کرم تصدیق کریں",
   "authenticationFailed": "تصدیق ناکام ہو گئی",
@@ -1452,7 +1452,7 @@
   "listeningForSms": "ایس ایم ایس کا انتظار ہے...",
   "earningsInfoOnly": "صرف معلوماتی مقاصد کے لیے",
   "throughApp": "ایپ کے ذریعے",
-  "outsideApp": "ایپ سے باہر",
+  "outsideApp": "خارج ایپ",
   "rebookTechnician": "ٹیکنیشن کو دوبارہ بک کریں",
   "selectService": "سروس منتخب کریں",
   "searchServices": "سروسز تلاش کریں...",
@@ -1602,7 +1602,6 @@
   "customDateRange": "حسب ضرورت تاریخ کا انتخاب",
   "thisMonth": "اس مہینے",
   "inApp": "ان ایپ",
-  "outsideApp": "خارج ایپ",
   "clearWalletBalances": "والٹ کا بیلنس صاف کریں",
   "clearWalletConfirmation": "کیا آپ واقعی {name} کے والٹ بیلنس کو مکمل طور پر صاف اور دوبارہ ترتیب دینا چاہتے ہیں؟ یہ عمل ناقابل واپسی ہے۔",
   "@clearWalletConfirmation": {
@@ -1612,8 +1611,6 @@
       }
     }
   },
-  "clearWallet": "والٹ صاف کریں",
-  "walletClearedSuccessfully": "والٹ بیلنس کامیابی سے صاف کر دیا گیا",
   "errorClearingWallet": "والٹ صاف کرنے میں خرابی: {error}",
   "@errorClearingWallet": {
     "placeholders": {
@@ -1621,5 +1618,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "bookingDate": "بکنگ کی تاریخ",
+  "yourAccountIsBeingVerified": "آپ کا اکاؤنٹ ایڈمن کے ذریعے تصدیق ہو رہا ہے۔ براہ کرم بعد میں دوبارہ چیک کریں۔",
+  "aboGlumboWorker": "ابو گلمبو ٹیکنیشن",
+  "workerCannotBeAssignedMultipleTimes": "ایک ہی ٹیکنیشن کو ایک ہی وقت میں ایک سے زیادہ بکنگ پر تفویض نہیں کیا جا سکتا۔ براہ کرم مختلف وقت یا دوسرا ٹیکنیشن منتخب کریں۔",
+  "unknownWorker": "نامعلوم ٹیکنیشن",
+  "workerCancelled": "بکنگ ٹیکنیشن کے ذریعے منسوخ کی گئی",
+  "cancelledByWorker": "ٹیکنیشن کے ذریعے منسوخ",
+  "workerPreviouslyCancelled": "ٹیکنیشن نے پہلے منسوخ کیا",
+  "workerCancelledAtTime": "اس ٹیکنیشن نے ایک ہی وقت میں پہلے بکنگ منسوخ کی تھی۔ بہتر قابل اعتمادی کے لیے کسی اور ٹیکنیشن کو تفویض کرنے کی سفارش کی جاتی ہے۔",
+  "workerRestrictedTitle": "ٹیکنیشن پابند",
+  "cannotAssignCancelledWorker": "ایسے ٹیکنیشن کو تفویض نہیں کیا جا سکتا جس نے پہلے منسوخ کیا ہو",
+  "workerCancelledRestrictionMessage": "اس ٹیکنیشن نے پہلے بکنگ منسوخ کی ہے اور اب نئی تفویض سے محدود ہے۔ براہ کرم کوئی اور ٹیکنیشن منتخب کریں۔",
+  "managefaqs": "اکثر پوچھے گئے سوالات کا انتظام",
+  "manageWorkers": "ٹیکنیشنز کا انتظام",
+  "noWorkersMatchYourFilters": "آپ کی تلاش کے معیار سے کوئی ٹیکنیشن مطابقت نہیں رکھتا",
+  "workerInformation": "ٹیکنیشن کی معلومات",
+  "loadingWorkers": "ٹیکنیشنز لوڈ ہو رہے ہیں...",
+  "serviceDeletedSuccessfully": "سروس کامیابی سے حذف ہو گئی",
+  "netTechnicianror": "ٹیکنیشنز لوڈ کرتے وقت خرابی پیش آئی",
+  "allTime": "ہر وقت",
+  "errorOccurred": "خرابی: {error}",
+  "cannotOpenFile": "فائل نہیں کھولی جا سکی: {path}",
+  "failedToSendMessage": "پیغام بھیجنے میں ناکام: {error}",
+  "failedToRetryMessage": "پیغام دوبارہ بھیجنے میں ناکام: {error}",
+  "errorFetchingLocation": "مقام لانے میں خرابی: {error}",
+  "confirmRemoveAdmin": "کیا آپ واقعی {name} کی ایڈمن رسائی ختم کرنا چاہتے ہیں؟",
+  "adminAccessRevoked": "{name} کی ایڈمن رسائی منسوخ کر دی گئی",
+  "inviteDeleted": "{name} کی دعوت حذف کر دی گئی"
 }

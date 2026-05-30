@@ -180,7 +180,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to send message: $e'),
+            content: Text(AppLocalizations.of(context)?.failedToSendMessage(e.toString()) ?? 'Failed to send message: $e'),
             backgroundColor: Colors.red,
             action: SnackBarAction(
               label: 'Retry',
@@ -241,7 +241,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to retry message: $e'),
+            content: Text(AppLocalizations.of(context)?.failedToRetryMessage(e.toString()) ?? 'Failed to retry message: $e'),
             backgroundColor: Colors.red,
           ),
         );

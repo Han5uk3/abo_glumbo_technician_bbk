@@ -4842,7 +4842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get customDateRange => 'نطاق تاريخ مخصص';
 
   @override
-  String get allTime => 'All Time';
+  String get allTime => 'كل الوقت';
 
   @override
   String get thisMonth => 'هذا الشهر';
@@ -4861,5 +4861,110 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String errorClearingWallet(String error) {
     return 'خطأ أثناء مسح المحفظة: $error';
+  }
+
+  @override
+  String get bookingDate => 'تاريخ الحجز';
+
+  @override
+  String get yourAccountIsBeingVerified =>
+      'يتم التحقق من حسابك من قبل المشرف، يرجى العودة لاحقًا';
+
+  @override
+  String get aboGlumboWorker => 'فني أبو جلمبو';
+
+  @override
+  String get workerCannotBeAssignedMultipleTimes =>
+      'لا يمكن تعيين نفس الفني لأكثر من حجز في نفس الوقت. يرجى اختيار وقت مختلف أو فني آخر.';
+
+  @override
+  String get unknownWorker => 'الفني غير معروف';
+
+  @override
+  String get workerCancelled => 'تم إلغاء الحجز بواسطة الفني';
+
+  @override
+  String get cancelledByWorker => 'تم الإلغاء من قبل الفني';
+
+  @override
+  String get workerPreviouslyCancelled => 'الفني ألغى سابقًا';
+
+  @override
+  String get workerCancelledAtTime =>
+      'هذا الفني ألغى حجزًا سابقًا في نفس التوقيت. يُنصح بتعيين فني آخر للحصول على موثوقية أفضل.';
+
+  @override
+  String get workerRestrictedTitle => 'الفني محظور';
+
+  @override
+  String get cannotAssignCancelledWorker => 'لا يمكن تعيين فني ألغى من قبل';
+
+  @override
+  String get workerCancelledRestrictionMessage =>
+      'هذا الفني ألغى حجزاً سابقاً وهو الآن محظور من التكليفات الجديدة. يرجى اختيار فني مختلف.';
+
+  @override
+  String get managefaqs => 'إدارة الأسئلة الشائعة';
+
+  @override
+  String get manageWorkers => 'ادارة الفنيين';
+
+  @override
+  String get noWorkersMatchYourFilters =>
+      'لا يوجد فنيين يطابقون معايير البحث الخاصة بك';
+
+  @override
+  String get workerInformation => 'معلومات الفني';
+
+  @override
+  String get loadingWorkers => 'جارٍ تحميل الفنيين';
+
+  @override
+  String get serviceDeletedSuccessfully => 'تم حذف الخدمة بنجاح';
+
+  @override
+  String get netTechnicianror => 'حدث خطأ في تحميل الفنيين';
+
+  @override
+  String get urdu => 'أوردو';
+
+  @override
+  String errorOccurred(String error) {
+    return 'حدث خطأ: $error';
+  }
+
+  @override
+  String cannotOpenFile(String path) {
+    return 'لا يمكن فتح الملف: $path';
+  }
+
+  @override
+  String failedToSendMessage(String error) {
+    return 'فشل إرسال الرسالة: $error';
+  }
+
+  @override
+  String failedToRetryMessage(String error) {
+    return 'فشل إعادة المحاولة: $error';
+  }
+
+  @override
+  String errorFetchingLocation(String error) {
+    return 'خطأ في جلب الموقع: $error';
+  }
+
+  @override
+  String confirmRemoveAdmin(String name) {
+    return 'هل أنت متأكد أنك تريد إزالة وصول المسؤول لـ $name؟';
+  }
+
+  @override
+  String adminAccessRevoked(String name) {
+    return 'تم إبطال وصول المسؤول لـ $name';
+  }
+
+  @override
+  String inviteDeleted(String name) {
+    return 'تم حذف دعوة $name';
   }
 }

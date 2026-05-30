@@ -29,7 +29,7 @@ class CategoryTileDevWidget extends StatelessWidget {
           ),
         ],
       ),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 12),
       padding: const EdgeInsets.all(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -373,7 +373,7 @@ class _BookingInfoState extends State<BookingInfo> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
@@ -464,7 +464,7 @@ class _BookingInfoState extends State<BookingInfo> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);

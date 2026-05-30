@@ -179,7 +179,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -202,7 +202,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                             horizontal: 8,
                             vertical: 4,
                           ),
-                          margin: const EdgeInsets.only(right: 8),
+                          margin: const EdgeInsetsDirectional.only(end: 8),
                           decoration: BoxDecoration(
                             color: AppColors.secondary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),

@@ -242,7 +242,7 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
                   if (showSelectAll && onSelectAll != null)
                     TextButton(
                       onPressed: enabled ? onSelectAll : null,
-                      child: const Text('Select All', style: TextStyle(fontSize: 12)),
+                      child: Text(AppLocalizations.of(context)?.selectAll ?? 'Select All', style: const TextStyle(fontSize: 12)),
                     ),
                 ],
               ),

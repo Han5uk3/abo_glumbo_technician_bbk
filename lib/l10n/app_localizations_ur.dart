@@ -4925,7 +4925,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get customDateRange => 'حسب ضرورت تاریخ کا انتخاب';
 
   @override
-  String get allTime => 'All Time';
+  String get allTime => 'ہر وقت';
 
   @override
   String get thisMonth => 'اس مہینے';
@@ -4944,5 +4944,111 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String errorClearingWallet(String error) {
     return 'والٹ صاف کرنے میں خرابی: $error';
+  }
+
+  @override
+  String get bookingDate => 'بکنگ کی تاریخ';
+
+  @override
+  String get yourAccountIsBeingVerified =>
+      'آپ کا اکاؤنٹ ایڈمن کے ذریعے تصدیق ہو رہا ہے۔ براہ کرم بعد میں دوبارہ چیک کریں۔';
+
+  @override
+  String get aboGlumboWorker => 'ابو گلمبو ٹیکنیشن';
+
+  @override
+  String get workerCannotBeAssignedMultipleTimes =>
+      'ایک ہی ٹیکنیشن کو ایک ہی وقت میں ایک سے زیادہ بکنگ پر تفویض نہیں کیا جا سکتا۔ براہ کرم مختلف وقت یا دوسرا ٹیکنیشن منتخب کریں۔';
+
+  @override
+  String get unknownWorker => 'نامعلوم ٹیکنیشن';
+
+  @override
+  String get workerCancelled => 'بکنگ ٹیکنیشن کے ذریعے منسوخ کی گئی';
+
+  @override
+  String get cancelledByWorker => 'ٹیکنیشن کے ذریعے منسوخ';
+
+  @override
+  String get workerPreviouslyCancelled => 'ٹیکنیشن نے پہلے منسوخ کیا';
+
+  @override
+  String get workerCancelledAtTime =>
+      'اس ٹیکنیشن نے ایک ہی وقت میں پہلے بکنگ منسوخ کی تھی۔ بہتر قابل اعتمادی کے لیے کسی اور ٹیکنیشن کو تفویض کرنے کی سفارش کی جاتی ہے۔';
+
+  @override
+  String get workerRestrictedTitle => 'ٹیکنیشن پابند';
+
+  @override
+  String get cannotAssignCancelledWorker =>
+      'ایسے ٹیکنیشن کو تفویض نہیں کیا جا سکتا جس نے پہلے منسوخ کیا ہو';
+
+  @override
+  String get workerCancelledRestrictionMessage =>
+      'اس ٹیکنیشن نے پہلے بکنگ منسوخ کی ہے اور اب نئی تفویض سے محدود ہے۔ براہ کرم کوئی اور ٹیکنیشن منتخب کریں۔';
+
+  @override
+  String get managefaqs => 'اکثر پوچھے گئے سوالات کا انتظام';
+
+  @override
+  String get manageWorkers => 'ٹیکنیشنز کا انتظام';
+
+  @override
+  String get noWorkersMatchYourFilters =>
+      'آپ کی تلاش کے معیار سے کوئی ٹیکنیشن مطابقت نہیں رکھتا';
+
+  @override
+  String get workerInformation => 'ٹیکنیشن کی معلومات';
+
+  @override
+  String get loadingWorkers => 'ٹیکنیشنز لوڈ ہو رہے ہیں...';
+
+  @override
+  String get serviceDeletedSuccessfully => 'سروس کامیابی سے حذف ہو گئی';
+
+  @override
+  String get netTechnicianror => 'ٹیکنیشنز لوڈ کرتے وقت خرابی پیش آئی';
+
+  @override
+  String get urdu => 'اردو';
+
+  @override
+  String errorOccurred(String error) {
+    return 'خرابی: $error';
+  }
+
+  @override
+  String cannotOpenFile(String path) {
+    return 'فائل نہیں کھولی جا سکی: $path';
+  }
+
+  @override
+  String failedToSendMessage(String error) {
+    return 'پیغام بھیجنے میں ناکام: $error';
+  }
+
+  @override
+  String failedToRetryMessage(String error) {
+    return 'پیغام دوبارہ بھیجنے میں ناکام: $error';
+  }
+
+  @override
+  String errorFetchingLocation(String error) {
+    return 'مقام لانے میں خرابی: $error';
+  }
+
+  @override
+  String confirmRemoveAdmin(String name) {
+    return 'کیا آپ واقعی $name کی ایڈمن رسائی ختم کرنا چاہتے ہیں؟';
+  }
+
+  @override
+  String adminAccessRevoked(String name) {
+    return '$name کی ایڈمن رسائی منسوخ کر دی گئی';
+  }
+
+  @override
+  String inviteDeleted(String name) {
+    return '$name کی دعوت حذف کر دی گئی';
   }
 }

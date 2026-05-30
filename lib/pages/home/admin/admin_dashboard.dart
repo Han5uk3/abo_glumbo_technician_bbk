@@ -36,10 +36,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             return Center(child: Loader(color: AppColors.primary));
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)?.errorOccurred(snapshot.error.toString()) ?? 'Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData) {
-            return const Center(child: Text('No data available'));
+            return Center(child: Text(AppLocalizations.of(context)?.noDataAvailable ?? 'No data available'));
           }
 
           final data = snapshot.data!;

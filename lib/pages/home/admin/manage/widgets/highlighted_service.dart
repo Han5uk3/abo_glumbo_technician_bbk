@@ -91,9 +91,7 @@ class HighlightedServiceWidget extends StatelessWidget {
                       return Container(
                         height: 110,
                         width: 140,
-                        margin: isRtlLanguage
-                            ? const EdgeInsets.only(left: 10)
-                            : const EdgeInsets.only(right: 10),
+                        margin: const EdgeInsetsDirectional.only(end: 10),
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
@@ -152,9 +150,7 @@ class HighlightedServiceWidget extends StatelessWidget {
       height: 127,
       width: 127,
       alignment: Alignment.center,
-      margin: isRtlLanguage
-          ? const EdgeInsets.only(left: 13)
-          : const EdgeInsets.only(right: 13),
+      margin: const EdgeInsetsDirectional.only(end: 13),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(4),
@@ -169,9 +165,7 @@ class HighlightedServiceWidget extends StatelessWidget {
       height: 127,
       width: 127,
       alignment: Alignment.center,
-      margin: isRtlLanguage
-          ? const EdgeInsets.only(left: 13)
-          : const EdgeInsets.only(right: 13),
+      margin: const EdgeInsetsDirectional.only(end: 13),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(4),

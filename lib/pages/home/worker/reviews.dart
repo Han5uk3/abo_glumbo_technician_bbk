@@ -264,7 +264,7 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
           iconData = Icons.star_border_rounded;
         }
         return Padding(
-          padding: const EdgeInsets.only(right: 3),
+          padding: const EdgeInsetsDirectional.only(end: 3),
           child: Icon(
             iconData,
             size: 24,
@@ -324,7 +324,7 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       widthFactor: percentage,
                       child: Container(
                         decoration: BoxDecoration(

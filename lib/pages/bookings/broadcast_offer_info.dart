@@ -86,7 +86,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -167,7 +167,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -4275,15 +4275,15 @@ exports.autoAssignTechnician = onDocumentWritten(
         }
 
         const techData = doc.data();
-        const techLoc = techData.liveLocation || techData.location;
+        const techLoc = techData.last_known_location || techData.liveLocation || techData.location;
 
         if (!techLoc) {
           logger.info(`[${bookingId}] Technician ${techId} has no location data. Skipping.`);
           continue;
         }
 
-        const techLat = parseFloat(techLoc.latitude || techLoc.lat);
-        const techLon = parseFloat(techLoc.longitude || techLoc.lon);
+        const techLat = parseFloat(techLoc.latitude || techLoc.lat || techLoc._latitude);
+        const techLon = parseFloat(techLoc.longitude || techLoc.lon || techLoc._longitude);
 
         if (isNaN(techLat) || isNaN(techLon)) {
           logger.info(`[${bookingId}] Technician ${techId} has invalid coordinates. Lat=${techLat}, Lon=${techLon}`);

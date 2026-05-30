@@ -128,7 +128,7 @@ class _SignupState extends State<Signup> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error fetching location: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorFetchingLocation(e.toString()) ?? 'Error fetching location: $e')));
       }
     }
   }
@@ -523,7 +523,7 @@ class _SignupState extends State<Signup> {
         Navigator.pop(context);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Registration failed: $e')));
+        ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)?.registrationFailed} ${e.toString()}' ?? 'Registration failed: $e')));
       }
     }
   }

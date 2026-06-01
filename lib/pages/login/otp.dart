@@ -12,6 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pinput/pinput.dart';
 
 class OtpPage extends StatefulWidget {
   final String? phoneNumber;
@@ -39,14 +40,8 @@ class _OtpPageState extends State<OtpPage> {
   Timer? _timer;
   Timer? _smsListeningTimer;
   final _formKey = GlobalKey<FormState>();
-  // List of OTP controllers for 6 digits
-  final List<TextEditingController> _otpControllers = List.generate(
-    6,
-    (index) => TextEditingController(),
-  );
-
-  // List of focus nodes for each OTP field
-  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+  final TextEditingController _otpController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   String? _verificationId;
   int? _resendToken;
@@ -63,9 +58,7 @@ class _OtpPageState extends State<OtpPage> {
   }
 
   // Get the complete OTP from all controllers
-  String get _fullOtp {
-    return _otpControllers.map((controller) => controller.text).join();
-  }
+  String get _fullOtp => _otpController.text;
 
   int get _remainingTime => resendSeconds;
   String get _formattedTime {
@@ -124,9 +117,7 @@ class _OtpPageState extends State<OtpPage> {
               _resendToken = resendToken;
 
               // Clear all OTP fields when resending
-              for (var controller in _otpControllers) {
-                controller.clear();
-              }
+              _otpController.clear();
             });
 
             ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +230,10 @@ class _OtpPageState extends State<OtpPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.failedResendOtp ?? 'Failed to resend OTP. Please try again.'),
+            content: Text(
+              AppLocalizations.of(context)?.failedResendOtp ??
+                  'Failed to resend OTP. Please try again.',
+            ),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
@@ -374,7 +368,10 @@ class _OtpPageState extends State<OtpPage> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)?.verificationIdNotFound ?? 'Verification ID not found. Please try again.'),
+          content: Text(
+            AppLocalizations.of(context)?.verificationIdNotFound ??
+                'Verification ID not found. Please try again.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -479,11 +476,9 @@ class _OtpPageState extends State<OtpPage> {
         );
 
         // Clear all OTP fields on error
-        for (var controller in _otpControllers) {
-          controller.clear();
-        }
+        _otpController.clear();
         // Focus on first field
-        _focusNodes[0].requestFocus();
+        _focusNode.requestFocus();
       }
     }
   }
@@ -522,11 +517,7 @@ class _OtpPageState extends State<OtpPage> {
       );
 
       if (smsCode != null && smsCode.isNotEmpty && mounted) {
-        // Split the SMS code into individual digits and fill the boxes
-        final List<String> digits = smsCode.split('');
-        for (int i = 0; i < digits.length && i < 6; i++) {
-          _otpControllers[i].text = digits[i];
-        }
+        _otpController.text = smsCode;
 
         // Clear the form to reset validation
         _formKey.currentState?.reset();
@@ -560,66 +551,9 @@ class _OtpPageState extends State<OtpPage> {
     _timer?.cancel();
     _smsListeningTimer?.cancel();
     _smsAutofillService.cancelListening();
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
+    _otpController.dispose();
+    _focusNode.dispose();
     super.dispose();
-  }
-
-  // Widget for individual OTP input box
-  Widget _buildOtpTextField(int index) {
-    return SizedBox(
-      width: 45,
-      height: 60,
-      child: TextFormField(
-        controller: _otpControllers[index],
-        focusNode: _focusNodes[index],
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        maxLength: 1,
-        style: GoogleFonts.dmSans(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-        decoration: InputDecoration(
-          counterText: '',
-          contentPadding: EdgeInsets.zero,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.secondary, width: 2),
-          ),
-          fillColor: Colors.white,
-          filled: true,
-        ),
-        onChanged: (value) {
-          if (value.isNotEmpty && index < 5) {
-            // Move to next field
-            _focusNodes[index + 1].requestFocus();
-          } else if (value.isEmpty && index > 0) {
-            // Move to previous field on backspace
-            _focusNodes[index - 1].requestFocus();
-          }
-
-          // Auto-verify when all fields are filled
-          if (_fullOtp.length == 6) {
-            FocusScope.of(context).unfocus();
-            verifyOtp();
-          }
-        },
-      ),
-    );
   }
 
   @override
@@ -697,11 +631,50 @@ class _OtpPageState extends State<OtpPage> {
                         key: _formKey,
                         child: Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: List.generate(
-                                6,
-                                (index) => _buildOtpTextField(index),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Pinput(
+                                length: 6,
+                                controller: _otpController,
+                                focusNode: _focusNode,
+                                defaultPinTheme: PinTheme(
+                                  width: 45,
+                                  height: 60,
+                                  textStyle: GoogleFonts.dmSans(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                                focusedPinTheme: PinTheme(
+                                  width: 45,
+                                  height: 60,
+                                  textStyle: GoogleFonts.dmSans(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.secondary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                                onCompleted: (pin) {
+                                  FocusScope.of(context).unfocus();
+                                  verifyOtp();
+                                },
                               ),
                             ),
                             if (_isSmsAutofillListening)

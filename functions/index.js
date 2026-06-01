@@ -3,7 +3,7 @@ const {
   onDocumentWritten,
 } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onValueCreated } = require("firebase-functions/v2/database");
 const { logger } = require("firebase-functions/v2");
@@ -39,7 +39,7 @@ async function sendAndStoreNotification({
   let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
     .where("titleEn", "==", titleEn)
     .where("bodyEn", "==", bodyEn);
-    
+
   if (requestId) {
     query = query.where("data.requestId", "==", requestId);
   }
@@ -4060,8 +4060,8 @@ function isPointInPolygon(lat, lon, polygon) {
     const yj = parseFloat(polygon[j].lng || polygon[j].lon || polygon[j].longitude);
 
     const intersect =
-        ((yi > lon) !== (yj > lon)) &&
-        (lat < (xj - xi) * (lon - yi) / (yj - yi) + xi);
+      ((yi > lon) !== (yj > lon)) &&
+      (lat < (xj - xi) * (lon - yi) / (yj - yi) + xi);
 
     if (intersect) inside = !inside;
     j = i;
@@ -4084,416 +4084,6 @@ function isAddressInServiceZones(lat, lon, serviceLocations) {
   }
   return false;
 }
-
-/**
- * Automatically assigns technicians to a new booking based on proximity and service role.
- * Progressively expands search radius (5, 10, 20, 30, 40 km) every 90 seconds.
- */
-exports.autoAssignTechnician = onDocumentWritten(
-  {
-    document: "bookings/{bookingId}",
-    timeoutSeconds: 540,
-    memory: "256MiB",
-    region: "asia-southeast1",
-  },
-  async (event) => {
-    const change = event.data;
-    if (!change) return null;
-
-    const booking = change.after.data();
-    const oldBooking = change.before.exists ? change.before.data() : null;
-    const bookingId = event.params.bookingId;
-
-    if (!booking) return null; // Deletion
-
-    // 1. Initial validation
-    if (booking.bookingStatusCode !== "P") {
-      return null;
-    }
-
-    if (booking.bookingStatusCode !== "P") {
-      return null;
-    }
-
-    // 2. Prevent redundant triggers and infinite loops
-    // If it's already in searching state, don't start a new cycle.
-    if (booking.autoAssignmentStatus === "searching") {
-      return null;
-    }
-
-    const isNew = !change.before.exists;
-    const isReassigned = change.before.exists && oldBooking?.agent && !booking.agent;
-    const isReady = booking.autoAssignmentStatus === "ready_to_assign";
-
-    // If it's a new booking, check if it has a scheduled time in the future
-    if (isNew && booking.assignmentScheduledTime) {
-      if (Date.now() < booking.assignmentScheduledTime.toDate().getTime()) {
-        logger.info(`[${bookingId}] New booking, but assignment scheduled for later. Ignoring for now.`);
-        return null;
-      }
-    }
-
-    if (!isNew && !isReassigned && !isReady) {
-      // Avoid triggers for other field updates if it's already an empty P
-      if (change.before.exists && oldBooking?.bookingStatusCode === "P" && !oldBooking?.agent && !booking.agent) return null;
-    }
-
-    logger.info(`[${bookingId}] Function triggered. isNew: ${isNew}, isReassigned: ${isReassigned}`);
-
-    // Use a transaction to perform a check-and-set "lock" to prevent race conditions
-    let shouldContinue = false;
-    try {
-      await db.runTransaction(async (t) => {
-        const doc = await t.get(db.collection("bookings").doc(bookingId));
-        if (!doc.exists) return;
-        const data = doc.data();
-
-        // If it's already being handled by another instance, bail out
-        if (data.autoAssignmentStatus === "searching") {
-          return;
-        }
-
-        // Lock it
-        t.update(db.collection("bookings").doc(bookingId), {
-          autoAssignmentStatus: "searching",
-          updatedAt: FieldValue.serverTimestamp()
-        });
-        shouldContinue = true;
-      });
-    } catch (e) {
-      logger.error(`[${bookingId}] Transaction lock failed:`, e);
-      return null;
-    }
-
-    if (!shouldContinue) {
-      logger.info(`[${bookingId}] Trigger ignored. Already being processed or document missing.`);
-      return null;
-    }
-
-    logger.info(`[${bookingId}] Lock acquired. Starting assignment cycle. isNew: ${isNew}, isReassigned: ${isReassigned}`);
-
-    const addresses = booking.customer?.addresses || [];
-    const selectedAddress = addresses.find(a => a.isSelected === true) || (addresses.length > 0 ? addresses[0] : null);
-
-    // Support multiple coordinate field names and handle potential string values
-    const custLat = parseFloat(selectedAddress?.lat || booking.location?.lat || booking.lat || booking.latitude);
-    const custLon = parseFloat(selectedAddress?.lon || booking.location?.lon || booking.lon || booking.longitude);
-
-    const serviceCategoryId = booking.service?.category;
-    const cancelledWorkerUids = new Set(booking.cancelledWorkerUids || []);
-
-    logger.info(`[${bookingId}] Triggered. isOnHour=${booking.isOnHour}, Lat=${custLat}, Lon=${custLon}, Category=${serviceCategoryId}`);
-
-    if (isNaN(custLat) || isNaN(custLon)) {
-      logger.error(`[${bookingId}] Customer coordinates missing or invalid. Lat=${custLat}, Lon=${custLon}`);
-      await db.collection("bookings").doc(bookingId).update({
-        autoAssignmentStatus: "technicianNotFound" // Fallback status
-      });
-      return null;
-    }
-
-    if (!serviceCategoryId) {
-      logger.error(`[${bookingId}] Service category ID is missing.`);
-      await db.collection("bookings").doc(bookingId).update({
-        autoAssignmentStatus: "technicianNotFound",
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      return null;
-    }
-
-    // Fetch service locations/zones for this service
-    let serviceLocations = [];
-    const serviceId = booking.service?.id;
-    if (serviceId) {
-      try {
-        const serviceLocationsQuery = await db.collection("locations")
-          .where("service_id", "==", serviceId)
-          .get();
-        if (!serviceLocationsQuery.empty) {
-          const data = serviceLocationsQuery.docs[0].data();
-          serviceLocations = data.locations || [];
-        }
-      } catch (e) {
-        logger.error(`[${bookingId}] Error fetching service locations:`, e);
-      }
-    }
-
-    const radii = [5, 10, 20, 30, 40];
-    const notifiedTechnicians = new Set();
-
-    for (let i = 0; i < radii.length; i++) {
-      const radius = radii[i];
-      logger.info(`[${bookingId}] Iteration ${i + 1}: Searching within ${radius}km...`);
-
-      // Verify booking is still eligible before each expansion
-      const currentSnap = await db.collection("bookings").doc(bookingId).get();
-      if (!currentSnap.exists) {
-        logger.info(`[${bookingId}] Booking deleted. Stopping loop.`);
-        return null;
-      }
-      const currentBooking = currentSnap.data();
-      const hasAgent = currentBooking.agent && currentBooking.agent.uid;
-
-      if (currentBooking.bookingStatusCode !== "P" || hasAgent) {
-        logger.info(`[${bookingId}] Stopping loop. Status=${currentBooking.bookingStatusCode}, HasAgent=${!!hasAgent}`);
-        return null;
-      }
-
-      // Fetch potential technicians
-      logger.info(`[${bookingId}] Searching for technicians. Category required: ${serviceCategoryId}`);
-
-      const techQuery = await db.collection("users")
-        .where("isOnline", "==", true)
-        .where("isVerified", "==", true)
-        .get();
-
-      const candidateDocs = techQuery.docs.filter(doc => {
-        const d = doc.data();
-        const hasRole = d.jobRoles && d.jobRoles.includes(serviceCategoryId);
-        const notAdmin = d.isAdmin !== true;
-        const isTechRole = d.role === 'technician';
-
-        // Log details for Riyadh technician to help debug matching issues
-        if (d.name && d.name.includes("Riyadh")) {
-          logger.info(`[${bookingId}] Debug Riyadh Tech ${doc.id}: hasRole=${hasRole}, notAdmin=${notAdmin}, role=${d.role}, isOnline=${d.isOnline}, isVerified=${d.isVerified}`);
-        }
-
-        // Must have the required job role and be a technician (either by role or not being admin)
-        return hasRole && (isTechRole || notAdmin);
-      });
-
-      logger.info(`[${bookingId}] Found ${candidateDocs.length} matching technicians after filtering roles/admin status.`);
-
-      const newOffers = [];
-      const offerPromises = [];
-
-      for (const doc of candidateDocs) {
-        const techId = doc.id;
-        if (notifiedTechnicians.has(techId) || cancelledWorkerUids.has(techId)) {
-          logger.info(`[${bookingId}] Skipping technician ${techId} (already notified or cancelled)`);
-          continue;
-        }
-
-        const techData = doc.data();
-        const techLoc = techData.last_known_location || techData.liveLocation || techData.location;
-
-        if (!techLoc) {
-          logger.info(`[${bookingId}] Technician ${techId} has no location data. Skipping.`);
-          continue;
-        }
-
-        const techLat = parseFloat(techLoc.latitude || techLoc.lat || techLoc._latitude);
-        const techLon = parseFloat(techLoc.longitude || techLoc.lon || techLoc._longitude);
-
-        if (isNaN(techLat) || isNaN(techLon)) {
-          logger.info(`[${bookingId}] Technician ${techId} has invalid coordinates. Lat=${techLat}, Lon=${techLon}`);
-          continue;
-        }
-
-        const distance = calculateDistance(custLat, custLon, techLat, techLon);
-        logger.info(`[${bookingId}] Tech ${techId} (${doc.data().name}) distance: ${distance.toFixed(2)}km. Target: ${radius}km`);
-
-        if (distance <= radius) {
-          // Check if technician is within the service zone set for the service
-          const isWithinZone = isAddressInServiceZones(techLat, techLon, serviceLocations);
-          if (!isWithinZone) {
-            logger.info(`[${bookingId}] Technician ${techId} is not within any service zone set for the service. Skipping.`);
-            continue;
-          }
-
-          const activeJobs = await db.collection("bookings")
-            .where("agent.uid", "==", techId)
-            .where("bookingStatusCode", "==", "A")
-            .limit(1)
-            .get();
-
-          if (activeJobs.empty) {
-            logger.info(`[${bookingId}] Adding technician ${techId} to offer list.`);
-            newOffers.push({ id: techId, fcmToken: techData.fcmToken, lanCode: techData.lanCode });
-            notifiedTechnicians.add(techId);
-          } else {
-            logger.info(`[${bookingId}] Technician ${techId} is busy with another booking. Skipping.`);
-          }
-        }
-      }
-
-      if (newOffers.length > 0) {
-        console.log(`[${bookingId}] Creating ${newOffers.length} offers for radius ${radius}km.`);
-        const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minute acceptance window
-
-        for (const tech of newOffers) {
-          const offerPayload = {
-            bookingId: bookingId,
-            technicianId: tech.id,
-            status: "pending",
-            radius: radius,
-            createdAt: FieldValue.serverTimestamp(),
-            expiresAt: expiresAt,
-            serviceName: booking.service?.name || "Service",
-            serviceNameAr: booking.service?.name_ar || booking.service?.name || "Service",
-            customerName: booking.customer?.name || "A customer",
-          };
-
-          offerPromises.push(db.collection("job_offers").add(offerPayload));
-        }
-        await Promise.all(offerPromises);
-      }
-
-      // Wait 90 seconds before expanding radius, unless it's the last step
-      if (i < radii.length - 1) {
-        console.log(`[${bookingId}] Waiting 90 seconds for next expansion...`);
-        await new Promise(resolve => setTimeout(resolve, 90 * 1000));
-      }
-    }
-
-    console.log(`[${bookingId}] Radius escalation reached limit (40km). Ending search.`);
-
-    if (notifiedTechnicians.size === 0) {
-      await db.collection("bookings").doc(bookingId).update({
-        autoAssignmentStatus: "technicianNotFound",
-        updatedAt: FieldValue.serverTimestamp()
-      });
-    } else {
-      // It reached the end of the loop, meaning either they rejected or ignored.
-      await db.collection("bookings").doc(bookingId).update({
-        autoAssignmentStatus: "timedOut",
-        updatedAt: FieldValue.serverTimestamp()
-      });
-    }
-    return null;
-  }
-);
-
-/**
- * Scheduled function that runs every 5 minutes.
- * Finds bookings that are within 3 hours of appointment time, 
- * off-hours, pending, and haven't been picked up by the assignment system yet.
- * It updates them to trigger the main autoAssignTechnician function.
- */
-exports.triggerScheduledAssignments = onSchedule("every 5 minutes", async (event) => {
-  const now = admin.firestore.Timestamp.now();
-  const snapshot = await db.collection("bookings")
-    .where("bookingStatusCode", "==", "P")
-    .where("assignmentScheduledTime", "<=", now)
-    .get();
-
-  const batch = db.batch();
-  let count = 0;
-
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    // If it hasn't been picked up yet (agent is null, status is not already searching or accepted)
-    if (data.autoAssignmentStatus !== "searching" && data.autoAssignmentStatus !== "ready_to_assign" && data.autoAssignmentStatus !== "accepted" && !data.agent) {
-      batch.update(doc.ref, { autoAssignmentStatus: "ready_to_assign", updatedAt: FieldValue.serverTimestamp() });
-      count++;
-    }
-  });
-
-  if (count > 0) {
-    await batch.commit();
-    logger.info(`Triggered scheduled assignment for ${count} bookings.`);
-  }
-});
-
-/**
- * Scheduled function that runs every minute.
- * Finds job offers that are pending and have passed their expiresAt timestamp.
- * Updates their status to 'declined' to ensure they are cleaned up even if the technician app is closed.
- */
-exports.expireJobOffers = onSchedule("every 1 minutes", async (event) => {
-  const now = admin.firestore.Timestamp.now();
-  
-  try {
-    const snapshot = await db.collection("job_offers")
-      .where("status", "==", "pending")
-      .where("expiresAt", "<=", now)
-      .get();
-
-    if (snapshot.empty) {
-      return null;
-    }
-
-    const batch = db.batch();
-    snapshot.forEach(doc => {
-      batch.update(doc.ref, {
-        status: "declined",
-        declinedAt: now,
-        updatedAt: now,
-        expiryReason: "timeout"
-      });
-    });
-
-    await batch.commit();
-    logger.info(`Expired ${snapshot.size} job offers.`);
-  } catch (e) {
-    logger.error("Error expiring job offers:", e);
-  }
-  return null;
-});
-
-exports.notifyTechnicianOnNewJobOffer = onDocumentCreated(
-  "job_offers/{offerId}",
-  async (event) => {
-    const snap = event.data;
-    if (!snap) return null;
-    const offer = snap.data();
-    const offerId = event.params.offerId;
-    const technicianId = offer.technicianId;
-
-    if (!technicianId) {
-      console.log(`[${offerId}] Missing technicianId in job_offer`);
-      return null;
-    }
-
-    try {
-      const techDoc = await admin.firestore().collection("users").doc(technicianId).get();
-      if (!techDoc.exists) {
-        console.log(`[${offerId}] Technician document not found: ${technicianId}`);
-        return null;
-      }
-      const techData = techDoc.data();
-
-      const serviceName = offer.serviceName || "Service";
-      const serviceNameAr = offer.serviceNameAr || serviceName;
-      const serviceNameUr = offer.serviceNameUr || serviceNameAr || serviceName;
-      const isRebook = offer.isRebook === true;
-
-      await sendAndStoreNotification({
-        targetRole: "technician",
-        targetId: technicianId,
-        titleEn: isRebook ? "New Rebooking Offer" : "New Job Offer!",
-        titleAr: isRebook ? "عرض إعادة حجز جديد" : "عرض عمل جديد!",
-        titleUr: isRebook ? "دوبارہ بکنگ کی نئی پیشکش" : "کام کا نیا موقع!",
-        bodyEn: isRebook 
-          ? "A customer has requested to rebook you for a service!"
-          : `A new service request for ${serviceName} is available nearby. Tap to view and accept.`,
-        bodyAr: isRebook
-          ? "لقد طلب عميل إعادة حجزك لخدمة!"
-          : `يوجد طلب خدمة جديد لـ ${serviceNameAr} متاح بالقرب منك. اضغط للعرض والقبول.`,
-        bodyUr: isRebook
-          ? "صارف نے آپ کو دوبارہ سروس کے لیے بک کرنے کی درخواست کی ہے!"
-          : `${serviceNameUr} کے لیے ایک نیا سروس کا موقع قریب ہی دستیاب ہے۔ دیکھنے اور قبول کرنے کے لیے ٹیپ کریں۔`,
-        data: {
-          targetRole: "technician",
-          category: "job_offer",
-          requestId: offer.requestId || "",
-          bookingId: offer.bookingId || "",
-          offerId: offerId,
-          type: "job_offer",
-          serviceNameUr: serviceNameUr
-        },
-        fcmToken: techData.fcmToken,
-        lanCode: techData.lanCode || "en"
-      });
-
-      console.log(`[${offerId}] Job offer notification processed for technician ${technicianId}`);
-    } catch (e) {
-      console.error(`[${offerId}] Error processing job offer notification:`, e);
-    }
-    return null;
-  }
-);
-
 exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
   "users/{userId}",
   async (event) => {
@@ -4518,10 +4108,10 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
             ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
+              uid: doc.id,
+              token: data.fcmToken,
+              lanCode: data.lanCode || "en",
+            }
             : null;
         })
         .filter(Boolean);
@@ -4618,7 +4208,7 @@ exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
 
         // Calculate distance in kilometers
         const distance = calculateDistance(custLat, custLon, techLat, techLon);
-        
+
         // 50 meters is 0.05 km
         if (distance <= 0.05) {
           console.log(`[${bookingId}] Technician ${userId} is within ${distance * 1000} meters of service location! Sending nearby notification.`);
@@ -4724,3 +4314,777 @@ exports.notifyCustomerOnBroadcastAccepted = onDocumentUpdated(
     return null;
   }
 );
+
+// Helper for distance calculation
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Helper to safely extract customer coordinates from a request document
+function extractCustomerCoordinates(request) {
+  let lat = null;
+  let lon = null;
+
+  const selectedAddressId = request.selectedAddressId;
+  const addresses = request.customer?.addresses || [];
+
+  const parseVal = (val) => {
+    if (val === undefined || val === null) return NaN;
+    const num = parseFloat(val);
+    return isNaN(num) ? NaN : num;
+  };
+
+  // 1. First attempt: Find the address by selectedAddressId
+  if (selectedAddressId && addresses.length > 0) {
+    const selectedAddr = addresses.find(addr => addr.id === selectedAddressId);
+    if (selectedAddr) {
+      lat = parseVal(selectedAddr.lat !== undefined && selectedAddr.lat !== null ? selectedAddr.lat : selectedAddr.latitude);
+      lon = parseVal(selectedAddr.lon !== undefined && selectedAddr.lon !== null ? selectedAddr.lon : selectedAddr.longitude);
+    }
+  }
+
+  // 2. Second attempt: Find the address where isSelected is true
+  if ((lat === null || isNaN(lat) || lon === null || isNaN(lon)) && addresses.length > 0) {
+    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === 'true');
+    if (selectedAddr) {
+      lat = parseVal(selectedAddr.lat !== undefined && selectedAddr.lat !== null ? selectedAddr.lat : selectedAddr.latitude);
+      lon = parseVal(selectedAddr.lon !== undefined && selectedAddr.lon !== null ? selectedAddr.lon : selectedAddr.longitude);
+    }
+  }
+
+  // 3. Third attempt: Default to first address in the customer's list
+  if ((lat === null || isNaN(lat) || lon === null || isNaN(lon)) && addresses.length > 0) {
+    const firstAddr = addresses[0];
+    lat = parseVal(firstAddr.lat !== undefined && firstAddr.lat !== null ? firstAddr.lat : firstAddr.latitude);
+    lon = parseVal(firstAddr.lon !== undefined && firstAddr.lon !== null ? firstAddr.lon : firstAddr.longitude);
+  }
+
+  if (lat === null || isNaN(lat) || lon === null || isNaN(lon)) {
+    return null;
+  }
+  return { lat, lon };
+}
+
+// Helper to safely extract customer address from a request document
+function extractCustomerAddress(request) {
+  const selectedAddressId = request.selectedAddressId;
+  const addresses = request.customer?.addresses || [];
+
+  if (selectedAddressId && addresses.length > 0) {
+    const selectedAddr = addresses.find(addr => addr.id === selectedAddressId);
+    if (selectedAddr) return selectedAddr;
+  }
+
+  if (addresses.length > 0) {
+    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === 'true');
+    if (selectedAddr) return selectedAddr;
+  }
+
+  if (addresses.length > 0) {
+    return addresses[0];
+  }
+
+  return null;
+}
+
+// Helper to safely extract technician coordinates from a user document
+function extractTechnicianCoordinates(tech) {
+  const techLoc = tech.liveLocation || tech.lastKnownLocation || tech.last_known_location;
+  if (!techLoc) return null;
+
+  const parseVal = (val) => {
+    if (val === undefined || val === null) return NaN;
+    const num = parseFloat(val);
+    return isNaN(num) ? NaN : num;
+  };
+
+  const lat = parseVal(techLoc.latitude !== undefined && techLoc.latitude !== null ? techLoc.latitude : techLoc.lat);
+  const lon = parseVal(techLoc.longitude !== undefined && techLoc.longitude !== null ? techLoc.longitude : techLoc.lon);
+
+  if (isNaN(lat) || isNaN(lon)) {
+    return null;
+  }
+  return { lat, lon };
+}
+
+// 1. Trigger when a manual booking request is created
+exports.onBookingRequestCreated = onDocumentCreated(
+  "booking_request/{requestId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) {
+      console.log("No data associated with the event");
+      return null;
+    }
+
+    const request = snap.data();
+    const requestId = event.params.requestId;
+
+    const coords = extractCustomerCoordinates(request);
+    if (!coords) {
+      console.error(`[Booking Request ${requestId}] Missing or invalid customer coordinates`);
+      return null;
+    }
+    const custLat = coords.lat;
+    const custLon = coords.lon;
+    const customerAddress = extractCustomerAddress(request);
+
+    try {
+      // Fetch all online verified technicians (role is technician)
+      const techsSnapshot = await db.collection("users")
+        .where("role", "==", "technician")
+        .where("isOnline", "==", true)
+        .where("isVerified", "==", true)
+        .get();
+
+      const eligibleTechs = [];
+
+      for (const doc of techsSnapshot.docs) {
+        const tech = doc.data();
+        const techUid = doc.id;
+
+        // 1. Proximity check (60km)
+        const techCoords = extractTechnicianCoordinates(tech);
+        if (!techCoords) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} has no valid coordinates`);
+          continue;
+        }
+        const techLat = techCoords.lat;
+        const techLon = techCoords.lon;
+
+        const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
+        if (distance > 60.0) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} too far (${distance.toFixed(1)} km)`);
+          continue;
+        }
+
+        // 2. Active started booking check
+        const activeBookings = await db.collection("bookings")
+          .where("agent.uid", "==", techUid)
+          .where("bookingStatusCode", "==", "A")
+          .get();
+
+        let hasStartedJob = false;
+        for (const bookingDoc of activeBookings.docs) {
+          const bData = bookingDoc.data();
+          if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
+            hasStartedJob = true;
+            break;
+          }
+        }
+
+        if (hasStartedJob) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} has an active started job`);
+          continue;
+        }
+
+        eligibleTechs.push({ uid: techUid, data: tech, distance });
+      }
+
+      console.log(`[Booking Request ${requestId}] Found ${eligibleTechs.length} eligible technicians`);
+
+      if (eligibleTechs.length === 0) {
+        return null;
+      }
+
+      const batch = db.batch();
+      const expiresAtDate = new Date(Date.now() + 120 * 1000);
+      const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
+
+      // Create a job offer for each eligible technician
+      for (const tech of eligibleTechs) {
+        const offerId = db.collection("job_offers").doc().id;
+        const offerRef = db.collection("job_offers").doc(offerId);
+
+        batch.set(offerRef, {
+          id: offerId,
+          bookingId: requestId, // Document ID and booking ID are the same
+          requestId: requestId,
+          technicianId: tech.uid,
+          status: "pending",
+          createdAt: FieldValue.serverTimestamp(),
+          expiresAt: expiresAtTimestamp,
+          customerName: request.customer?.name || "Customer",
+          serviceLocation: {
+            fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+            streetName: customerAddress?.streetName || "",
+            lat: custLat,
+            lon: custLon
+          },
+          serviceName: request.service?.name || "Service",
+          serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+          serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+          notes: request.notes || "",
+          issueImage: request.issueImage || "",
+          issueVideo: request.issueVideo || "",
+          bookingDateTime: request.bookingDateTime,
+          isRebook: false,
+          customerId: request.customer?.uid || ""
+        });
+
+        // Send push notification
+        if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+          const lan = tech.data.lanCode || "en";
+          await sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: tech.uid,
+            titleEn: "New Manual Job Offer",
+            titleAr: "عرض حجز يدوي جديد",
+            titleUr: "بکنگ کی نئی دستی پیشکش",
+            bodyEn: "A new job is available nearby. Tap to accept within 120 seconds.",
+            bodyAr: "هناك طلب عمل جديد متاح بالقرب منك. اضغط للقبول خلال 120 ثانية.",
+            bodyUr: "قریب ہی ایک نیا کام دستیاب ہے۔ 120 سیکنڈ کے اندر قبول کرنے کے لیے ٹیپ کریں۔",
+            data: {
+              bookingId: requestId,
+              requestId: requestId,
+              offerId: offerId,
+              targetRole: "technician",
+              category: "job_offer",
+              type: "job_offer"
+            },
+            fcmToken: tech.data.fcmToken,
+            lanCode: lan
+          });
+        }
+      }
+
+      await batch.commit();
+      console.log(`[Booking Request ${requestId}] Broadcast job offers created for ${eligibleTechs.length} technicians`);
+
+    } catch (e) {
+      console.error(`Error processing booking request ${requestId}:`, e);
+    }
+
+    return null;
+  }
+);
+
+// 2. Trigger when job offer status is updated
+exports.onManualJobOfferUpdated = onDocumentUpdated(
+  "job_offers/{offerId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+
+    if (!afterData) return null;
+
+    const offerId = event.params.offerId;
+    const bookingId = afterData.bookingId;
+
+    if (!bookingId) return null;
+
+    // Check if status changed to accepted_by_technician
+    if (beforeData.status !== "accepted_by_technician" && afterData.status === "accepted_by_technician") {
+      const techId = afterData.technicianId;
+
+      try {
+        const requestRef = db.collection("booking_request").doc(bookingId);
+        const requestSnap = await requestRef.get();
+
+        if (requestSnap.exists) {
+          const requestData = requestSnap.data();
+          
+          // Check if request is still active/searching
+          if (requestData.status === "searching") {
+            const techSnap = await db.collection("users").doc(techId).get();
+            
+            if (techSnap.exists) {
+              const techData = techSnap.data();
+
+              // Fetch all bookings for this technician to count ratings and completed jobs safely without indexes
+              const bookingsSnapshot = await db.collection("bookings")
+                .where("agent.uid", "==", techId)
+                .get();
+
+              let completedJobsCount = 0;
+              let totalRating = 0;
+              let ratingCount = 0;
+
+              bookingsSnapshot.forEach((doc) => {
+                const b = doc.data();
+                if (b.bookingStatusCode === "C" && b.paymentCompleted === true) {
+                  completedJobsCount++;
+                }
+                if (b.review && b.review.rating != null) {
+                  totalRating += b.review.rating;
+                  ratingCount++;
+                }
+              });
+
+              const averageRating = ratingCount > 0 ? parseFloat((totalRating / ratingCount).toFixed(2)) : (techData.rating || 0.0);
+
+              const techCoords = extractTechnicianCoordinates(techData);
+              const custCoords = extractCustomerCoordinates(requestData);
+              let distance = null;
+              if (techCoords && custCoords) {
+                distance = parseFloat(calculateDistanceKm(techCoords.lat, techCoords.lon, custCoords.lat, custCoords.lon).toFixed(1));
+              }
+
+              const acceptedTechObject = {
+                uid: techId,
+                name: techData.name || "Technician",
+                phone: techData.phone || "",
+                profileUrl: techData.profileUrl || "",
+                rating: averageRating,
+                completedJobs: completedJobsCount,
+                distance: distance,
+                acceptedAt: admin.firestore.Timestamp.now()
+              };
+
+              // Append to acceptedTechnicians
+              await requestRef.update({
+                acceptedTechnicians: FieldValue.arrayUnion(acceptedTechObject),
+                updatedAt: FieldValue.serverTimestamp()
+              });
+
+              // Notify the customer
+              const customerId = requestData.customer?.uid;
+              if (customerId) {
+                const custSnap = await db.collection("customers").doc(customerId).get();
+                if (custSnap.exists) {
+                  const custData = custSnap.data();
+                  if (custData.fcmToken && custData.fcmToken.trim() !== "") {
+                    await sendAndStoreNotification({
+                      targetRole: "customer",
+                      targetId: customerId,
+                      titleEn: "Technician Accepted!",
+                      titleAr: "قبل الفني العرض!",
+                      titleUr: "ٹیکنیشن نے قبول کر لیا!",
+                      bodyEn: `${techData.name || "A technician"} has accepted your request. Review and select them!`,
+                      bodyAr: `لقد قبل الفني ${techData.name || "فني"} طلبك. اضغط للمراجعة والاختيار!`,
+                      bodyUr: `ٹیکنیشن ${techData.name || "فنی"} نے آپ کی درخواست قبول کر لی ہے۔ جائزہ لیں اور منتخب کریں!`,
+                      data: {
+                        bookingId: bookingId,
+                        category: "manual_accepted",
+                        type: "manual_accepted"
+                      },
+                      fcmToken: custData.fcmToken,
+                      lanCode: custData.lanCode || "en"
+                    });
+                  }
+                }
+              }
+
+              console.log(`[Offer ${offerId}] Technician ${techId} added to booking_request ${bookingId}`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Error handling manual job offer acceptance for offer ${offerId}:`, e);
+      }
+    }
+
+    // Check if status changed to declined
+    if (beforeData.status !== "declined" && afterData.status === "declined") {
+      const techId = afterData.technicianId;
+      try {
+        const requestRef = db.collection("booking_request").doc(bookingId);
+        await requestRef.update({
+          rejectedTechnicians: FieldValue.arrayUnion(techId),
+          updatedAt: FieldValue.serverTimestamp()
+        });
+        console.log(`[Offer ${offerId}] Technician ${techId} declined and added to rejectedTechnicians list`);
+      } catch (e) {
+        console.error(`Error logging declination of offer ${offerId}:`, e);
+      }
+    }
+
+    return null;
+  }
+);
+
+// 3. Cron scheduled function for Auto-Assignment
+exports.processAutoAssignments = onSchedule(
+  "every 5 minutes",
+  async (event) => {
+    console.log("Processing scheduled auto-assignment requests...");
+    const now = new Date();
+    const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const threeHoursFromNowTimestamp = admin.firestore.Timestamp.fromDate(threeHoursFromNow);
+
+    try {
+      // Find pending auto-assignment requests safely and filter locally to avoid index requirements
+      const snapshot = await db.collection("auto-assignment_requests")
+        .where("status", "==", "P")
+        .get();
+
+      console.log(`Found ${snapshot.size} pending auto-assignment requests to check`);
+
+      for (const doc of snapshot.docs) {
+        const request = doc.data();
+        const requestId = doc.id;
+
+        // Filter locally in JS memory
+        if (request.type !== "late" || request.notificationSent !== false) {
+          continue;
+        }
+
+        if (request.bookingDateTime) {
+          const bookingDate = request.bookingDateTime.toDate();
+          if (bookingDate > threeHoursFromNow) {
+            continue; // Not within 3 hours yet
+          }
+        } else {
+          continue;
+        }
+
+        const coords = extractCustomerCoordinates(request);
+        if (!coords) continue;
+        const custLat = coords.lat;
+        const custLon = coords.lon;
+        const customerAddress = extractCustomerAddress(request);
+
+        // Query eligible technicians
+        const techsSnapshot = await db.collection("users")
+          .where("role", "==", "technician")
+          .where("isOnline", "==", true)
+          .where("isVerified", "==", true)
+          .get();
+
+        const eligibleTechs = [];
+
+        for (const techDoc of techsSnapshot.docs) {
+          const tech = techDoc.data();
+          const techUid = techDoc.id;
+
+          const techCoords = extractTechnicianCoordinates(tech);
+          if (!techCoords) continue;
+          const techLat = techCoords.lat;
+          const techLon = techCoords.lon;
+
+          const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
+          if (distance > 60.0) continue;
+
+          // Started work check
+          const activeBookings = await db.collection("bookings")
+            .where("agent.uid", "==", techUid)
+            .where("bookingStatusCode", "==", "A")
+            .get();
+
+          let hasStartedJob = false;
+          for (const bookingDoc of activeBookings.docs) {
+            const bData = bookingDoc.data();
+            if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
+              hasStartedJob = true;
+              break;
+            }
+          }
+
+          if (hasStartedJob) continue;
+
+          eligibleTechs.push({ uid: techUid, data: tech });
+        }
+
+        if (eligibleTechs.length === 0) {
+          console.log(`No technicians eligible for auto-assignment ${requestId} yet`);
+          continue;
+        }
+
+        const batch = db.batch();
+
+        for (const tech of eligibleTechs) {
+          const offerId = db.collection("job_offers").doc().id;
+          const offerRef = db.collection("job_offers").doc(offerId);
+
+          batch.set(offerRef, {
+            id: offerId,
+            bookingId: requestId,
+            technicianId: tech.uid,
+            status: "pending",
+            createdAt: FieldValue.serverTimestamp(),
+            expiresAt: request.bookingDateTime,
+            customerName: request.customer?.name || "Customer",
+            serviceLocation: {
+              fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+              streetName: customerAddress?.streetName || "",
+              lat: custLat,
+              lon: custLon
+            },
+            serviceName: request.service?.name || "Service",
+            serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+            serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+            notes: request.notes || "",
+            issueImage: request.issueImage || "",
+            issueVideo: request.issueVideo || "",
+            bookingDateTime: request.bookingDateTime,
+            isRebook: false,
+            customerId: request.customer?.uid || ""
+          });
+
+          // Push notifications
+          if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+            const lan = tech.data.lanCode || "en";
+            await sendAndStoreNotification({
+              targetRole: "technician",
+              targetId: tech.uid,
+              titleEn: "New Auto-Assignment Job Available",
+              titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
+              titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
+              bodyEn: "A new scheduled booking is available to accept.",
+              bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
+              bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
+              data: {
+                bookingId: requestId,
+                offerId: offerId,
+                targetRole: "technician",
+                category: "job_offer",
+                type: "job_offer"
+              },
+              fcmToken: tech.data.fcmToken,
+              lanCode: lan
+            });
+          }
+        }
+
+        // Mark notification as sent for this auto-assignment request
+        batch.update(db.collection("auto-assignment_requests").doc(requestId), {
+          notificationSent: true,
+          updatedAt: FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+        console.log(`[Auto-Assignment Late ${requestId}] Notifications sent to ${eligibleTechs.length} technicians`);
+      }
+    } catch (e) {
+      console.error("Error processing late auto assignments: ", e);
+    }
+    return null;
+  }
+);
+
+// 4. Trigger when auto-assignment request document is created
+exports.onAutoAssignmentRequestCreated = onDocumentCreated(
+  "auto-assignment_requests/{requestId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return null;
+
+    const request = snap.data();
+    const requestId = event.params.requestId;
+
+    // We only process 'instant' here. 'late' is handled by the scheduled cron job.
+    if (request.type !== "instant") {
+      console.log(`[Auto-Assignment ${requestId}] Request type is 'late', skipping immediate notification.`);
+      return null;
+    }
+
+    const coords = extractCustomerCoordinates(request);
+    if (!coords) {
+      console.error(`[Auto-Assignment ${requestId}] Invalid customer coordinates`);
+      return null;
+    }
+    const custLat = coords.lat;
+    const custLon = coords.lon;
+    const customerAddress = extractCustomerAddress(request);
+
+    try {
+      // Find eligible technicians
+      const techsSnapshot = await db.collection("users")
+        .where("role", "==", "technician")
+        .where("isOnline", "==", true)
+        .where("isVerified", "==", true)
+        .get();
+
+      const eligibleTechs = [];
+
+      for (const techDoc of techsSnapshot.docs) {
+        const tech = techDoc.data();
+        const techUid = techDoc.id;
+
+        const techCoords = extractTechnicianCoordinates(tech);
+        if (!techCoords) continue;
+        const techLat = techCoords.lat;
+        const techLon = techCoords.lon;
+
+        const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
+        if (distance > 60.0) continue;
+
+        // Active booking check
+        const activeBookings = await db.collection("bookings")
+          .where("agent.uid", "==", techUid)
+          .where("bookingStatusCode", "==", "A")
+          .get();
+
+        let hasStartedJob = false;
+        for (const bookingDoc of activeBookings.docs) {
+          const bData = bookingDoc.data();
+          if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
+            hasStartedJob = true;
+            break;
+          }
+        }
+
+        if (hasStartedJob) continue;
+
+        eligibleTechs.push({ uid: techUid, data: tech });
+      }
+
+      console.log(`[Auto-Assignment Instant ${requestId}] Found ${eligibleTechs.length} eligible technicians`);
+
+      if (eligibleTechs.length === 0) {
+        return null;
+      }
+
+      const batch = db.batch();
+
+      for (const tech of eligibleTechs) {
+        const offerId = db.collection("job_offers").doc().id;
+        const offerRef = db.collection("job_offers").doc(offerId);
+
+        batch.set(offerRef, {
+          id: offerId,
+          bookingId: requestId,
+          technicianId: tech.uid,
+          status: "pending",
+          createdAt: FieldValue.serverTimestamp(),
+          expiresAt: request.bookingDateTime,
+          customerName: request.customer?.name || "Customer",
+          serviceLocation: {
+            fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+            streetName: customerAddress?.streetName || "",
+            lat: custLat,
+            lon: custLon
+          },
+          serviceName: request.service?.name || "Service",
+          serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+          serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+          notes: request.notes || "",
+          issueImage: request.issueImage || "",
+          issueVideo: request.issueVideo || "",
+          bookingDateTime: request.bookingDateTime,
+          isRebook: false,
+          customerId: request.customer?.uid || ""
+        });
+
+        // Push notification
+        if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+          const lan = tech.data.lanCode || "en";
+          await sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: tech.uid,
+            titleEn: "New Auto-Assignment Job Available",
+            titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
+            titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
+            bodyEn: "A new scheduled booking is available to accept.",
+            bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
+            bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
+            data: {
+              bookingId: requestId,
+              offerId: offerId,
+              targetRole: "technician",
+              category: "job_offer",
+              type: "job_offer"
+            },
+            fcmToken: tech.data.fcmToken,
+            lanCode: lan
+          });
+        }
+      }
+
+      // Set notificationSent = true
+      batch.update(db.collection("auto-assignment_requests").doc(requestId), {
+        notificationSent: true,
+        updatedAt: FieldValue.serverTimestamp()
+      });
+
+      await batch.commit();
+      console.log(`[Auto-Assignment Instant ${requestId}] Offers and notifications sent to ${eligibleTechs.length} technicians`);
+
+    } catch (e) {
+      console.error(`Error processing instant auto-assignment ${requestId}:`, e);
+    }
+    return null;
+  }
+);
+
+// 5. Trigger when a booking is assigned to copy the agent info to auto-assignment requests
+exports.syncAgentToAutoAssignment = onDocumentUpdated(
+  "bookings/{bookingId}",
+  async (event) => {
+    const afterData = event.data.after.data();
+    const beforeData = event.data.before.data();
+    
+    if (!afterData) return null;
+    
+    const bookingId = event.params.bookingId;
+    
+    // Check if agent was added
+    if (afterData.agent && (!beforeData || !beforeData.agent)) {
+      try {
+        const autoReqRef = db.collection("auto-assignment_requests").doc(bookingId);
+        const autoReqSnap = await autoReqRef.get();
+        if (autoReqSnap.exists) {
+          await autoReqRef.update({
+            agent: afterData.agent,
+            status: "assigned",
+            updatedAt: FieldValue.serverTimestamp()
+          });
+          console.log(`[Sync Agent] Assigned agent ${afterData.agent.uid} synced to auto-assignment_requests ${bookingId}`);
+        }
+      } catch (e) {
+        console.error(`Error syncing agent to auto-assignment request ${bookingId}:`, e);
+      }
+    }
+    return null;
+  }
+);
+
+// 6. Trigger when a booking is created to clean up all pending/stale job offers for that booking
+exports.onBookingCreatedCleanupOffers = onDocumentCreated(
+  "bookings/{bookingId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return null;
+    const bookingId = event.params.bookingId;
+
+    try {
+      // Find all job offers matching this booking ID or request ID
+      const snapshot = await db.collection("job_offers")
+        .where("bookingId", "==", bookingId)
+        .get();
+
+      const batch = db.batch();
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log(`[Booking Created Cleanup] Deleted ${snapshot.size} job offers for booking ${bookingId}`);
+    } catch (e) {
+      console.error(`Error cleaning up job offers for booking ${bookingId}:`, e);
+    }
+    return null;
+  }
+);
+
+// 7. Trigger when a booking request is deleted to clean up all corresponding job offers
+exports.onBookingRequestDeletedCleanupOffers = onDocumentDeleted(
+  "booking_request/{requestId}",
+  async (event) => {
+    const requestId = event.params.requestId;
+
+    try {
+      const snapshot = await db.collection("job_offers")
+        .where("bookingId", "==", requestId)
+        .get();
+
+      const batch = db.batch();
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log(`[Booking Request Deleted Cleanup] Deleted ${snapshot.size} job offers for request ${requestId}`);
+    } catch (e) {
+      console.error(`Error cleaning up job offers for request ${requestId}:`, e);
+    }
+    return null;
+  }
+);
+
+

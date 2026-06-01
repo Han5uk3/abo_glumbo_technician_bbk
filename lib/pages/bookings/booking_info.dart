@@ -2427,18 +2427,19 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Confirmed / Assigned
-      if (widget.booking.assignedAt != null) {
+      final dateToUse = widget.booking.assignedAt ?? widget.booking.acceptedAt;
+      if (dateToUse != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.acceptedAt,
           'time': _formatDateLocalized(
-            widget.booking.assignedAt!.toDate(),
+            dateToUse.toDate(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
-          'date': widget.booking.assignedAt!.toDate(),
+          'date': dateToUse.toDate(),
         });
       }
 
@@ -4488,9 +4489,10 @@ class _BookingInfoState extends State<BookingInfo> {
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",
       );
     }
-    if (booking.acceptedAt != null && booking.bookingStatusCode == "A") {
+    final dateToUse = booking.assignedAt ?? booking.acceptedAt;
+    if (dateToUse != null && booking.bookingStatusCode == "A") {
       return _timestampText(
-        "${AppLocalizations.of(context)!.acceptedAt} : ${formatBookingDateTime(booking.acceptedAt!.toDate(), locale)}",
+        "${AppLocalizations.of(context)!.acceptedAt} : ${formatBookingDateTime(dateToUse.toDate(), locale)}",
       );
     }
     if (booking.completedAt != null &&

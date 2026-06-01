@@ -258,11 +258,14 @@ class BookingTrackerService {
         .get();
 
     if (docs.docs.isNotEmpty) {
-      final localizations = AppLocalizations.of(context);
-      throw Exception(
-        localizations?.youHaveAnActiveBookingAlready ??
-            'You have an active booking already',
-      );
+      final activeDocs = docs.docs.where((doc) => doc.id != bookingId).toList();
+      if (activeDocs.isNotEmpty) {
+        final localizations = AppLocalizations.of(context);
+        throw Exception(
+          localizations?.youHaveAnActiveBookingAlready ??
+              'You have an active booking already',
+        );
+      }
     }
 
     try {
@@ -676,11 +679,14 @@ class BookingTrackerService {
         .get();
 
     if (docs.docs.isNotEmpty) {
-      final localizations = AppLocalizations.of(context);
-      throw Exception(
-        localizations?.youHaveAnActiveBookingAlready ??
-            'You have an active booking already',
-      );
+      final activeDocs = docs.docs.where((doc) => doc.id != bookingId).toList();
+      if (activeDocs.isNotEmpty) {
+        final localizations = AppLocalizations.of(context);
+        throw Exception(
+          localizations?.youHaveAnActiveBookingAlready ??
+              'You have an active booking already',
+        );
+      }
     }
 
     try {

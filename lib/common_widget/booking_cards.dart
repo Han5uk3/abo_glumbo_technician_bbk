@@ -611,12 +611,14 @@ class BookingListTileWidget extends StatelessWidget {
           booking.createdAt!.toDate(),
           context,
         );
-      } else if (booking.bookingStatusCode == 'A' &&
-          booking.acceptedAt != null) {
-        text = LocalizationHelper().formatDateTimeCompact(
-          booking.acceptedAt!.toDate(),
-          context,
-        );
+      } else if (booking.bookingStatusCode == 'A') {
+        final dateToUse = booking.assignedAt ?? booking.acceptedAt;
+        if (dateToUse != null) {
+          text = LocalizationHelper().formatDateTimeCompact(
+            dateToUse.toDate(),
+            context,
+          );
+        }
       } else if (booking.bookingStatusCode == 'C' &&
           booking.completedAt != null) {
         text = LocalizationHelper().formatDateTimeCompact(

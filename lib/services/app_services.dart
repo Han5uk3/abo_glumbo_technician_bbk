@@ -2797,15 +2797,25 @@ class AppServices {
 
           if (bookingId != null) {
             final booking = await getBookingById(bookingId);
-            if (booking != null && (booking.bookingStatusCode == 'P' || booking.bookingStatusCode == 'A')) {
-              // If booking is 'A' (Assigned), it should only show for the assigned technician
-              if (booking.bookingStatusCode == 'A' && booking.agent?.uid != userId) {
-                return null;
-              }
+            if (booking != null) {
+              if (booking.bookingStatusCode == 'P' || booking.bookingStatusCode == 'A') {
+                // If booking is 'A' (Assigned), it should only show for the assigned technician
+                if (booking.bookingStatusCode == 'A' && booking.agent?.uid != userId) {
+                  return null;
+                }
 
+                return JobOfferContainer(
+                  offerId: doc.id,
+                  booking: booking,
+                  offerData: data,
+                );
+              }
+            } else if (requestId != null) {
+              // The booking document doesn't exist in bookings collection yet (Manual Booking Request).
+              // We render this request card using the offerData.
               return JobOfferContainer(
                 offerId: doc.id,
-                booking: booking,
+                requestId: requestId,
                 offerData: data,
               );
             }

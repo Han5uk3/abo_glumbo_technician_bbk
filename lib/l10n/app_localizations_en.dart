@@ -5052,4 +5052,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String inviteDeleted(String name) {
     return 'Invite deleted for $name';
   }
+
+  @override
+  String get biometricError => '❌ Biometric error';
+
+  @override
+  String get unknownError => 'Unknown error';
+
+  @override
+  String get errorDuringLogin => 'Error during login';
 }

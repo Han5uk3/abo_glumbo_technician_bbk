@@ -845,29 +845,40 @@ class _AgentInfoState extends State<AgentInfo> {
         context: context,
         builder: (context) {
           final controller = TextEditingController();
-          return AlertDialog(
-            title: Text(l10n.rejectionReason),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: "Enter reason for rejection",
-              ),
-              maxLines: 3,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (controller.text.trim().isNotEmpty) {
-                    Navigator.pop(context, controller.text.trim());
-                  }
-                },
-                child: Text(l10n.reject),
-              ),
-            ],
+          String? errorText;
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: Text(l10n.rejectionReason),
+                content: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: "Enter reason for rejection",
+                    errorText: errorText,
+                  ),
+                  maxLines: 3,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      final text = controller.text.trim();
+                      if (text.isEmpty) {
+                        setState(() {
+                          errorText = l10n.pleaseProvideARejectionReason;
+                        });
+                      } else {
+                        Navigator.pop(context, text);
+                      }
+                    },
+                    child: Text(l10n.reject),
+                  ),
+                ],
+              );
+            },
           );
         },
       );

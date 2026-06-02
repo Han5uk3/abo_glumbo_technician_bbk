@@ -791,6 +791,11 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
   }
 
   void _startCountdown() {
+    final status = widget.offer.offerData['status'] as String?;
+    if (status == 'accepted_by_technician') {
+      return; // No countdown if already accepted
+    }
+
     final expiresAt = widget.offer.offerData['expiresAt'] as Timestamp?;
     if (expiresAt == null) return;
 
@@ -1073,30 +1078,31 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: timerColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.timer_outlined, size: 14, color: timerColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        timerText,
-                        style: DMSansFont.textStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: timerColor,
+                if (data['status'] != 'accepted_by_technician')
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: timerColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.timer_outlined, size: 14, color: timerColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          timerText,
+                          style: DMSansFont.textStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: timerColor,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 12),

@@ -2332,7 +2332,6 @@ class AppServices {
         .where("bookingStatusCode", isEqualTo: "C")
         .where('warranty', isNull: false)
         .where("warranty.assignedTechnicianId", isEqualTo: uid)
-        .where("warranty.availability", isEqualTo: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -2346,6 +2345,12 @@ class AppServices {
                 return WarrantyModel();
               })
               .where((warranty) {
+                // Only include requested ('R') and confirmed/accepted ('S') claims
+                if (warranty.warrantyStatusCode != 'R' &&
+                    warranty.warrantyStatusCode != 'S') {
+                  return false;
+                }
+
                 // If rejectedTechnicians is null or empty, include the request
                 if (warranty.rejectedTechnicians == null ||
                     warranty.rejectedTechnicians!.isEmpty) {
@@ -2439,9 +2444,16 @@ class AppServices {
     final warrantyClaims = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'C')
         .where('paymentCompleted', isEqualTo: true)
-        .where('warranty.availability', isEqualTo: true)
         .snapshots()
-        .map((s) => s.docs.length);
+        .map((s) {
+          return s.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>?;
+            final warranty = data?['warranty'] as Map<String, dynamic>?;
+            if (warranty == null) return false;
+            final statusCode = warranty['warrantyStatusCode'] as String?;
+            return statusCode == 'R' || statusCode == 'S';
+          }).length;
+        });
 
     final customers = AppFirestore.customersCollectionRef.snapshots().map((s) {
       return s.docs.where((doc) {
@@ -2782,7 +2794,10 @@ class AppServices {
       final activeOffers = snapshot.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
         final expiresAt = data['expiresAt'] as Timestamp?;
-        return expiresAt != null && expiresAt.toDate().isAfter(now);
+        final status = data['status'] as String?;
+        final isExpired = expiresAt != null && expiresAt.toDate().isBefore(now);
+        final isAcceptedByMe = status == 'accepted_by_technician';
+        return !isExpired || isAcceptedByMe;
       }).toList();
 
       if (activeOffers.isEmpty) return [];

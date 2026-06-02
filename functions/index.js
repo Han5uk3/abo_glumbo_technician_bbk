@@ -1522,43 +1522,87 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
 
       if (adminsWithTokens.length === 0) {
         console.log("No admin users found with FCM tokens");
-        return;
+      } else {
+        // Send notification to each admin
+        for (const adminDoc of adminsWithTokens) {
+          const adminData = adminDoc.data();
+          const adminFcmToken = adminData.fcmToken;
+          const adminLanCode = adminData.lanCode || "en";
+
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: adminDoc.id,
+            titleEn: "Technician Cancelled Booking",
+            titleAr: "الفني ألغى الحجز",
+            titleUr: "ٹیکنیشن نے بکنگ منسوخ کر دی",
+            bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.id} for customer ${customerName}.`,
+            bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.id} للعميل ${customerName}.`,
+            bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.id} منسوخ کر دی ہے۔`,
+            data: {
+              bookingId: afterData.id,
+              bookingStatusCode: afterData.bookingStatusCode,
+              cancelledWorkerName: lastCancelledWorker.agentName,
+              cancelledWorkerUid: lastCancelledWorker.uid,
+              cancelledWorkerCount: afterCancelledCount.toString(),
+              customerName: customerName,
+              serviceName: serviceName,
+              bookingDateTime: afterData.bookingDateTime.toDate().toISOString(),
+              totalCancelledWorkers: afterCancelledCount.toString(),
+            },
+            fcmToken: adminFcmToken,
+            lanCode: adminLanCode,
+          });
+        }
+        console.log(
+          `✅ Admin notifications sent for booking ${afterData.id} - Worker ${lastCancelledWorker.agentName} rejected`
+        );
       }
 
-      // Send notification to each admin
-      for (const adminDoc of adminsWithTokens) {
-        const adminData = adminDoc.data();
-        const adminFcmToken = adminData.fcmToken;
-        const adminLanCode = adminData.lanCode || "en";
-
-        await sendAndStoreNotification({
-          targetRole: "admin",
-          targetId: adminDoc.id,
-          titleEn: "Technician Cancelled A Booking",
-          titleAr: "الفني قام برفض الحجز",
-          bodyEn: `${lastCancelledWorker.agentName} rejected booking for ${serviceName} from ${customerName}. Please review and assign a new Technician.`,
-          bodyAr: `${lastCancelledWorker.agentName} رفض حجزك ل${serviceNameAr} من ${customerName}. يرجى مراجعة وتعيين فني جديد.`,
-          data: {
-            bookingId: afterData.id,
-            bookingStatusCode: afterData.bookingStatusCode,
-            cancelledWorkerName: lastCancelledWorker.agentName,
-            cancelledWorkerUid: lastCancelledWorker.uid,
-            cancelledWorkerCount: afterCancelledCount.toString(),
-            customerName: customerName,
-            serviceName: serviceName,
-            bookingDateTime: afterData.bookingDateTime.toDate().toISOString(),
-            totalCancelledWorkers: afterCancelledCount.toString(),
-          },
-          fcmToken: adminFcmToken,
-          lanCode: adminLanCode,
-        });
+      // --- Trigger Auto-Reassignment Search ---
+      const bookingId = afterData.id;
+      const bookingDateTime = afterData.bookingDateTime;
+      let isInstant = true;
+      if (bookingDateTime) {
+        const bookingDate = bookingDateTime.toDate();
+        isInstant = (bookingDate.getTime() - Date.now()) <= 3 * 60 * 60 * 1000;
       }
-      console.log(
-        `✅ Admin notifications sent for booking ${afterData.id} - Worker ${lastCancelledWorker.agentName} rejected`
-      );
+
+      const autoReqRef = db.collection("auto-assignment_requests").doc(bookingId);
+      const autoReqData = {
+        id: bookingId,
+        service: afterData.service || null,
+        bookingDateTime: bookingDateTime || null,
+        notes: afterData.notes || "",
+        issueImage: afterData.issueImage || "",
+        issueVideo: afterData.issueVideo || "",
+        customer: afterData.customer || null,
+        paymentModeCode: afterData.paymentModeCode || "U",
+        selectedAddressId: afterData.selectedAddressId || null,
+        isOnHour: afterData.isOnHour !== undefined ? afterData.isOnHour : true,
+        serviceLocation: afterData.serviceLocation || null,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        status: "P",
+        type: isInstant ? "instant" : "late",
+        notificationSent: false,
+        agent: null,
+        cancelledWorkerUids: afterData.cancelledWorkerUids || []
+      };
+
+      await autoReqRef.set(autoReqData);
+      console.log(`[AutoReassign] Created/updated auto-assignment request for cancelled booking ${bookingId}`);
+
+      // Update the booking itself to set autoAssignmentStatus = 'ready_to_assign' and status = 'P' (just in case)
+      await db.collection("bookings").doc(bookingId).update({
+        autoAssignmentStatus: "ready_to_assign",
+        bookingStatusCode: "P",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      console.log(`[AutoReassign] Updated booking ${bookingId} with autoAssignmentStatus ready_to_assign`);
+
     } catch (error) {
       console.error(
-        `❌ Error sending admin cancellation notification: ${error}`
+        `❌ Error sending admin cancellation notification / auto-reassign: ${error}`
       );
     }
   }
@@ -4707,10 +4751,9 @@ exports.processAutoAssignments = onSchedule(
     console.log("Processing scheduled auto-assignment requests...");
     const now = new Date();
     const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-    const threeHoursFromNowTimestamp = admin.firestore.Timestamp.fromDate(threeHoursFromNow);
 
     try {
-      // Find pending auto-assignment requests safely and filter locally to avoid index requirements
+      // Find pending auto-assignment requests safely
       const snapshot = await db.collection("auto-assignment_requests")
         .where("status", "==", "P")
         .get();
@@ -4721,8 +4764,19 @@ exports.processAutoAssignments = onSchedule(
         const request = doc.data();
         const requestId = doc.id;
 
-        // Filter locally in JS memory
-        if (request.type !== "late" || request.notificationSent !== false) {
+        // Check if booking is still active/pending in bookings collection
+        const bookingSnap = await db.collection("bookings").doc(requestId).get();
+        if (!bookingSnap.exists) {
+          console.log(`[Auto-Assignment ${requestId}] Booking document not found in bookings collection. Skipping.`);
+          continue;
+        }
+        const bookingData = bookingSnap.data();
+        if (bookingData.bookingStatusCode !== "P") {
+          console.log(`[Auto-Assignment ${requestId}] Booking status is '${bookingData.bookingStatusCode}' (not 'P'). Syncing status and skipping.`);
+          await db.collection("auto-assignment_requests").doc(requestId).update({
+            status: bookingData.bookingStatusCode,
+            updatedAt: FieldValue.serverTimestamp()
+          });
           continue;
         }
 
@@ -4741,6 +4795,67 @@ exports.processAutoAssignments = onSchedule(
         const custLon = coords.lon;
         const customerAddress = extractCustomerAddress(request);
 
+        // --- Send Customer Search Notification (For late bookings starting search for the first time) ---
+        const shouldSendCustomerNotification = (request.type === "late" && request.notificationSent === false);
+
+        if (shouldSendCustomerNotification) {
+          const customerId = request.customer?.uid;
+          if (customerId) {
+            try {
+              const customerDoc = await db.collection("customers").doc(customerId).get();
+              if (customerDoc.exists) {
+                const custData = customerDoc.data();
+                const fcmToken = custData.fcmToken || request.customer?.fcmToken;
+                const lan = custData.lanCode || request.customer?.lanCode || "en";
+                if (fcmToken && fcmToken.trim() !== "") {
+                  await sendAndStoreNotification({
+                    targetRole: "customer",
+                    targetId: customerId,
+                    titleEn: "Searching for Technician",
+                    titleAr: "جاري البحث عن فني",
+                    titleUr: "ٹیکنیشن کی تلاش",
+                    bodyEn: "We have started searching for eligible technicians for your booking.",
+                    bodyAr: "لقد بدأنا في البحث عن الفنيين المؤهلين لحجزك.",
+                    bodyUr: "ہم نے آپ کی بکنگ کے لیے اہل ٹیکنیشنز کی تلاش شروع کر دی ہے۔",
+                    data: {
+                      bookingId: requestId,
+                      category: "searching_technician",
+                      type: "searching_technician"
+                    },
+                    fcmToken: fcmToken,
+                    lanCode: lan
+                  });
+                  console.log(`[Auto-Assignment ${requestId}] Customer notified that search has started`);
+                }
+              }
+            } catch (err) {
+              console.error(`Error notifying customer for search start:`, err);
+            }
+          }
+        }
+
+        // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
+        const existingOffersSnapshot = await db.collection("job_offers")
+          .where("bookingId", "==", requestId)
+          .get();
+
+        const techsWithOffers = new Set();
+        existingOffersSnapshot.forEach(offerDoc => {
+          const offer = offerDoc.data();
+          if (offer.technicianId) {
+            const expiresAt = offer.expiresAt ? offer.expiresAt.toDate() : null;
+            if (expiresAt && expiresAt <= now) {
+              return; // Skip expired offers
+            }
+            if (offer.status === "pending" || offer.status === "accepted_by_technician") {
+              techsWithOffers.add(offer.technicianId);
+            }
+          }
+        });
+
+        // --- Skip Cancelled Technicians ---
+        const cancelledWorkerUids = request.cancelledWorkerUids || bookingData.cancelledWorkerUids || [];
+
         // Query eligible technicians
         const techsSnapshot = await db.collection("users")
           .where("role", "==", "technician")
@@ -4753,6 +4868,16 @@ exports.processAutoAssignments = onSchedule(
         for (const techDoc of techsSnapshot.docs) {
           const tech = techDoc.data();
           const techUid = techDoc.id;
+
+          // Skip if technician has already been offered this job
+          if (techsWithOffers.has(techUid)) {
+            continue;
+          }
+
+          // Skip if technician previously cancelled this booking
+          if (cancelledWorkerUids.includes(techUid)) {
+            continue;
+          }
 
           const techCoords = extractTechnicianCoordinates(tech);
           if (!techCoords) continue;
@@ -4782,75 +4907,75 @@ exports.processAutoAssignments = onSchedule(
           eligibleTechs.push({ uid: techUid, data: tech });
         }
 
-        if (eligibleTechs.length === 0) {
-          console.log(`No technicians eligible for auto-assignment ${requestId} yet`);
-          continue;
-        }
+        if (eligibleTechs.length > 0 || shouldSendCustomerNotification) {
+          const batch = db.batch();
 
-        const batch = db.batch();
+          for (const tech of eligibleTechs) {
+            const offerId = db.collection("job_offers").doc().id;
+            const offerRef = db.collection("job_offers").doc(offerId);
 
-        for (const tech of eligibleTechs) {
-          const offerId = db.collection("job_offers").doc().id;
-          const offerRef = db.collection("job_offers").doc(offerId);
-
-          batch.set(offerRef, {
-            id: offerId,
-            bookingId: requestId,
-            technicianId: tech.uid,
-            status: "pending",
-            createdAt: FieldValue.serverTimestamp(),
-            expiresAt: request.bookingDateTime,
-            customerName: request.customer?.name || "Customer",
-            serviceLocation: {
-              fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
-              streetName: customerAddress?.streetName || "",
-              lat: custLat,
-              lon: custLon
-            },
-            serviceName: request.service?.name || "Service",
-            serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
-            serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
-            notes: request.notes || "",
-            issueImage: request.issueImage || "",
-            issueVideo: request.issueVideo || "",
-            bookingDateTime: request.bookingDateTime,
-            isRebook: false,
-            customerId: request.customer?.uid || ""
-          });
-
-          // Push notifications
-          if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
-            const lan = tech.data.lanCode || "en";
-            await sendAndStoreNotification({
-              targetRole: "technician",
-              targetId: tech.uid,
-              titleEn: "New Auto-Assignment Job Available",
-              titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
-              titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
-              bodyEn: "A new scheduled booking is available to accept.",
-              bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
-              bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
-              data: {
-                bookingId: requestId,
-                offerId: offerId,
-                targetRole: "technician",
-                category: "job_offer",
-                type: "job_offer"
+            batch.set(offerRef, {
+              id: offerId,
+              bookingId: requestId,
+              technicianId: tech.uid,
+              status: "pending",
+              createdAt: FieldValue.serverTimestamp(),
+              expiresAt: request.bookingDateTime,
+              customerName: request.customer?.name || "Customer",
+              serviceLocation: {
+                fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+                streetName: customerAddress?.streetName || "",
+                lat: custLat,
+                lon: custLon
               },
-              fcmToken: tech.data.fcmToken,
-              lanCode: lan
+              serviceName: request.service?.name || "Service",
+              serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+              serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+              notes: request.notes || "",
+              issueImage: request.issueImage || "",
+              issueVideo: request.issueVideo || "",
+              bookingDateTime: request.bookingDateTime,
+              isRebook: false,
+              customerId: request.customer?.uid || ""
+            });
+
+            // Push notifications
+            if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+              const lan = tech.data.lanCode || "en";
+              await sendAndStoreNotification({
+                targetRole: "technician",
+                targetId: tech.uid,
+                titleEn: "New Auto-Assignment Job Available",
+                titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
+                titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
+                bodyEn: "A new scheduled booking is available to accept.",
+                bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
+                bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
+                data: {
+                  bookingId: requestId,
+                  offerId: offerId,
+                  targetRole: "technician",
+                  category: "job_offer",
+                  type: "job_offer"
+                },
+                fcmToken: tech.data.fcmToken,
+                lanCode: lan
+              });
+            }
+          }
+
+          if (shouldSendCustomerNotification) {
+            batch.update(db.collection("auto-assignment_requests").doc(requestId), {
+              notificationSent: true,
+              updatedAt: FieldValue.serverTimestamp()
             });
           }
+
+          await batch.commit();
+          console.log(`[Auto-Assignment ${requestId}] Processed. Offers sent to ${eligibleTechs.length} technicians.`);
+        } else {
+          console.log(`No new technicians eligible for auto-assignment ${requestId} in this iteration.`);
         }
-
-        // Mark notification as sent for this auto-assignment request
-        batch.update(db.collection("auto-assignment_requests").doc(requestId), {
-          notificationSent: true,
-          updatedAt: FieldValue.serverTimestamp()
-        });
-
-        await batch.commit();
-        console.log(`[Auto-Assignment Late ${requestId}] Notifications sent to ${eligibleTechs.length} technicians`);
       }
     } catch (e) {
       console.error("Error processing late auto assignments: ", e);
@@ -4885,6 +5010,29 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
     const customerAddress = extractCustomerAddress(request);
 
     try {
+      const now = new Date();
+      // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
+      const existingOffersSnapshot = await db.collection("job_offers")
+        .where("bookingId", "==", requestId)
+        .get();
+
+      const techsWithOffers = new Set();
+      existingOffersSnapshot.forEach(offerDoc => {
+        const offer = offerDoc.data();
+        if (offer.technicianId) {
+          const expiresAt = offer.expiresAt ? offer.expiresAt.toDate() : null;
+          if (expiresAt && expiresAt <= now) {
+            return; // Skip expired offers
+          }
+          if (offer.status === "pending" || offer.status === "accepted_by_technician") {
+            techsWithOffers.add(offer.technicianId);
+          }
+        }
+      });
+
+      // --- Skip Cancelled Technicians ---
+      const cancelledWorkerUids = request.cancelledWorkerUids || [];
+
       // Find eligible technicians
       const techsSnapshot = await db.collection("users")
         .where("role", "==", "technician")
@@ -4897,6 +5045,16 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       for (const techDoc of techsSnapshot.docs) {
         const tech = techDoc.data();
         const techUid = techDoc.id;
+
+        // Skip if technician has already been offered this job
+        if (techsWithOffers.has(techUid)) {
+          continue;
+        }
+
+        // Skip if technician previously cancelled this booking
+        if (cancelledWorkerUids.includes(techUid)) {
+          continue;
+        }
 
         const techCoords = extractTechnicianCoordinates(tech);
         if (!techCoords) continue;

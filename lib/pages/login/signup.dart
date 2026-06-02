@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
+import 'package:aboglumbo_bbk_panel/helpers/geohash_helper.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/location.dart';
@@ -21,6 +22,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Signup extends StatefulWidget {
   final String uid;
@@ -51,12 +53,90 @@ class _SignupState extends State<Signup> {
   List<String> selectedJobRoles = [];
   bool isLoadingCategories = true;
 
+  String? existingProfileUrl;
+  String? existingResidenceIdUrl;
+  String? existingSponsorWorkPermitUrl;
+  String? existingChamberOfCommerceUrl;
+  List<String> existingCertifications = [];
+  Timestamp? existingCreatedAt;
+  bool _isLoadingExistingData = false;
+
   @override
   void initState() {
     super.initState();
     phoneController.text = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
     _loadJobCategories();
-    _getCurrentLocation();
+    _initRegistrationFlow();
+  }
+
+  Future<void> _initRegistrationFlow() async {
+    await _loadExistingUserData();
+    if (_currentPosition == null) {
+      await _getCurrentLocation();
+    }
+  }
+
+  Future<void> _loadExistingUserData() async {
+    setState(() {
+      _isLoadingExistingData = true;
+    });
+    try {
+      final doc = await AppFirestore.usersCollectionRef.doc(widget.uid).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          final user = UserModel.fromJson(data);
+          
+          nameController.text = user.name ?? '';
+          if (user.phone != null && user.phone!.isNotEmpty) {
+            phoneController.text = user.phone!;
+          }
+          emailController.text = user.email ?? '';
+          
+          if (user.jobRoles != null) {
+            selectedJobRoles = List<String>.from(user.jobRoles!);
+          }
+          
+          existingProfileUrl = user.profileUrl;
+          existingResidenceIdUrl = user.residenceIdUrl;
+          existingSponsorWorkPermitUrl = user.sponsorWorkPermitUrl;
+          existingChamberOfCommerceUrl = user.chamberOfCommerceApprovalUrl;
+          if (user.certifications != null) {
+            existingCertifications = List<String>.from(user.certifications!);
+          }
+          existingCreatedAt = user.createdAt;
+          
+          if (user.location != null && user.location!.lat != null && user.location!.lon != null) {
+            _currentPosition = Position(
+              latitude: user.location!.lat!,
+              longitude: user.location!.lon!,
+              timestamp: DateTime.now(),
+              accuracy: 0.0,
+              altitude: 0.0,
+              altitudeAccuracy: 0.0,
+              heading: 0.0,
+              headingAccuracy: 0.0,
+              speed: 0.0,
+              speedAccuracy: 0.0,
+            );
+            if (user.location!.fullAddress != null) {
+              _placeMark = Placemark(
+                name: user.location!.fullAddress,
+                street: user.location!.street ?? user.location!.fullAddress,
+              );
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading existing user data: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingExistingData = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadJobCategories() async {
@@ -68,7 +148,8 @@ class _SignupState extends State<Signup> {
           'id': entry.key,
           'name': entry.value['en'] ?? '',
           'nameAr': entry.value['ar'] ?? '',
-          'nameUr': entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '',
+          'nameUr':
+              entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '',
         };
       }).toList();
     } catch (e) {
@@ -126,9 +207,16 @@ class _SignupState extends State<Signup> {
         setState(() {
           _isFetchingLocation = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorFetchingLocation(e.toString()) ?? 'Error fetching location: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(
+                    context,
+                  )?.errorFetchingLocation(e.toString()) ??
+                  'Error fetching location: $e',
+            ),
+          ),
+        );
       }
     }
   }
@@ -238,11 +326,13 @@ class _SignupState extends State<Signup> {
   Widget _buildFileOrImagePickerTile({
     required String title,
     required dynamic fileOrImage, // Can be XFile or PlatformFile
+    String? existingUrl,
     required VoidCallback onTap,
     required VoidCallback onClear,
     bool mandatory = false,
   }) {
     bool hasFile = fileOrImage != null;
+    bool hasRemote = existingUrl != null && existingUrl.isNotEmpty;
     bool isImage = false;
     String? path;
     if (hasFile) {
@@ -261,6 +351,14 @@ class _SignupState extends State<Signup> {
           'png',
         ].contains(fileOrImage.extension?.toLowerCase() ?? '');
       }
+    } else if (hasRemote) {
+      isImage = [
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'webp',
+      ].contains(existingUrl.split('?').first.split('.').last.toLowerCase());
     }
 
     return Column(
@@ -268,21 +366,23 @@ class _SignupState extends State<Signup> {
       children: [
         _buildSectionTitle(title, mandatory: mandatory),
         GestureDetector(
-          onTap: hasFile ? () => _previewFile(path, isImage) : onTap,
+          onTap: hasFile
+              ? () => _previewFile(path, isImage)
+              : (hasRemote ? () => _previewFile(existingUrl, isImage, isRemote: true) : onTap),
           child: Container(
             width: double.infinity,
-            height: hasFile ? 70 : 140,
+            height: (hasFile || hasRemote) ? 70 : 140,
             decoration: BoxDecoration(
-              color: hasFile ? Colors.white : Colors.grey[50],
+              color: (hasFile || hasRemote) ? Colors.white : Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: hasFile
+                color: (hasFile || hasRemote)
                     ? AppColors.primary.withOpacity(0.2)
                     : Colors.grey[200]!,
                 width: 1.5,
               ),
             ),
-            child: !hasFile
+            child: !(hasFile || hasRemote)
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -322,7 +422,9 @@ class _SignupState extends State<Signup> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
-                            title,
+                            hasFile
+                                ? (fileOrImage is XFile ? fileOrImage.name : fileOrImage.name)
+                                : title,
                             style: DMSansFont.textStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -357,8 +459,8 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  void _previewFile(String? path, bool isImage) {
-    if (path == null) return;
+  void _previewFile(String? pathOrUrl, bool isImage, {bool isRemote = false}) {
+    if (pathOrUrl == null) return;
 
     if (isImage) {
       Navigator.of(context).push(
@@ -375,14 +477,20 @@ class _SignupState extends State<Signup> {
             ),
             body: Center(
               child: InteractiveViewer(
-                child: Image.file(File(path), fit: BoxFit.contain),
+                child: isRemote
+                    ? Image.network(pathOrUrl, fit: BoxFit.contain)
+                    : Image.file(File(pathOrUrl), fit: BoxFit.contain),
               ),
             ),
           ),
         ),
       );
     } else {
-      OpenFilex.open(path);
+      if (isRemote) {
+        launchUrl(Uri.parse(pathOrUrl), mode: LaunchMode.externalApplication);
+      } else {
+        OpenFilex.open(pathOrUrl);
+      }
     }
   }
 
@@ -392,7 +500,12 @@ class _SignupState extends State<Signup> {
     if (_currentPosition == null) {
       debugPrint('Signup Error: Current position is null');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseFetchLocation ?? 'Please fetch your current location')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.pleaseFetchLocation ??
+                'Please fetch your current location',
+          ),
+        ),
       );
       return;
     }
@@ -400,17 +513,29 @@ class _SignupState extends State<Signup> {
     if (selectedJobRoles.isEmpty) {
       debugPrint('Signup Error: No job roles selected');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseSelectRole ?? 'Please select at least one job role')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.pleaseSelectRole ??
+                'Please select at least one job role',
+          ),
+        ),
       );
       return;
     }
 
-    if (residenceIdImage == null ||
-        sponsorWorkPermitFile == null ||
-        chamberOfCommerceFile == null) {
+    final hasResidenceId = residenceIdImage != null || (existingResidenceIdUrl != null && existingResidenceIdUrl!.isNotEmpty);
+    final hasSponsorWorkPermit = sponsorWorkPermitFile != null || (existingSponsorWorkPermitUrl != null && existingSponsorWorkPermitUrl!.isNotEmpty);
+    final hasChamberOfCommerce = chamberOfCommerceFile != null || (existingChamberOfCommerceUrl != null && existingChamberOfCommerceUrl!.isNotEmpty);
+
+    if (!hasResidenceId || !hasSponsorWorkPermit || !hasChamberOfCommerce) {
       debugPrint('Signup Error: Missing mandatory documents');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseUploadDocuments ?? 'Please upload all mandatory documents')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.pleaseUploadDocuments ??
+                'Please upload all mandatory documents',
+          ),
+        ),
       );
       return;
     }
@@ -422,11 +547,11 @@ class _SignupState extends State<Signup> {
     );
 
     try {
-      String? profileUrl;
-      String? residenceIdUrl;
-      String? sponsorWorkPermitUrl;
-      String? chamberOfCommerceUrl;
-      List<String> certUrls = [];
+      String? profileUrl = existingProfileUrl;
+      String? residenceIdUrl = existingResidenceIdUrl;
+      String? sponsorWorkPermitUrl = existingSponsorWorkPermitUrl;
+      String? chamberOfCommerceUrl = existingChamberOfCommerceUrl;
+      List<String> certUrls = List.from(existingCertifications);
 
       if (profileImage != null) {
         profileUrl = await UploadToFireStorage().uploadFile(
@@ -434,10 +559,12 @@ class _SignupState extends State<Signup> {
           'agents/profiles',
         );
       }
-      residenceIdUrl = await UploadToFireStorage().uploadFile(
-        residenceIdImage!,
-        'agents/documents',
-      );
+      if (residenceIdImage != null) {
+        residenceIdUrl = await UploadToFireStorage().uploadFile(
+          residenceIdImage!,
+          'agents/documents',
+        );
+      }
 
       // Upload Sponsor Work Permit
       if (sponsorWorkPermitFile?.path != null) {
@@ -481,13 +608,21 @@ class _SignupState extends State<Signup> {
             : emailController.text.trim(),
         country: "SA",
         location: location,
+        lastKnownLocation: GeoPoint(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+        ),
+        geohash: GeohashHelper.encode(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+        ),
         jobRoles: selectedJobRoles,
         profileUrl: profileUrl,
         residenceIdUrl: residenceIdUrl,
         sponsorWorkPermitUrl: sponsorWorkPermitUrl,
         chamberOfCommerceApprovalUrl: chamberOfCommerceUrl,
         certifications: certUrls,
-        createdAt: Timestamp.now(),
+        createdAt: existingCreatedAt ?? Timestamp.now(),
         updatedAt: Timestamp.now(),
         isVerified: false,
         isAdmin: false,
@@ -521,15 +656,25 @@ class _SignupState extends State<Signup> {
       debugPrint('Signup Exception: $e');
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)?.registrationFailed} ${e.toString()}' ?? 'Registration failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context)!.registrationFailed} ${e.toString()}',
+            ),
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingExistingData) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: Loader()),
+      );
+    }
     final localization = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -559,8 +704,10 @@ class _SignupState extends State<Signup> {
                     backgroundColor: Colors.grey[100],
                     backgroundImage: profileImage != null
                         ? FileImage(File(profileImage!.path))
-                        : null,
-                    child: profileImage == null
+                        : (existingProfileUrl != null && existingProfileUrl!.isNotEmpty
+                            ? NetworkImage(existingProfileUrl!) as ImageProvider
+                            : null),
+                    child: (profileImage == null && (existingProfileUrl == null || existingProfileUrl!.isEmpty))
                         ? Icon(
                             Icons.person_outline,
                             size: 50,
@@ -689,12 +836,16 @@ class _SignupState extends State<Signup> {
             _buildFileOrImagePickerTile(
               title: localization.residenceIDImage,
               fileOrImage: residenceIdImage,
+              existingUrl: existingResidenceIdUrl,
               mandatory: true,
               onTap: () async {
                 final img = await _pickImage(square: false);
                 if (img != null) setState(() => residenceIdImage = img);
               },
-              onClear: () => setState(() => residenceIdImage = null),
+              onClear: () => setState(() {
+                residenceIdImage = null;
+                existingResidenceIdUrl = null;
+              }),
             ),
 
             const SizedBox(height: 16),
@@ -702,12 +853,16 @@ class _SignupState extends State<Signup> {
             _buildFileOrImagePickerTile(
               title: localization.sponsorWorkPermit,
               fileOrImage: sponsorWorkPermitFile,
+              existingUrl: existingSponsorWorkPermitUrl,
               mandatory: true,
               onTap: () async {
                 final file = await _pickFile();
                 if (file != null) setState(() => sponsorWorkPermitFile = file);
               },
-              onClear: () => setState(() => sponsorWorkPermitFile = null),
+              onClear: () => setState(() {
+                sponsorWorkPermitFile = null;
+                existingSponsorWorkPermitUrl = null;
+              }),
             ),
 
             const SizedBox(height: 16),
@@ -715,12 +870,16 @@ class _SignupState extends State<Signup> {
             _buildFileOrImagePickerTile(
               title: localization.chamberOfCommerceApproval,
               fileOrImage: chamberOfCommerceFile,
+              existingUrl: existingChamberOfCommerceUrl,
               mandatory: true,
               onTap: () async {
                 final file = await _pickFile();
                 if (file != null) setState(() => chamberOfCommerceFile = file);
               },
-              onClear: () => setState(() => chamberOfCommerceFile = null),
+              onClear: () => setState(() {
+                chamberOfCommerceFile = null;
+                existingChamberOfCommerceUrl = null;
+              }),
             ),
 
             const SizedBox(height: 24),
@@ -743,9 +902,9 @@ class _SignupState extends State<Signup> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        certifications.isEmpty
+                        certifications.isEmpty && existingCertifications.isEmpty
                             ? localization.uploadCertificates
-                            : '${certifications.length} ${localization.filesSelected}',
+                            : '${certifications.length + existingCertifications.length} ${localization.filesSelected}',
                         style: DMSansFont.textStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
@@ -761,23 +920,37 @@ class _SignupState extends State<Signup> {
                 ),
               ),
             ),
-            if (certifications.isNotEmpty)
+            if (certifications.isNotEmpty || existingCertifications.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 12.0),
                 child: Wrap(
                   spacing: 8,
-                  children: certifications.asMap().entries.map((entry) {
-                    return Chip(
-                      label: Text(
-                        entry.value.name,
-                        style: const TextStyle(fontSize: 11),
-                      ),
-                      onDeleted: () =>
-                          setState(() => certifications.removeAt(entry.key)),
-                      deleteIcon: const Icon(Icons.close, size: 14),
-                      backgroundColor: Colors.grey[100],
-                    );
-                  }).toList(),
+                  children: [
+                    ...existingCertifications.asMap().entries.map((entry) {
+                      return Chip(
+                        label: Text(
+                          '${localization.certificate} ${entry.key + 1}',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        onDeleted: () =>
+                            setState(() => existingCertifications.removeAt(entry.key)),
+                        deleteIcon: const Icon(Icons.close, size: 14),
+                        backgroundColor: Colors.grey[100],
+                      );
+                    }),
+                    ...certifications.asMap().entries.map((entry) {
+                      return Chip(
+                        label: Text(
+                          entry.value.name,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        onDeleted: () =>
+                            setState(() => certifications.removeAt(entry.key)),
+                        deleteIcon: const Icon(Icons.close, size: 14),
+                        backgroundColor: Colors.grey[100],
+                      );
+                    }),
+                  ],
                 ),
               ),
 
@@ -816,7 +989,9 @@ class _SignupState extends State<Signup> {
                         Text(
                           _placeMark != null
                               ? '${_placeMark!.street}, ${_placeMark!.locality}'
-                              : localization.fetching,
+                              : (_currentPosition != null
+                                    ? '${_currentPosition!.latitude.toStringAsFixed(6)}, ${_currentPosition!.longitude.toStringAsFixed(6)}'
+                                    : localization.fetching),
                           style: DMSansFont.textStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -825,6 +1000,14 @@ class _SignupState extends State<Signup> {
                         if (_placeMark != null)
                           Text(
                             '${_placeMark!.subAdministrativeArea}, ${_placeMark!.country}',
+                            style: DMSansFont.textStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          )
+                        else if (_currentPosition != null)
+                          Text(
+                            localization.locationSaved,
                             style: DMSansFont.textStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
@@ -992,10 +1175,14 @@ class _SignupState extends State<Signup> {
                                       Expanded(
                                         child: Text(
                                           LocalStore.getUserlanguage() == 'ur'
-                                              ? (cat['nameUr'] ?? cat['nameAr'] ?? cat['name'] ?? '')
-                                              : (LocalStore.getUserlanguage() == 'ar'
-                                                  ? cat['nameAr']
-                                                  : cat['name']),
+                                              ? (cat['nameUr'] ??
+                                                    cat['nameAr'] ??
+                                                    cat['name'] ??
+                                                    '')
+                                              : (LocalStore.getUserlanguage() ==
+                                                        'ar'
+                                                    ? cat['nameAr']
+                                                    : cat['name']),
                                           style: DMSansFont.textStyle(
                                             fontWeight: isSelected
                                                 ? FontWeight.bold

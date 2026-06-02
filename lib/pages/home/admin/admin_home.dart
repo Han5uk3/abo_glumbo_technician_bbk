@@ -9,6 +9,7 @@ import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/bloc/admin_bloc.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -99,6 +100,51 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _searchAndNavigateToTab(String query) async {
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return;
+
+    try {
+      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery).get();
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toUpperCase()).get();
+      }
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toLowerCase()).get();
+      }
+
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+
+      if (doc.exists) {
+        final booking = BookingModel.fromDocumentSnapshot(doc);
+        final statusCode = booking.bookingStatusCode;
+        final index = bookingStatus.indexWhere((status) => status['code'] == statusCode);
+        if (index != -1 && index != _tabController.index) {
+          _tabController.animateTo(index);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error searching booking: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -121,6 +167,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
       });
+      _searchAndNavigateToTab(_searchController.text);
     });
 
     context.read<AccountBloc>().add(LoadDistrictsEvent());

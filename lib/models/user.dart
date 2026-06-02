@@ -143,6 +143,8 @@ class UserModel {
     bool? isGrantedAdminByMain,
     int? adminAccessLevel,
     Timestamp? grantedAdminAt,
+    GeoPoint? lastKnownLocation,
+    String? geohash,
     String role = 'technician',
     String? residenceIdUrl,
     String? sponsorWorkPermitUrl,

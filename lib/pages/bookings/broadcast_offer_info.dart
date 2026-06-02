@@ -40,6 +40,11 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
   }
 
   void _startCountdown() {
+    final status = widget.offer.offerData['status'] as String?;
+    if (status == 'accepted_by_technician') {
+      return; // No countdown if already accepted
+    }
+
     final expiresAt = widget.offer.offerData['expiresAt'] as Timestamp?;
     if (expiresAt == null) return;
 
@@ -236,19 +241,20 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
           ),
         ),
         actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                timerText,
-                style: DMSansFont.textStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+          if (data['status'] != 'accepted_by_technician')
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  timerText,
+                  style: DMSansFont.textStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
       body: SingleChildScrollView(

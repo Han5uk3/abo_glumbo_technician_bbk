@@ -680,9 +680,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
         mode: _serviceCompleted ? 1 : 0,
         bookingId: widget.booking.id,
         selectedFiles: selectedFiles,
-        serviceCost: _serviceCompleted && _serviceItems.isEmpty
-            ? double.parse(_serviceCostController.text)
-            : 0,
+        serviceCost: _totalCost,
         serviceItems: items,
         totalCost: _totalCost,
       ),

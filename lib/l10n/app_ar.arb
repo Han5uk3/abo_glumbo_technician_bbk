@@ -1701,5 +1701,8 @@
   "areYouSureYouWantToSuspendThisAccount": "هل أنت متأكد أنك تريد إيقاف هذا الحساب؟",
   "areYouSureYouWantToUnblockThisAccount": "هل أنت متأكد أنك تريد تفعيل هذا الحساب؟",
   "accountSuspended": "تم إيقاف الحساب",
-  "accountUnblocked": "تم تفعيل الحساب"
+  "accountUnblocked": "تم تفعيل الحساب",
+  "biometricError": "❌ خطأ في المصادقة البيومترية",
+  "unknownError": "خطأ غير معروف",
+  "errorDuringLogin": "خطأ أثناء تسجيل الدخول"
 }

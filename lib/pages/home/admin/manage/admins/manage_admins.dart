@@ -3,6 +3,7 @@ import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/admins/add_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -118,6 +119,7 @@ class _ManageAdminsState extends State<ManageAdmins>
 
   @override
   Widget build(BuildContext context) {
+    final isCoreAdmin = LocalStore.getCachedAdminData()?.isSuperAdmin ?? false;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -253,12 +255,14 @@ class _ManageAdminsState extends State<ManageAdmins>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const AddAdminPage())),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add_rounded, color: Colors.white),
-      ),
+      floatingActionButton: isCoreAdmin
+          ? FloatingActionButton(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const AddAdminPage())),
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.add_rounded, color: Colors.white),
+            )
+          : null,
     );
   }
 
@@ -302,6 +306,7 @@ class _ManageAdminsState extends State<ManageAdmins>
   }
 
   Widget _buildAdminCard(AdminModel admin, bool isPending) {
+    final isCoreAdmin = LocalStore.getCachedAdminData()?.isSuperAdmin ?? false;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -424,7 +429,28 @@ class _ManageAdminsState extends State<ManageAdmins>
                     ],
                   ),
                 ),
-                if (!admin.isSuperAdmin)
+                if (isCoreAdmin && !admin.isSuperAdmin) ...[
+                  IconButton(
+                    onPressed: () {
+                      final actualId = isPending
+                          ? admin.uid!.replaceFirst('pending_', '')
+                          : admin.uid!;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddAdminPage(
+                            adminToEdit: admin.copyWith(uid: actualId),
+                            isPending: isPending,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.edit_outlined,
+                        color: AppColors.primary, size: 20),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.zero,
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     onPressed: () async {
                       final confirm = await _showRevokeConfirmationDialog(
@@ -445,6 +471,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
                   ),
+                ],
               ],
             ),
           ],

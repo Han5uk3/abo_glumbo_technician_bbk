@@ -1652,5 +1652,8 @@
   "areYouSureYouWantToSuspendThisAccount": "کیا آپ واقعی اس اکاؤنٹ کو معطل کرنا چاہتے ہیں؟",
   "areYouSureYouWantToUnblockThisAccount": "کیا آپ واقعی اس اکاؤنٹ کو بحال کرنا چاہتے ہیں؟",
   "accountSuspended": "اکاؤنٹ معطل کر دیا گیا",
-  "accountUnblocked": "اکاؤنٹ بحال کر دیا گیا"
+  "accountUnblocked": "اکاؤنٹ بحال کر دیا گیا",
+  "biometricError": "❌ بایومیٹرک غلطی",
+  "unknownError": "نامعلوم غلطی",
+  "errorDuringLogin": "لاگ ان کے دوران غلطی"
 }

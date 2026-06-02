@@ -337,6 +337,13 @@ class _BookingInfoState extends State<BookingInfo> {
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>?;
         final expiresAt = data?['expiresAt'] as Timestamp?;
+        final status = data?['status'] as String?;
+
+        if (status == 'accepted_by_technician' || status == 'accepted' || status == 'counter_offered') {
+          _offerExpiresAt = null;
+          return;
+        }
+
         if (expiresAt != null) {
           _offerExpiresAt = expiresAt.toDate();
         }

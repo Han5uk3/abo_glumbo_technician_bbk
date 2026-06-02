@@ -196,7 +196,10 @@ class _LoginPageState extends State<LoginPage> {
               _isBiometricLoading = false;
             });
           }
-          _showSnackBar('Error during login: ${e.toString()}', Colors.red);
+          _showSnackBar(
+            '${AppLocalizations.of(context)?.errorDuringLogin ?? 'Error during login'}: ${e.toString()}',
+            Colors.red,
+          );
         }
       } else {
         _showSnackBar(
@@ -225,8 +228,10 @@ class _LoginPageState extends State<LoginPage> {
           if (exception.message?.toLowerCase().contains('canceled') == true) {
             return;
           }
+          final errorPrefix = AppLocalizations.of(context)?.biometricError ?? '❌ Biometric error';
+          final unknownError = AppLocalizations.of(context)?.unknownError ?? 'Unknown error';
           message =
-              '❌ Biometric error: ${exception.message ?? 'Unknown error'}';
+              '$errorPrefix: ${exception.message ?? unknownError}';
       }
 
       if (message.isNotEmpty) {
@@ -266,7 +271,36 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
         } else if (state is OTPSentFailure) {
-          _showSnackBar(state.error, Colors.red);
+          String errorMessage;
+          switch (state.error) {
+            case 'too-many-requests':
+              errorMessage = AppLocalizations.of(context)?.tooManyRequests ??
+                  'Too many requests. Please wait and try again.';
+              break;
+            case 'invalid-phone-number':
+              errorMessage = AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
+                  'Please enter a valid phone number';
+              break;
+            case 'quota-exceeded':
+              errorMessage = AppLocalizations.of(context)?.quotaExceeded ??
+                  'SMS quota exceeded. Try again later.';
+              break;
+            case 'network-request-failed':
+              errorMessage = AppLocalizations.of(context)?.networkError ??
+                  'Network error. Please check your connection.';
+              break;
+            case 'internal-error':
+              errorMessage = AppLocalizations.of(context)?.internalError ??
+                  'An internal error occurred. Please try again later.';
+              break;
+            case 'timeout':
+              errorMessage = AppLocalizations.of(context)?.timedOut ??
+                  'Timed Out';
+              break;
+            default:
+              errorMessage = state.error;
+          }
+          _showSnackBar(errorMessage, Colors.red);
         } else if (state is OTPVerifiedForRegistration) {
           // No account found → navigate to create account page
           Navigator.pushAndRemoveUntil(
@@ -288,6 +322,26 @@ class _LoginPageState extends State<LoginPage> {
               errorMessage =
                   AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
                   'Please enter a valid phone number';
+              break;
+            case 'quota-exceeded':
+              errorMessage =
+                  AppLocalizations.of(context)?.quotaExceeded ??
+                  'SMS quota exceeded. Try again later.';
+              break;
+            case 'network-request-failed':
+              errorMessage =
+                  AppLocalizations.of(context)?.networkError ??
+                  'Network error. Please check your connection.';
+              break;
+            case 'internal-error':
+              errorMessage =
+                  AppLocalizations.of(context)?.internalError ??
+                  'An internal error occurred. Please try again later.';
+              break;
+            case 'invalid-verification-code':
+              errorMessage =
+                  AppLocalizations.of(context)?.invalidOtpCode ??
+                  'Invalid OTP code';
               break;
             default:
               errorMessage = state.error;

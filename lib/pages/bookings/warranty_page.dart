@@ -3,7 +3,9 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
@@ -39,6 +41,53 @@ class _WarrantyPageState extends State<WarrantyPage>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  Future<void> _searchAndNavigateToTab(String query) async {
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return;
+
+    try {
+      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery).get();
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toUpperCase()).get();
+      }
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toLowerCase()).get();
+      }
+
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+
+      if (doc.exists) {
+        final booking = BookingModel.fromDocumentSnapshot(doc);
+        if (booking.warranty != null) {
+          final warrantyCode = booking.warranty!.warrantyStatusCode;
+          final index = _warrantyStatuses.indexWhere((status) => status['code'] == warrantyCode);
+          if (index != -1 && index != _tabController.index) {
+            _tabController.animateTo(index);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error searching warranty: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +113,7 @@ class _WarrantyPageState extends State<WarrantyPage>
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
       });
+      _searchAndNavigateToTab(_searchController.text);
     });
   }
 

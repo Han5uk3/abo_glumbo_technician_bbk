@@ -100,7 +100,8 @@ class CustomerInfo extends StatelessWidget {
                   offset: const Offset(0, 10),
                 ),
               ],
-              image: customer.profileUrl != null && customer.profileUrl!.isNotEmpty
+              image:
+                  customer.profileUrl != null && customer.profileUrl!.isNotEmpty
                   ? DecorationImage(
                       image: CachedNetworkImageProvider(customer.profileUrl!),
                       fit: BoxFit.cover,
@@ -131,7 +132,10 @@ class CustomerInfo extends StatelessWidget {
               child: Text(
                 customer.name ?? 'Unknown Customer',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -272,22 +276,25 @@ class CustomerInfo extends StatelessWidget {
         _buildDetailRow(
           AppLocalizations.of(context)!.name,
           customer.name ?? 'N/A',
+          false,
         ),
         _buildDetailRow(
           AppLocalizations.of(context)!.email,
           customer.email ?? 'N/A',
+          false,
         ),
         _buildDetailRow(
           AppLocalizations.of(context)!.phone,
           customer.phone ?? 'N/A',
+          true,
         ),
         _buildDetailRow(
           AppLocalizations.of(context)!.location,
-          customer.location?.fullAddress ?? 'N/A',
-        ),
-        _buildDetailRow(
-          AppLocalizations.of(context)!.language,
-          customer.lanCode?.toUpperCase() ?? 'N/A',
+          customer.addresses
+                  .firstWhere((element) => element.isSelected == true)
+                  .streetName ??
+              "",
+          false,
         ),
       ],
     );
@@ -300,14 +307,16 @@ class CustomerInfo extends StatelessWidget {
       icon: Icons.info_outline,
       iconColor: Colors.grey.shade700,
       children: [
-        _buildDetailRow('User ID', customer.uid),
+        _buildDetailRow('User ID', customer.uid, false),
         _buildDetailRow(
           AppLocalizations.of(context)!.createdAt,
           _formatTimestamp(customer.createdAt, context) ?? 'N/A',
+          false,
         ),
         _buildDetailRow(
           AppLocalizations.of(context)!.updatedAt,
           _formatTimestamp(customer.updatedAt, context) ?? 'N/A',
+          false,
         ),
       ],
     );
@@ -368,7 +377,12 @@ class CustomerInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {Widget? trailing}) {
+  Widget _buildDetailRow(
+    String label,
+    String value,
+    bool isPhone, {
+    Widget? trailing,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -378,7 +392,11 @@ class CustomerInfo extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -389,6 +407,7 @@ class CustomerInfo extends StatelessWidget {
                 Text(
                   value,
                   textAlign: TextAlign.right,
+                  textDirection: isPhone ? TextDirection.ltr : null,
                   style: DMSansFont.textStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

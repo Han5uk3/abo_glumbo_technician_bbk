@@ -5071,4 +5071,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String inviteDeleted(String name) {
     return '$name کی دعوت حذف کر دی گئی';
   }
+
+  @override
+  String get biometricError => '❌ بایومیٹرک غلطی';
+
+  @override
+  String get unknownError => 'نامعلوم غلطی';
+
+  @override
+  String get errorDuringLogin => 'لاگ ان کے دوران غلطی';
 }

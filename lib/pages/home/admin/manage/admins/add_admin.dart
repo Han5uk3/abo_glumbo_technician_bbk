@@ -3,12 +3,20 @@ import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class AddAdminPage extends StatefulWidget {
-  const AddAdminPage({super.key});
+  final AdminModel? adminToEdit;
+  final bool isPending;
+
+  const AddAdminPage({
+    super.key,
+    this.adminToEdit,
+    this.isPending = false,
+  });
 
   @override
   State<AddAdminPage> createState() => _AddAdminPageState();
@@ -22,6 +30,60 @@ class _AddAdminPageState extends State<AddAdminPage> {
   int _accessLevel = 1; // 1 = Customer Service, 2 = Full Admin
   bool _isLoading = false;
 
+  String get _submitButtonText {
+    if (widget.adminToEdit == null) return 'Add Admin';
+    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
+    if (locale == 'ar') return 'حفظ التغييرات';
+    if (locale == 'ur') return 'تبدیلیاں محفوظ کریں';
+    return 'Save Changes';
+  }
+
+  String get _pageTitle {
+    if (widget.adminToEdit == null) return 'Add New Admin';
+    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
+    if (locale == 'ar') return 'تعديل المشرف';
+    if (locale == 'ur') return 'ایڈمن میں ترمیم کریں';
+    return 'Edit Admin';
+  }
+
+  String get _pageSubtitle {
+    if (widget.adminToEdit == null) {
+      return 'Enter admin details to invite them to the platform.';
+    }
+    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
+    if (locale == 'ar') return 'تعديل تفاصيل المشرف ومستوى الوصول.';
+    if (locale == 'ur') return 'ایڈمن کی تفصیلات اور رسائی کی سطح میں ترمیم کریں۔';
+    return 'Edit admin details and access level.';
+  }
+
+  String get _successMessage {
+    if (widget.adminToEdit == null) {
+      return AppLocalizations.of(context)?.adminAddedSuccessfully ?? 'Admin added successfully to pending invites.';
+    }
+    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
+    if (locale == 'ar') return 'تم تحديث المشرف بنجاح.';
+    if (locale == 'ur') return 'ایڈمن کو کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے۔';
+    return 'Admin updated successfully.';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.adminToEdit != null) {
+      _nameController.text = widget.adminToEdit!.name;
+      _emailController.text = widget.adminToEdit!.email;
+      
+      String rawPhone = widget.adminToEdit!.phoneNumber;
+      if (rawPhone.startsWith('+966')) {
+        rawPhone = rawPhone.substring(4);
+      } else if (rawPhone.startsWith('966')) {
+        rawPhone = rawPhone.substring(3);
+      }
+      _phoneController.text = rawPhone;
+      _accessLevel = widget.adminToEdit!.accessLevel;
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -30,7 +92,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
     super.dispose();
   }
 
-  Future<void> _addAdmin() async {
+  Future<void> _addOrSaveAdmin() async {
     if (_isLoading) return;
 
     // Check if the current user is the Core Admin
@@ -61,38 +123,62 @@ class _AddAdminPageState extends State<AddAdminPage> {
         }
       }
 
-      // Check if admin already exists in active or pending
-      final activeCheck = await AppFirestore.adminsCollectionRef
-          .where('phoneNumber', isEqualTo: phone)
-          .limit(1)
-          .get();
+      // Check if phone number already exists, ignoring the current admin if editing
+      if (widget.adminToEdit == null || phone != widget.adminToEdit!.phoneNumber) {
+        final activeCheck = await AppFirestore.adminsCollectionRef
+            .where('phoneNumber', isEqualTo: phone)
+            .get();
 
-      if (activeCheck.docs.isNotEmpty) {
-        throw 'Admin with this phone number already exists.';
+        for (var doc in activeCheck.docs) {
+          if (widget.adminToEdit == null || doc.id != widget.adminToEdit!.uid || widget.isPending) {
+            throw 'Admin with this phone number already exists.';
+          }
+        }
+
+        final pendingCheck = await AppFirestore.pendingAdminsCollectionRef
+            .where('phoneNumber', isEqualTo: phone)
+            .get();
+
+        for (var doc in pendingCheck.docs) {
+          if (widget.adminToEdit == null || doc.id != widget.adminToEdit!.uid || !widget.isPending) {
+            throw 'Admin with this phone number is already invited.';
+          }
+        }
       }
 
-      final pendingCheck = await AppFirestore.pendingAdminsCollectionRef
-          .where('phoneNumber', isEqualTo: phone)
-          .limit(1)
-          .get();
-
-      if (pendingCheck.docs.isNotEmpty) {
-        throw 'Admin with this phone number is already invited.';
+      if (widget.adminToEdit != null) {
+        // Edit mode
+        if (widget.isPending) {
+          await AppFirestore.pendingAdminsCollectionRef.doc(widget.adminToEdit!.uid).update({
+            'name': _nameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phoneNumber': phone,
+            'accessLevel': _accessLevel,
+          });
+        } else {
+          await AppFirestore.adminsCollectionRef.doc(widget.adminToEdit!.uid).update({
+            'name': _nameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phoneNumber': phone,
+            'accessLevel': _accessLevel,
+          });
+        }
+      } else {
+        // Add mode
+        await AppFirestore.pendingAdminsCollectionRef.add({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'phoneNumber': phone,
+          'accessLevel': _accessLevel,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isCoreAdmin': false,
+        });
       }
-
-      await AppFirestore.pendingAdminsCollectionRef.add({
-        'name': _nameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phoneNumber': phone,
-        'accessLevel': _accessLevel,
-        'createdAt': FieldValue.serverTimestamp(),
-        'isCoreAdmin': false,
-      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.adminAddedSuccessfully ?? 'Admin added successfully to pending invites.'),
+            content: Text(_successMessage),
             backgroundColor: Colors.green,
           ),
         );
@@ -113,9 +199,9 @@ class _AddAdminPageState extends State<AddAdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Add New Admin',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          _pageTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -127,9 +213,9 @@ class _AddAdminPageState extends State<AddAdminPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Enter admin details to invite them to the platform.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+              Text(
+                _pageSubtitle,
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 24),
               TextFormWidget(
@@ -187,10 +273,10 @@ class _AddAdminPageState extends State<AddAdminPage> {
                         ? const Center(child: CircularProgressIndicator())
                         : eButton(
                           context: context,
-                          text: 'Add Admin',
+                          text: _submitButtonText,
                           backgroundColor: AppColors.primary,
                           textColor: Colors.white,
-                          onPressed: _addAdmin,
+                          onPressed: _addOrSaveAdmin,
                         ),
               ),
             ],

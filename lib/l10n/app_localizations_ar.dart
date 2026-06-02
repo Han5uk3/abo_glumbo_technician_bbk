@@ -4987,4 +4987,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String inviteDeleted(String name) {
     return 'تم حذف دعوة $name';
   }
+
+  @override
+  String get biometricError => '❌ خطأ في المصادقة البيومترية';
+
+  @override
+  String get unknownError => 'خطأ غير معروف';
+
+  @override
+  String get errorDuringLogin => 'خطأ أثناء تسجيل الدخول';
 }

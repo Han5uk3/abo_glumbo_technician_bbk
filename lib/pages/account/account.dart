@@ -698,6 +698,8 @@ class _AccountPageState extends State<AccountPage> {
     }
 
     try {
+      final uid = user.uid;
+
       try {
         await AppServices.clearFCMToken();
         await NotificationServices.deleteFCMToken();
@@ -707,17 +709,17 @@ class _AccountPageState extends State<AccountPage> {
         }
       }
 
-      await AppFirestore.usersCollectionRef.doc(user.uid).delete();
-      await user.delete();
-
+      // Clear local biometric settings and credentials immediately to guarantee biometrics are disabled
       await LocalStore.clearLogoutStatus();
       await LocalStore.putRememberMe(false);
       await LocalStore.clearRememberedPhone();
       await LocalStore.clearUID();
       await LocalStore.clearCachedUserData();
-      await LocalStore.clearBiometricAuthEnabled(user.uid);
+      await LocalStore.clearBiometricAuthEnabled(uid);
       await LocalStore.clearLastValidUID();
 
+      await AppFirestore.usersCollectionRef.doc(uid).delete();
+      await user.delete();
 
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();

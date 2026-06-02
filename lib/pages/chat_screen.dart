@@ -32,7 +32,7 @@ class TechnicianChatScreen extends StatefulWidget {
   State<TechnicianChatScreen> createState() => _TechnicianChatScreenState();
 }
 
-class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
+class _TechnicianChatScreenState extends State<TechnicianChatScreen> with WidgetsBindingObserver {
   final TechnicianChatService _chatService = TechnicianChatService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -50,6 +50,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _chatService.markAsRead(widget.chatId);
     _chatService.setActiveChat(widget.chatId);
 
@@ -791,7 +792,18 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _chatService.clearActiveChat(widget.chatId);
+    } else if (state == AppLifecycleState.resumed) {
+      _chatService.setActiveChat(widget.chatId);
+      _chatService.markAsRead(widget.chatId);
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _chatService.clearActiveChat(widget.chatId);
     // Clear active chat for notification suppression
     NotificationServices.setActiveChatId(null);

@@ -5245,4 +5245,103 @@ exports.onBookingRequestDeletedCleanupOffers = onDocumentDeleted(
   }
 );
 
+// 8. Trigger when technician registration is rejected or resubmitted
+exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
+  "users/{userId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+    if (!afterData || !beforeData) return null;
+    
+    const userId = event.params.userId;
 
+    if (afterData.role !== "technician") {
+      return null;
+    }
+
+    // 1. Check if rejected
+    const isNowUnverified = afterData.isVerified === false;
+    const wasRejected = !beforeData.rejectionReason && afterData.rejectionReason;
+    const rejectionReasonChanged = beforeData.rejectionReason !== afterData.rejectionReason;
+    
+    if (isNowUnverified && (wasRejected || rejectionReasonChanged) && afterData.rejectionReason) {
+      if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
+        try {
+          await sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: userId,
+            titleEn: "Registration Rejected",
+            titleAr: "تم رفض التسجيل",
+            titleUr: "رجسٹریشن مسترد کر دی گئی",
+            bodyEn: `Your registration was rejected. Reason: ${afterData.rejectionReason}`,
+            bodyAr: `تم رفض تسجيلك. السبب: ${afterData.rejectionReason}`,
+            bodyUr: `آپ کی رجسٹریشن مسترد کر دی گئی ہے۔ وجہ: ${afterData.rejectionReason}`,
+            data: {
+              targetRole: "technician",
+              category: "registration_rejected",
+              type: "registration_rejected"
+            },
+            fcmToken: afterData.fcmToken,
+            lanCode: afterData.lanCode || "en"
+          });
+          console.log(`[${userId}] Rejection notification sent to technician.`);
+        } catch (error) {
+          console.error(`[${userId}] Error sending rejection notification to technician:`, error);
+        }
+      }
+    }
+
+    // 2. Check if resubmitted
+    const wasPending = beforeData.isDocsPendingReview === true;
+    const isNowPending = afterData.isDocsPendingReview === true;
+    
+    if (!wasPending && isNowPending) {
+      const techName = afterData.name || "Technician";
+      try {
+        const adminUsersDocs = await getAllAdminUsers();
+
+        const adminTokens = adminUsersDocs
+          .map((doc) => {
+            const data = doc.data();
+            return data.fcmToken && data.fcmToken.trim() !== ""
+              ? {
+                uid: doc.id,
+                token: data.fcmToken,
+                lanCode: data.lanCode || "en",
+              }
+              : null;
+          })
+          .filter(Boolean);
+
+        if (adminTokens.length > 0) {
+          for (const { uid, token, lanCode } of adminTokens) {
+            await sendAndStoreNotification({
+              targetRole: "admin",
+              targetId: uid,
+              titleEn: "Technician Documents Resubmitted",
+              titleAr: "إعادة إرسال مستندات الفني",
+              titleUr: "ٹیکنیشن کی دستاویزات دوبارہ جمع کر دی گئیں",
+              bodyEn: `Technician "${techName}" has resubmitted their documents for review.`,
+              bodyAr: `أعاد الفني "${techName}" إرسال مستنداته للمراجعة.`,
+              bodyUr: `ٹیکنیشن "${techName}" نے جائزے کے لیے اپنی دستاویزات دوبارہ جمع کر دی ہیں۔`,
+              data: {
+                targetRole: "admin",
+                category: "technician_registration_resubmitted",
+                technicianId: userId,
+                technicianName: techName,
+                isAdmin: "true",
+              },
+              fcmToken: token,
+              lanCode: lanCode,
+            });
+          }
+          console.log(`[${userId}] Admin notifications sent for document resubmission.`);
+        }
+      } catch (error) {
+        console.error(`[${userId}] Error sending admin notifications for document resubmission:`, error);
+      }
+    }
+
+    return null;
+  }
+);

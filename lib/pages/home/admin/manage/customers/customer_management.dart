@@ -23,9 +23,21 @@ class CustomerInfo extends StatelessWidget {
         throw 'Could not launch $launchUri';
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error launching phone call: $e');
+      debugPrint('Error launching phone call: $e');
+    }
+  }
+
+  Future<void> _launchWhatsApp(String phoneNumber) async {
+    final number = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final Uri launchUri = Uri.parse('https://wa.me/$number');
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $launchUri';
       }
+    } catch (e) {
+      debugPrint('Error launching WhatsApp: $e');
     }
   }
 
@@ -211,18 +223,24 @@ class CustomerInfo extends StatelessWidget {
                 icon: Icons.copy_outlined,
                 label: AppLocalizations.of(context)!.copyId,
                 color: Colors.blue,
-                onTap: () => _copyToClipboard(context, customer.uid, 'User ID'),
+                onTap: () => _copyToClipboard(
+                  context,
+                  customer.uid,
+                  AppLocalizations.of(context)!.userId,
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
                 context,
-                icon: Icons.chat_outlined,
-                label: 'Chat',
-                color: Colors.purple,
+                imageAsset: 'assets/images/whatsapp.png',
+                label: AppLocalizations.of(context)!.whatsapp,
+                color: const Color(0xFF25D366),
                 onTap: () {
-                  // Chat logic usually goes here
+                  if (customer.phone?.isNotEmpty == true) {
+                    _launchWhatsApp(customer.phone!);
+                  }
                 },
               ),
             ),
@@ -234,7 +252,8 @@ class CustomerInfo extends StatelessWidget {
 
   Widget _buildActionButton(
     BuildContext context, {
-    required IconData icon,
+    IconData? icon,
+    String? imageAsset,
     required String label,
     required Color color,
     required VoidCallback onTap,
@@ -249,7 +268,10 @@ class CustomerInfo extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 24),
+              if (imageAsset != null)
+                Image.asset(imageAsset, width: 24, height: 24)
+              else if (icon != null)
+                Icon(icon, color: color, size: 24),
               const SizedBox(height: 6),
               Text(
                 label,
@@ -307,7 +329,11 @@ class CustomerInfo extends StatelessWidget {
       icon: Icons.info_outline,
       iconColor: Colors.grey.shade700,
       children: [
-        _buildDetailRow('User ID', customer.uid, false),
+        _buildDetailRow(
+          AppLocalizations.of(context)!.userId,
+          customer.uid,
+          false,
+        ),
         _buildDetailRow(
           AppLocalizations.of(context)!.createdAt,
           _formatTimestamp(customer.createdAt, context) ?? 'N/A',

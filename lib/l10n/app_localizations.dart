@@ -4930,6 +4930,54 @@ abstract class AppLocalizations {
   /// **'Account Unblocked'**
   String get accountUnblocked;
 
+  /// No description provided for @completedOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Orders'**
+  String get completedOrders;
+
+  /// No description provided for @profession.
+  ///
+  /// In en, this message translates to:
+  /// **'Profession'**
+  String get profession;
+
+  /// No description provided for @idAndDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'ID and Documents'**
+  String get idAndDocuments;
+
+  /// No description provided for @bonusTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus Tier'**
+  String get bonusTier;
+
+  /// No description provided for @systemInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'System Info'**
+  String get systemInfo;
+
+  /// No description provided for @earningsBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings Breakdown'**
+  String get earningsBreakdown;
+
+  /// No description provided for @bonuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonuses'**
+  String get bonuses;
+
+  /// No description provided for @noDocumentsUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'No Documents Uploaded'**
+  String get noDocumentsUploaded;
+
   /// No description provided for @cancelledThisBooking.
   ///
   /// In en, this message translates to:
@@ -8264,7 +8312,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchAdmins.
   ///
   /// In en, this message translates to:
-  /// **'Search Admins...'**
+  /// **'Search admins...'**
   String get searchAdmins;
 
   /// No description provided for @aboutUs.
@@ -9454,6 +9502,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error during login'**
   String get errorDuringLogin;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @coreAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Core Admin'**
+  String get coreAdmin;
+
+  /// No description provided for @addAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin'**
+  String get addAdmin;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @addNewAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Admin'**
+  String get addNewAdmin;
+
+  /// No description provided for @editAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Admin'**
+  String get editAdmin;
+
+  /// No description provided for @enterAdminDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter admin details to invite them to the platform.'**
+  String get enterAdminDetails;
+
+  /// No description provided for @editAdminDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit admin details and access level.'**
+  String get editAdminDetails;
+
+  /// No description provided for @adminUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin updated successfully.'**
+  String get adminUpdatedSuccessfully;
+
+  /// No description provided for @adminPhoneExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin with this phone number already exists.'**
+  String get adminPhoneExists;
+
+  /// No description provided for @adminPhoneInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin with this phone number is already invited.'**
+  String get adminPhoneInvited;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full name'**
+  String get enterFullName;
+
+  /// No description provided for @pleaseEnterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter name'**
+  String get pleaseEnterName;
+
+  /// No description provided for @enterEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email address'**
+  String get enterEmailAddress;
+
+  /// No description provided for @egPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 50XXXXXXX'**
+  String get egPhoneNumber;
+
+  /// No description provided for @accessLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Level'**
+  String get accessLevelTitle;
+
+  /// No description provided for @customerServiceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Service Only'**
+  String get customerServiceOnly;
+
+  /// No description provided for @customerServiceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View only access to bookings and manage sections.'**
+  String get customerServiceDesc;
+
+  /// No description provided for @fullAdminAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Admin Access'**
+  String get fullAdminAccess;
+
+  /// No description provided for @fullAdminDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Full access except management of other admins.'**
+  String get fullAdminDesc;
+
+  /// No description provided for @phoneNoteWithCountryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'(enter phone number along with country code example : +966)'**
+  String get phoneNoteWithCountryCode;
 }
 
 class _AppLocalizationsDelegate

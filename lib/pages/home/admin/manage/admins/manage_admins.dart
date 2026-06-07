@@ -131,8 +131,8 @@ class _ManageAdminsState extends State<ManageAdmins>
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
-        title: const Text(
-          'Manage Admins',
+        title: Text(
+          AppLocalizations.of(context)?.manageAdmins ?? 'Manage Admins',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -164,7 +164,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                 onChanged: (value) =>
                     setState(() => _searchQuery = value.toLowerCase()),
                 decoration: InputDecoration(
-                  hintText: 'Search admins...',
+                  hintText: AppLocalizations.of(context)?.searchAdmins ?? 'Search admins...',
                   hintStyle: TextStyle(
                     color: Colors.grey.shade400,
                     fontSize: 14,
@@ -193,13 +193,13 @@ class _ManageAdminsState extends State<ManageAdmins>
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip(0, 'All', Icons.apps_rounded),
+                  _buildFilterChip(0, AppLocalizations.of(context)?.filterAll ?? 'All', Icons.apps_rounded),
                   const SizedBox(width: 8),
                   _buildFilterChip(
-                      1, 'Customer Service', Icons.support_agent_rounded),
+                      1, AppLocalizations.of(context)?.customerService ?? 'Customer Service', Icons.support_agent_rounded),
                   const SizedBox(width: 8),
                   _buildFilterChip(
-                      2, 'Full Admin', Icons.admin_panel_settings_rounded),
+                      2, AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin', Icons.admin_panel_settings_rounded),
                 ],
               ),
             ),
@@ -403,8 +403,8 @@ class _ManageAdminsState extends State<ManageAdmins>
                       const SizedBox(height: 4),
                       Text(
                         admin.isSuperAdmin
-                            ? 'Core Admin'
-                            : (admin.hasFullAccess ? 'Full Admin' : 'Customer Service'),
+                            ? (AppLocalizations.of(context)?.coreAdmin ?? 'Core Admin')
+                            : (admin.hasFullAccess ? (AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin') : (AppLocalizations.of(context)?.customerService ?? 'Customer Service')),
                         style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w500),
                       ),
@@ -423,6 +423,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                       const SizedBox(height: 4),
                       Text(
                         admin.phoneNumber,
+                        textDirection: TextDirection.ltr,
                         style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w500),
                       ),

@@ -160,7 +160,9 @@ class _AgentInfoState extends State<AgentInfo> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              agent.name ?? 'Technician',
+              agent.name ??
+                  AppLocalizations.of(context)?.technician ??
+                  'Technician',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             if (agent.isVerified == true) ...[
@@ -173,9 +175,9 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatsRow(context),
         const SizedBox(height: 4),
         _buildStatItem(
-          Icons.attach_money,
+          Icons.money_outlined,
           Colors.blue,
-          'Earned SAR ${agent.paidAmounts ?? "0.00"}',
+          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${AppLocalizations.of(context)!.sar} ${agent.paidAmounts ?? "0.00"}',
         ),
         const SizedBox(height: 8),
         Divider(
@@ -221,13 +223,13 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.star,
           Colors.orange,
-          '${agent.rating ?? 0} (4 Reviews)',
+          '${agent.rating ?? 0} (4 ${AppLocalizations.of(context)?.reviews ?? "Reviews"})',
         ),
         _buildStatSeparator(),
         _buildStatItem(
           Icons.check_circle_outline,
           Colors.green,
-          '${agent.currentMonthJobs ?? 0} Completed Orders',
+          '${agent.currentMonthJobs ?? 0} ${AppLocalizations.of(context)?.completedOrders ?? "Completed Orders"}',
         ),
       ],
     );
@@ -289,14 +291,15 @@ class _AgentInfoState extends State<AgentInfo> {
 
   Widget _buildProfessionSection(BuildContext context) {
     final currentLocale = Localizations.localeOf(context).languageCode;
+    final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: 'Profession',
+      title: l10n.profession ?? 'Profession',
       icon: Icons.settings_outlined,
       iconColor: Colors.blue.shade700,
       children: [
-        const Text(
-          'Job Roles',
+        Text(
+          l10n.jobRoles ?? 'Job Roles',
           style: TextStyle(
             fontSize: 13,
             color: Colors.grey,
@@ -314,8 +317,8 @@ class _AgentInfoState extends State<AgentInfo> {
         if (agent.certifications != null &&
             agent.certifications!.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const Text(
-            'Certifications',
+          Text(
+            l10n.certifications,
             style: TextStyle(
               fontSize: 13,
               color: Colors.grey,
@@ -340,7 +343,7 @@ class _AgentInfoState extends State<AgentInfo> {
     final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: 'ID & Documents',
+      title: l10n.idAndDocuments,
       icon: Icons.check_outlined,
       iconColor: Colors.blue.shade700,
       children: [
@@ -372,8 +375,8 @@ class _AgentInfoState extends State<AgentInfo> {
             agent.residenceIdUrl == null &&
             agent.sponsorWorkPermitUrl == null &&
             agent.chamberOfCommerceApprovalUrl == null)
-          const Text(
-            'No documents uploaded',
+          Text(
+            l10n.noDocumentsUploaded,
             style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
       ],
@@ -382,10 +385,12 @@ class _AgentInfoState extends State<AgentInfo> {
 
   Widget _buildEarningsSection(BuildContext context) {
     final hasFilter = widget.startDate != null || widget.endDate != null;
-    final hasFullAccess = LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
+    final hasFullAccess =
+        LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
+    final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: 'Earnings Breakdown',
+      title: l10n.earningsBreakdown ?? 'Earnings Breakdown',
       icon: Icons.attach_money,
       iconColor: Colors.blue.shade700,
       children: [
@@ -394,7 +399,7 @@ class _AgentInfoState extends State<AgentInfo> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                "Filtered: ${DateFormat('dd/MM/yyyy').format(widget.startDate!)} - ${DateFormat('dd/MM/yyyy').format(widget.endDate!)}",
+                "${AppLocalizations.of(context)?.filteredBy ?? 'Filtered:'} ${DateFormat('dd/MM/yyyy').format(widget.startDate!)} - ${DateFormat('dd/MM/yyyy').format(widget.endDate!)}",
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade600,
@@ -403,21 +408,21 @@ class _AgentInfoState extends State<AgentInfo> {
               ),
             ),
           _buildDetailRow(
-            'In-App Earnings',
+            l10n.inAppEarnings ?? 'In-App Earnings',
             'SAR ${(widget.initialInAppEarnings ?? 0.0).toStringAsFixed(2)}',
           ),
           _buildDetailRow(
-            'Outside-App Earnings',
+            l10n.outsideAppEarnings ?? 'Outside-App Earnings',
             'SAR ${(widget.initialOutsideAppEarnings ?? 0.0).toStringAsFixed(2)}',
           ),
           const Divider(height: 24),
         ],
         _buildDetailRow(
-          'Service Earnings (Total)',
+          l10n.totalEarnings ?? 'Service Earnings (Total)',
           'SAR ${agent.paidAmounts ?? "0.00"}',
         ),
         _buildDetailRow(
-          'Bonuses',
+          l10n.bonuses ?? 'Bonuses',
           'SAR ${agent.bonusAmount ?? agent.totalMonthlyBonus ?? "0.00"}',
         ),
         if (hasFullAccess) ...[
@@ -430,7 +435,10 @@ class _AgentInfoState extends State<AgentInfo> {
               icon: const Icon(Icons.delete_sweep, size: 20),
               label: Text(
                 AppLocalizations.of(context)!.clearWalletBalances,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.shade50,
@@ -449,9 +457,10 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildBonusTierSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: 'Bonus Tier',
+      title: l10n.bonusTier ?? 'Bonus Tier',
       icon: Icons.card_giftcard,
       iconColor: Colors.blue.shade700,
       children: [
@@ -461,7 +470,7 @@ class _AgentInfoState extends State<AgentInfo> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                agent.tier ?? 'Bronze',
+                _getLocalizedTier(agent.tier, l10n),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -472,7 +481,7 @@ class _AgentInfoState extends State<AgentInfo> {
             ),
             const SizedBox(width: 8),
             Text(
-              '${agent.totalMonthlyBonus != null && agent.totalMonthlyBonus! > 0 ? "5%" : "0%"} Bonus',
+              '${agent.totalMonthlyBonus != null && agent.totalMonthlyBonus! > 0 ? "5%" : "0%"} ${AppLocalizations.of(context)?.bonus ?? "Bonus"}',
               style: const TextStyle(color: Colors.grey, fontSize: 13),
             ),
           ],
@@ -482,19 +491,20 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   Widget _buildSystemInfoSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: 'System info',
+      title: l10n.systemInfo,
       icon: Icons.info_outline,
       iconColor: Colors.blue.shade700,
       children: [
-        _buildDetailRow('User ID', agent.uid ?? 'N/A'),
+        _buildDetailRow(l10n.userId, agent.uid ?? 'N/A'),
         _buildDetailRow(
-          'Created at',
+          l10n.createdAt,
           _formatTimestamp(agent.createdAt) ?? 'N/A',
         ),
         _buildDetailRow(
-          'Updated at',
+          l10n.updatedAt,
           _formatTimestamp(agent.updatedAt) ?? 'N/A',
         ),
       ],
@@ -732,8 +742,14 @@ class _AgentInfoState extends State<AgentInfo> {
                   Expanded(
                     child: Text(
                       agent.rejectionReason != null
-                          ? "Waiting for technician to re-upload documents"
-                          : "Waiting for technician to complete registration",
+                          ? AppLocalizations.of(
+                                  context,
+                                )?.waitingForTechnicianVerification ??
+                                "Waiting for technician to re-upload documents"
+                          : AppLocalizations.of(
+                                  context,
+                                )?.pleaseWaitAccountVerification ??
+                                "Waiting for technician to complete registration",
                       style: const TextStyle(
                         color: Colors.orange,
                         fontWeight: FontWeight.w500,
@@ -778,11 +794,23 @@ class _AgentInfoState extends State<AgentInfo> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isBlocked ? "Block Technician" : "Unblock Technician"),
+        title: Text(
+          isBlocked
+              ? AppLocalizations.of(context)?.suspendAccount ??
+                    "Block Technician"
+              : AppLocalizations.of(context)?.unblockAccount ??
+                    "Unblock Technician",
+        ),
         content: Text(
           isBlocked
-              ? "Are you sure you want to block this technician?"
-              : "Are you sure you want to unblock this technician?",
+              ? AppLocalizations.of(
+                      context,
+                    )?.areYouSureYouWantToSuspendThisAccount ??
+                    "Are you sure you want to block this technician?"
+              : AppLocalizations.of(
+                      context,
+                    )?.areYouSureYouWantToUnblockThisAccount ??
+                    "Are you sure you want to unblock this technician?",
         ),
         actions: [
           TextButton(
@@ -791,7 +819,11 @@ class _AgentInfoState extends State<AgentInfo> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(isBlocked ? "Block" : "Unblock"),
+            child: Text(
+              isBlocked
+                  ? AppLocalizations.of(context)?.block ?? "Block"
+                  : AppLocalizations.of(context)?.unblock ?? "Unblock",
+            ),
           ),
         ],
       ),
@@ -817,7 +849,11 @@ class _AgentInfoState extends State<AgentInfo> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  isBlocked ? "Technician Blocked" : "Technician Unblocked",
+                  isBlocked
+                      ? AppLocalizations.of(context)?.accountSuspended ??
+                            "Technician Blocked"
+                      : AppLocalizations.of(context)?.accountUnblocked ??
+                            "Technician Unblocked",
                 ),
                 backgroundColor: isBlocked ? Colors.red : Colors.green,
               ),
@@ -829,7 +865,13 @@ class _AgentInfoState extends State<AgentInfo> {
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                    'Error: $e',
+              ),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -853,7 +895,7 @@ class _AgentInfoState extends State<AgentInfo> {
                 content: TextField(
                   controller: controller,
                   decoration: InputDecoration(
-                    hintText: "Enter reason for rejection",
+                    hintText: l10n.enterReasonForReject,
                     errorText: errorText,
                   ),
                   maxLines: 3,
@@ -966,7 +1008,13 @@ class _AgentInfoState extends State<AgentInfo> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -976,6 +1024,12 @@ class _AgentInfoState extends State<AgentInfo> {
     String imageUrl,
     BuildContext context,
   ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: Loader(color: Colors.white)),
+    );
+
     final ext = imageUrl.split('.').last.split('?').first.toLowerCase();
     final isImageExtension = [
       'jpg',
@@ -986,6 +1040,7 @@ class _AgentInfoState extends State<AgentInfo> {
     ].contains(ext);
 
     if (!isImageExtension) {
+      if (context.mounted) Navigator.of(context).pop();
       await _openDocument(imageUrl, context);
       return;
     }
@@ -1006,11 +1061,13 @@ class _AgentInfoState extends State<AgentInfo> {
             bytes[1] == 0x50 &&
             bytes[2] == 0x44 &&
             bytes[3] == 0x46) {
+          if (context.mounted) Navigator.of(context).pop();
           await _openDocument(imageUrl, context);
           return;
         }
         // Check for ZIP/DOCX magic number: PK.. (0x50 0x4B 0x03 0x04)
         if (bytes.length >= 2 && bytes[0] == 0x50 && bytes[1] == 0x4B) {
+          if (context.mounted) Navigator.of(context).pop();
           await _openDocument(imageUrl, context);
           return;
         }
@@ -1020,6 +1077,7 @@ class _AgentInfoState extends State<AgentInfo> {
     }
 
     if (!context.mounted) return;
+    Navigator.of(context).pop();
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -1040,14 +1098,15 @@ class _AgentInfoState extends State<AgentInfo> {
                 fit: BoxFit.contain,
                 placeholder: (context, url) =>
                     const Loader(color: Colors.white),
-                errorWidget: (context, url, error) => const Center(
+                errorWidget: (context, url, error) => Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.error_outline, color: Colors.white, size: 48),
                       SizedBox(height: 16),
                       Text(
-                        "Failed to load image",
+                        AppLocalizations.of(context)?.failedToLoadImage ??
+                            "Failed to load image",
                         style: TextStyle(color: Colors.white),
                       ),
                     ],
@@ -1125,6 +1184,15 @@ class _AgentInfoState extends State<AgentInfo> {
       }
     }
     return jobKey;
+  }
+
+  String _getLocalizedTier(String? tier, AppLocalizations l10n) {
+    if (tier == null) return l10n.bronze ?? 'Bronze';
+    final lowerTier = tier.toLowerCase();
+    if (lowerTier == 'bronze') return l10n.bronze ?? 'Bronze';
+    if (lowerTier == 'silver') return l10n.silver ?? 'Silver';
+    if (lowerTier == 'gold') return l10n.gold ?? 'Gold';
+    return tier;
   }
 
   String? _formatTimestamp(Timestamp? timestamp) {

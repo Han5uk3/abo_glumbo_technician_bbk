@@ -2555,6 +2555,30 @@ class AppLocalizationsUr extends AppLocalizations {
   String get accountUnblocked => 'اکاؤنٹ بحال کر دیا گیا';
 
   @override
+  String get completedOrders => 'مکمل شدہ آرڈرز';
+
+  @override
+  String get profession => 'پیشہ';
+
+  @override
+  String get idAndDocuments => 'شناختی دستاویزات';
+
+  @override
+  String get bonusTier => 'بونس درجہ';
+
+  @override
+  String get systemInfo => 'سسٹم کی معلومات';
+
+  @override
+  String get earningsBreakdown => 'آمدنی کی تفصیل';
+
+  @override
+  String get bonuses => 'بونس';
+
+  @override
+  String get noDocumentsUploaded => 'کوئی دستاویز اپ لوڈ نہیں کی گئی';
+
+  @override
   String get cancelledThisBooking => 'یہ بکنگ منسوخ کر دی';
 
   @override
@@ -4789,90 +4813,91 @@ class AppLocalizationsUr extends AppLocalizations {
   String get noReasonProvided => 'کوئی وجہ فراہم نہیں کی گئی';
 
   @override
-  String get failedResendOtp => '[UR] Failed to resend OTP. Please try again.';
+  String get failedResendOtp =>
+      'OTP دوبارہ بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔';
 
   @override
   String get verificationIdNotFound =>
-      '[UR] Verification ID not found. Please try again.';
+      'تصدیقی شناختی کارڈ نہیں ملا۔ براہ کرم دوبارہ کوشش کریں۔';
 
   @override
-  String get pleaseFetchLocation => '[UR] Please fetch your current location';
+  String get pleaseFetchLocation => 'براہ کرم اپنا موجودہ مقام حاصل کریں';
 
   @override
-  String get pleaseSelectRole => '[UR] Please select at least one job role';
+  String get pleaseSelectRole => 'براہ کرم کم از کم ایک جاب رول منتخب کریں';
 
   @override
   String get pleaseUploadDocuments =>
-      '[UR] Please upload all mandatory documents';
+      'براہ کرم تمام ضروری دستاویزات اپ لوڈ کریں';
 
   @override
-  String get revokeAccess => '[UR] Revoke Access';
+  String get revokeAccess => 'رسائی منسوخ کریں';
 
   @override
-  String get coreAdminCannotRemove => '[UR] Core admin cannot be removed.';
+  String get coreAdminCannotRemove => 'بنیادی ایڈمن کو ہٹایا نہیں جا سکتا۔';
 
   @override
   String get onlyCoreAdminCanAdd =>
-      '[UR] Only the core admin can add new admins.';
+      'صرف بنیادی ایڈمن ہی نئے ایڈمنز شامل کر سکتا ہے۔';
 
   @override
   String get adminAddedSuccessfully =>
-      '[UR] Admin added successfully to pending invites.';
+      'ایڈمن کو زیر التواء دعوت ناموں میں کامیابی سے شامل کر دیا گیا۔';
 
   @override
   String get failedUpdateTechStatus =>
-      '[UR] Failed to update technician status';
+      'ٹیکنیشن کی حیثیت اپ ڈیٹ کرنے میں ناکامی';
 
   @override
-  String get offerAcceptedSuccessfully => '[UR] Offer accepted successfully';
+  String get offerAcceptedSuccessfully => 'پیشکش کامیابی سے قبول کر لی گئی';
 
   @override
-  String get failedToSendCounter => '[UR] Failed to send counter offer';
+  String get failedToSendCounter => 'جوابی پیشکش بھیجنے میں ناکامی';
 
   @override
-  String get couldNotLaunchEmail => '[UR] Could not launch email client';
+  String get couldNotLaunchEmail => 'ای میل کلائنٹ شروع نہیں کیا جا سکا';
 
   @override
-  String get couldNotLaunchWhatsapp => '[UR] Could not launch WhatsApp';
+  String get couldNotLaunchWhatsapp => 'واٹس ایپ شروع نہیں کیا جا سکا';
 
   @override
-  String get cancelLower => '[UR] Cancel';
+  String get cancelLower => 'منسوخ کریں';
 
   @override
-  String get invited => '[UR] INVITED';
+  String get invited => 'مدعو';
 
   @override
-  String get accessLevelUpper => '[UR] ACCESS LEVEL';
+  String get accessLevelUpper => 'رسائی کی سطح';
 
   @override
-  String get phoneUpper => '[UR] PHONE';
+  String get phoneUpper => 'فون';
 
   @override
-  String get invoiceTitle => '[UR] Service Booking Invoice';
+  String get invoiceTitle => 'سروس بکنگ انوائس';
 
   @override
-  String get invoiceWord => '[UR] INVOICE';
+  String get invoiceWord => 'انوائس';
 
   @override
-  String get statusPaid => '[UR] Status: PAID';
+  String get statusPaid => 'حیثیت: ادا شدہ';
 
   @override
-  String get billTo => '[UR] BILL TO:';
+  String get billTo => 'بل بھیجیں:';
 
   @override
-  String get bookingDetailsInvoice => '[UR] BOOKING DETAILS:';
+  String get bookingDetailsInvoice => 'بکنگ کی تفصیلات:';
 
   @override
-  String get subtotal => '[UR] Subtotal:';
+  String get subtotal => 'مجموعی ذیلی:';
 
   @override
-  String get inspectionFeeLabel => '[UR] Inspection Fee:';
+  String get inspectionFeeLabel => 'معائنہ فیس:';
 
   @override
-  String get totalLabel => '[UR] Total:';
+  String get totalLabel => 'کل:';
 
   @override
-  String get thankYouInvoice => '[UR] Thank you for choosing Abo Glumbo!';
+  String get thankYouInvoice => 'ابو جلمبو منتخب کرنے کے لیے آپ کا شکریہ!';
 
   @override
   String invoiceNumber(String number) {
@@ -5080,4 +5105,73 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get errorDuringLogin => 'لاگ ان کے دوران غلطی';
+
+  @override
+  String get filterAll => 'تمام';
+
+  @override
+  String get coreAdmin => 'بنیادی ایڈمن';
+
+  @override
+  String get addAdmin => 'ایڈمن شامل کریں';
+
+  @override
+  String get saveChanges => 'تبدیلیاں محفوظ کریں';
+
+  @override
+  String get addNewAdmin => 'نیا ایڈمن شامل کریں';
+
+  @override
+  String get editAdmin => 'ایڈمن میں ترمیم کریں';
+
+  @override
+  String get enterAdminDetails =>
+      'ایڈمن کو پلیٹ فارم پر مدعو کرنے کے لیے تفصیلات درج کریں۔';
+
+  @override
+  String get editAdminDetails =>
+      'ایڈمن کی تفصیلات اور رسائی کی سطح میں ترمیم کریں۔';
+
+  @override
+  String get adminUpdatedSuccessfully =>
+      'ایڈمن کو کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے۔';
+
+  @override
+  String get adminPhoneExists => 'اس فون نمبر کے ساتھ ایڈمن پہلے ہی موجود ہے۔';
+
+  @override
+  String get adminPhoneInvited =>
+      'اس فون نمبر کے ساتھ ایڈمن کو پہلے ہی مدعو کیا گیا ہے۔';
+
+  @override
+  String get enterFullName => 'پورا نام درج کریں';
+
+  @override
+  String get pleaseEnterName => 'براہ کرم نام درج کریں';
+
+  @override
+  String get enterEmailAddress => 'ای میل ایڈریس درج کریں';
+
+  @override
+  String get egPhoneNumber => 'مثلاً 50XXXXXXX';
+
+  @override
+  String get accessLevelTitle => 'رسائی کی سطح';
+
+  @override
+  String get customerServiceOnly => 'صرف کسٹمر سروس';
+
+  @override
+  String get customerServiceDesc =>
+      'بکنگ اور انتظام کے حصوں تک صرف دیکھنے کی رسائی۔';
+
+  @override
+  String get fullAdminAccess => 'مکمل ایڈمن کی رسائی';
+
+  @override
+  String get fullAdminDesc => 'دوسرے ایڈمنز کے انتظام کے علاوہ مکمل رسائی۔';
+
+  @override
+  String get phoneNoteWithCountryCode =>
+      '(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)';
 }

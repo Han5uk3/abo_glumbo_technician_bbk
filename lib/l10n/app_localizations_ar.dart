@@ -2509,6 +2509,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountUnblocked => 'تم تفعيل الحساب';
 
   @override
+  String get completedOrders => 'الطلبات المكتملة';
+
+  @override
+  String get profession => 'المهنة';
+
+  @override
+  String get idAndDocuments => 'الهوية والمستندات';
+
+  @override
+  String get bonusTier => 'مستوى المكافآت';
+
+  @override
+  String get systemInfo => 'معلومات النظام';
+
+  @override
+  String get earningsBreakdown => 'تفصيل الأرباح';
+
+  @override
+  String get bonuses => 'المكافآت';
+
+  @override
+  String get noDocumentsUploaded => 'لم يتم رفع أي مستندات';
+
+  @override
   String get cancelledThisBooking => 'ألغى هذا الحجز';
 
   @override
@@ -3727,7 +3751,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن يتضمن رقم الهاتف رمز الدولة';
 
   @override
-  String get pleaseEnterPhoneNumber => 'يرجى إدخال رقم الهاتف';
+  String get pleaseEnterPhoneNumber => 'الرجاء إدخال رقم الهاتف';
 
   @override
   String get fileTooLarge => 'الملف كبير جداً';
@@ -4706,90 +4730,89 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noReasonProvided => 'لم يتم تقديم سبب';
 
   @override
-  String get failedResendOtp => '[AR] Failed to resend OTP. Please try again.';
+  String get failedResendOtp =>
+      'فشل إعادة إرسال رمز التحقق. يرجى المحاولة مرة أخرى.';
 
   @override
   String get verificationIdNotFound =>
-      '[AR] Verification ID not found. Please try again.';
+      'لم يتم العثور على معرف التحقق. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get pleaseFetchLocation => '[AR] Please fetch your current location';
+  String get pleaseFetchLocation => 'يرجى تحديد موقعك الحالي';
 
   @override
-  String get pleaseSelectRole => '[AR] Please select at least one job role';
+  String get pleaseSelectRole => 'يرجى تحديد دور وظيفي واحد على الأقل';
 
   @override
-  String get pleaseUploadDocuments =>
-      '[AR] Please upload all mandatory documents';
+  String get pleaseUploadDocuments => 'يرجى تحميل جميع المستندات الإلزامية';
 
   @override
-  String get revokeAccess => '[AR] Revoke Access';
+  String get revokeAccess => 'إلغاء الصلاحية';
 
   @override
-  String get coreAdminCannotRemove => '[AR] Core admin cannot be removed.';
+  String get coreAdminCannotRemove => 'لا يمكن إزالة المشرف الأساسي.';
 
   @override
   String get onlyCoreAdminCanAdd =>
-      '[AR] Only the core admin can add new admins.';
+      'المشرف الأساسي فقط يمكنه إضافة مشرفين جدد.';
 
   @override
   String get adminAddedSuccessfully =>
-      '[AR] Admin added successfully to pending invites.';
+      'تمت إضافة المشرف بنجاح إلى الدعوات المعلقة.';
 
   @override
-  String get failedUpdateTechStatus =>
-      '[AR] Failed to update technician status';
+  String get failedUpdateTechStatus => 'فشل في تحديث حالة الفني';
 
   @override
-  String get offerAcceptedSuccessfully => '[AR] Offer accepted successfully';
+  String get offerAcceptedSuccessfully => 'تم قبول العرض بنجاح';
 
   @override
-  String get failedToSendCounter => '[AR] Failed to send counter offer';
+  String get failedToSendCounter => 'فشل في إرسال العرض المضاد';
 
   @override
-  String get couldNotLaunchEmail => '[AR] Could not launch email client';
+  String get couldNotLaunchEmail => 'تعذر فتح تطبيق البريد الإلكتروني';
 
   @override
-  String get couldNotLaunchWhatsapp => '[AR] Could not launch WhatsApp';
+  String get couldNotLaunchWhatsapp => 'تعذر فتح الواتساب';
 
   @override
-  String get cancelLower => '[AR] Cancel';
+  String get cancelLower => 'إلغاء';
 
   @override
-  String get invited => '[AR] INVITED';
+  String get invited => 'مدعو';
 
   @override
-  String get accessLevelUpper => '[AR] ACCESS LEVEL';
+  String get accessLevelUpper => 'مستوى الوصول';
 
   @override
-  String get phoneUpper => '[AR] PHONE';
+  String get phoneUpper => 'الهاتف';
 
   @override
-  String get invoiceTitle => '[AR] Service Booking Invoice';
+  String get invoiceTitle => 'فاتورة حجز الخدمة';
 
   @override
-  String get invoiceWord => '[AR] INVOICE';
+  String get invoiceWord => 'الفاتورة';
 
   @override
-  String get statusPaid => '[AR] Status: PAID';
+  String get statusPaid => 'الحالة: مدفوعة';
 
   @override
-  String get billTo => '[AR] BILL TO:';
+  String get billTo => 'فاتورة إلى:';
 
   @override
-  String get bookingDetailsInvoice => '[AR] BOOKING DETAILS:';
+  String get bookingDetailsInvoice => 'تفاصيل الحجز:';
 
   @override
-  String get subtotal => '[AR] Subtotal:';
+  String get subtotal => 'المجموع الفرعي:';
 
   @override
-  String get inspectionFeeLabel => '[AR] Inspection Fee:';
+  String get inspectionFeeLabel => 'رسوم الفحص:';
 
   @override
-  String get totalLabel => '[AR] Total:';
+  String get totalLabel => 'الإجمالي:';
 
   @override
-  String get thankYouInvoice => '[AR] Thank you for choosing Abo Glumbo!';
+  String get thankYouInvoice => 'شكراً لاختيارك أبو جلمبو!';
 
   @override
   String invoiceNumber(String number) {
@@ -4996,4 +5019,68 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorDuringLogin => 'خطأ أثناء تسجيل الدخول';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get coreAdmin => 'مشرف أساسي';
+
+  @override
+  String get addAdmin => 'إضافة مشرف';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get addNewAdmin => 'إضافة مشرف جديد';
+
+  @override
+  String get editAdmin => 'تعديل المشرف';
+
+  @override
+  String get enterAdminDetails => 'أدخل تفاصيل المشرف لدعوته إلى المنصة.';
+
+  @override
+  String get editAdminDetails => 'تعديل تفاصيل المشرف ومستوى الوصول.';
+
+  @override
+  String get adminUpdatedSuccessfully => 'تم تحديث المشرف بنجاح.';
+
+  @override
+  String get adminPhoneExists => 'يوجد مشرف بهذا الرقم بالفعل.';
+
+  @override
+  String get adminPhoneInvited => 'تمت دعوة مشرف بهذا الرقم بالفعل.';
+
+  @override
+  String get enterFullName => 'أدخل الاسم الكامل';
+
+  @override
+  String get pleaseEnterName => 'الرجاء إدخال الاسم';
+
+  @override
+  String get enterEmailAddress => 'أدخل عنوان البريد الإلكتروني';
+
+  @override
+  String get egPhoneNumber => 'مثال 50XXXXXXX';
+
+  @override
+  String get accessLevelTitle => 'مستوى الوصول';
+
+  @override
+  String get customerServiceOnly => 'خدمة العملاء فقط';
+
+  @override
+  String get customerServiceDesc => 'وصول للعرض فقط للحجوزات وأقسام الإدارة.';
+
+  @override
+  String get fullAdminAccess => 'وصول مشرف كامل';
+
+  @override
+  String get fullAdminDesc => 'وصول كامل باستثناء إدارة المشرفين الآخرين.';
+
+  @override
+  String get phoneNoteWithCountryCode =>
+      '(أدخل رقم الهاتف مع رمز الدولة مثال : 966+)';
 }

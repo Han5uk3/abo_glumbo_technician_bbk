@@ -2546,6 +2546,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountUnblocked => 'Account Unblocked';
 
   @override
+  String get completedOrders => 'Completed Orders';
+
+  @override
+  String get profession => 'Profession';
+
+  @override
+  String get idAndDocuments => 'ID and Documents';
+
+  @override
+  String get bonusTier => 'Bonus Tier';
+
+  @override
+  String get systemInfo => 'System Info';
+
+  @override
+  String get earningsBreakdown => 'Earnings Breakdown';
+
+  @override
+  String get bonuses => 'Bonuses';
+
+  @override
+  String get noDocumentsUploaded => 'No Documents Uploaded';
+
+  @override
   String get cancelledThisBooking => 'Cancelled This Booking';
 
   @override
@@ -4374,7 +4398,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageAdmins => 'Manage Admins';
 
   @override
-  String get searchAdmins => 'Search Admins...';
+  String get searchAdmins => 'Search admins...';
 
   @override
   String get aboutUs => 'About Us';
@@ -5061,4 +5085,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorDuringLogin => 'Error during login';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get coreAdmin => 'Core Admin';
+
+  @override
+  String get addAdmin => 'Add Admin';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get addNewAdmin => 'Add New Admin';
+
+  @override
+  String get editAdmin => 'Edit Admin';
+
+  @override
+  String get enterAdminDetails =>
+      'Enter admin details to invite them to the platform.';
+
+  @override
+  String get editAdminDetails => 'Edit admin details and access level.';
+
+  @override
+  String get adminUpdatedSuccessfully => 'Admin updated successfully.';
+
+  @override
+  String get adminPhoneExists => 'Admin with this phone number already exists.';
+
+  @override
+  String get adminPhoneInvited =>
+      'Admin with this phone number is already invited.';
+
+  @override
+  String get enterFullName => 'Enter full name';
+
+  @override
+  String get pleaseEnterName => 'Please enter name';
+
+  @override
+  String get enterEmailAddress => 'Enter email address';
+
+  @override
+  String get egPhoneNumber => 'e.g. 50XXXXXXX';
+
+  @override
+  String get accessLevelTitle => 'Access Level';
+
+  @override
+  String get customerServiceOnly => 'Customer Service Only';
+
+  @override
+  String get customerServiceDesc =>
+      'View only access to bookings and manage sections.';
+
+  @override
+  String get fullAdminAccess => 'Full Admin Access';
+
+  @override
+  String get fullAdminDesc => 'Full access except management of other admins.';
+
+  @override
+  String get phoneNoteWithCountryCode =>
+      '(enter phone number along with country code example : +966)';
 }

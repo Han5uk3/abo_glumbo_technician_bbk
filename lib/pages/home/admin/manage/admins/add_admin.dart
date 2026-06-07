@@ -31,39 +31,27 @@ class _AddAdminPageState extends State<AddAdminPage> {
   bool _isLoading = false;
 
   String get _submitButtonText {
-    if (widget.adminToEdit == null) return 'Add Admin';
-    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
-    if (locale == 'ar') return 'حفظ التغييرات';
-    if (locale == 'ur') return 'تبدیلیاں محفوظ کریں';
-    return 'Save Changes';
+    if (widget.adminToEdit == null) return AppLocalizations.of(context)?.addAdmin ?? 'Add Admin';
+    return AppLocalizations.of(context)?.saveChanges ?? 'Save Changes';
   }
 
   String get _pageTitle {
-    if (widget.adminToEdit == null) return 'Add New Admin';
-    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
-    if (locale == 'ar') return 'تعديل المشرف';
-    if (locale == 'ur') return 'ایڈمن میں ترمیم کریں';
-    return 'Edit Admin';
+    if (widget.adminToEdit == null) return AppLocalizations.of(context)?.addNewAdmin ?? 'Add New Admin';
+    return AppLocalizations.of(context)?.editAdmin ?? 'Edit Admin';
   }
 
   String get _pageSubtitle {
     if (widget.adminToEdit == null) {
-      return 'Enter admin details to invite them to the platform.';
+      return AppLocalizations.of(context)?.enterAdminDetails ?? 'Enter admin details to invite them to the platform.';
     }
-    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
-    if (locale == 'ar') return 'تعديل تفاصيل المشرف ومستوى الوصول.';
-    if (locale == 'ur') return 'ایڈمن کی تفصیلات اور رسائی کی سطح میں ترمیم کریں۔';
-    return 'Edit admin details and access level.';
+    return AppLocalizations.of(context)?.editAdminDetails ?? 'Edit admin details and access level.';
   }
 
   String get _successMessage {
     if (widget.adminToEdit == null) {
       return AppLocalizations.of(context)?.adminAddedSuccessfully ?? 'Admin added successfully to pending invites.';
     }
-    final locale = AppLocalizations.of(context)?.localeName ?? 'en';
-    if (locale == 'ar') return 'تم تحديث المشرف بنجاح.';
-    if (locale == 'ur') return 'ایڈمن کو کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے۔';
-    return 'Admin updated successfully.';
+    return AppLocalizations.of(context)?.adminUpdatedSuccessfully ?? 'Admin updated successfully.';
   }
 
   @override
@@ -131,7 +119,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
 
         for (var doc in activeCheck.docs) {
           if (widget.adminToEdit == null || doc.id != widget.adminToEdit!.uid || widget.isPending) {
-            throw 'Admin with this phone number already exists.';
+            throw AppLocalizations.of(context)?.adminPhoneExists ?? 'Admin with this phone number already exists.';
           }
         }
 
@@ -141,7 +129,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
 
         for (var doc in pendingCheck.docs) {
           if (widget.adminToEdit == null || doc.id != widget.adminToEdit!.uid || !widget.isPending) {
-            throw 'Admin with this phone number is already invited.';
+            throw AppLocalizations.of(context)?.adminPhoneInvited ?? 'Admin with this phone number is already invited.';
           }
         }
       }
@@ -220,50 +208,55 @@ class _AddAdminPageState extends State<AddAdminPage> {
               const SizedBox(height: 24),
               TextFormWidget(
                 controller: _nameController,
-                label: 'Full Name',
-                hintText: 'Enter full name',
+                label: AppLocalizations.of(context)?.fullName ?? 'Full Name',
+                hintText: AppLocalizations.of(context)?.enterFullName ?? 'Enter full name',
                 validator:
-                    (v) => v == null || v.isEmpty ? 'Please enter name' : null,
+                    (v) => v == null || v.isEmpty ? (AppLocalizations.of(context)?.pleaseEnterName ?? 'Please enter name') : null,
               ),
               const SizedBox(height: 16),
               TextFormWidget(
                 controller: _emailController,
-                label: 'Email Address',
-                hintText: 'Enter email address',
+                label: AppLocalizations.of(context)?.emailAddress ?? 'Email Address',
+                hintText: AppLocalizations.of(context)?.enterEmailAddress ?? 'Enter email address',
                 keyboardType: TextInputType.emailAddress,
                 validator:
                     (v) =>
                         v == null || !v.contains('@')
-                            ? 'Please enter a valid email'
+                            ? (AppLocalizations.of(context)?.pleaseEnterValidEmail ?? 'Please enter a valid email')
                             : null,
               ),
               const SizedBox(height: 16),
               TextFormWidget(
                 controller: _phoneController,
-                label: 'Phone Number',
-                hintText: 'e.g. 50XXXXXXX',
+                label: AppLocalizations.of(context)?.phoneNumber ?? 'Phone Number',
+                hintText: AppLocalizations.of(context)?.egPhoneNumber ?? 'e.g. 50XXXXXXX',
                 isPhoneNumber: true,
                 validator:
                     (v) =>
                         v == null || v.isEmpty
-                            ? 'Please enter phone number'
+                            ? (AppLocalizations.of(context)?.pleaseEnterPhoneNumber ?? 'Please enter phone number')
                             : null,
               ),
+              const SizedBox(height: 4),
+              Text(
+                AppLocalizations.of(context)?.phoneNoteWithCountryCode ?? '(enter phone number along with country code example : +966)',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
               const SizedBox(height: 24),
-              const Text(
-                'Access Level',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)?.accessLevelTitle ?? 'Access Level',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               _buildAccessLevelOption(
                 value: 1,
-                title: 'Customer Service Only',
-                subtitle: 'View only access to bookings and manage sections.',
+                title: AppLocalizations.of(context)?.customerServiceOnly ?? 'Customer Service Only',
+                subtitle: AppLocalizations.of(context)?.customerServiceDesc ?? 'View only access to bookings and manage sections.',
               ),
               _buildAccessLevelOption(
                 value: 2,
-                title: 'Full Admin Access',
-                subtitle: 'Full access except management of other admins.',
+                title: AppLocalizations.of(context)?.fullAdminAccess ?? 'Full Admin Access',
+                subtitle: AppLocalizations.of(context)?.fullAdminDesc ?? 'Full access except management of other admins.',
               ),
               const SizedBox(height: 40),
               SizedBox(

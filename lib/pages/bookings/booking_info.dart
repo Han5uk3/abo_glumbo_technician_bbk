@@ -3769,7 +3769,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => _showCounterOfferDatePicker(booking),
+                    onPressed: () => _showCounterOfferDatePicker(booking, _offerId),
                     icon: const Icon(Icons.history_toggle_off, size: 18),
                     label: Text(l10n.proposeNewTime),
                     style: ElevatedButton.styleFrom(
@@ -3815,7 +3815,7 @@ class _BookingInfoState extends State<BookingInfo> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-              onPressed: () => _showCounterOfferDatePicker(booking),
+              onPressed: () => _showCounterOfferDatePicker(booking, _offerId),
               icon: const Icon(Icons.history_toggle_off, size: 20),
               label: Text(l10n.proposeNewTime),
               style: ElevatedButton.styleFrom(
@@ -3845,82 +3845,7 @@ class _BookingInfoState extends State<BookingInfo> {
     if (widget.isAdmin) {
       return _buildAdminPendingBookingControls(context, booking);
     }
-    final l10n = AppLocalizations.of(context)!;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.06)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        _showAcceptConfirmationDialog(context, booking),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.accept,
-                      style: DMSansFont.textStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: () => _showRejectBookingDialog(context, booking),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.reject,
-                      style: DMSansFont.textStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildAdminPendingBookingControls(

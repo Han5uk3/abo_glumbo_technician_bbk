@@ -239,8 +239,23 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                     );
 
                     if (confirm == true) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return const Center(
+                            child: Loader(size: 40),
+                          );
+                        },
+                      );
+
                       await AppServices.deleteAllFirestoreNotifications();
+                      
                       if (context.mounted) {
+                        Navigator.pop(context); // Close the loading dialog
+                        setState(() {
+                          _cachedNotifications.clear();
+                        });
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: Colors.green,

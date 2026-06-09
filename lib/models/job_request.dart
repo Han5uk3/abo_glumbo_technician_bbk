@@ -1,19 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
-import 'package:aboglumbo_bbk_panel/models/location.dart'; // Address is location in tech app? Wait let me check.
+
 
 class JobRequestModel {
   final String id;
   final ServiceModel service;
   final CustomerModel customer;
-  final Map<String, dynamic> address; // Using map for flexibility if models differ slightly
+  final Map<String, dynamic> address;
   final String notes;
   final String? issueImage;
   final String? issueVideo;
   final Timestamp createdAt;
   final Timestamp expiresAt;
+  final bool isOnHour;
+  final Timestamp? bookingDateTime;
   final String status;
+  final bool isRebook;
+  final String? rebookTechnicianId;
 
   JobRequestModel({
     required this.id,
@@ -25,7 +29,11 @@ class JobRequestModel {
     this.issueVideo,
     required this.createdAt,
     required this.expiresAt,
+    this.isOnHour = true,
+    this.bookingDateTime,
     required this.status,
+    this.isRebook = false,
+    this.rebookTechnicianId,
   });
 
   factory JobRequestModel.fromJson(Map<String, dynamic> json) {
@@ -39,7 +47,11 @@ class JobRequestModel {
       issueVideo: json['issueVideo'],
       createdAt: json['createdAt'] as Timestamp,
       expiresAt: json['expiresAt'] as Timestamp,
+      isOnHour: json['isOnHour'] ?? true,
+      bookingDateTime: json['bookingDateTime'] as Timestamp?,
       status: json['status'] ?? 'pending',
+      isRebook: json['isRebook'] ?? false,
+      rebookTechnicianId: json['rebookTechnicianId'],
     );
   }
 
@@ -54,7 +66,11 @@ class JobRequestModel {
       'issueVideo': issueVideo,
       'createdAt': createdAt,
       'expiresAt': expiresAt,
+      'isOnHour': isOnHour,
+      'bookingDateTime': bookingDateTime,
       'status': status,
+      'isRebook': isRebook,
+      'rebookTechnicianId': rebookTechnicianId,
     };
   }
 }

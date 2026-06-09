@@ -34,10 +34,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 class AppServices {
-  static Future<void> updateFCMToken(
-    String token, {
-    bool? isAdmin,
-  }) async {
+  static Future<void> updateFCMToken(String token, {bool? isAdmin}) async {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isEmpty) {
@@ -48,7 +45,8 @@ class AppServices {
       bool isUserAdmin = isAdmin ?? false;
       if (isAdmin == null) {
         UserModel? cachedUser = LocalStore.getCachedUserData();
-        isUserAdmin = cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
+        isUserAdmin =
+            cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
       }
 
       final collection = isUserAdmin
@@ -72,16 +70,17 @@ class AppServices {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isNotEmpty) {
         UserModel? cachedUser = LocalStore.getCachedUserData();
-        bool isAdmin = cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
+        bool isAdmin =
+            cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
         final collection = isAdmin
             ? AppFirestore.adminsCollectionRef
             : AppFirestore.usersCollectionRef;
 
-        await collection.doc(userId).update({
-          'fcmToken': FieldValue.delete(),
-        });
+        await collection.doc(userId).update({'fcmToken': FieldValue.delete()});
         if (kDebugMode) {
-          print('✅ FCM token cleared from ${isAdmin ? 'admins' : 'users'} collection');
+          print(
+            '✅ FCM token cleared from ${isAdmin ? 'admins' : 'users'} collection',
+          );
         }
       }
     } catch (e) {
@@ -172,7 +171,6 @@ class AppServices {
     bool updateSponsorPermit = false,
     bool updateChamberApproval = false,
   }) async {
-
     try {
       String userId = user.uid ?? '';
 
@@ -211,8 +209,10 @@ class AppServices {
           userData['sponsorWorkPermitUrl'] = user.sponsorWorkPermitUrl;
         }
 
-        if (updateChamberApproval && user.chamberOfCommerceApprovalUrl != null) {
-          userData['chamberOfCommerceApprovalUrl'] = user.chamberOfCommerceApprovalUrl;
+        if (updateChamberApproval &&
+            user.chamberOfCommerceApprovalUrl != null) {
+          userData['chamberOfCommerceApprovalUrl'] =
+              user.chamberOfCommerceApprovalUrl;
         }
 
         bool isAdmin = user.isAdmin == true || user.role == 'admin';
@@ -262,9 +262,7 @@ class AppServices {
           ? AppFirestore.adminsCollectionRef
           : AppFirestore.usersCollectionRef;
 
-      await collection.doc(userId).update({
-        'lanCode': language,
-      });
+      await collection.doc(userId).update({'lanCode': language});
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error updating worker language: $e');
@@ -1098,7 +1096,10 @@ class AppServices {
     }
   }
 
-  static Future<bool> blockOrUnblockAgent(String agentId, bool isBlocked) async {
+  static Future<bool> blockOrUnblockAgent(
+    String agentId,
+    bool isBlocked,
+  ) async {
     try {
       await AppFirestore.usersCollectionRef.doc(agentId).update({
         'isBlocked': isBlocked,
@@ -1229,11 +1230,8 @@ class AppServices {
     required List<Map<String, dynamic>> serviceItems,
     required double totalCost,
     required double inspectionFee,
- 
   }) async {
     try {
-      
-
       final String status = 'CP';
 
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
@@ -1250,7 +1248,6 @@ class AppServices {
           'totalCost': totalCost,
           'mode': mode,
           'inspectionFee': inspectionFee,
-          
         },
 
         if (mode == 1) ...{
@@ -1262,8 +1259,8 @@ class AppServices {
             'createdAt': FieldValue.serverTimestamp(),
             'updatedAt': FieldValue.serverTimestamp(),
             'expiredOn': Timestamp.fromDate(
-                    DateTime.now().add(const Duration(days: 7)),
-                  ),
+              DateTime.now().add(const Duration(days: 7)),
+            ),
             'rejectedTechnicians': [],
           },
         },
@@ -2138,11 +2135,11 @@ class AppServices {
 
     final warrantyClaims = getWarrantyClaimRequestsStream(
       uid,
-    ).map((claims) => claims.length)
-    .onErrorReturn(0);
+    ).map((claims) => claims.length).onErrorReturn(0);
 
-    final wallet = UnifiedPayoutServices.getUnifiedWalletStream(uid)
-        .onErrorReturn(UnifiedWalletModel());
+    final wallet = UnifiedPayoutServices.getUnifiedWalletStream(
+      uid,
+    ).onErrorReturn(UnifiedWalletModel());
 
     return Rx.combineLatest7<
       int,
@@ -2329,11 +2326,13 @@ class AppServices {
 
   static Stream<TippingModel> _getLiveTipsStream(String uid) {
     final stream = AppFirestore.tippingCollectionRef.doc(uid).snapshots();
-    return stream.map((snapshot) {
-      final data = snapshot.data();
-      if (!snapshot.exists || data == null) return TippingModel();
-      return TippingModel.fromJson(data as Map<String, dynamic>);
-    }).onErrorReturn(TippingModel());
+    return stream
+        .map((snapshot) {
+          final data = snapshot.data();
+          if (!snapshot.exists || data == null) return TippingModel();
+          return TippingModel.fromJson(data as Map<String, dynamic>);
+        })
+        .onErrorReturn(TippingModel());
   }
 
   /// Stream user data
@@ -2479,23 +2478,29 @@ class AppServices {
         })
         .onErrorReturn(0);
 
-    final customers = AppFirestore.customersCollectionRef.snapshots().map((s) {
-      return s.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['role'] == 'customer' &&
-            data['uid'] != null &&
-            data['uid'].toString().isNotEmpty;
-      }).length;
-    }).onErrorReturn(0);
+    final customers = AppFirestore.customersCollectionRef
+        .snapshots()
+        .map((s) {
+          return s.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['role'] == 'customer' &&
+                data['uid'] != null &&
+                data['uid'].toString().isNotEmpty;
+          }).length;
+        })
+        .onErrorReturn(0);
 
-    final technicians = AppFirestore.usersCollectionRef.snapshots().map((s) {
-      return s.docs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['isAdmin'] != true &&
-            data['uid'] != null &&
-            data['uid'].toString().isNotEmpty;
-      }).length;
-    }).onErrorReturn(0);
+    final technicians = AppFirestore.usersCollectionRef
+        .snapshots()
+        .map((s) {
+          return s.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['isAdmin'] != true &&
+                data['uid'] != null &&
+                data['uid'].toString().isNotEmpty;
+          }).length;
+        })
+        .onErrorReturn(0);
 
     final completedBookings = AppFirestore.bookingsCollectionRef
         .where('paymentCompleted', isEqualTo: true)
@@ -2838,9 +2843,11 @@ class AppServices {
           if (bookingId != null) {
             final booking = await getBookingById(bookingId);
             if (booking != null) {
-              if (booking.bookingStatusCode == 'P' || booking.bookingStatusCode == 'A') {
+              if (booking.bookingStatusCode == 'P' ||
+                  booking.bookingStatusCode == 'A') {
                 // If booking is 'A' (Assigned), it should only show for the assigned technician
-                if (booking.bookingStatusCode == 'A' && booking.agent?.uid != userId) {
+                if (booking.bookingStatusCode == 'A' &&
+                    booking.agent?.uid != userId) {
                   return null;
                 }
 
@@ -2894,6 +2901,28 @@ class AppServices {
         'status': 'accepted_by_technician',
         'acceptedAt': FieldValue.serverTimestamp(),
       });
+
+      final offerSnap = await offerRef.get();
+      if (offerSnap.exists) {
+        final offerData = offerSnap.data() as Map<String, dynamic>;
+        final customerId = offerData['customerId'];
+        final isRebook = offerData['isRebook'] == true;
+        if (customerId != null) {
+          await _recordCustomerNotification(
+            customerId: customerId,
+            titleEn: 'Technician Accepted!',
+            titleAr: 'تم قبول الفني!',
+            bodyEn: isRebook
+                ? '${technician.name} accepted your rebooking request.'
+                : '${technician.name} has accepted your request. Please confirm to proceed.',
+            bodyAr: isRebook
+                ? 'قبل ${technician.name} طلب إعادة الجدولة الخاص بك.'
+                : 'وافق ${technician.name} على طلبك. يرجى التأكيد للمتابعة.',
+            type: 'offer_accepted',
+            data: {'requestId': requestId},
+          );
+        }
+      }
       return;
     }
 
@@ -2926,7 +2955,7 @@ class AppServices {
       }
 
       final bool isAutoAssignment = bookingData['autoAssignmentStatus'] != null;
-      
+
       if (isAutoAssignment) {
         // Auto-assignment booking: Assign technician immediately
         transaction.update(bookingRef, {
@@ -2953,12 +2982,39 @@ class AppServices {
         });
       }
     });
+
+    try {
+      final bookingDoc = await AppFirestore.bookingsCollectionRef
+          .doc(bookingId)
+          .get();
+      if (bookingDoc.exists) {
+        final bookingData = bookingDoc.data() as Map<String, dynamic>;
+        final customerId = bookingData['customerId'];
+        final isRebook = offerRef
+            .id
+            .isNotEmpty; // Just for context, we can assume auto-assign or direct
+        if (customerId != null) {
+          await _recordCustomerNotification(
+            customerId: customerId,
+            titleEn: 'Technician Assigned!',
+            titleAr: 'تم تعيين الفني!',
+            bodyEn: '${technician.name} has been assigned to your booking.',
+            bodyAr: 'تم تعيين ${technician.name} لطلبك.',
+            type: 'booking_assigned',
+            data: {'bookingId': bookingId},
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error sending acceptance notification: $e');
+    }
   }
 
   static Future<void> declineJobOffer(String offerId) async {
     try {
-      final offerDoc =
-          await AppFirestore.jobOffersCollectionRef.doc(offerId).get();
+      final offerDoc = await AppFirestore.jobOffersCollectionRef
+          .doc(offerId)
+          .get();
       if (!offerDoc.exists) return;
 
       final data = offerDoc.data() as Map<String, dynamic>;

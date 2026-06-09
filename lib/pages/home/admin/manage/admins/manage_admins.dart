@@ -228,6 +228,8 @@ class _ManageAdminsState extends State<ManageAdmins>
                 }
 
                 final allAdmins = snapshot.data!.where((admin) {
+                  if (admin.isSuperAdmin) return false;
+
                   final matchesSearch =
                       admin.name.toLowerCase().contains(_searchQuery) ||
                           admin.phoneNumber.contains(_searchQuery) ||

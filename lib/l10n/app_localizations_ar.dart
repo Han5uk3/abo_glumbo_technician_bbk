@@ -5063,7 +5063,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterEmailAddress => 'أدخل عنوان البريد الإلكتروني';
 
   @override
-  String get egPhoneNumber => 'مثال 50XXXXXXX';
+  String get egPhoneNumber => 'مثال +9665XXXXXXXX';
 
   @override
   String get accessLevelTitle => 'مستوى الوصول';

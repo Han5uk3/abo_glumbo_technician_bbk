@@ -5131,7 +5131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterEmailAddress => 'Enter email address';
 
   @override
-  String get egPhoneNumber => 'e.g. 50XXXXXXX';
+  String get egPhoneNumber => 'e.g. +9665XXXXXXXX';
 
   @override
   String get accessLevelTitle => 'Access Level';

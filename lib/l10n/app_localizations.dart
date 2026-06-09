@@ -9590,7 +9590,7 @@ abstract class AppLocalizations {
   /// No description provided for @egPhoneNumber.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 50XXXXXXX'**
+  /// **'e.g. +9665XXXXXXXX'**
   String get egPhoneNumber;
 
   /// No description provided for @accessLevelTitle.

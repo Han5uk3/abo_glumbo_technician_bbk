@@ -36,7 +36,7 @@ import 'package:uuid/uuid.dart';
 class AppServices {
   static Future<void> updateFCMToken(
     String token, {
-    bool isAdmin = false,
+    bool? isAdmin,
   }) async {
     try {
       String userId = LocalStore.getUID() ?? '';
@@ -45,7 +45,13 @@ class AppServices {
         return;
       }
 
-      final collection = isAdmin
+      bool isUserAdmin = isAdmin ?? false;
+      if (isAdmin == null) {
+        UserModel? cachedUser = LocalStore.getCachedUserData();
+        isUserAdmin = cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
+      }
+
+      final collection = isUserAdmin
           ? AppFirestore.adminsCollectionRef
           : AppFirestore.usersCollectionRef;
 
@@ -54,7 +60,7 @@ class AppServices {
         'fcmTokenUpdatedAt': Timestamp.now(),
       }, SetOptions(merge: true));
       debugPrint(
-        '✅ FCM token updated in ${isAdmin ? 'admins' : 'users'} collection',
+        '✅ FCM token updated in ${isUserAdmin ? 'admins' : 'users'} collection',
       );
     } catch (e) {
       debugPrint('❌ Error updating FCM token: $e');
@@ -65,16 +71,22 @@ class AppServices {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isNotEmpty) {
-        await AppFirestore.usersCollectionRef.doc(userId).update({
+        UserModel? cachedUser = LocalStore.getCachedUserData();
+        bool isAdmin = cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
+        final collection = isAdmin
+            ? AppFirestore.adminsCollectionRef
+            : AppFirestore.usersCollectionRef;
+
+        await collection.doc(userId).update({
           'fcmToken': FieldValue.delete(),
         });
         if (kDebugMode) {
-          print('✅ FCM token cleared from user document');
+          print('✅ FCM token cleared from ${isAdmin ? 'admins' : 'users'} collection');
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error clearing FCM token from user document: $e');
+        print('❌ Error clearing FCM token: $e');
       }
     }
   }
@@ -203,8 +215,12 @@ class AppServices {
           userData['chamberOfCommerceApprovalUrl'] = user.chamberOfCommerceApprovalUrl;
         }
 
+        bool isAdmin = user.isAdmin == true || user.role == 'admin';
+        final collection = isAdmin
+            ? AppFirestore.adminsCollectionRef
+            : AppFirestore.usersCollectionRef;
 
-        await AppFirestore.usersCollectionRef.doc(userId).update(userData);
+        await collection.doc(userId).update(userData);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -239,7 +255,14 @@ class AppServices {
         }
         return;
       }
-      await AppFirestore.usersCollectionRef.doc(userId).update({
+
+      UserModel? cachedUser = LocalStore.getCachedUserData();
+      bool isAdmin = cachedUser?.isAdmin == true || cachedUser?.role == 'admin';
+      final collection = isAdmin
+          ? AppFirestore.adminsCollectionRef
+          : AppFirestore.usersCollectionRef;
+
+      await collection.doc(userId).update({
         'lanCode': language,
       });
     } catch (e) {
@@ -2050,7 +2073,8 @@ class AppServices {
         .where('bookingStatusCode', isEqualTo: 'C')
         .where('paymentCompleted', isEqualTo: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+        .map((snapshot) => snapshot.docs.length)
+        .onErrorReturn(0);
 
     final latest = Rx.combineLatest2(
       AppFirestore.bookingsCollectionRef
@@ -2069,20 +2093,22 @@ class AppServices {
         }
         return uniqueMap.length;
       },
-    );
+    ).onErrorReturn(0);
 
     final accepted = AppFirestore.bookingsCollectionRef
         .where('agent.uid', isEqualTo: uid)
         .where('bookingStatusCode', isEqualTo: 'A')
         .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+        .map((snapshot) => snapshot.docs.length)
+        .onErrorReturn(0);
 
     final paymentPending = AppFirestore.bookingsCollectionRef
         .where('agent.uid', isEqualTo: uid)
         .where('bookingStatusCode', isEqualTo: 'C')
         .where('paymentCompleted', isEqualTo: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+        .map((snapshot) => snapshot.docs.length)
+        .onErrorReturn(0);
 
     final Stream<double> rating = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'C')
@@ -2107,13 +2133,16 @@ class AppServices {
 
           final sum = ratings.reduce((a, b) => a + b);
           return sum / ratings.length;
-        });
+        })
+        .onErrorReturn(0.0);
 
     final warrantyClaims = getWarrantyClaimRequestsStream(
       uid,
-    ).map((claims) => claims.length);
+    ).map((claims) => claims.length)
+    .onErrorReturn(0);
 
-    final wallet = UnifiedPayoutServices.getUnifiedWalletStream(uid);
+    final wallet = UnifiedPayoutServices.getUnifiedWalletStream(uid)
+        .onErrorReturn(UnifiedWalletModel());
 
     return Rx.combineLatest7<
       int,
@@ -2175,10 +2204,7 @@ class AppServices {
               )
               .toList(),
         )
-        .handleError((error) {
-          debugPrint('❌ Error fetching transactions stream: $error');
-          return <TransactionModel>[];
-        });
+        .onErrorReturn(<TransactionModel>[]);
   }
 
   /// Real-time stream for tips
@@ -2203,10 +2229,7 @@ class AppServices {
               )
               .toList();
         })
-        .handleError((error) {
-          debugPrint('❌ Error fetching tips stream: $error');
-          return <AllTipsModel>[];
-        });
+        .onErrorReturn(<AllTipsModel>[]);
   }
 
   /// Real-time stream for booking earnings (Full Service cost only)
@@ -2227,10 +2250,7 @@ class AppServices {
           }
           return total;
         })
-        .handleError((error) {
-          debugPrint('❌ Error fetching booking earnings stream: $error');
-          return 0.0;
-        });
+        .onErrorReturn(0.0);
   }
 
   // ========== REFRESH CONTROL WITH STREAMS ==========
@@ -2313,7 +2333,7 @@ class AppServices {
       final data = snapshot.data();
       if (!snapshot.exists || data == null) return TippingModel();
       return TippingModel.fromJson(data as Map<String, dynamic>);
-    });
+    }).onErrorReturn(TippingModel());
   }
 
   /// Stream user data
@@ -2428,18 +2448,21 @@ class AppServices {
     final pending = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'P')
         .snapshots()
-        .map((s) => s.docs.length);
+        .map((s) => s.docs.length)
+        .onErrorReturn(0);
 
     final assigned = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'A')
         .snapshots()
-        .map((s) => s.docs.length);
+        .map((s) => s.docs.length)
+        .onErrorReturn(0);
 
     final completed = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'C')
         .where('paymentCompleted', isEqualTo: true)
         .snapshots()
-        .map((s) => s.docs.length);
+        .map((s) => s.docs.length)
+        .onErrorReturn(0);
 
     final warrantyClaims = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'C')
@@ -2453,7 +2476,8 @@ class AppServices {
             final statusCode = warranty['warrantyStatusCode'] as String?;
             return statusCode == 'R' || statusCode == 'S';
           }).length;
-        });
+        })
+        .onErrorReturn(0);
 
     final customers = AppFirestore.customersCollectionRef.snapshots().map((s) {
       return s.docs.where((doc) {
@@ -2462,7 +2486,7 @@ class AppServices {
             data['uid'] != null &&
             data['uid'].toString().isNotEmpty;
       }).length;
-    });
+    }).onErrorReturn(0);
 
     final technicians = AppFirestore.usersCollectionRef.snapshots().map((s) {
       return s.docs.where((doc) {
@@ -2471,7 +2495,7 @@ class AppServices {
             data['uid'] != null &&
             data['uid'].toString().isNotEmpty;
       }).length;
-    });
+    }).onErrorReturn(0);
 
     final completedBookings = AppFirestore.bookingsCollectionRef
         .where('paymentCompleted', isEqualTo: true)
@@ -2480,7 +2504,8 @@ class AppServices {
           (s) => s.docs
               .map((doc) => BookingModel.fromDocumentSnapshot(doc))
               .toList(),
-        );
+        )
+        .onErrorReturn(<BookingModel>[]);
 
     return Rx.combineLatest7<
       int,

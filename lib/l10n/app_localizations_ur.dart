@@ -5153,7 +5153,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get enterEmailAddress => 'ای میل ایڈریس درج کریں';
 
   @override
-  String get egPhoneNumber => 'مثلاً 50XXXXXXX';
+  String get egPhoneNumber => 'مثال +9665XXXXXXXX';
 
   @override
   String get accessLevelTitle => 'رسائی کی سطح';

@@ -1828,7 +1828,7 @@
   "enterFullName": "Enter full name",
   "pleaseEnterName": "Please enter name",
   "enterEmailAddress": "Enter email address",
-  "egPhoneNumber": "e.g. 50XXXXXXX",
+  "egPhoneNumber": "e.g. +9665XXXXXXXX",
   "pleaseEnterPhoneNumber": "Please enter phone number",
   "accessLevelTitle": "Access Level",
   "customerServiceOnly": "Customer Service Only",

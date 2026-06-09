@@ -81,7 +81,9 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
 
   int _getInitialIndex() {
     if (widget.initialStatus != null) {
-      final index = bookingStatus.indexWhere((status) => status['code'] == widget.initialStatus);
+      final index = bookingStatus.indexWhere(
+        (status) => status['code'] == widget.initialStatus,
+      );
       if (index != -1) {
         return index;
       }
@@ -92,8 +94,11 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(covariant AdminHome oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialStatus != oldWidget.initialStatus && widget.initialStatus != null) {
-      final targetIndex = bookingStatus.indexWhere((status) => status['code'] == widget.initialStatus);
+    if (widget.initialStatus != oldWidget.initialStatus &&
+        widget.initialStatus != null) {
+      final targetIndex = bookingStatus.indexWhere(
+        (status) => status['code'] == widget.initialStatus,
+      );
       if (targetIndex != -1 && targetIndex != _tabController.index) {
         _tabController.animateTo(targetIndex);
       }
@@ -105,12 +110,18 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     if (cleanQuery.isEmpty) return;
 
     try {
-      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery).get();
+      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef
+          .doc(cleanQuery)
+          .get();
       if (!doc.exists) {
-        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toUpperCase()).get();
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toUpperCase())
+            .get();
       }
       if (!doc.exists) {
-        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toLowerCase()).get();
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toLowerCase())
+            .get();
       }
 
       if (!doc.exists) {
@@ -135,7 +146,9 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       if (doc.exists) {
         final booking = BookingModel.fromDocumentSnapshot(doc);
         final statusCode = booking.bookingStatusCode;
-        final index = bookingStatus.indexWhere((status) => status['code'] == statusCode);
+        final index = bookingStatus.indexWhere(
+          (status) => status['code'] == statusCode,
+        );
         if (index != -1 && index != _tabController.index) {
           _tabController.animateTo(index);
         }
@@ -235,9 +248,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           return Scaffold(
             appBar: AppBar(
               titleSpacing: 16,
-              title: Text(
-                AppLocalizations.of(context)?.orders ?? "Orders",
-              ),
+              title: Text(AppLocalizations.of(context)?.orders ?? "Orders"),
               elevation: 0,
               shape: Border.all(style: BorderStyle.none),
               actions: [],
@@ -566,7 +577,6 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                 key: ValueKey(item.id),
                 booking: item,
                 isAdmin: true,
-                isWarranty: item.warranty != null,
                 onAssign: () {
                   showAssignToUserBottomSheet(item);
                 },
@@ -592,11 +602,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 100,
-              color: Colors.grey,
-            ),
+            Icon(Icons.search_off, size: 100, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
               localizations?.noBookingsFound ?? 'No results found',
@@ -619,11 +625,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.hourglass_empty,
-            size: 100,
-            color: Colors.grey,
-          ),
+          Icon(Icons.hourglass_empty, size: 100, color: Colors.grey),
           const SizedBox(height: 12),
           Text(
             localizations!.noBookings,

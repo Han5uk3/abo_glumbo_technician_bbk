@@ -20,7 +20,6 @@ class WorkerHome extends StatefulWidget {
 
 class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
   static const List<Map<String, String>> _bookingStatuses = [
-
     {'code': 'P', 'name': 'Pending'},
     {'code': 'A', 'name': 'Accepted'},
     {'code': 'CP', 'name': 'Payment Pending'},
@@ -222,9 +221,7 @@ class _BookingListTabState extends State<_BookingListTab>
     if (widget.bookingStatusCode == 'P') {
       // Combine job offers and pending bookings for the 'Pending' tab
       final offers = AppServices.getJobOffersStream();
-      final bookings = AppServices.getBookingsStream(
-        bookingStatusCode: 'P',
-      );
+      final bookings = AppServices.getBookingsStream(bookingStatusCode: 'P');
 
       _bookingsStream = Rx.combineLatest2(
         offers,
@@ -308,7 +305,6 @@ class _BookingListTabState extends State<_BookingListTab>
               return BookingListTileWidget(
                 key: ValueKey(item.id),
                 booking: item,
-                isWarranty: item.warranty != null,
                 isFromOffersTab: widget.bookingStatusCode == 'P',
               );
             }

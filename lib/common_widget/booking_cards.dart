@@ -173,7 +173,7 @@ class BookingListTileWidget extends StatelessWidget {
                                   color: Colors.grey[500],
                                 ),
                               ),
-                              if (isWarranty) ...[
+                              if (booking.warranty != null) ...[
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -198,7 +198,9 @@ class BookingListTileWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            booking.service.nameLocalized(languageCode: locale) ??
+                            booking.service.nameLocalized(
+                                  languageCode: locale,
+                                ) ??
                                 booking.service.name ??
                                 '',
                             maxLines: 2,
@@ -216,12 +218,15 @@ class BookingListTileWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP")
+                        if (booking.bookingStatusCode == "C" ||
+                            booking.bookingStatusCode == "VP")
                           Text(
                             isWarranty
                                 ? "0.0" // Warranty repairs are free
                                 : ((booking.completionData?.totalCost ?? 0) +
-                                          booking.service.getDiscountedPrice(booking.effectiveInspectionFee))
+                                          booking.service.getDiscountedPrice(
+                                            booking.effectiveInspectionFee,
+                                          ))
                                       .toStringAsFixed(1),
                             style: DMSansFont.textStyle(
                               color: AppColors.primary,
@@ -229,7 +234,8 @@ class BookingListTileWidget extends StatelessWidget {
                               fontSize: 15,
                             ),
                           ),
-                        if (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP")
+                        if (booking.bookingStatusCode == "C" ||
+                            booking.bookingStatusCode == "VP")
                           Text(
                             localization.sar,
                             style: DMSansFont.textStyle(
@@ -240,18 +246,33 @@ class BookingListTileWidget extends StatelessWidget {
                           ),
                         if (booking.isOnHour != null)
                           Padding(
-                            padding: EdgeInsets.only(top: (booking.bookingStatusCode == "C" || booking.bookingStatusCode == "VP") ? 4.0 : 0.0),
+                            padding: EdgeInsets.only(
+                              top:
+                                  (booking.bookingStatusCode == "C" ||
+                                      booking.bookingStatusCode == "VP")
+                                  ? 4.0
+                                  : 0.0,
+                            ),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: booking.isOnHour == true ? Colors.blue.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                                color: booking.isOnHour == true
+                                    ? Colors.blue.withOpacity(0.1)
+                                    : Colors.orange.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                booking.isOnHour == true ? localization.onHour : localization.offHour,
+                                booking.isOnHour == true
+                                    ? localization.onHour
+                                    : localization.offHour,
                                 style: DMSansFont.textStyle(
                                   fontSize: 10,
-                                  color: booking.isOnHour == true ? Colors.blue : Colors.orange,
+                                  color: booking.isOnHour == true
+                                      ? Colors.blue
+                                      : Colors.orange,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -834,14 +855,24 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.offerAcceptedSuccessfully ??
+                  'Offer accepted successfully',
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: ${e.toString()}',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -992,9 +1023,14 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       await AppServices.declineJobOffer(widget.offer.offerId);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: ${e.toString()}',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

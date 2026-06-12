@@ -3818,7 +3818,7 @@ class _BookingInfoState extends State<BookingInfo> {
           booking.rebookTechnicianId == LocalStore.getUID();
 
       if (isRebookForMe &&
-          ((statusCode == 'P' || statusCode == 'SR') &&
+          (((statusCode == 'P' || statusCode == 'SR') &&
                   (isAssigned || isUnassigned)) ||
               (statusCode == 'A' && isAssigned))) {
         return Container(

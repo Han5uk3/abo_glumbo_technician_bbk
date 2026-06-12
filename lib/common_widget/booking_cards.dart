@@ -1113,13 +1113,43 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    serviceName,
-                    style: DMSansFont.textStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                  child: Row(
+                    children: [
+                      if (data['isRebook'] == true) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
+                          ),
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Colors.orange.withOpacity(0.5),
+                            ),
+                          ),
+                          child: Text(
+                            localization.rebookTechnician.toUpperCase(),
+                            style: DMSansFont.textStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ),
+                      ],
+                      Expanded(
+                        child: Text(
+                          serviceName,
+                          style: DMSansFont.textStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (data['status'] != 'accepted_by_technician')

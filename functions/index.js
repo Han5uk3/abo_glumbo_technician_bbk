@@ -5345,3 +5345,58 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     return null;
   }
 );
+
+// 9. Trigger when a rebooking job offer is created manually by the customer app
+exports.onJobOfferCreatedForRebook = onDocumentCreated(
+  "job_offers/{offerId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return null;
+    const offerData = snap.data();
+
+    // We only care about new rebooking job offers that are pending
+    if (offerData.isRebook === true && offerData.status === "pending") {
+      const technicianId = offerData.technicianId;
+      if (!technicianId) return null;
+
+      try {
+        const techDoc = await admin.firestore().collection("users").doc(technicianId).get();
+        if (!techDoc.exists) return null;
+
+        const techData = techDoc.data();
+        if (!techData.fcmToken || techData.fcmToken.trim() === "") return null;
+
+        const lanCode = techData.lanCode || "en";
+        const serviceName = offerData.serviceName || "Service";
+        const serviceNameAr = offerData.serviceNameAr || serviceName;
+        const serviceNameUr = offerData.serviceNameUr || serviceNameAr;
+        const customerName = offerData.customerName || "Customer";
+
+        await sendAndStoreNotification({
+          targetRole: "technician",
+          targetId: technicianId,
+          titleEn: "New Rebooking Request",
+          titleAr: "طلب إعادة حجز جديد",
+          titleUr: "نئی دوبارہ بکنگ کی درخواست",
+          bodyEn: `Customer ${customerName} has requested to rebook you for ${serviceName}.`,
+          bodyAr: `لقد طلب العميل ${customerName} إعادة حجزك لخدمة ${serviceNameAr}.`,
+          bodyUr: `صارف ${customerName} نے آپ کو ${serviceNameUr} کے لیے دوبارہ بک کرنے کی درخواست کی ہے۔`,
+          data: {
+            bookingId: offerData.requestId || offerData.bookingId || "",
+            requestId: offerData.requestId || offerData.bookingId || "",
+            offerId: event.params.offerId,
+            targetRole: "technician",
+            category: "rebook_request",
+            type: "rebook_request"
+          },
+          fcmToken: techData.fcmToken,
+          lanCode: lanCode
+        });
+        console.log(`[${event.params.offerId}] Rebooking push notification sent to technician ${technicianId}.`);
+      } catch (error) {
+        console.error(`[${event.params.offerId}] Error sending rebooking push notification:`, error);
+      }
+    }
+    return null;
+  }
+);

@@ -2062,7 +2062,7 @@ class _EditProfileState extends State<EditProfile> {
 
   Widget _buildBottomButton(AccountState state, AppLocalizations locale) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + (Platform.isIOS ? 20 : 0)),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

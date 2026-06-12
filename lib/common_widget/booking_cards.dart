@@ -295,8 +295,9 @@ class BookingListTileWidget extends StatelessWidget {
             const SizedBox(height: 8),
             _buildDetailTile(
               Icons.location_on_outlined,
-              (selectedAddress != null && selectedAddress.id.isNotEmpty)
-                  ? (selectedAddress.streetName ?? '')
+              (selectedAddress != null &&
+                      selectedAddress.displayAddress.isNotEmpty)
+                  ? selectedAddress.displayAddress
                   : (booking.customer.location?.fullAddress ?? 'N/A'),
               color: Colors.grey[600],
             ),

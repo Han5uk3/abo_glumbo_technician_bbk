@@ -61,6 +61,7 @@ class _BookingInfoState extends State<BookingInfo> {
   Timer? _offerTimer;
   int _offerSecondsRemaining = 0;
   DateTime? _offerExpiresAt;
+  bool _isRebookOffer = false;
   Future<void> handleChatButton() async {
     if (isInitiatingChat) return;
 
@@ -342,6 +343,10 @@ class _BookingInfoState extends State<BookingInfo> {
         if (status == 'accepted_by_technician' || status == 'accepted' || status == 'counter_offered') {
           _offerExpiresAt = null;
           return;
+        }
+
+        if (data?['isRebook'] == true) {
+          _isRebookOffer = true;
         }
 
         if (expiresAt != null) {
@@ -840,9 +845,9 @@ class _BookingInfoState extends State<BookingInfo> {
           Divider(thickness: 1, color: Colors.grey.shade300),
           const SizedBox(height: 4),
           Text(
-            customerSelectedAddress?.streetName ??
-                widget.booking.customer.location?.fullAddress ??
-                "",
+            (customerSelectedAddress?.displayAddress.isNotEmpty == true)
+                ? customerSelectedAddress!.displayAddress
+                : (widget.booking.customer.location?.fullAddress ?? ""),
             style: DMSansFont.textStyle(fontSize: 12, color: Colors.black),
           ),
         ],
@@ -1176,18 +1181,22 @@ class _BookingInfoState extends State<BookingInfo> {
                             ),
 
                           if (!widget.isWarranty &&
-                              !widget.isAdmin &&
-                              statusCode.toUpperCase() == 'P' &&
-                              (currentBooking.agent?.uid ==
-                                      LocalStore.getUID() ||
-                                  currentBooking.agent == null))
-                            if (_offerId != null)
-                              _buildJobOfferControls(context, currentBooking)
-                            else if (!_isCheckingOffer)
+                              statusCode.toUpperCase() == 'P')
+                            if (widget.isAdmin)
                               _buildPendingBookingControls(
                                 context,
                                 currentBooking,
-                              ),
+                              )
+                            else if (currentBooking.agent?.uid ==
+                                    LocalStore.getUID() ||
+                                currentBooking.agent == null)
+                              if (_offerId != null)
+                                _buildJobOfferControls(context, currentBooking)
+                              else if (!_isCheckingOffer)
+                                _buildPendingBookingControls(
+                                  context,
+                                  currentBooking,
+                                ),
 
                           // blue booking id card
                           Container(
@@ -3635,45 +3644,46 @@ class _BookingInfoState extends State<BookingInfo> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _handleCounterOfferResponse(
-                          context,
-                          booking,
-                          'rejected',
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                if (!widget.isAdmin)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _handleCounterOfferResponse(
+                            context,
+                            booking,
+                            'rejected',
                           ),
-                        ),
-                        child: Text(l10n.rejectOffer),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            _handleCounterConfirm(context, booking, 'accepted'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
+                          child: Text(l10n.rejectOffer),
                         ),
-                        child: Text(l10n.acceptOffer),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              _handleCounterConfirm(context, booking, 'accepted'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(l10n.acceptOffer),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           );
@@ -4054,6 +4064,7 @@ class _BookingInfoState extends State<BookingInfo> {
   }
 
   Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {
+    return const SizedBox.shrink();
     if (_isOfferLoading) {
       return const Center(
         child: Padding(

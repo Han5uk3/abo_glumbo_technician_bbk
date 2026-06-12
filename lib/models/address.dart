@@ -11,6 +11,13 @@ class AddressModel {
   bool? isSelected;
   final bool? isCurrentLocation; // Flag for auto-updated current location
 
+  String get displayAddress {
+    List<String> parts = [];
+    if (buildingNumber.isNotEmpty) parts.add(buildingNumber);
+    if (streetName != null && streetName!.isNotEmpty) parts.add(streetName!);
+    return parts.join(', ');
+  }
+
   AddressModel({
     required this.id,
     required this.fullName,

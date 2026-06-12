@@ -309,7 +309,9 @@ class _AccountPageState extends State<AccountPage> {
     final currentNotifLanguage = currentWorkerData?.lanCode ?? 'en';
     final displayNotifLanguage = currentNotifLanguage == 'ar'
         ? 'عربي'
-        : 'English';
+        : currentNotifLanguage == 'ur'
+            ? 'اردو'
+            : 'English';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -442,11 +444,19 @@ class _AccountPageState extends State<AccountPage> {
       }
     }
 
+    final lastUid = LocalStore.getUID();
+    bool keepFirebaseAuth = false;
+    if (lastUid != null) {
+      keepFirebaseAuth = LocalStore.getBiometricAuthEnabled(lastUid);
+    }
+
     // This handles clearing UID, cached data, and setting logout status to true
     await LocalStore.clearAllAuthData();
 
     try {
-      await FirebaseAuth.instance.signOut();
+      if (!keepFirebaseAuth) {
+        await FirebaseAuth.instance.signOut();
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error signing out from Firebase Auth: $e');

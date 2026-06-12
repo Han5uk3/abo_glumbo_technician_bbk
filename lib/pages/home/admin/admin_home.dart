@@ -33,6 +33,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     {'code': 'CP', 'name': 'Payment Pending'},
     {'code': 'C', 'name': 'Completed'},
     {'code': 'X', 'name': 'Cancelled'},
+    {'code': 'R', 'name': 'Rejected'},
   ];
 
   late TabController _tabController;

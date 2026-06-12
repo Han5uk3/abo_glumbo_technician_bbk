@@ -391,6 +391,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           role: 'admin',
           adminAccessLevel: adminData?['accessLevel'],
           createdAt: adminData?['createdAt'],
+          lanCode: adminData?['lanCode'],
         );
 
         LocalStore.putUID(uid);
@@ -511,6 +512,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           role: 'admin',
           adminAccessLevel: adminData?['accessLevel'],
           createdAt: adminData?['createdAt'],
+          lanCode: adminData?['lanCode'],
         );
 
         LocalStore.putUID(uid);
@@ -565,6 +567,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             role: 'admin',
             adminAccessLevel: pendingData['accessLevel'],
             createdAt: pendingData['createdAt'],
+            lanCode: pendingData['lanCode'],
           );
 
           LocalStore.putUID(uid);

@@ -263,6 +263,20 @@ class AppServices {
           : AppFirestore.usersCollectionRef;
 
       await collection.doc(userId).update({'lanCode': language});
+
+      // Update local storage cached user data
+      if (cachedUser != null) {
+        cachedUser.lanCode = language;
+        await LocalStore.storeUserData(cachedUser);
+      }
+
+      // Update local storage cached admin data if admin
+      if (isAdmin) {
+        AdminModel? cachedAdmin = LocalStore.getCachedAdminData();
+        if (cachedAdmin != null) {
+          await LocalStore.storeAdminData(cachedAdmin.copyWith(lanCode: language));
+        }
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error updating worker language: $e');
@@ -463,15 +477,6 @@ class AppServices {
   }) {
     if (isAdmin) {
       if (bookingStatusCode == 'X') {
-        final adminCancel = AppFirestore.bookingsCollectionRef
-            .where('bookingStatusCode', isEqualTo: 'R')
-            .snapshots()
-            .map((snapshot) {
-              return snapshot.docs
-                  .map((doc) => BookingModel.fromDocumentSnapshot(doc))
-                  .toList();
-            });
-
         final customerCancel = AppFirestore.bookingsCollectionRef
             .where('bookingStatusCode', isEqualTo: 'XC')
             .snapshots()
@@ -481,11 +486,8 @@ class AppServices {
                   .toList();
             });
 
-        return Rx.combineLatest2(customerCancel, adminCancel, (
-          List<BookingModel> customer,
-          List<BookingModel> admin,
-        ) {
-          final combined = [...customer, ...admin];
+        return customerCancel.map((customer) {
+          final combined = [...customer];
 
           combined.sort((a, b) {
             final aTime = _getComparisonTimestamp(a);
@@ -495,6 +497,17 @@ class AppServices {
 
           return combined;
         });
+      } else if (bookingStatusCode == 'R') {
+        return AppFirestore.bookingsCollectionRef
+            .where('bookingStatusCode', isEqualTo: 'R')
+            .orderBy('createdAt', descending: true)
+            .limit(50)
+            .snapshots()
+            .map((snapshot) {
+              return snapshot.docs
+                  .map((doc) => BookingModel.fromDocumentSnapshot(doc))
+                  .toList();
+            });
       } else if (bookingStatusCode == 'CP') {
         return AppFirestore.bookingsCollectionRef
             .where('bookingStatusCode', whereIn: ['CP', 'VP'])
@@ -544,16 +557,8 @@ class AppServices {
                   .toList();
             });
 
-        final adminCancel = AppFirestore.bookingsCollectionRef
-            .where('bookingStatusCode', isEqualTo: 'R')
-            .snapshots()
-            .map((snapshot) {
-              return snapshot.docs
-                  .map((doc) => BookingModel.fromDocumentSnapshot(doc))
-                  .toList();
-            });
-
         final customerCancel = AppFirestore.bookingsCollectionRef
+            .where('agent.uid', isEqualTo: workerId)
             .where('bookingStatusCode', isEqualTo: 'XC')
             .snapshots()
             .map((snapshot) {
@@ -562,12 +567,11 @@ class AppServices {
                   .toList();
             });
 
-        return Rx.combineLatest3(customerCancel, adminCancel, workerCancel, (
+        return Rx.combineLatest2(customerCancel, workerCancel, (
           List<BookingModel> customer,
-          List<BookingModel> admin,
           List<BookingModel> worker,
         ) {
-          final combined = [...customer, ...admin, ...worker];
+          final combined = [...customer, ...worker];
 
           combined.sort((a, b) {
             final aTime = _getComparisonTimestamp(a);
@@ -3039,6 +3043,23 @@ class AppServices {
       }
 
       await batch.commit();
+
+      if (isRebook) {
+        final customerId = data['customerId'];
+        if (customerId != null) {
+          final technician = LocalStore.getCachedUserData();
+          final techName = technician?.name ?? 'The technician';
+          await _recordCustomerNotification(
+            customerId: customerId,
+            titleEn: 'Request Declined',
+            titleAr: 'تم رفض الطلب',
+            bodyEn: '$techName has declined your rebooking request.',
+            bodyAr: 'لقد رفض $techName طلب إعادة الجدولة الخاص بك.',
+            type: 'offer_declined',
+            data: {'offerId': offerId},
+          );
+        }
+      }
     } catch (e) {
       debugPrint('Error declining job offer: $e');
     }

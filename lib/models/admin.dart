@@ -8,6 +8,7 @@ class AdminModel {
   int accessLevel; // 1 = Customer Service, 2 = Full Admin
   Timestamp? createdAt;
   bool isCoreAdmin;
+  String? lanCode;
 
   bool get isSuperAdmin => isCoreAdmin || accessLevel == 0;
   bool get hasFullAccess => isSuperAdmin || accessLevel == 2;
@@ -20,6 +21,7 @@ class AdminModel {
     required this.accessLevel,
     this.createdAt,
     this.isCoreAdmin = false,
+    this.lanCode,
   });
 
   factory AdminModel.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -31,6 +33,7 @@ class AdminModel {
       accessLevel: json['accessLevel'] ?? 1,
       createdAt: json['createdAt'],
       isCoreAdmin: json['isCoreAdmin'] ?? false,
+      lanCode: json['lanCode'],
     );
   }
 
@@ -43,6 +46,7 @@ class AdminModel {
       'accessLevel': accessLevel,
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
       'isCoreAdmin': isCoreAdmin,
+      'lanCode': lanCode,
     };
   }
 
@@ -54,6 +58,7 @@ class AdminModel {
     int? accessLevel,
     Timestamp? createdAt,
     bool? isCoreAdmin,
+    String? lanCode,
   }) {
     return AdminModel(
       uid: uid ?? this.uid,
@@ -63,6 +68,7 @@ class AdminModel {
       accessLevel: accessLevel ?? this.accessLevel,
       createdAt: createdAt ?? this.createdAt,
       isCoreAdmin: isCoreAdmin ?? this.isCoreAdmin,
+      lanCode: lanCode ?? this.lanCode,
     );
   }
 }

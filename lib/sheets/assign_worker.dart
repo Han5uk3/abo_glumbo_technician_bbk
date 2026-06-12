@@ -21,14 +21,14 @@ class AssignUserBottomSheet extends StatefulWidget {
   final BookingModel booking;
   final Function({required BookingModel booking, required UserModel user})
   onAssignAgent;
-  final Function(BookingModel booking) onRejectOrder;
+  final Function(BookingModel booking)? onRejectOrder;
   final bool isWarranty;
 
   const AssignUserBottomSheet({
     super.key,
     required this.booking,
     required this.onAssignAgent,
-    required this.onRejectOrder,
+    this.onRejectOrder,
     this.isWarranty = false,
   });
 
@@ -479,7 +479,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       iconColor: Colors.red,
       primaryActionLabel: AppLocalizations.of(context)!.reject,
       primaryAction: () {
-        widget.onRejectOrder(widget.booking);
+        widget.onRejectOrder?.call(widget.booking);
         Navigator.pop(context);
       },
       isDanger: true,
@@ -787,17 +787,18 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
               ],
             ),
           ),
-          ValueListenableBuilder<bool>(
-            valueListenable: _isAssigning,
-            builder: (context, assigning, _) => IconButton.filled(
-              onPressed: assigning ? null : _showRejectConfirmationDialog,
-              icon: const Icon(Icons.close, size: 20),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.08),
-                foregroundColor: Colors.red,
+          if (widget.onRejectOrder != null)
+            ValueListenableBuilder<bool>(
+              valueListenable: _isAssigning,
+              builder: (context, assigning, _) => IconButton.filled(
+                onPressed: assigning ? null : _showRejectConfirmationDialog,
+                icon: const Icon(Icons.close, size: 20),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(0.08),
+                  foregroundColor: Colors.red,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

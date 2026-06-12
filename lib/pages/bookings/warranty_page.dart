@@ -40,6 +40,8 @@ class _WarrantyPageState extends State<WarrantyPage>
   late AnimationController _shimmerController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  late Stream<List<BookingModel>> _pendingWarrantiesStream;
+  late Stream<List<BookingModel>> _acceptedWarrantiesStream;
 
   Future<void> _searchAndNavigateToTab(String query) async {
     final cleanQuery = query.trim();
@@ -91,6 +93,15 @@ class _WarrantyPageState extends State<WarrantyPage>
   @override
   void initState() {
     super.initState();
+
+    _pendingWarrantiesStream = AppServices.getWarrantiesStream(
+      warrantyStatusCode: 'R',
+      isAdmin: widget.workerData.isAdmin ?? false,
+    );
+    _acceptedWarrantiesStream = AppServices.getWarrantiesStream(
+      warrantyStatusCode: 'S',
+      isAdmin: widget.workerData.isAdmin ?? false,
+    );
 
     _tabController = TabController(
       length: _warrantyStatuses.length,
@@ -226,19 +237,59 @@ class _WarrantyPageState extends State<WarrantyPage>
     required ColorScheme colorScheme,
     required VoidCallback onPressed,
   }) {
+    if (code == 'R' || code == 'S') {
+      final stream = code == 'R' ? _pendingWarrantiesStream : _acceptedWarrantiesStream;
+      return StreamBuilder<List<BookingModel>>(
+        stream: stream,
+        builder: (context, snapshot) {
+          final hasRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
+          final inactiveColor = hasRequests ? Colors.orange : Colors.grey.shade600;
+          return _buildChipWidget(
+            context,
+            code: code,
+            name: name,
+            isSelected: isSelected,
+            colorScheme: colorScheme,
+            inactiveColor: inactiveColor,
+            onPressed: onPressed,
+          );
+        },
+      );
+    }
+
+    return _buildChipWidget(
+      context,
+      code: code,
+      name: name,
+      isSelected: isSelected,
+      colorScheme: colorScheme,
+      inactiveColor: Colors.grey.shade600,
+      onPressed: onPressed,
+    );
+  }
+
+  Widget _buildChipWidget(
+    BuildContext context, {
+    required String code,
+    required String name,
+    required bool isSelected,
+    required ColorScheme colorScheme,
+    required Color inactiveColor,
+    required VoidCallback onPressed,
+  }) {
+    final chipColor = isSelected ? AppColors.primary : inactiveColor;
     return ActionChip(
       onPressed: onPressed,
       backgroundColor: Colors.white,
-
       side: BorderSide(
-        color: isSelected ? AppColors.primary : Colors.grey.shade600,
+        color: chipColor,
         width: isSelected ? 1.5 : 1,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       label: Text(
         getLocalizedName(name, context).toUpperCase(),
         style: TextStyle(
-          color: isSelected ? AppColors.primary : Colors.grey.shade600,
+          color: chipColor,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           fontSize: 14,
         ),

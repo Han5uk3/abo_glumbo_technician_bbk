@@ -1181,7 +1181,8 @@ class _BookingInfoState extends State<BookingInfo> {
                             ),
 
                           if (!widget.isWarranty &&
-                              statusCode.toUpperCase() == 'P')
+                              (statusCode.toUpperCase() == 'P' ||
+                                  statusCode.toUpperCase() == 'SR'))
                             if (widget.isAdmin)
                               _buildPendingBookingControls(
                                 context,
@@ -3817,7 +3818,8 @@ class _BookingInfoState extends State<BookingInfo> {
           booking.rebookTechnicianId == LocalStore.getUID();
 
       if (isRebookForMe &&
-          ((statusCode == 'P' && (isAssigned || isUnassigned)) ||
+          ((statusCode == 'P' || statusCode == 'SR') &&
+                  (isAssigned || isUnassigned)) ||
               (statusCode == 'A' && isAssigned))) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -4427,7 +4429,8 @@ class _BookingInfoState extends State<BookingInfo> {
   Widget _buildBookingTimestamp(BuildContext context, BookingModel booking) {
     final locale = AppLocalizations.of(context)?.localeName ?? 'en';
 
-    if (booking.bookingStatusCode == "P" && booking.createdAt != null) {
+    if ((booking.bookingStatusCode == "P" || booking.bookingStatusCode == "SR") &&
+        booking.createdAt != null) {
       return _timestampText(
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",
       );

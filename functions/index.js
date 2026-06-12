@@ -424,8 +424,8 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
       return;
     }
 
-    if (afterData.bookingStatusCode === "P") {
-      console.log("Booking status is pending, skipping notification...");
+    if (afterData.bookingStatusCode === "P" || afterData.bookingStatusCode === "SR") {
+      console.log("Booking status is pending/searching, skipping notification...");
       return;
     }
 
@@ -1592,10 +1592,10 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
       await autoReqRef.set(autoReqData);
       console.log(`[AutoReassign] Created/updated auto-assignment request for cancelled booking ${bookingId}`);
 
-      // Update the booking itself to set autoAssignmentStatus = 'ready_to_assign' and status = 'P' (just in case)
+      // Update the booking itself to set autoAssignmentStatus = 'ready_to_assign' and status = 'SR' (Searching/Re-Routing)
       await db.collection("bookings").doc(bookingId).update({
         autoAssignmentStatus: "ready_to_assign",
-        bookingStatusCode: "P",
+        bookingStatusCode: "SR",
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
       console.log(`[AutoReassign] Updated booking ${bookingId} with autoAssignmentStatus ready_to_assign`);
@@ -4771,8 +4771,8 @@ exports.processAutoAssignments = onSchedule(
           continue;
         }
         const bookingData = bookingSnap.data();
-        if (bookingData.bookingStatusCode !== "P") {
-          console.log(`[Auto-Assignment ${requestId}] Booking status is '${bookingData.bookingStatusCode}' (not 'P'). Syncing status and skipping.`);
+        if (bookingData.bookingStatusCode !== "P" && bookingData.bookingStatusCode !== "SR") {
+          console.log(`[Auto-Assignment ${requestId}] Booking status is '${bookingData.bookingStatusCode}' (not 'P' or 'SR'). Syncing status and skipping.`);
           await db.collection("auto-assignment_requests").doc(requestId).update({
             status: bookingData.bookingStatusCode,
             updatedAt: FieldValue.serverTimestamp()

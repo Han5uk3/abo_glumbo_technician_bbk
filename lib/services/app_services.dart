@@ -532,6 +532,17 @@ class AppServices {
                   .map((doc) => BookingModel.fromDocumentSnapshot(doc))
                   .toList();
             });
+      } else if (bookingStatusCode == 'P') {
+        return AppFirestore.bookingsCollectionRef
+            .where('bookingStatusCode', whereIn: ['P', 'SR'])
+            .orderBy('createdAt', descending: true)
+            .limit(50)
+            .snapshots()
+            .map((snapshot) {
+              return snapshot.docs
+                  .map((doc) => BookingModel.fromDocumentSnapshot(doc))
+                  .toList();
+            });
       } else {
         return AppFirestore.bookingsCollectionRef
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
@@ -599,6 +610,18 @@ class AppServices {
             .where('agent.uid', isEqualTo: workerId)
             .where('bookingStatusCode', isEqualTo: bookingStatusCode)
             .where('paymentCompleted', isEqualTo: true)
+            .orderBy('createdAt', descending: true)
+            .limit(50)
+            .snapshots()
+            .map((snapshot) {
+              return snapshot.docs
+                  .map((doc) => BookingModel.fromDocumentSnapshot(doc))
+                  .toList();
+            });
+      } else if (bookingStatusCode == 'P') {
+        return AppFirestore.bookingsCollectionRef
+            .where('agent.uid', isEqualTo: workerId)
+            .where('bookingStatusCode', whereIn: ['P', 'SR'])
             .orderBy('createdAt', descending: true)
             .limit(50)
             .snapshots()
@@ -1210,7 +1233,7 @@ class AppServices {
         ]),
         'cancelledWorkerUids': FieldValue.arrayUnion([agentUid]),
         'agent': FieldValue.delete(),
-        'bookingStatusCode': 'P',
+        'bookingStatusCode': 'SR',
         'acceptedAt': FieldValue.delete(),
         'cancelledBy': 'worker',
         'updatedAt': cancelledAt,
@@ -3038,7 +3061,7 @@ class AppServices {
         batch.update(AppFirestore.bookingsCollectionRef.doc(bookingId), {
           'rebookTechnicianId': null,
           'agent': null,
-          'bookingStatusCode': 'P',
+          'bookingStatusCode': 'SR',
           'autoAssignmentStatus': null,
           'updatedAt': FieldValue.serverTimestamp(),
         });

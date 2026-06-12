@@ -2848,6 +2848,8 @@ class AppServices {
             final booking = await getBookingById(bookingId);
             if (booking != null) {
               if (booking.bookingStatusCode == 'P' ||
+                  booking.bookingStatusCode == 'SR' ||
+                  (booking.bookingStatusCode == 'R' && booking.rejectedBy != 'Admin') ||
                   booking.bookingStatusCode == 'A') {
                 // If booking is 'A' (Assigned), it should only show for the assigned technician
                 if (booking.bookingStatusCode == 'A' &&

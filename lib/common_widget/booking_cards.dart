@@ -538,9 +538,16 @@ class BookingListTileWidget extends StatelessWidget {
           break;
         case 'X':
         case 'XC':
-        case 'R':
           label = localization.canceled;
           color = Colors.red;
+          break;
+        case 'R':
+          label = localization.rejected;
+          color = Colors.red;
+          break;
+        case 'SR':
+          label = localization.assigningTechnician; // Searching
+          color = AppColors.primary;
           break;
         case 'A':
           label = localization.accepted;

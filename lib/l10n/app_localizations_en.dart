@@ -5152,4 +5152,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phoneNoteWithCountryCode =>
       '(enter phone number along with country code example : +966)';
+
+  @override
+  String get selectNewDateAppointment =>
+      'Select a new date and time for the appointment';
 }

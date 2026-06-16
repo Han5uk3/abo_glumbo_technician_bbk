@@ -309,7 +309,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Select a new date and time for the appointment',
+            (AppLocalizations.of(context)?.selectNewDateAppointment ?? 'Select a new date and time for the appointment'),
             style: DMSansFont.textStyle(
               fontSize: 14,
               color: Colors.grey[600],

@@ -1664,11 +1664,7 @@
   "biometricError": "❌ بایومیٹرک غلطی",
   "unknownError": "نامعلوم غلطی",
   "errorDuringLogin": "لاگ ان کے دوران غلطی",
-  "manageAdmins": "ایڈمنز کا انتظام کریں",
-  "searchAdmins": "ایڈمنز تلاش کریں...",
   "filterAll": "تمام",
-  "customerService": "کسٹمر سروس",
-  "fullAdmin": "مکمل ایڈمن",
   "coreAdmin": "بنیادی ایڈمن",
   "addAdmin": "ایڈمن شامل کریں",
   "saveChanges": "تبدیلیاں محفوظ کریں",
@@ -1683,11 +1679,11 @@
   "pleaseEnterName": "براہ کرم نام درج کریں",
   "enterEmailAddress": "ای میل ایڈریس درج کریں",
   "egPhoneNumber": "مثال +9665XXXXXXXX",
-  "pleaseEnterPhoneNumber": "براہ کرم فون نمبر درج کریں",
   "accessLevelTitle": "رسائی کی سطح",
   "customerServiceOnly": "صرف کسٹمر سروس",
   "customerServiceDesc": "بکنگ اور انتظام کے حصوں تک صرف دیکھنے کی رسائی۔",
   "fullAdminAccess": "مکمل ایڈمن کی رسائی",
   "fullAdminDesc": "دوسرے ایڈمنز کے انتظام کے علاوہ مکمل رسائی۔",
-  "phoneNoteWithCountryCode": "(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)"
+  "phoneNoteWithCountryCode": "(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)",
+  "selectNewDateAppointment": "ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں"
 }

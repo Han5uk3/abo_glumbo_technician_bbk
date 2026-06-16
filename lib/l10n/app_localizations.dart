@@ -9628,6 +9628,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'(enter phone number along with country code example : +966)'**
   String get phoneNoteWithCountryCode;
+
+  /// No description provided for @selectNewDateAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a new date and time for the appointment'**
+  String get selectNewDateAppointment;
 }
 
 class _AppLocalizationsDelegate

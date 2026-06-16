@@ -5083,4 +5083,7 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get phoneNoteWithCountryCode =>
       '(أدخل رقم الهاتف مع رمز الدولة مثال : 966+)';
+
+  @override
+  String get selectNewDateAppointment => 'حدد تاريخًا ووقتًا جديدين للموعد';
 }

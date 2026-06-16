@@ -5174,4 +5174,8 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get phoneNoteWithCountryCode =>
       '(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)';
+
+  @override
+  String get selectNewDateAppointment =>
+      'ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں';
 }

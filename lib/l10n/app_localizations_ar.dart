@@ -1752,6 +1752,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stop => 'إيقاف';
 
   @override
+  String get activeBooking => 'الحجز النشط';
+
+  @override
   String get failedToStartTracking => 'فشل بدء التتبع';
 
   @override

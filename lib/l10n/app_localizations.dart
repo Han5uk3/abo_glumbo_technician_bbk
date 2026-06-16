@@ -3502,6 +3502,12 @@ abstract class AppLocalizations {
   /// **'Stop'**
   String get stop;
 
+  /// No description provided for @activeBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Booking'**
+  String get activeBooking;
+
   /// No description provided for @failedToStartTracking.
   ///
   /// In en, this message translates to:

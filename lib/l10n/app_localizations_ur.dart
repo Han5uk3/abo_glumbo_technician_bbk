@@ -1779,6 +1779,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get stop => 'روکیں';
 
   @override
+  String get activeBooking => 'فعال بکنگ';
+
+  @override
   String get failedToStartTracking => 'ٹریکنگ شروع کرنے میں ناکامی';
 
   @override

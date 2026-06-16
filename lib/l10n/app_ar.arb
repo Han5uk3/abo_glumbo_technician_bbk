@@ -530,6 +530,7 @@
   "start": "بدء",
   "areYouSureYouWantToStopTracking": "هل أنت متأكد أنك تريد إيقاف التتبع لهذا الحجز؟ سيتم تعطيل تتبع الموقع.",
   "stop": "إيقاف",
+  "activeBooking": "الحجز النشط",
   "failedToStartTracking": "فشل بدء التتبع",
   "trackingStarted": "تم بدء التتبع",
   "locationServicesDisabled": "خدمات الموقع معطّلة",

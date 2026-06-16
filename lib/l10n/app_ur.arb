@@ -560,6 +560,7 @@
   "start": "شروع کریں",
   "areYouSureYouWantToStopTracking": "کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ روکنا چاہتے ہیں؟ مقام کی نگرانی غیر فعال کر دی جائے گی۔",
   "stop": "روکیں",
+  "activeBooking": "فعال بکنگ",
   "failedToStartTracking": "ٹریکنگ شروع کرنے میں ناکامی",
   "trackingStarted": "ٹریکنگ شروع ہو گئی",
   "locationServicesDisabled": "مقام کی خدمات غیر فعال ہیں",

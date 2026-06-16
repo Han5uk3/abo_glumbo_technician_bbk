@@ -566,6 +566,7 @@
   "start": "Start",
   "areYouSureYouWantToStopTracking": "Are you sure you want to stop tracking for this booking? Location monitoring will be disabled.",
   "stop": "Stop",
+  "activeBooking": "Active Booking",
   "failedToStartTracking": "Failed to start tracking",
   "trackingStarted": "Tracking started",
   "locationServicesDisabled": "Location services are disabled",

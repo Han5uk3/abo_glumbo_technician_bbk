@@ -1769,6 +1769,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stop => 'Stop';
 
   @override
+  String get activeBooking => 'Active Booking';
+
+  @override
   String get failedToStartTracking => 'Failed to start tracking';
 
   @override

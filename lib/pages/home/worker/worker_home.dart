@@ -240,11 +240,14 @@ class _BookingListTabState extends State<_BookingListTab>
     // Even if multiple offer documents were created, we only want one card per booking.
     final Map<String, dynamic> uniqueMap = {};
     for (var item in data) {
+      if (item is BookingModel) {
+        uniqueMap[item.id] = item;
+      }
+    }
+    for (var item in data) {
       if (item is JobOfferContainer) {
         final id = item.booking?.id ?? item.requestId ?? item.offerId;
         uniqueMap[id] = item;
-      } else if (item is BookingModel) {
-        uniqueMap[item.id] = item;
       }
     }
     final List<dynamic> uniqueData = uniqueMap.values.toList();

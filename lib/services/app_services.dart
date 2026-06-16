@@ -2472,7 +2472,13 @@ class AppServices {
 
   static Stream<AdminDashboardData> getAdminDashboardStream() {
     final pending = AppFirestore.bookingsCollectionRef
-        .where('bookingStatusCode', isEqualTo: 'P')
+        .where('bookingStatusCode', whereIn: ['P', 'SR'])
+        .snapshots()
+        .map((s) => s.docs.length)
+        .onErrorReturn(0);
+
+    final jobRequests = AppFirestore.jobRequestsCollectionRef
+        .where('status', isEqualTo: 'pending')
         .snapshots()
         .map((s) => s.docs.length)
         .onErrorReturn(0);
@@ -2539,7 +2545,8 @@ class AppServices {
         )
         .onErrorReturn(<BookingModel>[]);
 
-    return Rx.combineLatest7<
+    return Rx.combineLatest8<
+      int,
       int,
       int,
       int,
@@ -2555,8 +2562,9 @@ class AppServices {
       warrantyClaims,
       customers,
       technicians,
+      jobRequests,
       completedBookings,
-      (p, a, c, w, cust, tech, bookings) {
+      (p, a, c, w, cust, tech, jr, bookings) {
         Map<String, double> revenue = {};
         final now = DateTime.now();
 
@@ -2588,7 +2596,7 @@ class AppServices {
         }
 
         return AdminDashboardData(
-          pendingCount: p,
+          pendingCount: p + jr,
           assignedCount: a,
           completedCount: c,
           warrantyClaimsCount: w,
@@ -2886,7 +2894,7 @@ class AppServices {
                   offerData: data,
                 );
               }
-            } else if (requestId != null) {
+            } else {
               // The booking document doesn't exist in bookings collection yet (Manual Booking Request).
               // We render this request card using the offerData.
               return JobOfferContainer(

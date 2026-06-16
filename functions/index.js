@@ -145,8 +145,8 @@ async function getAllAdminUsers() {
       const level = data.accessLevel;
 
       // Per USER request: Only access level 1 or 2 needs to get notifications.
-      // Those with level 0 should not get notifications.
-      if (level === 1 || level === 2) {
+      // However, accessLevel 0 is Super Admin and should also receive them.
+      if (level === 0 || level === 1 || level === 2) {
         adminUsersMap.set(doc.id, doc);
       }
     });
@@ -1837,6 +1837,7 @@ exports.notifyAdminsOnNewWorkerSignup = onDocumentCreated(
       const tokensWithLanguage = [];
       adminUsersDocs.forEach((doc) => {
         const user = doc.data();
+        if (user.accessLevel === 1) return; // Exclude customer service admins
         if (user.fcmToken && user.fcmToken.trim() !== "") {
           tokensWithLanguage.push({
             token: user.fcmToken,
@@ -4148,6 +4149,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
       const adminUsersDocs = await getAllAdminUsers();
 
       const adminTokens = adminUsersDocs
+        .filter(doc => doc.data().accessLevel !== 1) // Exclude customer service admins
         .map((doc) => {
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
@@ -4179,6 +4181,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
             technicianId: userId,
             technicianName: techName,
             isAdmin: "true",
+            requestId: userId,
           },
           fcmToken: token,
           lanCode: lanCode,
@@ -5301,6 +5304,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
         const adminUsersDocs = await getAllAdminUsers();
 
         const adminTokens = adminUsersDocs
+          .filter(doc => doc.data().accessLevel !== 1) // Exclude customer service admins
           .map((doc) => {
             const data = doc.data();
             return data.fcmToken && data.fcmToken.trim() !== ""
@@ -5330,6 +5334,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
                 technicianId: userId,
                 technicianName: techName,
                 isAdmin: "true",
+                requestId: userId,
               },
               fcmToken: token,
               lanCode: lanCode,

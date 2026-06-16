@@ -5347,6 +5347,37 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
       }
     }
 
+    // 3. Check if approved
+    const wasVerified = beforeData.isVerified === true;
+    const isNowVerified = afterData.isVerified === true;
+    
+    if (!wasVerified && isNowVerified) {
+      if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
+        try {
+          await sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: userId,
+            titleEn: "Registration Approved",
+            titleAr: "تمت الموافقة على التسجيل",
+            titleUr: "رجسٹریشن منظور کر لی گئی",
+            bodyEn: "Congratulations! Your registration has been approved. You can now start receiving requests.",
+            bodyAr: "مبارك! تمت الموافقة على تسجيلك. يمكنك الآن البدء في تلقي الطلبات.",
+            bodyUr: "مبارک ہو! آپ کی رجسٹریشن منظور کر لی گئی ہے۔ اب آپ درخواستیں وصول کرنا شروع کر سکتے ہیں۔",
+            data: {
+              targetRole: "technician",
+              category: "registration_approved",
+              type: "registration_approved"
+            },
+            fcmToken: afterData.fcmToken,
+            lanCode: afterData.lanCode || "en"
+          });
+          console.log(`[${userId}] Approval notification sent to technician.`);
+        } catch (error) {
+          console.error(`[${userId}] Error sending approval notification to technician:`, error);
+        }
+      }
+    }
+
     return null;
   }
 );

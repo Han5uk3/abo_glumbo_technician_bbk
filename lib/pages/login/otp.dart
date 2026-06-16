@@ -90,6 +90,7 @@ class _OtpPageState extends State<OtpPage> {
       );
       return;
     }
+    if (isResendingOtp) return;
 
     debugPrint('🔄 [RESEND OTP] Starting resend OTP process');
     debugPrint('📱 [RESEND OTP] Phone number: ${widget.phoneNumber}');

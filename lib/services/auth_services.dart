@@ -7,7 +7,6 @@ import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AuthServices {
@@ -84,15 +83,13 @@ class AuthServices {
 
     try {
       if (Platform.isIOS) {
-        if (kDebugMode) {
-          debugPrint(
-            '🍎 [AUTH SERVICE] Debug mode: appVerificationDisabledForTesting set to true',
-          );
-          await FirebaseAuth.instance.setSettings(
-            appVerificationDisabledForTesting: true,
-            userAccessGroup: null,
-          );
-        }
+        debugPrint(
+          '🍎 [AUTH SERVICE] Explicitly setting appVerificationDisabledForTesting to false to clear cache',
+        );
+        await FirebaseAuth.instance.setSettings(
+          appVerificationDisabledForTesting: false,
+          userAccessGroup: null,
+        );
       }
 
       debugPrint(
@@ -110,9 +107,7 @@ class AuthServices {
             await _auth.signInWithCredential(credential);
             debugPrint('✅ [AUTH SERVICE] Auto sign-in successful');
           } catch (e) {
-            debugPrint(
-              "❌ [AUTH SERVICE] Auto verification sign-in failed: $e",
-            );
+            debugPrint("❌ [AUTH SERVICE] Auto verification sign-in failed: $e");
           }
         },
         verificationFailed: (FirebaseAuthException e) {
@@ -297,15 +292,20 @@ class AuthServices {
     }
   }
 
-  Future<void> _handleAdminPromotion(String uid, AdminModel pendingAdmin) async {
+  Future<void> _handleAdminPromotion(
+    String uid,
+    AdminModel pendingAdmin,
+  ) async {
     try {
       // Create admin document
-      await AppFirestore.adminsCollectionRef.doc(uid).set(
-        pendingAdmin.copyWith(uid: uid).toJson(),
-      );
+      await AppFirestore.adminsCollectionRef
+          .doc(uid)
+          .set(pendingAdmin.copyWith(uid: uid).toJson());
       // Delete pending admin
       if (pendingAdmin.uid != null) {
-        await AppFirestore.pendingAdminsCollectionRef.doc(pendingAdmin.uid).delete();
+        await AppFirestore.pendingAdminsCollectionRef
+            .doc(pendingAdmin.uid)
+            .delete();
       }
     } catch (e) {
       debugPrint("Error promoting admin: $e");
@@ -326,7 +326,9 @@ class AuthServices {
       }
 
       // 1. Check if user is in ACTIVE admins collection (by UID)
-      debugPrint("🔍 [TECH AUTH] Step 1: Checking admins collection for UID: $uid");
+      debugPrint(
+        "🔍 [TECH AUTH] Step 1: Checking admins collection for UID: $uid",
+      );
       final adminDoc = await AppFirestore.adminsCollectionRef.doc(uid).get();
       if (adminDoc.exists) {
         final adminData = adminDoc.data() as Map<String, dynamic>?;
@@ -343,7 +345,9 @@ class AuthServices {
       }
 
       // 2. Check if user is in PENDING admins collection by phone
-      debugPrint("🔍 [TECH AUTH] Step 2: Checking pending admins for phone: $phone");
+      debugPrint(
+        "🔍 [TECH AUTH] Step 2: Checking pending admins for phone: $phone",
+      );
       if (phone != null) {
         final pendingAdminQuery = await AppFirestore.pendingAdminsCollectionRef
             .where('phoneNumber', isEqualTo: phone)
@@ -355,7 +359,9 @@ class AuthServices {
             pendingAdminQuery.docs.first.data() as Map<String, dynamic>,
             id: pendingAdminQuery.docs.first.id,
           );
-          debugPrint("✅ [TECH AUTH] Pending admin found, promoting to active admin");
+          debugPrint(
+            "✅ [TECH AUTH] Pending admin found, promoting to active admin",
+          );
 
           // Promote to active admin
           await _handleAdminPromotion(uid, pendingAdmin);
@@ -372,13 +378,16 @@ class AuthServices {
       }
 
       // 3. Check users collection for role "technician"
-      debugPrint("🔍 [TECH AUTH] Step 3: Checking users collection for UID: $uid");
+      debugPrint(
+        "🔍 [TECH AUTH] Step 3: Checking users collection for UID: $uid",
+      );
       final userDoc = await AppFirestore.usersCollectionRef.doc(uid).get();
       bool isValidTechnician = false;
 
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>?;
-        final userRole = userData?['role']?.toString().toLowerCase() ?? 'technician';
+        final userRole =
+            userData?['role']?.toString().toLowerCase() ?? 'technician';
         debugPrint("🔍 [TECH AUTH] User found with role: $userRole");
 
         if (userRole == 'technician' &&
@@ -387,7 +396,9 @@ class AuthServices {
             userData['uid'].toString().isNotEmpty) {
           isValidTechnician = true;
         } else if (userRole != null && userRole != 'technician') {
-          debugPrint("❌ [TECH AUTH] User role is '$userRole', not 'technician'. Access denied.");
+          debugPrint(
+            "❌ [TECH AUTH] User role is '$userRole', not 'technician'. Access denied.",
+          );
         }
       }
 
@@ -407,16 +418,21 @@ class AuthServices {
       // 4. Check if phone number belongs to an admin in the admins collection (by phone)
       //    This handles admin users who log in for the first time on a new device
       if (phone != null) {
-        debugPrint("🔍 [TECH AUTH] Step 4: Checking admins collection by phone: $phone");
+        debugPrint(
+          "🔍 [TECH AUTH] Step 4: Checking admins collection by phone: $phone",
+        );
         final adminByPhoneQuery = await AppFirestore.adminsCollectionRef
             .where('phoneNumber', isEqualTo: phone)
             .limit(1)
             .get();
 
         if (adminByPhoneQuery.docs.isNotEmpty) {
-          final existingAdminData = adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
+          final existingAdminData =
+              adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
           final accessLevel = existingAdminData?['accessLevel'] ?? 1;
-          debugPrint("✅ [TECH AUTH] Admin found by phone with accessLevel: $accessLevel");
+          debugPrint(
+            "✅ [TECH AUTH] Admin found by phone with accessLevel: $accessLevel",
+          );
 
           // Create/update admin doc with current UID
           final adminModel = AdminModel.fromJson(
@@ -425,12 +441,14 @@ class AuthServices {
           );
           // If the admin doc UID differs from current UID, update it
           if (adminModel.uid != uid) {
-            await AppFirestore.adminsCollectionRef.doc(uid).set(
-              adminModel.copyWith(uid: uid).toJson(),
-            );
+            await AppFirestore.adminsCollectionRef
+                .doc(uid)
+                .set(adminModel.copyWith(uid: uid).toJson());
             // Clean up old admin doc if it has a different ID
             if (adminByPhoneQuery.docs.first.id != uid) {
-              await AppFirestore.adminsCollectionRef.doc(adminByPhoneQuery.docs.first.id).delete();
+              await AppFirestore.adminsCollectionRef
+                  .doc(adminByPhoneQuery.docs.first.id)
+                  .delete();
             }
           }
 
@@ -447,7 +465,9 @@ class AuthServices {
 
       // 5. Core admin bootstrap (hardcoded phone for initial setup)
       if (phone == '+966501234567') {
-        debugPrint("✅ [TECH AUTH] Core admin phone detected, creating core admin");
+        debugPrint(
+          "✅ [TECH AUTH] Core admin phone detected, creating core admin",
+        );
         final coreAdmin = AdminModel(
           uid: uid,
           name: 'Core Admin',
@@ -470,7 +490,9 @@ class AuthServices {
 
       // 6. Check if phone exists in users collection as technician (prevents duplicate accounts)
       if (phone != null) {
-        debugPrint("🔍 [TECH AUTH] Step 6: Checking users collection by phone: $phone");
+        debugPrint(
+          "🔍 [TECH AUTH] Step 6: Checking users collection by phone: $phone",
+        );
         final techByPhoneQuery = await AppFirestore.usersCollectionRef
             .where('phone', isEqualTo: phone)
             .limit(1)
@@ -481,22 +503,29 @@ class AuthServices {
           final oldData = oldDoc.data() as Map<String, dynamic>;
           final oldDocId = oldDoc.id;
 
-          final userRole = oldData['role']?.toString().toLowerCase() ?? 'technician';
+          final userRole =
+              oldData['role']?.toString().toLowerCase() ?? 'technician';
           if (userRole != 'technician') {
-            debugPrint("❌ [TECH AUTH] User found by phone but role is '$userRole', not 'technician'. Skipping.");
+            debugPrint(
+              "❌ [TECH AUTH] User found by phone but role is '$userRole', not 'technician'. Skipping.",
+            );
           } else {
-            debugPrint("✅ [TECH AUTH] Existing technician found by phone (old UID: $oldDocId), migrating to new UID: $uid");
+            debugPrint(
+              "✅ [TECH AUTH] Existing technician found by phone (old UID: $oldDocId), migrating to new UID: $uid",
+            );
 
-          // Migrate doc to new UID
-          oldData['uid'] = uid;
-          oldData['updatedAt'] = Timestamp.now();
-          await AppFirestore.usersCollectionRef.doc(uid).set(oldData);
+            // Migrate doc to new UID
+            oldData['uid'] = uid;
+            oldData['updatedAt'] = Timestamp.now();
+            await AppFirestore.usersCollectionRef.doc(uid).set(oldData);
 
-          // Delete old document
-          if (oldDocId != uid) {
-            await AppFirestore.usersCollectionRef.doc(oldDocId).delete();
-            debugPrint("🗑️ [TECH AUTH] Old technician doc ($oldDocId) deleted");
-          }
+            // Delete old document
+            if (oldDocId != uid) {
+              await AppFirestore.usersCollectionRef.doc(oldDocId).delete();
+              debugPrint(
+                "🗑️ [TECH AUTH] Old technician doc ($oldDocId) deleted",
+              );
+            }
 
             LocalStore.putUID(uid);
             LocalStore.putlogoutStatus(false);
@@ -511,7 +540,9 @@ class AuthServices {
       }
 
       // 7. User not found in any collection — redirect to signup
-      debugPrint("📝 [TECH AUTH] Redirecting to Signup (User not found or invalid role): $uid");
+      debugPrint(
+        "📝 [TECH AUTH] Redirecting to Signup (User not found or invalid role): $uid",
+      );
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => Signup(uid: uid)),

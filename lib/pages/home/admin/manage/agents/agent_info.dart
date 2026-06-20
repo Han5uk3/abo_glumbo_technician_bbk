@@ -177,7 +177,7 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.money_outlined,
           Colors.blue,
-          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${AppLocalizations.of(context)!.sar} ${agent.paidAmounts ?? "0.00"}',
+          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${agent.paidAmounts ?? "0.00"} ${AppLocalizations.of(context)!.sar}',
         ),
         const SizedBox(height: 8),
         Divider(

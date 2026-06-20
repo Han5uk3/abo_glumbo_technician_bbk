@@ -204,16 +204,20 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
             : (data['serviceName'] ?? booking?.service.name ?? '');
 
     final customerName =
-        data['customerName'] ?? booking?.customer.name ?? 'Customer';
+        data['customerName'] ?? booking?.customer.name ?? localization.customer;
+
+    final selectedAddress = booking?.customer.addresses.where((a) => a.isSelected == true).firstOrNull ?? booking?.customer.addresses.firstOrNull;
+    final displayAddress = selectedAddress?.displayAddress.isNotEmpty == true ? selectedAddress!.displayAddress : null;
 
     final address =
         data['serviceLocation']?['fullAddress'] ??
         data['serviceLocation']?['streetName'] ??
+        displayAddress ??
         booking?.customer.location?.fullAddress ??
-        'N/A';
+        localization.notAvailable;
 
     final notes =
-        data['notes'] ?? booking?.notes ?? 'No additional description';
+        data['notes'] ?? booking?.notes ?? localization.noAdditionalDescription;
     final issueImage = data['issueImage'] ?? booking?.issueImage;
     final issueVideo = data['issueVideo'] ?? booking?.issueVideo;
     final bookingDateTime = data['bookingDateTime'] as Timestamp? ??
@@ -285,11 +289,11 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 [
                   _buildDetailRow(
                     localization.date,
-                    DateFormat('EEEE, d MMMM yyyy').format(bookingDateTime.toDate()),
+                    DateFormat('EEEE, d MMMM yyyy', locale).format(bookingDateTime.toDate()),
                   ),
                   _buildDetailRow(
                     localization.time,
-                    DateFormat('hh:mm a').format(bookingDateTime.toDate()),
+                    DateFormat('hh:mm a', locale).format(bookingDateTime.toDate()),
                   ),
                 ],
               ),
@@ -436,6 +440,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
   }
 
   Widget _buildDistanceRow(Map<String, dynamic> loc) {
+    final localization = AppLocalizations.of(context)!;
     final technician = LocalStore.getCachedUserData();
     double? techLat;
     double? techLon;
@@ -460,8 +465,8 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
         loc['lon'],
       );
       return _buildDetailRow(
-        "Distance",
-        "${(dist / 1000).toStringAsFixed(1)} km away",
+        localization.distance,
+        localization.kmAway((dist / 1000).toStringAsFixed(1)),
       );
     }
 
@@ -480,8 +485,8 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
           loc['lon'],
         );
         return _buildDetailRow(
-          "Distance",
-          "${(dist / 1000).toStringAsFixed(1)} km away",
+          localization.distance,
+          localization.kmAway((dist / 1000).toStringAsFixed(1)),
         );
       },
     );

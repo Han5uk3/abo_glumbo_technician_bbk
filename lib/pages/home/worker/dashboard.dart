@@ -485,7 +485,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            "${l10n.sar} ${stats['paidAmounts']?.toString() ?? "0.00"}",
+                            "${stats['paidAmounts']?.toString() ?? "0.00"} ${l10n.sar}",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,

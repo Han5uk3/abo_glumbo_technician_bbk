@@ -4939,7 +4939,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String sarAmount(String amount) {
-    return 'SAR $amount';
+    return '$amount SAR';
   }
 
   @override
@@ -5181,4 +5181,13 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get selectNewDateAppointment =>
       'ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں';
+
+  @override
+  String get notAvailable => 'N/A';
+
+  @override
+  String get noAdditionalDescription => 'No additional description';
+
+  @override
+  String get distance => 'Distance';
 }

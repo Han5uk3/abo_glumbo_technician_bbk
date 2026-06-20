@@ -431,14 +431,20 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     final locationKey = (_selectedZoneIds.toList()..sort()).join('_');
     if (_cachedUsersStream == null || _lastLocationKey != locationKey) {
       _cachedUsersStream = _createUsersStream().map((users) {
-        if (_selectedZoneIds.isEmpty) return users;
+        final assignedUid = widget.booking.agent?.uid;
+        var filteredUsers = users;
+        if (assignedUid != null) {
+          filteredUsers = users.where((u) => u.uid != assignedUid).toList();
+        }
+
+        if (_selectedZoneIds.isEmpty) return filteredUsers;
 
         final selectedPolygons = _availableZones
             .where((z) => _selectedZoneIds.contains(z.id))
             .map((z) => z.polygon)
             .toList();
 
-        return users.where((user) {
+        return filteredUsers.where((user) {
           double? userLat;
           double? userLng;
 

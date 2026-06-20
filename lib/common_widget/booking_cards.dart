@@ -173,7 +173,7 @@ class BookingListTileWidget extends StatelessWidget {
                                   color: Colors.grey[500],
                                 ),
                               ),
-                              if (booking.warranty != null) ...[
+                              if (isWarranty) ...[
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -218,7 +218,7 @@ class BookingListTileWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (booking.bookingStatusCode == "C" ||
+                        if ((booking.bookingStatusCode == "C" && isAdmin) ||
                             booking.bookingStatusCode == "VP")
                           Text(
                             isWarranty
@@ -234,7 +234,7 @@ class BookingListTileWidget extends StatelessWidget {
                               fontSize: 15,
                             ),
                           ),
-                        if (booking.bookingStatusCode == "C" ||
+                        if ((booking.bookingStatusCode == "C" && isAdmin) ||
                             booking.bookingStatusCode == "VP")
                           Text(
                             localization.sar,

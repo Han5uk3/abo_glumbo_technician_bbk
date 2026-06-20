@@ -9224,7 +9224,7 @@ abstract class AppLocalizations {
   /// No description provided for @sarAmount.
   ///
   /// In en, this message translates to:
-  /// **'SAR {amount}'**
+  /// **'{amount} SAR'**
   String sarAmount(String amount);
 
   /// No description provided for @onHour.
@@ -9640,6 +9640,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select a new date and time for the appointment'**
   String get selectNewDateAppointment;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
+  /// No description provided for @noAdditionalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No additional description'**
+  String get noAdditionalDescription;
+
+  /// No description provided for @distance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get distance;
 }
 
 class _AppLocalizationsDelegate

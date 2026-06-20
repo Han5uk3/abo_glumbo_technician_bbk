@@ -1416,7 +1416,7 @@
   "alreadyInHand": "بالفعل مستلم",
   "enableAvailability": "تفعيل الجاهزية",
   "selectRecipientType": "اختر نوع المستلم",
-  "aboutUs": "عننا",
+  "aboutUs": "من نحن",
   "recipientsSelected": "المستلمين محدد",
   "welcomeToAboGlumboTechnician": "مرحباً {name}",
   "@welcomeToAboGlumboTechnician": {
@@ -1666,10 +1666,10 @@
       }
     }
   },
-  "onHour": "On-Hour",
-  "offHour": "Off-Hour",
-  "onHourBooking": "On-Hour Booking",
-  "offHourBooking": "Off-Hour Booking",
+  "onHour": "أوقات العمل",
+  "offHour": "خارج أوقات العمل",
+  "onHourBooking": "حجز في أوقات العمل",
+  "offHourBooking": "حجز خارج أوقات العمل",
   "inAppEarnings": "الأرباح داخل التطبيق",
   "outsideAppEarnings": "الأرباح خارج التطبيق",
   "earningsPeriod": "فترة الأرباح",
@@ -1735,5 +1735,8 @@
   "fullAdminAccess": "وصول مشرف كامل",
   "fullAdminDesc": "وصول كامل باستثناء إدارة المشرفين الآخرين.",
   "phoneNoteWithCountryCode": "(أدخل رقم الهاتف مع رمز الدولة مثال : 966+)",
-  "selectNewDateAppointment": "حدد تاريخًا ووقتًا جديدين للموعد"
+  "selectNewDateAppointment": "حدد تاريخًا ووقتًا جديدين للموعد",
+  "notAvailable": "غير متوفر",
+  "noAdditionalDescription": "لا يوجد وصف إضافي",
+  "distance": "المسافة"
 }

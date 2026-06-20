@@ -1583,7 +1583,7 @@
       }
     }
   },
-  "sarAmount": "SAR {amount}",
+  "sarAmount": "{amount} SAR",
   "@sarAmount": {
     "placeholders": {
       "amount": {
@@ -1686,5 +1686,8 @@
   "fullAdminAccess": "مکمل ایڈمن کی رسائی",
   "fullAdminDesc": "دوسرے ایڈمنز کے انتظام کے علاوہ مکمل رسائی۔",
   "phoneNoteWithCountryCode": "(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)",
-  "selectNewDateAppointment": "ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں"
+  "selectNewDateAppointment": "ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں",
+  "notAvailable": "دستیاب نہیں",
+  "noAdditionalDescription": "کوئی اضافی تفصیل نہیں",
+  "distance": "فاصلہ"
 }

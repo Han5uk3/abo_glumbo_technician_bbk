@@ -34,7 +34,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     SendOTPPressed event,
     Emitter<LoginState> emit,
   ) async {
-    if (state is LoginLoading || state is OTPSentSuccess) return;
+    if (state is LoginLoading) return;
     emit(LoginLoading());
     try {
       // ✅ Use Completer to properly wait for callbacks

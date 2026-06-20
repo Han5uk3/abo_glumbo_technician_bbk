@@ -36,6 +36,7 @@ class _ManageAgentsState extends State<ManageAgents>
     }
     return _periodLabel;
   }
+
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
 
@@ -183,9 +184,21 @@ class _ManageAgentsState extends State<ManageAgents>
 
     if (picked != null) {
       setState(() {
-        _startDate = DateTime(picked.start.year, picked.start.month, picked.start.day);
-        _endDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
-        _periodLabel = "${DateFormat('dd/MM/yyyy').format(picked.start)} - ${DateFormat('dd/MM/yyyy').format(picked.end)}";
+        _startDate = DateTime(
+          picked.start.year,
+          picked.start.month,
+          picked.start.day,
+        );
+        _endDate = DateTime(
+          picked.end.year,
+          picked.end.month,
+          picked.end.day,
+          23,
+          59,
+          59,
+        );
+        _periodLabel =
+            "${DateFormat('dd/MM/yyyy').format(picked.start)} - ${DateFormat('dd/MM/yyyy').format(picked.end)}";
       });
     }
   }
@@ -205,7 +218,9 @@ class _ManageAgentsState extends State<ManageAgents>
             AppLocalizations.of(context)?.selectMonth ?? "Select Month",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: Container(
             width: double.maxFinite,
             child: ListView.builder(
@@ -213,9 +228,15 @@ class _ManageAgentsState extends State<ManageAgents>
               itemCount: months.length,
               itemBuilder: (context, index) {
                 final monthDate = months[index];
-                final label = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(monthDate);
+                final label = DateFormat(
+                  'MMMM yyyy',
+                  Localizations.localeOf(context).languageCode,
+                ).format(monthDate);
                 return ListTile(
-                  title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  title: Text(
+                    label,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 14),
                   onTap: () => Navigator.pop(context, monthDate),
                 );
@@ -230,7 +251,10 @@ class _ManageAgentsState extends State<ManageAgents>
       setState(() {
         _startDate = DateTime(selected.year, selected.month, 1);
         _endDate = DateTime(selected.year, selected.month + 1, 0, 23, 59, 59);
-        _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(selected);
+        _periodLabel = DateFormat(
+          'MMMM yyyy',
+          Localizations.localeOf(context).languageCode,
+        ).format(selected);
       });
     }
   }
@@ -273,7 +297,10 @@ class _ManageAgentsState extends State<ManageAgents>
                     color: Colors.blue.shade50,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.all_inclusive_rounded, color: Colors.blue),
+                  child: const Icon(
+                    Icons.all_inclusive_rounded,
+                    color: Colors.blue,
+                  ),
                 ),
                 title: Text(
                   AppLocalizations.of(context)?.allTime ?? "All Time",
@@ -283,7 +310,8 @@ class _ManageAgentsState extends State<ManageAgents>
                   setState(() {
                     _startDate = null;
                     _endDate = null;
-                    _periodLabel = AppLocalizations.of(context)?.allTime ?? 'All Time';
+                    _periodLabel =
+                        AppLocalizations.of(context)?.allTime ?? 'All Time';
                   });
                   Navigator.pop(context);
                 },
@@ -306,7 +334,10 @@ class _ManageAgentsState extends State<ManageAgents>
                   setState(() {
                     _startDate = DateTime(now.year, now.month, 1);
                     _endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-                    _periodLabel = DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode).format(now);
+                    _periodLabel = DateFormat(
+                      'MMMM yyyy',
+                      Localizations.localeOf(context).languageCode,
+                    ).format(now);
                   });
                   Navigator.pop(context);
                 },
@@ -318,7 +349,10 @@ class _ManageAgentsState extends State<ManageAgents>
                     color: Colors.orange.shade50,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.date_range_rounded, color: Colors.orange),
+                  child: const Icon(
+                    Icons.date_range_rounded,
+                    color: Colors.orange,
+                  ),
                 ),
                 title: Text(
                   AppLocalizations.of(context)?.selectMonth ?? "Select Month",
@@ -336,10 +370,14 @@ class _ManageAgentsState extends State<ManageAgents>
                     color: Colors.purple.shade50,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.calendar_month_rounded, color: Colors.purple),
+                  child: const Icon(
+                    Icons.calendar_month_rounded,
+                    color: Colors.purple,
+                  ),
                 ),
                 title: Text(
-                  AppLocalizations.of(context)?.customDateRange ?? "Custom Date Range",
+                  AppLocalizations.of(context)?.customDateRange ??
+                      "Custom Date Range",
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () {
@@ -357,7 +395,6 @@ class _ManageAgentsState extends State<ManageAgents>
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<ManageAppBloc, ManageAppState>(
       listener: (context, state) {
         if (state is AgentApproved) {
@@ -403,8 +440,11 @@ class _ManageAgentsState extends State<ManageAgents>
           scrolledUnderElevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon:
-                const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
           title: Text(
             AppLocalizations.of(context)!.manageTechnicians,
@@ -452,8 +492,9 @@ class _ManageAgentsState extends State<ManageAgents>
                     });
                   },
                   decoration: InputDecoration(
-                    hintText:
-                        AppLocalizations.of(context)!.searchByTechnicianName,
+                    hintText: AppLocalizations.of(
+                      context,
+                    )!.searchByTechnicianName,
                     hintStyle: TextStyle(
                       color: Colors.grey.shade400,
                       fontSize: 14,
@@ -534,11 +575,11 @@ class _ManageAgentsState extends State<ManageAgents>
                 stream: Rx.combineLatest2(
                   AppServices.getAllAgentsStream(),
                   AppServices.getAllTransactionsStream(),
-                  (List<UserModel> agents, List<TransactionModel> transactions) {
-                    return {
-                      'agents': agents,
-                      'transactions': transactions,
-                    };
+                  (
+                    List<UserModel> agents,
+                    List<TransactionModel> transactions,
+                  ) {
+                    return {'agents': agents, 'transactions': transactions};
                   },
                 ),
                 builder: (context, snapshot) {
@@ -567,9 +608,13 @@ class _ManageAgentsState extends State<ManageAgents>
                   }
 
                   final allUsers = snapshot.data!['agents'] as List<UserModel>;
-                  final allTransactions = snapshot.data!['transactions'] as List<TransactionModel>? ?? [];
-                  final agents =
-                      allUsers.where((user) => user.isAdmin != true).toList();
+                  final allTransactions =
+                      snapshot.data!['transactions']
+                          as List<TransactionModel>? ??
+                      [];
+                  final agents = allUsers
+                      .where((user) => user.isAdmin != true)
+                      .toList();
 
                   final filteredAgents = agents.where((agent) {
                     bool matchesSearch = true;
@@ -597,14 +642,20 @@ class _ManageAgentsState extends State<ManageAgents>
                   double combinedInApp = 0.0;
                   double combinedOutside = 0.0;
                   for (var t in allTransactions) {
-                    final isCompleted = t.paymentStatus.toLowerCase() == 'completed' || t.paymentStatus.toLowerCase() == 'paid';
+                    final isCompleted =
+                        t.paymentStatus.toLowerCase() == 'completed' ||
+                        t.paymentStatus.toLowerCase() == 'paid';
                     if (!isCompleted) continue;
 
                     final date = t.createdAt.toDate();
-                    if (_startDate != null && date.isBefore(_startDate!)) continue;
+                    if (_startDate != null && date.isBefore(_startDate!))
+                      continue;
                     if (_endDate != null && date.isAfter(_endDate!)) continue;
 
-                    final isOutside = t.paymentMethod.toLowerCase().contains('outside') || t.paymentMethod.toLowerCase().contains('cash') || t.paymentMethod.toLowerCase().contains('hand');
+                    final isOutside =
+                        t.paymentMethod.toLowerCase().contains('outside') ||
+                        t.paymentMethod.toLowerCase().contains('cash') ||
+                        t.paymentMethod.toLowerCase().contains('hand');
                     if (isOutside) {
                       combinedOutside += t.amount;
                     } else {
@@ -618,68 +669,105 @@ class _ManageAgentsState extends State<ManageAgents>
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.primary.withOpacity(0.05), AppColors.primary.withOpacity(0.12)],
+                              colors: [
+                                AppColors.primary.withOpacity(0.05),
+                                AppColors.primary.withOpacity(0.12),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)?.earningsPeriod ?? "Earnings Period",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade600,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                              GestureDetector(
+                                onTap: () => _showPeriodSelectorSheet(context),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      width: 1.0,
+                                      color: AppColors.primary,
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _displayPeriodLabel,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                     Text(
-                                      "Total: SAR ${(combinedInApp + combinedOutside).toStringAsFixed(2)} (${AppLocalizations.of(context)?.inApp ?? "In-App"}: SAR ${combinedInApp.toStringAsFixed(2)} | ${AppLocalizations.of(context)?.outsideApp ?? "Outside-App"}: SAR ${combinedOutside.toStringAsFixed(2)})",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.tune_rounded,
+                                        size: 22,
                                         color: AppColors.primary,
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        AppLocalizations.of(context)?.filter ??
+                                            "Filter",
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              TextButton.icon(
-                                onPressed: () => _showPeriodSelectorSheet(context),
-                                icon: const Icon(Icons.tune_rounded, size: 16),
-                                label: Text(AppLocalizations.of(context)?.change ?? "Change"),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.primary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
+                              Spacer(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(
+                                          context,
+                                        )?.earningsPeriod ??
+                                        "Earnings Period",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _displayPeriodLabel,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "${AppLocalizations.of(context)?.totalLabel ?? "Total"} ${(combinedInApp + combinedOutside).toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"}",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "(${AppLocalizations.of(context)?.inApp ?? "In-App"}: ${combinedInApp.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"} | ${AppLocalizations.of(context)?.outsideApp ?? "Outside-App"}: ${combinedOutside.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"})",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -691,10 +779,12 @@ class _ManageAgentsState extends State<ManageAgents>
                           child: _buildEmptyState(
                             context: context,
                             icon: Icons.search_off_rounded,
-                            title: AppLocalizations.of(context)!
-                                .noTechniciansMatchYourFilters,
-                            subtitle: AppLocalizations.of(context)!
-                                .tryAdjustingYourSearchCriteria,
+                            title: AppLocalizations.of(
+                              context,
+                            )!.noTechniciansMatchYourFilters,
+                            subtitle: AppLocalizations.of(
+                              context,
+                            )!.tryAdjustingYourSearchCriteria,
                             color: AppColors.primary,
                           ),
                         )
@@ -710,20 +800,35 @@ class _ManageAgentsState extends State<ManageAgents>
                             itemCount: filteredAgents.length,
                             itemBuilder: (context, index) {
                               final agent = filteredAgents[index];
-                              
+
                               // Calculate earnings for this specific agent
                               double inApp = 0.0;
                               double outside = 0.0;
                               for (var t in allTransactions) {
                                 if (t.workerId != agent.uid) continue;
-                                final isCompleted = t.paymentStatus.toLowerCase() == 'completed' || t.paymentStatus.toLowerCase() == 'paid';
+                                final isCompleted =
+                                    t.paymentStatus.toLowerCase() ==
+                                        'completed' ||
+                                    t.paymentStatus.toLowerCase() == 'paid';
                                 if (!isCompleted) continue;
 
                                 final date = t.createdAt.toDate();
-                                if (_startDate != null && date.isBefore(_startDate!)) continue;
-                                if (_endDate != null && date.isAfter(_endDate!)) continue;
+                                if (_startDate != null &&
+                                    date.isBefore(_startDate!))
+                                  continue;
+                                if (_endDate != null && date.isAfter(_endDate!))
+                                  continue;
 
-                                final isOutside = t.paymentMethod.toLowerCase().contains('outside') || t.paymentMethod.toLowerCase().contains('cash') || t.paymentMethod.toLowerCase().contains('hand');
+                                final isOutside =
+                                    t.paymentMethod.toLowerCase().contains(
+                                      'outside',
+                                    ) ||
+                                    t.paymentMethod.toLowerCase().contains(
+                                      'cash',
+                                    ) ||
+                                    t.paymentMethod.toLowerCase().contains(
+                                      'hand',
+                                    );
                                 if (isOutside) {
                                   outside += t.amount;
                                 } else {
@@ -871,32 +976,41 @@ class _ManageAgentsState extends State<ManageAgents>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: (isVerified ? Colors.green : Colors.orange)
-                                    .withOpacity(0.1),
+                                color:
+                                    (isVerified ? Colors.green : Colors.orange)
+                                        .withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 (() {
-                                  if (isVerified) return AppLocalizations.of(context)!.verified;
-                                  if (agent.rejectionReason != null && agent.rejectionReason!.isNotEmpty && agent.isDocsPendingReview != true) {
+                                  if (isVerified) {
+                                    return AppLocalizations.of(
+                                      context,
+                                    )!.verified;
+                                  }
+                                  if (agent.rejectionReason != null &&
+                                      agent.rejectionReason!.isNotEmpty &&
+                                      agent.isDocsPendingReview != true) {
                                     return "REJECTED";
                                   }
                                   if (agent.isDocsPendingReview == true) {
                                     return "PENDING REVIEW";
                                   }
                                   return AppLocalizations.of(context)!.pending;
-                                })()
-                                    .toUpperCase(),
+                                })().toUpperCase(),
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: isVerified
                                       ? Colors.green
                                       : (agent.rejectionReason != null &&
-                                              agent.rejectionReason!.isNotEmpty &&
-                                              agent.isDocsPendingReview != true
-                                          ? Colors.red
-                                          : Colors.orange),
+                                                agent
+                                                    .rejectionReason!
+                                                    .isNotEmpty &&
+                                                agent.isDocsPendingReview !=
+                                                    true
+                                            ? Colors.red
+                                            : Colors.orange),
                                 ),
                               ),
                             ),
@@ -931,18 +1045,16 @@ class _ManageAgentsState extends State<ManageAgents>
                           final confirmed = await _showConfirmationDialog(
                             context: context,
                             title: AppLocalizations.of(context)!.approveAgent,
-                            message: AppLocalizations.of(context)!
-                                .areYouSureYouWantToApproveThisAgent,
+                            message: AppLocalizations.of(
+                              context,
+                            )!.areYouSureYouWantToApproveThisAgent,
                             isApproval: true,
                           );
 
                           if (confirmed == true && context.mounted) {
                             context.read<ManageAppBloc>().add(
-                                  ApproveRejectAgentEvent(
-                                    agent.uid!,
-                                    true,
-                                  ),
-                                );
+                              ApproveRejectAgentEvent(agent.uid!, true),
+                            );
                           }
                         } else {
                           final isCurrentlyBlocked = agent.isBlocked ?? false;
@@ -950,7 +1062,11 @@ class _ManageAgentsState extends State<ManageAgents>
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text(isCurrentlyBlocked ? l10n.unblockAccount : l10n.suspendAccount),
+                              title: Text(
+                                isCurrentlyBlocked
+                                    ? l10n.unblockAccount
+                                    : l10n.suspendAccount,
+                              ),
                               content: Text(
                                 isCurrentlyBlocked
                                     ? l10n.areYouSureYouWantToUnblockThisAccount
@@ -958,12 +1074,17 @@ class _ManageAgentsState extends State<ManageAgents>
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
                                   child: Text(l10n.cancel),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.pop(context, true),
-                                  child: Text(isCurrentlyBlocked ? l10n.unblock : l10n.suspendAccount),
+                                  child: Text(
+                                    isCurrentlyBlocked
+                                        ? l10n.unblock
+                                        : l10n.suspendAccount,
+                                  ),
                                 ),
                               ],
                             ),
@@ -973,22 +1094,28 @@ class _ManageAgentsState extends State<ManageAgents>
                             showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (context) => const Center(child: Loader()),
+                              builder: (context) =>
+                                  const Center(child: Loader()),
                             );
                             try {
-                              final success = await AppServices.blockOrUnblockAgent(
-                                agent.uid!,
-                                !isCurrentlyBlocked,
-                              );
+                              final success =
+                                  await AppServices.blockOrUnblockAgent(
+                                    agent.uid!,
+                                    !isCurrentlyBlocked,
+                                  );
                               if (context.mounted) {
                                 Navigator.pop(context); // close loader
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        !isCurrentlyBlocked ? l10n.accountSuspended : l10n.accountUnblocked,
+                                        !isCurrentlyBlocked
+                                            ? l10n.accountSuspended
+                                            : l10n.accountUnblocked,
                                       ),
-                                      backgroundColor: !isCurrentlyBlocked ? Colors.red : Colors.green,
+                                      backgroundColor: !isCurrentlyBlocked
+                                          ? Colors.red
+                                          : Colors.green,
                                     ),
                                   );
                                 }
@@ -997,7 +1124,10 @@ class _ManageAgentsState extends State<ManageAgents>
                               if (context.mounted) {
                                 Navigator.pop(context); // close loader
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                                  SnackBar(
+                                    content: Text('Error: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
                                 );
                               }
                             }
@@ -1007,17 +1137,21 @@ class _ManageAgentsState extends State<ManageAgents>
                       icon: Icon(
                         !isVerified
                             ? Icons.check_circle_outline
-                            : (agent.isBlocked == true ? Icons.lock_open_rounded : Icons.block_rounded),
+                            : (agent.isBlocked == true
+                                  ? Icons.lock_open_rounded
+                                  : Icons.block_rounded),
                         color: !isVerified
                             ? Colors.green
-                            : (agent.isBlocked == true ? Colors.green : Colors.red),
+                            : (agent.isBlocked == true
+                                  ? Colors.green
+                                  : Colors.red),
                       ),
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Dynamic Period Earnings Section
               Container(
                 padding: const EdgeInsets.all(12),
@@ -1032,7 +1166,8 @@ class _ManageAgentsState extends State<ManageAgents>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context)?.totalEarnings ?? "Total Earnings",
+                          AppLocalizations.of(context)?.totalEarnings ??
+                              "Total Earnings",
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1040,7 +1175,7 @@ class _ManageAgentsState extends State<ManageAgents>
                           ),
                         ),
                         Text(
-                          "SAR ${(inAppEarnings + outsideAppEarnings).toStringAsFixed(2)}",
+                          "${(inAppEarnings + outsideAppEarnings).toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"}",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
@@ -1066,7 +1201,7 @@ class _ManageAgentsState extends State<ManageAgents>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                "SAR ${inAppEarnings.toStringAsFixed(2)}",
+                                "${inAppEarnings.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -1087,7 +1222,8 @@ class _ManageAgentsState extends State<ManageAgents>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context)?.outsideApp ?? "Outside-App",
+                                AppLocalizations.of(context)?.outsideApp ??
+                                    "Outside-App",
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey.shade500,
@@ -1096,7 +1232,7 @@ class _ManageAgentsState extends State<ManageAgents>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                "SAR ${outsideAppEarnings.toStringAsFixed(2)}",
+                                "${outsideAppEarnings.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,

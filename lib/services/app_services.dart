@@ -2471,17 +2471,36 @@ class AppServices {
   }
 
   static Stream<AdminDashboardData> getAdminDashboardStream() {
-    final pending = AppFirestore.bookingsCollectionRef
+    final pendingBookings = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', whereIn: ['P', 'SR'])
         .snapshots()
-        .map((s) => s.docs.length)
-        .onErrorReturn(0);
+        .map((s) => s.docs.map((doc) => doc.id).toList())
+        .onErrorReturn([]);
 
-    final jobRequests = AppFirestore.jobRequestsCollectionRef
+    final jobOffers = getJobOffersStream(isAdmin: true)
+        .map((offers) => offers.map((o) => o.booking?.id ?? o.requestId ?? o.offerId).toList())
+        .onErrorReturn([]);
+
+    final rawJobRequests = AppFirestore.jobRequestsCollectionRef
         .where('status', isEqualTo: 'pending')
         .snapshots()
-        .map((s) => s.docs.length)
-        .onErrorReturn(0);
+        .map((s) => s.docs.map((doc) => doc.id).toList())
+        .onErrorReturn([]);
+
+    final pending = Rx.combineLatest3(
+      pendingBookings,
+      jobOffers,
+      rawJobRequests,
+      (List<String> b, List<String> o, List<String> jr) {
+        final Set<String> uniqueIds = {};
+        uniqueIds.addAll(b);
+        uniqueIds.addAll(o);
+        uniqueIds.addAll(jr);
+        return uniqueIds.length;
+      },
+    ).onErrorReturn(0);
+
+    final jobRequests = Stream.value(0);
 
     final assigned = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'A')

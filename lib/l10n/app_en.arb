@@ -1686,7 +1686,7 @@
       }
     }
   },
-  "sarAmount": "SAR {amount}",
+  "sarAmount": "{amount} SAR",
   "@sarAmount": {
     "placeholders": {
       "amount": {
@@ -1832,5 +1832,8 @@
   "fullAdminAccess": "Full Admin Access",
   "fullAdminDesc": "Full access except management of other admins.",
   "phoneNoteWithCountryCode": "(enter phone number along with country code example : +966)",
-  "selectNewDateAppointment": "Select a new date and time for the appointment"
+  "selectNewDateAppointment": "Select a new date and time for the appointment",
+  "notAvailable": "N/A",
+  "noAdditionalDescription": "No additional description",
+  "distance": "Distance"
 }

@@ -4341,7 +4341,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchAdmins => 'البحث عن المشرفين...';
 
   @override
-  String get aboutUs => 'عننا';
+  String get aboutUs => 'من نحن';
 
   @override
   String get noAdminsFound => 'لم يتم العثور على مشرفين';
@@ -4858,16 +4858,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'On-Hour';
+  String get onHour => 'أوقات العمل';
 
   @override
-  String get offHour => 'Off-Hour';
+  String get offHour => 'خارج أوقات العمل';
 
   @override
-  String get onHourBooking => 'On-Hour Booking';
+  String get onHourBooking => 'حجز في أوقات العمل';
 
   @override
-  String get offHourBooking => 'Off-Hour Booking';
+  String get offHourBooking => 'حجز خارج أوقات العمل';
 
   @override
   String get inAppEarnings => 'الأرباح داخل التطبيق';
@@ -5089,4 +5089,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectNewDateAppointment => 'حدد تاريخًا ووقتًا جديدين للموعد';
+
+  @override
+  String get notAvailable => 'غير متوفر';
+
+  @override
+  String get noAdditionalDescription => 'لا يوجد وصف إضافي';
+
+  @override
+  String get distance => 'المسافة';
 }

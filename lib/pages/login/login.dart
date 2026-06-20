@@ -506,7 +506,7 @@ class _LoginPageState extends State<LoginPage> {
                     constraints: const BoxConstraints(maxWidth: 250),
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: localcolor.AppColors.primary,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(

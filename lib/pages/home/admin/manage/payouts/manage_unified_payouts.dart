@@ -503,7 +503,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                       ),
                     ),
                     Text(
-                      '${AppLocalizations.of(context)!.sar} ${(request.totalAmount ?? 0.0).toStringAsFixed(2)}',
+                      '${(request.totalAmount ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -1060,7 +1060,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${AppLocalizations.of(context)!.amount}: ${AppLocalizations.of(context)!.sar} ${(request.totalAmount ?? 0.0).toStringAsFixed(2)} ',
+                      '${AppLocalizations.of(context)!.amount}: ${(request.totalAmount ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

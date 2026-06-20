@@ -9,6 +9,7 @@ import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+import 'package:aboglumbo_bbk_panel/models/customer.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
@@ -340,7 +341,9 @@ class _BookingInfoState extends State<BookingInfo> {
         final expiresAt = data?['expiresAt'] as Timestamp?;
         final status = data?['status'] as String?;
 
-        if (status == 'accepted_by_technician' || status == 'accepted' || status == 'counter_offered') {
+        if (status == 'accepted_by_technician' ||
+            status == 'accepted' ||
+            status == 'counter_offered') {
           _offerExpiresAt = null;
           return;
         }
@@ -383,9 +386,14 @@ class _BookingInfoState extends State<BookingInfo> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: ${e.toString()}',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
@@ -474,9 +482,14 @@ class _BookingInfoState extends State<BookingInfo> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: ${e.toString()}',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isOfferLoading = false);
@@ -775,7 +788,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   style: DMSansFont.textStyle(fontSize: 12),
                 ),
                 Text(
-                  '${AppLocalizations.of(context)!.sar} ${widget.booking.service.price}',
+                  '${widget.booking.service.price} ${AppLocalizations.of(context)!.sar}',
                   style: DMSansFont.textStyle(
                     fontSize: 12,
                     color: Colors.green,
@@ -786,6 +799,60 @@ class _BookingInfoState extends State<BookingInfo> {
         ],
       ),
     );
+  }
+
+  String _getBestLocationString(
+    BuildContext context,
+    AddressModel? selectedAddress,
+    CustomerModel customer,
+  ) {
+    if (selectedAddress != null &&
+        selectedAddress.displayAddress.isNotEmpty &&
+        selectedAddress.displayAddress != 'N/A') {
+      return selectedAddress.displayAddress;
+    }
+
+    if (customer.location != null) {
+      if (customer.location!.fullAddress != null &&
+          customer.location!.fullAddress!.isNotEmpty &&
+          customer.location!.fullAddress != 'N/A') {
+        return customer.location!.fullAddress!;
+      }
+      if (customer.location!.displayName.isNotEmpty &&
+          customer.location!.displayName != 'Unknown location' &&
+          customer.location!.displayName != 'N/A') {
+        return customer.location!.displayName;
+      }
+    }
+
+    final List<String> parts = [];
+    if (customer.buildingNumber != null &&
+        customer.buildingNumber!.isNotEmpty &&
+        customer.buildingNumber != 'N/A')
+      parts.add(customer.buildingNumber!);
+    if (customer.streetName != null &&
+        customer.streetName!.isNotEmpty &&
+        customer.streetName != 'N/A')
+      parts.add(customer.streetName!);
+    if (customer.districtName != null &&
+        customer.districtName!.isNotEmpty &&
+        customer.districtName != 'N/A')
+      parts.add(customer.districtName!);
+    if (customer.cityName != null &&
+        customer.cityName!.isNotEmpty &&
+        customer.cityName != 'N/A')
+      parts.add(customer.cityName!);
+
+    final fallback = parts.join(', ');
+    if (fallback.isNotEmpty) return fallback;
+
+    if (widget.booking.serviceLocation != null) {
+      final locale = Localizations.localeOf(context).languageCode;
+      final locName = widget.booking.serviceLocation!.localizedName(locale);
+      if (locName.isNotEmpty) return locName;
+    }
+
+    return AppLocalizations.of(context)?.location ?? 'Unknown';
   }
 
   Widget _buildLocationCard(
@@ -840,14 +907,40 @@ class _BookingInfoState extends State<BookingInfo> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: openDirections,
+                icon: Icon(
+                  Icons.directions,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: Text(
+                  localization.directions,
+                  style: DMSansFont.textStyle(
+                    fontSize: 14,
+                    color: AppColors.primary,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
             ],
           ),
           Divider(thickness: 1, color: Colors.grey.shade300),
           const SizedBox(height: 4),
           Text(
-            (customerSelectedAddress?.displayAddress.isNotEmpty == true)
-                ? customerSelectedAddress!.displayAddress
-                : (widget.booking.customer.location?.fullAddress ?? ""),
+            _getBestLocationString(
+              context,
+              customerSelectedAddress,
+              widget.booking.customer,
+            ),
             style: DMSansFont.textStyle(fontSize: 12, color: Colors.black),
           ),
         ],
@@ -937,10 +1030,14 @@ class _BookingInfoState extends State<BookingInfo> {
                   '',
               context,
             ),
-            _buildLocationCard(
-              widget.booking.customer.addresses.firstOrNull,
-              context,
-            ),
+            _buildLocationCard(() {
+              final addresses = widget.booking.customer.addresses;
+              return addresses.where((a) => a.isSelected == true).isNotEmpty
+                  ? addresses.firstWhere((a) => a.isSelected == true)
+                  : addresses.isNotEmpty
+                  ? addresses.first
+                  : null;
+            }(), context),
 
             const SizedBox(height: 16),
             _buildSectionCard(
@@ -959,7 +1056,9 @@ class _BookingInfoState extends State<BookingInfo> {
                 if (!widget.isWarranty && widget.booking.isOnHour != null) ...[
                   Divider(color: Colors.grey[200]),
                   _buildDetailRow(
-                    widget.booking.isOnHour == true ? AppLocalizations.of(context)!.onHourBooking : AppLocalizations.of(context)!.offHourBooking,
+                    widget.booking.isOnHour == true
+                        ? AppLocalizations.of(context)!.onHourBooking
+                        : AppLocalizations.of(context)!.offHourBooking,
                     "",
                   ),
                   _buildDetailRow(
@@ -2448,10 +2547,7 @@ class _BookingInfoState extends State<BookingInfo> {
       if (dateToUse != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.acceptedAt,
-          'time': _formatDateLocalized(
-            dateToUse.toDate(),
-            context,
-          ),
+          'time': _formatDateLocalized(dateToUse.toDate(), context),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
@@ -3178,7 +3274,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                   Expanded(
                                     flex: 5,
                                     child: Text(
-                                      '${AppLocalizations.of(context)!.sar} ${entry.value.price.toStringAsFixed(2)}',
+                                      '${entry.value.price.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                                       style: DMSansFont.textStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
@@ -3236,7 +3332,8 @@ class _BookingInfoState extends State<BookingInfo> {
               _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.paymentMode,
-                value: (widget.booking.paymentModeCode.toLowerCase() == 'c' ||
+                value:
+                    (widget.booking.paymentModeCode.toLowerCase() == 'c' ||
                         widget.booking.paymentModeCode.toLowerCase() == 'a')
                     ? AppLocalizations.of(context)!.insideApp
                     : AppLocalizations.of(context)!.outsideApp,
@@ -3268,7 +3365,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                   ),
                   Text(
-                    '${AppLocalizations.of(context)!.sar} ${(completionData.totalCost + widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee)).toStringAsFixed(2)}',
+                    '${(completionData.totalCost + widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                     style: DMSansFont.textStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -3303,7 +3400,7 @@ class _BookingInfoState extends State<BookingInfo> {
           ),
         ),
         Text(
-          '${AppLocalizations.of(context)!.sar} ${amount.toStringAsFixed(2)}',
+          '${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
           style: DMSansFont.textStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -3669,8 +3766,11 @@ class _BookingInfoState extends State<BookingInfo> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () =>
-                              _handleCounterConfirm(context, booking, 'accepted'),
+                          onPressed: () => _handleCounterConfirm(
+                            context,
+                            booking,
+                            'accepted',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -3780,7 +3880,8 @@ class _BookingInfoState extends State<BookingInfo> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => _showCounterOfferDatePicker(booking, _offerId),
+                    onPressed: () =>
+                        _showCounterOfferDatePicker(booking, _offerId),
                     icon: const Icon(Icons.history_toggle_off, size: 18),
                     label: Text(l10n.proposeNewTime),
                     style: ElevatedButton.styleFrom(
@@ -4429,7 +4530,8 @@ class _BookingInfoState extends State<BookingInfo> {
   Widget _buildBookingTimestamp(BuildContext context, BookingModel booking) {
     final locale = AppLocalizations.of(context)?.localeName ?? 'en';
 
-    if ((booking.bookingStatusCode == "P" || booking.bookingStatusCode == "SR") &&
+    if ((booking.bookingStatusCode == "P" ||
+            booking.bookingStatusCode == "SR") &&
         booking.createdAt != null) {
       return _timestampText(
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",

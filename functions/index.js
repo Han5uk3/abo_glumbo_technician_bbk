@@ -274,8 +274,8 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
     // 1. New Assignment Notification
     // ==============================
     const statusChangedToAssigned =
-      beforeData?.bookingStatusCode !== "A" &&
-      afterData.bookingStatusCode === "A";
+      (beforeData?.bookingStatusCode !== "A" && afterData.bookingStatusCode === "A") ||
+      (afterData.bookingStatusCode === "A" && beforeData?.agent?.uid !== afterData?.agent?.uid && afterData?.agent?.uid);
 
     if (statusChangedToAssigned) {
       const agent = afterData.agent;
@@ -434,8 +434,10 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
       beforeData?.bookingStatusCode !== afterData.bookingStatusCode;
     const paymentCompleted =
       beforeData?.paymentCompleted !== afterData.paymentCompleted;
+    const technicianChanged = 
+      beforeData?.agent?.uid !== afterData?.agent?.uid && afterData?.agent?.uid;
 
-    if (!statusChanged && !paymentCompleted) {
+    if (!statusChanged && !paymentCompleted && !technicianChanged) {
       console.log("No relevant changes detected, skipping...");
       return;
     }
@@ -529,12 +531,19 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
         ar: "تم إلغاء حجزك.",
         ur: "آپ کی بکنگ منسوخ کر دی گئی ہے۔",
       },
+      REASSIGNED: {
+        en: `New technician ${agentNameEn} has been assigned to your booking.`,
+        ar: `تم تعيين فني جديد ${agentNameAr} لحجزك.`,
+        ur: `آپ کی بکنگ کے لیے نیا ٹیکنیشن ${agentNameUr} تفویض کیا گیا ہے۔`,
+      },
     };
 
     // Determine which message to use
     let messageKey = bookingStatus;
     if (bookingStatus === "C" && isPaymentCompleted && afterData.completionData?.mode !== 0) {
       messageKey = "C_PAYMENT_COMPLETED";
+    } else if (technicianChanged && !statusChanged && bookingStatus === "A") {
+      messageKey = "REASSIGNED";
     }
 
     const bodyEn =

@@ -5183,11 +5183,11 @@ class AppLocalizationsUr extends AppLocalizations {
       'ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں';
 
   @override
-  String get notAvailable => 'N/A';
+  String get notAvailable => 'دستیاب نہیں';
 
   @override
-  String get noAdditionalDescription => 'No additional description';
+  String get noAdditionalDescription => 'کوئی اضافی تفصیل نہیں';
 
   @override
-  String get distance => 'Distance';
+  String get distance => 'فاصلہ';
 }

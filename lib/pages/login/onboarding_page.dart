@@ -143,7 +143,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     Expanded(
                                       flex: 5,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4.0,
+                                        ),
                                         child: Text(
                                           _getVerifiedText(context),
                                           maxLines: 2,
@@ -226,9 +228,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             left: 0,
             right: 0,
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-              ),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.05)),
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
               margin: const EdgeInsets.fromLTRB(0, 24, 0, 32),
               child: SizedBox(

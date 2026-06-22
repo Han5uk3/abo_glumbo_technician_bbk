@@ -1348,7 +1348,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  "#${currentBooking.id}",
+                                                  "#${currentBooking.newBookingId ?? currentBooking.id}",
                                                   style: TextStyle(
                                                     fontSize: 10,
                                                     color: Colors.black,
@@ -1362,7 +1362,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                             onPressed: () {
                                               Clipboard.setData(
                                                 ClipboardData(
-                                                  text: widget.booking.id,
+                                                  text: widget.booking.newBookingId ?? widget.booking.id,
                                                 ),
                                               );
                                               ScaffoldMessenger.of(

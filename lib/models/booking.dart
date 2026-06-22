@@ -7,6 +7,7 @@ import '/models/service.dart';
 
 class BookingModel {
   String id;
+  String? newBookingId;
   late ServiceModel service;
   late Timestamp bookingDateTime;
   late String bookingStatusCode;
@@ -107,6 +108,7 @@ class BookingModel {
 
   BookingModel({
     required this.id,
+    this.newBookingId,
     required this.paymentCompletedAt,
     required this.service,
     required this.bookingDateTime,
@@ -167,6 +169,7 @@ class BookingModel {
       isStartTracking = data['isStarted'] ?? false,
       notes = data['notes'],
       id = data['id'] ?? '',
+      newBookingId = data['newBookingId'],
       chatroomId = data['chatroomId'],
       issueImage = data['issueImage'],
       warranty = data['warranty'] != null
@@ -277,6 +280,9 @@ class BookingModel {
     };
 
     map['id'] = id;
+    if (newBookingId != null) {
+      map['newBookingId'] = newBookingId;
+    }
     if (serviceLocation != null) {
       map['serviceLocation'] = serviceLocation!.toJson();
     }

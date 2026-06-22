@@ -1,13 +1,14 @@
+import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
 
-
 class JobRequestModel {
   final String id;
+  final String? newBookingId;
   final ServiceModel service;
   final CustomerModel customer;
-  final Map<String, dynamic> address;
+  final AddressModel address;
   final String notes;
   final String? issueImage;
   final String? issueVideo;
@@ -21,6 +22,7 @@ class JobRequestModel {
 
   JobRequestModel({
     required this.id,
+    this.newBookingId,
     required this.service,
     required this.customer,
     required this.address,
@@ -39,9 +41,10 @@ class JobRequestModel {
   factory JobRequestModel.fromJson(Map<String, dynamic> json) {
     return JobRequestModel(
       id: json['id'] ?? '',
+      newBookingId: json['newBookingId'],
       service: ServiceModel.fromJson(json['service']),
       customer: CustomerModel.fromJson(json['customer']),
-      address: json['address'] as Map<String, dynamic>,
+      address: AddressModel.fromJson(json['address'] as Map<String, dynamic>),
       notes: json['notes'] ?? '',
       issueImage: json['issueImage'],
       issueVideo: json['issueVideo'],
@@ -58,9 +61,10 @@ class JobRequestModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'newBookingId': newBookingId,
       'service': service.toJson(),
       'customer': customer.toJson(),
-      'address': address,
+      'address': address.toJson(),
       'notes': notes,
       'issueImage': issueImage,
       'issueVideo': issueVideo,

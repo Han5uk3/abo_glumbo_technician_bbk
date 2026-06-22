@@ -28,12 +28,8 @@ class AnimatedExpandingNavBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          height: height + MediaQuery.of(context).padding.bottom,
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
+          height: height,
+          padding: EdgeInsets.only(left: 16, right: 16),
           decoration: BoxDecoration(
             color: (backgroundColor ?? Colors.white).withOpacity(0.7),
             border: Border(

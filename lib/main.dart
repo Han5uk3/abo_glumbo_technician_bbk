@@ -37,7 +37,9 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
   try {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint('ℹ️ Headless background fetch: User is admin, skipping background location update');
+      debugPrint(
+        'ℹ️ Headless background fetch: User is admin, skipping background location update',
+      );
       BackgroundFetch.finish(taskId);
       return;
     }
@@ -205,112 +207,120 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           return MultiBlocProvider(
             providers: providers,
-            child: MaterialApp(
-              key: ValueKey(state.locale.languageCode),
-              navigatorKey: navigatorKey,
-              title: 'Abo Glumbo - Technician',
-              debugShowCheckedModeBanner: false,
-              builder: (context, child) {
-                final mq = MediaQuery.of(context);
-                final bottom = mq.padding.bottom;
+            child: SafeArea(
+              top: false,
+              child: MaterialApp(
+                key: ValueKey(state.locale.languageCode),
+                navigatorKey: navigatorKey,
+                title: 'Abo Glumbo - Technician',
+                debugShowCheckedModeBanner: false,
+                builder: (context, child) {
+                  final mq = MediaQuery.of(context);
+                  final bottom = mq.padding.bottom;
 
-                // Samsung OneUI gesture nav bug → returns 0 bottom inset
-                final fixedBottom = bottom == 0 ? 16.0 : bottom;
+                  // Samsung OneUI gesture nav bug → returns 0 bottom inset
+                  final fixedBottom = bottom == 0 ? 16.0 : bottom;
 
-                return MediaQuery(
-                  data: mq.copyWith(
-                    padding: mq.padding.copyWith(bottom: fixedBottom),
+                  return MediaQuery(
+                    data: mq.copyWith(
+                      padding: mq.padding.copyWith(bottom: fixedBottom),
+                    ),
+                    child: child!,
+                  );
+                },
+
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                locale: state.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                theme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(
+                    seedColor: AppColors.primary,
                   ),
-                  child: child!,
-                );
-              },
-
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              locale: state.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-                scaffoldBackgroundColor: AppColors.bgWhite,
-                navigationBarTheme: NavigationBarThemeData(
-                  backgroundColor: Colors.white,
-                  indicatorColor: Colors.transparent,
-                  labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
-                    if (states.contains(WidgetState.selected)) {
+                  scaffoldBackgroundColor: AppColors.bgWhite,
+                  navigationBarTheme: NavigationBarThemeData(
+                    backgroundColor: Colors.white,
+                    indicatorColor: Colors.transparent,
+                    labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return GoogleFonts.dmSans(
+                          color: AppColors.darkGrey,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        );
+                      }
                       return GoogleFonts.dmSans(
-                        color: AppColors.darkGrey,
+                        color: AppColors.grey,
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
                       );
-                    }
-                    return GoogleFonts.dmSans(
-                      color: AppColors.grey,
-                      fontSize: 10,
-                    );
-                  }),
-                ),
-                dialogTheme: DialogThemeData(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
+                    }),
                   ),
-                ),
-                filledButtonTheme: FilledButtonThemeData(
-                  style: FilledButton.styleFrom(
+                  dialogTheme: DialogThemeData(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(13),
                     ),
                   ),
-                ),
-                textButtonTheme: TextButtonThemeData(
-                  style: TextButton.styleFrom(
+                  filledButtonTheme: FilledButtonThemeData(
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  appBarTheme: AppBarTheme(
+                    centerTitle: true,
+                    backgroundColor: Colors.white,
+                    surfaceTintColor: Colors.transparent,
+                    elevation: 0,
+                    iconTheme: const IconThemeData(
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    titleSpacing: 0,
+                    titleTextStyle: GoogleFonts.dmSans(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  searchBarTheme: SearchBarThemeData(
+                    elevation: const WidgetStatePropertyAll(0),
+                    backgroundColor: const WidgetStatePropertyAll(Colors.white),
+                    textStyle: WidgetStatePropertyAll(
+                      GoogleFonts.dmSans(color: Colors.black45, fontSize: 14),
+                    ),
+                    constraints: const BoxConstraints(
+                      minHeight: 50,
+                      maxHeight: 50,
+                    ),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    side: const WidgetStatePropertyAll(
+                      BorderSide(color: Colors.black12, width: 1),
+                    ),
+                  ),
+                  bottomSheetTheme: const BottomSheetThemeData(
+                    backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
                     ),
                   ),
+                  useMaterial3: true,
                 ),
-                appBarTheme: AppBarTheme(
-                  centerTitle: true,
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.transparent,
-                  elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.black, size: 20),
-                  titleSpacing: 0,
-                  titleTextStyle: GoogleFonts.dmSans(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                searchBarTheme: SearchBarThemeData(
-                  elevation: const WidgetStatePropertyAll(0),
-                  backgroundColor: const WidgetStatePropertyAll(Colors.white),
-                  textStyle: WidgetStatePropertyAll(
-                    GoogleFonts.dmSans(color: Colors.black45, fontSize: 14),
-                  ),
-                  constraints: const BoxConstraints(
-                    minHeight: 50,
-                    maxHeight: 50,
-                  ),
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  side: const WidgetStatePropertyAll(
-                    BorderSide(color: Colors.black12, width: 1),
-                  ),
-                ),
-                bottomSheetTheme: const BottomSheetThemeData(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                  ),
-                ),
-                useMaterial3: true,
+                home: SplashScreen(),
               ),
-              home: SplashScreen(),
             ),
           );
         },

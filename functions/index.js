@@ -5390,3 +5390,94 @@ exports.onJobOfferCreatedForRebook = onDocumentCreated(
     return null;
   }
 );
+
+// --- Assign newBookingId Logic ---
+async function assignNewBookingIdHelper(docRef, data) {
+  // If it already has a newBookingId, skip
+  if (data.newBookingId) {
+    return null;
+  }
+
+  const db = admin.firestore();
+  
+  // Check if there is a requestId or bookingId to carry over
+  const sourceId = data.requestId || data.bookingId;
+  if (sourceId) {
+    const collectionsToCheck = ["booking_request", "job_requests", "auto-assignment_requests", "bookings"];
+    for (const coll of collectionsToCheck) {
+      try {
+        const sourceDoc = await db.collection(coll).doc(sourceId).get();
+        if (sourceDoc.exists) {
+          const sourceData = sourceDoc.data();
+          if (sourceData.newBookingId) {
+            console.log(`Carrying over newBookingId ${sourceData.newBookingId} from ${coll}/${sourceId} to ${docRef.path}`);
+            return docRef.update({ newBookingId: sourceData.newBookingId });
+          }
+        }
+      } catch (err) {
+        console.error(`Error checking source collection ${coll} for carry over:`, err);
+      }
+    }
+  }
+
+  // Generate new ID
+  // To ensure the correct local time date or UTC date? The prompt says "first booking of 22nd june 2026 should be AG-260622-0001"
+  // Let's use UTC or the server's local time. Server time is usually UTC.
+  // Using a consistent timezone for date string generation. UTC is safest.
+  const dateObj = new Date();
+  const yy = String(dateObj.getUTCFullYear()).slice(-2);
+  const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+  const dateString = `${yy}${mm}${dd}`;
+
+  const counterRef = db.collection("counters").doc("daily_booking_id");
+
+  try {
+    const newId = await db.runTransaction(async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      let count = 1;
+
+      if (counterDoc.exists) {
+        const counterData = counterDoc.data();
+        if (counterData.date === dateString) {
+          count = (counterData.count || 0) + 1;
+        }
+      }
+
+      transaction.set(counterRef, {
+        date: dateString,
+        count: count,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      const countString = String(count).padStart(4, '0');
+      return `AG-${dateString}-${countString}`;
+    });
+
+    console.log(`Generated newBookingId ${newId} for ${docRef.path}`);
+    return docRef.update({ newBookingId: newId });
+  } catch (error) {
+    console.error(`Error assigning newBookingId for ${docRef.path}:`, error);
+    return null;
+  }
+}
+
+exports.assignNewBookingId_bookings = onDocumentCreated("bookings/{docId}", async (event) => {
+  if (!event.data) return null;
+  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+});
+
+exports.assignNewBookingId_jobRequests = onDocumentCreated("job_requests/{docId}", async (event) => {
+  if (!event.data) return null;
+  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+});
+
+exports.assignNewBookingId_bookingRequest = onDocumentCreated("booking_request/{docId}", async (event) => {
+  if (!event.data) return null;
+  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+});
+
+exports.assignNewBookingId_autoAssignment = onDocumentCreated("auto-assignment_requests/{docId}", async (event) => {
+  if (!event.data) return null;
+  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+});

@@ -493,12 +493,15 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
 
     return filtered.where((item) {
       String id = '';
+      String newId = '';
       if (item is BookingModel) {
         id = item.id.toLowerCase();
+        newId = (item.newBookingId ?? '').toLowerCase();
       } else if (item is JobOfferContainer) {
         id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
+        newId = (item.booking?.newBookingId ?? '').toLowerCase();
       }
-      return id.contains(_searchQuery);
+      return id.contains(_searchQuery) || (newId.isNotEmpty && newId.contains(_searchQuery));
     }).toList();
   }
 

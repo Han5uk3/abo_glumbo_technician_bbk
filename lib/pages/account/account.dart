@@ -407,17 +407,8 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildDangerZone() {
-    if (isMainAdmin) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: AccountListTile(
-        leading: const Icon(Icons.delete, color: Colors.red),
-        textcolor: Colors.red,
-        title: AppLocalizations.of(context)?.deleteAccount ?? '',
-        onTap: _showDeleteAccountConfirmation,
-        dense: true,
-      ),
-    );
+    // Hidden per user request
+    return const SizedBox.shrink();
   }
 
   Widget _buildAuthSection() {

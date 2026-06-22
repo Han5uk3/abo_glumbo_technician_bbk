@@ -166,7 +166,7 @@ class BookingListTileWidget extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                "#${booking.id}",
+                                "#${booking.newBookingId ?? booking.id}",
                                 style: DMSansFont.textStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,

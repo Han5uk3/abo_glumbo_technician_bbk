@@ -432,7 +432,7 @@ class _TransactionTileState extends State<TransactionTile> {
                           _buildDetailRow(
                             context,
                             AppLocalizations.of(context)!.bookingId,
-                            widget.transaction.bookingId,
+                            booking.newBookingId ?? widget.transaction.bookingId,
                             copyable: true,
                           ),
                           _buildDetailRow(

@@ -258,12 +258,15 @@ class _BookingListTabState extends State<_BookingListTab>
 
     return uniqueData.where((item) {
       String id = '';
+      String newId = '';
       if (item is BookingModel) {
         id = item.id.toLowerCase();
+        newId = (item.newBookingId ?? '').toLowerCase();
       } else if (item is JobOfferContainer) {
         id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
+        newId = (item.booking?.newBookingId ?? '').toLowerCase();
       }
-      return id.contains(widget.searchQuery);
+      return id.contains(widget.searchQuery) || (newId.isNotEmpty && newId.contains(widget.searchQuery));
     }).toList();
   }
 

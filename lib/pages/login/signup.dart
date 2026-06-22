@@ -207,14 +207,29 @@ class _SignupState extends State<Signup> {
         setState(() {
           _isFetchingLocation = false;
         });
+        String errorMessage = e.toString();
+        SnackBarAction? snackBarAction;
+
+        if (e is LocationServiceDisabledException || errorMessage.contains('Location services are disabled')) {
+          errorMessage = AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+          snackBarAction = SnackBarAction(
+            label: AppLocalizations.of(context)?.openSettings ?? 'Settings',
+            onPressed: () => Geolocator.openLocationSettings(),
+          );
+        } else if (e is PermissionDeniedException || errorMessage.contains('User denied permissions') || errorMessage.contains('Permission denied')) {
+          errorMessage = AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+          snackBarAction = SnackBarAction(
+            label: AppLocalizations.of(context)?.openSettings ?? 'Settings',
+            onPressed: () => Geolocator.openAppSettings(),
+          );
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(
-                    context,
-                  )?.errorFetchingLocation(e.toString()) ??
-                  'Error fetching location: $e',
+              AppLocalizations.of(context)?.errorFetchingLocation(errorMessage) ?? 'Error fetching location: $errorMessage',
             ),
+            action: snackBarAction,
           ),
         );
       }

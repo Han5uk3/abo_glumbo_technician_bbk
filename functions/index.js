@@ -706,6 +706,57 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
     console.log(
       `[${bookingId}] Payment completion notification sent to technician ${agent.uid}`
     );
+
+    // Notify admins (excluding customer service)
+    try {
+      const adminUsersDocs = await getAllAdminUsers();
+      const adminTokens = adminUsersDocs
+        .filter((doc) => doc.data().accessLevel !== 1) // Exclude customer service admins
+        .map((doc) => {
+          const data = doc.data();
+          return data.fcmToken && data.fcmToken.trim() !== ""
+            ? {
+                uid: doc.id,
+                token: data.fcmToken,
+                lanCode: data.lanCode || "en",
+              }
+            : null;
+        })
+        .filter(Boolean);
+
+      if (adminTokens.length > 0) {
+        for (const { uid, token, lanCode } of adminTokens) {
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: uid,
+            titleEn: "Payment Received",
+            titleAr: "تم استلام الدفع",
+            titleUr: "ادائیگی موصول ہو گئی",
+            bodyEn: `${customerName} has completed payment of ${totalAmount} for ${serviceName}. The transaction is now complete.`,
+            bodyAr: `قام ${customerName} بإكمال دفع ${totalAmount} مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
+            bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ${totalAmount} کی ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
+            data: {
+              targetRole: "admin",
+              category: "payment",
+              bookingId,
+              serviceName,
+              serviceNameAr: serviceNameAr,
+              serviceNameUr: serviceNameUr,
+              customerName,
+              amount: totalAmount.toString(),
+              isAdmin: "true",
+            },
+            fcmToken: token,
+            lanCode: lanCode,
+          });
+        }
+        console.log(
+          `[${bookingId}] Payment completion notification sent to ${adminTokens.length} admin(s)`
+        );
+      }
+    } catch (error) {
+      console.error(`[${bookingId}] Error notifying admins of payment:`, error);
+    }
   }
 );
 
@@ -1805,114 +1856,7 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
     }
   }
 );
-exports.notifyAdminsOnNewWorkerSignup = onDocumentCreated(
-  "users/{userId}",
-  async (event) => {
-    const snap = event.data;
-    if (!snap) {
-      console.log("No data associated with the event");
-      return;
-    }
 
-    const worker = snap.data();
-    const userId = event.params.userId;
-
-    // Only notify for new workers (not admins or customers)
-    if (worker.isAdmin === true) {
-      console.log("User is admin, skipping notification.");
-      return null;
-    }
-
-    // Optional: Check if worker has job roles (indicating they're a worker, not a customer)
-    if (!worker.jobRoles || worker.jobRoles.length === 0) {
-      console.log(
-        "User has no job roles, might not be a Technician yet. Skipping notification."
-      );
-      return null;
-    }
-
-    const workerName = worker.name || "A new worker";
-    const workerPhone = worker.phone || "Not provided";
-    const workerEmail = worker.email || "Not provided";
-    const jobRoles = worker.jobRoles
-      ? worker.jobRoles.join(", ")
-      : "Not specified";
-    const districtName = worker.districtName || "Not specified";
-
-    try {
-      // Fetch all admin users
-      const adminUsersDocs = await getAllAdminUsers();
-
-      const tokensWithLanguage = [];
-      adminUsersDocs.forEach((doc) => {
-        const user = doc.data();
-        if (user.accessLevel === 1) return; // Exclude customer service admins
-        if (user.fcmToken && user.fcmToken.trim() !== "") {
-          tokensWithLanguage.push({
-            token: user.fcmToken,
-            lanCode: user.lanCode || "en",
-          });
-        }
-      });
-
-      if (tokensWithLanguage.length === 0) {
-        console.log("No admin tokens found.");
-        return null;
-      }
-
-      const results = [];
-
-      // Send notification to each admin
-      for (const { token, lanCode } of tokensWithLanguage) {
-        try {
-          const message = {
-            notification: {
-              title:
-                lanCode === "ar"
-                  ? "فني جديد انضم!"
-                  : "New Technician Signed Up!",
-              body:
-                lanCode === "ar"
-                  ? `${workerName} قام بالتسجيل كفني جديد. يرجى مراجعة الملف الشخصي والموافقة عليه`
-                  : `${workerName} has signed up as a new Technician. Please review their profile and approve`,
-            },
-            data: {
-              targetRole: "admin",
-              category: "worker_signup",
-              workerId: userId,
-              workerName: workerName,
-              workerPhone: workerPhone,
-              jobRoles: jobRoles,
-              districtName: districtName,
-            },
-            token: token,
-          };
-
-          const response = await admin.messaging().send(message);
-          results.push({ token, success: true, messageId: response });
-          console.log(
-            `Notification sent to admin with token: ${token.substring(
-              0,
-              20
-            )}...`
-          );
-        } catch (error) {
-          results.push({ token, success: false, error: error.message });
-          console.error(`Failed to send to token: ${error.message}`);
-        }
-      }
-
-      console.log(
-        `Notified ${results.filter((r) => r.success).length
-        } admins about new worker signup: ${workerName}`
-      );
-    } catch (error) {
-      console.error("Error sending admin notifications:", error);
-    }
-
-    return null;
-  }
-);
 // ============================================
 // Warranty Request Notifications
 // ============================================
@@ -4138,21 +4082,32 @@ function isAddressInServiceZones(lat, lon, serviceLocations) {
   }
   return false;
 }
-exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
+exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
   "users/{userId}",
   async (event) => {
-    const snap = event.data;
-    if (!snap) return null;
-    const userData = snap.data();
+    const beforeData = event.data?.before?.data() || {};
+    const afterData = event.data?.after?.data();
+
+    if (!afterData) return null; // Document was deleted
     const userId = event.params.userId;
 
-    // Only notify if the new user is a technician
-    if (userData.role !== "technician") {
-      console.log(`[${userId}] New user is not a technician, skipping notification.`);
+    // Only notify if the user is a technician
+    if (afterData.role !== "technician") {
       return null;
     }
 
-    const techName = userData.name || "New Technician";
+    // Check if registration was just completed
+    const wasCompleted = beforeData.isRegistrationComplete === true;
+    const isNowCompleted = afterData.isRegistrationComplete === true;
+
+    // If it was already completed, or is still not completed, skip.
+    // (This triggers both on initial creation with isRegistrationComplete=true
+    // AND on update when isRegistrationComplete changes from false to true)
+    if (wasCompleted || !isNowCompleted) {
+      return null;
+    }
+
+    const techName = afterData.name || "New Technician";
 
     try {
       const adminUsersDocs = await getAllAdminUsers();
@@ -4182,8 +4137,10 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentCreated(
           targetId: uid,
           titleEn: "New Technician Registered",
           titleAr: "فني جديد مسجل",
+          titleUr: "نیا ٹیکنیشن رجسٹرڈ ہو گیا",
           bodyEn: `A new technician "${techName}" has registered and is pending review.`,
           bodyAr: `تم تسجيل فني جديد باسم "${techName}" وهو بانتظار المراجعة.`,
+          bodyUr: `ایک نیا ٹیکنیشن "${techName}" رجسٹر ہوا ہے اور جائزے کا منتظر ہے۔`,
           data: {
             targetRole: "admin",
             category: "technician_registration",

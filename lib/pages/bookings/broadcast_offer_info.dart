@@ -208,13 +208,15 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
 
     final selectedAddress = booking?.customer.addresses.where((a) => a.isSelected == true).firstOrNull ?? booking?.customer.addresses.firstOrNull;
     final displayAddress = selectedAddress?.displayAddress.isNotEmpty == true ? selectedAddress!.displayAddress : null;
+    final selectedText = booking?.customerSelectedAddressText ?? '';
 
-    final address =
-        data['serviceLocation']?['fullAddress'] ??
-        data['serviceLocation']?['streetName'] ??
-        displayAddress ??
-        booking?.customer.location?.fullAddress ??
-        localization.notAvailable;
+    final address = selectedText.isNotEmpty
+        ? selectedText
+        : data['serviceLocation']?['fullAddress'] ??
+          data['serviceLocation']?['streetName'] ??
+          displayAddress ??
+          booking?.customer.location?.fullAddress ??
+          localization.notAvailable;
 
     final notes =
         data['notes'] ?? booking?.notes ?? localization.noAdditionalDescription;

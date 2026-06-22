@@ -4858,16 +4858,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'أوقات العمل';
+  String get onHour => 'دوام';
 
   @override
-  String get offHour => 'خارج أوقات العمل';
+  String get offHour => 'بعد الدوام';
 
   @override
-  String get onHourBooking => 'حجز في أوقات العمل';
+  String get onHourBooking => 'حجز دوام';
 
   @override
-  String get offHourBooking => 'حجز خارج أوقات العمل';
+  String get offHourBooking => 'حجز بعد الدوام';
 
   @override
   String get inAppEarnings => 'الأرباح داخل التطبيق';

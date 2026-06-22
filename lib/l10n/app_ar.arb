@@ -1666,10 +1666,10 @@
       }
     }
   },
-  "onHour": "أوقات العمل",
-  "offHour": "خارج أوقات العمل",
-  "onHourBooking": "حجز في أوقات العمل",
-  "offHourBooking": "حجز خارج أوقات العمل",
+  "onHour": "دوام",
+  "offHour": "بعد الدوام",
+  "onHourBooking": "حجز دوام",
+  "offHourBooking": "حجز بعد الدوام",
   "inAppEarnings": "الأرباح داخل التطبيق",
   "outsideAppEarnings": "الأرباح خارج التطبيق",
   "earningsPeriod": "فترة الأرباح",

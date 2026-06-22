@@ -4943,16 +4943,16 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'On-Hour';
+  String get onHour => 'اوقاتِ کار';
 
   @override
-  String get offHour => 'Off-Hour';
+  String get offHour => 'بعد اوقاتِ کار';
 
   @override
-  String get onHourBooking => 'On-Hour Booking';
+  String get onHourBooking => 'بکنگ اوقاتِ کار';
 
   @override
-  String get offHourBooking => 'Off-Hour Booking';
+  String get offHourBooking => 'بکنگ بعد اوقاتِ کار';
 
   @override
   String get inAppEarnings => 'ان ایپ آمدنی';

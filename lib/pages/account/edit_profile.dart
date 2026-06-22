@@ -570,10 +570,71 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         setState(() {
           _isFetchingLocation = false;
-          _locationError = e.toString();
+          final errorString = e.toString();
+          if (e is LocationServiceDisabledException || errorString.contains('Location services are disabled')) {
+            _locationError = AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+            _showLocationSettingsPrompt();
+          } else if (e is PermissionDeniedException || errorString.contains('User denied permissions') || errorString.contains('Permission denied')) {
+            _locationError = AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+            _showPermissionSettingsPrompt();
+          } else {
+            _locationError = errorString;
+          }
         });
       }
     }
+  }
+
+  void _showLocationSettingsPrompt() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: Text(AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location Services Disabled'),
+        content: Text(AppLocalizations.of(context)?.locationServicesDisabledPleaseEnable ?? 'Please enable location services.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.black)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Geolocator.openLocationSettings();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(AppLocalizations.of(context)?.openSettings ?? 'Open Settings', style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPermissionSettingsPrompt() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: Text(AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location Permission Denied'),
+        content: Text(AppLocalizations.of(context)?.locationPermissionDeniedPleaseGrant ?? 'Please grant location permissions.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.black)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Geolocator.openAppSettings();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(AppLocalizations.of(context)?.openSettings ?? 'Open Settings', style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

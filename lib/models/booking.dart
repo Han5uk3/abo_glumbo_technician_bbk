@@ -71,6 +71,40 @@ class BookingModel {
     }
   }
 
+  /// Returns the formatted string for the customer's selected service address.
+  /// Prioritizes the address with isSelected == true.
+  String get customerSelectedAddressText {
+    try {
+      final selectedAddress = customer.addresses.firstWhere(
+        (address) => address.isSelected == true,
+      );
+      final text = "${selectedAddress.buildingNumber.isNotEmpty ? '${selectedAddress.buildingNumber}, ' : ''}${selectedAddress.streetName ?? ''}".trim();
+      if (text.isNotEmpty && text != ',') {
+        return text;
+      }
+    } catch (e) {
+      // Ignored
+    }
+
+    try {
+      if (customer.addresses.isNotEmpty) {
+        final firstAddress = customer.addresses.first;
+        final text = "${firstAddress.buildingNumber.isNotEmpty ? '${firstAddress.buildingNumber}, ' : ''}${firstAddress.streetName ?? ''}".trim();
+        if (text.isNotEmpty && text != ',') {
+          return text;
+        }
+      }
+    } catch (e) {
+      // Ignored
+    }
+
+    if (customer.location?.fullAddress != null && customer.location!.fullAddress!.isNotEmpty) {
+      return customer.location!.fullAddress!;
+    }
+    
+    return '';
+  }
+
   BookingModel({
     required this.id,
     required this.paymentCompletedAt,

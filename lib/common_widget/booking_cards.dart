@@ -295,10 +295,12 @@ class BookingListTileWidget extends StatelessWidget {
             const SizedBox(height: 8),
             _buildDetailTile(
               Icons.location_on_outlined,
-              (selectedAddress != null &&
-                      selectedAddress.displayAddress.isNotEmpty)
-                  ? selectedAddress.displayAddress
-                  : (booking.customer.location?.fullAddress ?? 'N/A'),
+              booking.customerSelectedAddressText.isNotEmpty
+                  ? booking.customerSelectedAddressText
+                  : (selectedAddress != null &&
+                          selectedAddress.displayAddress.isNotEmpty)
+                      ? selectedAddress.displayAddress
+                      : (booking.customer.location?.fullAddress ?? 'N/A'),
               color: Colors.grey[600],
             ),
 
@@ -1055,10 +1057,12 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     final serviceName = locale == 'en'
         ? (data['serviceName'] ?? '')
         : (data['serviceNameAr'] ?? data['serviceName'] ?? '');
-    final address =
-        data['serviceLocation']?['fullAddress'] ??
-        data['serviceLocation']?['streetName'] ??
-        'N/A';
+    final selectedText = widget.offer.booking?.customerSelectedAddressText ?? '';
+    final address = selectedText.isNotEmpty
+        ? selectedText
+        : data['serviceLocation']?['fullAddress'] ??
+          data['serviceLocation']?['streetName'] ??
+          'N/A';
 
     final minutes = _secondsRemaining ~/ 60;
     final seconds = _secondsRemaining % 60;

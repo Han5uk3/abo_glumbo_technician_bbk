@@ -4855,13 +4855,7 @@ exports.processAutoAssignments = onSchedule(
         existingOffersSnapshot.forEach(offerDoc => {
           const offer = offerDoc.data();
           if (offer.technicianId) {
-            const expiresAt = offer.expiresAt ? offer.expiresAt.toDate() : null;
-            if (expiresAt && expiresAt <= now) {
-              return; // Skip expired offers
-            }
-            if (offer.status === "pending" || offer.status === "accepted_by_technician") {
-              techsWithOffers.add(offer.technicianId);
-            }
+            techsWithOffers.add(offer.technicianId);
           }
         });
 
@@ -5032,13 +5026,7 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       existingOffersSnapshot.forEach(offerDoc => {
         const offer = offerDoc.data();
         if (offer.technicianId) {
-          const expiresAt = offer.expiresAt ? offer.expiresAt.toDate() : null;
-          if (expiresAt && expiresAt <= now) {
-            return; // Skip expired offers
-          }
-          if (offer.status === "pending" || offer.status === "accepted_by_technician") {
-            techsWithOffers.add(offer.technicianId);
-          }
+          techsWithOffers.add(offer.technicianId);
         }
       });
 

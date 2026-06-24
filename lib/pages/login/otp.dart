@@ -11,7 +11,6 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 
 class OtpPage extends StatefulWidget {
@@ -576,7 +575,7 @@ class _OtpPageState extends State<OtpPage> {
         ),
         title: Text(
           locn.enterOtp,
-          style: GoogleFonts.dmSans(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.normal,
             color: Colors.black,
@@ -602,7 +601,7 @@ class _OtpPageState extends State<OtpPage> {
                           RichText(
                             text: TextSpan(
                               text: locn.otpHasbeensentto,
-                              style: GoogleFonts.dmSans(
+                              style: TextStyle(
                                 color: Colors.black45,
                                 fontSize: 14,
                               ),
@@ -612,7 +611,7 @@ class _OtpPageState extends State<OtpPage> {
                                     textDirection: TextDirection.ltr,
                                     child: Text(
                                       " ${widget.phoneNumber ?? ''} ",
-                                      style: GoogleFonts.dmSans(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
                                         color: Colors.black,
@@ -641,7 +640,7 @@ class _OtpPageState extends State<OtpPage> {
                                 defaultPinTheme: PinTheme(
                                   width: 45,
                                   height: 60,
-                                  textStyle: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -658,7 +657,7 @@ class _OtpPageState extends State<OtpPage> {
                                 focusedPinTheme: PinTheme(
                                   width: 45,
                                   height: 60,
-                                  textStyle: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -695,7 +694,7 @@ class _OtpPageState extends State<OtpPage> {
                                     const SizedBox(width: 8),
                                     Text(
                                       locn.listeningForSms,
-                                      style: GoogleFonts.dmSans(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.green,
                                         fontWeight: FontWeight.w500,
@@ -716,7 +715,7 @@ class _OtpPageState extends State<OtpPage> {
                             _remainingTime > 0
                                 ? '${locn.resend} ($_formattedTime)'
                                 : locn.didNotReceiveOTP,
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               color: Colors.black54,
                               fontSize: 14,
                             ),
@@ -736,7 +735,7 @@ class _OtpPageState extends State<OtpPage> {
                                   ? Loader(color: AppColors.green, size: 16)
                                   : Text(
                                       locn.resend,
-                                      style: GoogleFonts.dmSans(
+                                      style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -766,7 +765,7 @@ class _OtpPageState extends State<OtpPage> {
                               ? Loader(color: Colors.white, size: 24)
                               : Text(
                                   locn.verifyOtp,
-                                  style: GoogleFonts.dmSans(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -834,7 +833,7 @@ class _OtpPageState extends State<OtpPage> {
             const SizedBox(height: 28),
             Text(
               AppLocalizations.of(context)!.migratingData,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
@@ -845,7 +844,7 @@ class _OtpPageState extends State<OtpPage> {
             Text(
               AppLocalizations.of(context)!.weAreMigratingYourData,
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
                 color: Colors.black54,
@@ -890,7 +889,7 @@ class _OtpPageState extends State<OtpPage> {
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.pleaseDontCloseTheApp,
-                      style: GoogleFonts.dmSans(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: Colors.orange.shade700,
@@ -904,7 +903,7 @@ class _OtpPageState extends State<OtpPage> {
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context)!.transferringData,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: Colors.grey.shade600,

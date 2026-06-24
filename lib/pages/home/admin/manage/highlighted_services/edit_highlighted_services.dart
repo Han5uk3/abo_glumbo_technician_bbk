@@ -7,7 +7,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '/models/highlighted_services.dart';
 import '/models/service.dart';
 
@@ -233,7 +232,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                   Text(
                     AppLocalizations.of(context)?.selectServices ??
                         'Select Services',
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -509,7 +508,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                                         ) ??
                                         service.name ??
                                         '',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,

@@ -1,6 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +23,7 @@ class TermsAndConditionsPage extends StatelessWidget {
         ),
         title: Text(
           isFromLogin ? locale.termsOfUse : locale.termsAndConditions,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -99,7 +98,7 @@ class TermsAndConditionsPage extends StatelessWidget {
       children: [
         Text(
           index == 0 ? title : "$index. $title",
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -108,7 +107,7 @@ class TermsAndConditionsPage extends StatelessWidget {
         SizedBox(height: 3),
         Text(
           text,
-          style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 14),
         ),
       ],
     );
@@ -126,7 +125,7 @@ class TermsAndConditionsPage extends StatelessWidget {
       children: [
         Text(
           "$index. $title",
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -135,7 +134,7 @@ class TermsAndConditionsPage extends StatelessWidget {
         SizedBox(height: 3),
         RichText(
           text: TextSpan(
-            style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+            style: TextStyle(color: Colors.black, fontSize: 14),
             children: [
               TextSpan(text: part1),
               TextSpan(
@@ -158,7 +157,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                             ),
                             title: Text(
                               AppLocalizations.of(context)!.warrantyPolicy,
-                              style: DMSansFont.textStyle(
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
@@ -202,7 +201,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                                   delay: 300,
                                   child: Text(
                                     AppLocalizations.of(context)!.claimText,
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 14,
                                     ),
@@ -217,7 +216,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                   },
 
                 text: ' ${AppLocalizations.of(context)!.warrantyPolicy} ',
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.blue,
                   fontSize: 14,
                   decoration: TextDecoration.underline,
@@ -225,7 +224,7 @@ class TermsAndConditionsPage extends StatelessWidget {
               ),
               TextSpan(
                 text: part2,
-                style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+                style: TextStyle(color: Colors.black, fontSize: 14),
               ),
             ],
           ),
@@ -247,7 +246,7 @@ class TermsAndConditionsPage extends StatelessWidget {
       children: [
         Text(
           heading,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -256,28 +255,28 @@ class TermsAndConditionsPage extends StatelessWidget {
         SizedBox(height: 16),
         Text(
           "1. $content1",
-          style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 14),
         ),
         SizedBox(height: 6),
         Text(
           "2. $content2",
-          style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 14),
         ),
         SizedBox(height: 6),
         Text(
           "3. $content3",
-          style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 14),
         ),
         SizedBox(height: 6),
         Text(
           "4. $content4",
-          style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: Colors.black, fontSize: 14),
         ),
         if (content5 != null) ...[
           SizedBox(height: 6),
           Text(
             "5. $content5",
-            style: DMSansFont.textStyle(color: Colors.black, fontSize: 14),
+            style: TextStyle(color: Colors.black, fontSize: 14),
           ),
         ],
       ],

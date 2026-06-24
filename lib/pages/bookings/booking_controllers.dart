@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BookingControlsWidget extends StatefulWidget {
@@ -122,7 +121,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                               context,
                             )!.backgroundLocationPermissionRequired
                           : state.error.replaceAll('Exception: ', ''),
-                      style: DMSansFont.textStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
@@ -332,7 +331,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                                   )
                                 : Text(
                                     AppLocalizations.of(context)!.completeWork,
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -386,7 +385,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                     )
                   : Text(
                       label,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: fontSize,
                         fontWeight: FontWeight.w600,
                         color: baseColor,
@@ -415,7 +414,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                     )
                   : Text(
                       label,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: fontSize,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -594,7 +593,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               const SizedBox(height: 16),
               Text(
                 title,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -604,7 +603,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: Colors.grey[600]!,
                 ),
@@ -624,7 +623,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                         icon: const Icon(Icons.history_toggle_off, size: 20),
                         label: Text(
                           additionalActionLabel,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -664,7 +663,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                               ),
                               child: Text(
                                 secondaryActionLabel,
-                                style: DMSansFont.textStyle(
+                                style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -694,7 +693,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                             ),
                             child: Text(
                               primaryActionLabel,
-                              style: DMSansFont.textStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),

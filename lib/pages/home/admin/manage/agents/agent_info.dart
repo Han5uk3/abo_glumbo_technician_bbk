@@ -1,4 +1,3 @@
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -650,7 +649,7 @@ class _AgentInfoState extends State<AgentInfo> {
                 Expanded(
                   child: Text(
                     label,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -932,11 +931,11 @@ class _AgentInfoState extends State<AgentInfo> {
         builder: (context) => AlertDialog(
           title: Text(
             l10n.approveAgent,
-            style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Text(
             l10n.areYouSureYouWantToApproveThisAgent,
-            style: DMSansFont.textStyle(),
+            style: TextStyle(),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

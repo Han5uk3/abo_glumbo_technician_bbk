@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 
 class WorkerReviewsPage extends StatefulWidget {
@@ -96,7 +95,7 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.reviews,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
             color: Colors.black,

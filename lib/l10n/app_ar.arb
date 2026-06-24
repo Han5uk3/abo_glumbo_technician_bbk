@@ -1,5 +1,5 @@
 {
-  "viewOnly": "للمعاينة فقط",
+  "viewOnly": "للمسؤولين فقط للمعاينة",
   "calculatingDistance": "جاري حساب المسافة...",
   "awaitingCustomerAction": "في انتظار إجراء العميل",
   "kmAway": "على بعد {distance} كم",
@@ -1666,8 +1666,8 @@
       }
     }
   },
-  "onHour": "دوام",
-  "offHour": "بعد الدوام",
+  "onHour": "الحجز بالساعة",
+  "offHour": "الحجز خارج الساعة",
   "onHourBooking": "حجز دوام",
   "offHourBooking": "حجز بعد الدوام",
   "inAppEarnings": "الأرباح داخل التطبيق",

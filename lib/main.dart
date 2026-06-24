@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:aboglumbo_bbk_panel/firebase_options.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -17,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
@@ -233,6 +233,9 @@ class MyApp extends StatelessWidget {
                 locale: state.locale,
                 supportedLocales: AppLocalizations.supportedLocales,
                 theme: ThemeData(
+                  fontFamily: state.locale.languageCode == 'ar'
+                      ? GoogleFonts.notoKufiArabic().fontFamily
+                      : 'DMSans',
                   colorScheme: ColorScheme.fromSeed(
                     seedColor: AppColors.primary,
                   ),
@@ -242,13 +245,13 @@ class MyApp extends StatelessWidget {
                     indicatorColor: Colors.transparent,
                     labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
                       if (states.contains(WidgetState.selected)) {
-                        return GoogleFonts.dmSans(
+                        return TextStyle(
                           color: AppColors.darkGrey,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         );
                       }
-                      return GoogleFonts.dmSans(
+                      return TextStyle(
                         color: AppColors.grey,
                         fontSize: 10,
                       );
@@ -283,7 +286,7 @@ class MyApp extends StatelessWidget {
                       size: 20,
                     ),
                     titleSpacing: 0,
-                    titleTextStyle: GoogleFonts.dmSans(
+                    titleTextStyle: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
@@ -293,7 +296,7 @@ class MyApp extends StatelessWidget {
                     elevation: const WidgetStatePropertyAll(0),
                     backgroundColor: const WidgetStatePropertyAll(Colors.white),
                     textStyle: WidgetStatePropertyAll(
-                      GoogleFonts.dmSans(color: Colors.black45, fontSize: 14),
+                      TextStyle(color: Colors.black45, fontSize: 14),
                     ),
                     constraints: const BoxConstraints(
                       minHeight: 50,

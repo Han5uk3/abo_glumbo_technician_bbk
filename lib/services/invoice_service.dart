@@ -69,8 +69,9 @@ class InvoiceService {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Text(loc.invoiceWord, style: pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold, color: PdfColors.blue)),
-                  pw.SizedBox(height: 10),
-                  pw.Text(loc.invoiceNumber(booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase())),
+                  pw.Text(
+                    loc.invoiceNumber(booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase()),
+                  ),
                   pw.Text(loc.dateString(dateFormat.format(DateTime.now()))),
                   pw.Text(loc.statusPaid, style: pw.TextStyle(color: PdfColors.green, fontWeight: pw.FontWeight.bold)),
                 ],
@@ -247,6 +248,23 @@ class InvoiceService {
                           ),
                         ],
                       ),
+                    if ((booking.service.discountPercentage ?? 0) > 0)
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                              (loc.localeName == 'ar')
+                                  ? 'الخصم (${booking.service.discountPercentage}%)'
+                                  : (loc.localeName == 'ur')
+                                      ? 'رعایت (${booking.service.discountPercentage}%)'
+                                      : 'Discount (${booking.service.discountPercentage}%)'
+                          ),
+                          pw.Text(
+                            '- ${loc.sarAmount((data.inspectionFee - booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2))}',
+                            style: pw.TextStyle(color: PdfColors.red),
+                          ),
+                        ],
+                      ),
                     pw.Divider(),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -259,7 +277,7 @@ class InvoiceService {
                           ),
                         ),
                         pw.Text(
-                          loc.sarAmount((data.totalCost + data.inspectionFee).toStringAsFixed(2)),
+                          loc.sarAmount((data.totalCost + booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2)),
                           style: pw.TextStyle(
                             fontSize: 16,
                             fontWeight: pw.FontWeight.bold,
@@ -277,7 +295,11 @@ class InvoiceService {
           pw.SizedBox(height: 60),
           pw.Center(
             child: pw.Text(
-              loc.thankYouInvoice,
+              (loc.localeName == 'ar')
+                  ? 'شكرا لاختيارك أبو جلمبو'
+                  : (loc.localeName == 'ur')
+                      ? 'ابو جلمبو کا انتخاب کرنے کا شکریہ'
+                      : 'Thank you for choosing Abo Glumbo',
               style: pw.TextStyle(
                 fontStyle: pw.FontStyle.italic,
                 color: PdfColors.grey,
@@ -291,7 +313,7 @@ class InvoiceService {
     // Show preview/print dialog
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) => pdf.save(),
-      name: 'Invoice_${booking.newBookingId ?? booking.id.substring(0, 8)}',
+      name: 'Invoice_${booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase()}',
     );
   }
 }

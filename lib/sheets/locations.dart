@@ -2,8 +2,7 @@
 // import 'package:aboglumbo_bbk_panel/models/location.dart';
 // import 'package:aboglumbo_bbk_panel/styles/color.dart';
 // import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
+// 
 // showLocationPicker(
 //   BuildContext context,
 //   Function(String) districtName,
@@ -43,7 +42,7 @@
 //             children: [
 //               Text(
 //                 AppLocalizations.of(context)?.selectLocation ?? '',
-//                 style: GoogleFonts.dmSans(
+//                 style: TextStyle(
 //                   fontSize: 16,
 //                   fontWeight: FontWeight.w500,
 //                   color: Colors.black87,
@@ -72,7 +71,7 @@
 //                   AppLocalizations.of(context)?.localeName == 'ar'
 //                       ? location.name_ar ?? ''
 //                       : location.name ?? '',
-//                   style: GoogleFonts.dmSans(
+//                   style: TextStyle(
 //                     fontSize: 14,
 //                     fontWeight: FontWeight.w500,
 //                   ),

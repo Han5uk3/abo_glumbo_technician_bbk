@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewOnly.
   ///
   /// In en, this message translates to:
-  /// **'View Only'**
+  /// **'Admin View Only'**
   String get viewOnly;
 
   /// No description provided for @noTechnicianAssigned.

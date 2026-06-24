@@ -18,7 +18,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get change => 'تبدیل کریں';
 
   @override
-  String get viewOnly => 'صرف دیکھنے کے لیے';
+  String get viewOnly => 'صرف ایڈمن کے دیکھنے کے لیے';
 
   @override
   String get noTechnicianAssigned => 'کوئی ٹیکنیشن تفویض نہیں کیا گیا';
@@ -4943,10 +4943,10 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'اوقاتِ کار';
+  String get onHour => 'فی گھنٹہ بکنگ';
 
   @override
-  String get offHour => 'بعد اوقاتِ کار';
+  String get offHour => 'آف آور بکنگ';
 
   @override
   String get onHourBooking => 'بکنگ اوقاتِ کار';

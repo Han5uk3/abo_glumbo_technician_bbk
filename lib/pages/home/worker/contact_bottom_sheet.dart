@@ -5,7 +5,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactService {
@@ -123,7 +122,7 @@ class ContactBottomSheet extends StatelessWidget {
               SizedBox(height: 20),
               Text(
                 AppLocalizations.of(context)?.contactSupportOptions ?? "",
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -232,7 +231,7 @@ class _ContactOption extends StatelessWidget {
       leading: Icon(icon, color: iconColor),
       title: Text(
         title,
-        style: GoogleFonts.dmSans(fontSize: 16, color: AppColors.black1),
+        style: TextStyle(fontSize: 16, color: AppColors.black1),
       ),
       onTap: onTap,
     );

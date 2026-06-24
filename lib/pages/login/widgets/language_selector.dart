@@ -4,7 +4,6 @@ import 'package:aboglumbo_bbk_panel/pages/account/widgets/language_dialog.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LanguageSelectorCard extends StatelessWidget {
   final bool isInLoginPage;
@@ -89,7 +88,7 @@ class LanguageSelectorCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     color: AppColors.black1,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

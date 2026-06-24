@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -55,7 +54,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
       ),
       title: Text(
         localizations.payoutAccounts,
-        style: DMSansFont.textStyle(
+        style: TextStyle(
           color: Colors.black,
           fontSize: 18,
           fontWeight: FontWeight.w500,
@@ -98,7 +97,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
           Expanded(
             child: Text(
               localizations.addAndManageYourPayoutAccounts,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 color: Colors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -152,7 +151,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
       icon: const Icon(Icons.add_rounded),
       label: Text(
         localizations.addAccount,
-        style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
@@ -250,7 +249,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
             const SizedBox(height: 24),
             Text(
               localizations.deleteAccount,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -260,7 +259,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
             Text(
               localizations.deleteAccountConfirmation,
               textAlign: TextAlign.center,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: Colors.black45,
                 height: 1.5,
@@ -280,7 +279,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
                     ),
                     child: Text(
                       localizations.cancel,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.black38,
                         fontWeight: FontWeight.bold,
                       ),
@@ -303,7 +302,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
                     ),
                     child: Text(
                       localizations.delete,
-                      style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -386,7 +385,7 @@ class _EmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 32),
             Text(
               localizations.noPayoutAccountsAdded,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -396,7 +395,7 @@ class _EmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               localizations.addAnAccountToReceivePayments,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: Colors.black45,
                 fontWeight: FontWeight.w500,
@@ -409,7 +408,7 @@ class _EmptyStateWidget extends StatelessWidget {
               icon: const Icon(Icons.add_rounded),
               label: Text(
                 localizations.addFirstAccount,
-                style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -461,7 +460,7 @@ class _ErrorStateWidget extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               localizations?.error ?? 'Error',
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.red,
@@ -470,7 +469,7 @@ class _ErrorStateWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               error,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 13,
                 color: Colors.black45,
                 fontWeight: FontWeight.w500,
@@ -571,7 +570,7 @@ class _AccountCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       account.accountHolderName ?? '',
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -585,7 +584,7 @@ class _AccountCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 account.bankName ?? '',
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 13,
                   color: Colors.black54,
                   fontWeight: FontWeight.w500,
@@ -646,7 +645,7 @@ class _AccountCard extends StatelessWidget {
               ),
               child: Text(
                 localizations.setPrimary,
-                style: DMSansFont.textStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
           ),
@@ -664,7 +663,7 @@ class _AccountCard extends StatelessWidget {
             ),
             child: Text(
               localizations.edit,
-              style: DMSansFont.textStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
         ),
@@ -759,7 +758,7 @@ class _AccountDetailRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.black38,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
@@ -768,7 +767,7 @@ class _AccountDetailRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.black,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -880,7 +879,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
               children: [
                 Text(
                   isEdit ? localizations.editAccount : localizations.addAccount,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -891,7 +890,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
                   isEdit
                       ? localizations.updateAccountDetails
                       : localizations.enterAccountDetails,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: Colors.black45,
                   ),
@@ -1018,7 +1017,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
       children: [
         Text(
           label,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -1027,7 +1026,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -1042,7 +1041,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            hintStyle: DMSansFont.textStyle(
+            hintStyle: TextStyle(
               color: Colors.black26,
               fontWeight: FontWeight.normal,
             ),
@@ -1108,7 +1107,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
             Expanded(
               child: Text(
                 localizations.setAsPrimaryAccount,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: _isPrimary ? AppColors.primary : Colors.black54,
@@ -1144,7 +1143,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
             ),
             child: Text(
               localizations.cancel,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 color: Colors.black45,
                 fontWeight: FontWeight.bold,
               ),
@@ -1175,7 +1174,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
                     isEdit
                         ? localizations.updateAccount
                         : localizations.addAccount,
-                    style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
           ),
         ),

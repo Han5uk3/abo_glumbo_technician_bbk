@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -60,10 +59,11 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       minutes = 0;
     }
     
-    // Ensure it's within 8 AM - Midnight
-    if (hour < 8) hour = 8;
-    if (hour >= 24) {
-      hour = 8;
+    // Ensure it's within 6 AM - 10 PM
+    if (hour < 6) hour = 6;
+    if (hour > 22 || (hour == 22 && minutes > 0)) {
+      hour = 6;
+      minutes = 0;
       _selectedDate = baseTime.add(const Duration(days: 1));
     }
     
@@ -98,9 +98,11 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
 
   List<TimeOfDay> _generateTimeSlots() {
     List<TimeOfDay> slots = [];
-    for (int hour = 8; hour < 24; hour++) {
+    for (int hour = 6; hour <= 22; hour++) {
       slots.add(TimeOfDay(hour: hour, minute: 0));
-      slots.add(TimeOfDay(hour: hour, minute: 30));
+      if (hour < 22) {
+        slots.add(TimeOfDay(hour: hour, minute: 30));
+      }
     }
     return slots;
   }
@@ -134,7 +136,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   AppLocalizations.of(context)!.selectTime,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -184,7 +186,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                         alignment: Alignment.center,
                         child: Text(
                           slot.format(context),
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             color: isSelected 
@@ -301,7 +303,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           ),
           Text(
             l10n.proposeNewTime,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -310,7 +312,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           const SizedBox(height: 8),
           Text(
             (AppLocalizations.of(context)?.selectNewDateAppointment ?? 'Select a new date and time for the appointment'),
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
             ),
@@ -362,7 +364,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                     )
                   : Text(
                       l10n.submitCounterOffer,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -406,14 +408,14 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
               children: [
                 Text(
                   label,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
                 ),
                 Text(
                   value,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,

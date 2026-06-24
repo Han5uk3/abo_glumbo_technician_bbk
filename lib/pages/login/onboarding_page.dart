@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
-import 'package:aboglumbo_bbk_panel/utils/poppins_font.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -150,7 +149,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                           _getVerifiedText(context),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: PoppinsFont.textStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -174,7 +173,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Text(
                       _getTitle(context),
                       textAlign: TextAlign.center,
-                      style: PoppinsFont.textStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -188,7 +187,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Text(
                       _getDescription(context),
                       textAlign: TextAlign.center,
-                      style: PoppinsFont.textStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: Colors.white.withOpacity(0.85),
                         height: 1.5,
@@ -246,7 +245,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   child: Text(
                     _getBtnText(context),
-                    style: PoppinsFont.textStyle(
+                    style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

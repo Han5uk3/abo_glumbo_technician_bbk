@@ -4,7 +4,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,7 +78,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
             ),
             Text(
               AppLocalizations.of(context)?.selectSource ?? 'Select Source',
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -145,7 +144,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
             const SizedBox(height: 12),
             Text(
               label,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
@@ -224,7 +223,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
       SnackBar(
         content: Text(
           message,
-          style: DMSansFont.textStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
@@ -283,7 +282,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               Expanded(
                 child: Text(
                   title,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -293,7 +292,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
           ),
           content: Text(
             message,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 15,
               color: Colors.grey[600],
               height: 1.5,
@@ -304,7 +303,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 AppLocalizations.of(context)!.cancel,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.grey[600],
                 ),
@@ -330,7 +329,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               ),
               child: Text(
                 primaryLabel,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -370,7 +369,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               ),
               title: Text(
                 file.path.split('/').last,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.normal,
@@ -491,7 +490,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               Expanded(
                 child: Text(
                   AppLocalizations.of(context)!.confirmCompletion,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -506,7 +505,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.confirmCompletionMessage,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     color: Colors.grey[600],
                     height: 1.5,
@@ -538,7 +537,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                         _serviceCompleted
                             ? AppLocalizations.of(context)!.serviceCompleted
                             : AppLocalizations.of(context)!.inspectionOnly,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: _serviceCompleted ? Colors.green : Colors.blue,
                         ),
@@ -589,7 +588,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     ),
                     child: Text(
                       AppLocalizations.of(context)!.cancel,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.grey[700],
                       ),
@@ -614,7 +613,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     ),
                     child: Text(
                       AppLocalizations.of(context)!.confirm,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -647,7 +646,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
         children: [
           Text(
             label,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: isTotal ? 16 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
               color: isTotal ? AppColors.primary : Colors.grey[700],
@@ -655,7 +654,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
           ),
           Text(
             '${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: isTotal ? 18 : 14,
               fontWeight: FontWeight.bold,
               color: isTotal ? AppColors.primary : Colors.black87,
@@ -720,7 +719,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               ),
               Text(
                 AppLocalizations.of(context)!.completeWork,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -768,7 +767,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                             _serviceCompleted
                                 ? AppLocalizations.of(context)!.serviceCompleted
                                 : AppLocalizations.of(context)!.inspectionOnly,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -783,7 +782,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                 : AppLocalizations.of(
                                     context,
                                   )!.inspectionOnlyDescription,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
                             ),
@@ -832,7 +831,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       child: Text(
                         maxLines: 2,
                         '${AppLocalizations.of(context)!.uploadFilesTitle}*',
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -880,7 +879,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                       ),
                                       child: Text(
                                         file.path.split('/').last,
-                                        style: DMSansFont.textStyle(
+                                        style: TextStyle(
                                           fontSize: 10,
                                         ),
                                         maxLines: 1,
@@ -949,7 +948,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                           selectedFiles.isEmpty
                               ? AppLocalizations.of(context)!.tapToUploadFiles
                               : AppLocalizations.of(context)!.addMoreFiles,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -964,7 +963,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     padding: const EdgeInsets.only(top: 8, left: 4),
                     child: Text(
                       _fileError!,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.red,
                         fontSize: 12,
                       ),
@@ -976,7 +975,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 if (_serviceItems.isEmpty) ...[
                   Text(
                     '${AppLocalizations.of(context)!.serviceCost} *',
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1022,7 +1021,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.serviceItems,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1067,7 +1066,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                             AppLocalizations.of(
                               context,
                             )!.pleaseAddAtleastOneServiceItem,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               color: Colors.grey[500],
                               fontSize: 13,
                             ),
@@ -1200,7 +1199,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.cancel,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey[800],
@@ -1223,7 +1222,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.complete,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -1262,8 +1261,8 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
     return InputDecoration(
       hintText: hint,
       labelText: label,
-      labelStyle: DMSansFont.textStyle(color: Colors.grey[500], fontSize: 13),
-      hintStyle: DMSansFont.textStyle(color: Colors.grey[400], fontSize: 14),
+      labelStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
       prefixIcon: icon != null
           ? Icon(icon, color: AppColors.primary, size: 20)
           : null,

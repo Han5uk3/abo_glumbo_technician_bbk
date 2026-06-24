@@ -530,42 +530,30 @@ class _ManageAgentsState extends State<ManageAgents>
               ),
             ),
 
-            // Filter Chips
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterChip(
-                      context: context,
-                      label: AppLocalizations.of(context)!.all,
-                      icon: Icons.apps_rounded,
-                      isSelected: _selectedFilter == 0,
-                      onTap: () => setState(() => _selectedFilter = 0),
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      context: context,
-                      label: AppLocalizations.of(context)!.verified,
-                      icon: Icons.verified_rounded,
-                      isSelected: _selectedFilter == 1,
-                      onTap: () => setState(() => _selectedFilter = 1),
-                      color: Colors.green,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      context: context,
-                      label: AppLocalizations.of(context)!.pending,
-                      icon: Icons.pending_rounded,
-                      isSelected: _selectedFilter == 2,
-                      onTap: () => setState(() => _selectedFilter = 2),
-                      color: Colors.orange,
-                    ),
-                  ],
-                ),
+            // Filter Chips Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)!.all,
+                    0,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)!.verified,
+                    1,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)!.pending,
+                    2,
+                  ),
+                ],
               ),
             ),
 
@@ -749,24 +737,6 @@ class _ManageAgentsState extends State<ManageAgents>
                                       color: Colors.black,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "${AppLocalizations.of(context)?.totalLabel ?? "Total"} ${(combinedInApp + combinedOutside).toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"}",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    "(${AppLocalizations.of(context)?.inApp ?? "In-App"}: ${combinedInApp.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"} | ${AppLocalizations.of(context)?.outsideApp ?? "Outside-App"}: ${combinedOutside.toStringAsFixed(2)} ${AppLocalizations.of(context)?.sar ?? "SAR"})",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ],
@@ -868,40 +838,31 @@ class _ManageAgentsState extends State<ManageAgents>
     );
   }
 
-  Widget _buildFilterChip({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
+  Widget _buildFilterChip(BuildContext context, String label, int value) {
+    final isSelected = _selectedFilter == value;
     return InkWell(
-      onTap: onTap,
+      onTap: () => setState(() => _selectedFilter = value),
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? color : Colors.black.withOpacity(0.08),
+            color: isSelected
+                ? AppColors.primary
+                : Colors.black.withOpacity(0.08),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: isSelected ? color : Colors.grey),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? color : Colors.grey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
-              ),
-            ),
-          ],
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : Colors.grey,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
         ),
       ),
     );

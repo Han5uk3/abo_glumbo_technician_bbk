@@ -29,7 +29,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AccountPage extends StatefulWidget {
   final UserModel? workerData;
@@ -111,7 +110,7 @@ class _AccountPageState extends State<AccountPage> {
                   shape: Border.all(style: BorderStyle.none),
                   title: Text(
                     AppLocalizations.of(context)!.account,
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       color: Colors.black,
@@ -217,7 +216,7 @@ class _AccountPageState extends State<AccountPage> {
                                         ?.substring(0, 1)
                                         .toUpperCase() ??
                                     '',
-                                style: GoogleFonts.dmSans(
+                                style: TextStyle(
                                   fontSize: AccountPageConstants.avatarFontSize,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -242,14 +241,14 @@ class _AccountPageState extends State<AccountPage> {
         children: [
           Text(
             currentWorkerData?.name ?? '',
-            style: GoogleFonts.dmSans(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             currentWorkerData?.email ?? '',
-            style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+            style: TextStyle(fontSize: 10, color: Colors.black),
           ),
         ],
       ),
@@ -521,7 +520,7 @@ class _AccountPageState extends State<AccountPage> {
                 child: Text(
                   AppLocalizations.of(dialogContext)?.deleteAccount ??
                       'Delete Account?',
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
@@ -537,7 +536,7 @@ class _AccountPageState extends State<AccountPage> {
               Text(
                 AppLocalizations.of(dialogContext)?.deleteAccountWarning ??
                     'This action cannot be undone. All your data will be permanently deleted.',
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -567,7 +566,7 @@ class _AccountPageState extends State<AccountPage> {
                                   dialogContext,
                                 )?.whatWillBeDeleted ??
                                 'What will be deleted:',
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                               color: Colors.red.shade700,
@@ -639,7 +638,7 @@ class _AccountPageState extends State<AccountPage> {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.red.shade700,
               ),
@@ -688,7 +687,7 @@ class _AccountPageState extends State<AccountPage> {
                   Text(
                     AppLocalizations.of(dialogContext)?.deletingAccount ??
                         'Deleting account...',
-                    style: GoogleFonts.dmSans(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                   ),
                 ],
               ),
@@ -826,7 +825,7 @@ class _AccountPageState extends State<AccountPage> {
                   child: Text(
                     AppLocalizations.of(dialogContext)?.disableBiometric ??
                         'Disable Biometric?',
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -841,7 +840,7 @@ class _AccountPageState extends State<AccountPage> {
                 Text(
                   AppLocalizations.of(dialogContext)?.disableBiometricWarning ??
                       'Disabling biometric authentication will prevent you from logging in using fingerprint or face recognition.',
-                  style: GoogleFonts.dmSans(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -865,7 +864,7 @@ class _AccountPageState extends State<AccountPage> {
                                 dialogContext,
                               )?.youWillNeedPhoneOtp ??
                               'You will need to use your phone number and OTP to login.',
-                          style: GoogleFonts.dmSans(
+                          style: TextStyle(
                             fontSize: 13,
                             color: Colors.blue.shade700,
                           ),

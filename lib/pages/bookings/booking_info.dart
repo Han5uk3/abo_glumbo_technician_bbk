@@ -25,7 +25,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
 import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
@@ -120,7 +119,7 @@ class _BookingInfoState extends State<BookingInfo> {
                       Text(
                         AppLocalizations.of(context)!.loadingChat,
 
-                        style: DMSansFont.textStyle(fontSize: 14),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),
@@ -407,11 +406,11 @@ class _BookingInfoState extends State<BookingInfo> {
       builder: (context) => AlertDialog(
         title: Text(
           l10n.areYouSure,
-          style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           l10n.rejectionProfessionalMessage,
-          style: DMSansFont.textStyle(),
+          style: TextStyle(),
         ),
         actions: [
           TextButton(
@@ -556,7 +555,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -631,7 +630,7 @@ class _BookingInfoState extends State<BookingInfo> {
             width: 100,
             child: Text(
               label,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[600],
@@ -642,7 +641,7 @@ class _BookingInfoState extends State<BookingInfo> {
           Expanded(
             child: Text(
               value,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.w400,
                 color: isHighlighted ? AppColors.blue1 : Colors.black,
@@ -700,7 +699,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)?.serviceInfo ?? '',
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -755,7 +754,7 @@ class _BookingInfoState extends State<BookingInfo> {
                       name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.black,
                       ),
@@ -767,7 +766,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           color: Colors.grey[600],
                         ),
@@ -785,11 +784,11 @@ class _BookingInfoState extends State<BookingInfo> {
               children: [
                 Text(
                   '${AppLocalizations.of(context)!.price}\t\t  ',
-                  style: DMSansFont.textStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12),
                 ),
                 Text(
                   '${widget.booking.service.price} ${AppLocalizations.of(context)!.sar}',
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: Colors.green,
                   ),
@@ -907,7 +906,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(width: 8),
               Text(
                 localization.location,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -918,19 +917,23 @@ class _BookingInfoState extends State<BookingInfo> {
                 icon: Icon(
                   Icons.directions,
                   size: 16,
-                  color: AppColors.primary,
+                  color: AppColors.white,
                 ),
                 label: Text(
                   localization.directions,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.primary,
+                    color: AppColors.white,
                   ),
                 ),
                 style: TextButton.styleFrom(
+                  backgroundColor: AppColors.green,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -946,7 +949,7 @@ class _BookingInfoState extends State<BookingInfo> {
               customerSelectedAddress,
               widget.booking.customer,
             ),
-            style: DMSansFont.textStyle(fontSize: 12, color: Colors.black),
+            style: TextStyle(fontSize: 12, color: Colors.black),
           ),
         ],
       ),
@@ -1098,7 +1101,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       widget.booking.notes,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
                         height: 1.4,
@@ -1247,7 +1250,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 shape: Border.all(style: BorderStyle.none),
                 title: Text(
                   AppLocalizations.of(context)!.bookingInfo,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -1511,7 +1514,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.uploadFilesTitle,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1630,7 +1633,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.warrantyRejectedTechnicians,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -1667,7 +1670,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         const SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.technicianName,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: colorScheme.onSurface.withOpacity(0.7),
@@ -1678,7 +1681,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     const SizedBox(height: 4),
                     Text(
                       tech.name ?? 'Unknown',
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurface,
@@ -1697,7 +1700,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         const SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.phone,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: colorScheme.onSurface.withOpacity(0.7),
@@ -1711,7 +1714,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         Expanded(
                           child: Text(
                             tech.phone ?? 'N/A',
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               color: colorScheme.onSurface,
                             ),
@@ -1758,7 +1761,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         const SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.reasonforrejection,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: colorScheme.onSurface.withOpacity(0.7),
@@ -1769,7 +1772,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     const SizedBox(height: 4),
                     Text(
                       tech.reason ?? 'No reason provided',
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: colorScheme.onSurface,
                       ),
@@ -1787,7 +1790,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         const SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.cancelledDate,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: colorScheme.onSurface.withOpacity(0.7),
@@ -1803,7 +1806,7 @@ class _BookingInfoState extends State<BookingInfo> {
                               context,
                             )
                           : 'N/A',
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: colorScheme.onSurface,
                       ),
@@ -1864,7 +1867,7 @@ class _BookingInfoState extends State<BookingInfo> {
   //                 hasChatRoom
   //                     ? AppLocalizations.of(context)!.continueChat
   //                     : AppLocalizations.of(context)!.chatWithCustomer,
-  //                 style: DMSansFont.textStyle(
+  //                 style: TextStyle(
   //                   fontSize: 12,
   //                   fontWeight: FontWeight.w600,
   //                   color: Colors.white,
@@ -1907,7 +1910,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.of(context)!.image,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -1946,7 +1949,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.of(context)!.video,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -2026,7 +2029,7 @@ class _BookingInfoState extends State<BookingInfo> {
               backgroundColor: AppColors.primary,
               child: Text(
                 _getInitials(widget.booking.customer.name ?? ""),
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -2040,7 +2043,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 children: [
                   Text(
                     widget.booking.customer.name ?? "",
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -2048,7 +2051,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   if (widget.booking.customer.phone != null)
                     Text(
                       widget.booking.customer.phone!,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
                       ),
@@ -2156,7 +2159,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 backgroundColor: AppColors.primary,
                 child: Text(
                   _getInitials(agent.name ?? ""),
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: AppColors.white,
@@ -2171,7 +2174,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 children: [
                   Text(
                     agent.name ?? "",
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -2179,7 +2182,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   if (agent.phone != null)
                     Text(
                       agent.phone!,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
                       ),
@@ -2971,7 +2974,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.bookingTimeline,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -3083,7 +3086,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   children: [
                     Text(
                       title,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: status == 'pending'
@@ -3096,7 +3099,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: status == 'pending'
                         ? colorScheme.onSurface.withOpacity(0.4)
@@ -3105,7 +3108,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 Text(
                   time,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: colorScheme.onSurface.withOpacity(0.5),
                   ),
@@ -3169,7 +3172,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.completionDetails,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -3231,7 +3234,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.uploadFilesTitle,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: colorScheme.onSurface.withOpacity(0.7),
@@ -3246,7 +3249,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.serviceItems,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: colorScheme.onSurface.withOpacity(0.7),
@@ -3281,7 +3284,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                     flex: 12,
                                     child: Text(
                                       entry.value.name,
-                                      style: DMSansFont.textStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                         color: colorScheme.onSurface,
@@ -3292,7 +3295,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                     flex: 2,
                                     child: Text(
                                       'x${entry.value.quantity.toInt()}',
-                                      style: DMSansFont.textStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                         color: colorScheme.onSurface
@@ -3305,7 +3308,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                     flex: 5,
                                     child: Text(
                                       '${entry.value.price.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                                      style: DMSansFont.textStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.green,
@@ -3388,7 +3391,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     widget.booking.paymentCompleted
                         ? AppLocalizations.of(context)!.amountPaid
                         : AppLocalizations.of(context)!.amountToBePaid,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
@@ -3396,7 +3399,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   ),
                   Text(
                     '${(completionData.totalCost + widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Colors.green,
@@ -3423,7 +3426,7 @@ class _BookingInfoState extends State<BookingInfo> {
       children: [
         Text(
           label,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: colorScheme.onSurface.withOpacity(0.7),
@@ -3431,7 +3434,7 @@ class _BookingInfoState extends State<BookingInfo> {
         ),
         Text(
           '${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface,
@@ -3476,7 +3479,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     Expanded(
                       child: Text(
                         _getFileName(entry.value),
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: colorScheme.primary,
@@ -3563,7 +3566,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.review,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -3655,7 +3658,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.tip,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -3730,7 +3733,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     Expanded(
                       child: Text(
                         l10n.customerProposedNewTime,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: Colors.orange.shade900,
@@ -3761,7 +3764,7 @@ class _BookingInfoState extends State<BookingInfo> {
                             activeOffer.proposedTime.toDate(),
                             locale,
                           ),
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
@@ -3840,7 +3843,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     const SizedBox(width: 10),
                     Text(
                       l10n.waitingForCustomer,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: Colors.blue.shade900,
@@ -3851,7 +3854,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(height: 10),
                 Text(
                   "${l10n.newProposedTime}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[800]!,
                   ),
@@ -3887,7 +3890,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   const SizedBox(width: 10),
                   Text(
                     isRejected ? l10n.proposalRejected : l10n.proposalAccepted,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                       color: isRejected ? Colors.red : Colors.green[700],
@@ -3901,7 +3904,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   activeOffer.proposedBy == 'technician'
                       ? l10n.customerRejectedProposal
                       : l10n.youRejectedProposal,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[700]!,
                   ),
@@ -3926,7 +3929,7 @@ class _BookingInfoState extends State<BookingInfo> {
               ] else ...[
                 Text(
                   "${l10n.appointmentRescheduledTo}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[700]!,
                   ),
@@ -4031,7 +4034,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       l10n.assign,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontSize: 14,
@@ -4055,7 +4058,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       l10n.reject,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
                         fontSize: 14,
@@ -4141,14 +4144,14 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.rejectBooking,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         content: Text(
           l10n.areYouSureYouWantToRejectThisBooking,
-          style: DMSansFont.textStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Colors.grey[600]),
         ),
         actions: [
           TextButton(
@@ -4249,7 +4252,7 @@ class _BookingInfoState extends State<BookingInfo> {
         children: [
           Text(
             l10n.acceptOffer,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: AppColors.primary,
@@ -4277,7 +4280,7 @@ class _BookingInfoState extends State<BookingInfo> {
                       const SizedBox(height: 2),
                       Text(
                         timerText,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: timerColor,
@@ -4296,7 +4299,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 : Localizations.localeOf(context).languageCode == 'ur'
                 ? 'جواب دینے کا وقت'
                 : 'Time to respond',
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 12,
               color: Colors.grey.shade600,
             ),
@@ -4318,7 +4321,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       l10n.reject,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -4342,7 +4345,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       l10n.accept,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -4370,14 +4373,14 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.acceptBooking,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         content: Text(
           l10n.areYouSureYouWantToAcceptThisBooking,
-          style: DMSansFont.textStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Colors.grey[600]),
         ),
         actions: [
           TextButton(
@@ -4430,14 +4433,14 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.rejectBooking,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         content: Text(
           l10n.areYouSureYouWantToRejectThisBooking,
-          style: DMSansFont.textStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Colors.grey[600]),
         ),
         actions: [
           Padding(
@@ -4469,7 +4472,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     ),
                     child: Text(
                       l10n.reject,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -4484,7 +4487,7 @@ class _BookingInfoState extends State<BookingInfo> {
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
                       l10n.cancel,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w600,
                       ),
@@ -4674,7 +4677,7 @@ class VerifyPaymentControls extends StatelessWidget {
                 booking.bookingStatusCode == 'CP'
                     ? AppLocalizations.of(context)!.paymentPending
                     : AppLocalizations.of(context)!.verificationPending,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,
@@ -4689,7 +4692,7 @@ class VerifyPaymentControls extends StatelessWidget {
                 : AppLocalizations.of(
                     context,
                   )!.waitingForTechnicianVerification,
-            style: DMSansFont.textStyle(fontSize: 13, color: AppColors.white),
+            style: TextStyle(fontSize: 13, color: AppColors.white),
           ),
           const SizedBox(height: 20),
           SizedBox(
@@ -4701,7 +4704,7 @@ class VerifyPaymentControls extends StatelessWidget {
               icon: const Icon(Icons.verified_rounded, color: Colors.white),
               label: Text(
                 AppLocalizations.of(context)!.verifyPayment,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),

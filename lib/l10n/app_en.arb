@@ -2,7 +2,7 @@
   "assign": "Assign",
   "later": "Later",
   "change": "Change",
-  "viewOnly": "View Only",
+  "viewOnly": "Admin View Only",
   "noTechnicianAssigned": "No Technician Assigned",
   "calculatingDistance": "Calculating distance...",
   "awaitingCustomerAction": "Awaiting Customer Action",

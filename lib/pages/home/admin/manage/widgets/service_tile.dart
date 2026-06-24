@@ -9,7 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ServiceTileDevWidget extends StatelessWidget {
   const ServiceTileDevWidget({super.key, required this.service});
@@ -138,7 +137,7 @@ class ServiceTileDevWidget extends StatelessWidget {
               Flexible(
                 child: Text(
                   "${AppLocalizations.of(context)!.serviceCost}:",
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     color: AppColors.green1,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -149,7 +148,7 @@ class ServiceTileDevWidget extends StatelessWidget {
               Flexible(
                 child: Text(
                   "${service.price} ${AppLocalizations.of(context)!.sar}",
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     color: AppColors.green1,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -165,7 +164,7 @@ class ServiceTileDevWidget extends StatelessWidget {
               Flexible(
                 child: Text(
                   "${AppLocalizations.of(context)!.active}:",
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     color: AppColors.green1,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,

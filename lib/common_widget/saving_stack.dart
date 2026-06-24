@@ -1,6 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SavingStackWidget extends StatelessWidget {
   const SavingStackWidget({
@@ -44,7 +43,7 @@ class SavingStackWidget extends StatelessWidget {
                       ? AppLocalizations.of(context)?.saving ?? 'Saving...'
                       : AppLocalizations.of(context)?.uploading ??
                           'Uploading...',
-                  style: GoogleFonts.roboto(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),

@@ -5,7 +5,6 @@ import 'package:aboglumbo_bbk_panel/models/booking.dart';
 
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shimmer/shimmer.dart';
@@ -153,7 +152,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
       elevation: 0,
       title: Text(
         AppLocalizations.of(context)?.orders ?? "Manage Orders",
-        style: DMSansFont.textStyle(
+        style: TextStyle(
           color: Colors.black,
           fontSize: 18,
           fontWeight: FontWeight.w500,

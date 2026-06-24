@@ -4,7 +4,6 @@ import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -105,11 +104,11 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
       builder: (context) => AlertDialog(
         title: Text(
           l10n.areYouSure,
-          style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           l10n.rejectionProfessionalMessage,
-          style: DMSansFont.textStyle(),
+          style: TextStyle(),
         ),
         actions: [
           TextButton(
@@ -241,7 +240,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
         ),
         title: Text(
           serviceName,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
@@ -253,7 +252,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   timerText,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -306,7 +305,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
             if (notes.isNotEmpty) ...[
               Text(
                 localization.notes,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -322,7 +321,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 ),
                 child: Text(
                   notes,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[800],
                   ),
@@ -336,7 +335,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 (issueVideo != null && issueVideo.isNotEmpty)) ...[
               Text(
                 localization.issueMedia,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -396,7 +395,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -420,7 +419,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
             width: 80,
             child: Text(
               label,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 13,
               ),
@@ -430,7 +429,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
           Expanded(
             child: Text(
               value,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
               ),

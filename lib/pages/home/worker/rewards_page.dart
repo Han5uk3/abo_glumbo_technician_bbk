@@ -5,7 +5,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 
 class RewardsPage extends StatefulWidget {
@@ -80,7 +79,7 @@ class _RewardsPageState extends State<RewardsPage> {
         backgroundColor: Colors.white,
         title: Text(
           AppLocalizations.of(context)!.rewards,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -535,7 +534,7 @@ class _RewardsPageState extends State<RewardsPage> {
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        fontFamily: 'Mulish',
+                        
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -551,7 +550,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               color: Colors.white,
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
-                              fontFamily: 'Mulish',
+                              
                               height: 1,
                             ),
                           ),
@@ -562,7 +561,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              fontFamily: 'Mulish',
+                              
                             ),
                           ),
                         ],
@@ -588,7 +587,7 @@ class _RewardsPageState extends State<RewardsPage> {
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
-                        fontFamily: 'Mulish',
+                        
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

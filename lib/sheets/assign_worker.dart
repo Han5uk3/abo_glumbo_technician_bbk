@@ -10,7 +10,6 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/widgets/conflict_widgets.da
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/conflict_check_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/models/service_location.dart';
@@ -339,7 +338,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         SnackBar(
           content: Text(
             message,
-            style: DMSansFont.textStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white),
           ),
           backgroundColor: color,
           behavior: SnackBarBehavior.floating,
@@ -530,7 +529,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             Expanded(
               child: Text(
                 title,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -540,7 +539,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         ),
         content: Text(
           message,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 15,
             color: Colors.grey[600],
             height: 1.5,
@@ -551,7 +550,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               AppLocalizations.of(context)!.cancel,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Colors.grey[600],
               ),
@@ -569,7 +568,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             ),
             child: Text(
               primaryActionLabel,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -594,7 +593,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           ),
           title: Text(
             AppLocalizations.of(context)!.filterByLocation,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -606,7 +605,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                 : _availableZones.isEmpty
                 ? Text(
                     AppLocalizations.of(context)!.noDataAvailable,
-                    style: DMSansFont.textStyle(),
+                    style: TextStyle(),
                   )
                 : ListView.builder(
                     shrinkWrap: true,
@@ -619,7 +618,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                           : (lang == 'ur' ? zone.name_ur : zone.name);
                       final isSelected = tempSelected.contains(zone.id);
                       return CheckboxListTile(
-                        title: Text(zoneName, style: DMSansFont.textStyle()),
+                        title: Text(zoneName, style: TextStyle()),
                         value: isSelected,
                         onChanged: (bool? val) {
                           setDialogState(() {
@@ -642,7 +641,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
               onPressed: () => Navigator.pop(context, false),
               child: Text(
                 AppLocalizations.of(context)!.cancel,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w600,
                 ),
@@ -660,7 +659,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
               ),
               child: Text(
                 AppLocalizations.of(context)!.apply,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -693,7 +692,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       children: [
         Text(
           label,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.grey[700],
@@ -786,7 +785,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                   name != null
                       ? '${AppLocalizations.of(context)!.assignTo} $name'
                       : AppLocalizations.of(context)!.assignToUser,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -794,7 +793,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                 const SizedBox(height: 4),
                 Text(
                   AppLocalizations.of(context)!.loadingAgents,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
                   ),
@@ -854,7 +853,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                       hasFilter
                           ? _getSelectedLocationText()
                           : AppLocalizations.of(context)!.filterByLocation,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: hasFilter
                             ? FontWeight.w600
@@ -953,7 +952,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                 children: [
                   Text(
                     user.name ?? '',
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -962,7 +961,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                     const SizedBox(height: 4),
                     Text(
                       roleNames,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
                       ),
@@ -1009,7 +1008,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     return Center(
       child: Text(
         user.name?.isNotEmpty == true ? user.name![0].toUpperCase() : '?',
-        style: DMSansFont.textStyle(
+        style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
           color: AppColors.primary,
@@ -1043,7 +1042,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           Flexible(
             child: Text(
               _getConflictLabel(data),
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: color,
@@ -1094,7 +1093,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context)!.noTechniciansFound,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey[600],
@@ -1103,7 +1102,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(context)!.appLoginCaption,
-            style: DMSansFont.textStyle(fontSize: 14, color: Colors.grey[400]),
+            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
           ),
         ],
       ),
@@ -1122,7 +1121,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: DMSansFont.textStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Colors.grey[600]),
             ),
             TextButton(
               onPressed: () => setState(() => _cachedUsersStream = null),

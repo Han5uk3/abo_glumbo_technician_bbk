@@ -18,7 +18,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/error_codes.dart' as local_auth_error;
 import 'package:local_auth/local_auth.dart';
 
@@ -410,7 +409,7 @@ class _LoginPageState extends State<LoginPage> {
                                 children: [
                                   Text(
                                     AppLocalizations.of(context)!.login,
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
@@ -434,7 +433,7 @@ class _LoginPageState extends State<LoginPage> {
                                           context,
                                         )?.mobileNumber ??
                                         '',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       color: Colors.black.withOpacity(.7),
                                       fontSize: 14,
                                     ),
@@ -466,7 +465,7 @@ class _LoginPageState extends State<LoginPage> {
                                           child: Text(
                                             AppLocalizations.of(context)?.or ??
                                                 'OR',
-                                            style: GoogleFonts.dmSans(
+                                            style: TextStyle(
                                               color: Colors.grey.withOpacity(
                                                 0.7,
                                               ),
@@ -523,7 +522,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             AppLocalizations.of(context)?.loggingIn ??
                                 'Logging in...',
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -563,7 +562,7 @@ class _LoginPageState extends State<LoginPage> {
                 textDirection: TextDirection.ltr,
                 child: Text(
                   "+966",
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     color: Colors.black,
@@ -585,7 +584,7 @@ class _LoginPageState extends State<LoginPage> {
               textInputAction: TextInputAction.done,
               keyboardType: TextInputType.number,
               textAlignVertical: TextAlignVertical.center,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 color: Colors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -595,7 +594,7 @@ class _LoginPageState extends State<LoginPage> {
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
                 hintText: '5XXXXXXXX',
-                hintStyle: GoogleFonts.dmSans(
+                hintStyle: TextStyle(
                   color: Colors.black.withOpacity(0.3),
                   fontSize: 14,
                   fontWeight: FontWeight.normal,
@@ -631,7 +630,7 @@ class _LoginPageState extends State<LoginPage> {
           onTap: () => _onRememberMeChanged(!_isRememberMeChecked),
           child: Text(
             AppLocalizations.of(context)?.rememberMe ?? 'Remember me',
-            style: GoogleFonts.dmSans(
+            style: TextStyle(
               color: Colors.black.withOpacity(0.7),
               fontSize: 12,
             ),
@@ -659,7 +658,7 @@ class _LoginPageState extends State<LoginPage> {
             ? Loader(size: 20, color: Colors.white)
             : Text(
                 AppLocalizations.of(context)?.continueText ?? '',
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -678,7 +677,7 @@ class _LoginPageState extends State<LoginPage> {
             TextSpan(
               text:
                   "${AppLocalizations.of(context)?.byContinuingYouAgreeToOur ?? ''}\n ",
-              style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+              style: TextStyle(fontSize: 10, color: Colors.black),
             ),
             TextSpan(
               recognizer: TapGestureRecognizer()
@@ -691,7 +690,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 },
               text: AppLocalizations.of(context)?.termsOfUse ?? '',
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.blue,
                 decoration: TextDecoration.underline,
@@ -699,7 +698,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextSpan(
               text: " ${AppLocalizations.of(context)!.and} ",
-              style: GoogleFonts.dmSans(fontSize: 10, color: Colors.black),
+              style: TextStyle(fontSize: 10, color: Colors.black),
             ),
             TextSpan(
               recognizer: TapGestureRecognizer()
@@ -711,7 +710,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 },
               text: AppLocalizations.of(context)?.privacyPolicy ?? '',
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.blue,
                 decoration: TextDecoration.underline,

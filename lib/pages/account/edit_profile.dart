@@ -16,7 +16,6 @@ import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
 import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +27,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
@@ -87,7 +85,7 @@ class _EditProfileState extends State<EditProfile> {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
                 AppLocalizations.of(context)!.selectSource,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -407,7 +405,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               title: Text(
                 AppLocalizations.of(context)?.idDocument ?? 'ID Document',
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.normal,
                 ),
@@ -455,7 +453,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               title: Text(
                 AppLocalizations.of(context)?.idDocument ?? 'ID Document',
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.normal,
                 ),
@@ -764,7 +762,7 @@ class _EditProfileState extends State<EditProfile> {
                                           context,
                                         )?.selectJobRoles ??
                                         'Select Job Roles',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
@@ -774,7 +772,7 @@ class _EditProfileState extends State<EditProfile> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '${tempSelectedJobRoles.length} ${AppLocalizations.of(context)?.selected ?? 'selected'}',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
                                     ),
@@ -805,7 +803,7 @@ class _EditProfileState extends State<EditProfile> {
                               Text(
                                 AppLocalizations.of(context)?.availableRoles ??
                                     'Available Roles',
-                                style: GoogleFonts.dmSans(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.grey[600],
@@ -899,7 +897,7 @@ class _EditProfileState extends State<EditProfile> {
                                           Expanded(
                                             child: Text(
                                               displayName,
-                                              style: GoogleFonts.dmSans(
+                                              style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: isSelected
                                                     ? FontWeight.w600
@@ -969,7 +967,7 @@ class _EditProfileState extends State<EditProfile> {
                               children: [
                                 Text(
                                   '${AppLocalizations.of(context)?.apply ?? 'Apply'} (${tempSelectedJobRoles.length})',
-                                  style: GoogleFonts.dmSans(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1115,7 +1113,7 @@ class _EditProfileState extends State<EditProfile> {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.dmSans(
+            style: TextStyle(
               color: backgroundColor == AppColors.yellow
                   ? Colors.grey.shade800
                   : Colors.white,
@@ -1261,7 +1259,7 @@ class _EditProfileState extends State<EditProfile> {
         surfaceTintColor: Colors.white,
         title: Text(
           locale.profileManagement,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -1418,7 +1416,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 : _updatePhoneNumber,
                                             child: Text(
                                               locale.update,
-                                              style: DMSansFont.textStyle(
+                                              style: TextStyle(
                                                 color: AppColors.secondary,
                                                 fontWeight: FontWeight.w600,
                                               ),
@@ -1440,7 +1438,7 @@ class _EditProfileState extends State<EditProfile> {
                                     ),
                                     child: Text(
                                       locale.phoneNumberFormatHint,
-                                      style: DMSansFont.textStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey.shade600,
                                       ),
@@ -1475,7 +1473,7 @@ class _EditProfileState extends State<EditProfile> {
                                     _isFetchingLocation
                                         ? 'Fetching...'
                                         : (locale.useCurrentLocation),
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -1525,7 +1523,7 @@ class _EditProfileState extends State<EditProfile> {
                                                       ?.location
                                                       ?.displayName ??
                                                   locale.locationSaved,
-                                              style: DMSansFont.textStyle(
+                                              style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 color: Colors.black87,
@@ -1533,7 +1531,7 @@ class _EditProfileState extends State<EditProfile> {
                                             ),
                                             Text(
                                               "${locale.latitudeLabel}: ${widget.workerData!.location!.lat?.toStringAsFixed(4)}, ${locale.longitudeLabel}: ${widget.workerData!.location!.lon?.toStringAsFixed(4)}",
-                                              style: DMSansFont.textStyle(
+                                              style: TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.grey.shade600,
                                               ),
@@ -1549,7 +1547,7 @@ class _EditProfileState extends State<EditProfile> {
                                 const SizedBox(height: 8),
                                 Text(
                                   _locationError!,
-                                  style: DMSansFont.textStyle(
+                                  style: TextStyle(
                                     color: Colors.red,
                                     fontSize: 12,
                                   ),
@@ -1567,7 +1565,7 @@ class _EditProfileState extends State<EditProfile> {
                                 children: [
                                   Text(
                                     locale.jobRoles,
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black87,
@@ -1600,7 +1598,7 @@ class _EditProfileState extends State<EditProfile> {
                                             child: selectedJobRoles.isEmpty
                                                 ? Text(
                                                     locale.selectJobRoles,
-                                                    style: DMSansFont.textStyle(
+                                                    style: TextStyle(
                                                       fontSize: 14,
                                                       color: Colors.grey,
                                                     ),
@@ -1619,7 +1617,7 @@ class _EditProfileState extends State<EditProfile> {
                                                             ),
                                                           ),
                                                           style:
-                                                              DMSansFont.textStyle(
+                                                              TextStyle(
                                                                 fontSize: 12,
                                                               ),
                                                         ),
@@ -1639,7 +1637,7 @@ class _EditProfileState extends State<EditProfile> {
                                                                   0.1,
                                                                 ),
                                                         labelStyle:
-                                                            DMSansFont.textStyle(
+                                                            TextStyle(
                                                               color: AppColors
                                                                   .secondary,
                                                               fontSize: 12,
@@ -1920,7 +1918,7 @@ class _EditProfileState extends State<EditProfile> {
               const SizedBox(width: 12),
               Text(
                 title,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
@@ -2027,7 +2025,7 @@ class _EditProfileState extends State<EditProfile> {
       children: [
         Text(
           title,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -2061,7 +2059,7 @@ class _EditProfileState extends State<EditProfile> {
                 const SizedBox(width: 10),
                 Text(
                   buttonLabel,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     color: isUploaded ? Colors.green : AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -2097,7 +2095,7 @@ class _EditProfileState extends State<EditProfile> {
               Expanded(
                 child: Text(
                   label,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87,
@@ -2221,7 +2219,7 @@ class _EditProfileState extends State<EditProfile> {
               ? Loader(color: Colors.white, size: 24)
               : Text(
                   locale.update,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

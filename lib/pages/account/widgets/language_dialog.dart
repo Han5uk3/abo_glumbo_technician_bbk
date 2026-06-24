@@ -1,6 +1,5 @@
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LanguageSelectionDialog extends StatelessWidget {
   final String title;
@@ -49,7 +48,7 @@ class LanguageSelectionDialog extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.black1,
@@ -155,7 +154,7 @@ class _LanguageOptionTile extends StatelessWidget {
                     children: [
                       Text(
                         nativeName,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight:
                               isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -167,7 +166,7 @@ class _LanguageOptionTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         languageName,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
                         ),

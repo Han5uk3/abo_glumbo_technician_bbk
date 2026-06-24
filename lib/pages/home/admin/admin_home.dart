@@ -72,7 +72,9 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
               ({required BookingModel booking, required UserModel user}) {
                 adminBloc.add(AssignAgentEvent(booking: booking, user: user));
               },
-          onRejectOrder: (booking.bookingStatusCode == 'R' || booking.bookingStatusCode == 'X')
+          onRejectOrder:
+              (booking.bookingStatusCode == 'R' ||
+                  booking.bookingStatusCode == 'X')
               ? null
               : (BookingModel booking) {
                   adminBloc.add(RejectOrderEvent(booking: booking));
@@ -530,7 +532,8 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
         newId = (item.booking?.newBookingId ?? '').toLowerCase();
       }
-      return id.contains(_searchQuery) || (newId.isNotEmpty && newId.contains(_searchQuery));
+      return id.contains(_searchQuery) ||
+          (newId.isNotEmpty && newId.contains(_searchQuery));
     }).toList();
   }
 
@@ -545,11 +548,20 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         bookingStatusCode: 'P',
         isAdmin: true,
       );
-      stream = Rx.combineLatest2(
-        offers,
-        bookings,
-        (List<JobOfferContainer> o, List<BookingModel> b) => [...o, ...b],
-      ).cast<List<dynamic>>();
+      stream = Rx.combineLatest2(offers, bookings, (
+        List<JobOfferContainer> o,
+        List<BookingModel> b,
+      ) {
+        final offerBookingIds = o
+            .map(
+              (offer) => offer.booking?.id ?? offer.requestId ?? offer.offerId,
+            )
+            .toSet();
+        final filteredBookings = b
+            .where((booking) => !offerBookingIds.contains(booking.id))
+            .toList();
+        return [...o, ...filteredBookings];
+      }).cast<List<dynamic>>();
     } else {
       stream = AppServices.getBookingsStream(
         bookingStatusCode: selectedBookingStatus,
@@ -597,13 +609,38 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           itemBuilder: (context, index) {
             final item = filteredData[index];
             if (item is JobOfferContainer) {
+              if (item.booking != null) {
+                return BookingListTileWidget(
+                  key: ValueKey(item.booking!.id),
+                  booking: item.booking!,
+                  isAdmin: true,
+                  onAssign: null, // Ensure service for now remains view only
+                  actionOverride: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.viewOnly.toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                );
+              }
               return JobOfferTileWidget(
                 key: ValueKey(item.offerId),
                 offer: item,
                 isAdmin: true,
-                onAssign: item.booking != null
-                    ? () => showAssignToUserBottomSheet(item.booking!)
-                    : null,
+                onAssign: null,
               );
             } else if (item is BookingModel) {
               return BookingListTileWidget(

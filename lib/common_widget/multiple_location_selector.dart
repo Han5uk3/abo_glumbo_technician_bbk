@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/service_location.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LocationSelectorWidget extends StatefulWidget {
   final List<ServiceLocationModel> locations;
@@ -187,7 +186,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                     widget.title ??
                         AppLocalizations.of(context)?.selectLocation ??
                         'Select Location',
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -209,7 +208,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                           ),
                           child: Text(
                             '${selectedLocations.length} ${AppLocalizations.of(context)?.selected ?? 'Selected'}',
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                               color: AppColors.secondary,
@@ -232,7 +231,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                 onChanged: _toggleSelectAll,
                 title: Text(
                   AppLocalizations.of(context)?.selectAll ?? 'Select All',
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.secondary,
@@ -281,7 +280,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                   widget.currentLocationText ??
                       AppLocalizations.of(context)?.useCurrentLocation ??
                       'Use Current Location',
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.secondary,
@@ -300,7 +299,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                   ? Center(
                       child: Text(
                         widget.noLocationsMessage ?? 'No locations found',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
                         ),
@@ -327,7 +326,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                           ),
                           title: Text(
                             _getLocationName(location),
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: isSelected
                                   ? FontWeight.w600
@@ -375,7 +374,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                     AppLocalizations.of(
                       context,
                     )!.doneSelectedCount(selectedLocations.length),
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

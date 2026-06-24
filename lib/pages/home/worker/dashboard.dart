@@ -199,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'Mulish',
+                                
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -327,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.white,
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Mulish',
+                        
                       ),
                       textAlign: TextAlign.center,
                     ),

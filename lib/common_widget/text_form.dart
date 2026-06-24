@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class TextFormWidget extends StatelessWidget {
   const TextFormWidget({
@@ -45,7 +44,7 @@ class TextFormWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.dmSans(fontSize: 16)),
+        Text(label, style: TextStyle(fontSize: 16)),
         const SizedBox(height: 5),
         TextFormField(
 
@@ -82,7 +81,7 @@ class TextFormWidget extends StatelessWidget {
             ),
             counterText: isPhoneNumber ? '' : null,
           ),
-          style: GoogleFonts.dmSans(fontSize: 16, color: Colors.black),
+          style: TextStyle(fontSize: 16, color: Colors.black),
           controller: controller,
           enabled: enabled,
           keyboardType: isPhoneNumber ? TextInputType.number : keyboardType,

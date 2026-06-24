@@ -10,7 +10,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 Future<bool?> showVerifyPaymentSheet(
   BuildContext context, {
@@ -225,7 +224,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
             children: [
               Text(
                 l10n.confirmPaymentReceipt,
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -243,7 +242,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
           // Info
           Text(
             l10n.uploadTechnicianPaymentProof,
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.grey.shade700,
@@ -343,7 +342,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
                     )
                   : Text(
                       l10n.confirm,
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,

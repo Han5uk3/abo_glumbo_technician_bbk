@@ -5,7 +5,6 @@ import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -28,7 +27,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.wallet,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -171,7 +170,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
             children: [
               Text(
                 AppLocalizations.of(context)!.availableBalance,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -185,7 +184,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                 ),
                 child: Text(
                   DateFormat('MMM dd', locale).format(DateTime.now()),
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -201,7 +200,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
             children: [
               Text(
                 AppLocalizations.of(context)!.sar,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -210,7 +209,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
               const SizedBox(width: 8),
               Text(
                 (wallet.totalAvailableBalance ?? 0.0).toStringAsFixed(2),
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
@@ -234,7 +233,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   children: [
                     Text(
                       AppLocalizations.of(context)!.lifetimeEarnings,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.white.withOpacity(0.6),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -243,7 +242,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                     const SizedBox(height: 4),
                     Text(
                       '${(wallet.lifetimeTotal ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -266,7 +265,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
       children: [
         Text(
           AppLocalizations.of(context)!.balanceBreakdown,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -341,7 +340,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   children: [
                     Text(
                       AppLocalizations.of(context)!.totalEarnings,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -350,7 +349,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                     const SizedBox(height: 2),
                     Text(
                       AppLocalizations.of(context)!.earningsInfoOnly,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         color: Colors.black38,
                         fontStyle: FontStyle.italic,
@@ -429,7 +428,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   children: [
                     Text(
                       title,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -439,7 +438,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           color: Colors.black38,
                           fontStyle: FontStyle.italic,
@@ -487,12 +486,12 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
       children: [
         Text(
           label,
-          style: DMSansFont.textStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
         Text(
           "${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}",
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
             color: color,
@@ -538,7 +537,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
               Expanded(
                 child: Text(
                   AppLocalizations.of(context)!.requestPayout,
-                  style: DMSansFont.textStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -577,7 +576,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.payoutPending,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                             color: Colors.black,
@@ -586,7 +585,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                         const SizedBox(height: 4),
                         Text(
                           '${(wallet.requestedAmount ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             color: Colors.black54,
                             fontWeight: FontWeight.w500,
@@ -657,7 +656,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                     const SizedBox(width: 12),
                     Text(
                       AppLocalizations.of(context)!.requestPayout,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -670,7 +669,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
             Center(
               child: Text(
                 AppLocalizations.of(context)!.payoutNote,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 11,
                   color: Colors.black26,
                   fontWeight: FontWeight.w500,
@@ -690,7 +689,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
       children: [
         Text(
           AppLocalizations.of(context)!.payoutHistory,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -730,7 +729,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                       const SizedBox(height: 16),
                       Text(
                         AppLocalizations.of(context)!.noPayoutRequests,
-                        style: DMSansFont.textStyle(color: Colors.black38, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: Colors.black38, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -803,7 +802,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
             children: [
               Text(
                 '${(request.totalAmount ?? 0.0).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -825,7 +824,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                     const SizedBox(width: 6),
                     Text(
                       statusText,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: statusColor,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -873,7 +872,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   request.createdAt?.toDate() ?? DateTime.now(),
                   context,
                 ),
-                style: DMSansFont.textStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
               ),
               if (request.status == 'P')
                 InkWell(
@@ -883,7 +882,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Text(
                       AppLocalizations.of(context)!.cancel,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.red,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -908,7 +907,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   Expanded(
                     child: Text(
                       '${AppLocalizations.of(context)!.reason}: ${request.rejectionReason}',
-                      style: DMSansFont.textStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -935,7 +934,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
         children: [
           Text(
             label,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 10,
               color: color.withOpacity(0.7),
               fontWeight: FontWeight.w600,
@@ -944,7 +943,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           const SizedBox(height: 4),
           Text(
             amount.toStringAsFixed(0),
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: color,
@@ -1005,7 +1004,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                         children: [
                           Text(
                             AppLocalizations.of(context)!.confirmPayoutRequest,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -1014,7 +1013,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                           const SizedBox(height: 8),
                           Text(
                             AppLocalizations.of(context)!.reviewPayoutDetails,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               color: Colors.black45,
                             ),
@@ -1052,7 +1051,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.totalPayoutAmount,
-                                  style: DMSansFont.textStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.black45,
@@ -1060,7 +1059,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                 ),
                                 Text(
                                   '${totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                                  style: DMSansFont.textStyle(
+                                  style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,
@@ -1087,7 +1086,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                 Expanded(
                                   child: Text(
                                     AppLocalizations.of(context)!.payoutNote,
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: AppColors.primary.withOpacity(0.7),
                                       fontWeight: FontWeight.w500,
@@ -1116,7 +1115,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                   ),
                                   child: Text(
                                     AppLocalizations.of(context)!.cancel,
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black38,
@@ -1198,7 +1197,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                         )
                                       : Text(
                                           AppLocalizations.of(context)!.confirm,
-                                          style: DMSansFont.textStyle(
+                                          style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -1247,7 +1246,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           Expanded(
             child: Text(
               label,
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -1256,7 +1255,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           ),
           Text(
             '${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: color,

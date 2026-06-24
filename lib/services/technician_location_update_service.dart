@@ -5,7 +5,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
@@ -276,10 +275,10 @@ class TechnicianLocationUpdateService {
           children: [
             const Icon(Icons.location_off_rounded, color: Colors.red),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 18))),
+            Expanded(child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
           ],
         ),
-        content: Text(message, style: GoogleFonts.dmSans(fontSize: 14, color: Colors.grey[700])),
+        content: Text(message, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

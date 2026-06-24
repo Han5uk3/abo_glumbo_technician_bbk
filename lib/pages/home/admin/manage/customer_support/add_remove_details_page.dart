@@ -8,7 +8,6 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AddRemoveDetailsPage extends StatefulWidget {
   final int index;
@@ -197,7 +196,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                               child: Text(
                                                 snapshot.data?[index].name ??
                                                     '',
-                                                style: GoogleFonts.dmSans(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 16,
                                                   color: Colors.black87,
@@ -225,7 +224,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                                   AppLocalizations.of(
                                                     context,
                                                   )!.primary,
-                                                  style: GoogleFonts.dmSans(
+                                                  style: TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w600,
                                                     color: Colors.white,
@@ -251,7 +250,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                           ),
                                           child: Text(
                                             snapshot.data?[index].detail ?? '',
-                                            style: GoogleFonts.dmSans(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 13,
                                               color: AppColors.primary,
@@ -518,7 +517,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                     AppLocalizations.of(
                                       context,
                                     )!.whatsappCondition,
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: AppColors.secondary,
                                     ),
@@ -534,7 +533,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                 Expanded(
                                   child: Text(
                                     AppLocalizations.of(context)!.setAsPrimary,
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black87,
@@ -577,7 +576,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                     AppLocalizations.of(
                                       context,
                                     )!.cannotRemovePrimaryStatusFromTheOnlyContact,
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.red,

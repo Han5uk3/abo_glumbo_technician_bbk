@@ -9,7 +9,6 @@ import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -167,7 +166,7 @@ class BookingListTileWidget extends StatelessWidget {
                             children: [
                               Text(
                                 "#${booking.newBookingId ?? booking.id}",
-                                style: DMSansFont.textStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[500],
@@ -186,7 +185,7 @@ class BookingListTileWidget extends StatelessWidget {
                                   ),
                                   child: Text(
                                     localization.warranty.toUpperCase(),
-                                    style: DMSansFont.textStyle(
+                                    style: TextStyle(
                                       fontSize: 8,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primary,
@@ -205,7 +204,7 @@ class BookingListTileWidget extends StatelessWidget {
                                 '',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: Colors.black,
@@ -228,7 +227,7 @@ class BookingListTileWidget extends StatelessWidget {
                                             booking.effectiveInspectionFee,
                                           ))
                                       .toStringAsFixed(1),
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -238,7 +237,7 @@ class BookingListTileWidget extends StatelessWidget {
                             booking.bookingStatusCode == "VP")
                           Text(
                             localization.sar,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 10,
@@ -268,7 +267,7 @@ class BookingListTileWidget extends StatelessWidget {
                                 booking.isOnHour == true
                                     ? localization.onHour
                                     : localization.offHour,
-                                style: DMSansFont.textStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   color: booking.isOnHour == true
                                       ? Colors.blue
@@ -394,7 +393,7 @@ class BookingListTileWidget extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             text: TextSpan(
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 12,
                 color: color ?? Colors.black,
               ),
@@ -439,7 +438,7 @@ class BookingListTileWidget extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: color,
@@ -459,7 +458,7 @@ class BookingListTileWidget extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -581,7 +580,7 @@ class BookingListTileWidget extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: DMSansFont.textStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 9,
           color: color,
@@ -682,7 +681,7 @@ class BookingListTileWidget extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               color: Colors.grey[500],
               fontSize: 10,
               fontWeight: FontWeight.w500,
@@ -752,7 +751,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: color,
@@ -772,7 +771,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -913,7 +912,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
               child: Text(
                 l10n.areYouSure,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -924,7 +923,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
         ),
         content: Text(
           l10n.rejectionProfessionalMessage,
-          style: DMSansFont.textStyle(color: Colors.grey[600], fontSize: 14),
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
           textAlign: TextAlign.center,
         ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -943,7 +942,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       l10n.rejectOffer,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
@@ -967,7 +966,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       l10n.proposeAlternativeTime,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -988,7 +987,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       l10n.cancel,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.bold,
                       ),
@@ -1012,7 +1011,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       l10n.rejectOffer,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1135,7 +1134,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                           ),
                           child: Text(
                             localization.rebookTechnician.toUpperCase(),
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: Colors.orange,
@@ -1146,7 +1145,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                       Expanded(
                         child: Text(
                           serviceName,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Colors.black,
@@ -1172,7 +1171,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                         const SizedBox(width: 4),
                         Text(
                           timerText,
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: timerColor,
@@ -1234,7 +1233,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       localization.viewOnly.toUpperCase(),
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -1274,7 +1273,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                     ),
                     child: Text(
                       localization.awaitingCustomerAction,
-                      style: DMSansFont.textStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -1335,7 +1334,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
         Expanded(
           child: Text(
             text,
-            style: DMSansFont.textStyle(
+            style: TextStyle(
               fontSize: 13,
               color: color ?? Colors.grey[700],
             ),
@@ -1366,7 +1365,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(
+                style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1384,7 +1383,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               ),
               child: Text(
                 label,
-                style: DMSansFont.textStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
     );

@@ -12,7 +12,6 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/firestorage.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -318,7 +317,7 @@ class _SignupState extends State<Signup> {
       child: RichText(
         text: TextSpan(
           text: title,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -409,7 +408,7 @@ class _SignupState extends State<Signup> {
                       const SizedBox(height: 8),
                       Text(
                         'Upload File or Image',
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 13,
                         ),
@@ -440,7 +439,7 @@ class _SignupState extends State<Signup> {
                             hasFile
                                 ? (fileOrImage is XFile ? fileOrImage.name : fileOrImage.name)
                                 : title,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Colors.black87,
@@ -699,7 +698,7 @@ class _SignupState extends State<Signup> {
         elevation: 0,
         title: Text(
           localization.createAccount,
-          style: DMSansFont.textStyle(
+          style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
@@ -764,7 +763,7 @@ class _SignupState extends State<Signup> {
               controller: nameController,
               decoration: InputDecoration(
                 hintText: localization.enterYourFullName,
-                hintStyle: DMSansFont.textStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Colors.black12),
@@ -782,7 +781,7 @@ class _SignupState extends State<Signup> {
                   vertical: 16,
                 ),
               ),
-              style: DMSansFont.textStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16),
               validator: (v) =>
                   v!.isEmpty ? localization.pleaseEnterYourFullName : null,
             ),
@@ -810,7 +809,7 @@ class _SignupState extends State<Signup> {
                   vertical: 16,
                 ),
               ),
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
               ),
@@ -822,7 +821,7 @@ class _SignupState extends State<Signup> {
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 hintText: localization.enterYourEmail,
-                hintStyle: DMSansFont.textStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Colors.black12),
@@ -840,7 +839,7 @@ class _SignupState extends State<Signup> {
                   vertical: 16,
                 ),
               ),
-              style: DMSansFont.textStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16),
             ),
 
             const Padding(
@@ -920,7 +919,7 @@ class _SignupState extends State<Signup> {
                         certifications.isEmpty && existingCertifications.isEmpty
                             ? localization.uploadCertificates
                             : '${certifications.length + existingCertifications.length} ${localization.filesSelected}',
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1007,7 +1006,7 @@ class _SignupState extends State<Signup> {
                               : (_currentPosition != null
                                     ? '${_currentPosition!.latitude.toStringAsFixed(6)}, ${_currentPosition!.longitude.toStringAsFixed(6)}'
                                     : localization.fetching),
-                          style: DMSansFont.textStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -1015,7 +1014,7 @@ class _SignupState extends State<Signup> {
                         if (_placeMark != null)
                           Text(
                             '${_placeMark!.subAdministrativeArea}, ${_placeMark!.country}',
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
                             ),
@@ -1023,7 +1022,7 @@ class _SignupState extends State<Signup> {
                         else if (_currentPosition != null)
                           Text(
                             localization.locationSaved,
-                            style: DMSansFont.textStyle(
+                            style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
                             ),
@@ -1072,7 +1071,7 @@ class _SignupState extends State<Signup> {
                         selectedJobRoles.isEmpty
                             ? localization.selectJobRoles
                             : _getJobRoleNames(),
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           color: selectedJobRoles.isEmpty
                               ? Colors.grey[400]
                               : Colors.black87,
@@ -1131,7 +1130,7 @@ class _SignupState extends State<Signup> {
                     children: [
                       Text(
                         localization.selectJobRoles,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1145,7 +1144,7 @@ class _SignupState extends State<Signup> {
                   const SizedBox(height: 8),
                   Text(
                     localization.selectJobRolesDescription,
-                    style: DMSansFont.textStyle(color: Colors.grey[600]),
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 24),
                   Expanded(
@@ -1198,7 +1197,7 @@ class _SignupState extends State<Signup> {
                                                         'ar'
                                                     ? cat['nameAr']
                                                     : cat['name']),
-                                          style: DMSansFont.textStyle(
+                                          style: TextStyle(
                                             fontWeight: isSelected
                                                 ? FontWeight.bold
                                                 : FontWeight.normal,

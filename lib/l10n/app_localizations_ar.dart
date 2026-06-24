@@ -18,7 +18,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get change => 'تغيير';
 
   @override
-  String get viewOnly => 'للمعاينة فقط';
+  String get viewOnly => 'للمسؤولين فقط للمعاينة';
 
   @override
   String get noTechnicianAssigned => 'لم يتم تعيين فنّي';
@@ -4858,10 +4858,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'دوام';
+  String get onHour => 'الحجز بالساعة';
 
   @override
-  String get offHour => 'بعد الدوام';
+  String get offHour => 'الحجز خارج الساعة';
 
   @override
   String get onHourBooking => 'حجز دوام';

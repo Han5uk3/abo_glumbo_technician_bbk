@@ -7,7 +7,6 @@ import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -160,7 +159,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
             backgroundColor: Colors.white,
             title: Text(
               AppLocalizations.of(context)?.notifications ?? 'Notifications',
-              style: DMSansFont.textStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,

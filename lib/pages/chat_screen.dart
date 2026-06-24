@@ -5,7 +5,6 @@ import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 class TechnicianChatScreen extends StatefulWidget {
@@ -279,7 +278,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                       widget.participantName.isNotEmpty
                           ? widget.participantName[0].toUpperCase()
                           : '?',
-                      style: GoogleFonts.dmSans(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -296,7 +295,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                   Text(
                     widget.participantName,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.normal,
                       color: Colors.black,
@@ -304,7 +303,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                   ),
                   Text(
                     localization.customer,
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
                       fontSize: 10,
                       color: Colors.black54,
                     ),
@@ -342,7 +341,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                           const SizedBox(height: 16),
                           Text(
                             localization.errorLoadingMessages,
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[600],
                             ),
@@ -442,7 +441,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                           const SizedBox(height: 16),
                           Text(
                             localization.noMessages,
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[600],
                             ),
@@ -450,7 +449,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                           const SizedBox(height: 8),
                           Text(
                             localization.startConversationWithCustomer,
-                            style: GoogleFonts.dmSans(
+                            style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[500],
                             ),
@@ -560,7 +559,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               dateText,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
@@ -649,7 +648,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
             children: [
               Text(
                 message,
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
                   fontSize: 15,
                   color: status == 'failed'
                       ? Colors.red[900]
@@ -665,7 +664,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                     textDirection: TextDirection.ltr,
                     child: Text(
                       _formatTime(timestamp),
-                      style: GoogleFonts.dmSans(
+                      style: TextStyle(
                         fontSize: 11,
                         color: status == 'failed'
                             ? Colors.red[700]
@@ -680,7 +679,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                     const SizedBox(width: 8),
                     Text(
                       AppLocalizations.of(context)!.tapToRetry,
-                      style: GoogleFonts.dmSans(
+                      style: TextStyle(
                         fontSize: 10,
                         color: Colors.red[700],
                         fontStyle: FontStyle.italic,
@@ -729,10 +728,10 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 onSubmitted: (_) => _sendMessage(),
-                style: GoogleFonts.dmSans(fontSize: 15),
+                style: TextStyle(fontSize: 15),
                 decoration: InputDecoration(
                   hintText: localization.typeMessageToCustomer,
-                  hintStyle: GoogleFonts.dmSans(
+                  hintStyle: TextStyle(
                     fontSize: 15,
                     color: Colors.grey[500],
                   ),

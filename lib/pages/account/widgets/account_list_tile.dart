@@ -1,7 +1,6 @@
 import 'package:aboglumbo_bbk_panel/helpers/constants.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AccountListTile extends StatelessWidget {
   final String title;
@@ -47,7 +46,7 @@ class AccountListTile extends StatelessWidget {
       leading: leading,
       trailing: Text(
         trailingText,
-        style: GoogleFonts.dmSans(
+        style: TextStyle(
           fontSize: 12,
           color: textColor ?? AppColors.black1,
           fontWeight: FontWeight.w600,
@@ -63,7 +62,7 @@ class AccountListTile extends StatelessWidget {
       onTap: onTap,
       title: Text(
         title,
-        style: GoogleFonts.dmSans(
+        style: TextStyle(
           fontSize: 13, // Matches font-size change requested in historical context
           color: textcolor ?? Colors.black,
           fontWeight: FontWeight.w500,
@@ -86,7 +85,7 @@ class SectionHeader extends StatelessWidget {
       padding: AccountPageConstants.horizontalPadding,
       child: Text(
         title,
-        style: GoogleFonts.dmSans(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: AppColors.lightGrey,

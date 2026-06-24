@@ -1,7 +1,6 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:aboglumbo_bbk_panel/utils/dm_sans_font.dart';
 
 /// Welcome modal for technicians with availability disabled
 class TechnicianWelcomeModal extends StatelessWidget {
@@ -54,7 +53,7 @@ class TechnicianWelcomeModal extends StatelessWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.welcomeToAboGlumboTechnician(technicianName),
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -72,7 +71,7 @@ class TechnicianWelcomeModal extends StatelessWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.welcomeDescription,
-                    style: DMSansFont.textStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                       color: Colors.grey[800],
@@ -103,7 +102,7 @@ class TechnicianWelcomeModal extends StatelessWidget {
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.enableAvailability,
-                        style: DMSansFont.textStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,

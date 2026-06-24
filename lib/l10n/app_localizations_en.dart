@@ -18,7 +18,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get change => 'Change';
 
   @override
-  String get viewOnly => 'View Only';
+  String get viewOnly => 'Admin View Only';
 
   @override
   String get noTechnicianAssigned => 'No Technician Assigned';

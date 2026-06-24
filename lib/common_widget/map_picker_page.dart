@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/common_widget/place_suggestion_api.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/address.dart';
@@ -490,7 +489,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           editIndex != null
               ? AppLocalizations.of(context)!.editLocation
               : AppLocalizations.of(context)!.addLocation,
-          style: GoogleFonts.poppins(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: AppColors.primary,
@@ -504,7 +503,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               children: [
                 TextFormField(
                   controller: _nameEnController,
-                  style: GoogleFonts.poppins(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.englishName,
                     labelStyle: TextStyle(color: Colors.grey[700]),
@@ -533,7 +532,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _nameArController,
-                  style: GoogleFonts.poppins(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                   textAlign: TextAlign.right,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.arabicName,
@@ -568,7 +567,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _priorityController,
-                  style: GoogleFonts.poppins(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.priority,
                     labelStyle: TextStyle(color: Colors.grey[700]),
@@ -613,7 +612,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             },
             child: Text(
               AppLocalizations.of(context)!.cancel,
-              style: GoogleFonts.poppins(
+              style: TextStyle(
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
@@ -657,7 +656,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               editIndex != null
                   ? AppLocalizations.of(context)!.update
                   : AppLocalizations.of(context)!.addArea,
-              style: GoogleFonts.poppins(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -859,7 +858,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             children: [
               Text(
                 '${_selectedLocations.length} ${AppLocalizations.of(context)!.selected}',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1156,7 +1155,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.selectedLocations,
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1283,7 +1282,7 @@ class LocationCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(
                     fontSize: dense ? 13 : 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87,

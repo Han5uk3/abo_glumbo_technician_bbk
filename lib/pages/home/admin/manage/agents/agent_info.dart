@@ -223,7 +223,7 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.star,
           Colors.orange,
-          '${agent.rating ?? 0} (4 ${AppLocalizations.of(context)?.reviews ?? "Reviews"})',
+          '${agent.rating ?? 0.0} (${agent.reviewCount ?? 0} ${AppLocalizations.of(context)?.reviews ?? "Reviews"})',
         ),
         _buildStatSeparator(),
         _buildStatItem(

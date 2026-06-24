@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 
 class TechnicianChatService {
   late final DatabaseReference _rtdb;
@@ -12,7 +13,7 @@ class TechnicianChatService {
     _rtdb = FirebaseDatabase.instance.ref();
   }
 
-  String get currentUserId => _auth.currentUser!.uid;
+  String get currentUserId => _auth.currentUser?.uid ?? LocalStore.getUID() ?? '';
 
   String generateChatId(String bookingId, String userId1, String userId2) {
     List<String> ids = [userId1, userId2]..sort();
@@ -378,7 +379,7 @@ class TechnicianChatService {
   }
 
   Future<void> setActiveChat(String chatId) async {
-    final String uid = _auth.currentUser?.uid ?? '';
+    final String uid = currentUserId;
     if (uid.isEmpty || chatId.isEmpty) return;
 
     // Use the 'chats' root which we know is working
@@ -401,7 +402,7 @@ class TechnicianChatService {
   }
 
   Future<void> clearActiveChat(String chatId) async {
-    final String uid = _auth.currentUser?.uid ?? '';
+    final String uid = currentUserId;
     if (uid.isEmpty || chatId.isEmpty) return;
 
     try {

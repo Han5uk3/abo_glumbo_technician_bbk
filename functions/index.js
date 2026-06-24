@@ -685,9 +685,9 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       titleEn: "Payment Received",
       titleAr: "تم استلام الدفع",
       titleUr: "ادائیگی موصول ہو گئی",
-      bodyEn: `${customerName} has completed payment of ${totalAmount} for ${serviceName}. The transaction is now complete.`,
-      bodyAr: `قام ${customerName} بإكمال دفع ${totalAmount} مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
-      bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ${totalAmount} کی ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
+      bodyEn: `${customerName} has completed payment for ${serviceName}. The transaction is now complete.`,
+      bodyAr: `قام ${customerName} بإكمال الدفع مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
+      bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
       data: {
         targetRole: "technician",
         category: "payment",
@@ -732,9 +732,9 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
             titleEn: "Payment Received",
             titleAr: "تم استلام الدفع",
             titleUr: "ادائیگی موصول ہو گئی",
-            bodyEn: `${customerName} has completed payment of ${totalAmount} for ${serviceName}. The transaction is now complete.`,
-            bodyAr: `قام ${customerName} بإكمال دفع ${totalAmount} مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
-            bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ${totalAmount} کی ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
+            bodyEn: `${customerName} has completed payment for ${serviceName}. The transaction is now complete.`,
+            bodyAr: `قام ${customerName} بإكمال الدفع مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
+            bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
             data: {
               targetRole: "admin",
               category: "payment",
@@ -3271,25 +3271,21 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
       const currentRating = userData.rating || 0;
       const currentTier = userData.tier || "Bronze";
 
-      // Calculate new average rating (overall, not per-category)
       const newJobCount = currentJobs + 1;
-      const newAverageRating =
-        (currentRating * currentJobs + rating) / newJobCount;
 
       // Calculate new tier based on total jobs and overall rating
       let newTier = "Bronze";
-      if (newAverageRating >= 4.8 && newJobCount >= 60) {
+      if (currentRating >= 4.8 && newJobCount >= 60) {
         newTier = "Platinum";
-      } else if (newAverageRating >= 4.5 && newJobCount >= 40) {
+      } else if (currentRating >= 4.5 && newJobCount >= 40) {
         newTier = "Gold";
-      } else if (newAverageRating >= 4.0 && newJobCount >= 20) {
+      } else if (currentRating >= 4.0 && newJobCount >= 20) {
         newTier = "Silver";
       }
 
-      // Update user document with job count, rating, and tier
+      // Update user document with job count and tier
       await userRef.update({
         currentMonthJobs: admin.firestore.FieldValue.increment(1),
-        rating: newAverageRating,
         tier: newTier,
       });
 
@@ -5481,3 +5477,52 @@ exports.assignNewBookingId_autoAssignment = onDocumentCreated("auto-assignment_r
   if (!event.data) return null;
   return assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
+
+exports.updateTechnicianRatingOnReview = onDocumentWritten(
+  "bookings/{bookingId}",
+  async (event) => {
+    const afterData = event.data.after ? event.data.after.data() : null;
+    const beforeData = event.data.before ? event.data.before.data() : null;
+
+    const workerId = afterData?.agent?.uid;
+    if (!workerId) return null;
+
+    const newRating = afterData?.review?.rating;
+    const oldRating = beforeData?.review?.rating;
+
+    if (newRating === oldRating) return null; // No change in rating
+
+    const userRef = db.collection("users").doc(workerId);
+
+    return db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+      if (!userDoc.exists) return;
+
+      const userData = userDoc.data();
+      let currentRatingCount = userData.reviewCount || 0;
+      let currentAverageRating = userData.rating || 0.0;
+      let totalRating = currentAverageRating * currentRatingCount;
+
+      if (typeof oldRating !== "number" && typeof newRating === "number") {
+        // New review
+        currentRatingCount += 1;
+        totalRating += newRating;
+      } else if (typeof oldRating === "number" && typeof newRating === "number") {
+        // Updated review
+        totalRating = totalRating - oldRating + newRating;
+      } else if (typeof oldRating === "number" && typeof newRating !== "number") {
+        // Deleted review
+        currentRatingCount = Math.max(0, currentRatingCount - 1);
+        totalRating -= oldRating;
+      }
+
+      const newAverageRating = currentRatingCount > 0 ? parseFloat((totalRating / currentRatingCount).toFixed(2)) : 0.0;
+
+      transaction.update(userRef, {
+        rating: newAverageRating,
+        reviewCount: currentRatingCount,
+      });
+      console.log(`Updated technician ${workerId} rating to ${newAverageRating} (${currentRatingCount} reviews)`);
+    });
+  }
+);

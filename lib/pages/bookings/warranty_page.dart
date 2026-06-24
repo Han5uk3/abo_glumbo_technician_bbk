@@ -74,6 +74,33 @@ class _WarrantyPageState extends State<WarrantyPage>
           doc = querySnap.docs.first;
         }
       }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toLowerCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
 
       if (doc.exists) {
         final booking = BookingModel.fromDocumentSnapshot(doc);
@@ -365,9 +392,11 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
                   ),
                 );
               },
-          onRejectOrder: (BookingModel booking) {
-            warrantyBloc.add(RejectWarranty(bookingId: booking.id));
-          },
+          onRejectOrder: booking.warranty?.warrantyStatusCode == 'X'
+              ? null
+              : (BookingModel booking) {
+                  warrantyBloc.add(RejectWarranty(bookingId: booking.id));
+                },
         );
       },
     );
@@ -380,8 +409,10 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
 
     return warranties.where((warranty) {
       final bookingId = warranty.id.toLowerCase();
+      final newBookingId = warranty.newBookingId?.toLowerCase() ?? '';
 
-      return bookingId.contains(widget.searchQuery);
+      return bookingId.contains(widget.searchQuery) ||
+          (newBookingId.isNotEmpty && newBookingId.contains(widget.searchQuery));
     }).toList();
   }
 

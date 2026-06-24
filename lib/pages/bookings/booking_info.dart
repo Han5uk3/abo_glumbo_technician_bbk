@@ -4083,9 +4083,12 @@ class _BookingInfoState extends State<BookingInfo> {
               ({required BookingModel booking, required UserModel user}) {
                 _assignAgentToDriver(context, booking, user);
               },
-          onRejectOrder: (booking) {
-            _rejectBookingAsAdmin(context, booking);
-          },
+          onRejectOrder: (widget.isWarranty && booking.warranty?.warrantyStatusCode == 'X') || 
+                         (!widget.isWarranty && (booking.bookingStatusCode == 'R' || booking.bookingStatusCode == 'X'))
+              ? null
+              : (booking) {
+                  _rejectBookingAsAdmin(context, booking);
+                },
         );
       },
     );
@@ -4170,12 +4173,18 @@ class _BookingInfoState extends State<BookingInfo> {
     if (confirmed != true) return;
 
     try {
-      await AppFirestore.bookingsCollectionRef.doc(booking.id).update({
-        'bookingStatusCode': 'R',
-        'rejectedBy': 'Admin',
-        'rejectedAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final Map<String, dynamic> updateData = {};
+      if (widget.isWarranty) {
+        updateData['warranty.warrantyStatusCode'] = 'X';
+        updateData['warranty.rejectedAt'] = FieldValue.serverTimestamp();
+      } else {
+        updateData['bookingStatusCode'] = 'R';
+        updateData['rejectedBy'] = 'Admin';
+        updateData['rejectedAt'] = FieldValue.serverTimestamp();
+        updateData['updatedAt'] = FieldValue.serverTimestamp();
+      }
+
+      await AppFirestore.bookingsCollectionRef.doc(booking.id).update(updateData);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

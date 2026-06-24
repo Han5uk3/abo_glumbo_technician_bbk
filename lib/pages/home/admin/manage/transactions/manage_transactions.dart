@@ -4,9 +4,11 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/transaction_
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
+import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'dart:async';
 
 class ManageTransactionsPage extends StatefulWidget {
   const ManageTransactionsPage({super.key});
@@ -22,6 +24,8 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   DateTime? _startDate;
   DateTime? _endDate;
   String _periodLabel = 'All Time';
+  StreamSubscription? _bookingsSub;
+  final Map<String, BookingModel> _bookingsMap = {};
 
   String get _displayPeriodLabel {
     if (_startDate == null && _endDate == null) {
@@ -38,11 +42,21 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
         _searchQuery = _searchController.text.toLowerCase();
       });
     });
+    _bookingsSub = AppServices.getBookingsStream(isAdmin: true).listen((bookings) {
+      if (mounted) {
+        setState(() {
+          for (var b in bookings) {
+            _bookingsMap[b.id] = b;
+          }
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _bookingsSub?.cancel();
     super.dispose();
   }
 
@@ -307,8 +321,12 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
       if (_searchQuery.isNotEmpty) {
         final bookingId = t.bookingId.toLowerCase();
         final orderId = t.orderId.toLowerCase();
+        final booking = _bookingsMap[t.bookingId];
+        final newBookingId = booking?.newBookingId?.toLowerCase() ?? '';
+        
         if (!bookingId.contains(_searchQuery) &&
-            !orderId.contains(_searchQuery)) {
+            !orderId.contains(_searchQuery) &&
+            !newBookingId.contains(_searchQuery)) {
           return false;
         }
       }

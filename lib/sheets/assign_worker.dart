@@ -477,6 +477,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     return _cachedUsersStream!;
   }
 
+  bool _isRejecting = false;
+
   Future<void> _showRejectConfirmationDialog() async {
     _showPremiumDialog(
       title: AppLocalizations.of(context)!.confirmReject,
@@ -484,9 +486,16 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       icon: Icons.cancel_outlined,
       iconColor: Colors.red,
       primaryActionLabel: AppLocalizations.of(context)!.reject,
-      primaryAction: () {
-        widget.onRejectOrder?.call(widget.booking);
-        Navigator.pop(context);
+      primaryAction: () async {
+        if (_isRejecting) return;
+        _isRejecting = true;
+        try {
+          widget.onRejectOrder?.call(widget.booking);
+          if (mounted) Navigator.pop(context);
+          if (mounted) Navigator.pop(context);
+        } finally {
+          _isRejecting = false;
+        }
       },
       isDanger: true,
     );

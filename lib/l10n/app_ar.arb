@@ -1308,7 +1308,7 @@
   "orderRejectedSuccessfully": "تم رفض الطلب بنجاح",
   "copiedToClipboard": "تم النسخ إلى الحافظة",
   "couldNotLaunchPhone": "تعذر فتح تطبيق الهاتف",
-  "daysAgo": "{count, plural, one {منذ 1 يوم} other {أيام {count} منذ}}",
+  "daysAgo": "{count, plural, one {منذ 1 يوم} other {منذ {count} أيام}}",
   "@daysAgo": {
     "placeholders": {
       "count": {
@@ -1317,7 +1317,7 @@
       }
     }
   },
-  "hoursAgo": "{count, plural, one {منذ 1 ساعة} other {ساعات {count} منذ}}",
+  "hoursAgo": "{count, plural, one {منذ 1 ساعة} other {منذ {count} ساعات}}",
   "@hoursAgo": {
     "placeholders": {
       "count": {
@@ -1326,7 +1326,7 @@
       }
     }
   },
-  "minutesAgo": "{count, plural, one {منذ 1 دقيقة} other {دقائق {count} منذ}}",
+  "minutesAgo": "{count, plural, one {منذ 1 دقيقة} other {منذ {count} دقائق}}",
   "@minutesAgo": {
     "placeholders": {
       "count": {

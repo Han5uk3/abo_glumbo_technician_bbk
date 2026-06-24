@@ -72,9 +72,11 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
               ({required BookingModel booking, required UserModel user}) {
                 adminBloc.add(AssignAgentEvent(booking: booking, user: user));
               },
-          onRejectOrder: (BookingModel booking) {
-            adminBloc.add(RejectOrderEvent(booking: booking));
-          },
+          onRejectOrder: (booking.bookingStatusCode == 'R' || booking.bookingStatusCode == 'X')
+              ? null
+              : (BookingModel booking) {
+                  adminBloc.add(RejectOrderEvent(booking: booking));
+                },
         );
       },
     );
@@ -137,6 +139,33 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       if (!doc.exists) {
         final querySnap = await AppFirestore.bookingsCollectionRef
             .where('id', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toLowerCase())
             .limit(1)
             .get();
         if (querySnap.docs.isNotEmpty) {

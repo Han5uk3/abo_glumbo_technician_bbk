@@ -3985,7 +3985,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'دقائق $count منذ',
+      other: 'منذ $count دقائق',
       one: 'منذ 1 دقيقة',
     );
     return '$_temp0';
@@ -3996,7 +3996,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'أيام $count منذ',
+      other: 'منذ $count أيام',
       one: 'منذ 1 يوم',
     );
     return '$_temp0';
@@ -4007,7 +4007,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'ساعات $count منذ',
+      other: 'منذ $count ساعات',
       one: 'منذ 1 ساعة',
     );
     return '$_temp0';

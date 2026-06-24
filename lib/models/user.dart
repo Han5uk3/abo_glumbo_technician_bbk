@@ -21,6 +21,7 @@ class UserModel {
   String? profileUrl;
   String? fcmToken;
   double? rating;
+  int? reviewCount;
   String? availableBalance;
   String? paidAmounts;
   List<String>? certifications;
@@ -73,6 +74,7 @@ class UserModel {
     this.profileUrl,
     this.fcmToken,
     this.rating,
+    this.reviewCount,
     this.isOnline,
     this.payoutAccounts,
     this.availableBalance,
@@ -124,6 +126,7 @@ class UserModel {
     String? profileUrl,
     String? fcmToken,
     double? rating,
+    int? reviewCount,
     List<PayoutAccountModel>? payoutAccounts,
     String? availableBalance,
     String? paidAmounts,
@@ -174,6 +177,7 @@ class UserModel {
       profileUrl: profileUrl ?? this.profileUrl,
       fcmToken: fcmToken ?? this.fcmToken,
       rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
       availableBalance: availableBalance ?? this.availableBalance,
       paidAmounts: paidAmounts ?? this.paidAmounts,
       payoutAccounts: payoutAccounts ?? this.payoutAccounts,
@@ -241,6 +245,9 @@ class UserModel {
       fcmToken: json['fcmToken'],
       rating: json['rating'] != null
           ? (json['rating'] as num).toDouble()
+          : null,
+      reviewCount: json['reviewCount'] != null
+          ? (json['reviewCount'] as num).toInt()
           : null,
       payoutAccounts: json['payoutAccounts'] != null
           ? List<PayoutAccountModel>.from(
@@ -316,6 +323,7 @@ class UserModel {
       'role': role,
       'fcmToken': fcmToken,
       'rating': rating,
+      'reviewCount': reviewCount,
       'payoutAccounts': payoutAccounts
           ?.map((account) => account.toJson())
           .toList(),
@@ -378,6 +386,7 @@ class UserModel {
       'fcmToken': fcmToken,
       'role': role,
       'rating': rating,
+      'reviewCount': reviewCount,
       'payoutAccounts': payoutAccounts
           ?.map((account) => account.toJson())
           .toList(),
@@ -460,6 +469,9 @@ class UserModel {
     }
     if (rating != previous.rating && rating != null) {
       json['rating'] = rating;
+    }
+    if (reviewCount != previous.reviewCount && reviewCount != null) {
+      json['reviewCount'] = reviewCount;
     }
     if (payoutAccounts != previous.payoutAccounts && payoutAccounts != null) {
       json['payoutAccounts'] = payoutAccounts;

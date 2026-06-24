@@ -207,6 +207,10 @@ class TechnicianLocationUpdateService {
   static Future<void> ensureLocationPermissionAndFetch(
     BuildContext context,
   ) async {
+    if (LocalStore.isCurrentUserAdmin()) {
+      debugPrint('ℹ️ User is admin, skipping manual location permission request');
+      return;
+    }
     final locale = AppLocalizations.of(context);
 
     // 1. Check if services are enabled

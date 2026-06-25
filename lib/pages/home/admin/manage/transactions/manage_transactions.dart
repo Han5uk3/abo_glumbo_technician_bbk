@@ -42,7 +42,9 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
         _searchQuery = _searchController.text.toLowerCase();
       });
     });
-    _bookingsSub = AppServices.getBookingsStream(isAdmin: true).listen((bookings) {
+    _bookingsSub = AppServices.getBookingsStream(isAdmin: true).listen((
+      bookings,
+    ) {
       if (mounted) {
         setState(() {
           for (var b in bookings) {
@@ -323,7 +325,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
         final orderId = t.orderId.toLowerCase();
         final booking = _bookingsMap[t.bookingId];
         final newBookingId = booking?.newBookingId?.toLowerCase() ?? '';
-        
+
         if (!bookingId.contains(_searchQuery) &&
             !orderId.contains(_searchQuery) &&
             !newBookingId.contains(_searchQuery)) {
@@ -358,7 +360,13 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
         ),
         shape: Border.all(style: BorderStyle.none),
       ),
-      body: Column(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {});
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+          child: Column(
         children: [
           // Stats Overview Section
           Padding(
@@ -511,30 +519,32 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
           // Filter Chips Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _buildFilterChip(
-                  context,
-                  AppLocalizations.of(context)!.all,
-                  'all',
-                ),
-                const SizedBox(width: 8),
-                _buildFilterChip(
-                  context,
-                  AppLocalizations.of(context)?.inApp ?? 'In-App',
-                  'inApp',
-                ),
-                const SizedBox(width: 8),
-                _buildFilterChip(
-                  context,
-                  AppLocalizations.of(context)?.outsideApp ?? 'Outside-App',
-                  'outsideApp',
-                ),
-              ],
+            child: SingleChildScrollView(
+              physics: ClampingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: [
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)!.all,
+                    'all',
+                  ),
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)?.inApp ?? 'In-App',
+                    'inApp',
+                  ),
+                  _buildFilterChip(
+                    context,
+                    AppLocalizations.of(context)?.outsideApp ?? 'Outside-App',
+                    'outsideApp',
+                  ),
+                ],
+              ),
             ),
           ),
-
           // Period Filter Card
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -620,9 +630,8 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
             ),
           ),
 
-          Expanded(
-            child: StreamBuilder<List<TransactionModel>>(
-              stream: AppServices.getAllTransactionsStream(),
+          StreamBuilder<List<TransactionModel>>(
+            stream: AppServices.getAllTransactionsStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: SizedBox(height: 24, child: Loader()));
@@ -691,24 +700,22 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                   );
                 }
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    setState(() {});
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filteredTransactions.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final transaction = filteredTransactions[index];
+                    return TransactionTile(transaction: transaction);
                   },
-                  child: ListView.separated(
-                    itemCount: filteredTransactions.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final transaction = filteredTransactions[index];
-                      return TransactionTile(transaction: transaction);
-                    },
-                  ),
                 );
               },
             ),
-          ),
         ],
+      ),
+      ),
       ),
     );
   }

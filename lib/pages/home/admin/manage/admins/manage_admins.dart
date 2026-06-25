@@ -191,13 +191,13 @@ class _ManageAdminsState extends State<ManageAdmins>
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
+              physics: const ClampingScrollPhysics(),
+              child: Wrap(
+                spacing: 8.0,
                 children: [
                   _buildFilterChip(0, AppLocalizations.of(context)?.filterAll ?? 'All', Icons.apps_rounded),
-                  const SizedBox(width: 8),
                   _buildFilterChip(
                       1, AppLocalizations.of(context)?.customerService ?? 'Customer Service', Icons.support_agent_rounded),
-                  const SizedBox(width: 8),
                   _buildFilterChip(
                       2, AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin', Icons.admin_panel_settings_rounded),
                 ],
@@ -243,6 +243,7 @@ class _ManageAdminsState extends State<ManageAdmins>
                 }).toList();
 
                 return ListView.builder(
+                  physics: const ClampingScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
                   itemCount: allAdmins.length,
                   itemBuilder: (context, index) {

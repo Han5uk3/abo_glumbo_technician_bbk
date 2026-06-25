@@ -466,7 +466,9 @@ class _ManageAgentsState extends State<ManageAgents>
             const SizedBox(width: 8),
           ],
         ),
-        body: Column(
+        body: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
           children: [
             // Search Bar
             Padding(
@@ -533,34 +535,36 @@ class _ManageAgentsState extends State<ManageAgents>
             // Filter Chips Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)!.all,
-                    0,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)!.verified,
-                    1,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)!.pending,
-                    2,
-                  ),
-                ],
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: [
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.all,
+                      0,
+                    ),
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.verified,
+                      1,
+                    ),
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.pending,
+                      2,
+                    ),
+                  ],
+                ),
               ),
             ),
 
             // Agents List & Period Filter
-            Expanded(
-              child: StreamBuilder<Map<String, dynamic>>(
-                stream: Rx.combineLatest2(
+            StreamBuilder<Map<String, dynamic>>(
+              stream: Rx.combineLatest2(
                   AppServices.getAllAgentsStream(),
                   AppServices.getAllTransactionsStream(),
                   (
@@ -745,83 +749,81 @@ class _ManageAgentsState extends State<ManageAgents>
                       ),
 
                       if (filteredAgents.isEmpty)
-                        Expanded(
-                          child: _buildEmptyState(
-                            context: context,
-                            icon: Icons.search_off_rounded,
-                            title: AppLocalizations.of(
-                              context,
-                            )!.noTechniciansMatchYourFilters,
-                            subtitle: AppLocalizations.of(
-                              context,
-                            )!.tryAdjustingYourSearchCriteria,
-                            color: AppColors.primary,
-                          ),
+                        _buildEmptyState(
+                          context: context,
+                          icon: Icons.search_off_rounded,
+                          title: AppLocalizations.of(
+                            context,
+                          )!.noTechniciansMatchYourFilters,
+                          subtitle: AppLocalizations.of(
+                            context,
+                          )!.tryAdjustingYourSearchCriteria,
+                          color: AppColors.primary,
                         )
                       else
-                        Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.only(
-                              top: 4,
-                              bottom: 100,
-                              left: 16,
-                              right: 16,
-                            ),
-                            itemCount: filteredAgents.length,
-                            itemBuilder: (context, index) {
-                              final agent = filteredAgents[index];
-
-                              // Calculate earnings for this specific agent
-                              double inApp = 0.0;
-                              double outside = 0.0;
-                              for (var t in allTransactions) {
-                                if (t.workerId != agent.uid) continue;
-                                final isCompleted =
-                                    t.paymentStatus.toLowerCase() ==
-                                        'completed' ||
-                                    t.paymentStatus.toLowerCase() == 'paid';
-                                if (!isCompleted) continue;
-
-                                final date = t.createdAt.toDate();
-                                if (_startDate != null &&
-                                    date.isBefore(_startDate!))
-                                  continue;
-                                if (_endDate != null && date.isAfter(_endDate!))
-                                  continue;
-
-                                final isOutside =
-                                    t.paymentMethod.toLowerCase().contains(
-                                      'outside',
-                                    ) ||
-                                    t.paymentMethod.toLowerCase().contains(
-                                      'cash',
-                                    ) ||
-                                    t.paymentMethod.toLowerCase().contains(
-                                      'hand',
-                                    );
-                                if (isOutside) {
-                                  outside += t.amount;
-                                } else {
-                                  inApp += t.amount;
-                                }
-                              }
-
-                              return _buildAgentCard(
-                                context: context,
-                                agent: agent,
-                                index: index,
-                                inAppEarnings: inApp,
-                                outsideAppEarnings: outside,
-                              );
-                            },
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(
+                            top: 4,
+                            bottom: 100,
+                            left: 16,
+                            right: 16,
                           ),
+                          itemCount: filteredAgents.length,
+                          itemBuilder: (context, index) {
+                            final agent = filteredAgents[index];
+
+                            // Calculate earnings for this specific agent
+                            double inApp = 0.0;
+                            double outside = 0.0;
+                            for (var t in allTransactions) {
+                              if (t.workerId != agent.uid) continue;
+                              final isCompleted =
+                                  t.paymentStatus.toLowerCase() ==
+                                      'completed' ||
+                                  t.paymentStatus.toLowerCase() == 'paid';
+                              if (!isCompleted) continue;
+
+                              final date = t.createdAt.toDate();
+                              if (_startDate != null &&
+                                  date.isBefore(_startDate!))
+                                continue;
+                              if (_endDate != null && date.isAfter(_endDate!))
+                                continue;
+
+                              final isOutside =
+                                  t.paymentMethod.toLowerCase().contains(
+                                    'outside',
+                                  ) ||
+                                  t.paymentMethod.toLowerCase().contains(
+                                    'cash',
+                                  ) ||
+                                  t.paymentMethod.toLowerCase().contains(
+                                    'hand',
+                                  );
+                              if (isOutside) {
+                                outside += t.amount;
+                              } else {
+                                inApp += t.amount;
+                              }
+                            }
+
+                            return _buildAgentCard(
+                              context: context,
+                              agent: agent,
+                              index: index,
+                              inAppEarnings: inApp,
+                              outsideAppEarnings: outside,
+                            );
+                          },
                         ),
                     ],
                   );
                 },
               ),
-            ),
           ],
+        ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

@@ -171,8 +171,9 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+        physics: const ClampingScrollPhysics(),
+        child: Wrap(
+          spacing: 8.0,
           children: [
             _buildFilterChip(
               label: AppLocalizations.of(context)!.all,
@@ -180,21 +181,18 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
               icon: Icons.list_rounded,
               color: AppColors.primary,
             ),
-            const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.pending,
               value: 'P',
               icon: Icons.schedule_rounded,
               color: Colors.orange,
             ),
-            const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.approved,
               value: 'A',
               icon: Icons.check_circle_outline_rounded,
               color: Colors.green,
             ),
-            const SizedBox(width: 8),
             _buildFilterChip(
               label: AppLocalizations.of(context)!.rejected,
               value: 'R',
@@ -367,6 +365,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             setState(() {});
           },
           child: ListView.builder(
+            physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
             itemCount: requests.length,
             itemBuilder: (context, index) {

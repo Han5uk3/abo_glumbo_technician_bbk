@@ -316,7 +316,9 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(
+                physics: const ClampingScrollPhysics(),
+                child: Wrap(
+                  spacing: 8.0,
                   children: [
                     _buildFilterChip(
                       context: context,
@@ -326,7 +328,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                       onTap: () => setState(() => _selectedFilter = 0),
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 8),
                     _buildFilterChip(
                       context: context,
                       label: AppLocalizations.of(context)!.active,
@@ -335,7 +336,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                       onTap: () => setState(() => _selectedFilter = 1),
                       color: Colors.green,
                     ),
-                    const SizedBox(width: 8),
                     _buildFilterChip(
                       context: context,
                       label: AppLocalizations.of(context)!.blocked,
@@ -414,6 +414,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                   }
 
                   return ListView.builder(
+                    physics: const ClampingScrollPhysics(),
                     padding: const EdgeInsets.only(
                       top: 4,
                       bottom: 100,

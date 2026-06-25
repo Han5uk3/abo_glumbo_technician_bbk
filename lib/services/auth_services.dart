@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
+import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -334,8 +335,10 @@ class AuthServices {
         final adminData = adminDoc.data() as Map<String, dynamic>?;
         final accessLevel = adminData?['accessLevel'] ?? 1;
         debugPrint("✅ [TECH AUTH] Admin found with accessLevel: $accessLevel");
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
+        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const Home()),
@@ -366,8 +369,10 @@ class AuthServices {
           // Promote to active admin
           await _handleAdminPromotion(uid, pendingAdmin);
 
-          LocalStore.putUID(uid);
-          LocalStore.putlogoutStatus(false);
+          await LocalStore.putUID(uid);
+          await LocalStore.putlogoutStatus(false);
+          await LocalStore.storeAdminData(pendingAdmin.copyWith(uid: uid));
+          if (!context.mounted) return;
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const Home()),
@@ -395,7 +400,7 @@ class AuthServices {
             userData['uid'] != null &&
             userData['uid'].toString().isNotEmpty) {
           isValidTechnician = true;
-        } else if (userRole != null && userRole != 'technician') {
+        } else if (userRole != 'technician') {
           debugPrint(
             "❌ [TECH AUTH] User role is '$userRole', not 'technician'. Access denied.",
           );
@@ -404,9 +409,14 @@ class AuthServices {
 
       if (isValidTechnician) {
         debugPrint("✅ [TECH AUTH] Valid technician found, logging in");
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
+        final userData = (await AppFirestore.usersCollectionRef.doc(uid).get()).data() as Map<String, dynamic>?;
+        if (userData != null) {
+          await LocalStore.storeUserData(UserModel.fromJson(userData));
+        }
 
+        if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const Home()),
@@ -452,8 +462,10 @@ class AuthServices {
             }
           }
 
-          LocalStore.putUID(uid);
-          LocalStore.putlogoutStatus(false);
+          await LocalStore.putUID(uid);
+          await LocalStore.putlogoutStatus(false);
+          await LocalStore.storeAdminData(adminModel.copyWith(uid: uid));
+          if (!context.mounted) return;
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const Home()),
@@ -478,8 +490,10 @@ class AuthServices {
         );
         await AppFirestore.adminsCollectionRef.doc(uid).set(coreAdmin.toJson());
 
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
+        await LocalStore.storeAdminData(coreAdmin);
+        if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const Home()),
@@ -527,8 +541,10 @@ class AuthServices {
               );
             }
 
-            LocalStore.putUID(uid);
-            LocalStore.putlogoutStatus(false);
+            await LocalStore.putUID(uid);
+            await LocalStore.putlogoutStatus(false);
+            await LocalStore.storeUserData(UserModel.fromJson(oldData));
+            if (!context.mounted) return;
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const Home()),

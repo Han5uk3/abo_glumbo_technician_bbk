@@ -348,15 +348,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           return null;
         }
 
-        LocalStore.putUID(userData?['uid'] ?? uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(userData?['uid'] ?? uid);
+        await LocalStore.putlogoutStatus(false);
 
         if (kDebugMode) {
           print('✅ Worker user found with role "technician": ${userData?['name']}');
         }
 
         // Caching for local access
-        LocalStore.storeUserData(user);
+        await LocalStore.storeUserData(user);
         
         return user;
       } else {
@@ -395,16 +395,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           lanCode: adminData?['lanCode'],
         );
 
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
         
         if (kDebugMode) {
           print('✅ Admin user found: ${user.name}');
         }
 
         // Store both in local storage
-        LocalStore.storeUserData(user);
-        LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        await LocalStore.storeUserData(user);
+        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
         
         return user;
       }
@@ -457,9 +457,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         final user = UserModel.fromJson(oldData);
 
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
-        LocalStore.storeUserData(user);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
+        await LocalStore.storeUserData(user);
 
         return user;
       }
@@ -516,12 +516,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           lanCode: adminData?['lanCode'],
         );
 
-        LocalStore.putUID(uid);
-        LocalStore.putlogoutStatus(false);
+        await LocalStore.putUID(uid);
+        await LocalStore.putlogoutStatus(false);
 
         // Store both in local storage
-        LocalStore.storeUserData(user);
-        LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        await LocalStore.storeUserData(user);
+        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
 
         return user;
       } else {
@@ -571,12 +571,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             lanCode: pendingData['lanCode'],
           );
 
-          LocalStore.putUID(uid);
-          LocalStore.putlogoutStatus(false);
+          await LocalStore.putUID(uid);
+          await LocalStore.putlogoutStatus(false);
 
           // Store both in local storage
-          LocalStore.storeUserData(user);
-          LocalStore.storeAdminData(AdminModel.fromJson(pendingData, id: uid));
+          await LocalStore.storeUserData(user);
+          await LocalStore.storeAdminData(AdminModel.fromJson(pendingData, id: uid));
 
           return user;
         }

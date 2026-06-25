@@ -204,16 +204,16 @@ class InvoiceService {
                 (item) => [
                   item.name,
                   item.quantity.toStringAsFixed(0),
-                  loc.sarAmount(item.price.toStringAsFixed(2)),
-                  loc.sarAmount((item.quantity * item.price).toStringAsFixed(2)),
+                  "${item.price.toStringAsFixed(2)} ${loc.sar}",
+                  "${(item.quantity * item.price).toStringAsFixed(2)} ${loc.sar}",
                 ],
               ),
               if (data.inspectionFee > 0)
                 [
                   loc.inspectionFee,
                   '1',
-                  loc.sarAmount(data.inspectionFee.toStringAsFixed(2)),
-                  loc.sarAmount(data.inspectionFee.toStringAsFixed(2)),
+                  "${data.inspectionFee.toStringAsFixed(2)} ${loc.sar}",
+                  "${data.inspectionFee.toStringAsFixed(2)} ${loc.sar}",
                 ],
             ],
           ),
@@ -232,7 +232,7 @@ class InvoiceService {
                       children: [
                         pw.Text(loc.subtotal),
                         pw.Text(
-                          loc.sarAmount(data.serviceCost.toStringAsFixed(2)),
+                          "${data.serviceCost.toStringAsFixed(2)} ${loc.sar}",
                         ),
                       ],
                     ),
@@ -242,9 +242,7 @@ class InvoiceService {
                         children: [
                           pw.Text(loc.inspectionFee),
                           pw.Text(
-                            loc.sarAmount(
-                                  data.inspectionFee.toStringAsFixed(2),
-                                ),
+                            "${data.inspectionFee.toStringAsFixed(2)} ${loc.sar}",
                           ),
                         ],
                       ),
@@ -260,7 +258,7 @@ class InvoiceService {
                                       : 'Discount (${booking.service.discountPercentage}%)'
                           ),
                           pw.Text(
-                            '- ${loc.sarAmount((data.inspectionFee - booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2))}',
+                            '- ${(data.inspectionFee - booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2)} ${loc.sar}',
                             style: pw.TextStyle(color: PdfColors.red),
                           ),
                         ],
@@ -277,7 +275,7 @@ class InvoiceService {
                           ),
                         ),
                         pw.Text(
-                          loc.sarAmount((data.totalCost + booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2)),
+                          "${(data.totalCost + booking.service.getDiscountedPrice(data.inspectionFee)).toStringAsFixed(2)} ${loc.sar}",
                           style: pw.TextStyle(
                             fontSize: 16,
                             fontWeight: pw.FontWeight.bold,
@@ -301,7 +299,6 @@ class InvoiceService {
                       ? 'ابو جلمبو کا انتخاب کرنے کا شکریہ'
                       : 'Thank you for choosing Abo Glumbo',
               style: pw.TextStyle(
-                fontStyle: pw.FontStyle.italic,
                 color: PdfColors.grey,
               ),
             ),
@@ -313,7 +310,7 @@ class InvoiceService {
     // Show preview/print dialog
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) => pdf.save(),
-      name: 'Invoice_${booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase()}',
+      name: booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase(),
     );
   }
 }

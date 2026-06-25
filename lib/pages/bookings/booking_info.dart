@@ -1162,8 +1162,37 @@ class _BookingInfoState extends State<BookingInfo> {
           child: Column(
             children: [
               if (widget.booking.bookingStatusCode.toLowerCase() == 'c' &&
-                  widget.booking.completionData != null)
+                  widget.booking.completionData != null) ...[
                 _buildCompletionDataCard(context, textTheme, colorScheme),
+                if (widget.isAdmin) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: () => InvoiceService.generateAndShowInvoice(
+                        context,
+                        widget.booking,
+                      ),
+                      icon: const Icon(Icons.download_rounded, color: Colors.white),
+                      label: Text(
+                        "Download Invoice",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
               if (widget.booking.technicianPaymentProof != null &&
                   widget.booking.technicianPaymentProof!.isNotEmpty) ...[
                 if (widget.booking.bookingStatusCode.toLowerCase() == 'c' &&
@@ -1513,7 +1542,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  AppLocalizations.of(context)!.uploadFilesTitle,
+                  "Payment Proof",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -1522,32 +1551,7 @@ class _BookingInfoState extends State<BookingInfo> {
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 120,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.booking.technicianPaymentProof!.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final url = widget.booking.technicianPaymentProof![index];
-                  return GestureDetector(
-                    onTap: () => _viewInfoImage(url, context),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: CachedNetworkImage(
-                        imageUrl: url,
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(child: Loader()),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            ..._buildFileLinks(context, widget.booking.technicianPaymentProof!, colorScheme),
           ],
         ),
       ),
@@ -3178,39 +3182,17 @@ class _BookingInfoState extends State<BookingInfo> {
                     color: colorScheme.onSurface,
                   ),
                 ),
-                const Spacer(),
-                if (widget.booking.bookingStatusCode.toLowerCase() ==
-                        'completed' ||
-                    widget.booking.bookingStatusCode.toLowerCase() == 'c')
-                  IconButton(
-                    onPressed: () => InvoiceService.generateAndShowInvoice(
-                      context,
-                      widget.booking,
-                    ),
-                    icon: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.download_rounded,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    tooltip: "Download Invoice",
-                  ),
               ],
             ),
             const SizedBox(height: 12),
-            if (widget.booking.paymentCompleted) ...[
+            if (widget.booking.paymentCompleted && 
+                ((widget.booking.transactionId != null && widget.booking.transactionId!.isNotEmpty) || 
+                 (widget.booking.orderId != null && widget.booking.orderId!.isNotEmpty))) ...[
               _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.transactionId,
                 value:
-                    widget.booking.transactionId ??
-                    widget.booking.orderId ??
+                    (widget.booking.transactionId?.isNotEmpty == true ? widget.booking.transactionId : widget.booking.orderId) ??
                     "",
                 textTheme: textTheme,
                 colorScheme: colorScheme,
@@ -3340,19 +3322,39 @@ class _BookingInfoState extends State<BookingInfo> {
             // Service Cost
             if (completionData.serviceCost > 0) ...[
               const SizedBox(height: 12),
-              _buildCostRow(
+              _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.serviceCost,
-                amount: completionData.serviceCost,
+                value: '${completionData.serviceCost.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                textTheme: textTheme,
                 colorScheme: colorScheme,
               ),
+              if (widget.booking.service.discountPercentage != null && widget.booking.service.discountPercentage! > 0) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  context,
+                  label: AppLocalizations.of(context)!.discountPercentage,
+                  value: '${widget.booking.service.discountPercentage!.toStringAsFixed(0)}%',
+                  textTheme: textTheme,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  context,
+                  label: "Discount Amount",
+                  value: '${(completionData.serviceCost * (widget.booking.service.discountPercentage! / 100)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                  textTheme: textTheme,
+                  colorScheme: colorScheme,
+                ),
+              ],
             ],
 
             const SizedBox(height: 12),
-            _buildCostRow(
+            _buildInfoRow(
               context,
               label: AppLocalizations.of(context)!.inspectionFee,
-              amount: widget.booking.effectiveInspectionFee,
+              value: '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+              textTheme: textTheme,
               colorScheme: colorScheme,
             ),
 

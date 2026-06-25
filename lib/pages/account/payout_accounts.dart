@@ -45,17 +45,17 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
 
   PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primary,
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         localizations.payoutAccounts,
         style: TextStyle(
-          color: Colors.black,
+          color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w500,
         ),
@@ -641,7 +641,9 @@ class _AccountCard extends StatelessWidget {
                 foregroundColor: AppColors.primary,
                 side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: Text(
                 localizations.setPrimary,
@@ -659,7 +661,9 @@ class _AccountCard extends StatelessWidget {
               foregroundColor: AppColors.primary,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(
               localizations.edit,
@@ -677,7 +681,11 @@ class _AccountCard extends StatelessWidget {
           ),
           child: IconButton(
             onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.red,
+              size: 20,
+            ),
           ),
         ),
       ],
@@ -890,10 +898,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
                   isEdit
                       ? localizations.updateAccountDetails
                       : localizations.enterAccountDetails,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.black45,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.black45),
                 ),
               ],
             ),
@@ -901,9 +906,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
           IconButton(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close_rounded, color: Colors.black45),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.bgBlueTint,
-            ),
+            style: IconButton.styleFrom(backgroundColor: AppColors.bgBlueTint),
           ),
         ],
       ),
@@ -991,7 +994,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
                 return null;
               },
             ),
-                      const SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildPrimaryCheckbox(colorScheme, localizations),
             const SizedBox(height: 32),
             _buildActionButtons(colorScheme, localizations),
@@ -1033,14 +1036,21 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
           ),
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 20),
+            prefixIcon: Icon(
+              icon,
+              color: AppColors.primary.withOpacity(0.5),
+              size: 20,
+            ),
             filled: true,
             fillColor: AppColors.bgBlueTint,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             hintStyle: TextStyle(
               color: Colors.black26,
               fontWeight: FontWeight.normal,
@@ -1054,8 +1064,6 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
       ],
     );
   }
-
- 
 
   // DropdownMenuItem<String> _buildDropdownItem(
   //   String value,
@@ -1079,10 +1087,14 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: _isPrimary ? AppColors.primary.withOpacity(0.05) : AppColors.bgBlueTint,
+          color: _isPrimary
+              ? AppColors.primary.withOpacity(0.05)
+              : AppColors.bgBlueTint,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _isPrimary ? AppColors.primary.withOpacity(0.2) : Colors.transparent,
+            color: _isPrimary
+                ? AppColors.primary.withOpacity(0.2)
+                : Colors.transparent,
             width: 1,
           ),
         ),
@@ -1206,7 +1218,7 @@ class _AddEditAccountDialogState extends State<AddEditAccountDialog> {
           accountNumber: _accountNumberController.text.trim(),
           bankName: _bankNameController.text.trim(),
           ifscCode: _ifscCodeController.text.trim(),
-       
+
           isPrimary: _isPrimary,
         );
       }

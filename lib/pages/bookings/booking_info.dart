@@ -1730,7 +1730,8 @@ class _BookingInfoState extends State<BookingInfo> {
                           color: Colors.green,
                           onPressed: () async {
                             if (tech.phone != null && tech.phone!.isNotEmpty) {
-                              final phoneUrl = 'tel:${tech.phone}';
+                              final cleanPhone = tech.phone!.replaceAll(RegExp(r'[^\d+]'), '');
+                              final phoneUrl = 'tel:$cleanPhone';
                               if (await canLaunchUrlString(phoneUrl)) {
                                 await launchUrlString(phoneUrl);
                               } else {
@@ -2105,7 +2106,7 @@ class _BookingInfoState extends State<BookingInfo> {
               GestureDetector(
                 onTap: () async {
                   final phone = (widget.booking.customer.phone ?? "")
-                      .replaceAll(RegExp(r'\s+'), '');
+                      .replaceAll(RegExp(r'[^\d+]'), '');
                   final phoneUrl = 'tel:$phone';
                   if (await canLaunchUrlString(phoneUrl)) {
                     await launchUrlString(phoneUrl);
@@ -2215,7 +2216,7 @@ class _BookingInfoState extends State<BookingInfo> {
             GestureDetector(
               onTap: () async {
                 final phone = (agent.phone ?? "").replaceAll(
-                  RegExp(r'\s+'),
+                  RegExp(r'[^\d+]'),
                   '',
                 );
                 final phoneUrl = 'tel:$phone';

@@ -15,10 +15,11 @@ class TermsAndConditionsPage extends StatelessWidget {
       backgroundColor: AppColors.bgWhite,
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        surfaceTintColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -26,7 +27,7 @@ class TermsAndConditionsPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
       ),
@@ -105,10 +106,7 @@ class TermsAndConditionsPage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 3),
-        Text(
-          text,
-          style: TextStyle(color: Colors.black, fontSize: 14),
-        ),
+        Text(text, style: TextStyle(color: Colors.black, fontSize: 14)),
       ],
     );
   }

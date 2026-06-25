@@ -50,7 +50,7 @@ class ContactService {
   }
 
   static Future<void> launchPhone(BuildContext context, String phoneNumber) async {
-    final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
     final url = "tel:$cleanPhone";
     log('Attempting to launch phone: $url');
     try {

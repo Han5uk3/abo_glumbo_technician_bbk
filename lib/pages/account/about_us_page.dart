@@ -16,10 +16,15 @@ class AboutUsPage extends StatelessWidget {
           SliverAppBar(
             pinned: true,
             centerTitle: true,
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.primary,
+            surfaceTintColor: AppColors.primary,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 18,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -27,7 +32,7 @@ class AboutUsPage extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Colors.black,
+                color: Colors.white,
               ),
             ),
           ),

@@ -85,10 +85,7 @@ class _EditProfileState extends State<EditProfile> {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
                 AppLocalizations.of(context)!.selectSource,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             const Divider(height: 1),
@@ -429,7 +426,12 @@ class _EditProfileState extends State<EditProfile> {
       if (result.type != ResultType.done) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ?? 'Cannot open file: ${file.path}')),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ??
+                    'Cannot open file: ${file.path}',
+              ),
+            ),
           );
         }
       }
@@ -477,7 +479,12 @@ class _EditProfileState extends State<EditProfile> {
       if (result.type != ResultType.done) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ?? 'Cannot open file: ${file.path}')),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.cannotOpenFile(file.path ?? '') ??
+                    'Cannot open file: ${file.path}',
+              ),
+            ),
           );
         }
       }
@@ -530,19 +537,22 @@ class _EditProfileState extends State<EditProfile> {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        throw AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+        throw AppLocalizations.of(context)?.locationServicesDisabled ??
+            'Location services are disabled.';
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          throw AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+          throw AppLocalizations.of(context)?.locationPermissionDenied ??
+              'Location permissions are denied';
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        throw AppLocalizations.of(context)?.locationPermissionDeniedForever ?? 'Location permissions are permanently denied.';
+        throw AppLocalizations.of(context)?.locationPermissionDeniedForever ??
+            'Location permissions are permanently denied.';
       }
 
       final position = await Geolocator.getCurrentPosition();
@@ -569,11 +579,18 @@ class _EditProfileState extends State<EditProfile> {
         setState(() {
           _isFetchingLocation = false;
           final errorString = e.toString();
-          if (e is LocationServiceDisabledException || errorString.contains('Location services are disabled')) {
-            _locationError = AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+          if (e is LocationServiceDisabledException ||
+              errorString.contains('Location services are disabled')) {
+            _locationError =
+                AppLocalizations.of(context)?.locationServicesDisabled ??
+                'Location services are disabled.';
             _showLocationSettingsPrompt();
-          } else if (e is PermissionDeniedException || errorString.contains('User denied permissions') || errorString.contains('Permission denied')) {
-            _locationError = AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+          } else if (e is PermissionDeniedException ||
+              errorString.contains('User denied permissions') ||
+              errorString.contains('Permission denied')) {
+            _locationError =
+                AppLocalizations.of(context)?.locationPermissionDenied ??
+                'Location permissions are denied';
             _showPermissionSettingsPrompt();
           } else {
             _locationError = errorString;
@@ -589,12 +606,21 @@ class _EditProfileState extends State<EditProfile> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        title: Text(AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location Services Disabled'),
-        content: Text(AppLocalizations.of(context)?.locationServicesDisabledPleaseEnable ?? 'Please enable location services.'),
+        title: Text(
+          AppLocalizations.of(context)?.locationServicesDisabled ??
+              'Location Services Disabled',
+        ),
+        content: Text(
+          AppLocalizations.of(context)?.locationServicesDisabledPleaseEnable ??
+              'Please enable location services.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.black)),
+            child: Text(
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
+              style: const TextStyle(color: Colors.black),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -602,7 +628,10 @@ class _EditProfileState extends State<EditProfile> {
               Geolocator.openLocationSettings();
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: Text(AppLocalizations.of(context)?.openSettings ?? 'Open Settings', style: const TextStyle(color: Colors.white)),
+            child: Text(
+              AppLocalizations.of(context)?.openSettings ?? 'Open Settings',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -615,12 +644,21 @@ class _EditProfileState extends State<EditProfile> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        title: Text(AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location Permission Denied'),
-        content: Text(AppLocalizations.of(context)?.locationPermissionDeniedPleaseGrant ?? 'Please grant location permissions.'),
+        title: Text(
+          AppLocalizations.of(context)?.locationPermissionDenied ??
+              'Location Permission Denied',
+        ),
+        content: Text(
+          AppLocalizations.of(context)?.locationPermissionDeniedPleaseGrant ??
+              'Please grant location permissions.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.black)),
+            child: Text(
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
+              style: const TextStyle(color: Colors.black),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -628,7 +666,10 @@ class _EditProfileState extends State<EditProfile> {
               Geolocator.openAppSettings();
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: Text(AppLocalizations.of(context)?.openSettings ?? 'Open Settings', style: const TextStyle(color: Colors.white)),
+            child: Text(
+              AppLocalizations.of(context)?.openSettings ?? 'Open Settings',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -1255,19 +1296,19 @@ class _EditProfileState extends State<EditProfile> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        surfaceTintColor: AppColors.primary,
         title: Text(
           locale.profileManagement,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 18),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
         ),
       ),
       body: BlocConsumer<AccountBloc, AccountState>(
@@ -1616,10 +1657,9 @@ class _EditProfileState extends State<EditProfile> {
                                                               role,
                                                             ),
                                                           ),
-                                                          style:
-                                                              TextStyle(
-                                                                fontSize: 12,
-                                                              ),
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                          ),
                                                         ),
                                                         deleteIcon: const Icon(
                                                           Icons.close,
@@ -1636,12 +1676,11 @@ class _EditProfileState extends State<EditProfile> {
                                                                 .withOpacity(
                                                                   0.1,
                                                                 ),
-                                                        labelStyle:
-                                                            TextStyle(
-                                                              color: AppColors
-                                                                  .secondary,
-                                                              fontSize: 12,
-                                                            ),
+                                                        labelStyle: TextStyle(
+                                                          color: AppColors
+                                                              .secondary,
+                                                          fontSize: 12,
+                                                        ),
                                                         deleteIconColor:
                                                             AppColors.secondary,
                                                         padding:
@@ -2121,7 +2160,12 @@ class _EditProfileState extends State<EditProfile> {
 
   Widget _buildBottomButton(AccountState state, AppLocalizations locale) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        16,
+        20,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

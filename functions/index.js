@@ -434,7 +434,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
       beforeData?.bookingStatusCode !== afterData.bookingStatusCode;
     const paymentCompleted =
       beforeData?.paymentCompleted !== afterData.paymentCompleted;
-    const technicianChanged = 
+    const technicianChanged =
       beforeData?.agent?.uid !== afterData?.agent?.uid && afterData?.agent?.uid;
 
     if (!statusChanged && !paymentCompleted && !technicianChanged) {
@@ -711,15 +711,15 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
       const adminTokens = adminUsersDocs
-        .filter((doc) => doc.data().accessLevel !== 1) // Exclude customer service admins
+        .filter((doc) => doc.data().accessLevel !== 2) // Exclude customer service admins
         .map((doc) => {
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
             ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
+              uid: doc.id,
+              token: data.fcmToken,
+              lanCode: data.lanCode || "en",
+            }
             : null;
         })
         .filter(Boolean);
@@ -4109,7 +4109,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
       const adminUsersDocs = await getAllAdminUsers();
 
       const adminTokens = adminUsersDocs
-        .filter(doc => doc.data().accessLevel !== 1) // Exclude customer service admins
+        .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
         .map((doc) => {
           const data = doc.data();
           return data.fcmToken && data.fcmToken.trim() !== ""
@@ -4330,8 +4330,8 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -4599,11 +4599,11 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
 
         if (requestSnap.exists) {
           const requestData = requestSnap.data();
-          
+
           // Check if request is still active/searching
           if (requestData.status === "searching") {
             const techSnap = await db.collection("users").doc(techId).get();
-            
+
             if (techSnap.exists) {
               const techData = techSnap.data();
 
@@ -5121,11 +5121,11 @@ exports.syncAgentToAutoAssignment = onDocumentUpdated(
   async (event) => {
     const afterData = event.data.after.data();
     const beforeData = event.data.before.data();
-    
+
     if (!afterData) return null;
-    
+
     const bookingId = event.params.bookingId;
-    
+
     // Check if agent was added
     if (afterData.agent && (!beforeData || !beforeData.agent)) {
       try {
@@ -5205,7 +5205,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     const beforeData = event.data.before.data();
     const afterData = event.data.after.data();
     if (!afterData || !beforeData) return null;
-    
+
     const userId = event.params.userId;
 
     if (afterData.role !== "technician") {
@@ -5216,7 +5216,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     const isNowUnverified = afterData.isVerified === false;
     const wasRejected = !beforeData.rejectionReason && afterData.rejectionReason;
     const rejectionReasonChanged = beforeData.rejectionReason !== afterData.rejectionReason;
-    
+
     if (isNowUnverified && (wasRejected || rejectionReasonChanged) && afterData.rejectionReason) {
       if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
         try {
@@ -5247,14 +5247,14 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     // 2. Check if resubmitted
     const wasPending = beforeData.isDocsPendingReview === true;
     const isNowPending = afterData.isDocsPendingReview === true;
-    
+
     if (!wasPending && isNowPending) {
       const techName = afterData.name || "Technician";
       try {
         const adminUsersDocs = await getAllAdminUsers();
 
         const adminTokens = adminUsersDocs
-          .filter(doc => doc.data().accessLevel !== 1) // Exclude customer service admins
+          .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
           .map((doc) => {
             const data = doc.data();
             return data.fcmToken && data.fcmToken.trim() !== ""
@@ -5300,7 +5300,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     // 3. Check if approved
     const wasVerified = beforeData.isVerified === true;
     const isNowVerified = afterData.isVerified === true;
-    
+
     if (!wasVerified && isNowVerified) {
       if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
         try {
@@ -5395,7 +5395,7 @@ async function assignNewBookingIdHelper(docRef, data) {
   }
 
   const db = admin.firestore();
-  
+
   // Check if there is a requestId or bookingId to carry over
   const sourceId = data.requestId || data.bookingId;
   if (sourceId) {

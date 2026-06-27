@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:aboglumbo_bbk_panel/common_widget/place_suggestion_api.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -173,7 +174,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           markerId: MarkerId('m_$i'),
           position: pos,
           infoWindow: InfoWindow(
-            title: loc['address'] ?? AppLocalizations.of(context)!.locationNumber(i + 1),
+            title:
+                loc['address'] ??
+                AppLocalizations.of(context)!.locationNumber(i + 1),
             snippet:
                 '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
           ),
@@ -270,9 +273,11 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         'ar_name': nameAr,
         'polygon': _currentPolygonPoints.isNotEmpty
             ? _currentPolygonPoints
-                .map((p) => {'lat': p.latitude, 'lng': p.longitude})
-                .toList()
-            : (editIndex != null ? _selectedLocations[editIndex]['polygon'] ?? [] : []),
+                  .map((p) => {'lat': p.latitude, 'lng': p.longitude})
+                  .toList()
+            : (editIndex != null
+                  ? _selectedLocations[editIndex]['polygon'] ?? []
+                  : []),
         'priority': priority,
         'lat': _selectedLocation!.latitude,
         'lng': _selectedLocation!.longitude,
@@ -322,6 +327,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (LocalStore.isCurrentUserAdmin()) {
+      setState(() => _isLoading = false);
+      return;
+    }
     try {
       setState(() => _isLoading = true);
 
@@ -347,8 +356,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           return;
         }
       }
-      
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         setState(() {
           _hasLocationPermission = true;
         });
@@ -621,12 +631,14 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           ElevatedButton(
             onPressed: () {
               if (_dialogFormKey.currentState!.validate()) {
-                bool hasExistingPolygon = editIndex != null && 
-                    _selectedLocations[editIndex]['polygon'] != null && 
-                    (_selectedLocations[editIndex]['polygon'] as List).isNotEmpty;
-                
+                bool hasExistingPolygon =
+                    editIndex != null &&
+                    _selectedLocations[editIndex]['polygon'] != null &&
+                    (_selectedLocations[editIndex]['polygon'] as List)
+                        .isNotEmpty;
+
                 bool hasDrawnPolygon = _currentPolygonPoints.isNotEmpty;
-                
+
                 if (!hasExistingPolygon && !hasDrawnPolygon) {
                   Navigator.pop(context);
                   _showSnackBar(
@@ -756,17 +768,24 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context)!.tapOnMapToDrawPolygonPoints),
+                content: Text(
+                  AppLocalizations.of(context)!.tapOnMapToDrawPolygonPoints,
+                ),
                 backgroundColor: Colors.blue,
                 duration: Duration(seconds: 2),
               ),
             );
           },
           icon: Icon(Icons.add_location_alt, color: Colors.white),
-          label: Text(AppLocalizations.of(context)!.addRegion, style: TextStyle(color: Colors.white)),
+          label: Text(
+            AppLocalizations.of(context)!.addRegion,
+            style: TextStyle(color: Colors.white),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: EdgeInsets.symmetric(vertical: 12),
           ),
         ),
@@ -801,7 +820,9 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                 ),
               ),
               child: Text(
-                AppLocalizations.of(context)!.completeRegionWithPts(_currentPolygonPoints.length),
+                AppLocalizations.of(
+                  context,
+                )!.completeRegionWithPts(_currentPolygonPoints.length),
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -822,7 +843,6 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       ),
     );
   }
-
 
   Widget _buildLocationsList() {
     if (_selectedLocations.isEmpty) {
@@ -858,10 +878,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             children: [
               Text(
                 '${_selectedLocations.length} ${AppLocalizations.of(context)!.selected}',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
               if (_selectedLocations.isNotEmpty)
                 TextButton(
@@ -908,7 +925,8 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                   onTap: () {
-                    if (loc['polygon'] != null && (loc['polygon'] as List).isNotEmpty) {
+                    if (loc['polygon'] != null &&
+                        (loc['polygon'] as List).isNotEmpty) {
                       List<LatLng> points = (loc['polygon'] as List)
                           .where((p) => p['lat'] != null && p['lng'] != null)
                           .map(

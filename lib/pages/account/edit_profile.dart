@@ -529,6 +529,12 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (LocalStore.isCurrentUserAdmin()) {
+      setState(() {
+        _isFetchingLocation = false;
+      });
+      return;
+    }
     setState(() {
       _isFetchingLocation = true;
       _locationError = null;

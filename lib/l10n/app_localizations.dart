@@ -9230,26 +9230,14 @@ abstract class AppLocalizations {
   /// No description provided for @onHour.
   ///
   /// In en, this message translates to:
-  /// **'On-Hour'**
+  /// **'Working Hours'**
   String get onHour;
 
   /// No description provided for @offHour.
   ///
   /// In en, this message translates to:
-  /// **'Off-Hour'**
+  /// **'Outside Working Hours'**
   String get offHour;
-
-  /// No description provided for @onHourBooking.
-  ///
-  /// In en, this message translates to:
-  /// **'On-Hour Booking'**
-  String get onHourBooking;
-
-  /// No description provided for @offHourBooking.
-  ///
-  /// In en, this message translates to:
-  /// **'Off-Hour Booking'**
-  String get offHourBooking;
 
   /// No description provided for @inAppEarnings.
   ///
@@ -9658,6 +9646,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Distance'**
   String get distance;
+
+  /// No description provided for @discountAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Amount'**
+  String get discountAmount;
 }
 
 class _AppLocalizationsDelegate

@@ -4949,12 +4949,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get offHour => 'آف آور بکنگ';
 
   @override
-  String get onHourBooking => 'بکنگ اوقاتِ کار';
-
-  @override
-  String get offHourBooking => 'بکنگ بعد اوقاتِ کار';
-
-  @override
   String get inAppEarnings => 'ان ایپ آمدنی';
 
   @override
@@ -5190,4 +5184,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get distance => 'فاصلہ';
+
+  @override
+  String get discountAmount => 'رعایتی رقم';
 }

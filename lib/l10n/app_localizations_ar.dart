@@ -1410,7 +1410,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingServices => 'جارٍ تحميل الخدمات';
 
   @override
-  String get completionDetails => 'تفاصيل الانتهاء';
+  String get completionDetails => 'تفاصيل الانجاز';
 
   @override
   String get loadingFaqs => 'جارٍ تحميل الأسئلة الشائعة';
@@ -4858,16 +4858,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'الحجز بالساعة';
+  String get onHour => 'خلال أوقات العمل';
 
   @override
-  String get offHour => 'الحجز خارج الساعة';
-
-  @override
-  String get onHourBooking => 'حجز دوام';
-
-  @override
-  String get offHourBooking => 'حجز بعد الدوام';
+  String get offHour => 'خارج أوقات العمل';
 
   @override
   String get inAppEarnings => 'الأرباح داخل التطبيق';
@@ -5098,4 +5092,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get distance => 'المسافة';
+
+  @override
+  String get discountAmount => 'مبلغ الخصم';
 }

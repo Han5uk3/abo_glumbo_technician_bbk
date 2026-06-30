@@ -1601,8 +1601,6 @@
   "noDocumentsUploaded": "کوئی دستاویز اپ لوڈ نہیں کی گئی",
   "onHour": "فی گھنٹہ بکنگ",
   "offHour": "آف آور بکنگ",
-  "onHourBooking": "بکنگ اوقاتِ کار",
-  "offHourBooking": "بکنگ بعد اوقاتِ کار",
   "inAppEarnings": "ان ایپ آمدنی",
   "outsideAppEarnings": "خارج ایپ آمدنی",
   "earningsPeriod": "آمدنی کا دورانیہ",
@@ -1689,5 +1687,6 @@
   "selectNewDateAppointment": "ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں",
   "notAvailable": "دستیاب نہیں",
   "noAdditionalDescription": "کوئی اضافی تفصیل نہیں",
-  "distance": "فاصلہ"
+  "distance": "فاصلہ",
+  "discountAmount": "رعایتی رقم"
 }

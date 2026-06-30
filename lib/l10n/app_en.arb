@@ -1694,10 +1694,8 @@
       }
     }
   },
-  "onHour": "On-Hour",
-  "offHour": "Off-Hour",
-  "onHourBooking": "On-Hour Booking",
-  "offHourBooking": "Off-Hour Booking",
+  "onHour": "Working Hours",
+  "offHour": "Outside Working Hours",
   "inAppEarnings": "In-App Earnings",
   "outsideAppEarnings": "Outside-App Earnings",
   "earningsPeriod": "Earnings Period",
@@ -1835,5 +1833,6 @@
   "selectNewDateAppointment": "Select a new date and time for the appointment",
   "notAvailable": "N/A",
   "noAdditionalDescription": "No additional description",
-  "distance": "Distance"
+  "distance": "Distance",
+  "discountAmount": "Discount Amount"
 }

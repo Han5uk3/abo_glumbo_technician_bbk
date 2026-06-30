@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 
 class InvoiceService {
-  static Future<void> generateAndShowInvoice(
+  static Future<pw.Document?> _buildInvoiceDocument(
     BuildContext context,
     BookingModel booking,
   ) async {
@@ -27,7 +27,7 @@ class InvoiceService {
     }
 
     final data = booking.completionData;
-    if (data == null) return;
+    if (data == null) return null;
 
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final completedAtStr = booking.completedAt != null
@@ -222,7 +222,7 @@ class InvoiceService {
           // Totals
           pw.Row(
             children: [
-              pw.Spacer(flex: 2),
+              if (!isArabic) pw.Spacer(flex: 2),
               pw.Expanded(
                 flex: 1,
                 child: pw.Column(
@@ -287,6 +287,7 @@ class InvoiceService {
                   ],
                 ),
               ),
+              if (isArabic) pw.Spacer(flex: 2),
             ],
           ),
 
@@ -307,10 +308,34 @@ class InvoiceService {
       ),
     );
 
+    return pdf;
+  }
+
+  static Future<void> generateAndShowInvoice(
+    BuildContext context,
+    BookingModel booking,
+  ) async {
+    final pdf = await _buildInvoiceDocument(context, booking);
+    if (pdf == null) return;
+
     // Show preview/print dialog
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) => pdf.save(),
       name: booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase(),
+    );
+  }
+
+  static Future<void> generateAndShareInvoice(
+    BuildContext context,
+    BookingModel booking,
+  ) async {
+    final pdf = await _buildInvoiceDocument(context, booking);
+    if (pdf == null) return;
+
+    final bytes = await pdf.save();
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: '${booking.newBookingId ?? booking.id.substring(0, 8).toUpperCase()}.pdf',
     );
   }
 }

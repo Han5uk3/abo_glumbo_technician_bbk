@@ -4923,16 +4923,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'On-Hour';
+  String get onHour => 'Working Hours';
 
   @override
-  String get offHour => 'Off-Hour';
-
-  @override
-  String get onHourBooking => 'On-Hour Booking';
-
-  @override
-  String get offHourBooking => 'Off-Hour Booking';
+  String get offHour => 'Outside Working Hours';
 
   @override
   String get inAppEarnings => 'In-App Earnings';
@@ -5168,4 +5162,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get distance => 'Distance';
+
+  @override
+  String get discountAmount => 'Discount Amount';
 }

@@ -408,10 +408,7 @@ class _BookingInfoState extends State<BookingInfo> {
           l10n.areYouSure,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: Text(
-          l10n.rejectionProfessionalMessage,
-          style: TextStyle(),
-        ),
+        content: Text(l10n.rejectionProfessionalMessage, style: TextStyle()),
         actions: [
           TextButton(
             onPressed: () {
@@ -699,10 +696,7 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)?.serviceInfo ?? '',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -754,10 +748,7 @@ class _BookingInfoState extends State<BookingInfo> {
                       name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.black),
                     ),
                     const SizedBox(height: 8),
                     if (description.isNotEmpty) ...[
@@ -766,10 +757,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                       ),
                     ],
                   ],
@@ -788,10 +776,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 Text(
                   '${widget.booking.service.price} ${AppLocalizations.of(context)!.sar}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.green,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.green),
                 ),
               ],
             ),
@@ -861,8 +846,9 @@ class _BookingInfoState extends State<BookingInfo> {
 
   Widget _buildLocationCard(
     AddressModel? customerSelectedAddress,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    bool showDirections = true,
+  }) {
     final localization = AppLocalizations.of(context)!;
     return Container(
       width: double.maxFinite,
@@ -906,39 +892,34 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(width: 8),
               Text(
                 localization.location,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
-              TextButton.icon(
-                onPressed: openDirections,
-                icon: Icon(
-                  Icons.directions,
-                  size: 16,
-                  color: AppColors.white,
-                ),
-                label: Text(
-                  localization.directions,
-                  style: TextStyle(
-                    fontSize: 14,
+              if (showDirections)
+                TextButton.icon(
+                  onPressed: openDirections,
+                  icon: Icon(
+                    Icons.directions,
+                    size: 16,
                     color: AppColors.white,
                   ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.green,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                  label: Text(
+                    localization.directions,
+                    style: TextStyle(fontSize: 14, color: AppColors.white),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.green,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-              ),
             ],
           ),
           Divider(thickness: 1, color: Colors.grey.shade300),
@@ -1038,14 +1019,18 @@ class _BookingInfoState extends State<BookingInfo> {
                   '',
               context,
             ),
-            _buildLocationCard(() {
-              final addresses = widget.booking.customer.addresses;
-              return addresses.where((a) => a.isSelected == true).isNotEmpty
-                  ? addresses.firstWhere((a) => a.isSelected == true)
-                  : addresses.isNotEmpty
-                  ? addresses.first
-                  : null;
-            }(), context),
+            _buildLocationCard(
+              () {
+                final addresses = widget.booking.customer.addresses;
+                return addresses.where((a) => a.isSelected == true).isNotEmpty
+                    ? addresses.firstWhere((a) => a.isSelected == true)
+                    : addresses.isNotEmpty
+                    ? addresses.first
+                    : null;
+              }(),
+              context,
+              showDirections: _shouldShowDirections(),
+            ),
 
             const SizedBox(height: 16),
             _buildSectionCard(
@@ -1065,8 +1050,8 @@ class _BookingInfoState extends State<BookingInfo> {
                   Divider(color: Colors.grey[200]),
                   _buildDetailRow(
                     widget.booking.isOnHour == true
-                        ? AppLocalizations.of(context)!.onHourBooking
-                        : AppLocalizations.of(context)!.offHourBooking,
+                        ? AppLocalizations.of(context)!.onHour
+                        : AppLocalizations.of(context)!.offHour,
                     "",
                   ),
                   _buildDetailRow(
@@ -1166,30 +1151,72 @@ class _BookingInfoState extends State<BookingInfo> {
                 _buildCompletionDataCard(context, textTheme, colorScheme),
                 if (widget.isAdmin) ...[
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: () => InvoiceService.generateAndShowInvoice(
-                        context,
-                        widget.booking,
-                      ),
-                      icon: const Icon(Icons.download_rounded, color: Colors.white),
-                      label: Text(
-                        "Download Invoice",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: () =>
+                                InvoiceService.generateAndShowInvoice(
+                                  context,
+                                  widget.booking,
+                                ),
+                            icon: const Icon(
+                              Icons.download_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              "Download",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: () =>
+                                InvoiceService.generateAndShareInvoice(
+                                  context,
+                                  widget.booking,
+                                ),
+                            icon: const Icon(
+                              Icons.share_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              "Share",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ],
@@ -1394,7 +1421,11 @@ class _BookingInfoState extends State<BookingInfo> {
                                             onPressed: () {
                                               Clipboard.setData(
                                                 ClipboardData(
-                                                  text: widget.booking.newBookingId ?? widget.booking.id,
+                                                  text:
+                                                      widget
+                                                          .booking
+                                                          .newBookingId ??
+                                                      widget.booking.id,
                                                 ),
                                               );
                                               ScaffoldMessenger.of(
@@ -1543,15 +1574,16 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(width: 12),
                 Text(
                   "Payment Proof",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            ..._buildFileLinks(context, widget.booking.technicianPaymentProof!, colorScheme),
+            ..._buildFileLinks(
+              context,
+              widget.booking.technicianPaymentProof!,
+              colorScheme,
+            ),
           ],
         ),
       ),
@@ -1730,7 +1762,10 @@ class _BookingInfoState extends State<BookingInfo> {
                           color: Colors.green,
                           onPressed: () async {
                             if (tech.phone != null && tech.phone!.isNotEmpty) {
-                              final cleanPhone = tech.phone!.replaceAll(RegExp(r'[^\d+]'), '');
+                              final cleanPhone = tech.phone!.replaceAll(
+                                RegExp(r'[^\d+]'),
+                                '',
+                              );
                               final phoneUrl = 'tel:$cleanPhone';
                               if (await canLaunchUrlString(phoneUrl)) {
                                 await launchUrlString(phoneUrl);
@@ -2048,18 +2083,12 @@ class _BookingInfoState extends State<BookingInfo> {
                 children: [
                   Text(
                     widget.booking.customer.name ?? "",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   if (widget.booking.customer.phone != null)
                     Text(
                       widget.booking.customer.phone!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                 ],
               ),
@@ -2179,18 +2208,12 @@ class _BookingInfoState extends State<BookingInfo> {
                 children: [
                   Text(
                     agent.name ?? "",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   if (agent.phone != null)
                     Text(
                       agent.phone!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                 ],
               ),
@@ -2701,7 +2724,9 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Rejected by Admin
-      if (widget.booking.bookingStatusCode.toLowerCase() == 'r' && (widget.booking.rejectedBy == 'Admin' || widget.booking.rejectedBy == null)) {
+      if (widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
+          (widget.booking.rejectedBy == 'Admin' ||
+              widget.booking.rejectedBy == null)) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.cancelledByAdmin,
           'time': _formatDateLocalized(
@@ -2717,7 +2742,9 @@ class _BookingInfoState extends State<BookingInfo> {
               widget.booking.updatedAt?.toDate() ??
               DateTime.now(),
         });
-      } else if (widget.booking.bookingStatusCode.toLowerCase() == 'r' && widget.booking.rejectedBy != 'Admin' && widget.booking.rejectedBy != null) {
+      } else if (widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
+          widget.booking.rejectedBy != 'Admin' &&
+          widget.booking.rejectedBy != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.technicianCancelled,
           'time': _formatDateLocalized(
@@ -2814,8 +2841,9 @@ class _BookingInfoState extends State<BookingInfo> {
 
     if (currentTechCancelledAt == null) {
       // Check if there is any rejection (admin rejected or customer cancelled)
-      bool hasRejectionOrCancellation =
-          timelineItems.any((item) => item['status'] == 'rejected');
+      bool hasRejectionOrCancellation = timelineItems.any(
+        (item) => item['status'] == 'rejected',
+      );
 
       if (!hasRejectionOrCancellation) {
         bool isInProgress =
@@ -2823,63 +2851,118 @@ class _BookingInfoState extends State<BookingInfo> {
             widget.booking.trackingStoppedAt == null;
 
         if (isWarranty) {
-        // Warranty current status
-        // Only show pending status if warranty is not completed, rejected, or expired
-        final warrantyStatusCode = widget.booking.warranty!.warrantyStatusCode
-            .toLowerCase();
-        final isWarrantyActive =
-            widget.booking.warranty?.completedAt == null &&
-            widget.booking.warranty?.rejectedAt == null &&
-            warrantyStatusCode != 'e' && // Not expired
-            warrantyStatusCode != 'x' && // Not rejected
-            warrantyStatusCode != 'c'; // Not completed
+          // Warranty current status
+          // Only show pending status if warranty is not completed, rejected, or expired
+          final warrantyStatusCode = widget.booking.warranty!.warrantyStatusCode
+              .toLowerCase();
+          final isWarrantyActive =
+              widget.booking.warranty?.completedAt == null &&
+              widget.booking.warranty?.rejectedAt == null &&
+              warrantyStatusCode != 'e' && // Not expired
+              warrantyStatusCode != 'x' && // Not rejected
+              warrantyStatusCode != 'c'; // Not completed
 
-        if (isWarrantyActive) {
-          if (isInProgress) {
-            timelineItems.add({
-              'title': AppLocalizations.of(context)!.serviceInProgress,
-              'time': AppLocalizations.of(context)!.current,
-              'description': AppLocalizations.of(
-                context,
-              )!.serviceIsCurrentlyBeingPerformed,
-              'status': 'current',
-              'date': DateTime.now(),
-            });
-          } else if (widget.booking.warranty?.acceptedAt != null) {
-            timelineItems.add({
-              'title': AppLocalizations.of(context)!.waitingForServiceProvider,
-              'time': AppLocalizations.of(context)!.pending,
-              'description': AppLocalizations.of(
-                context,
-              )!.waitingForTechnicianToStartService,
-              'status': 'current',
-              'date': DateTime.now(),
-            });
-          } else {
-            // Check if there are any rejected technicians
-            final hasRejectedTechnicians =
-                widget.booking.warranty?.rejectedTechnicians != null &&
-                widget.booking.warranty!.rejectedTechnicians!.isNotEmpty;
-
-            if (hasRejectedTechnicians) {
-              // After technician rejection, waiting for admin to reassign
+          if (isWarrantyActive) {
+            if (isInProgress) {
               timelineItems.add({
-                'title': AppLocalizations.of(context)!.waitingForAdmin,
+                'title': AppLocalizations.of(context)!.serviceInProgress,
+                'time': AppLocalizations.of(context)!.current,
+                'description': AppLocalizations.of(
+                  context,
+                )!.serviceIsCurrentlyBeingPerformed,
+                'status': 'current',
+                'date': DateTime.now(),
+              });
+            } else if (widget.booking.warranty?.acceptedAt != null) {
+              timelineItems.add({
+                'title': AppLocalizations.of(
+                  context,
+                )!.waitingForServiceProvider,
                 'time': AppLocalizations.of(context)!.pending,
                 'description': AppLocalizations.of(
                   context,
-                )!.waitingForAdminToReassign,
+                )!.waitingForTechnicianToStartService,
                 'status': 'current',
                 'date': DateTime.now(),
               });
             } else {
-              // Initial state, waiting for technician to accept
+              // Check if there are any rejected technicians
+              final hasRejectedTechnicians =
+                  widget.booking.warranty?.rejectedTechnicians != null &&
+                  widget.booking.warranty!.rejectedTechnicians!.isNotEmpty;
+
+              if (hasRejectedTechnicians) {
+                // After technician rejection, waiting for admin to reassign
+                timelineItems.add({
+                  'title': AppLocalizations.of(context)!.waitingForAdmin,
+                  'time': AppLocalizations.of(context)!.pending,
+                  'description': AppLocalizations.of(
+                    context,
+                  )!.waitingForAdminToReassign,
+                  'status': 'current',
+                  'date': DateTime.now(),
+                });
+              } else {
+                // Initial state, waiting for technician to accept
+                final isSearching =
+                    widget.booking.autoAssignmentStatus == 'ready_to_assign';
+                timelineItems.add({
+                  'title': isSearching
+                      ? AppLocalizations.of(context)!.assigningTechnician
+                      : AppLocalizations.of(context)!.waitingForServiceProvider,
+                  'time': AppLocalizations.of(context)!.pending,
+                  'description': isSearching
+                      ? AppLocalizations.of(context)!.assigningTechnician
+                      : AppLocalizations.of(
+                          context,
+                        )!.waitingForServiceProviderResponse,
+                  'status': 'current',
+                  'date': DateTime.now(),
+                });
+              }
+            }
+          }
+        } else {
+          // Normal booking current status
+          bool isAdminRejection =
+              widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
+              (widget.booking.rejectedBy == 'Admin' ||
+                  widget.booking.rejectedBy == null);
+
+          if (widget.booking.completedAt == null &&
+              widget.booking.rejectedAt == null &&
+              widget.booking.bookingStatusCode.toLowerCase() != 'xc' &&
+              !isAdminRejection) {
+            if (isInProgress) {
+              timelineItems.add({
+                'title': AppLocalizations.of(context)!.serviceInProgress,
+                'time': AppLocalizations.of(context)!.current,
+                'description': AppLocalizations.of(
+                  context,
+                )!.serviceIsCurrentlyBeingPerformed,
+                'status': 'current',
+                'date': DateTime.now(),
+              });
+            } else if (widget.booking.assignedAt != null ||
+                widget.booking.acceptedAt != null) {
+              timelineItems.add({
+                'title': AppLocalizations.of(
+                  context,
+                )!.waitingForServiceProvider,
+                'time': AppLocalizations.of(context)!.pending,
+                'description': AppLocalizations.of(
+                  context,
+                )!.waitingForTechnicianToStartService,
+                'status': 'current',
+                'date': DateTime.now(),
+              });
+            } else {
               final isSearching =
                   widget.booking.autoAssignmentStatus == 'ready_to_assign';
               timelineItems.add({
                 'title': isSearching
                     ? AppLocalizations.of(context)!.assigningTechnician
-                    : AppLocalizations.of(context)!.waitingForServiceProvider,
+                    : AppLocalizations.of(context)!.waitingForAcceptance,
                 'time': AppLocalizations.of(context)!.pending,
                 'description': isSearching
                     ? AppLocalizations.of(context)!.assigningTechnician
@@ -2892,56 +2975,7 @@ class _BookingInfoState extends State<BookingInfo> {
             }
           }
         }
-      } else {
-        // Normal booking current status
-        bool isAdminRejection = widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
-            (widget.booking.rejectedBy == 'Admin' || widget.booking.rejectedBy == null);
-
-        if (widget.booking.completedAt == null &&
-            widget.booking.rejectedAt == null &&
-            widget.booking.bookingStatusCode.toLowerCase() != 'xc' &&
-            !isAdminRejection) {
-          if (isInProgress) {
-            timelineItems.add({
-              'title': AppLocalizations.of(context)!.serviceInProgress,
-              'time': AppLocalizations.of(context)!.current,
-              'description': AppLocalizations.of(
-                context,
-              )!.serviceIsCurrentlyBeingPerformed,
-              'status': 'current',
-              'date': DateTime.now(),
-            });
-          } else if (widget.booking.assignedAt != null ||
-              widget.booking.acceptedAt != null) {
-            timelineItems.add({
-              'title': AppLocalizations.of(context)!.waitingForServiceProvider,
-              'time': AppLocalizations.of(context)!.pending,
-              'description': AppLocalizations.of(
-                context,
-              )!.waitingForTechnicianToStartService,
-              'status': 'current',
-              'date': DateTime.now(),
-            });
-          } else {
-            final isSearching =
-                widget.booking.autoAssignmentStatus == 'ready_to_assign';
-            timelineItems.add({
-              'title': isSearching
-                  ? AppLocalizations.of(context)!.assigningTechnician
-                  : AppLocalizations.of(context)!.waitingForAcceptance,
-              'time': AppLocalizations.of(context)!.pending,
-              'description': isSearching
-                  ? AppLocalizations.of(context)!.assigningTechnician
-                  : AppLocalizations.of(
-                      context,
-                    )!.waitingForServiceProviderResponse,
-              'status': 'current',
-              'date': DateTime.now(),
-            });
-          }
-        }
       }
-    }
     }
 
     return Container(
@@ -3186,14 +3220,18 @@ class _BookingInfoState extends State<BookingInfo> {
               ],
             ),
             const SizedBox(height: 12),
-            if (widget.booking.paymentCompleted && 
-                ((widget.booking.transactionId != null && widget.booking.transactionId!.isNotEmpty) || 
-                 (widget.booking.orderId != null && widget.booking.orderId!.isNotEmpty))) ...[
+            if (widget.booking.paymentCompleted &&
+                ((widget.booking.transactionId != null &&
+                        widget.booking.transactionId!.isNotEmpty) ||
+                    (widget.booking.orderId != null &&
+                        widget.booking.orderId!.isNotEmpty))) ...[
               _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.transactionId,
                 value:
-                    (widget.booking.transactionId?.isNotEmpty == true ? widget.booking.transactionId : widget.booking.orderId) ??
+                    (widget.booking.transactionId?.isNotEmpty == true
+                        ? widget.booking.transactionId
+                        : widget.booking.orderId) ??
                     "",
                 textTheme: textTheme,
                 colorScheme: colorScheme,
@@ -3326,16 +3364,19 @@ class _BookingInfoState extends State<BookingInfo> {
               _buildInfoRow(
                 context,
                 label: AppLocalizations.of(context)!.serviceCost,
-                value: '${completionData.serviceCost.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                value:
+                    '${completionData.serviceCost.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                 textTheme: textTheme,
                 colorScheme: colorScheme,
               ),
-              if (widget.booking.service.discountPercentage != null && widget.booking.service.discountPercentage! > 0) ...[
+              if (widget.booking.service.discountPercentage != null &&
+                  widget.booking.service.discountPercentage! > 0) ...[
                 const SizedBox(height: 12),
                 _buildInfoRow(
                   context,
                   label: AppLocalizations.of(context)!.discountPercentage,
-                  value: '${widget.booking.service.discountPercentage!.toStringAsFixed(0)}%',
+                  value:
+                      '${widget.booking.service.discountPercentage!.toStringAsFixed(0)}%',
                   textTheme: textTheme,
                   colorScheme: colorScheme,
                 ),
@@ -3343,7 +3384,8 @@ class _BookingInfoState extends State<BookingInfo> {
                 _buildInfoRow(
                   context,
                   label: "Discount Amount",
-                  value: '${(completionData.serviceCost * (widget.booking.service.discountPercentage! / 100)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                  value:
+                      '${(completionData.serviceCost * (widget.booking.service.discountPercentage! / 100)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                   textTheme: textTheme,
                   colorScheme: colorScheme,
                 ),
@@ -3354,7 +3396,8 @@ class _BookingInfoState extends State<BookingInfo> {
             _buildInfoRow(
               context,
               label: AppLocalizations.of(context)!.inspectionFee,
-              value: '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+              value:
+                  '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
               textTheme: textTheme,
               colorScheme: colorScheme,
             ),
@@ -3857,10 +3900,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 const SizedBox(height: 10),
                 Text(
                   "${l10n.newProposedTime}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[800]!,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[800]!),
                 ),
               ],
             ),
@@ -3907,10 +3947,7 @@ class _BookingInfoState extends State<BookingInfo> {
                   activeOffer.proposedBy == 'technician'
                       ? l10n.customerRejectedProposal
                       : l10n.youRejectedProposal,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700]!,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]!),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -3932,10 +3969,7 @@ class _BookingInfoState extends State<BookingInfo> {
               ] else ...[
                 Text(
                   "${l10n.appointmentRescheduledTo}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700]!,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]!),
                 ),
               ],
             ],
@@ -4089,8 +4123,12 @@ class _BookingInfoState extends State<BookingInfo> {
               ({required BookingModel booking, required UserModel user}) {
                 _assignAgentToDriver(context, booking, user);
               },
-          onRejectOrder: (widget.isWarranty && booking.warranty?.warrantyStatusCode == 'X') || 
-                         (!widget.isWarranty && (booking.bookingStatusCode == 'R' || booking.bookingStatusCode == 'X'))
+          onRejectOrder:
+              (widget.isWarranty &&
+                      booking.warranty?.warrantyStatusCode == 'X') ||
+                  (!widget.isWarranty &&
+                      (booking.bookingStatusCode == 'R' ||
+                          booking.bookingStatusCode == 'X'))
               ? null
               : (booking) {
                   _rejectBookingAsAdmin(context, booking);
@@ -4147,10 +4185,7 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.rejectBooking,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         content: Text(
           l10n.areYouSureYouWantToRejectThisBooking,
@@ -4190,7 +4225,9 @@ class _BookingInfoState extends State<BookingInfo> {
         updateData['updatedAt'] = FieldValue.serverTimestamp();
       }
 
-      await AppFirestore.bookingsCollectionRef.doc(booking.id).update(updateData);
+      await AppFirestore.bookingsCollectionRef
+          .doc(booking.id)
+          .update(updateData);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4209,6 +4246,21 @@ class _BookingInfoState extends State<BookingInfo> {
         );
       }
     }
+  }
+
+  bool _shouldShowDirections() {
+    bool isWarrantyTech =
+        widget.booking.warranty != null &&
+        widget.booking.warranty!.claimrequested == true &&
+        FirebaseAuth.instance.currentUser?.uid ==
+            widget.booking.warranty!.assignedTechnicianId;
+
+    if (widget.booking.bookingStatusCode == 'C' ||
+        widget.booking.arrivedAt != null) {
+      return isWarrantyTech;
+    }
+
+    return true;
   }
 
   Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {
@@ -4302,10 +4354,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 : Localizations.localeOf(context).languageCode == 'ur'
                 ? 'جواب دینے کا وقت'
                 : 'Time to respond',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
           Row(
@@ -4376,10 +4425,7 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.acceptBooking,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         content: Text(
           l10n.areYouSureYouWantToAcceptThisBooking,
@@ -4436,10 +4482,7 @@ class _BookingInfoState extends State<BookingInfo> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.rejectBooking,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         content: Text(
           l10n.areYouSureYouWantToRejectThisBooking,

@@ -505,8 +505,10 @@ class _EditProfileState extends State<EditProfile> {
       profileImageUrl = widget.workerData!.profileUrl;
       nameController.text = widget.workerData!.name ?? '';
       emailController.text = widget.workerData!.email ?? '';
-      phoneController.text =
-          "0${widget.workerData!.phone.toString().substring(4)}";
+      final phoneStr = widget.workerData!.phone.toString();
+      phoneController.text = phoneStr.startsWith('+966') 
+          ? "0${phoneStr.substring(4)}" 
+          : phoneStr;
       selectedJobRoles = widget.workerData!.jobRoles ?? [];
       selectedCertifications = widget.workerData!.certifications ?? [];
 
@@ -1328,7 +1330,9 @@ class _EditProfileState extends State<EditProfile> {
                     role: 'technician',
                     name: nameController.text,
                     email: emailController.text,
-                    phone: phoneController.text,
+                    phone: phoneController.text.startsWith('0') 
+                        ? '+966${phoneController.text.substring(1)}'
+                        : phoneController.text,
                     location: _currentPosition != null
                         ? LocationModel.fromGPS(
                             lat: _currentPosition!.latitude,

@@ -3372,18 +3372,10 @@ class _BookingInfoState extends State<BookingInfo> {
               if (widget.booking.service.discountPercentage != null &&
                   widget.booking.service.discountPercentage! > 0) ...[
                 const SizedBox(height: 12),
+
                 _buildInfoRow(
                   context,
-                  label: AppLocalizations.of(context)!.discountPercentage,
-                  value:
-                      '${widget.booking.service.discountPercentage!.toStringAsFixed(0)}%',
-                  textTheme: textTheme,
-                  colorScheme: colorScheme,
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  context,
-                  label: "Discount Amount",
+                  label: AppLocalizations.of(context)!.discountAmount,
                   value:
                       '${(completionData.serviceCost * (widget.booking.service.discountPercentage! / 100)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                   textTheme: textTheme,

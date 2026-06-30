@@ -3002,7 +3002,8 @@ class AppServices {
 
       if (bookingData['agent'] != null &&
           bookingData['agent']['uid'] != null &&
-          (bookingData['agent']['uid'] as String).isNotEmpty) {
+          (bookingData['agent']['uid'] as String).isNotEmpty &&
+          bookingData['agent']['uid'] != technician.uid) {
         throw Exception('Booking is already assigned to another technician');
       }
 
@@ -3083,16 +3084,6 @@ class AppServices {
         'status': 'declined',
         'declinedAt': FieldValue.serverTimestamp(),
       });
-
-      if (isRebook && bookingId != null) {
-        batch.update(AppFirestore.bookingsCollectionRef.doc(bookingId), {
-          'rebookTechnicianId': null,
-          'agent': null,
-          'bookingStatusCode': 'SR',
-          'autoAssignmentStatus': null,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
 
       await batch.commit();
 

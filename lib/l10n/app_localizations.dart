@@ -8882,7 +8882,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposeAlternativeTime.
   ///
   /// In en, this message translates to:
-  /// **'Propose Alternative Time'**
+  /// **'Propose New Time'**
   String get proposeAlternativeTime;
 
   /// No description provided for @areYouSure.

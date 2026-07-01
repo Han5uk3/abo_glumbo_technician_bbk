@@ -1573,7 +1573,7 @@
   "rebookTechnician": "Rebook Technician",
   "selectService": "Select Service",
   "rejectionProfessionalMessage": "If you are unavailable at the requested time, please propose an alternative date and time to the customer instead of canceling the appointment.",
-  "proposeAlternativeTime": "Propose Alternative Time",
+  "proposeAlternativeTime": "Propose New Time",
   "areYouSure": "Are you sure?",
   "notes": "Notes",
   "time": "Time",

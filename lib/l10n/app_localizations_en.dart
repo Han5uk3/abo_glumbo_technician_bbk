@@ -4724,7 +4724,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you are unavailable at the requested time, please propose an alternative date and time to the customer instead of canceling the appointment.';
 
   @override
-  String get proposeAlternativeTime => 'Propose Alternative Time';
+  String get proposeAlternativeTime => 'Propose New Time';
 
   @override
   String get areYouSure => 'Are you sure?';

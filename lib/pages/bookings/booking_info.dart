@@ -3972,40 +3972,8 @@ class _BookingInfoState extends State<BookingInfo> {
     }
 
     if (activeOffer == null) {
-      final statusCode = booking.bookingStatusCode.toUpperCase();
-      final isAssigned = booking.agent?.uid == LocalStore.getUID();
-      final isUnassigned = booking.agent == null;
-
-      // Only show "Propose New Time" for rebookings assigned to the current technician
-      final isRebookForMe =
-          booking.rebookTechnicianId != null &&
-          booking.rebookTechnicianId == LocalStore.getUID();
-
-      if (isRebookForMe &&
-          (((statusCode == 'P' || statusCode == 'SR') &&
-                  (isAssigned || isUnassigned)) ||
-              (statusCode == 'A' && isAssigned))) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () => _showCounterOfferDatePicker(booking, _offerId),
-              icon: const Icon(Icons.history_toggle_off, size: 20),
-              label: Text(l10n.proposeNewTime),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
+      // Propose New Time button removed as per request
+      return const SizedBox.shrink();
     }
 
     return const SizedBox.shrink();
@@ -4618,7 +4586,7 @@ class _BookingInfoState extends State<BookingInfo> {
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",
       );
     }
-    final dateToUse = booking.assignedAt ?? booking.acceptedAt;
+    final dateToUse = booking.assignedAt ?? booking.acceptedAt ?? booking.createdAt;
     if (dateToUse != null && booking.bookingStatusCode == "A") {
       return _timestampText(
         "${AppLocalizations.of(context)!.acceptedAt} : ${formatBookingDateTime(dateToUse.toDate(), locale)}",

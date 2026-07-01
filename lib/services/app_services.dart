@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:rxdart/rxdart.dart';
 import 'package:aboglumbo_bbk_panel/helpers/custom_exception.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/models/banner.dart';
@@ -2873,7 +2874,7 @@ class AppServices {
       timerStream,
       (snapshot, _) => snapshot,
     ).asyncMap((snapshot) async {
-      final now = DateTime.now();
+      final now = TimeService.now;
 
       final activeOffers = snapshot.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -3121,7 +3122,7 @@ class AppServices {
 
     if (snapshot.docs.isNotEmpty) {
       final expiresAt = snapshot.docs.first['expiresAt'] as Timestamp;
-      if (expiresAt.toDate().isAfter(DateTime.now())) {
+      if (expiresAt.toDate().isAfter(TimeService.now)) {
         return snapshot.docs.first.id;
       }
     }

@@ -18,6 +18,7 @@ import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/verify_payment_sheet.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -246,7 +247,7 @@ class _BookingInfoState extends State<BookingInfo> {
     _stopOfferTimer();
     if (_offerExpiresAt == null) return;
 
-    final remaining = _offerExpiresAt!.difference(DateTime.now()).inSeconds;
+    final remaining = _offerExpiresAt!.difference(TimeService.now).inSeconds;
     if (remaining <= 0) {
       // Already expired — auto-decline
       _autoDeclineExpiredOffer();

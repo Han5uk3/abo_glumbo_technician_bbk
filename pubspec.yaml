@@ -74,6 +74,7 @@ dependencies:
   pdf: ^3.12.0
   printing: ^5.14.3
   pinput: ^6.0.2
+  ntp: ^2.0.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0

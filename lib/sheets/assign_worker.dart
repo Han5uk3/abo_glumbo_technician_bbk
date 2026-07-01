@@ -453,6 +453,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           } else if (user.liveLocation != null) {
             userLat = user.liveLocation!.latitude;
             userLng = user.liveLocation!.longitude;
+          } else if (user.location != null) {
+            userLat = user.location!.lat;
+            userLng = user.location!.lon;
           }
 
           if (userLat == null || userLng == null) {

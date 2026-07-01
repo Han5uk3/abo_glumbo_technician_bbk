@@ -13,6 +13,7 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
@@ -829,7 +830,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     final expiresAt = widget.offer.offerData['expiresAt'] as Timestamp?;
     if (expiresAt == null) return;
 
-    final remaining = expiresAt.toDate().difference(DateTime.now()).inSeconds;
+    final remaining = expiresAt.toDate().difference(TimeService.now).inSeconds;
     if (remaining <= 0) {
       _declineOffer(context);
       return;

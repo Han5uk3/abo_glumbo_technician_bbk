@@ -1,4 +1,4 @@
-{
+﻿{
   "assign": "Assign",
   "later": "Later",
   "change": "Change",
@@ -454,7 +454,7 @@
   "paymentPending": "Payment Pending",
   "loadingHighlightedServices": "Loading Highlighted Services",
   "loadingServices": "Loading Services",
-  "completionDetails": "Completion Details",
+  "completionDetails": "Completed Details",
   "loadingFaqs": "Loading FAQs",
   "loadingTechnicians": "Loading Technicians",
   "bookingWasCancelledByCustomer": "Booking was cancelled by customer",
@@ -514,10 +514,10 @@
   "exitAppMessage": "Are you sure you want to exit the app?",
   "exit": "Exit",
   "nextTierProgress": "Next tier progress",
-  "greaterThan20jobsPerMonth": "≥ 20 jobs/month",
+  "greaterThan20jobsPerMonth": "â‰¥ 20 jobs/month",
   "orderId": "Order ID",
-  "greaterThan40jobsPerMonth": "≥ 40 jobs/month",
-  "greaterThan60jobsPerMonth": "≥ 60 jobs/month",
+  "greaterThan40jobsPerMonth": "â‰¥ 40 jobs/month",
+  "greaterThan60jobsPerMonth": "â‰¥ 60 jobs/month",
   "progressResetsMonthly": "Progress resets monthly, Maintain high ratings and complete more jobs to unlock better rewards.",
   "progressResetsMonthlyDesc": "Progresses rests monthly. Maintain high ratings and complete more jobs to unlock better rewards",
   "zeroPercentBonus": "0% Bonus",
@@ -571,7 +571,7 @@
   "trackingStarted": "Tracking started",
   "locationServicesDisabled": "Location services are disabled",
   "settings": "Settings",
-  "trackingNote": "Note: If you’re starting the work, please click the “Start Tracking” button. In case the button gets cut off or changes, make sure to click “Start Tracking” again.",
+  "trackingNote": "Note: If youâ€™re starting the work, please click the â€œStart Trackingâ€ button. In case the button gets cut off or changes, make sure to click â€œStart Trackingâ€ again.",
   "filterByLocation": "Filter by Location",
   "allLocations": "All Locations",
   "clearFilter": "Clear Filter",
@@ -1097,7 +1097,7 @@
   "apply": "Apply",
   "tapToUploadFiles": "Tap to upload files",
   "addRecipients": "Add Recipients",
-  "serviceItemsCalculationNote": "The total cost will be calculated automatically as (Quantity × Price) for each item and added to the inspection fee.",
+  "serviceItemsCalculationNote": "The total cost will be calculated automatically as (Quantity Ã— Price) for each item and added to the inspection fee.",
   "addMoreFiles": "Add more files",
   "allowedFileTypes": "Allowed file types: jpg, jpeg, png, pdf, doc,",
   "uploadFiles": "Upload Files",
@@ -1371,10 +1371,10 @@
   "terms4p1": "Warranty (Guarantee): Completed work is subject to the Platform's",
   "warrantyPolicy": "Warranty Policy",
   "terms4p2": "the full details of which can be reviewed via the dedicated link.",
-  "terms5": "You have the right to rate the Technician's performance after service completion, and you must ensure that ratings are honest and objective.",
+  "terms5": "You have the right to rate the Technician's performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.",
   "policy1": "Name, phone number, email address, the precise service location address, order history, and Technician ratings.",
   "policy2": "Used to match you with Technicians, facilitate the booking and payment process, and send order notifications.",
-  "policy3": "Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable service delivery.",
+  "policy3": "Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable serviceÂ delivery.",
   "waitingForAdminAction": "Waiting for admin action",
   "whatsCovered": "What's Covered",
   "issueone": "Faulty installation or poor workmanship",
@@ -1425,7 +1425,7 @@
   "alreadyInHand": "already in hand",
   "minimumPayoutAmount": "Minimum payout amount is 10 SAR",
   "enableAvailability": "Enable Availability",
-  "welcomeDescription": "We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians",
+  "welcomeDescription": "We are happy to have you join the Abo Glumbo team.\n\nâ€¢ One-week warranty for every service\nâ€¢ Higher ratings increase future selection chances\nâ€¢ Special rewards for high-performing technicians",
   "welcomeToAboGlumboTechnician": "Welcome {name}",
   "@welcomeToAboGlumboTechnician": {
     "placeholders": {
@@ -1487,7 +1487,7 @@
     }
   },
   "selectedLocation": "Selected Location",
-  "mapPickerInstructions": "• Click 'Add Region' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click 'Complete Region' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area",
+  "mapPickerInstructions": "â€¢ Click 'Add Region' to start drawing a new area\nâ€¢ Tap on the map to add boundary points (at least 4 points required)\nâ€¢ Click 'Complete Region' when finished\nâ€¢ Enter location details and confirm\nâ€¢ Use the Edit icon to update details or the Red X to remove an area",
   "tapOnMapToDrawPolygonPoints": "Tap on the map to draw polygon points",
   "addRegion": "Add Region",
   "regionMustHaveAtLeast4Points": "A region must have at least 4 points to be completed.",
@@ -1806,7 +1806,7 @@
       }
     }
   },
-  "biometricError": "❌ Biometric error",
+  "biometricError": "âŒ Biometric error",
   "unknownError": "Unknown error",
   "errorDuringLogin": "Error during login",
   "filterAll": "All",
@@ -1834,5 +1834,6 @@
   "notAvailable": "N/A",
   "noAdditionalDescription": "No additional description",
   "distance": "Distance",
-  "discountAmount": "Discount Amount"
+  "discountAmount": "Discount Amount",
+  "discountAppliesToInspectionFeeOnly": "Discount applies to the inspection fee only."
 }

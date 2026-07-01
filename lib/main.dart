@@ -21,6 +21,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 
 // Enhanced Background Fetch Handler
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -139,6 +140,11 @@ void main() async {
     debugPrint('🔄 Registering FCM background handler...');
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     debugPrint('✅ FCM background handler registered');
+
+    // STEP 5: Initialize Time Service
+    debugPrint('🔄 Initializing TimeService...');
+    await TimeService.init();
+    debugPrint('✅ TimeService initialized');
 
     // STEP 6: Setup System UI (with One UI 8 fix)
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

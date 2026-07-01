@@ -2833,7 +2833,7 @@ abstract class AppLocalizations {
   /// No description provided for @completionDetails.
   ///
   /// In en, this message translates to:
-  /// **'Completion Details'**
+  /// **'Completed Details'**
   String get completionDetails;
 
   /// No description provided for @loadingFaqs.
@@ -3193,7 +3193,7 @@ abstract class AppLocalizations {
   /// No description provided for @greaterThan20jobsPerMonth.
   ///
   /// In en, this message translates to:
-  /// **'≥ 20 jobs/month'**
+  /// **'â‰¥ 20 jobs/month'**
   String get greaterThan20jobsPerMonth;
 
   /// No description provided for @orderId.
@@ -3205,13 +3205,13 @@ abstract class AppLocalizations {
   /// No description provided for @greaterThan40jobsPerMonth.
   ///
   /// In en, this message translates to:
-  /// **'≥ 40 jobs/month'**
+  /// **'â‰¥ 40 jobs/month'**
   String get greaterThan40jobsPerMonth;
 
   /// No description provided for @greaterThan60jobsPerMonth.
   ///
   /// In en, this message translates to:
-  /// **'≥ 60 jobs/month'**
+  /// **'â‰¥ 60 jobs/month'**
   String get greaterThan60jobsPerMonth;
 
   /// No description provided for @progressResetsMonthly.
@@ -3535,7 +3535,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackingNote.
   ///
   /// In en, this message translates to:
-  /// **'Note: If you’re starting the work, please click the “Start Tracking” button. In case the button gets cut off or changes, make sure to click “Start Tracking” again.'**
+  /// **'Note: If youâ€™re starting the work, please click the â€œStart Trackingâ€ button. In case the button gets cut off or changes, make sure to click â€œStart Trackingâ€ again.'**
   String get trackingNote;
 
   /// No description provided for @filterByLocation.
@@ -6691,7 +6691,7 @@ abstract class AppLocalizations {
   /// No description provided for @serviceItemsCalculationNote.
   ///
   /// In en, this message translates to:
-  /// **'The total cost will be calculated automatically as (Quantity × Price) for each item and added to the inspection fee.'**
+  /// **'The total cost will be calculated automatically as (Quantity Ã— Price) for each item and added to the inspection fee.'**
   String get serviceItemsCalculationNote;
 
   /// No description provided for @addMoreFiles.
@@ -7892,7 +7892,7 @@ abstract class AppLocalizations {
   /// No description provided for @terms5.
   ///
   /// In en, this message translates to:
-  /// **'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honest and objective.'**
+  /// **'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.'**
   String get terms5;
 
   /// No description provided for @policy1.
@@ -7910,7 +7910,7 @@ abstract class AppLocalizations {
   /// No description provided for @policy3.
   ///
   /// In en, this message translates to:
-  /// **'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable service delivery.'**
+  /// **'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable serviceÂ delivery.'**
   String get policy3;
 
   /// No description provided for @waitingForAdminAction.
@@ -8216,7 +8216,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeDescription.
   ///
   /// In en, this message translates to:
-  /// **'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians'**
+  /// **'We are happy to have you join the Abo Glumbo team.\n\nâ€¢ One-week warranty for every service\nâ€¢ Higher ratings increase future selection chances\nâ€¢ Special rewards for high-performing technicians'**
   String get welcomeDescription;
 
   /// No description provided for @welcomeToAboGlumboTechnician.
@@ -8498,7 +8498,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapPickerInstructions.
   ///
   /// In en, this message translates to:
-  /// **'• Click \'Add Region\' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click \'Complete Region\' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area'**
+  /// **'â€¢ Click \'Add Region\' to start drawing a new area\nâ€¢ Tap on the map to add boundary points (at least 4 points required)\nâ€¢ Click \'Complete Region\' when finished\nâ€¢ Enter location details and confirm\nâ€¢ Use the Edit icon to update details or the Red X to remove an area'**
   String get mapPickerInstructions;
 
   /// No description provided for @tapOnMapToDrawPolygonPoints.
@@ -9482,7 +9482,7 @@ abstract class AppLocalizations {
   /// No description provided for @biometricError.
   ///
   /// In en, this message translates to:
-  /// **'❌ Biometric error'**
+  /// **'âŒ Biometric error'**
   String get biometricError;
 
   /// No description provided for @unknownError.
@@ -9652,6 +9652,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discount Amount'**
   String get discountAmount;
+
+  /// No description provided for @discountAppliesToInspectionFeeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount applies to the inspection fee only.'**
+  String get discountAppliesToInspectionFeeOnly;
 }
 
 class _AppLocalizationsDelegate

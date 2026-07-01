@@ -1421,7 +1421,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingServices => 'Loading Services';
 
   @override
-  String get completionDetails => 'Completion Details';
+  String get completionDetails => 'Completed Details';
 
   @override
   String get loadingFaqs => 'Loading FAQs';
@@ -1606,16 +1606,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextTierProgress => 'Next tier progress';
 
   @override
-  String get greaterThan20jobsPerMonth => '≥ 20 jobs/month';
+  String get greaterThan20jobsPerMonth => 'â‰¥ 20 jobs/month';
 
   @override
   String get orderId => 'Order ID';
 
   @override
-  String get greaterThan40jobsPerMonth => '≥ 40 jobs/month';
+  String get greaterThan40jobsPerMonth => 'â‰¥ 40 jobs/month';
 
   @override
-  String get greaterThan60jobsPerMonth => '≥ 60 jobs/month';
+  String get greaterThan60jobsPerMonth => 'â‰¥ 60 jobs/month';
 
   @override
   String get progressResetsMonthly =>
@@ -1785,7 +1785,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackingNote =>
-      'Note: If you’re starting the work, please click the “Start Tracking” button. In case the button gets cut off or changes, make sure to click “Start Tracking” again.';
+      'Note: If youâ€™re starting the work, please click the â€œStart Trackingâ€ button. In case the button gets cut off or changes, make sure to click â€œStart Trackingâ€ again.';
 
   @override
   String get filterByLocation => 'Filter by Location';
@@ -3480,7 +3480,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceItemsCalculationNote =>
-      'The total cost will be calculated automatically as (Quantity × Price) for each item and added to the inspection fee.';
+      'The total cost will be calculated automatically as (Quantity Ã— Price) for each item and added to the inspection fee.';
 
   @override
   String get addMoreFiles => 'Add more files';
@@ -4175,7 +4175,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get terms5 =>
-      'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honest and objective.';
+      'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.';
 
   @override
   String get policy1 =>
@@ -4187,7 +4187,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get policy3 =>
-      'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable service delivery.';
+      'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable serviceÂ delivery.';
 
   @override
   String get waitingForAdminAction => 'Waiting for admin action';
@@ -4347,7 +4347,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians';
+      'We are happy to have you join the Abo Glumbo team.\n\nâ€¢ One-week warranty for every service\nâ€¢ Higher ratings increase future selection chances\nâ€¢ Special rewards for high-performing technicians';
 
   @override
   String welcomeToAboGlumboTechnician(String name) {
@@ -4506,7 +4506,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapPickerInstructions =>
-      '• Click \'Add Region\' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click \'Complete Region\' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area';
+      'â€¢ Click \'Add Region\' to start drawing a new area\nâ€¢ Tap on the map to add boundary points (at least 4 points required)\nâ€¢ Click \'Complete Region\' when finished\nâ€¢ Enter location details and confirm\nâ€¢ Use the Edit icon to update details or the Red X to remove an area';
 
   @override
   String get tapOnMapToDrawPolygonPoints =>
@@ -5075,7 +5075,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get biometricError => '❌ Biometric error';
+  String get biometricError => 'âŒ Biometric error';
 
   @override
   String get unknownError => 'Unknown error';
@@ -5165,4 +5165,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discountAmount => 'Discount Amount';
+
+  @override
+  String get discountAppliesToInspectionFeeOnly =>
+      'Discount applies to the inspection fee only.';
 }

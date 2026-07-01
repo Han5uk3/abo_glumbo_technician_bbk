@@ -11,6 +11,7 @@ import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 
 class BroadcastOfferInfo extends StatefulWidget {
   final JobOfferContainer offer;
@@ -47,7 +48,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
     final expiresAt = widget.offer.offerData['expiresAt'] as Timestamp?;
     if (expiresAt == null) return;
 
-    final remaining = expiresAt.toDate().difference(DateTime.now()).inSeconds;
+    final remaining = expiresAt.toDate().difference(TimeService.now).inSeconds;
     if (remaining <= 0) {
       Navigator.pop(context);
       return;

@@ -601,12 +601,6 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       return;
     }
 
-    // Omit payment received notification for inspection only bookings
-    if (afterData.completionData?.mode === 0) {
-      console.log(`[${bookingId}] Inspection only booking, skipping payment received notification.`);
-      return;
-    }
-
     // Only notify if booking is completed
     if (afterData.bookingStatusCode !== "C") {
       console.log(
@@ -642,6 +636,8 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 
     // Fetch technician data
     let technicianData;
+    let fcmToken;
+    let lanCode = "en";
     try {
       const technicianDoc = await admin
         .firestore()
@@ -649,23 +645,15 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
         .doc(agent.uid)
         .get();
 
-      if (!technicianDoc.exists) {
+      if (technicianDoc.exists) {
+        technicianData = technicianDoc.data();
+        fcmToken = technicianData?.fcmToken;
+        lanCode = technicianData?.lanCode || "en";
+      } else {
         console.log(`[${bookingId}] Technician document not found`);
-        return;
       }
-
-      technicianData = technicianDoc.data();
     } catch (error) {
       console.error(`[${bookingId}] Error fetching technician data:`, error);
-      return;
-    }
-
-    const fcmToken = technicianData?.fcmToken;
-    const lanCode = technicianData?.lanCode || "en";
-
-    if (!fcmToken || fcmToken.trim() === "") {
-      console.log(`[${bookingId}] Technician has no valid FCM token`);
-      return;
     }
 
     const serviceName = afterData.service?.name || "Service";
@@ -679,33 +667,43 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       ? afterData.completionData?.inspectionFee || 0
       : afterData.completionData?.totalCost || 0;
 
-    await sendAndStoreNotification({
-      targetRole: "technician",
-      targetId: agent.uid,
-      titleEn: "Payment Received",
-      titleAr: "تم استلام الدفع",
-      titleUr: "ادائیگی موصول ہو گئی",
-      bodyEn: `${customerName} has completed payment for ${serviceName}. The transaction is now complete.`,
-      bodyAr: `قام ${customerName} بإكمال الدفع مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
-      bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
-      data: {
+    if (fcmToken && fcmToken.trim() !== "") {
+      await sendAndStoreNotification({
         targetRole: "technician",
-        category: "payment",
-        bookingId,
-        serviceName,
-        serviceNameAr: serviceNameAr,
-        serviceNameUr: serviceNameUr,
-        customerName,
-        amount: totalAmount.toString(),
-        isAdmin: "false",
-      },
-      fcmToken: fcmToken,
-      lanCode: lanCode,
-    });
+        targetId: agent.uid,
+        titleEn: "Payment Received",
+        titleAr: "تم استلام الدفع",
+        titleUr: "ادائیگی موصول ہو گئی",
+        bodyEn: `${customerName} has completed payment for ${serviceName}. The transaction is now complete.`,
+        bodyAr: `قام ${customerName} بإكمال الدفع مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
+        bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,
+        data: {
+          targetRole: "technician",
+          category: "payment",
+          bookingId,
+          serviceName,
+          serviceNameAr: serviceNameAr,
+          serviceNameUr: serviceNameUr,
+          customerName,
+          amount: totalAmount.toString(),
+          isAdmin: "false",
+        },
+        fcmToken: fcmToken,
+        lanCode: lanCode,
+      });
 
-    console.log(
-      `[${bookingId}] Payment completion notification sent to technician ${agent.uid}`
-    );
+      console.log(
+        `[${bookingId}] Payment completion notification sent to technician ${agent.uid}`
+      );
+    } else {
+      console.log(`[${bookingId}] Technician has no valid FCM token or fetch failed, skipping technician notification`);
+    }
+
+    // Determine admin notification texts based on payment method
+    const isOutsideApp = afterData.paymentModeCode === 'O';
+    const adminTitleEn = isOutsideApp ? "Payment received outside app" : "Payment received within app";
+    const adminTitleAr = isOutsideApp ? "تم استلام الدفع خارج التطبيق" : "تم استلام الدفع داخل التطبيق";
+    const adminTitleUr = isOutsideApp ? "ایپ کے باہر ادائیگی موصول ہوئی" : "ایپ کے اندر ادائیگی موصول ہوئی";
 
     // Notify admins (excluding customer service)
     try {
@@ -729,9 +727,9 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
           await sendAndStoreNotification({
             targetRole: "admin",
             targetId: uid,
-            titleEn: "Payment Received",
-            titleAr: "تم استلام الدفع",
-            titleUr: "ادائیگی موصول ہو گئی",
+            titleEn: adminTitleEn,
+            titleAr: adminTitleAr,
+            titleUr: adminTitleUr,
             bodyEn: `${customerName} has completed payment for ${serviceName}. The transaction is now complete.`,
             bodyAr: `قام ${customerName} بإكمال الدفع مقابل ${serviceNameAr}. اكتملت المعاملة الآن.`,
             bodyUr: `${customerName} نے ${serviceNameUr} کے لیے ادائیگی مکمل کر لی ہے۔ اب یہ لین دین مکمل ہو گیا ہے۔`,

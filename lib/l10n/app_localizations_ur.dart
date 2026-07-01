@@ -9,3539 +9,3781 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
-  String get assign => 'تفویض کریں';
+  String get assign => 'ØªÙÙˆÛŒØ¶ Ú©Ø±ÛŒÚº';
 
   @override
-  String get later => 'بعد میں';
+  String get later => 'Ø¨Ø¹Ø¯ Ù…ÛŒÚº';
 
   @override
-  String get change => 'تبدیل کریں';
+  String get change => 'ØªØ¨Ø¯ÛŒÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get viewOnly => 'صرف ایڈمن کے دیکھنے کے لیے';
+  String get viewOnly => 'ØµØ±Ù Ø§ÛŒÚˆÙ…Ù† Ú©Û’ Ø¯ÛŒÚ©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’';
 
   @override
-  String get noTechnicianAssigned => 'کوئی ٹیکنیشن تفویض نہیں کیا گیا';
+  String get noTechnicianAssigned =>
+      'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get calculatingDistance => 'فاصلہ کا حساب لگایا جا رہا ہے...';
+  String get calculatingDistance =>
+      'ÙØ§ØµÙ„Û Ú©Ø§ Ø­Ø³Ø§Ø¨ Ù„Ú¯Ø§ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get awaitingCustomerAction => 'گاہک کے اگلے اقدامات کا انتظار ہے';
+  String get awaitingCustomerAction =>
+      'Ú¯Ø§ÛÚ© Ú©Û’ Ø§Ú¯Ù„Û’ Ø§Ù‚Ø¯Ø§Ù…Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
   String kmAway(Object distance) {
-    return '$distance کلومیٹر دور';
+    return '$distance Ú©Ù„ÙˆÙ…ÛŒÙ¹Ø± Ø¯ÙˆØ±';
   }
 
   @override
-  String get appName => 'ابو جلمبو';
+  String get appName => 'Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ';
 
   @override
-  String get enterYourFullName => 'اپنا پورا نام درج کریں';
+  String get enterYourFullName => 'Ø§Ù¾Ù†Ø§ Ù¾ÙˆØ±Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterYourFullName => 'براہ کرم اپنا پورا نام درج کریں';
+  String get pleaseEnterYourFullName =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ù¾ÙˆØ±Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get onlineStatusOn => 'اب آپ آن لائن ہیں';
+  String get onlineStatusOn => 'Ø§Ø¨ Ø¢Ù¾ Ø¢Ù† Ù„Ø§Ø¦Ù† ÛÛŒÚº';
 
   @override
-  String get fullNameIsRequired => 'پورا نام ضروری ہے';
+  String get fullNameIsRequired => 'Ù¾ÙˆØ±Ø§ Ù†Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get enterYourEmail => 'اپنا ای میل درج کریں';
+  String get enterYourEmail => 'Ø§Ù¾Ù†Ø§ Ø§ÛŒ Ù…ÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get onlineStatusOff => 'اب آپ آف لائن ہیں';
+  String get onlineStatusOff => 'Ø§Ø¨ Ø¢Ù¾ Ø¢Ù Ù„Ø§Ø¦Ù† ÛÛŒÚº';
 
   @override
-  String get errorUpdatingStatus => 'اسٹیٹس اپ ڈیٹ کرنے میں خرابی';
+  String get errorUpdatingStatus =>
+      'Ø§Ø³Ù¹ÛŒÙ¹Ø³ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get appLoginCaption =>
-      'کوالٹی پروفیشنلز تلاش کرنے کے لیے آپ کی پسندیدہ ایپ۔';
+      'Ú©ÙˆØ§Ù„Ù¹ÛŒ Ù¾Ø±ÙˆÙÛŒØ´Ù†Ù„Ø² ØªÙ„Ø§Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¢Ù¾ Ú©ÛŒ Ù¾Ø³Ù†Ø¯ÛŒØ¯Û Ø§ÛŒÙ¾Û”';
 
   @override
-  String get mobileNumber => 'موبائل نمبر';
+  String get mobileNumber => 'Ù…ÙˆØ¨Ø§Ø¦Ù„ Ù†Ù…Ø¨Ø±';
 
   @override
-  String get continueText => 'جاری رکھیں';
+  String get continueText => 'Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾ÛŒÚº';
 
   @override
-  String get byContinuingYouAgreeToOur => 'جاری رکھ کر آپ ہمارے اس سے متفق ہیں';
+  String get byContinuingYouAgreeToOur =>
+      'Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾ Ú©Ø± Ø¢Ù¾ ÛÙ…Ø§Ø±Û’ Ø§Ø³ Ø³Û’ Ù…ØªÙÙ‚ ÛÛŒÚº';
 
   @override
   String get termsOfUseAndPrivacyPolicy =>
-      ' استعمال کی شرائط اور رازداری کی پالیسی';
+      ' Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©ÛŒ Ø´Ø±Ø§Ø¦Ø· Ø§ÙˆØ± Ø±Ø§Ø²Ø¯Ø§Ø±ÛŒ Ú©ÛŒ Ù¾Ø§Ù„ÛŒØ³ÛŒ';
 
   @override
-  String get rememberMe => 'مجھے یاد رکھیں';
+  String get rememberMe => 'Ù…Ø¬Ú¾Û’ ÛŒØ§Ø¯ Ø±Ú©Ú¾ÛŒÚº';
 
   @override
-  String get login => 'لاگ ان کریں';
+  String get login => 'Ù„Ø§Ú¯ Ø§Ù† Ú©Ø±ÛŒÚº';
 
   @override
-  String get monthlyRevenue => 'ماہانہ آمدنی';
+  String get monthlyRevenue => 'Ù…Ø§ÛØ§Ù†Û Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get admins => 'ایڈمنز';
+  String get admins => 'Ø§ÛŒÚˆÙ…Ù†Ø²';
 
   @override
-  String get banners => 'بینرز';
+  String get banners => 'Ø¨ÛŒÙ†Ø±Ø²';
 
   @override
-  String get customers => 'صارفین';
+  String get customers => 'ØµØ§Ø±ÙÛŒÙ†';
 
   @override
-  String get technicians => 'ٹیکنیشنز';
+  String get technicians => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø²';
 
   @override
-  String get payouts => 'ادائیگیاں';
+  String get payouts => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº';
 
   @override
-  String get faqs => 'سوالات';
+  String get faqs => 'Ø³ÙˆØ§Ù„Ø§Øª';
 
   @override
-  String get totalPayoutAmount => 'کل ادائیگی کی رقم';
+  String get totalPayoutAmount => 'Ú©Ù„ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø±Ù‚Ù…';
 
   @override
-  String get reviewPayoutDetails => 'ادائیگی کی تفصیلات کا جائزہ لیں';
+  String get reviewPayoutDetails =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ú©Ø§ Ø¬Ø§Ø¦Ø²Û Ù„ÛŒÚº';
 
   @override
-  String get manageOrders => 'آرڈرز کا انتظام کریں';
+  String get manageOrders => 'Ø¢Ø±ÚˆØ±Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get refreshStatus => 'اسٹیٹس ریفریش کریں';
+  String get refreshStatus => 'Ø§Ø³Ù¹ÛŒÙ¹Ø³ Ø±ÛŒÙØ±ÛŒØ´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get signOut => 'سائن آؤٹ';
+  String get signOut => 'Ø³Ø§Ø¦Ù† Ø¢Ø¤Ù¹';
 
   @override
-  String get rejectOrder => 'آرڈر مسترد کریں';
+  String get rejectOrder => 'Ø¢Ø±ÚˆØ± Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToRejectThisOrder =>
-      'کیا آپ واقعی اس آرڈر کو مسترد کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¢Ø±ÚˆØ± Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get loadingAgents => 'ٹیکنیشنز لوڈ ہو رہے ہیں...';
+  String get loadingAgents => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
   String get bonusCardDesc =>
-      'حاصل کردہ بونس ادائیگی کے لیے آپ کے بٹوے میں شامل کیا جائے گا۔';
+      'Ø­Ø§ØµÙ„ Ú©Ø±Ø¯Û Ø¨ÙˆÙ†Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ø¢Ù¾ Ú©Û’ Ø¨Ù¹ÙˆÛ’ Ù…ÛŒÚº Ø´Ø§Ù…Ù„ Ú©ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§Û”';
 
   @override
-  String get noReview => 'کوئی تبصرہ نہیں';
+  String get noReview => 'Ú©ÙˆØ¦ÛŒ ØªØ¨ØµØ±Û Ù†ÛÛŒÚº';
 
   @override
   String get areYouSureYouWantToAcceptThisNewTime =>
-      'کیا آپ واقعی اس نئے وقت کو قبول کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ù†Ø¦Û’ ÙˆÙ‚Øª Ú©Ùˆ Ù‚Ø¨ÙˆÙ„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get reject => 'مسترد کریں';
+  String get reject => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get walletBalance => 'بٹوے کا بیلنس';
+  String get walletBalance => 'Ø¨Ù¹ÙˆÛ’ Ú©Ø§ Ø¨ÛŒÙ„Ù†Ø³';
 
   @override
-  String get tip => 'ٹپ';
+  String get tip => 'Ù¹Ù¾';
 
   @override
-  String get availableToWork => 'کام کے لیے دستیاب';
+  String get availableToWork => 'Ú©Ø§Ù… Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨';
 
   @override
-  String get notAvailableToWork => 'کام کے لیے دستیاب نہیں';
+  String get notAvailableToWork => 'Ú©Ø§Ù… Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº';
 
   @override
-  String get choose => 'منتخب کریں';
+  String get choose => 'Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get availableLocations => 'دستیاب مقامات';
+  String get availableLocations => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ù…Ù‚Ø§Ù…Ø§Øª';
 
   @override
-  String get workHoursPricing => 'کام کے اوقات کی قیمتیں';
+  String get workHoursPricing => 'Ú©Ø§Ù… Ú©Û’ Ø§ÙˆÙ‚Ø§Øª Ú©ÛŒ Ù‚ÛŒÙ…ØªÛŒÚº';
 
   @override
-  String get workStartTime => 'کام شروع ہونے کا وقت';
+  String get workStartTime => 'Ú©Ø§Ù… Ø´Ø±ÙˆØ¹ ÛÙˆÙ†Û’ Ú©Ø§ ÙˆÙ‚Øª';
 
   @override
-  String get workEndTime => 'کام ختم ہونے کا وقت';
+  String get workEndTime => 'Ú©Ø§Ù… Ø®ØªÙ… ÛÙˆÙ†Û’ Ú©Ø§ ÙˆÙ‚Øª';
 
   @override
-  String get onWorkPrice => 'کام کے دوران کی قیمت';
+  String get onWorkPrice => 'Ú©Ø§Ù… Ú©Û’ Ø¯ÙˆØ±Ø§Ù† Ú©ÛŒ Ù‚ÛŒÙ…Øª';
 
   @override
-  String get offWorkPrice => 'کام کے بعد کی قیمت';
+  String get offWorkPrice => 'Ú©Ø§Ù… Ú©Û’ Ø¨Ø¹Ø¯ Ú©ÛŒ Ù‚ÛŒÙ…Øª';
 
   @override
-  String get generalPrice => 'عام قیمت';
+  String get generalPrice => 'Ø¹Ø§Ù… Ù‚ÛŒÙ…Øª';
 
   @override
-  String get chooseLocations => 'مقامات منتخب کریں';
+  String get chooseLocations => 'Ù…Ù‚Ø§Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseEnterAnOnWorkPrice =>
-      'براہ کرم کام کے دوران کی قیمت درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ø§Ù… Ú©Û’ Ø¯ÙˆØ±Ø§Ù† Ú©ÛŒ Ù‚ÛŒÙ…Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterOffWorkPrice => 'براہ کرم کام کے بعد کی قیمت درج کریں';
+  String get pleaseEnterOffWorkPrice =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ø§Ù… Ú©Û’ Ø¨Ø¹Ø¯ Ú©ÛŒ Ù‚ÛŒÙ…Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterAGeneralPrice => 'براہ کرم عام قیمت درج کریں';
+  String get pleaseEnterAGeneralPrice =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ø§Ù… Ù‚ÛŒÙ…Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get grantAdminAccess => 'ایڈمن رسائی دیں';
+  String get grantAdminAccess => 'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ø¯ÛŒÚº';
 
   @override
-  String get adminAccessManagement => 'ایڈمن رسائی کا انتظام';
+  String get adminAccessManagement => 'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù…';
 
   @override
-  String get searchByBookingId => 'بکنگ آئی ڈی سے تلاش کریں';
+  String get searchByBookingId => 'Ø¨Ú©Ù†Ú¯ Ø¢Ø¦ÛŒ ÚˆÛŒ Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get rejectingOrder => 'آرڈر مسترد کیا جا رہا ہے';
+  String get rejectingOrder => 'Ø¢Ø±ÚˆØ± Ù…Ø³ØªØ±Ø¯ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get failedToRejectOrder => 'آرڈر مسترد کرنے میں ناکامی';
+  String get failedToRejectOrder =>
+      'Ø¢Ø±ÚˆØ± Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get assigningBookingTo => 'بکنگ تفویض کی جا رہی ہے';
+  String get assigningBookingTo => 'Ø¨Ú©Ù†Ú¯ ØªÙÙˆÛŒØ¶ Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get failedToAssignBookingTo => 'بکنگ تفویض کرنے میں ناکامی';
+  String get failedToAssignBookingTo =>
+      'Ø¨Ú©Ù†Ú¯ ØªÙÙˆÛŒØ¶ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get completeOrder => 'آرڈر مکمل کریں';
+  String get completeOrder => 'Ø¢Ø±ÚˆØ± Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToCompleteThisOrder =>
-      'کیا آپ واقعی اس آرڈر کو مکمل کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¢Ø±ÚˆØ± Ú©Ùˆ Ù…Ú©Ù…Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get complete => 'مکمل';
+  String get complete => 'Ù…Ú©Ù…Ù„';
 
   @override
-  String get completingOrder => 'آرڈر مکمل کیا جا رہا ہے';
+  String get completingOrder => 'Ø¢Ø±ÚˆØ± Ù…Ú©Ù…Ù„ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get failedToCompleteOrder => 'آرڈر مکمل کرنے میں ناکامی';
+  String get failedToCompleteOrder =>
+      'Ø¢Ø±ÚˆØ± Ù…Ú©Ù…Ù„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get yourAccountHasBeenDeactivatedByAdmin =>
-      'آپ کا اکاؤنٹ ایڈمن نے غیر فعال کر دیا ہے';
+      'Ø¢Ù¾ Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø§ÛŒÚˆÙ…Ù† Ù†Û’ ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø± Ø¯ÛŒØ§ ÛÛ’';
 
   @override
-  String get assignTo => 'تفویض کریں';
+  String get assignTo => 'ØªÙÙˆÛŒØ¶ Ú©Ø±ÛŒÚº';
 
   @override
-  String get agent => 'ٹیکنیشن';
+  String get agent => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
-  String get assignToUser => 'صارف کو تفویض کریں';
+  String get assignToUser => 'ØµØ§Ø±Ù Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noAgentsAvailable => 'کوئی ٹیکنیشن دستیاب نہیں';
+  String get noAgentsAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº';
 
   @override
-  String get scheduledFor => 'کے لیے شیڈول کیا گیا';
+  String get scheduledFor => 'Ú©Û’ Ù„ÛŒÛ’ Ø´ÛŒÚˆÙˆÙ„ Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get services => 'خدمات';
+  String get services => 'Ø®Ø¯Ù…Ø§Øª';
 
   @override
-  String get highlightedServices => 'نمایاں خدمات';
+  String get highlightedServices => 'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Ø§Øª';
 
   @override
-  String get manageBanners => 'بینرز کا انتظام کریں';
+  String get manageBanners => 'Ø¨ÛŒÙ†Ø±Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get confirmDelete => 'حذف کرنے کی تصدیق کریں';
+  String get confirmDelete => 'Ø­Ø°Ù Ú©Ø±Ù†Û’ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get delete => 'حذف کریں';
+  String get delete => 'Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get bannerDeleted => 'بینر حذف کر دیا گیا';
+  String get bannerDeleted => 'Ø¨ÛŒÙ†Ø± Ø­Ø°Ù Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get failedToDeleteBanner => 'بینر حذف کرنے میں ناکامی';
+  String get failedToDeleteBanner =>
+      'Ø¨ÛŒÙ†Ø± Ø­Ø°Ù Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get failedToSaveBanner => 'بینر محفوظ کرنے میں ناکامی';
+  String get failedToSaveBanner =>
+      'Ø¨ÛŒÙ†Ø± Ù…Ø­ÙÙˆØ¸ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get active => 'فعال';
+  String get active => 'ÙØ¹Ø§Ù„';
 
   @override
-  String get showInPrimaryBanner => 'پرائمری بینر میں دکھائیں';
+  String get showInPrimaryBanner =>
+      'Ù¾Ø±Ø§Ø¦Ù…Ø±ÛŒ Ø¨ÛŒÙ†Ø± Ù…ÛŒÚº Ø¯Ú©Ú¾Ø§Ø¦ÛŒÚº';
 
   @override
   String get ifDisabledItWillShowInSecondaryBanner =>
-      'اگر غیر فعال ہو تو یہ سیکنڈری بینر میں دکھائے گا';
+      'Ø§Ú¯Ø± ØºÛŒØ± ÙØ¹Ø§Ù„ ÛÙˆ ØªÙˆ ÛŒÛ Ø³ÛŒÚ©Ù†ÚˆØ±ÛŒ Ø¨ÛŒÙ†Ø± Ù…ÛŒÚº Ø¯Ú©Ú¾Ø§Ø¦Û’ Ú¯Ø§';
 
   @override
-  String get pickImage => 'تصویر منتخب کریں';
+  String get pickImage => 'ØªØµÙˆÛŒØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get upload => 'اپ لوڈ کریں';
+  String get upload => 'Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
   String get failedToSaveHighlightedService =>
-      'نمایاں خدمت محفوظ کرنے میں ناکامی';
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Øª Ù…Ø­ÙÙˆØ¸ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get done => 'ہو گیا';
+  String get done => 'ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get addService => 'خدمت شامل کریں';
+  String get addService => 'Ø®Ø¯Ù…Øª Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noServicesSelected => 'کوئی خدمت منتخب نہیں کی گئی';
+  String get noServicesSelected =>
+      'Ú©ÙˆØ¦ÛŒ Ø®Ø¯Ù…Øª Ù…Ù†ØªØ®Ø¨ Ù†ÛÛŒÚº Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get failedToSaveService => 'خدمت محفوظ کرنے میں ناکامی';
+  String get failedToSaveService =>
+      'Ø®Ø¯Ù…Øª Ù…Ø­ÙÙˆØ¸ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get failedToCreateService => 'خدمت بنانے میں ناکامی';
+  String get failedToCreateService => 'Ø®Ø¯Ù…Øª Ø¨Ù†Ø§Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get failedToUpdateService => 'خدمت اپ ڈیٹ کرنے میں ناکامی';
+  String get failedToUpdateService =>
+      'Ø®Ø¯Ù…Øª Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get pleaseVerifyYourIqama =>
-      'براہ کرم کنفرمیشن باکس چیک کر کے اپنے اقامہ کی تصدیق کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù†ÙØ±Ù…ÛŒØ´Ù† Ø¨Ø§Ú©Ø³ Ú†ÛŒÚ© Ú©Ø± Ú©Û’ Ø§Ù¾Ù†Û’ Ø§Ù‚Ø§Ù…Û Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get uploadYourIqama => 'اپنا اقامہ اپ لوڈ کریں';
+  String get uploadYourIqama => 'Ø§Ù¾Ù†Ø§ Ø§Ù‚Ø§Ù…Û Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get locationPermissionsAreDenied => 'مقام کی اجازت مسترد کر دی گئی ہے';
+  String get locationPermissionsAreDenied =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’';
 
   @override
   String get locationPermissionsArePermanentlyDenied =>
-      'مقام کی اجازت مستقل طور پر مسترد کر دی گئی ہے';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªÙ‚Ù„ Ø·ÙˆØ± Ù¾Ø± Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’';
 
   @override
-  String get locationPermissionRequired => 'مقام کی اجازت درکار ہے';
+  String get locationPermissionRequired =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯Ø±Ú©Ø§Ø± ÛÛ’';
 
   @override
   String get locationPermissionPermanentlyDeniedMessage =>
-      'مقام کی اجازت مستقل طور پر مسترد کر دی گئی ہے۔ نوکری کی پیشکشیں حاصل کرنے کے لیے براہ کرم انہیں ایپ کی ترتیبات میں فعال کریں۔';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªÙ‚Ù„ Ø·ÙˆØ± Ù¾Ø± Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’Û” Ù†ÙˆÚ©Ø±ÛŒ Ú©ÛŒ Ù¾ÛŒØ´Ú©Ø´ÛŒÚº Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†ÛÛŒÚº Ø§ÛŒÙ¾ Ú©ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ù…ÛŒÚº ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get pleaseEnableLocationServices =>
-      'ٹیکنیشن کے طور پر ایپ کا استعمال جاری رکھنے کے لیے براہ کرم لوکیشن سروسز کو فعال کریں۔';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ø§ÛŒÙ¾ Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù„ÙˆÚ©ÛŒØ´Ù† Ø³Ø±ÙˆØ³Ø² Ú©Ùˆ ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get fetching => 'حاصل کیا جا رہا ہے...';
+  String get fetching => 'Ø­Ø§ØµÙ„ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get currentGeopoint => 'موجودہ جیو پوائنٹ';
+  String get currentGeopoint => 'Ù…ÙˆØ¬ÙˆØ¯Û Ø¬ÛŒÙˆ Ù¾ÙˆØ§Ø¦Ù†Ù¹';
 
   @override
-  String get latitudeLabel => 'عرض بلد';
+  String get latitudeLabel => 'Ø¹Ø±Ø¶ Ø¨Ù„Ø¯';
 
   @override
-  String get longitudeLabel => 'طول بلد';
+  String get longitudeLabel => 'Ø·ÙˆÙ„ Ø¨Ù„Ø¯';
 
   @override
-  String get locationSaved => 'مقام محفوظ کر لیا گیا';
+  String get locationSaved => 'Ù…Ù‚Ø§Ù… Ù…Ø­ÙÙˆØ¸ Ú©Ø± Ù„ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get errorDetectingLocation => 'مقام کا پتہ لگانے میں خرابی';
+  String get errorDetectingLocation =>
+      'Ù…Ù‚Ø§Ù… Ú©Ø§ Ù¾ØªÛ Ù„Ú¯Ø§Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorGettingAddress => 'پتہ حاصل کرنے میں خرابی';
+  String get errorGettingAddress =>
+      'Ù¾ØªÛ Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get pleaseSelectYourIdDocument =>
-      'براہ کرم اپنی شناختی دستاویز منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†ÛŒ Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseSelectAtLeastOneJobRole =>
-      'براہ کرم کم از کم ایک جاب رول منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø¬Ø§Ø¨ Ø±ÙˆÙ„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get unknown => 'نامعلوم';
+  String get unknown => 'Ù†Ø§Ù…Ø¹Ù„ÙˆÙ…';
 
   @override
-  String get timedOut => 'وقت ختم ہو گیا';
+  String get timedOut => 'ÙˆÙ‚Øª Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get technicianNotFound => 'ٹیکنیشن نہیں ملا';
+  String get technicianNotFound => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get otpAutoVerified => 'او ٹی پی خودکار طور پر تصدیق شدہ';
+  String get otpAutoVerified =>
+      'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ø®ÙˆØ¯Ú©Ø§Ø± Ø·ÙˆØ± Ù¾Ø± ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û';
 
   @override
-  String get somethingWentWrongTryAgain => 'کچھ غلط ہو گیا، دوبارہ کوشش کریں';
+  String get somethingWentWrongTryAgain =>
+      'Ú©Ú†Ú¾ ØºÙ„Ø· ÛÙˆ Ú¯ÛŒØ§ØŒ Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get otpSent => 'او ٹی پی بھیج دیا گیا';
+  String get otpSent => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get otpHasbeensentto => 'او ٹی پی بھیج دیا گیا ہے کو';
+  String get otpHasbeensentto =>
+      'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’ Ú©Ùˆ';
 
   @override
   String get anErrorOccurredPleaseTryAgainLater =>
-      'ایک خرابی پیش آگئی، براہ کرم بعد میں دوبارہ کوشش کریں';
+      'Ø§ÛŒÚ© Ø®Ø±Ø§Ø¨ÛŒ Ù¾ÛŒØ´ Ø¢Ú¯Ø¦ÛŒØŒ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¨Ø¹Ø¯ Ù…ÛŒÚº Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseEnterAValidPhoneNumber =>
-      'براہ کرم ایک درست فون نمبر درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ø¯Ø±Ø³Øª ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get invalidOtp => 'غلط او ٹی پی';
+  String get invalidOtp => 'ØºÙ„Ø· Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ';
 
   @override
-  String get otpVerification => 'او ٹی پی کی تصدیق';
+  String get otpVerification => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚';
 
   @override
   String get enterTheOtpSentToTheNumber =>
-      'نمبر پر بھیجا گیا او ٹی پی درج کریں ';
+      'Ù†Ù…Ø¨Ø± Ù¾Ø± Ø¨Ú¾ÛŒØ¬Ø§ Ú¯ÛŒØ§ Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº ';
 
   @override
-  String get enterOtp => 'او ٹی پی درج کریں';
+  String get enterOtp => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get verifyOtp => 'او ٹی پی کی تصدیق کریں';
+  String get verifyOtp => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get language => 'زبان';
+  String get language => 'Ø²Ø¨Ø§Ù†';
 
   @override
-  String get logout => 'لاگ آؤٹ';
+  String get logout => 'Ù„Ø§Ú¯ Ø¢Ø¤Ù¹';
 
   @override
   String get areYouSureYouWantToLogout =>
-      'کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ù„Ø§Ú¯ Ø¢Ø¤Ù¹ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get account => 'اکاؤنٹ';
+  String get account => 'Ø§Ú©Ø§Ø¤Ù†Ù¹';
 
   @override
-  String get wishlist => 'پسندیدہ فہرست';
+  String get wishlist => 'Ù¾Ø³Ù†Ø¯ÛŒØ¯Û ÙÛØ±Ø³Øª';
 
   @override
-  String get selectLanguage => 'زبان منتخب کریں';
+  String get selectLanguage => 'Ø²Ø¨Ø§Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get failedToLoadCategories => 'زمرے لوڈ کرنے میں ناکامی';
+  String get failedToLoadCategories =>
+      'Ø²Ù…Ø±Û’ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get home => 'ہوم';
+  String get home => 'ÛÙˆÙ…';
 
   @override
-  String get myBooking => 'میری بکنگ';
+  String get myBooking => 'Ù…ÛŒØ±ÛŒ Ø¨Ú©Ù†Ú¯';
 
   @override
-  String get categories => 'زمرے';
+  String get categories => 'Ø²Ù…Ø±Û’';
 
   @override
-  String get error => 'خرابی';
+  String get error => 'Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get searchHere => 'یہاں تلاش کریں';
+  String get searchHere => 'ÛŒÛØ§Úº ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get availableServices => 'دستیاب خدمات';
+  String get availableServices => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ø®Ø¯Ù…Ø§Øª';
 
   @override
-  String get failedToLoadLocations => 'مقامات لوڈ کرنے میں ناکامی';
+  String get failedToLoadLocations =>
+      'Ù…Ù‚Ø§Ù…Ø§Øª Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get retry => 'دوبارہ کوشش کریں';
+  String get retry => 'Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectLocation => 'مقام منتخب کریں';
+  String get selectLocation => 'Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get profileUpdatedSuccessfully =>
-      'پروفائل کامیابی کے ساتھ اپ ڈیٹ ہو گیا';
+      'Ù¾Ø±ÙˆÙØ§Ø¦Ù„ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ú©Û’ Ø³Ø§ØªÚ¾ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get failedToUpdateProfile => 'پروفائل اپ ڈیٹ کرنے میں ناکامی';
+  String get failedToUpdateProfile =>
+      'Ù¾Ø±ÙˆÙØ§Ø¦Ù„ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get profileManagement => 'پروفائل کا انتظام';
+  String get profileManagement => 'Ù¾Ø±ÙˆÙØ§Ø¦Ù„ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù…';
 
   @override
-  String get yourName => 'آپ کا نام';
+  String get yourName => 'Ø¢Ù¾ Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get nameIsRequired => 'نام ضروری ہے';
+  String get nameIsRequired => 'Ù†Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get enterAValidName => 'درست نام درج کریں';
+  String get enterAValidName => 'Ø¯Ø±Ø³Øª Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get emailAddress => 'ای میل ایڈریس';
+  String get emailAddress => 'Ø§ÛŒ Ù…ÛŒÙ„ Ø§ÛŒÚˆØ±ÛŒØ³';
 
   @override
-  String get emailIsRequired => 'ای میل ضروری ہے';
+  String get emailIsRequired => 'Ø§ÛŒ Ù…ÛŒÙ„ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get enterAValidEmail => 'درست ای میل درج کریں';
+  String get enterAValidEmail => 'Ø¯Ø±Ø³Øª Ø§ÛŒ Ù…ÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get phoneNumber => 'فون نمبر';
+  String get phoneNumber => 'ÙÙˆÙ† Ù†Ù…Ø¨Ø±';
 
   @override
-  String get locationIsRequired => 'مقام ضروری ہے';
+  String get locationIsRequired => 'Ù…Ù‚Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get buildingNumberIsRequired => 'بلڈنگ نمبر ضروری ہے';
+  String get buildingNumberIsRequired => 'Ø¨Ù„ÚˆÙ†Ú¯ Ù†Ù…Ø¨Ø± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get streetName => 'گلی کا نام';
+  String get streetName => 'Ú¯Ù„ÛŒ Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get streetNameIsRequired => 'گلی کا نام ضروری ہے';
+  String get streetNameIsRequired => 'Ú¯Ù„ÛŒ Ú©Ø§ Ù†Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get cityName => 'شہر کا نام';
+  String get cityName => 'Ø´ÛØ± Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get cityNameIsRequired => 'شہر کا نام ضروری ہے';
+  String get cityNameIsRequired => 'Ø´ÛØ± Ú©Ø§ Ù†Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get postcode => 'پوسٹ کوڈ';
+  String get postcode => 'Ù¾ÙˆØ³Ù¹ Ú©ÙˆÚˆ';
 
   @override
-  String get postcodeIsRequired => 'پوسٹ کوڈ ضروری ہے';
+  String get postcodeIsRequired => 'Ù¾ÙˆØ³Ù¹ Ú©ÙˆÚˆ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get extensionNumber => 'ایکسٹینشن نمبر';
+  String get extensionNumber => 'Ø§ÛŒÚ©Ø³Ù¹ÛŒÙ†Ø´Ù† Ù†Ù…Ø¨Ø±';
 
   @override
-  String get extensionNumberIsRequired => 'ایکسٹینشن نمبر ضروری ہے';
+  String get extensionNumberIsRequired =>
+      'Ø§ÛŒÚ©Ø³Ù¹ÛŒÙ†Ø´Ù† Ù†Ù…Ø¨Ø± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get update => 'اپ ڈیٹ کریں';
+  String get update => 'Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountCreatedSuccessfully => 'اکاؤنٹ کامیابی سے بن گیا';
+  String get accountCreatedSuccessfully =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ù† Ú¯ÛŒØ§';
 
   @override
-  String get failedToCreateAccount => 'اکاؤنٹ بنانے میں ناکامی';
+  String get failedToCreateAccount =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù†Ø§Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get pleaseFillTheInputBelowHereToContinue =>
-      'جاری رکھنے کے لیے براہ کرم نیچے دی گئی معلومات پُر کریں';
+      'Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù†ÛŒÚ†Û’ Ø¯ÛŒ Ú¯Ø¦ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ù¾ÙØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get createAccount => 'اکاؤنٹ بنائیں';
+  String get createAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù†Ø§Ø¦ÛŒÚº';
 
   @override
-  String get failedToLoadContent => 'مواد لوڈ کرنے میں ناکامی';
+  String get failedToLoadContent =>
+      'Ù…ÙˆØ§Ø¯ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get noAddress => 'کوئی پتہ نہیں';
+  String get noAddress => 'Ú©ÙˆØ¦ÛŒ Ù¾ØªÛ Ù†ÛÛŒÚº';
 
   @override
-  String get searchForAService => 'خدمت تلاش کریں';
+  String get searchForAService => 'Ø®Ø¯Ù…Øª ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get jobCategories => 'جاب کیٹیگریز';
+  String get jobCategories => 'Ø¬Ø§Ø¨ Ú©ÛŒÙ¹ÛŒÚ¯Ø±ÛŒØ²';
 
   @override
   String get failedToLoadDataPleaseTryAgainLater =>
-      'ڈیٹا لوڈ کرنے میں ناکامی۔ براہ کرم بعد میں دوبارہ کوشش کریں۔';
+      'ÚˆÛŒÙ¹Ø§ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¨Ø¹Ø¯ Ù…ÛŒÚº Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get noBookings => 'کوئی بکنگ نہیں';
+  String get noBookings => 'Ú©ÙˆØ¦ÛŒ Ø¨Ú©Ù†Ú¯ Ù†ÛÛŒÚº';
 
   @override
-  String get noBookingsFound => 'کوئی بکنگ نہیں ملی۔';
+  String get noBookingsFound => 'Ú©ÙˆØ¦ÛŒ Ø¨Ú©Ù†Ú¯ Ù†ÛÛŒÚº Ù…Ù„ÛŒÛ”';
 
   @override
-  String get searchServices => 'سروسز تلاش کریں...';
+  String get searchServices => 'Ø³Ø±ÙˆØ³Ø² ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº...';
 
   @override
   String get noServicesInYourWishlist =>
-      'آپ کی پسندیدہ فہرست میں کوئی خدمات نہیں ہیں';
+      'Ø¢Ù¾ Ú©ÛŒ Ù¾Ø³Ù†Ø¯ÛŒØ¯Û ÙÛØ±Ø³Øª Ù…ÛŒÚº Ú©ÙˆØ¦ÛŒ Ø®Ø¯Ù…Ø§Øª Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get failedToSaveBooking => 'بکنگ محفوظ کرنے میں ناکامی';
+  String get failedToSaveBooking =>
+      'Ø¨Ú©Ù†Ú¯ Ù…Ø­ÙÙˆØ¸ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get morning => 'صبح';
+  String get morning => 'ØµØ¨Ø­';
 
   @override
-  String get afterNoon => 'دوپہر';
+  String get afterNoon => 'Ø¯ÙˆÙ¾ÛØ±';
 
   @override
-  String get confirmRequest => 'درخواست کی تصدیق کریں';
+  String get confirmRequest => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get bonusAmount => 'بونس کی رقم';
+  String get bonusAmount => 'Ø¨ÙˆÙ†Ø³ Ú©ÛŒ Ø±Ù‚Ù…';
 
   @override
-  String get requestBonusPayout => 'بونس کی ادائیگی کی درخواست کریں';
+  String get requestBonusPayout =>
+      'Ø¨ÙˆÙ†Ø³ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚº';
 
   @override
   String get noBonusAvailableToClaim =>
-      'کلیم کرنے کے لیے کوئی بونس دستیاب نہیں ہے';
+      'Ú©Ù„ÛŒÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ú©ÙˆØ¦ÛŒ Ø¨ÙˆÙ†Ø³ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get monthlyBonusEarned => 'ماہانہ بونس حاصل کیا گیا';
+  String get monthlyBonusEarned =>
+      'Ù…Ø§ÛØ§Ù†Û Ø¨ÙˆÙ†Ø³ Ø­Ø§ØµÙ„ Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
   String get areYouSureYouWantToRequestAPayoutForYourMonthlyBonus =>
-      'کیا آپ واقعی اپنے ماہانہ بونس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ù¾Ù†Û’ Ù…Ø§ÛØ§Ù†Û Ø¨ÙˆÙ†Ø³ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get evening => 'شام';
+  String get evening => 'Ø´Ø§Ù…';
 
   @override
-  String get serviceBookedSuccessfully => 'خدمت کامیابی سے بک ہو گئی';
+  String get serviceBookedSuccessfully =>
+      'Ø®Ø¯Ù…Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ú© ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get checkForBookingStatus =>
-      'اپنی بکنگ کا اسٹیٹس \'میری بکنگ\' سیکشن میں چیک کریں';
+      'Ø§Ù¾Ù†ÛŒ Ø¨Ú©Ù†Ú¯ Ú©Ø§ Ø§Ø³Ù¹ÛŒÙ¹Ø³ \'Ù…ÛŒØ±ÛŒ Ø¨Ú©Ù†Ú¯\' Ø³ÛŒÚ©Ø´Ù† Ù…ÛŒÚº Ú†ÛŒÚ© Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectDateTime => 'تاریخ اور وقت منتخب کریں';
+  String get selectDateTime => 'ØªØ§Ø±ÛŒØ® Ø§ÙˆØ± ÙˆÙ‚Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get completeYourBooking => 'اپنی بکنگ مکمل کریں';
+  String get completeYourBooking => 'Ø§Ù¾Ù†ÛŒ Ø¨Ú©Ù†Ú¯ Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectDate => 'تاریخ منتخب کریں';
+  String get selectDate => 'ØªØ§Ø±ÛŒØ® Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get availableTimeSlot => 'دستیاب ٹائم سلاٹ';
+  String get availableTimeSlot => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ù¹Ø§Ø¦Ù… Ø³Ù„Ø§Ù¹';
 
   @override
-  String get addNotes => 'نوٹس شامل کریں';
+  String get addNotes => 'Ù†ÙˆÙ¹Ø³ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get cashInHand => 'نقد ادائیگی';
+  String get cashInHand => 'Ù†Ù‚Ø¯ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ';
 
   @override
-  String get netBankingUpiCard => 'نیٹ بینکنگ / کارڈ';
+  String get netBankingUpiCard => 'Ù†ÛŒÙ¹ Ø¨ÛŒÙ†Ú©Ù†Ú¯ / Ú©Ø§Ø±Úˆ';
 
   @override
-  String get pleaseSelectADate => 'براہ کرم تاریخ منتخب کریں';
+  String get pleaseSelectADate =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ§Ø±ÛŒØ® Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get back => 'پیچھے';
+  String get back => 'Ù¾ÛŒÚ†Ú¾Û’';
 
   @override
-  String get bookAppointment => 'اپائنٹمنٹ بک کریں';
+  String get bookAppointment => 'Ø§Ù¾Ø§Ø¦Ù†Ù¹Ù…Ù†Ù¹ Ø¨Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get filter => 'فلٹر';
+  String get filter => 'ÙÙ„Ù¹Ø±';
 
   @override
-  String get price => 'قیمت';
+  String get price => 'Ù‚ÛŒÙ…Øª';
 
   @override
-  String get clear => 'صاف کریں';
+  String get clear => 'ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get reviewSubmittedSuccessfully => 'تبصرہ کامیابی سے جمع ہو گیا۔';
+  String get reviewSubmittedSuccessfully =>
+      'ØªØ¨ØµØ±Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¬Ù…Ø¹ ÛÙˆ Ú¯ÛŒØ§Û”';
 
   @override
-  String get anErrorOccurred => 'ایک خرابی پیش آگئی۔';
+  String get anErrorOccurred => 'Ø§ÛŒÚ© Ø®Ø±Ø§Ø¨ÛŒ Ù¾ÛŒØ´ Ø¢Ú¯Ø¦ÛŒÛ”';
 
   @override
-  String get submitAReview => 'درجہ بندی جمع کرائیں';
+  String get submitAReview => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒÚº';
 
   @override
-  String get overallRating => 'مجموعی درجہ بندی';
+  String get overallRating => 'Ù…Ø¬Ù…ÙˆØ¹ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get writeYourReviewHere => 'اپنا تبصرہ یہاں لکھیں';
+  String get writeYourReviewHere => 'Ø§Ù¾Ù†Ø§ ØªØ¨ØµØ±Û ÛŒÛØ§Úº Ù„Ú©Ú¾ÛŒÚº';
 
   @override
-  String get pleaseWriteAReview => 'براہ کرم ایک تبصرہ لکھیں';
+  String get pleaseWriteAReview =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© ØªØ¨ØµØ±Û Ù„Ú©Ú¾ÛŒÚº';
 
   @override
-  String get cancel => 'منسوخ کریں';
+  String get cancel => 'Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get bookingCancelled => 'بکنگ منسوخ ہو گئی';
+  String get bookingCancelled => 'Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get failedToCancelBooking => 'بکنگ منسوخ کرنے میں ناکامی';
+  String get failedToCancelBooking =>
+      'Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get areYouSureToWantCancelBooking =>
-      'کیا آپ واقعی بکنگ منسوخ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get youWillBeRefundedTheFullAmount =>
-      'آپ کو پوری رقم واپس کر دی جائے گی';
+      'Ø¢Ù¾ Ú©Ùˆ Ù¾ÙˆØ±ÛŒ Ø±Ù‚Ù… ÙˆØ§Ù¾Ø³ Ú©Ø± Ø¯ÛŒ Ø¬Ø§Ø¦Û’ Ú¯ÛŒ';
 
   @override
-  String get no => 'نہیں';
+  String get no => 'Ù†ÛÛŒÚº';
 
   @override
-  String get yesCancel => 'جی ہاں، منسوخ کریں';
+  String get yesCancel => 'Ø¬ÛŒ ÛØ§ÚºØŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get failedToLoadServices => 'خدمات لوڈ کرنے میں ناکامی';
+  String get failedToLoadServices =>
+      'Ø®Ø¯Ù…Ø§Øª Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get writeAReview => 'تبصرہ لکھیں';
+  String get writeAReview => 'ØªØ¨ØµØ±Û Ù„Ú©Ú¾ÛŒÚº';
 
   @override
-  String get reviewSubmitted => 'درجہ بندی جمع کرائی گئی';
+  String get reviewSubmitted => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get canceled => 'منسوخ کر دیا گیا';
+  String get canceled => 'Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get requestService => 'خدمت کی درخواست کریں';
+  String get requestService => 'Ø®Ø¯Ù…Øª Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚº';
 
   @override
-  String get submit => 'جمع کرائیں';
+  String get submit => 'Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒÚº';
 
   @override
-  String get sar => 'سعودی ریال';
+  String get sar => 'Ø³Ø¹ÙˆØ¯ÛŒ Ø±ÛŒØ§Ù„';
 
   @override
-  String get serviceDescription => 'خدمت کی تفصیل';
+  String get serviceDescription => 'Ø®Ø¯Ù…Øª Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get serviceInfo => 'خدمت کی معلومات';
+  String get serviceInfo => 'Ø®Ø¯Ù…Øª Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get serviceName => 'خدمت کا نام';
+  String get serviceName => 'Ø®Ø¯Ù…Øª Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get customerInfo => 'صارف کی معلومات';
+  String get customerInfo => 'ØµØ§Ø±Ù Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get bookingInfo => 'بکنگ کی معلومات';
+  String get bookingInfo => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get agentInfo => 'ٹیکنیشن کی معلومات';
+  String get agentInfo => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get reviewInfo => 'درجہ بندی اور تبصرے کی معلومات';
+  String get reviewInfo =>
+      'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø§ÙˆØ± ØªØ¨ØµØ±Û’ Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get issueImage => 'مسئلہ کی تصویر';
+  String get issueImage => 'Ù…Ø³Ø¦Ù„Û Ú©ÛŒ ØªØµÙˆÛŒØ±';
 
   @override
-  String get issueVideo => 'مسئلہ کی ویڈیو';
+  String get issueVideo => 'Ù…Ø³Ø¦Ù„Û Ú©ÛŒ ÙˆÛŒÚˆÛŒÙˆ';
 
   @override
-  String get tapToZoom => 'زوم کرنے کے لیے تھپتھپائیں';
+  String get tapToZoom => 'Ø²ÙˆÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get email => 'ای میل';
+  String get email => 'Ø§ÛŒ Ù…ÛŒÙ„';
 
   @override
-  String get location => 'مقام';
+  String get location => 'Ù…Ù‚Ø§Ù…';
 
   @override
-  String get address => 'پتہ';
+  String get address => 'Ù¾ØªÛ';
 
   @override
-  String get buildingNumber => 'بلڈنگ نمبر';
+  String get buildingNumber => 'Ø¨Ù„ÚˆÙ†Ú¯ Ù†Ù…Ø¨Ø±';
 
   @override
-  String get street => 'گلی';
+  String get street => 'Ú¯Ù„ÛŒ';
 
   @override
-  String get city => 'شہر';
+  String get city => 'Ø´ÛØ±';
 
   @override
-  String get postCode => 'پوسٹ کوڈ';
+  String get postCode => 'Ù¾ÙˆØ³Ù¹ Ú©ÙˆÚˆ';
 
   @override
-  String get bookedFor => 'کے لیے بک کیا گیا';
+  String get bookedFor => 'Ú©Û’ Ù„ÛŒÛ’ Ø¨Ú© Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get paymentMode => 'ادائیگی کا طریقہ';
+  String get paymentMode => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø·Ø±ÛŒÙ‚Û';
 
   @override
-  String get paymentStatus => 'ادائیگی کی صورتحال';
+  String get paymentStatus => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get bookingStatus => 'بکنگ کی صورتحال';
+  String get bookingStatus => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get bookingNote => 'مسئلے کی تفصیل';
+  String get bookingNote => 'Ù…Ø³Ø¦Ù„Û’ Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get bookedAt => 'بک کیا گیا بروز';
+  String get bookedAt => 'Ø¨Ú© Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get rating => 'درجہ بندی';
+  String get rating => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get review => 'تبصرہ';
+  String get review => 'ØªØ¨ØµØ±Û';
 
   @override
-  String get reviewedAt => 'درجہ بندی کی گئی بروز';
+  String get reviewedAt => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ú©ÛŒ Ú¯Ø¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get manage => 'انتظام کریں';
+  String get manage => 'Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageServices => 'خدمات کا انتظام کریں';
+  String get manageServices => 'Ø®Ø¯Ù…Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageHighlightedServices => 'نمایاں خدمات کا انتظام کریں';
+  String get manageHighlightedServices =>
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageAgents => 'ٹیکنیشنز کا انتظام کریں';
+  String get manageAgents => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseEnterYourEmailToResetPassword =>
-      'پاس ورڈ ری سیٹ کرنے کے لیے براہ کرم اپنا ای میل درج کریں';
+      'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø±ÛŒ Ø³ÛŒÙ¹ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ø§ÛŒ Ù…ÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get passwordResetEmailSent =>
-      'پاس ورڈ ری سیٹ ای میل بھیج دی گئی۔ براہ کرم اپنا ای میل چیک کریں';
+      'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø±ÛŒ Ø³ÛŒÙ¹ Ø§ÛŒ Ù…ÛŒÙ„ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒ Ú¯Ø¦ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ø§ÛŒ Ù…ÛŒÙ„ Ú†ÛŒÚ© Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterYourEmail => 'براہ کرم اپنا ای میل درج کریں';
+  String get pleaseEnterYourEmail =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ø§ÛŒ Ù…ÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterYourPassword => 'براہ کرم اپنا پاس ورڈ درج کریں';
+  String get pleaseEnterYourPassword =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get password => 'پاس ورڈ';
+  String get password => 'Ù¾Ø§Ø³ ÙˆØ±Úˆ';
 
   @override
-  String get forgotPassword => 'پاس ورڈ بھول گئے';
+  String get forgotPassword => 'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø¨Ú¾ÙˆÙ„ Ú¯Ø¦Û’';
 
   @override
-  String get register => 'رجسٹر کریں';
+  String get register => 'Ø±Ø¬Ø³Ù¹Ø± Ú©Ø±ÛŒÚº';
 
   @override
-  String get deleteAccount => 'اکاؤنٹ حذف کریں';
+  String get deleteAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToApproveAgent =>
-      'کیا آپ واقعی منظوری دینا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ù…Ù†Ø¸ÙˆØ±ÛŒ Ø¯ÛŒÙ†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToDisapproveAgent =>
-      'کیا آپ واقعی نامنظور کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ù†Ø§Ù…Ù†Ø¸ÙˆØ± Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get yesText => 'جی ہاں';
+  String get yesText => 'Ø¬ÛŒ ÛØ§Úº';
 
   @override
-  String get cropImage => 'تصویر کراپ کریں';
+  String get cropImage => 'ØªØµÙˆÛŒØ± Ú©Ø±Ø§Ù¾ Ú©Ø±ÛŒÚº';
 
   @override
-  String get label => 'لیبل';
+  String get label => 'Ù„ÛŒØ¨Ù„';
 
   @override
-  String get url => 'یو آر ایل';
+  String get url => 'ÛŒÙˆ Ø¢Ø± Ø§ÛŒÙ„';
 
   @override
-  String get title => 'عنوان';
+  String get title => 'Ø¹Ù†ÙˆØ§Ù†';
 
   @override
-  String get titleArabic => 'عنوان (عربی)';
+  String get titleArabic => 'Ø¹Ù†ÙˆØ§Ù† (Ø¹Ø±Ø¨ÛŒ)';
 
   @override
-  String get name => 'نام';
+  String get name => 'Ù†Ø§Ù…';
 
   @override
-  String get nameArabic => 'نام (عربی)';
+  String get nameArabic => 'Ù†Ø§Ù… (Ø¹Ø±Ø¨ÛŒ)';
 
   @override
-  String get description => 'تفصیل';
+  String get description => 'ØªÙØµÛŒÙ„';
 
   @override
-  String get descriptionArabic => 'تفصیل (عربی)';
+  String get descriptionArabic => 'ØªÙØµÛŒÙ„ (Ø¹Ø±Ø¨ÛŒ)';
 
   @override
-  String get category => 'زمرہ';
+  String get category => 'Ø²Ù…Ø±Û';
 
   @override
-  String get sortOrder => 'ترتیب دیں';
+  String get sortOrder => 'ØªØ±ØªÛŒØ¨ Ø¯ÛŒÚº';
 
   @override
   String get pleaseEnterValidEmail =>
-      'براہ کرم ایک درست ای میل ایڈریس درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ø¯Ø±Ø³Øª Ø§ÛŒ Ù…ÛŒÙ„ Ø§ÛŒÚˆØ±ÛŒØ³ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get emailNotRegistered => 'ای میل رجسٹرڈ نہیں ہے';
+  String get emailNotRegistered => 'Ø§ÛŒ Ù…ÛŒÙ„ Ø±Ø¬Ø³Ù¹Ø±Úˆ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get invalidEmailFormat => 'ای میل کی شکل غلط ہے';
+  String get invalidEmailFormat => 'Ø§ÛŒ Ù…ÛŒÙ„ Ú©ÛŒ Ø´Ú©Ù„ ØºÙ„Ø· ÛÛ’';
 
   @override
-  String get tooManyRequests => 'بہت زیادہ درخواستیں';
+  String get tooManyRequests => 'Ø¨ÛØª Ø²ÛŒØ§Ø¯Û Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº';
 
   @override
-  String get netError => 'نیٹ ورک کی خرابی';
+  String get netError => 'Ù†ÛŒÙ¹ ÙˆØ±Ú© Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get wrongPassword => 'غلط پاس ورڈ';
+  String get wrongPassword => 'ØºÙ„Ø· Ù¾Ø§Ø³ ÙˆØ±Úˆ';
 
   @override
-  String get userNotFound => 'صارف نہیں ملا';
+  String get userNotFound => 'ØµØ§Ø±Ù Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get userDisabled => 'صارف کا اکاؤنٹ معطل ہے';
+  String get userDisabled => 'ØµØ§Ø±Ù Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…Ø¹Ø·Ù„ ÛÛ’';
 
   @override
-  String get deletingAccount => 'اکاؤنٹ حذف کیا جا رہا ہے...';
+  String get deletingAccount =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
   String get requiresRecentLogin =>
-      'اس آپریشن کے لیے حالیہ تصدیق ضروری ہے۔ براہ کرم لاگ آؤٹ کریں اور دوبارہ لاگ ان کریں۔';
+      'Ø§Ø³ Ø¢Ù¾Ø±ÛŒØ´Ù† Ú©Û’ Ù„ÛŒÛ’ Ø­Ø§Ù„ÛŒÛ ØªØµØ¯ÛŒÙ‚ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù„Ø§Ú¯ Ø¢Ø¤Ù¹ Ú©Ø±ÛŒÚº Ø§ÙˆØ± Ø¯ÙˆØ¨Ø§Ø±Û Ù„Ø§Ú¯ Ø§Ù† Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get resetPasswordError => 'پاس ورڈ ری سیٹ کرنے میں خرابی';
+  String get resetPasswordError =>
+      'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø±ÛŒ Ø³ÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get incorrectPassword => 'غلط پاس ورڈ';
+  String get incorrectPassword => 'ØºÙ„Ø· Ù¾Ø§Ø³ ÙˆØ±Úˆ';
 
   @override
-  String get accountDisabled => 'اکاؤنٹ معطل ہے';
+  String get accountDisabled => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…Ø¹Ø·Ù„ ÛÛ’';
 
   @override
-  String get invalidCredentials => 'غلط اسناد';
+  String get invalidCredentials => 'ØºÙ„Ø· Ø§Ø³Ù†Ø§Ø¯';
 
   @override
-  String get loginError => 'لاگ ان خرابی';
+  String get loginError => 'Ù„Ø§Ú¯ Ø§Ù† Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get passwordMustBeAtleast6Characters =>
-      'پاس ورڈ کم از کم 6 حروف طویل ہونا چاہیے';
+      'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ú©Ù… Ø§Ø² Ú©Ù… 6 Ø­Ø±ÙˆÙ Ø·ÙˆÛŒÙ„ ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pending => 'زیر التوا';
+  String get pending => 'Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§';
 
   @override
-  String get rejected => 'مسترد شدہ';
+  String get rejected => 'Ù…Ø³ØªØ±Ø¯ Ø´Ø¯Û';
 
   @override
-  String get accepted => 'تصدیق شدہ';
+  String get accepted => 'ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û';
 
   @override
-  String get cancelled => 'منسوخ شدہ';
+  String get cancelled => 'Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û';
 
   @override
-  String get bookings => 'بکنگز';
+  String get bookings => 'Ø¨Ú©Ù†Ú¯Ø²';
 
   @override
-  String get bookedOn => 'بک کیا گیا بروز';
+  String get bookedOn => 'Ø¨Ú© Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get agentsAvailable => 'ٹیکنیشنز دستیاب ہیں';
+  String get agentsAvailable => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ø¯Ø³ØªÛŒØ§Ø¨ ÛÛŒÚº';
 
   @override
-  String get acceptedAt => 'تصدیق کیا گیا بروز';
+  String get acceptedAt => 'ØªØµØ¯ÛŒÙ‚ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get rejectedAt => 'مسترد کیا گیا بروز';
+  String get rejectedAt => 'Ù…Ø³ØªØ±Ø¯ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get completedAt => 'مکمل کیا گیا بروز';
+  String get completedAt => 'Ù…Ú©Ù…Ù„ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get expiredOn => 'ختم ہوا بروز';
+  String get expiredOn => 'Ø®ØªÙ… ÛÙˆØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get phone => 'فون';
+  String get phone => 'ÙÙˆÙ†';
 
   @override
-  String get card => 'کارڈ';
+  String get card => 'Ú©Ø§Ø±Úˆ';
 
   @override
-  String get applePay => 'ایپل پے';
+  String get applePay => 'Ø§ÛŒÙ¾Ù„ Ù¾Û’';
 
   @override
-  String get cashOnHands => 'ایپ سے باہر';
+  String get cashOnHands => 'Ø§ÛŒÙ¾ Ø³Û’ Ø¨Ø§ÛØ±';
 
   @override
-  String get ext => 'ایکسٹینشن';
+  String get ext => 'Ø§ÛŒÚ©Ø³Ù¹ÛŒÙ†Ø´Ù†';
 
   @override
-  String get serviceAddedSuccessfully => 'خدمت کامیابی سے شامل ہو گئی';
+  String get serviceAddedSuccessfully =>
+      'Ø®Ø¯Ù…Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get serviceUpdatedSuccessfully => 'خدمت کامیابی سے اپ ڈیٹ ہو گئی';
+  String get serviceUpdatedSuccessfully =>
+      'Ø®Ø¯Ù…Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get editService => 'خدمت میں ترمیم کریں';
+  String get editService => 'Ø®Ø¯Ù…Øª Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterAName => 'براہ کرم نام درج کریں';
+  String get pleaseEnterAName => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterNameInArabic => 'براہ کرم عربی میں نام درج کریں';
+  String get pleaseEnterNameInArabic =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get textMustBeInArabic => 'متن عربی میں ہونا چاہیے';
+  String get textMustBeInArabic => 'Ù…ØªÙ† Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pleaseEnterADescription => 'براہ کرم تفصیل درج کریں';
+  String get pleaseEnterADescription =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªÙØµÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseEnterDescriptionInArabic =>
-      'براہ کرم عربی میں تفصیل درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº ØªÙØµÛŒÙ„ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get descriptionMustBeInArabic => 'تفصیل عربی میں ہونی چاہیے';
+  String get descriptionMustBeInArabic =>
+      'ØªÙØµÛŒÙ„ Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº ÛÙˆÙ†ÛŒ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pleaseEnterAPrice => 'براہ کرم قیمت درج کریں';
+  String get pleaseEnterAPrice => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù‚ÛŒÙ…Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseSelectACategory => 'براہ کرم زمرہ منتخب کریں';
+  String get pleaseSelectACategory =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø²Ù…Ø±Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get discountPercentage => 'رعایت کا فیصد (%)';
+  String get discountPercentage => 'Ø±Ø¹Ø§ÛŒØª Ú©Ø§ ÙÛŒØµØ¯ (%)';
 
   @override
   String get pleaseEnterADiscountPercentage =>
-      'براہ کرم رعایت کا فیصد درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø±Ø¹Ø§ÛŒØª Ú©Ø§ ÙÛŒØµØ¯ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get highlightedServiceAddedSuccessfully =>
-      'نمایاں خدمت کامیابی سے شامل ہو گئی';
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get highlightedServiceUpdatedSuccessfully =>
-      'نمایاں خدمت کامیابی سے اپ ڈیٹ ہو گئی';
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get selectServices => 'خدمات منتخب کریں';
+  String get selectServices => 'Ø®Ø¯Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addHighlightedService => 'نمایاں خدمت شامل کریں';
+  String get addHighlightedService => 'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Øª Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get editHighlightedService => 'نمایاں خدمت میں ترمیم کریں';
+  String get editHighlightedService =>
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Øª Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterATitle => 'براہ کرم عنوان درج کریں';
+  String get pleaseEnterATitle => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ù†ÙˆØ§Ù† Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterTheTitleInArabic => 'براہ کرم عربی میں عنوان درج کریں';
+  String get pleaseEnterTheTitleInArabic =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº Ø¹Ù†ÙˆØ§Ù† Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addBanner => 'بینر شامل کریں';
+  String get addBanner => 'Ø¨ÛŒÙ†Ø± Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get editBanner => 'بینر میں ترمیم کریں';
+  String get editBanner => 'Ø¨ÛŒÙ†Ø± Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get labelIsRequired => 'لیبل ضروری ہے';
+  String get labelIsRequired => 'Ù„ÛŒØ¨Ù„ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get urlIsRequired => 'یو آر ایل ضروری ہے';
+  String get urlIsRequired => 'ÛŒÙˆ Ø¢Ø± Ø§ÛŒÙ„ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get invalidUrl => 'غلط یو آر ایل';
+  String get invalidUrl => 'ØºÙ„Ø· ÛŒÙˆ Ø¢Ø± Ø§ÛŒÙ„';
 
   @override
-  String get bannerAddedSuccessfully => 'بینر کامیابی سے شامل ہو گیا';
+  String get bannerAddedSuccessfully =>
+      'Ø¨ÛŒÙ†Ø± Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get bannerUpdatedSuccessfully => 'بینر کامیابی سے اپ ڈیٹ ہو گیا';
+  String get bannerUpdatedSuccessfully =>
+      'Ø¨ÛŒÙ†Ø± Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get doYouWantToUploadThisImage =>
-      'کیا آپ یہ تصویر اپ لوڈ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÛŒÛ ØªØµÙˆÛŒØ± Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get pleaseSelectAnImage => 'براہ کرم ایک تصویر منتخب کریں';
+  String get pleaseSelectAnImage =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© ØªØµÙˆÛŒØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get hasBeenApprovedAsAnAgent => 'بطور ٹیکنیشن منظوری مل گئی ہے';
+  String get hasBeenApprovedAsAnAgent =>
+      'Ø¨Ø·ÙˆØ± Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†Ø¸ÙˆØ±ÛŒ Ù…Ù„ Ú¯Ø¦ÛŒ ÛÛ’';
 
   @override
   String get hasBeenDisapprovedAsAnAgent =>
-      'بطور ٹیکنیشن نامنظور کر دیا گیا ہے';
+      'Ø¨Ø·ÙˆØ± Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Ø§Ù…Ù†Ø¸ÙˆØ± Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’';
 
   @override
-  String get jobRoles => 'جاب رولز';
+  String get jobRoles => 'Ø¬Ø§Ø¨ Ø±ÙˆÙ„Ø²';
 
   @override
-  String get document => 'دستاویز';
+  String get document => 'Ø¯Ø³ØªØ§ÙˆÛŒØ²';
 
   @override
-  String get jobRolesAreRequired => 'جاب رولز ضروری ہیں';
+  String get jobRolesAreRequired => 'Ø¬Ø§Ø¨ Ø±ÙˆÙ„Ø² Ø¶Ø±ÙˆØ±ÛŒ ÛÛŒÚº';
 
   @override
-  String get failedToDeleteAccount => 'اکاؤنٹ حذف کرنے میں ناکامی';
+  String get failedToDeleteAccount =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get pleaseConfirmYourPassword => 'براہ کرم اپنے پاس ورڈ کی تصدیق کریں';
+  String get pleaseConfirmYourPassword =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Û’ Ù¾Ø§Ø³ ÙˆØ±Úˆ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get passwordsDoNotMatch => 'پاس ورڈ مماثل نہیں ہیں';
+  String get passwordsDoNotMatch => 'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ù…Ù…Ø§Ø«Ù„ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get confirmPassword => 'پاس ورڈ کی تصدیق کریں';
+  String get confirmPassword => 'Ù¾Ø§Ø³ ÙˆØ±Úˆ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectJobRoles => 'جاب رولز منتخب کریں';
+  String get selectJobRoles => 'Ø¬Ø§Ø¨ Ø±ÙˆÙ„Ø² Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get failedToDetectLocation => 'مقام کا پتہ لگانے میں ناکامی';
+  String get failedToDetectLocation =>
+      'Ù…Ù‚Ø§Ù… Ú©Ø§ Ù¾ØªÛ Ù„Ú¯Ø§Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get failedToGetAddress => 'پتہ حاصل کرنے میں ناکامی';
+  String get failedToGetAddress =>
+      'Ù¾ØªÛ Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get addCustomJobRoles => 'حسب ضرورت جاب رولز شامل کریں';
+  String get addCustomJobRoles =>
+      'Ø­Ø³Ø¨ Ø¶Ø±ÙˆØ±Øª Ø¬Ø§Ø¨ Ø±ÙˆÙ„Ø² Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterAdditionalJobRoles => 'اضافی جاب رولز درج کریں';
+  String get enterAdditionalJobRoles =>
+      'Ø§Ø¶Ø§ÙÛŒ Ø¬Ø§Ø¨ Ø±ÙˆÙ„Ø² Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get detectCurrentLocation => 'موجودہ مقام کا پتہ لگائیں';
+  String get detectCurrentLocation =>
+      'Ù…ÙˆØ¬ÙˆØ¯Û Ù…Ù‚Ø§Ù… Ú©Ø§ Ù¾ØªÛ Ù„Ú¯Ø§Ø¦ÛŒÚº';
 
   @override
-  String get failedToGetLocation => 'مقام حاصل کرنے میں ناکامی';
+  String get failedToGetLocation =>
+      'Ù…Ù‚Ø§Ù… Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get cannotCompleteTasksScheduledForTheFuture =>
-      'مستقبل کے لیے شیڈول کیے گئے کام مکمل نہیں کیے جا سکتے';
+      'Ù…Ø³ØªÙ‚Ø¨Ù„ Ú©Û’ Ù„ÛŒÛ’ Ø´ÛŒÚˆÙˆÙ„ Ú©ÛŒÛ’ Ú¯Ø¦Û’ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ù†ÛÛŒÚº Ú©ÛŒÛ’ Ø¬Ø§ Ø³Ú©ØªÛ’';
 
   @override
-  String get orders => 'آرڈرز';
+  String get orders => 'Ø¢Ø±ÚˆØ±Ø²';
 
   @override
-  String get offers => 'پیشکشیں';
+  String get offers => 'Ù¾ÛŒØ´Ú©Ø´ÛŒÚº';
 
   @override
-  String get failedToLoadUserData => 'صارف کا ڈیٹا لوڈ کرنے میں ناکامی';
+  String get failedToLoadUserData =>
+      'ØµØ§Ø±Ù Ú©Ø§ ÚˆÛŒÙ¹Ø§ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get areYouSureYouWantToDeleteYourAccountThisActionCannotBeUndone =>
-      'کیا آپ واقعی اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں لیا جا سکتا';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ù¾Ù†Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ÛŒÛ Ø¹Ù…Ù„ ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù„ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§';
 
   @override
-  String get completed => 'مکمل ہو گیا';
+  String get completed => 'Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get addCategory => 'زمرہ شامل کریں';
+  String get addCategory => 'Ø²Ù…Ø±Û Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get editCategory => 'زمرہ میں ترمیم کریں';
+  String get editCategory => 'Ø²Ù…Ø±Û Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageCategories => 'زمروں کا انتظام کریں';
+  String get manageCategories => 'Ø²Ù…Ø±ÙˆÚº Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get bookingAccepted => 'بکنگ کی تصدیق ہو گئی';
+  String get bookingAccepted => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get bookingAssignedToYou => 'آپ کو ایک نئی بکنگ تفویض کر دی گئی ہے۔';
+  String get bookingAssignedToYou =>
+      'Ø¢Ù¾ Ú©Ùˆ Ø§ÛŒÚ© Ù†Ø¦ÛŒ Ø¨Ú©Ù†Ú¯ ØªÙÙˆÛŒØ¶ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’Û”';
 
   @override
   String get yourBookingRequestHasBeenAccepted =>
-      'آپ کی بکنگ کی درخواست کی تصدیق ہو گئی ہے! ہماری ٹیم جلد ہی آپ سے رابطہ کرے گی۔';
+      'Ø¢Ù¾ Ú©ÛŒ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ ÛÛ’! ÛÙ…Ø§Ø±ÛŒ Ù¹ÛŒÙ… Ø¬Ù„Ø¯ ÛÛŒ Ø¢Ù¾ Ø³Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±Û’ Ú¯ÛŒÛ”';
 
   @override
-  String get bookingRejected => 'بکنگ مسترد کر دی گئی';
+  String get bookingRejected => 'Ø¨Ú©Ù†Ú¯ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get yourBookingRequestHasBeenRejected =>
-      'بدقسمتی سے، آپ کی بکنگ کی درخواست مسترد کر دی گئی ہے۔ براہ کرم دوبارہ کوشش کریں یا سپورٹ سے رابطہ کریں۔';
+      'Ø¨Ø¯Ù‚Ø³Ù…ØªÛŒ Ø³Û’ØŒ Ø¢Ù¾ Ú©ÛŒ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚº ÛŒØ§ Ø³Ù¾ÙˆØ±Ù¹ Ø³Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get sendingNotification => 'صارف کو اطلاع بھیجی جا رہی ہے';
+  String get sendingNotification =>
+      'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get notificationSent => 'صارف کو اطلاع بھیج دی گئی';
+  String get notificationSent =>
+      'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get bookingCompleted => 'بکنگ مکمل ہو گئی';
+  String get bookingCompleted => 'Ø¨Ú©Ù†Ú¯ Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get yourBookingHasBeenCompleted => 'آپ کی بکنگ مکمل ہو گئی ہے!';
+  String get yourBookingHasBeenCompleted =>
+      'Ø¢Ù¾ Ú©ÛŒ Ø¨Ú©Ù†Ú¯ Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ ÛÛ’!';
 
   @override
-  String get notifications => 'اطلاعات';
+  String get notifications => 'Ø§Ø·Ù„Ø§Ø¹Ø§Øª';
 
   @override
   String get pleaseWaitAccountVerification =>
-      'آپ کے اکاؤنٹ کی ایڈمن کے ذریعے تصدیق کی جا رہی ہے، بعد میں دوبارہ چیک کریں';
+      'Ø¢Ù¾ Ú©Û’ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ Ø§ÛŒÚˆÙ…Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ ØªØµØ¯ÛŒÙ‚ Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’ØŒ Ø¨Ø¹Ø¯ Ù…ÛŒÚº Ø¯ÙˆØ¨Ø§Ø±Û Ú†ÛŒÚ© Ú©Ø±ÛŒÚº';
 
   @override
-  String get goBack => 'واپس جائیں';
+  String get goBack => 'ÙˆØ§Ù¾Ø³ Ø¬Ø§Ø¦ÛŒÚº';
 
   @override
   String get deleteRegistrationConfirmation =>
-      'کیا آپ واقعی اپنی رجسٹریشن حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ù¾Ù†ÛŒ Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get phoneNumberAlreadyExists => 'فون نمبر پہلے سے موجود ہے';
+  String get phoneNumberAlreadyExists =>
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ù¾ÛÙ„Û’ Ø³Û’ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
-  String get keepImage => 'تصویر رکھیں';
+  String get keepImage => 'ØªØµÙˆÛŒØ± Ø±Ú©Ú¾ÛŒÚº';
 
   @override
   String get keepImageDescription =>
-      'کیا آپ منتخب تصویر کو کراپ کیے بغیر رکھنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ Ù…Ù†ØªØ®Ø¨ ØªØµÙˆÛŒØ± Ú©Ùˆ Ú©Ø±Ø§Ù¾ Ú©ÛŒÛ’ Ø¨ØºÛŒØ± Ø±Ú©Ú¾Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get keep => 'رکھیں';
+  String get keep => 'Ø±Ú©Ú¾ÛŒÚº';
 
   @override
   String get pleaseSelectAtLeastOneService =>
-      'براہ کرم کم از کم ایک خدمت منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø®Ø¯Ù…Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get deleteBannerConfirmation =>
-      'کیا آپ واقعی اس بینر کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨ÛŒÙ†Ø± Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get selectLocations => 'مقامات منتخب کریں';
+  String get selectLocations => 'Ù…Ù‚Ø§Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get tapToSelectLocations => 'مقامات منتخب کرنے کے لیے تھپتھپائیں';
+  String get tapToSelectLocations =>
+      'Ù…Ù‚Ø§Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get locationsSelected => 'مقامات منتخب کیے گئے';
+  String get locationsSelected => 'Ù…Ù‚Ø§Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©ÛŒÛ’ Ú¯Ø¦Û’';
 
   @override
-  String get locationSelected => 'مقام منتخب کیا گیا';
+  String get locationSelected => 'Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get searchLocation => 'مقام تلاش کریں';
+  String get searchLocation => 'Ù…Ù‚Ø§Ù… ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noLocationsFound => 'کوئی مقامات نہیں ملے';
+  String get noLocationsFound => 'Ú©ÙˆØ¦ÛŒ Ù…Ù‚Ø§Ù…Ø§Øª Ù†ÛÛŒÚº Ù…Ù„Û’';
 
   @override
   String get accountVerificationPending =>
-      'آپ کا اکاؤنٹ فی الحال ہماری ایڈمن ٹیم کے زیر جائزہ ہے۔';
+      'Ø¢Ù¾ Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ ÙÛŒ Ø§Ù„Ø­Ø§Ù„ ÛÙ…Ø§Ø±ÛŒ Ø§ÛŒÚˆÙ…Ù† Ù¹ÛŒÙ… Ú©Û’ Ø²ÛŒØ± Ø¬Ø§Ø¦Ø²Û ÛÛ’Û”';
 
   @override
-  String get saving => 'محفوظ کیا جا رہا ہے...';
+  String get saving => 'Ù…Ø­ÙÙˆØ¸ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get uploading => 'اپ لوڈ کیا جا رہا ہے...';
+  String get uploading => 'Ø§Ù¾ Ù„ÙˆÚˆ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get enterAValidPhoneNumber => 'براہ کرم ایک درست فون نمبر درج کریں';
+  String get enterAValidPhoneNumber =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ø¯Ø±Ø³Øª ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageTips => 'ٹپس کا انتظام کریں';
+  String get manageTips => 'Ù¹Ù¾Ø³ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get cancelBooking => 'بکنگ منسوخ کریں';
+  String get cancelBooking => 'Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get counterPropose => 'جوابی تجویز';
+  String get counterPropose => 'Ø¬ÙˆØ§Ø¨ÛŒ ØªØ¬ÙˆÛŒØ²';
 
   @override
-  String get proposeNewTime => 'نیا وقت تجویز کریں';
+  String get proposeNewTime => 'Ù†ÛŒØ§ ÙˆÙ‚Øª ØªØ¬ÙˆÛŒØ² Ú©Ø±ÛŒÚº';
 
   @override
-  String get counterOfferPending => 'جوابی پیشکش زیر التوا ہے';
+  String get counterOfferPending =>
+      'Ø¬ÙˆØ§Ø¨ÛŒ Ù¾ÛŒØ´Ú©Ø´ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§ ÛÛ’';
 
   @override
-  String get customerProposedNewTime => 'صارف نے نئے وقت کی تجویز دی ہے';
+  String get customerProposedNewTime =>
+      'ØµØ§Ø±Ù Ù†Û’ Ù†Ø¦Û’ ÙˆÙ‚Øª Ú©ÛŒ ØªØ¬ÙˆÛŒØ² Ø¯ÛŒ ÛÛ’';
 
   @override
-  String get acceptOffer => 'پیشکش قبول کریں';
+  String get acceptOffer => 'Ù¾ÛŒØ´Ú©Ø´ Ù‚Ø¨ÙˆÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get rejectOffer => 'پیشکش مسترد کریں';
+  String get rejectOffer => 'Ù¾ÛŒØ´Ú©Ø´ Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get newProposedTime => 'نیا مجوزہ وقت';
+  String get newProposedTime => 'Ù†ÛŒØ§ Ù…Ø¬ÙˆØ²Û ÙˆÙ‚Øª';
 
   @override
-  String get waitingForCustomer => 'صارف کے جواب کا انتظار ہے';
+  String get waitingForCustomer =>
+      'ØµØ§Ø±Ù Ú©Û’ Ø¬ÙˆØ§Ø¨ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get proposedTime => 'مجوزہ وقت';
+  String get proposedTime => 'Ù…Ø¬ÙˆØ²Û ÙˆÙ‚Øª';
 
   @override
-  String get counterOfferSent => 'جوابی پیشکش کامیابی سے بھیج دی گئی';
+  String get counterOfferSent =>
+      'Ø¬ÙˆØ§Ø¨ÛŒ Ù¾ÛŒØ´Ú©Ø´ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get counterOfferResponse => 'جواب کامیابی سے بھیج دیا گیا';
+  String get counterOfferResponse =>
+      'Ø¬ÙˆØ§Ø¨ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get counterProposalStarted => 'جوابی تجویز شروع ہو گئی';
+  String get counterProposalStarted =>
+      'Ø¬ÙˆØ§Ø¨ÛŒ ØªØ¬ÙˆÛŒØ² Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get counterProposalAccepted => 'جوابی تجویز کی تصدیق ہو گئی';
+  String get counterProposalAccepted =>
+      'Ø¬ÙˆØ§Ø¨ÛŒ ØªØ¬ÙˆÛŒØ² Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get proposalRejected => 'تجویز مسترد کر دی گئی';
+  String get proposalRejected => 'ØªØ¬ÙˆÛŒØ² Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get proposalAccepted => 'تجویز کی تصدیق ہو گئی';
+  String get proposalAccepted => 'ØªØ¬ÙˆÛŒØ² Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get customerRejectedProposal => 'صارف نے آپ کی تجویز مسترد کر دی۔';
+  String get customerRejectedProposal =>
+      'ØµØ§Ø±Ù Ù†Û’ Ø¢Ù¾ Ú©ÛŒ ØªØ¬ÙˆÛŒØ² Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒÛ”';
 
   @override
-  String get youRejectedProposal => 'آپ نے صارف کی تجویز مسترد کر دی۔';
+  String get youRejectedProposal =>
+      'Ø¢Ù¾ Ù†Û’ ØµØ§Ø±Ù Ú©ÛŒ ØªØ¬ÙˆÛŒØ² Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒÛ”';
 
   @override
-  String get appointmentRescheduledTo => 'اپائنٹمنٹ دوبارہ شیڈول کی گئی بروز';
+  String get appointmentRescheduledTo =>
+      'Ø§Ù¾Ø§Ø¦Ù†Ù¹Ù…Ù†Ù¹ Ø¯ÙˆØ¨Ø§Ø±Û Ø´ÛŒÚˆÙˆÙ„ Ú©ÛŒ Ú¯Ø¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
   String get rescheduleBookingTimeConfirmation =>
-      'کیا آپ واقعی اس نئے اپائنٹمنٹ کے وقت کو قبول کرنا چاہتے ہیں؟ بکنگ کا شیڈول فوری طور پر اپ ڈیٹ کر دیا جائے گا۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ù†Ø¦Û’ Ø§Ù¾Ø§Ø¦Ù†Ù¹Ù…Ù†Ù¹ Ú©Û’ ÙˆÙ‚Øª Ú©Ùˆ Ù‚Ø¨ÙˆÙ„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ Ø¨Ú©Ù†Ú¯ Ú©Ø§ Ø´ÛŒÚˆÙˆÙ„ ÙÙˆØ±ÛŒ Ø·ÙˆØ± Ù¾Ø± Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø± Ø¯ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§Û”';
 
   @override
-  String get startWork => 'کام شروع کریں';
+  String get startWork => 'Ú©Ø§Ù… Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterSortOrder => 'براہ کرم ترتیب دیں';
+  String get pleaseEnterSortOrder => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ±ØªÛŒØ¨ Ø¯ÛŒÚº';
 
   @override
-  String get yes => 'جی ہاں';
+  String get yes => 'Ø¬ÛŒ ÛØ§Úº';
 
   @override
-  String get categoryAddedSuccessfully => 'زمرہ کامیابی سے شامل ہو گیا';
+  String get categoryAddedSuccessfully =>
+      'Ø²Ù…Ø±Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get categoryUpdatedSuccessfully => 'زمرہ کامیابی سے اپ ڈیٹ ہو گیا';
+  String get categoryUpdatedSuccessfully =>
+      'Ø²Ù…Ø±Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get phoneNumberRequired => 'فون نمبر ضروری ہے';
+  String get phoneNumberRequired => 'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get phoneNumberInvalid => 'فون نمبر غلط ہے';
+  String get phoneNumberInvalid => 'ÙÙˆÙ† Ù†Ù…Ø¨Ø± ØºÙ„Ø· ÛÛ’';
 
   @override
-  String get useCurrentLocation => 'موجودہ مقام استعمال کریں';
+  String get useCurrentLocation =>
+      'Ù…ÙˆØ¬ÙˆØ¯Û Ù…Ù‚Ø§Ù… Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noNotifications => 'کوئی اطلاع نہیں';
+  String get noNotifications => 'Ú©ÙˆØ¦ÛŒ Ø§Ø·Ù„Ø§Ø¹ Ù†ÛÛŒÚº';
 
   @override
-  String get pleaseSelectALocation => 'براہ کرم مقام منتخب کریں';
+  String get pleaseSelectALocation =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get day => 'دن';
+  String get day => 'Ø¯Ù†';
 
   @override
-  String get hour => 'گھنٹہ';
+  String get hour => 'Ú¯Ú¾Ù†Ù¹Û';
 
   @override
-  String get minute => 'منٹ';
+  String get minute => 'Ù…Ù†Ù¹';
 
   @override
-  String get justNow => 'ابھی ابھی';
+  String get justNow => 'Ø§Ø¨Ú¾ÛŒ Ø§Ø¨Ú¾ÛŒ';
 
   @override
-  String get emailAlreadyExists => 'ای میل پہلے سے موجود ہے';
+  String get emailAlreadyExists => 'Ø§ÛŒ Ù…ÛŒÙ„ Ù¾ÛÙ„Û’ Ø³Û’ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
-  String get tippingCleared => 'ٹپنگ صاف کر دی گئی';
+  String get tippingCleared => 'Ù¹Ù¾Ù†Ú¯ ØµØ§Ù Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get failedToClearTipping => 'ٹپنگ صاف کرنے میں ناکامی';
+  String get failedToClearTipping =>
+      'Ù¹Ù¾Ù†Ú¯ ØµØ§Ù Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get manageTipping => 'ٹپنگ کا انتظام کریں';
+  String get manageTipping => 'Ù¹Ù¾Ù†Ú¯ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get noTipsAvailable => 'کوئی ٹپس دستیاب نہیں ہیں';
+  String get noTipsAvailable => 'Ú©ÙˆØ¦ÛŒ Ù¹Ù¾Ø³ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get noRecentActivity => 'کوئی حالیہ سرگرمی نہیں';
+  String get noRecentActivity => 'Ú©ÙˆØ¦ÛŒ Ø­Ø§Ù„ÛŒÛ Ø³Ø±Ú¯Ø±Ù…ÛŒ Ù†ÛÛŒÚº';
 
   @override
-  String get tipInfo => 'ٹپ کی معلومات';
+  String get tipInfo => 'Ù¹Ù¾ Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get totalTips => 'کل ٹپس';
+  String get totalTips => 'Ú©Ù„ Ù¹Ù¾Ø³';
 
   @override
-  String get lastTipAmount => 'آخری ٹپ کی رقم';
+  String get lastTipAmount => 'Ø¢Ø®Ø±ÛŒ Ù¹Ù¾ Ú©ÛŒ Ø±Ù‚Ù…';
 
   @override
-  String get lastUpdated => 'آخری بار اپ ڈیٹ کیا گیا';
+  String get lastUpdated => 'Ø¢Ø®Ø±ÛŒ Ø¨Ø§Ø± Ø§Ù¾ ÚˆÛŒÙ¹ Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get agentId => 'ٹیکنیشن آئی ڈی';
+  String get agentId => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
-  String get sendAndClearWallet => 'بھیجیں اور والٹ صاف کریں';
+  String get sendAndClearWallet =>
+      'Ø¨Ú¾ÛŒØ¬ÛŒÚº Ø§ÙˆØ± ÙˆØ§Ù„Ù¹ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get clearWallet => 'والٹ صاف کریں';
+  String get clearWallet => 'ÙˆØ§Ù„Ù¹ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
   String get clearWalletWarning =>
-      'یہ عمل واپس نہیں لیا جا سکتا۔ ٹیکنیشن کو اپنے والٹ میں کل رقم مل جائے گی، اور اسے صفر پر ری سیٹ کر دیا جائے گا۔';
+      'ÛŒÛ Ø¹Ù…Ù„ ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù„ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§Û” Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ø§Ù¾Ù†Û’ ÙˆØ§Ù„Ù¹ Ù…ÛŒÚº Ú©Ù„ Ø±Ù‚Ù… Ù…Ù„ Ø¬Ø§Ø¦Û’ Ú¯ÛŒØŒ Ø§ÙˆØ± Ø§Ø³Û’ ØµÙØ± Ù¾Ø± Ø±ÛŒ Ø³ÛŒÙ¹ Ú©Ø± Ø¯ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§Û”';
 
   @override
-  String get areYouSureYouWantToSend => 'کیا آپ واقعی بھیجنا چاہتے ہیں';
+  String get areYouSureYouWantToSend =>
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø¨Ú¾ÛŒØ¬Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚº';
 
   @override
-  String get to => 'کو';
+  String get to => 'Ú©Ùˆ';
 
   @override
-  String get confirm => 'تصدیق کریں';
+  String get confirm => 'ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get andClearTheirWallet => 'اور ان کا والٹ صاف کریں';
+  String get andClearTheirWallet => 'Ø§ÙˆØ± Ø§Ù† Ú©Ø§ ÙˆØ§Ù„Ù¹ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get invalid => 'غلط';
+  String get invalid => 'ØºÙ„Ø·';
 
   @override
   String get locationPermissionDeniedForever =>
-      'مقام کی اجازت ہمیشہ کے لیے مسترد کر دی گئی';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª ÛÙ…ÛŒØ´Û Ú©Û’ Ù„ÛŒÛ’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get tracking => 'ٹریکنگ';
+  String get tracking => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯';
 
   @override
-  String get uploadImage => 'تصویر اپ لوڈ کریں';
+  String get uploadImage => 'ØªØµÙˆÛŒØ± Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseUploadAnImage => 'براہ کرم ایک تصویر اپ لوڈ کریں';
+  String get pleaseUploadAnImage =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© ØªØµÙˆÛŒØ± Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get searchBookings => 'بکنگز تلاش کریں';
+  String get searchBookings => 'Ø¨Ú©Ù†Ú¯Ø² ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get item => 'آئٹم';
+  String get item => 'Ø¢Ø¦Ù¹Ù…';
 
   @override
-  String get quantity => 'مقدار';
+  String get quantity => 'Ù…Ù‚Ø¯Ø§Ø±';
 
   @override
-  String get warrantyRejectedTechnicians => 'وارنٹی مسترد کرنے والے ٹیکنیشنز';
+  String get warrantyRejectedTechnicians =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ ÙˆØ§Ù„Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø²';
 
   @override
-  String get loadingBanners => 'بینرز لوڈ ہو رہے ہیں...';
+  String get loadingBanners => 'Ø¨ÛŒÙ†Ø±Ø² Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
-  String get cancelledDate => 'منسوخی کی تاریخ';
+  String get cancelledDate => 'Ù…Ù†Ø³ÙˆØ®ÛŒ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get paymentPending => 'ادائیگی زیر التوا ہے';
+  String get paymentPending => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§ ÛÛ’';
 
   @override
-  String get loadingHighlightedServices => 'نمایاں خدمات لوڈ ہو رہی ہیں...';
+  String get loadingHighlightedServices =>
+      'Ù†Ù…Ø§ÛŒØ§Úº Ø®Ø¯Ù…Ø§Øª Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛŒ ÛÛŒÚº...';
 
   @override
-  String get loadingServices => 'خدمات لوڈ ہو رہی ہیں...';
+  String get loadingServices => 'Ø®Ø¯Ù…Ø§Øª Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛŒ ÛÛŒÚº...';
 
   @override
-  String get completionDetails => 'تکمیل کی تفصیلات';
+  String get completionDetails => 'ØªÚ©Ù…ÛŒÙ„ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get loadingFaqs => 'سوالات لوڈ ہو رہے ہیں...';
+  String get loadingFaqs => 'Ø³ÙˆØ§Ù„Ø§Øª Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
-  String get loadingTechnicians => 'ٹیکنیشنز لوڈ ہو رہے ہیں...';
+  String get loadingTechnicians =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
   String get bookingWasCancelledByCustomer =>
-      'بکنگ صارف کی طرف سے منسوخ کر دی گئی تھی';
+      'Ø¨Ú©Ù†Ú¯ ØµØ§Ø±Ù Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get deleteCategory => 'زمرہ حذف کریں';
+  String get deleteCategory => 'Ø²Ù…Ø±Û Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get deletedSuccessfully => 'کامیابی سے حذف ہو گیا';
+  String get deletedSuccessfully => 'Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø­Ø°Ù ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get deleteError => 'حذف کرنے میں خرابی';
+  String get deleteError => 'Ø­Ø°Ù Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get deleteService => 'خدمت حذف کریں';
+  String get deleteService => 'Ø®Ø¯Ù…Øª Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
   String get serviceCompletedDescription =>
-      'سروس کامیابی کے ساتھ مکمل ہو گئی ہے۔ 1 ہفتے کی وارنٹی لاگو ہوگی۔';
+      'Ø³Ø±ÙˆØ³ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ú©Û’ Ø³Ø§ØªÚ¾ Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ ÛÛ’Û” 1 ÛÙØªÛ’ Ú©ÛŒ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù„Ø§Ú¯Ùˆ ÛÙˆÚ¯ÛŒÛ”';
 
   @override
-  String get paymentThroughApp => 'ایپ کے اندر';
+  String get paymentThroughApp => 'Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø±';
 
   @override
-  String get paymentOutsideApp => 'ایپ سے باہر';
+  String get paymentOutsideApp => 'Ø§ÛŒÙ¾ Ø³Û’ Ø¨Ø§ÛØ±';
 
   @override
-  String get paymentThroughAppDesc => 'صارف ایپ کے ذریعے ادائیگی کرے گا۔';
+  String get paymentThroughAppDesc =>
+      'ØµØ§Ø±Ù Ø§ÛŒÙ¾ Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø±Û’ Ú¯Ø§Û”';
 
   @override
-  String get paymentOutsideAppDesc => 'نقد یا بیرونی ادائیگی وصول کریں۔';
+  String get paymentOutsideAppDesc =>
+      'Ù†Ù‚Ø¯ ÛŒØ§ Ø¨ÛŒØ±ÙˆÙ†ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ ÙˆØµÙˆÙ„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get deleteServiceConfirmation =>
-      'کیا آپ واقعی اس خدمت کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø®Ø¯Ù…Øª Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get failedToLoadData => 'ڈیٹا لوڈ کرنے میں ناکامی';
+  String get failedToLoadData => 'ÚˆÛŒÙ¹Ø§ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get categoryNameAlreadyExists => 'زمرہ کا نام پہلے سے موجود ہے';
+  String get categoryNameAlreadyExists =>
+      'Ø²Ù…Ø±Û Ú©Ø§ Ù†Ø§Ù… Ù¾ÛÙ„Û’ Ø³Û’ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
   String get deleteCategoryConfirmation =>
-      'کیا آپ واقعی اس زمرے کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø²Ù…Ø±Û’ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get openSettings => 'ترتیبات کھولیں';
+  String get openSettings => 'ØªØ±ØªÛŒØ¨Ø§Øª Ú©Ú¾ÙˆÙ„ÛŒÚº';
 
   @override
-  String get paymentMethod => 'ادائیگی کا طریقہ';
+  String get paymentMethod => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø·Ø±ÛŒÙ‚Û';
 
   @override
-  String get completeWork => 'کام مکمل کریں';
+  String get completeWork => 'Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get gallery => 'گیلری';
+  String get gallery => 'Ú¯ÛŒÙ„Ø±ÛŒ';
 
   @override
-  String get qty => 'مقدار';
+  String get qty => 'Ù…Ù‚Ø¯Ø§Ø±';
 
   @override
   String get inspectionOnlyDescription =>
-      'صرف معائنہ کیا گیا، کوئی خدمت فراہم نہیں کی گئی';
+      'ØµØ±Ù Ù…Ø¹Ø§Ø¦Ù†Û Ú©ÛŒØ§ Ú¯ÛŒØ§ØŒ Ú©ÙˆØ¦ÛŒ Ø®Ø¯Ù…Øª ÙØ±Ø§ÛÙ… Ù†ÛÛŒÚº Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get required => 'ضروری ہے';
+  String get required => 'Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get requests => 'درخواستیں';
+  String get requests => 'Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº';
 
   @override
-  String get newtext => 'نیا';
+  String get newtext => 'Ù†ÛŒØ§';
 
   @override
-  String get waitingForPayment => 'صارف کی ادائیگی کا انتظار ہے';
+  String get waitingForPayment =>
+      'ØµØ§Ø±Ù Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get totalCost => 'کل لاگت';
+  String get totalCost => 'Ú©Ù„ Ù„Ø§Ú¯Øª';
 
   @override
-  String get inspectionOnly => 'صرف معائنہ';
+  String get inspectionOnly => 'ØµØ±Ù Ù…Ø¹Ø§Ø¦Ù†Û';
 
   @override
-  String get support => 'سپورٹ';
+  String get support => 'Ø³Ù¾ÙˆØ±Ù¹';
 
   @override
-  String get getHelpAnytime => 'کسی بھی وقت مدد حاصل کریں';
+  String get getHelpAnytime => 'Ú©Ø³ÛŒ Ø¨Ú¾ÛŒ ÙˆÙ‚Øª Ù…Ø¯Ø¯ Ø­Ø§ØµÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get tierSystem => 'ٹائر سسٹم';
+  String get tierSystem => 'Ù¹Ø§Ø¦Ø± Ø³Ø³Ù¹Ù…';
 
   @override
-  String get bronze => 'کانسی';
+  String get bronze => 'Ú©Ø§Ù†Ø³ÛŒ';
 
   @override
-  String get silver => 'چاندی';
+  String get silver => 'Ú†Ø§Ù†Ø¯ÛŒ';
 
   @override
-  String get gold => 'سونا';
+  String get gold => 'Ø³ÙˆÙ†Ø§';
 
   @override
-  String get platinum => 'پلاٹینم';
+  String get platinum => 'Ù¾Ù„Ø§Ù¹ÛŒÙ†Ù…';
 
   @override
-  String get nobonus => 'کوئی بونس نہیں';
+  String get nobonus => 'Ú©ÙˆØ¦ÛŒ Ø¨ÙˆÙ†Ø³ Ù†ÛÛŒÚº';
 
   @override
-  String get fivepercentBonus => '5% بونس';
+  String get fivepercentBonus => '5% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get tenpercentBonus => '10% بونس';
+  String get tenpercentBonus => '10% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get fifteenpercentBonus => '15% بونس + بیج';
+  String get fifteenpercentBonus => '15% Ø¨ÙˆÙ†Ø³ + Ø¨ÛŒØ¬';
 
   @override
-  String get greaterThan3dot5rating => '3.5+ درجہ بندی';
+  String get greaterThan3dot5rating => '3.5+ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get greaterThan4dot0rating => '4.0+ درجہ بندی';
+  String get greaterThan4dot0rating => '4.0+ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get greaterThan4dot5rating => '4.5+ درجہ بندی';
+  String get greaterThan4dot5rating => '4.5+ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get greaterThan4dot8rating => '4.8+ درجہ بندی';
+  String get greaterThan4dot8rating => '4.8+ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get searchByTechnicianName => 'ٹیکنیشن کے نام سے تلاش کریں';
+  String get searchByTechnicianName =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ù†Ø§Ù… Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get bookingWasRejectedByAdmin => 'بکنگ ایڈمن نے مسترد کر دی تھی';
+  String get bookingWasRejectedByAdmin =>
+      'Ø¨Ú©Ù†Ú¯ Ø§ÛŒÚˆÙ…Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get bonus => 'بونس';
+  String get bonus => 'Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get jobs => 'جابز';
+  String get jobs => 'Ø¬Ø§Ø¨Ø²';
 
   @override
-  String get twentyPlusJobs => '20+ جابز';
+  String get twentyPlusJobs => '20+ Ø¬Ø§Ø¨Ø²';
 
   @override
-  String get thirtyPlusJobs => '30+ جابز';
+  String get thirtyPlusJobs => '30+ Ø¬Ø§Ø¨Ø²';
 
   @override
-  String get fortyPlusJobs => '40+ جابز';
+  String get fortyPlusJobs => '40+ Ø¬Ø§Ø¨Ø²';
 
   @override
-  String get sixtyPlusJobs => '60+ جابز';
+  String get sixtyPlusJobs => '60+ Ø¬Ø§Ø¨Ø²';
 
   @override
-  String get earnings => 'آمدنی';
+  String get earnings => 'Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get exitAppTitle => 'ایپ سے باہر نکلیں';
+  String get exitAppTitle => 'Ø§ÛŒÙ¾ Ø³Û’ Ø¨Ø§ÛØ± Ù†Ú©Ù„ÛŒÚº';
 
   @override
-  String get recentTransactions => 'حالیہ لین دین';
+  String get recentTransactions => 'Ø­Ø§Ù„ÛŒÛ Ù„ÛŒÙ† Ø¯ÛŒÙ†';
 
   @override
-  String get noTransactionsYet => 'ابھی تک کوئی لین دین نہیں ہوا';
+  String get noTransactionsYet =>
+      'Ø§Ø¨Ú¾ÛŒ ØªÚ© Ú©ÙˆØ¦ÛŒ Ù„ÛŒÙ† Ø¯ÛŒÙ† Ù†ÛÛŒÚº ÛÙˆØ§';
 
   @override
-  String get id => 'آئی ڈی';
+  String get id => 'Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
-  String get exitAppMessage => 'کیا آپ واقعی ایپ سے باہر نکلنا چاہتے ہیں؟';
+  String get exitAppMessage =>
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§ÛŒÙ¾ Ø³Û’ Ø¨Ø§ÛØ± Ù†Ú©Ù„Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get exit => 'باہر نکلیں';
+  String get exit => 'Ø¨Ø§ÛØ± Ù†Ú©Ù„ÛŒÚº';
 
   @override
-  String get nextTierProgress => 'اگلے ٹائر کی پیش رفت';
+  String get nextTierProgress => 'Ø§Ú¯Ù„Û’ Ù¹Ø§Ø¦Ø± Ú©ÛŒ Ù¾ÛŒØ´ Ø±ÙØª';
 
   @override
-  String get greaterThan20jobsPerMonth => '20+ جابز فی مہینہ';
+  String get greaterThan20jobsPerMonth => '20+ Ø¬Ø§Ø¨Ø² ÙÛŒ Ù…ÛÛŒÙ†Û';
 
   @override
-  String get orderId => 'آرڈر آئی ڈی';
+  String get orderId => 'Ø¢Ø±ÚˆØ± Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
-  String get greaterThan40jobsPerMonth => '40+ جابز فی مہینہ';
+  String get greaterThan40jobsPerMonth => '40+ Ø¬Ø§Ø¨Ø² ÙÛŒ Ù…ÛÛŒÙ†Û';
 
   @override
-  String get greaterThan60jobsPerMonth => '60+ جابز فی مہینہ';
+  String get greaterThan60jobsPerMonth => '60+ Ø¬Ø§Ø¨Ø² ÙÛŒ Ù…ÛÛŒÙ†Û';
 
   @override
   String get progressResetsMonthly =>
-      'پیش رفت ماہانہ ری سیٹ ہوتی ہے، بہتر انعامات حاصل کرنے کے لیے اعلیٰ درجہ بندی برقرار رکھیں اور مزید کام مکمل کریں۔';
+      'Ù¾ÛŒØ´ Ø±ÙØª Ù…Ø§ÛØ§Ù†Û Ø±ÛŒ Ø³ÛŒÙ¹ ÛÙˆØªÛŒ ÛÛ’ØŒ Ø¨ÛØªØ± Ø§Ù†Ø¹Ø§Ù…Ø§Øª Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ø¹Ù„ÛŒÙ° Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¨Ø±Ù‚Ø±Ø§Ø± Ø±Ú©Ú¾ÛŒÚº Ø§ÙˆØ± Ù…Ø²ÛŒØ¯ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get progressResetsMonthlyDesc =>
-      'پیش رفت ماہانہ ری سیٹ ہوتی ہے۔ بہتر انعامات حاصل کرنے کے لیے اعلیٰ درجہ بندی برقرار رکھیں اور مزید کام مکمل کریں';
+      'Ù¾ÛŒØ´ Ø±ÙØª Ù…Ø§ÛØ§Ù†Û Ø±ÛŒ Ø³ÛŒÙ¹ ÛÙˆØªÛŒ ÛÛ’Û” Ø¨ÛØªØ± Ø§Ù†Ø¹Ø§Ù…Ø§Øª Ø­Ø§ØµÙ„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ø¹Ù„ÛŒÙ° Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¨Ø±Ù‚Ø±Ø§Ø± Ø±Ú©Ú¾ÛŒÚº Ø§ÙˆØ± Ù…Ø²ÛŒØ¯ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get zeroPercentBonus => '0% بونس';
+  String get zeroPercentBonus => '0% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get fivepercentBonusOnly => '5% بونس';
+  String get fivepercentBonusOnly => '5% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get tenpercentBonusOnly => '10% بونس';
+  String get tenpercentBonusOnly => '10% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get fifteenpercentBonusOnly => '15% بونس';
+  String get fifteenpercentBonusOnly => '15% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get viewYourRewards => 'اپنے انعامات دیکھیں';
+  String get viewYourRewards => 'Ø§Ù¾Ù†Û’ Ø§Ù†Ø¹Ø§Ù…Ø§Øª Ø¯ÛŒÚ©Ú¾ÛŒÚº';
 
   @override
-  String get noSupportAvailable => 'کوئی سپورٹ دستیاب نہیں ہے';
+  String get noSupportAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ø³Ù¾ÙˆØ±Ù¹ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get contactSupportOptions => 'سپورٹ کے اختیارات سے رابطہ کریں';
+  String get contactSupportOptions =>
+      'Ø³Ù¾ÙˆØ±Ù¹ Ú©Û’ Ø§Ø®ØªÛŒØ§Ø±Ø§Øª Ø³Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get contactByEmail => 'ای میل کے ذریعے رابطہ کریں';
+  String get contactByEmail =>
+      'Ø§ÛŒ Ù…ÛŒÙ„ Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get contactByPhone => 'فون کے ذریعے رابطہ کریں';
+  String get contactByPhone => 'ÙÙˆÙ† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get contactByWhatsApp => 'واٹس ایپ کے ذریعے رابطہ کریں';
+  String get contactByWhatsApp =>
+      'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get serviceCompleted => 'خدمت مکمل ہو گئی';
+  String get serviceCompleted => 'Ø®Ø¯Ù…Øª Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get dashboard => 'ڈیش بورڈ';
+  String get dashboard => 'ÚˆÛŒØ´ Ø¨ÙˆØ±Úˆ';
 
   @override
-  String get serviceItems => 'خدمت کے آئٹمز';
+  String get serviceItems => 'Ø®Ø¯Ù…Øª Ú©Û’ Ø¢Ø¦Ù¹Ù…Ø²';
 
   @override
-  String get enterServiceCost => 'خدمت کی لاگت درج کریں';
+  String get enterServiceCost => 'Ø®Ø¯Ù…Øª Ú©ÛŒ Ù„Ø§Ú¯Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get serviceCostMustBeGreaterThanZero =>
-      'خدمت کی لاگت 0 سے زیادہ ہونی چاہیے';
+      'Ø®Ø¯Ù…Øª Ú©ÛŒ Ù„Ø§Ú¯Øª 0 Ø³Û’ Ø²ÛŒØ§Ø¯Û ÛÙˆÙ†ÛŒ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pleaseEnterValidNumber => 'براہ کرم ایک درست نمبر درج کریں';
+  String get pleaseEnterValidNumber =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ø¯Ø±Ø³Øª Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterServiceCost => 'براہ کرم خدمت کی لاگت درج کریں';
+  String get pleaseEnterServiceCost =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø®Ø¯Ù…Øª Ú©ÛŒ Ù„Ø§Ú¯Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get tapToUploadImage => 'تصویر اپ لوڈ کرنے کے لیے تھپتھپائیں';
+  String get tapToUploadImage =>
+      'ØªØµÙˆÛŒØ± Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get serviceCost => 'خدمت کی لاگت';
+  String get serviceCost => 'Ø®Ø¯Ù…Øª Ú©ÛŒ Ù„Ø§Ú¯Øª';
 
   @override
-  String get addItem => 'آئٹم شامل کریں';
+  String get addItem => 'Ø¢Ø¦Ù¹Ù… Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get camera => 'کیمرہ';
+  String get camera => 'Ú©ÛŒÙ…Ø±Û';
 
   @override
   String get pleaseAddAtleastOneServiceItem =>
-      'براہ کرم کم از کم ایک خدمت کا آئٹم شامل کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø®Ø¯Ù…Øª Ú©Ø§ Ø¢Ø¦Ù¹Ù… Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseFillAllServiceItemFields =>
-      'براہ کرم سروس آئٹم کے تمام فیلڈز پُر کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø³Ø±ÙˆØ³ Ø¢Ø¦Ù¹Ù… Ú©Û’ ØªÙ…Ø§Ù… ÙÛŒÙ„ÚˆØ² Ù¾ÙØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get workingDays => 'کام کے دن';
+  String get workingDays => 'Ú©Ø§Ù… Ú©Û’ Ø¯Ù†';
 
   @override
-  String get monday => 'پیر';
+  String get monday => 'Ù¾ÛŒØ±';
 
   @override
-  String get tuesday => 'منگل';
+  String get tuesday => 'Ù…Ù†Ú¯Ù„';
 
   @override
-  String get wednesday => 'بدھ';
+  String get wednesday => 'Ø¨Ø¯Ú¾';
 
   @override
-  String get thursday => 'جمعرات';
+  String get thursday => 'Ø¬Ù…Ø¹Ø±Ø§Øª';
 
   @override
-  String get friday => 'جمعہ';
+  String get friday => 'Ø¬Ù…Ø¹Û';
 
   @override
-  String get saturday => 'ہفتہ';
+  String get saturday => 'ÛÙØªÛ';
 
   @override
-  String get sunday => 'اتوار';
+  String get sunday => 'Ø§ØªÙˆØ§Ø±';
 
   @override
-  String get locationServiceRequired => 'مقام کی خدمت ضروری ہے';
+  String get locationServiceRequired =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Øª Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get pleaseEnableLocationService => 'براہ کرم مقام کی خدمت فعال کریں';
+  String get pleaseEnableLocationService =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Øª ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get ok => 'ٹھیک ہے';
+  String get ok => 'Ù¹Ú¾ÛŒÚ© ÛÛ’';
 
   @override
-  String get locationPermissionDenied => 'مقام کی اجازت مسترد کر دی گئی';
+  String get locationPermissionDenied =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get bioMetricAuthentication => 'بائیومیٹرک فعال کریں';
+  String get bioMetricAuthentication =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get confirmDeletion => 'حذف کرنے کی تصدیق کریں';
+  String get confirmDeletion => 'Ø­Ø°Ù Ú©Ø±Ù†Û’ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountDeleted => 'اکاؤنٹ حذف کر دیا گیا';
+  String get accountDeleted => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get startTracking => 'ٹریکنگ شروع کریں';
+  String get startTracking => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get stopTracking => 'ٹریکنگ روکیں';
+  String get stopTracking => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©ÛŒÚº';
 
   @override
-  String get arrivedAtLocation => 'مقام پر پہنچ گئے';
+  String get arrivedAtLocation => 'Ù…Ù‚Ø§Ù… Ù¾Ø± Ù¾ÛÙ†Ú† Ú¯Ø¦Û’';
 
   @override
-  String get youHaveActiveBooking => 'آپ کی ایک فعال بکنگ ہے';
+  String get youHaveActiveBooking => 'Ø¢Ù¾ Ú©ÛŒ Ø§ÛŒÚ© ÙØ¹Ø§Ù„ Ø¨Ú©Ù†Ú¯ ÛÛ’';
 
   @override
   String get areYouSureYouWantToStartTracking =>
-      'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ شروع کرنا چاہتے ہیں؟ اس سے مقام کی نگرانی فعال ہو جائے گی۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ Ø§Ø³ Ø³Û’ Ù…Ù‚Ø§Ù… Ú©ÛŒ Ù†Ú¯Ø±Ø§Ù†ÛŒ ÙØ¹Ø§Ù„ ÛÙˆ Ø¬Ø§Ø¦Û’ Ú¯ÛŒÛ”';
 
   @override
-  String get start => 'شروع کریں';
+  String get start => 'Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToStopTracking =>
-      'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ روکنا چاہتے ہیں؟ مقام کی نگرانی غیر فعال کر دی جائے گی۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ Ù…Ù‚Ø§Ù… Ú©ÛŒ Ù†Ú¯Ø±Ø§Ù†ÛŒ ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø± Ø¯ÛŒ Ø¬Ø§Ø¦Û’ Ú¯ÛŒÛ”';
 
   @override
-  String get stop => 'روکیں';
+  String get stop => 'Ø±ÙˆÚ©ÛŒÚº';
 
   @override
-  String get activeBooking => 'فعال بکنگ';
+  String get activeBooking => 'ÙØ¹Ø§Ù„ Ø¨Ú©Ù†Ú¯';
 
   @override
-  String get failedToStartTracking => 'ٹریکنگ شروع کرنے میں ناکامی';
+  String get failedToStartTracking =>
+      'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get trackingStarted => 'ٹریکنگ شروع ہو گئی';
+  String get trackingStarted => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get locationServicesDisabled => 'مقام کی خدمات غیر فعال ہیں';
+  String get locationServicesDisabled =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª ØºÛŒØ± ÙØ¹Ø§Ù„ ÛÛŒÚº';
 
   @override
-  String get settings => 'ترتیبات';
+  String get settings => 'ØªØ±ØªÛŒØ¨Ø§Øª';
 
   @override
   String get trackingNote =>
-      'نوٹ: اگر آپ کام شروع کر رہے ہیں، تو براہ کرم \'ٹریکنگ شروع کریں\' بٹن پر کلک کریں۔ اگر بٹن غائب ہو جائے یا تبدیل ہو جائے تو دوبارہ \'ٹریکنگ شروع کریں\' پر کلک کرنا یقینی بنائیں۔';
+      'Ù†ÙˆÙ¹: Ø§Ú¯Ø± Ø¢Ù¾ Ú©Ø§Ù… Ø´Ø±ÙˆØ¹ Ú©Ø± Ø±ÛÛ’ ÛÛŒÚºØŒ ØªÙˆ Ø¨Ø±Ø§Û Ú©Ø±Ù… \'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº\' Ø¨Ù¹Ù† Ù¾Ø± Ú©Ù„Ú© Ú©Ø±ÛŒÚºÛ” Ø§Ú¯Ø± Ø¨Ù¹Ù† ØºØ§Ø¦Ø¨ ÛÙˆ Ø¬Ø§Ø¦Û’ ÛŒØ§ ØªØ¨Ø¯ÛŒÙ„ ÛÙˆ Ø¬Ø§Ø¦Û’ ØªÙˆ Ø¯ÙˆØ¨Ø§Ø±Û \'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº\' Ù¾Ø± Ú©Ù„Ú© Ú©Ø±Ù†Ø§ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ø¦ÛŒÚºÛ”';
 
   @override
-  String get filterByLocation => 'مقام کے لحاظ سے فلٹر کریں';
+  String get filterByLocation =>
+      'Ù…Ù‚Ø§Ù… Ú©Û’ Ù„Ø­Ø§Ø¸ Ø³Û’ ÙÙ„Ù¹Ø± Ú©Ø±ÛŒÚº';
 
   @override
-  String get allLocations => 'تمام مقامات';
+  String get allLocations => 'ØªÙ…Ø§Ù… Ù…Ù‚Ø§Ù…Ø§Øª';
 
   @override
-  String get clearFilter => 'فلٹر صاف کریں';
+  String get clearFilter => 'ÙÙ„Ù¹Ø± ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get agents => 'ٹیکنیشنز';
+  String get agents => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø²';
 
   @override
-  String get inSelectedLocation => 'منتخب مقام میں';
+  String get inSelectedLocation => 'Ù…Ù†ØªØ®Ø¨ Ù…Ù‚Ø§Ù… Ù…ÛŒÚº';
 
   @override
-  String get totalAgents => 'کل ٹیکنیشنز';
+  String get totalAgents => 'Ú©Ù„ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø²';
 
   @override
-  String get filteredBy => 'فلٹر شدہ بذریعہ';
+  String get filteredBy => 'ÙÙ„Ù¹Ø± Ø´Ø¯Û Ø¨Ø°Ø±ÛŒØ¹Û';
 
   @override
-  String get notificationLanguage => 'اطلاع کی زبان';
+  String get notificationLanguage => 'Ø§Ø·Ù„Ø§Ø¹ Ú©ÛŒ Ø²Ø¨Ø§Ù†';
 
   @override
   String get areYouSureYouWantToCancelThisBooking =>
-      'کیا آپ واقعی اس بکنگ کو منسوخ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get bookingTimeline => 'بکنگ ٹائم لائن';
+  String get bookingTimeline => 'Ø¨Ú©Ù†Ú¯ Ù¹Ø§Ø¦Ù… Ù„Ø§Ø¦Ù†';
 
   @override
-  String get trackingStartedAt => 'ٹریکنگ شروع ہوئی بروز';
+  String get trackingStartedAt => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ ÛÙˆØ¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get createdAt => 'تخلیق کیا گیا بروز';
+  String get createdAt => 'ØªØ®Ù„ÛŒÙ‚ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get enableBiometricAuthentication => 'بائیومیٹرک تصدیق فعال کریں';
+  String get enableBiometricAuthentication =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØªØµØ¯ÛŒÙ‚ ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get notificationLanguageUpdated => 'اطلاع کی زبان اپ ڈیٹ ہو گئی';
+  String get notificationLanguageUpdated =>
+      'Ø§Ø·Ù„Ø§Ø¹ Ú©ÛŒ Ø²Ø¨Ø§Ù† Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get failedToLoadImage => 'تصویر لوڈ کرنے میں ناکامی';
+  String get failedToLoadImage =>
+      'ØªØµÙˆÛŒØ± Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get issueMedia => 'مسئلہ میڈیا';
+  String get issueMedia => 'Ù…Ø³Ø¦Ù„Û Ù…ÛŒÚˆÛŒØ§';
 
   @override
-  String get loadingVideo => 'ویڈیو لوڈ ہو رہی ہے';
+  String get loadingVideo => 'ÙˆÛŒÚˆÛŒÙˆ Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get categoryAlreadyExists => 'زمرہ پہلے سے موجود ہے';
+  String get categoryAlreadyExists => 'Ø²Ù…Ø±Û Ù¾ÛÙ„Û’ Ø³Û’ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
-  String get noLocationsAvailable => 'کوئی مقامات دستیاب نہیں ہیں';
+  String get noLocationsAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ù…Ù‚Ø§Ù…Ø§Øª Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get close => 'بند کریں';
+  String get close => 'Ø¨Ù†Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterPasswordToConfirm => 'تصدیق کے لیے پاس ورڈ درج کریں';
+  String get enterPasswordToConfirm =>
+      'ØªØµØ¯ÛŒÙ‚ Ú©Û’ Ù„ÛŒÛ’ Ù¾Ø§Ø³ ÙˆØ±Úˆ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get deleteAccountWarning =>
-      'کیا آپ واقعی اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں لیا جا سکتا';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ù¾Ù†Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ÛŒÛ Ø¹Ù…Ù„ ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù„ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§';
 
   @override
-  String get logoutConfirmation => 'کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟';
+  String get logoutConfirmation =>
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ù„Ø§Ú¯ Ø¢Ø¤Ù¹ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get customerName => 'صارف کا نام';
+  String get customerName => 'ØµØ§Ø±Ù Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get call => 'کال کریں';
+  String get call => 'Ú©Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get directions => 'راستہ دیکھیں';
+  String get directions => 'Ø±Ø§Ø³ØªÛ Ø¯ÛŒÚ©Ú¾ÛŒÚº';
 
   @override
-  String get images => 'تصاویر';
+  String get images => 'ØªØµØ§ÙˆÛŒØ±';
 
   @override
-  String get video => 'ویڈیو';
+  String get video => 'ÙˆÛŒÚˆÛŒÙˆ';
 
   @override
   String get walletClearedSuccessfully =>
-      'والٹ بیلنس کامیابی سے صاف کر دیا گیا';
+      'ÙˆØ§Ù„Ù¹ Ø¨ÛŒÙ„Ù†Ø³ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ ØµØ§Ù Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get biometricNotSupported => 'بائیومیٹرک سپورٹ نہیں ہے';
+  String get biometricNotSupported =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© Ø³Ù¾ÙˆØ±Ù¹ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
   String get pleaseAuthenticateToContinue =>
-      'جاری رکھنے کے لیے براہ کرم تصدیق کریں';
+      'Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get authenticationFailed => 'تصدیق ناکام ہو گئی';
+  String get authenticationFailed => 'ØªØµØ¯ÛŒÙ‚ Ù†Ø§Ú©Ø§Ù… ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get biometricNotAvailable => 'بائیومیٹرک دستیاب نہیں ہے';
+  String get biometricNotAvailable =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get biometricTemporarilyLocked => 'بائیومیٹرک عارضی طور پر مقفل ہے';
+  String get biometricTemporarilyLocked =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© Ø¹Ø§Ø±Ø¶ÛŒ Ø·ÙˆØ± Ù¾Ø± Ù…Ù‚ÙÙ„ ÛÛ’';
 
   @override
-  String get unexpectedErrorOccurred => 'غیر متوقع خرابی پیش آگئی';
+  String get unexpectedErrorOccurred =>
+      'ØºÛŒØ± Ù…ØªÙˆÙ‚Ø¹ Ø®Ø±Ø§Ø¨ÛŒ Ù¾ÛŒØ´ Ø¢Ú¯Ø¦ÛŒ';
 
   @override
-  String get ago => 'پہلے';
+  String get ago => 'Ù¾ÛÙ„Û’';
 
   @override
-  String get personalInformation => 'ذاتی معلومات';
+  String get personalInformation => 'Ø°Ø§ØªÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get country => 'ملک';
+  String get country => 'Ù…Ù„Ú©';
 
   @override
-  String get languageCode => 'زبان کا کوڈ';
+  String get languageCode => 'Ø²Ø¨Ø§Ù† Ú©Ø§ Ú©ÙˆÚˆ';
 
   @override
-  String get accountStatus => 'اکاؤنٹ کی صورتحال';
+  String get accountStatus => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get adminStatus => 'ایڈمن کی صورتحال';
+  String get adminStatus => 'Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get verified => 'تصدیق شدہ';
+  String get verified => 'ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û';
 
   @override
-  String get systemInformation => 'سسٹم کی معلومات';
+  String get systemInformation => 'Ø³Ø³Ù¹Ù… Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get userId => 'صارف آئی ڈی';
+  String get userId => 'ØµØ§Ø±Ù Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
-  String get updatedAt => 'اپ ڈیٹ کیا گیا بروز';
+  String get updatedAt => 'Ø§Ù¾ ÚˆÛŒÙ¹ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get admin => 'ایڈمن';
+  String get admin => 'Ø§ÛŒÚˆÙ…Ù†';
 
   @override
-  String get assignedRoles => 'تفویض کردہ کردار';
+  String get assignedRoles => 'ØªÙÙˆÛŒØ¶ Ú©Ø±Ø¯Û Ú©Ø±Ø¯Ø§Ø±';
 
   @override
-  String get noAgentsFound => 'کوئی ٹیکنیشن نہیں ملا';
+  String get noAgentsFound => 'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get agentApproved => 'ٹیکنیشن منظور شدہ';
+  String get agentApproved => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†Ø¸ÙˆØ± Ø´Ø¯Û';
 
   @override
-  String get agentDisapproved => 'ٹیکنیشن نامنظور شدہ';
+  String get agentDisapproved => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Ø§Ù…Ù†Ø¸ÙˆØ± Ø´Ø¯Û';
 
   @override
-  String get deleteBanner => 'بینر حذف کریں';
+  String get deleteBanner => 'Ø¨ÛŒÙ†Ø± Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get invalidImageUrl => 'غلط تصویر کا یو آر ایل';
+  String get invalidImageUrl => 'ØºÙ„Ø· ØªØµÙˆÛŒØ± Ú©Ø§ ÛŒÙˆ Ø¢Ø± Ø§ÛŒÙ„';
 
   @override
-  String get imageLoadError => 'تصویر لوڈ کرنے میں خرابی';
+  String get imageLoadError => 'ØªØµÙˆÛŒØ± Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get imageCropError => 'تصویر کراپ کرنے میں خرابی';
+  String get imageCropError => 'ØªØµÙˆÛŒØ± Ú©Ø±Ø§Ù¾ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorAddingCategory => 'زمرہ شامل کرنے میں خرابی';
+  String get errorAddingCategory =>
+      'Ø²Ù…Ø±Û Ø´Ø§Ù…Ù„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorUpdatingCategory => 'زمرہ اپ ڈیٹ کرنے میں خرابی';
+  String get errorUpdatingCategory =>
+      'Ø²Ù…Ø±Û Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get customerSubmittedBookingRequest =>
-      'صارف نے بکنگ کی درخواست جمع کرائی';
+      'ØµØ§Ø±Ù Ù†Û’ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒ';
 
   @override
   String get serviceProviderConfirmedAppointment =>
-      'ٹیکنیشن نے اپائنٹمنٹ کی تصدیق کر دی';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ø§Ù¾Ø§Ø¦Ù†Ù¹Ù…Ù†Ù¹ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get serviceTrackingInitiated => 'سروس ٹریکنگ شروع ہو گئی';
+  String get serviceTrackingInitiated =>
+      'Ø³Ø±ÙˆØ³ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get serviceHasBeenSuccessfullyCompleted =>
-      'سروس کامیابی سے مکمل ہو گئی ہے';
+      'Ø³Ø±ÙˆØ³ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ ÛÛ’';
 
   @override
   String get bookingWasRejectedByServiceProvider =>
-      'بکنگ ٹیکنیشن نے مسترد کر دی تھی';
+      'Ø¨Ú©Ù†Ú¯ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get bookingWasCancelled => 'بکنگ منسوخ ہو گئی تھی';
+  String get bookingWasCancelled => 'Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯Ø¦ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get serviceInProgress => 'سروس جاری ہے';
+  String get serviceInProgress => 'Ø³Ø±ÙˆØ³ Ø¬Ø§Ø±ÛŒ ÛÛ’';
 
   @override
-  String get current => 'موجودہ';
+  String get current => 'Ù…ÙˆØ¬ÙˆØ¯Û';
 
   @override
   String get serviceIsCurrentlyBeingPerformed =>
-      'سروس فی الحال انجام دی جا رہی ہے';
+      'Ø³Ø±ÙˆØ³ ÙÛŒ Ø§Ù„Ø­Ø§Ù„ Ø§Ù†Ø¬Ø§Ù… Ø¯ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get waitingForServiceProvider => 'ٹیکنیشن کا انتظار ہے';
+  String get waitingForServiceProvider =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
   String get waitingForTechnicianToStartService =>
-      'ٹیکنیشن کے سروس شروع کرنے کا انتظار ہے';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø³Ø±ÙˆØ³ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Û’ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get waitingForAcceptance => 'قبولیت کا انتظار ہے';
+  String get waitingForAcceptance => 'Ù‚Ø¨ÙˆÙ„ÛŒØª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
   String get waitingForServiceProviderResponse =>
-      'ٹیکنیشن کے جواب کا انتظار ہے';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø¬ÙˆØ§Ø¨ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get waitingForAdmin => 'ایڈمن کا انتظار ہے';
+  String get waitingForAdmin => 'Ø§ÛŒÚˆÙ…Ù† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
   String get waitingForAdminToReassign =>
-      'ایڈمن کے ذریعے دوبارہ ٹیکنیشن تفویض کرنے کا انتظار ہے';
+      'Ø§ÛŒÚˆÙ…Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø¯ÙˆØ¨Ø§Ø±Û Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† ØªÙÙˆÛŒØ¶ Ú©Ø±Ù†Û’ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get orderRejected => 'آرڈر کامیابی سے مسترد کر دیا گیا';
+  String get orderRejected =>
+      'Ø¢Ø±ÚˆØ± Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get registrationSuccess => 'رجسٹریشن کامیاب';
+  String get registrationSuccess => 'Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ú©Ø§Ù…ÛŒØ§Ø¨';
 
   @override
-  String get registrationFailed => 'رجسٹریشن ناکام';
+  String get registrationFailed => 'Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ù†Ø§Ú©Ø§Ù…';
 
   @override
-  String get confirmReject => 'مسترد کرنے کی تصدیق کریں';
+  String get confirmReject => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get updatedOn => 'اپ ڈیٹ کیا گیا بروز';
+  String get updatedOn => 'Ø§Ù¾ ÚˆÛŒÙ¹ Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get approvedOn => 'منظور کیا گیا بروز';
+  String get approvedOn => 'Ù…Ù†Ø¸ÙˆØ± Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
   String get confirmRejectMessage =>
-      'کیا آپ واقعی اس آرڈر کو مسترد کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¢Ø±ÚˆØ± Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get bookingCancelledSuccessfully => 'بکنگ کامیابی سے منسوخ ہو گئی';
+  String get bookingCancelledSuccessfully =>
+      'Ø¨Ú©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get workMarkedAsComplete => 'کام کو مکمل قرار دے دیا گیا';
+  String get workMarkedAsComplete =>
+      'Ú©Ø§Ù… Ú©Ùˆ Ù…Ú©Ù…Ù„ Ù‚Ø±Ø§Ø± Ø¯Û’ Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
   String get areYouSureYouWantToStartTrackingThisBooking =>
-      'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ شروع کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToPauseTrackingThisBooking =>
-      'کیا آپ واقعی اس بکنگ کی ٹریکنگ معطل کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ù…Ø¹Ø·Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToStopTrackingThisBooking =>
-      'کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ روکنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get pauseTracking => 'ٹریکنگ روک دیں';
+  String get pauseTracking => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ© Ø¯ÛŒÚº';
 
   @override
-  String get resumeTracking => 'ٹریکنگ بحال کریں';
+  String get resumeTracking => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø¨Ø­Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get trackingPausedSuccessfully => 'ٹریکنگ کامیابی سے معطل کر دی گئی';
+  String get trackingPausedSuccessfully =>
+      'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ø¹Ø·Ù„ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get areYouSureYouWantToCompleteThisWork =>
-      'کیا آپ واقعی یہ کام مکمل کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ ÛŒÛ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get useBiometric => 'بائیومیٹرک استعمال کریں';
+  String get useBiometric => 'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get imageIsRequired => 'تصویر ضروری ہے';
+  String get imageIsRequired => 'ØªØµÙˆÛŒØ± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get bookingCompletedSuccessfully => 'بکنگ کامیابی سے مکمل ہو گئی';
+  String get bookingCompletedSuccessfully =>
+      'Ø¨Ú©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get startedWorkingOnBookingSuccessfully =>
-      'بکنگ پر کام کامیابی سے شروع ہو گیا';
+      'Ø¨Ú©Ù†Ú¯ Ù¾Ø± Ú©Ø§Ù… Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get stopTrackingBookingSuccessfully =>
-      'بکنگ کی ٹریکنگ کامیابی سے روک دی گئی';
+      'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø±ÙˆÚ© Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get cards => 'ایپ کے اندر';
+  String get cards => 'Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø±';
 
   @override
-  String get insideApp => 'ایپ کے اندر';
+  String get insideApp => 'Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø±';
 
   @override
-  String get outsideApp => 'خارج ایپ';
+  String get outsideApp => 'Ø®Ø§Ø±Ø¬ Ø§ÛŒÙ¾';
 
   @override
-  String get goToLogin => 'لاگ ان پر جائیں';
+  String get goToLogin => 'Ù„Ø§Ú¯ Ø§Ù† Ù¾Ø± Ø¬Ø§Ø¦ÛŒÚº';
 
   @override
-  String get failedToSendNotification => 'صارف کو اطلاع بھیجنے میں ناکامی';
+  String get failedToSendNotification =>
+      'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
   String get locationPermissionErrorIOS =>
-      'آئی او ایس پر مقام کی اجازت کی خرابی۔ براہ کرم ترتیبات > رازداری اور سیکیورٹی > مقام کی خدمات > ابو جلمبو ٹیکنیشن پر جائیں اور بیک گراؤنڈ ٹریکنگ فعال کرنے کے لیے \'ہمیشہ\' منتخب کریں۔';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³ Ù¾Ø± Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ±ØªÛŒØ¨Ø§Øª > Ø±Ø§Ø²Ø¯Ø§Ø±ÛŒ Ø§ÙˆØ± Ø³ÛŒÚ©ÛŒÙˆØ±Ù¹ÛŒ > Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª > Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù¾Ø± Ø¬Ø§Ø¦ÛŒÚº Ø§ÙˆØ± Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù¹Ø±ÛŒÚ©Ù†Ú¯ ÙØ¹Ø§Ù„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ \'ÛÙ…ÛŒØ´Û\' Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get youHaveAnActiveBookingAlready =>
-      'آپ کی پہلے سے ہی ایک فعال بکنگ موجود ہے۔';
+      'Ø¢Ù¾ Ú©ÛŒ Ù¾ÛÙ„Û’ Ø³Û’ ÛÛŒ Ø§ÛŒÚ© ÙØ¹Ø§Ù„ Ø¨Ú©Ù†Ú¯ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’Û”';
 
   @override
   String get locationServicesDisabledPleaseEnable =>
-      'مقام کی خدمات غیر فعال ہیں۔ براہ کرم مقام کی خدمات فعال کریں۔';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª ØºÛŒØ± ÙØ¹Ø§Ù„ ÛÛŒÚºÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get openLocationSettings => 'مقام کی ترتیبات کھولیں';
+  String get openLocationSettings =>
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ú©Ú¾ÙˆÙ„ÛŒÚº';
 
   @override
-  String get image => 'تصویر';
+  String get image => 'ØªØµÙˆÛŒØ±';
 
   @override
-  String get notificationTitle => 'اطلاع کا عنوان';
+  String get notificationTitle => 'Ø§Ø·Ù„Ø§Ø¹ Ú©Ø§ Ø¹Ù†ÙˆØ§Ù†';
 
   @override
   String get enterYourNotificationMessageHere =>
-      'اپنا اطلاعی پیغام یہاں درج کریں';
+      'Ø§Ù¾Ù†Ø§ Ø§Ø·Ù„Ø§Ø¹ÛŒ Ù¾ÛŒØºØ§Ù… ÛŒÛØ§Úº Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get aboGlumboTechnician => 'ابو جلمبو ٹیکنیشن';
+  String get aboGlumboTechnician => 'Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
-  String get now => 'ابھی';
+  String get now => 'Ø§Ø¨Ú¾ÛŒ';
 
   @override
-  String get assigningTechnician => 'قبولیت زیر التوا';
+  String get assigningTechnician => 'Ù‚Ø¨ÙˆÙ„ÛŒØª Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§';
 
   @override
-  String get selectProvince => 'صوبہ منتخب کریں';
+  String get selectProvince => 'ØµÙˆØ¨Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectCity => 'شہر منتخب کریں';
+  String get selectCity => 'Ø´ÛØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get rejectionHistory => 'مسترد کرنے کی تاریخ';
+  String get rejectionHistory => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get selectNeighborhood => 'علاقہ منتخب کریں';
+  String get selectNeighborhood => 'Ø¹Ù„Ø§Ù‚Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get recipients => 'موصول کنندگان';
+  String get recipients => 'Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Ú¯Ø§Ù†';
 
   @override
-  String get techniciansRejectedThisClaim => 'ٹیکنیشنز نے یہ کلیم مسترد کر دیا';
+  String get techniciansRejectedThisClaim =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù†Û’ ÛŒÛ Ú©Ù„ÛŒÙ… Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒØ§';
 
   @override
-  String get technicianRejectedThisClaim => 'ٹیکنیشن نے یہ کلیم مسترد کر دیا';
+  String get technicianRejectedThisClaim =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ ÛŒÛ Ú©Ù„ÛŒÙ… Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒØ§';
 
   @override
-  String get warrantyClaims => 'وارنٹی کلیمز';
+  String get warrantyClaims => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ…Ø²';
 
   @override
-  String get expired => 'ختم شدہ';
+  String get expired => 'Ø®ØªÙ… Ø´Ø¯Û';
 
   @override
-  String get tapToView => 'دیکھنے کے لیے تھپتھپائیں';
+  String get tapToView => 'Ø¯ÛŒÚ©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get rejections => 'مسترد شدہ';
+  String get rejections => 'Ù…Ø³ØªØ±Ø¯ Ø´Ø¯Û';
 
   @override
-  String get exceedsMaxSize => 'زیادہ سے زیادہ سائز سے تجاوز کر گیا';
+  String get exceedsMaxSize =>
+      'Ø²ÛŒØ§Ø¯Û Ø³Û’ Ø²ÛŒØ§Ø¯Û Ø³Ø§Ø¦Ø² Ø³Û’ ØªØ¬Ø§ÙˆØ² Ú©Ø± Ú¯ÛŒØ§';
 
   @override
-  String get sendNotifications => 'اطلاعات بھیجیں';
+  String get sendNotifications => 'Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
-  String get sendNotification => 'اطلاع بھیجیں';
+  String get sendNotification => 'Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
-  String get couldNotOpenFile => 'فائل نہیں کھل سکی';
+  String get couldNotOpenFile => 'ÙØ§Ø¦Ù„ Ù†ÛÛŒÚº Ú©Ú¾Ù„ Ø³Ú©ÛŒ';
 
   @override
-  String get noTechniciansFound => 'کوئی ٹیکنیشن نہیں ملا';
+  String get noTechniciansFound => 'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get noTechniciansAvailable => 'کوئی ٹیکنیشن دستیاب نہیں';
+  String get noTechniciansAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº';
 
   @override
-  String get manageNotificationAlerts => 'اطلاعی الرٹس کا انتظام کریں';
+  String get manageNotificationAlerts =>
+      'Ø§Ø·Ù„Ø§Ø¹ÛŒ Ø§Ù„Ø±Ù¹Ø³ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get previewLanguage => 'زبان کا پیش نظارہ';
+  String get previewLanguage => 'Ø²Ø¨Ø§Ù† Ú©Ø§ Ù¾ÛŒØ´ Ù†Ø¸Ø§Ø±Û';
 
   @override
-  String get sendNotificationsToCustomer => 'صارف کو اطلاعات بھیجیں';
+  String get sendNotificationsToCustomer =>
+      'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
-  String get preview => 'پیش نظارہ';
+  String get preview => 'Ù¾ÛŒØ´ Ù†Ø¸Ø§Ø±Û';
 
   @override
-  String get message => 'پیغام';
+  String get message => 'Ù¾ÛŒØºØ§Ù…';
 
   @override
-  String get composeMessage => 'پیغام تحریر کریں';
+  String get composeMessage => 'Ù¾ÛŒØºØ§Ù… ØªØ­Ø±ÛŒØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get clearAll => 'سب صاف کریں';
+  String get clearAll => 'Ø³Ø¨ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get iqama => 'اقامہ';
+  String get iqama => 'Ø§Ù‚Ø§Ù…Û';
 
   @override
   String get certificationsrelevantExperienceDocuments =>
-      'سرٹیفکیٹ/متعلقہ تجربہ کی دستاویزات';
+      'Ø³Ø±Ù¹ÛŒÙÚ©ÛŒÙ¹/Ù…ØªØ¹Ù„Ù‚Û ØªØ¬Ø±Ø¨Û Ú©ÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª';
 
   @override
-  String get filesSelected => 'فائلیں منتخب کی گئیں';
+  String get filesSelected => 'ÙØ§Ø¦Ù„ÛŒÚº Ù…Ù†ØªØ®Ø¨ Ú©ÛŒ Ú¯Ø¦ÛŒÚº';
 
   @override
   String get certificationsrelevantExperienceDocumentsOptional =>
-      'سرٹیفکیٹ/متعلقہ تجربہ کی دستاویزات (اختیاری)';
+      'Ø³Ø±Ù¹ÛŒÙÚ©ÛŒÙ¹/Ù…ØªØ¹Ù„Ù‚Û ØªØ¬Ø±Ø¨Û Ú©ÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª (Ø§Ø®ØªÛŒØ§Ø±ÛŒ)';
 
   @override
-  String get invoiceType => 'انوائس کی قسم';
+  String get invoiceType => 'Ø§Ù†ÙˆØ§Ø¦Ø³ Ú©ÛŒ Ù‚Ø³Ù…';
 
   @override
-  String get fullService => 'مکمل سروس';
+  String get fullService => 'Ù…Ú©Ù…Ù„ Ø³Ø±ÙˆØ³';
 
   @override
-  String get inspection => 'معائنہ';
+  String get inspection => 'Ù…Ø¹Ø§Ø¦Ù†Û';
 
   @override
-  String get inspectionFee => 'معائنہ فیس';
+  String get inspectionFee => 'Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³';
 
   @override
-  String get bookingId => 'بکنگ آئی ڈی';
+  String get bookingId => 'Ø¨Ú©Ù†Ú¯ Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
-  String get typeMessageToCustomer => 'صارف کو پیغام لکھیں...';
+  String get typeMessageToCustomer => 'ØµØ§Ø±Ù Ú©Ùˆ Ù¾ÛŒØºØ§Ù… Ù„Ú©Ú¾ÛŒÚº...';
 
   @override
   String get startConversationWithCustomer =>
-      'اپنے صارف کے ساتھ گفتگو شروع کریں';
+      'Ø§Ù¾Ù†Û’ ØµØ§Ø±Ù Ú©Û’ Ø³Ø§ØªÚ¾ Ú¯ÙØªÚ¯Ùˆ Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get chatWithCustomer => 'صارف کے ساتھ چیٹ کریں';
+  String get chatWithCustomer => 'ØµØ§Ø±Ù Ú©Û’ Ø³Ø§ØªÚ¾ Ú†ÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get startChat => 'چیٹ شروع کریں';
+  String get startChat => 'Ú†ÛŒÙ¹ Ø´Ø±ÙˆØ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get today => 'آج';
+  String get today => 'Ø¢Ø¬';
 
   @override
-  String get yesterday => 'کل';
+  String get yesterday => 'Ú©Ù„';
 
   @override
-  String get amountPaid => 'ادا کردہ رقم';
+  String get amountPaid => 'Ø§Ø¯Ø§ Ú©Ø±Ø¯Û Ø±Ù‚Ù…';
 
   @override
-  String get continueChat => 'چیٹ جاری رکھیں';
+  String get continueChat => 'Ú†ÛŒÙ¹ Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾ÛŒÚº';
 
   @override
-  String get failedToStartChat => 'چیٹ شروع کرنے میں ناکامی';
+  String get failedToStartChat =>
+      'Ú†ÛŒÙ¹ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get creatingChatRoom => 'چیٹ روم بنایا جا رہا ہے';
+  String get creatingChatRoom => 'Ú†ÛŒÙ¹ Ø±ÙˆÙ… Ø¨Ù†Ø§ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get loadingChat => 'چیٹ لوڈ ہو رہی ہے';
+  String get loadingChat => 'Ú†ÛŒÙ¹ Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get noMessages => 'کوئی پیغام نہیں';
+  String get noMessages => 'Ú©ÙˆØ¦ÛŒ Ù¾ÛŒØºØ§Ù… Ù†ÛÛŒÚº';
 
   @override
-  String get errorLoadingMessages => 'پیغامات لوڈ کرنے میں خرابی';
+  String get errorLoadingMessages =>
+      'Ù¾ÛŒØºØ§Ù…Ø§Øª Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get transactionId => 'ٹرانزیکشن آئی ڈی';
+  String get transactionId => 'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ø¢Ø¦ÛŒ ÚˆÛŒ';
 
   @override
   String get backgroundLocationPermissionRequired =>
-      'بیک گراؤنڈ لوکیشن ٹریکنگ کے لیے ہمیشہ اجازت ضروری ہے۔ براہ کرم اسے اپنے آلے کی ترتیبات میں فعال کریں۔';
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ ÛÙ…ÛŒØ´Û Ø§Ø¬Ø§Ø²Øª Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø³Û’ Ø§Ù¾Ù†Û’ Ø¢Ù„Û’ Ú©ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ù…ÛŒÚº ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get locationPermissionDeniedPleaseGrant =>
-      'مقام کی اجازت مسترد کر دی گئی۔ جاری رکھنے کے لیے براہ کرم مقام کی اجازت دیں۔';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒÛ” Ø¬Ø§Ø±ÛŒ Ø±Ú©Ú¾Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒÚºÛ”';
 
   @override
   String get areYouSureYouWantToCompleteThisBooking =>
-      'کیا آپ واقعی یہ بکنگ مکمل کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ ÛŒÛ Ø¨Ú©Ù†Ú¯ Ù…Ú©Ù…Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get locationPermissionPermanentlyDeniedPleaseEnable =>
-      'مقام کی اجازت مستقل طور پر مسترد کر دی گئی۔ براہ کرم ترتیبات میں مقام کی رسائی فعال کریں۔';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªÙ‚Ù„ Ø·ÙˆØ± Ù¾Ø± Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ±ØªÛŒØ¨Ø§Øª Ù…ÛŒÚº Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø±Ø³Ø§Ø¦ÛŒ ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get locationServicesDisabledCannotRestoreTracking =>
-      'مقام کی خدمات غیر فعال ہیں، ٹریکنگ بحال نہیں ہو سکتی';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª ØºÛŒØ± ÙØ¹Ø§Ù„ ÛÛŒÚºØŒ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø¨Ø­Ø§Ù„ Ù†ÛÛŒÚº ÛÙˆ Ø³Ú©ØªÛŒ';
 
   @override
   String get locationPermissionDeniedCannotRestoreTracking =>
-      'مقام کی اجازت مسترد کر دی گئی، ٹریکنگ بحال نہیں ہو سکتی';
+      'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒØŒ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø¨Ø­Ø§Ù„ Ù†ÛÛŒÚº ÛÙˆ Ø³Ú©ØªÛŒ';
 
   @override
   String get iosLocationPermissionErrorDuringRestore =>
-      'آئی او ایس مقام کی اجازت کی خرابی - \'ہمیشہ\' اجازت کی ضرورت ہو سکتی ہے';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³ Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ - \'ÛÙ…ÛŒØ´Û\' Ø§Ø¬Ø§Ø²Øª Ú©ÛŒ Ø¶Ø±ÙˆØ±Øª ÛÙˆ Ø³Ú©ØªÛŒ ÛÛ’';
 
   @override
   String get locationTrackingRestoredSuccessfully =>
-      'لوکیشن ٹریکنگ کامیابی سے بحال ہو گئی';
+      'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ø­Ø§Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get iosLocationPermissionIssueDuringRestore =>
-      'آئی او ایس مقام کی اجازت کا مسئلہ';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³ Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ú©Ø§ Ù…Ø³Ø¦Ù„Û';
 
   @override
   String get iosOnlyWhenInUsePermissionGranted =>
-      'آئی او ایس: صرف \'ایپ استعمال کرتے وقت\' کی اجازت دی گئی۔ بیک گراؤنڈ ٹریکنگ محدود ہوگی۔';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³: ØµØ±Ù \'Ø§ÛŒÙ¾ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ØªÛ’ ÙˆÙ‚Øª\' Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒ Ú¯Ø¦ÛŒÛ” Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ù…Ø­Ø¯ÙˆØ¯ ÛÙˆÚ¯ÛŒÛ”';
 
   @override
   String get iosAlwaysPermissionGranted =>
-      'آئی او ایس: \'ہمیشہ\' کی اجازت دی گئی۔ مکمل بیک گراؤنڈ ٹریکنگ دستیاب ہے۔';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³: \'ÛÙ…ÛŒØ´Û\' Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒ Ú¯Ø¦ÛŒÛ” Ù…Ú©Ù…Ù„ Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø¯Ø³ØªÛŒØ§Ø¨ ÛÛ’Û”';
 
   @override
   String get iosErrorRequestingAlwaysPermission =>
-      'آئی او ایس: ہمیشہ کی اجازت مانگنے میں خرابی';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³: ÛÙ…ÛŒØ´Û Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ù…Ø§Ù†Ú¯Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get iosContinuingWithWhenInUsePermissionOnly =>
-      'آئی او ایس: صرف \'ایپ استعمال کرتے وقت\' کی اجازت کے ساتھ جاری ہے۔';
+      'Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³: ØµØ±Ù \'Ø§ÛŒÙ¾ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ØªÛ’ ÙˆÙ‚Øª\' Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ú©Û’ Ø³Ø§ØªÚ¾ Ø¬Ø§Ø±ÛŒ ÛÛ’Û”';
 
   @override
   String get batteryOptimizationEnabledMayAffectTracking =>
-      'بیٹری آپٹیمائزیشن فعال ہے، یہ بیک گراؤنڈ ٹریکنگ کو متاثر کر سکتی ہے';
+      'Ø¨ÛŒÙ¹Ø±ÛŒ Ø¢Ù¾Ù¹ÛŒÙ…Ø§Ø¦Ø²ÛŒØ´Ù† ÙØ¹Ø§Ù„ ÛÛ’ØŒ ÛŒÛ Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ùˆ Ù…ØªØ§Ø«Ø± Ú©Ø± Ø³Ú©ØªÛŒ ÛÛ’';
 
   @override
   String get trackingYourLocationForServiceDelivery =>
-      'سروس کی فراہمی کے لیے آپ کے مقام کو ٹریک کیا جا رہا ہے';
+      'Ø³Ø±ÙˆØ³ Ú©ÛŒ ÙØ±Ø§ÛÙ…ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ø¢Ù¾ Ú©Û’ Ù…Ù‚Ø§Ù… Ú©Ùˆ Ù¹Ø±ÛŒÚ© Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get aboGlumboLocationTracking => 'ابو جلمبو - لوکیشن ٹریکنگ';
+  String get aboGlumboLocationTracking =>
+      'Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ - Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯';
 
   @override
-  String get backgroundLocationUpdated => 'بیک گراؤنڈ مقام اپ ڈیٹ ہو گیا';
+  String get backgroundLocationUpdated =>
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù…Ù‚Ø§Ù… Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get errorUpdatingBackgroundLocation =>
-      'بیک گراؤنڈ مقام اپ ڈیٹ کرنے میں خرابی';
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù…Ù‚Ø§Ù… Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get backgroundFetchTriggered => 'بیک گراؤنڈ فیچ متحرک ہو گیا';
+  String get backgroundFetchTriggered =>
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ ÙÛŒÚ† Ù…ØªØ­Ø±Ú© ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get backgroundFetchTimeout => 'بیک گراؤنڈ فیچ کا وقت ختم ہو گیا';
+  String get backgroundFetchTimeout =>
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ ÙÛŒÚ† Ú©Ø§ ÙˆÙ‚Øª Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get locationStreamErrorDuringRestore =>
-      'بحالی کے دوران لوکیشن اسٹریم کی خرابی';
+      'Ø¨Ø­Ø§Ù„ÛŒ Ú©Û’ Ø¯ÙˆØ±Ø§Ù† Ù„ÙˆÚ©ÛŒØ´Ù† Ø§Ø³Ù¹Ø±ÛŒÙ… Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get errorRestoringLocationTracking =>
-      'لوکیشن ٹریکنگ بحال کرنے میں خرابی';
+      'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø¨Ø­Ø§Ù„ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get backgroundFetchConfiguredAndStarted =>
-      'بیک گراؤنڈ فیچ کنفیگر اور شروع ہو گیا';
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ ÙÛŒÚ† Ú©Ù†ÙÛŒÚ¯Ø± Ø§ÙˆØ± Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get errorConfiguringBackgroundFetch =>
-      'بیک گراؤنڈ فیچ کنفیگر کرنے میں خرابی';
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ ÙÛŒÚ† Ú©Ù†ÙÛŒÚ¯Ø± Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get locationUpdated => 'مقام اپ ڈیٹ ہو گیا';
+  String get locationUpdated => 'Ù…Ù‚Ø§Ù… Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get errorUpdatingLocationToFirestore =>
-      'فائر اسٹور پر مقام اپ ڈیٹ کرنے میں خرابی';
+      'ÙØ§Ø¦Ø± Ø§Ø³Ù¹ÙˆØ± Ù¾Ø± Ù…Ù‚Ø§Ù… Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorStoppingBackgroundFetch => 'بیک گراؤنڈ فیچ روکنے میں خرابی';
+  String get errorStoppingBackgroundFetch =>
+      'Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ ÙÛŒÚ† Ø±ÙˆÚ©Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorUpdatingBookingStatus => 'بکنگ اسٹیٹس اپ ڈیٹ کرنے میں خرابی';
+  String get errorUpdatingBookingStatus =>
+      'Ø¨Ú©Ù†Ú¯ Ø§Ø³Ù¹ÛŒÙ¹Ø³ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get locationTrackingStopped => 'لوکیشن ٹریکنگ روک دی گئی';
+  String get locationTrackingStopped =>
+      'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ© Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get deleteItemConfirmation =>
-      'کیا آپ واقعی اس آئٹم کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¢Ø¦Ù¹Ù… Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get agentUnavailable => 'ٹیکنیشن دستیاب نہیں';
+  String get agentUnavailable => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº';
 
   @override
-  String get timeConflictDetected => 'وقت کا تعارض پایا گیا';
+  String get timeConflictDetected => 'ÙˆÙ‚Øª Ú©Ø§ ØªØ¹Ø§Ø±Ø¶ Ù¾Ø§ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get cannotAssignWorkTo => 'کام تفویض نہیں کیا جا سکتا کو';
+  String get cannotAssignWorkTo =>
+      'Ú©Ø§Ù… ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§ Ú©Ùˆ';
 
   @override
   String get alreadyAssignedAtExactSameTime =>
-      'پہلے ہی بالکل اسی وقت تفویض کیا جا چکا ہے';
+      'Ù¾ÛÙ„Û’ ÛÛŒ Ø¨Ø§Ù„Ú©Ù„ Ø§Ø³ÛŒ ÙˆÙ‚Øª ØªÙÙˆÛŒØ¶ Ú©ÛŒØ§ Ø¬Ø§ Ú†Ú©Ø§ ÛÛ’';
 
   @override
-  String get currentBookingTime => 'موجودہ بکنگ کا وقت';
+  String get currentBookingTime => 'Ù…ÙˆØ¬ÙˆØ¯Û Ø¨Ú©Ù†Ú¯ Ú©Ø§ ÙˆÙ‚Øª';
 
   @override
   String get technicianCannotBeAssignedMultipleTimes =>
-      'ایک ٹیکنیشن کو بالکل ایک ہی وقت میں متعدد بکنگز تفویض نہیں کی جا سکتیں۔ براہ کرم ایک مختلف ٹائم سلاٹ منتخب کریں یا کوئی دوسرا ٹیکنیشن منتخب کریں۔';
+      'Ø§ÛŒÚ© Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ø¨Ø§Ù„Ú©Ù„ Ø§ÛŒÚ© ÛÛŒ ÙˆÙ‚Øª Ù…ÛŒÚº Ù…ØªØ¹Ø¯Ø¯ Ø¨Ú©Ù†Ú¯Ø² ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒ Ø¬Ø§ Ø³Ú©ØªÛŒÚºÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ù…Ø®ØªÙ„Ù Ù¹Ø§Ø¦Ù… Ø³Ù„Ø§Ù¹ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº ÛŒØ§ Ú©ÙˆØ¦ÛŒ Ø¯ÙˆØ³Ø±Ø§ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get unknownTechnician => 'نامعلوم ٹیکنیشن';
+  String get unknownTechnician => 'Ù†Ø§Ù…Ø¹Ù„ÙˆÙ… Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
-  String get tryadifferentsearchterm => 'مختلف تلاش کی اصطلاح آزمائیں';
+  String get tryadifferentsearchterm =>
+      'Ù…Ø®ØªÙ„Ù ØªÙ„Ø§Ø´ Ú©ÛŒ Ø§ØµØ·Ù„Ø§Ø­ Ø¢Ø²Ù…Ø§Ø¦ÛŒÚº';
 
   @override
-  String get warrantyRepairRequested => 'وارنٹی مرمت کی درخواست کی گئی';
+  String get warrantyRepairRequested =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get acceptWarrantyRepair => 'وارنٹی مرمت قبول کریں';
+  String get acceptWarrantyRepair => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ù‚Ø¨ÙˆÙ„ Ú©Ø±ÛŒÚº';
 
   @override
   String get customerRequestedRepairUnderWarranty =>
-      'صارف نے وارنٹی کے تحت مرمت کی درخواست کی';
+      'ØµØ§Ø±Ù Ù†Û’ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Û’ ØªØ­Øª Ù…Ø±Ù…Øª Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ';
 
   @override
-  String get warrantyRepairAccepted => 'وارنٹی مرمت کی تصدیق ہو گئی';
+  String get warrantyRepairAccepted =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get technicianAcceptedTheRequest =>
-      'ٹیکنیشن نے درخواست کی تصدیق کر دی';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get warrantyRepairCompleted => 'وارنٹی مرمت مکمل ہو گئی';
+  String get warrantyRepairCompleted =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get originalServiceCompleted => 'اصل خدمت مکمل ہو گئی';
+  String get originalServiceCompleted => 'Ø§ØµÙ„ Ø®Ø¯Ù…Øª Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get warrantyRejectedByAdmin => 'وارنٹی ایڈمن نے مسترد کر دی';
+  String get warrantyRejectedByAdmin =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ø§ÛŒÚˆÙ…Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get warrantyRejectedByTechnician => 'وارنٹی ٹیکنیشن نے مسترد کر دی';
+  String get warrantyRejectedByTechnician =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get reasonforrejection => 'مسترد کرنے کی وجہ';
+  String get reasonforrejection => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û';
 
   @override
   String get warrantyRequestWasRejectedByAdmin =>
-      'وارنٹی کی درخواست ایڈمن نے مسترد کر دی تھی';
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø§ÛŒÚˆÙ…Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ ØªÚ¾ÛŒ';
 
   @override
   String get warrantyRequestWasRejectedByTechnician =>
-      'وارنٹی کی درخواست ٹیکنیشن نے مسترد کر دی تھی';
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get technicianCompletedTheRequest => 'ٹیکنیشن نے درخواست مکمل کر لی';
+  String get technicianCompletedTheRequest =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ú©Ù…Ù„ Ú©Ø± Ù„ÛŒ';
 
   @override
-  String get warrantyExpired => 'وارنٹی ختم ہو گئی';
+  String get warrantyExpired => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ø®ØªÙ… ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get warrantyPeriodHasExpired => 'وارنٹی کی مدت ختم ہو چکی ہے';
+  String get warrantyPeriodHasExpired =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©ÛŒ Ù…Ø¯Øª Ø®ØªÙ… ÛÙˆ Ú†Ú©ÛŒ ÛÛ’';
 
   @override
-  String get trackingStoppedAt => 'ٹریکنگ روک دی گئی';
+  String get trackingStoppedAt => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ© Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get serviceTrackingStopped => 'سروس ٹریکنگ روک دی گئی ہے';
+  String get serviceTrackingStopped =>
+      'Ø³Ø±ÙˆØ³ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ© Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’';
 
   @override
-  String get youCancelledThisRequest => 'آپ نے یہ درخواست منسوخ کر دی';
+  String get youCancelledThisRequest =>
+      'Ø¢Ù¾ Ù†Û’ ÛŒÛ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒ';
 
   @override
   String get youDeclinedThisWarrantyRequest =>
-      'آپ نے وارنٹی کی یہ درخواست مسترد کر دی';
+      'Ø¢Ù¾ Ù†Û’ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©ÛŒ ÛŒÛ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get noresultsfound => 'کوئی نتائج نہیں ملے';
+  String get noresultsfound => 'Ú©ÙˆØ¦ÛŒ Ù†ØªØ§Ø¦Ø¬ Ù†ÛÛŒÚº Ù…Ù„Û’';
 
   @override
-  String get technicianCancelled => 'ٹیکنیشن نے منسوخ کر دیا';
+  String get technicianCancelled =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒØ§';
 
   @override
-  String get cancelledByTechnician => 'ٹیکنیشن کی طرف سے منسوخ کر دیا گیا';
+  String get cancelledByTechnician =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get technicianPreviouslyCancelled => 'ٹیکنیشن نے پہلے منسوخ کیا تھا';
+  String get technicianPreviouslyCancelled =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§ ØªÚ¾Ø§';
 
   @override
-  String get agentCancelledAtTimeSlot => 'ٹیکنیشن نے اس وقت پہلے منسوخ کیا تھا';
+  String get agentCancelledAtTimeSlot =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ø§Ø³ ÙˆÙ‚Øª Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§ ØªÚ¾Ø§';
 
   @override
-  String get previouslyCancelledAt => 'پہلے منسوخ کیا گیا بروز';
+  String get previouslyCancelledAt =>
+      'Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get chooseDifferentAgent => 'مختلف ٹیکنیشن منتخب کریں';
+  String get chooseDifferentAgent =>
+      'Ù…Ø®ØªÙ„Ù Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get assignAnyway => 'بہرحال تفویض کریں';
+  String get assignAnyway => 'Ø¨ÛØ±Ø­Ø§Ù„ ØªÙÙˆÛŒØ¶ Ú©Ø±ÛŒÚº';
 
   @override
-  String get cancelledAt => 'منسوخ کیا گیا بروز';
+  String get cancelledAt => 'Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
   String get technicianCancelledAtTime =>
-      'اس ٹیکنیشن نے پہلے بالکل اسی ٹائم سلاٹ میں بکنگ منسوخ کی تھی۔ بہتر وشوسنییتا کے لیے کسی دوسرے ٹیکنیشن کو تفویض کرنے پر غور کریں۔';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ Ø¨Ø§Ù„Ú©Ù„ Ø§Ø³ÛŒ Ù¹Ø§Ø¦Ù… Ø³Ù„Ø§Ù¹ Ù…ÛŒÚº Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ØªÚ¾ÛŒÛ” Ø¨ÛØªØ± ÙˆØ´ÙˆØ³Ù†ÛŒÛŒØªØ§ Ú©Û’ Ù„ÛŒÛ’ Ú©Ø³ÛŒ Ø¯ÙˆØ³Ø±Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ú©Ø±Ù†Û’ Ù¾Ø± ØºÙˆØ± Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get errorCheckingBatteryOptimization =>
-      'بیٹری آپٹیمائزیشن چیک کرنے میں خرابی';
+      'Ø¨ÛŒÙ¹Ø±ÛŒ Ø¢Ù¾Ù¹ÛŒÙ…Ø§Ø¦Ø²ÛŒØ´Ù† Ú†ÛŒÚ© Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get technicianRestrictedTitle => 'ٹیکنیشن محدود ہے';
+  String get technicianRestrictedTitle => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ø­Ø¯ÙˆØ¯ ÛÛ’';
 
   @override
   String get cannotAssignCancelledTechnician =>
-      'منسوخ شدہ ٹیکنیشن کو تفویض نہیں کیا جا سکتا';
+      'Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§';
 
   @override
-  String get lastCancellationOn => 'آخری منسوخی بروز';
+  String get lastCancellationOn => 'Ø¢Ø®Ø±ÛŒ Ù…Ù†Ø³ÙˆØ®ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
   String get technicianCancelledRestrictionMessage =>
-      'اس ٹیکنیشن نے پہلے بکنگ منسوخ کی ہے اور اب اسے نئی اسائنمنٹس سے روک دیا گیا ہے۔ براہ کرم ایک مختلف ٹیکنیشن منتخب کریں۔';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ÛÛ’ Ø§ÙˆØ± Ø§Ø¨ Ø§Ø³Û’ Ù†Ø¦ÛŒ Ø§Ø³Ø§Ø¦Ù†Ù…Ù†Ù¹Ø³ Ø³Û’ Ø±ÙˆÚ© Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ù…Ø®ØªÙ„Ù Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get understood => 'سمجھ گیا';
+  String get understood => 'Ø³Ù…Ø¬Ú¾ Ú¯ÛŒØ§';
 
   @override
-  String get suspendAccount => 'اکاؤنٹ معطل کریں';
+  String get suspendAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…Ø¹Ø·Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get unblockAccount => 'اکاؤنٹ بحال کریں';
+  String get unblockAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ø­Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToSuspendThisAccount =>
-      'کیا آپ واقعی اس اکاؤنٹ کو معطل کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ùˆ Ù…Ø¹Ø·Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToUnblockThisAccount =>
-      'کیا آپ واقعی اس اکاؤنٹ کو بحال کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ùˆ Ø¨Ø­Ø§Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get accountSuspended => 'اکاؤنٹ معطل کر دیا گیا';
+  String get accountSuspended => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…Ø¹Ø·Ù„ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get accountUnblocked => 'اکاؤنٹ بحال کر دیا گیا';
+  String get accountUnblocked => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ø­Ø§Ù„ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get completedOrders => 'مکمل شدہ آرڈرز';
+  String get completedOrders => 'Ù…Ú©Ù…Ù„ Ø´Ø¯Û Ø¢Ø±ÚˆØ±Ø²';
 
   @override
-  String get profession => 'پیشہ';
+  String get profession => 'Ù¾ÛŒØ´Û';
 
   @override
-  String get idAndDocuments => 'شناختی دستاویزات';
+  String get idAndDocuments => 'Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª';
 
   @override
-  String get bonusTier => 'بونس درجہ';
+  String get bonusTier => 'Ø¨ÙˆÙ†Ø³ Ø¯Ø±Ø¬Û';
 
   @override
-  String get systemInfo => 'سسٹم کی معلومات';
+  String get systemInfo => 'Ø³Ø³Ù¹Ù… Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get earningsBreakdown => 'آمدنی کی تفصیل';
+  String get earningsBreakdown => 'Ø¢Ù…Ø¯Ù†ÛŒ Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get bonuses => 'بونس';
+  String get bonuses => 'Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get noDocumentsUploaded => 'کوئی دستاویز اپ لوڈ نہیں کی گئی';
+  String get noDocumentsUploaded =>
+      'Ú©ÙˆØ¦ÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² Ø§Ù¾ Ù„ÙˆÚˆ Ù†ÛÛŒÚº Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get cancelledThisBooking => 'یہ بکنگ منسوخ کر دی';
+  String get cancelledThisBooking => 'ÛŒÛ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒ';
 
   @override
-  String get alreadyBookedAt => 'پہلے ہی بک ہے بروز';
+  String get alreadyBookedAt => 'Ù¾ÛÙ„Û’ ÛÛŒ Ø¨Ú© ÛÛ’ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get bookingAssignedTo => 'بکنگ تفویض کر دی گئی کو';
+  String get bookingAssignedTo => 'Ø¨Ú©Ù†Ú¯ ØªÙÙˆÛŒØ¶ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ Ú©Ùˆ';
 
   @override
-  String get bookingAssignmentSuccessful => 'بکنگ کی تفویض کامیاب رہی';
+  String get bookingAssignmentSuccessful =>
+      'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªÙÙˆÛŒØ¶ Ú©Ø§Ù…ÛŒØ§Ø¨ Ø±ÛÛŒ';
 
   @override
   String get anotherAssignmentInProgress =>
-      'ایک اور تفویض جاری ہے۔ براہ کرم انتظار کریں...';
+      'Ø§ÛŒÚ© Ø§ÙˆØ± ØªÙÙˆÛŒØ¶ Ø¬Ø§Ø±ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†ØªØ¸Ø§Ø± Ú©Ø±ÛŒÚº...';
 
   @override
-  String get assignmentInProgress => 'تفویض جاری ہے۔ براہ کرم انتظار کریں...';
+  String get assignmentInProgress =>
+      'ØªÙÙˆÛŒØ¶ Ø¬Ø§Ø±ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†ØªØ¸Ø§Ø± Ú©Ø±ÛŒÚº...';
 
   @override
   String get checkingAvailabilityAndAssigning =>
-      'دستیابی چیک کی جا رہی ہے اور تفویض کیا جا رہا ہے...';
+      'Ø¯Ø³ØªÛŒØ§Ø¨ÛŒ Ú†ÛŒÚ© Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’ Ø§ÙˆØ± ØªÙÙˆÛŒØ¶ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
   String get thisBookingAlreadyAssignedToAnotherAgent =>
-      'یہ بکنگ پہلے ہی کسی دوسرے ٹیکنیشن کو تفویض کی جا چکی ہے۔';
+      'ÛŒÛ Ø¨Ú©Ù†Ú¯ Ù¾ÛÙ„Û’ ÛÛŒ Ú©Ø³ÛŒ Ø¯ÙˆØ³Ø±Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ú©ÛŒ Ø¬Ø§ Ú†Ú©ÛŒ ÛÛ’Û”';
 
   @override
   String get failedToAssignAgent =>
-      'ٹیکنیشن تفویض کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† ØªÙÙˆÛŒØ¶ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get thisAgentCancelledSameBookingBefore =>
-      'اس ٹیکنیشن نے پہلے یہی بکنگ منسوخ کی تھی';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ ÛŒÛÛŒ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ØªÚ¾ÛŒ';
 
   @override
-  String get gotIt => 'سمجھ گیا';
+  String get gotIt => 'Ø³Ù…Ø¬Ú¾ Ú¯ÛŒØ§';
 
   @override
-  String get showAllAgents => 'تمام ٹیکنیشنز دکھائیں';
+  String get showAllAgents => 'ØªÙ…Ø§Ù… Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ø¯Ú©Ú¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get availableInSelectedLocation => 'منتخب مقام میں دستیاب';
+  String get availableInSelectedLocation =>
+      'Ù…Ù†ØªØ®Ø¨ Ù…Ù‚Ø§Ù… Ù…ÛŒÚº Ø¯Ø³ØªÛŒØ§Ø¨';
 
   @override
-  String get cancelledThisBookingOn => 'یہ بکنگ منسوخ کی بروز';
+  String get cancelledThisBookingOn => 'ÛŒÛ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get previouslyCancelledAgent => 'پہلے منسوخ شدہ ٹیکنیشن';
+  String get previouslyCancelledAgent =>
+      'Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
   String get agentPreviouslyCancelledWarning =>
-      'اس ٹیکنیشن نے پہلے یہی بکنگ کی درخواست منسوخ کی تھی۔ آپ پھر بھی انہیں تفویض کر سکتے ہیں، لیکن زیادہ قابل اعتماد ٹیکنیشن منتخب کرنے پر غور کریں۔';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ ÛŒÛÛŒ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ØªÚ¾ÛŒÛ” Ø¢Ù¾ Ù¾Ú¾Ø± Ø¨Ú¾ÛŒ Ø§Ù†ÛÛŒÚº ØªÙÙˆÛŒØ¶ Ú©Ø± Ø³Ú©ØªÛ’ ÛÛŒÚºØŒ Ù„ÛŒÚ©Ù† Ø²ÛŒØ§Ø¯Û Ù‚Ø§Ø¨Ù„ Ø§Ø¹ØªÙ…Ø§Ø¯ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ù¾Ø± ØºÙˆØ± Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get busyAt => 'مصروف ہے بروز';
+  String get busyAt => 'Ù…ØµØ±ÙˆÙ ÛÛ’ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get managefaq => 'سوالات کا انتظام کریں';
+  String get managefaq => 'Ø³ÙˆØ§Ù„Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get technicianArrived => 'ٹیکنیشن پہنچ گیا';
+  String get technicianArrived => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù¾ÛÙ†Ú† Ú¯ÛŒØ§';
 
   @override
-  String get paymentRequested => 'ادائیگی کی درخواست';
+  String get paymentRequested => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª';
 
   @override
-  String get reassignedAt => 'ری-اسائنڈ';
+  String get reassignedAt => 'Ø±ÛŒ-Ø§Ø³Ø§Ø¦Ù†Úˆ';
 
   @override
-  String get newTechnicianAssigned => 'نئے ٹیکنیشن کی تعیناتی';
+  String get newTechnicianAssigned =>
+      'Ù†Ø¦Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ ØªØ¹ÛŒÙ†Ø§ØªÛŒ';
 
   @override
-  String get technicianStartedTracking => 'ٹیکنیشن نے ٹریکنگ شروع کی';
+  String get technicianStartedTracking =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©ÛŒ';
 
   @override
-  String get technicianArrivedAtLocation => 'ٹیکنیشن مقام پر پہنچ گیا';
+  String get technicianArrivedAtLocation =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù‚Ø§Ù… Ù¾Ø± Ù¾ÛÙ†Ú† Ú¯ÛŒØ§';
 
   @override
-  String get inspectionCompleted => 'معائنہ مکمل';
+  String get inspectionCompleted => 'Ù…Ø¹Ø§Ø¦Ù†Û Ù…Ú©Ù…Ù„';
 
   @override
-  String get fullServiceCompleted => 'مکمل سروس مکمل';
+  String get fullServiceCompleted => 'Ù…Ú©Ù…Ù„ Ø³Ø±ÙˆØ³ Ù…Ú©Ù…Ù„';
 
   @override
-  String get cancelledByAdmin => 'ایڈمن کی طرف سے منسوخ شدہ';
+  String get cancelledByAdmin =>
+      'Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û';
 
   @override
-  String get paymentCompleted => 'ادائیگی مکمل';
+  String get paymentCompleted => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ú©Ù…Ù„';
 
   @override
-  String get paymentSuccessfullyCompleted => 'ادائیگی کامیابی سے مکمل';
+  String get paymentSuccessfullyCompleted =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ú©Ù…Ù„';
 
   @override
-  String get bookingCancelledByAdmin => 'ایڈمن کی جانب سے بکنگ منسوخ';
+  String get bookingCancelledByAdmin =>
+      'Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ Ø¬Ø§Ù†Ø¨ Ø³Û’ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ®';
 
   @override
-  String get addFaq => 'سوال شامل کریں';
+  String get addFaq => 'Ø³ÙˆØ§Ù„ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noFaqEntriesFound => 'کوئی سوال نہیں ملا';
+  String get noFaqEntriesFound => 'Ú©ÙˆØ¦ÛŒ Ø³ÙˆØ§Ù„ Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get manageFaqs => 'سوالات کا انتظام کریں';
+  String get manageFaqs => 'Ø³ÙˆØ§Ù„Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get english => 'انگریزی';
+  String get english => 'Ø§Ù†Ú¯Ø±ÛŒØ²ÛŒ';
 
   @override
-  String get arabic => 'عربی';
+  String get arabic => 'Ø¹Ø±Ø¨ÛŒ';
 
   @override
-  String get question => 'سوال';
+  String get question => 'Ø³ÙˆØ§Ù„';
 
   @override
-  String get answer => 'جواب';
+  String get answer => 'Ø¬ÙˆØ§Ø¨';
 
   @override
-  String get questionIsRequired => 'سوال ضروری ہے';
+  String get questionIsRequired => 'Ø³ÙˆØ§Ù„ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get answerIsRequired => 'جواب ضروری ہے';
+  String get answerIsRequired => 'Ø¬ÙˆØ§Ø¨ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get faqAddedSuccessfully => 'سوال کامیابی سے شامل ہو گیا';
+  String get faqAddedSuccessfully =>
+      'Ø³ÙˆØ§Ù„ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get addEntry => 'اندراج شامل کریں';
+  String get addEntry => 'Ø§Ù†Ø¯Ø±Ø§Ø¬ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addFaqEntry => 'سوال شامل کریں';
+  String get addFaqEntry => 'Ø³ÙˆØ§Ù„ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get questionMustBeInArabic => 'سوال عربی میں ہونا چاہیے';
+  String get questionMustBeInArabic =>
+      'Ø³ÙˆØ§Ù„ Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get answerMustBeInArabic => 'جواب عربی میں ہونا چاہیے';
+  String get answerMustBeInArabic =>
+      'Ø¬ÙˆØ§Ø¨ Ø¹Ø±Ø¨ÛŒ Ù…ÛŒÚº ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get faqEntryDeletedSuccessfully => 'سوال کامیابی سے حذف ہو گیا';
+  String get faqEntryDeletedSuccessfully =>
+      'Ø³ÙˆØ§Ù„ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø­Ø°Ù ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get position => 'پوزیشن';
+  String get position => 'Ù¾ÙˆØ²ÛŒØ´Ù†';
 
   @override
-  String get entryAlreadyExists => 'اس پوزیشن پر اندراج پہلے سے موجود ہے';
+  String get entryAlreadyExists =>
+      'Ø§Ø³ Ù¾ÙˆØ²ÛŒØ´Ù† Ù¾Ø± Ø§Ù†Ø¯Ø±Ø§Ø¬ Ù¾ÛÙ„Û’ Ø³Û’ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
-  String get manageCustomers => 'صارفین کا انتظام کریں';
+  String get manageCustomers => 'ØµØ§Ø±ÙÛŒÙ† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToUnBlockThisCustomer =>
-      'کیا آپ واقعی اس صارف کو ان بلاک کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ØµØ§Ø±Ù Ú©Ùˆ Ø§Ù† Ø¨Ù„Ø§Ú© Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToBlockThisCustomer =>
-      'کیا آپ واقعی اس صارف کو بلاک کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ØµØ§Ø±Ù Ú©Ùˆ Ø¨Ù„Ø§Ú© Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get customer => 'صارف';
+  String get customer => 'ØµØ§Ø±Ù';
 
   @override
-  String get blocked => 'بلاک شدہ';
+  String get blocked => 'Ø¨Ù„Ø§Ú© Ø´Ø¯Û';
 
   @override
-  String get customerUnblockedSuccessfully => 'صارف کامیابی سے ان بلاک ہو گیا';
+  String get customerUnblockedSuccessfully =>
+      'ØµØ§Ø±Ù Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù† Ø¨Ù„Ø§Ú© ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get customerBlockedSuccessfully => 'صارف کامیابی سے بلاک ہو گیا';
+  String get customerBlockedSuccessfully =>
+      'ØµØ§Ø±Ù Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ù„Ø§Ú© ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get noCustomersFound => 'کوئی صارف نہیں ملا';
+  String get noCustomersFound => 'Ú©ÙˆØ¦ÛŒ ØµØ§Ø±Ù Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get blockCustomer => 'صارف کو بلاک کریں';
+  String get blockCustomer => 'ØµØ§Ø±Ù Ú©Ùˆ Ø¨Ù„Ø§Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get unBlockCustomer => 'صارف کو ان بلاک کریں';
+  String get unBlockCustomer => 'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ù† Ø¨Ù„Ø§Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get checkingAvailability => 'دستیابی چیک کی جا رہی ہے...';
+  String get checkingAvailability =>
+      'Ø¯Ø³ØªÛŒØ§Ø¨ÛŒ Ú†ÛŒÚ© Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’...';
 
   @override
-  String get positionText => 'پوزیشن';
+  String get positionText => 'Ù¾ÙˆØ²ÛŒØ´Ù†';
 
   @override
-  String get faqUpdatedSuccessfully => 'سوال کامیابی سے اپ ڈیٹ ہو گیا';
+  String get faqUpdatedSuccessfully =>
+      'Ø³ÙˆØ§Ù„ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get deleteFaqEntry => 'سوال حذف کریں';
+  String get deleteFaqEntry => 'Ø³ÙˆØ§Ù„ Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageTechnicians => 'ٹیکنیشنز کا انتظام کریں';
+  String get manageTechnicians => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageCustomerSupport => 'کسٹمر سپورٹ کا انتظام کریں';
+  String get manageCustomerSupport =>
+      'Ú©Ø³Ù¹Ù…Ø± Ø³Ù¾ÙˆØ±Ù¹ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get customerSupport => 'کسٹمر سپورٹ';
+  String get customerSupport => 'Ú©Ø³Ù¹Ù…Ø± Ø³Ù¾ÙˆØ±Ù¹';
 
   @override
-  String get whatsapp => 'واٹس ایپ';
+  String get whatsapp => 'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾';
 
   @override
-  String get addNewEmail => 'نیا ای میل شامل کریں';
+  String get addNewEmail => 'Ù†ÛŒØ§ Ø§ÛŒ Ù…ÛŒÙ„ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get add => 'شامل کریں';
+  String get add => 'Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToDeleteThisFaqEntry =>
-      'کیا آپ واقعی اس سوال کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø³ÙˆØ§Ù„ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get thisActionCannotBeUndone => 'یہ عمل واپس نہیں لیا جا سکتا';
+  String get thisActionCannotBeUndone =>
+      'ÛŒÛ Ø¹Ù…Ù„ ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù„ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§';
 
   @override
   String get supportContactDeletedSuccessfully =>
-      'سپورٹ رابطہ کامیابی سے حذف ہو گیا';
+      'Ø³Ù¾ÙˆØ±Ù¹ Ø±Ø§Ø¨Ø·Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø­Ø°Ù ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get supportContactUpdatedSuccessfully =>
-      'سپورٹ رابطہ کامیابی سے اپ ڈیٹ ہو گیا';
+      'Ø³Ù¾ÙˆØ±Ù¹ Ø±Ø§Ø¨Ø·Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get supportContactAddedSuccessfully =>
-      'سپورٹ رابطہ کامیابی سے شامل ہو گیا';
+      'Ø³Ù¾ÙˆØ±Ù¹ Ø±Ø§Ø¨Ø·Û Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get noDataAvailable => 'کوئی ڈیٹا دستیاب نہیں ہے';
+  String get noDataAvailable => 'Ú©ÙˆØ¦ÛŒ ÚˆÛŒÙ¹Ø§ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get deleteConfirmation => 'حذف کرنے کی تصدیق';
+  String get deleteConfirmation => 'Ø­Ø°Ù Ú©Ø±Ù†Û’ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚';
 
   @override
   String get areYouSureYouWantToDeleteThisSupportContact =>
-      'کیا آپ واقعی اس سپورٹ رابطے کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø³Ù¾ÙˆØ±Ù¹ Ø±Ø§Ø¨Ø·Û’ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get supportContact => 'سپورٹ رابطہ';
+  String get supportContact => 'Ø³Ù¾ÙˆØ±Ù¹ Ø±Ø§Ø¨Ø·Û';
 
   @override
-  String get phoneIsRequired => 'فون نمبر ضروری ہے';
+  String get phoneIsRequired => 'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get whatsappNumberIsRequired => 'واٹس ایپ نمبر ضروری ہے';
+  String get whatsappNumberIsRequired =>
+      'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ù†Ù…Ø¨Ø± Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get editEmail => 'ای میل میں ترمیم کریں';
+  String get editEmail => 'Ø§ÛŒ Ù…ÛŒÙ„ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get addNewWhatsapp => 'نیا واٹس ایپ شامل کریں';
+  String get addNewWhatsapp => 'Ù†ÛŒØ§ ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addNewPhone => 'نیا فون شامل کریں';
+  String get addNewPhone => 'Ù†ÛŒØ§ ÙÙˆÙ† Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get editWhatsapp => 'واٹس ایپ میں ترمیم کریں';
+  String get editWhatsapp => 'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get editPhone => 'فون میں ترمیم کریں';
+  String get editPhone => 'ÙÙˆÙ† Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get edit => 'ترمیم کریں';
+  String get edit => 'ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get setAsPrimary => 'بنیادی کے طور پر سیٹ کریں';
+  String get setAsPrimary => 'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ø³ÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get primary => 'بنیادی';
+  String get primary => 'Ø¨Ù†ÛŒØ§Ø¯ÛŒ';
 
   @override
-  String get search => 'تلاش کریں';
+  String get search => 'ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get all => 'تمام';
+  String get all => 'ØªÙ…Ø§Ù…';
 
   @override
-  String get disapproveAgent => 'ٹیکنیشن کو نامنظور کریں';
+  String get disapproveAgent => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ù†Ø§Ù…Ù†Ø¸ÙˆØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get approveAgent => 'ٹیکنیشن کو منظور کریں';
+  String get approveAgent => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ù…Ù†Ø¸ÙˆØ± Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToDisapproveThisAgent =>
-      'کیا آپ واقعی اس ٹیکنیشن کو نامنظور کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ù†Ø§Ù…Ù†Ø¸ÙˆØ± Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToApproveThisAgent =>
-      'کیا آپ واقعی اس ٹیکنیشن کو منظور کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ù…Ù†Ø¸ÙˆØ± Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get tryAdjustingYourSearchCriteria =>
-      'اپنی تلاش یا فلٹرز کو ایڈجسٹ کرنے کی کوشش کریں۔';
+      'Ø§Ù¾Ù†ÛŒ ØªÙ„Ø§Ø´ ÛŒØ§ ÙÙ„Ù¹Ø±Ø² Ú©Ùˆ Ø§ÛŒÚˆØ¬Ø³Ù¹ Ú©Ø±Ù†Û’ Ú©ÛŒ Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get noTechniciansMatchYourFilters =>
-      'کوئی ٹیکنیشن آپ کی تلاش سے مطابقت نہیں رکھتا';
+      'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¢Ù¾ Ú©ÛŒ ØªÙ„Ø§Ø´ Ø³Û’ Ù…Ø·Ø§Ø¨Ù‚Øª Ù†ÛÛŒÚº Ø±Ú©Ú¾ØªØ§';
 
   @override
-  String get unblockCustomer => 'صارف کو ان بلاک کریں';
+  String get unblockCustomer => 'ØµØ§Ø±Ù Ú©Ùˆ Ø§Ù† Ø¨Ù„Ø§Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get filterByDate => 'تاریخ کے لحاظ سے فلٹر کریں';
+  String get filterByDate => 'ØªØ§Ø±ÛŒØ® Ú©Û’ Ù„Ø­Ø§Ø¸ Ø³Û’ ÙÙ„Ù¹Ø± Ú©Ø±ÛŒÚº';
 
   @override
   String get typeProvinceNameToSearch =>
-      'تلاش کرنے کے لیے صوبے کا نام لکھیں...';
+      'ØªÙ„Ø§Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØµÙˆØ¨Û’ Ú©Ø§ Ù†Ø§Ù… Ù„Ú©Ú¾ÛŒÚº...';
 
   @override
-  String get typeCityNameToSearch => 'تلاش کرنے کے لیے شہر کا نام لکھیں...';
+  String get typeCityNameToSearch =>
+      'ØªÙ„Ø§Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø´ÛØ± Ú©Ø§ Ù†Ø§Ù… Ù„Ú©Ú¾ÛŒÚº...';
 
   @override
   String get typeNeighborhoodNameToSearch =>
-      'تلاش کرنے کے لیے علاقے کا نام لکھیں...';
+      'ØªÙ„Ø§Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¹Ù„Ø§Ù‚Û’ Ú©Ø§ Ù†Ø§Ù… Ù„Ú©Ú¾ÛŒÚº...';
 
   @override
   String get areYouSureYouWantToUnblockThisCustomer =>
-      'کیا آپ واقعی اس صارف کو ان بلاک کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ØµØ§Ø±Ù Ú©Ùˆ Ø§Ù† Ø¨Ù„Ø§Ú© Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get noCustomersMatchYourSearch =>
-      'کوئی صارف آپ کی تلاش سے مطابقت نہیں رکھتا';
+      'Ú©ÙˆØ¦ÛŒ ØµØ§Ø±Ù Ø¢Ù¾ Ú©ÛŒ ØªÙ„Ø§Ø´ Ø³Û’ Ù…Ø·Ø§Ø¨Ù‚Øª Ù†ÛÛŒÚº Ø±Ú©Ú¾ØªØ§';
 
   @override
   String get searchbyBookingIdnameTechnician =>
-      'بکنگ آئی ڈی، نام، یا ٹیکنیشن کے ذریعے تلاش کریں';
+      'Ø¨Ú©Ù†Ú¯ Ø¢Ø¦ÛŒ ÚˆÛŒØŒ Ù†Ø§Ù…ØŒ ÛŒØ§ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get block => 'بلاک کریں';
+  String get block => 'Ø¨Ù„Ø§Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get days => 'دن';
+  String get days => 'Ø¯Ù†';
 
   @override
-  String get hours => 'گھنٹے';
+  String get hours => 'Ú¯Ú¾Ù†Ù¹Û’';
 
   @override
-  String get minutes => 'منٹ';
+  String get minutes => 'Ù…Ù†Ù¹';
 
   @override
-  String get startDate => 'شروع ہونے کی تاریخ';
+  String get startDate => 'Ø´Ø±ÙˆØ¹ ÛÙˆÙ†Û’ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get cancelledOn => 'منسوخ ہوا بروز';
+  String get cancelledOn => 'Ù…Ù†Ø³ÙˆØ® ÛÙˆØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get endDate => 'ختم ہونے کی تاریخ';
+  String get endDate => 'Ø®ØªÙ… ÛÙˆÙ†Û’ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get selectDateRange => 'تاریخ کی حد منتخب کریں';
+  String get selectDateRange => 'ØªØ§Ø±ÛŒØ® Ú©ÛŒ Ø­Ø¯ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get unblock => 'ان بلاک کریں';
+  String get unblock => 'Ø§Ù† Ø¨Ù„Ø§Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get whatsappNumber => 'واٹس ایپ نمبر';
+  String get whatsappNumber => 'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ù†Ù…Ø¨Ø±';
 
   @override
   String get whatsappCondition =>
-      'براہ کرم یقینی بنائیں کہ آپ جو فون نمبر درج کرتے ہیں اس کے شروع میں پلس سائن کے ساتھ ملک کا کوڈ شامل ہے۔ واٹس ایپ کے لیے نمبر کو صحیح طریقے سے پہچاننے کے لیے یہ فارمیٹ ضروری ہے۔';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ø¦ÛŒÚº Ú©Û Ø¢Ù¾ Ø¬Ùˆ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ØªÛ’ ÛÛŒÚº Ø§Ø³ Ú©Û’ Ø´Ø±ÙˆØ¹ Ù…ÛŒÚº Ù¾Ù„Ø³ Ø³Ø§Ø¦Ù† Ú©Û’ Ø³Ø§ØªÚ¾ Ù…Ù„Ú© Ú©Ø§ Ú©ÙˆÚˆ Ø´Ø§Ù…Ù„ ÛÛ’Û” ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ú©Û’ Ù„ÛŒÛ’ Ù†Ù…Ø¨Ø± Ú©Ùˆ ØµØ­ÛŒØ­ Ø·Ø±ÛŒÙ‚Û’ Ø³Û’ Ù¾ÛÚ†Ø§Ù†Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ÛŒÛ ÙØ§Ø±Ù…ÛŒÙ¹ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’Û”';
 
   @override
-  String get rewards => 'انعامات';
+  String get rewards => 'Ø§Ù†Ø¹Ø§Ù…Ø§Øª';
 
   @override
-  String get contactNotFound => 'رابطہ نہیں ملا';
+  String get contactNotFound => 'Ø±Ø§Ø¨Ø·Û Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get keepBooking => 'بکنگ رکھیں';
+  String get keepBooking => 'Ø¨Ú©Ù†Ú¯ Ø±Ú©Ú¾ÛŒÚº';
 
   @override
-  String get orderCancelledSuccessfully => 'آرڈر کامیابی سے منسوخ ہو گیا';
+  String get orderCancelledSuccessfully =>
+      'Ø¢Ø±ÚˆØ± Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get failedToCancelOrder => 'آرڈر منسوخ کرنے میں ناکامی';
+  String get failedToCancelOrder =>
+      'Ø¢Ø±ÚˆØ± Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get accept => 'قبول کریں';
+  String get accept => 'Ù‚Ø¨ÙˆÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get excellent => 'بہترین';
+  String get excellent => 'Ø¨ÛØªØ±ÛŒÙ†';
 
   @override
-  String get good => 'اچھا';
+  String get good => 'Ø§Ú†Ú¾Ø§';
 
   @override
-  String get average => 'اوسط';
+  String get average => 'Ø§ÙˆØ³Ø·';
 
   @override
-  String get poor => 'ناقص';
+  String get poor => 'Ù†Ø§Ù‚Øµ';
 
   @override
-  String get selected => 'منتخب شدہ';
+  String get selected => 'Ù…Ù†ØªØ®Ø¨ Ø´Ø¯Û';
 
   @override
-  String get selectAll => 'سب منتخب کریں';
+  String get selectAll => 'Ø³Ø¨ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get cancelledBy => 'منسوخ شدہ بذریعہ';
+  String get cancelledBy => 'Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û Ø¨Ø°Ø±ÛŒØ¹Û';
 
   @override
   String get pleaseEnterInspectionFeeAmount =>
-      'براہ کرم معائنہ فیس کی رقم درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³ Ú©ÛŒ Ø±Ù‚Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get rejectBooking => 'بکنگ مسترد کریں';
+  String get rejectBooking => 'Ø¨Ú©Ù†Ú¯ Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseuploadpaymentproof => 'براہ کرم ادائیگی کا ثبوت اپ لوڈ کریں';
+  String get pleaseuploadpaymentproof =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø«Ø¨ÙˆØª Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get iban => 'آئی بی اے این (IBAN)';
+  String get iban => 'Ø¢Ø¦ÛŒ Ø¨ÛŒ Ø§Û’ Ø§ÛŒÙ† (IBAN)';
 
   @override
-  String get tapToUpload => 'ثبوت کی تصویر/فائل اپ لوڈ کرنے کے لیے تھپتھپائیں';
+  String get tapToUpload =>
+      'Ø«Ø¨ÙˆØª Ú©ÛŒ ØªØµÙˆÛŒØ±/ÙØ§Ø¦Ù„ Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get selectSource => 'ذریعہ منتخب کریں';
+  String get selectSource => 'Ø°Ø±ÛŒØ¹Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToRejectThisBooking =>
-      'کیا آپ واقعی اس بکنگ کو مسترد کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get acceptBooking => 'بکنگ قبول کریں';
+  String get acceptBooking => 'Ø¨Ú©Ù†Ú¯ Ù‚Ø¨ÙˆÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get requestPayout => 'ادائیگی کی درخواست کریں';
+  String get requestPayout => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚº';
 
   @override
-  String get lastTip => 'آخری ٹپ';
+  String get lastTip => 'Ø¢Ø®Ø±ÛŒ Ù¹Ù¾';
 
   @override
-  String get paymentBreakdown => 'ادائیگی کی تفصیل';
+  String get paymentBreakdown => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get cashPayments => 'نقد ادائیگیاں';
+  String get cashPayments => 'Ù†Ù‚Ø¯ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº';
 
   @override
-  String get cardPayments => 'کارڈ ادائیگیاں';
+  String get cardPayments => 'Ú©Ø§Ø±Úˆ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº';
 
   @override
-  String get asOf => 'تک';
+  String get asOf => 'ØªÚ©';
 
   @override
-  String get totalEarnings => 'کل آمدنی';
+  String get totalEarnings => 'Ú©Ù„ Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get pleaseEnterAValidAmount => 'براہ کرم ایک درست رقم درج کریں';
+  String get pleaseEnterAValidAmount =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÚ© Ø¯Ø±Ø³Øª Ø±Ù‚Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get amountExceedsAvailableBalance => 'رقم دستیاب بیلنس سے زیادہ ہے';
+  String get amountExceedsAvailableBalance =>
+      'Ø±Ù‚Ù… Ø¯Ø³ØªÛŒØ§Ø¨ Ø¨ÛŒÙ„Ù†Ø³ Ø³Û’ Ø²ÛŒØ§Ø¯Û ÛÛ’';
 
   @override
   String get cashPaymentsAreAlreadyWithYou =>
-      'نقد ادائیگیاں پہلے سے ہی آپ کے پاس ہیں';
+      'Ù†Ù‚Ø¯ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº Ù¾ÛÙ„Û’ Ø³Û’ ÛÛŒ Ø¢Ù¾ Ú©Û’ Ù¾Ø§Ø³ ÛÛŒÚº';
 
   @override
-  String get amount => 'رقم';
+  String get amount => 'Ø±Ù‚Ù…';
 
   @override
-  String get availableForPayout => 'ادائیگی کے لیے دستیاب';
+  String get availableForPayout => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨';
 
   @override
   String get theAdminWillProcessYourRequestWithin2to3days =>
-      'ایڈمن آپ کی درخواست پر 2 سے 3 کاروباری دنوں میں کارروائی کرے گا۔';
+      'Ø§ÛŒÚˆÙ…Ù† Ø¢Ù¾ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù¾Ø± 2 Ø³Û’ 3 Ú©Ø§Ø±ÙˆØ¨Ø§Ø±ÛŒ Ø¯Ù†ÙˆÚº Ù…ÛŒÚº Ú©Ø§Ø±Ø±ÙˆØ§Ø¦ÛŒ Ú©Ø±Û’ Ú¯Ø§Û”';
 
   @override
-  String get availableBalance => 'دستیاب بیلنس';
+  String get availableBalance => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ø¨ÛŒÙ„Ù†Ø³';
 
   @override
   String get areYouSureYouWantToAcceptThisBooking =>
-      'کیا آپ واقعی اس بکنگ کو قبول کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Ùˆ Ù‚Ø¨ÙˆÙ„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get cancelledByCustomer => 'صارف کی طرف سے منسوخ شدہ';
+  String get cancelledByCustomer =>
+      'ØµØ§Ø±Ù Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ù…Ù†Ø³ÙˆØ® Ø´Ø¯Û';
 
   @override
-  String get bookingDetails => 'بکنگ کی تفصیلات';
+  String get bookingDetails => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get confirmCancellation => 'منسوخی کی تصدیق کریں';
+  String get confirmCancellation => 'Ù…Ù†Ø³ÙˆØ®ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
   String get adminCancelWarning =>
-      'کیا آپ واقعی اس بکنگ کو منسوخ کرنا چاہتے ہیں؟ صارف کو مطلع کر دیا جائے گا۔ اس بکنگ کو منسوخ کرنے سے صارف کو خودکار طور پر رقم واپس نہیں ملے گی۔ براہ کرم یقینی بنائیں کہ کوئی بھی ضروری رقم دستی طور پر واپس کی جائے۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ØµØ§Ø±Ù Ú©Ùˆ Ù…Ø·Ù„Ø¹ Ú©Ø± Ø¯ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§Û” Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Û’ Ø³Û’ ØµØ§Ø±Ù Ú©Ùˆ Ø®ÙˆØ¯Ú©Ø§Ø± Ø·ÙˆØ± Ù¾Ø± Ø±Ù‚Ù… ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù…Ù„Û’ Ú¯ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ø¦ÛŒÚº Ú©Û Ú©ÙˆØ¦ÛŒ Ø¨Ú¾ÛŒ Ø¶Ø±ÙˆØ±ÛŒ Ø±Ù‚Ù… Ø¯Ø³ØªÛŒ Ø·ÙˆØ± Ù¾Ø± ÙˆØ§Ù¾Ø³ Ú©ÛŒ Ø¬Ø§Ø¦Û’Û”';
 
   @override
-  String get atleastOneContactIsrequired => 'کم از کم ایک رابطہ ضروری ہے';
+  String get atleastOneContactIsrequired =>
+      'Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø±Ø§Ø¨Ø·Û Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
   String get cannotRemovePrimaryStatusFromTheOnlyContact =>
-      'واحد رابطہ سے بنیادی حیثیت ختم نہیں کی جا سکتی';
+      'ÙˆØ§Ø­Ø¯ Ø±Ø§Ø¨Ø·Û Ø³Û’ Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø­ÛŒØ«ÛŒØª Ø®ØªÙ… Ù†ÛÛŒÚº Ú©ÛŒ Ø¬Ø§ Ø³Ú©ØªÛŒ';
 
   @override
-  String get submitRequest => 'درخواست جمع کرائیں';
+  String get submitRequest => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒÚº';
 
   @override
-  String get payoutAccounts => 'ادائیگی کے اکاؤنٹس';
+  String get payoutAccounts => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ø§Ú©Ø§Ø¤Ù†Ù¹Ø³';
 
   @override
-  String get noPayoutAccountsAdded => 'کوئی ادائیگی اکاؤنٹ شامل نہیں کیا گیا';
+  String get noPayoutAccountsAdded =>
+      'Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø´Ø§Ù…Ù„ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
   String get imageIsTooLargePleaseSelectAnImageSmallerThan5MB =>
-      'تصویر بہت بڑی ہے۔ براہ کرم 5 ایم بی سے چھوٹی تصویر منتخب کریں';
+      'ØªØµÙˆÛŒØ± Ø¨ÛØª Ø¨Ú‘ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… 5 Ø§ÛŒÙ… Ø¨ÛŒ Ø³Û’ Ú†Ú¾ÙˆÙ¹ÛŒ ØªØµÙˆÛŒØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get managePayouts => 'ادائیگیوں کا انتظام کریں';
+  String get managePayouts => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒÙˆÚº Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get requestedOn => 'درخواست دی گئی بروز';
+  String get requestedOn => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¯ÛŒ Ú¯Ø¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
   String get selectedFileCouldNotBeFound =>
-      'منتخب فائل نہیں مل سکی۔ براہ کرم دوبارہ کوشش کریں۔';
+      'Ù…Ù†ØªØ®Ø¨ ÙØ§Ø¦Ù„ Ù†ÛÛŒÚº Ù…Ù„ Ø³Ú©ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get errorPickingImage => 'تصویر منتخب کرنے میں خرابی';
+  String get errorPickingImage =>
+      'ØªØµÙˆÛŒØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get errorCroppingImage => 'تصویر کراپ کرنے میں خرابی';
+  String get errorCroppingImage =>
+      'ØªØµÙˆÛŒØ± Ú©Ø±Ø§Ù¾ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get technicianInformation => 'ٹیکنیشن کی معلومات';
+  String get technicianInformation => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get noPayoutRequestsYet => 'ابھی تک کوئی ادائیگی کی درخواست نہیں ہے';
+  String get noPayoutRequestsYet =>
+      'Ø§Ø¨Ú¾ÛŒ ØªÚ© Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get reviews => 'تبصرے';
+  String get reviews => 'ØªØ¨ØµØ±Û’';
 
   @override
-  String get payoutHistory => 'ادائیگی کی تاریخ';
+  String get payoutHistory => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
   String get searchByTechnicianNameOrAmount =>
-      'ٹیکنیشن کے نام یا رقم سے تلاش کریں...';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ù†Ø§Ù… ÛŒØ§ Ø±Ù‚Ù… Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº...';
 
   @override
-  String get tipDetails => 'ٹپ کی تفصیلات';
+  String get tipDetails => 'Ù¹Ù¾ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get tipsSummary => 'ٹپس کا خلاصہ';
+  String get tipsSummary => 'Ù¹Ù¾Ø³ Ú©Ø§ Ø®Ù„Ø§ØµÛ';
 
   @override
-  String get noPayoutHistoryAvailable => 'کوئی ادائیگی کی تاریخ دستیاب نہیں ہے';
+  String get noPayoutHistoryAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªØ§Ø±ÛŒØ® Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
   String get smsRetrievalTimedOut =>
-      'ایس ایم ایس کی وصولی کا وقت ختم ہو گیا۔ براہ کرم چیک کریں کہ آیا آپ کو کوڈ موصول ہوا ہے یا دوبارہ کوشش کریں۔';
+      'Ø§ÛŒØ³ Ø§ÛŒÙ… Ø§ÛŒØ³ Ú©ÛŒ ÙˆØµÙˆÙ„ÛŒ Ú©Ø§ ÙˆÙ‚Øª Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú†ÛŒÚ© Ú©Ø±ÛŒÚº Ú©Û Ø¢ÛŒØ§ Ø¢Ù¾ Ú©Ùˆ Ú©ÙˆÚˆ Ù…ÙˆØµÙˆÙ„ ÛÙˆØ§ ÛÛ’ ÛŒØ§ Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get payoutRequirement =>
-      'ٹپ کی ادائیگی کی درخواست کرنے کے لیے، آپ کو ادائیگی کے لیے کم از کم 10 سعودی ریال دستیاب ہونے چاہئیں۔';
+      'Ù¹Ù¾ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ØŒ Ø¢Ù¾ Ú©Ùˆ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ú©Ù… Ø§Ø² Ú©Ù… 10 Ø³Ø¹ÙˆØ¯ÛŒ Ø±ÛŒØ§Ù„ Ø¯Ø³ØªÛŒØ§Ø¨ ÛÙˆÙ†Û’ Ú†Ø§ÛØ¦ÛŒÚºÛ”';
 
   @override
   String get notEnoughBalanceforRequestingTipPayout =>
-      'ٹپ کی ادائیگی کی درخواست کرنے کے لیے کافی بیلنس نہیں ہے';
+      'Ù¹Ù¾ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ú©Ø§ÙÛŒ Ø¨ÛŒÙ„Ù†Ø³ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get cashTips => 'ایپ کے باہر ٹپس';
+  String get cashTips => 'Ø§ÛŒÙ¾ Ú©Û’ Ø¨Ø§ÛØ± Ù¹Ù¾Ø³';
 
   @override
-  String get cardTips => 'ایپ کے اندر ٹپس';
+  String get cardTips => 'Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø± Ù¹Ù¾Ø³';
 
   @override
-  String get am => 'صبح';
+  String get am => 'ØµØ¨Ø­';
 
   @override
-  String get pm => 'شام';
+  String get pm => 'Ø´Ø§Ù…';
 
   @override
-  String get inHand => 'پاس موجود';
+  String get inHand => 'Ù¾Ø§Ø³ Ù…ÙˆØ¬ÙˆØ¯';
 
   @override
-  String get errorLoadingReviews => 'تبصرے لوڈ کرنے میں خرابی';
+  String get errorLoadingReviews =>
+      'ØªØ¨ØµØ±Û’ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get noReviewsYet => 'ابھی تک کوئی تبصرہ نہیں ہوا';
+  String get noReviewsYet =>
+      'Ø§Ø¨Ú¾ÛŒ ØªÚ© Ú©ÙˆØ¦ÛŒ ØªØ¨ØµØ±Û Ù†ÛÛŒÚº ÛÙˆØ§';
 
   @override
   String get reviewsWillAppearHereAfterCustomersRateYourService =>
-      'صارف کی طرف سے آپ کی سروس کی درجہ بندی کرنے کے بعد تبصرے یہاں ظاہر ہوں گے';
+      'ØµØ§Ø±Ù Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ø¢Ù¾ Ú©ÛŒ Ø³Ø±ÙˆØ³ Ú©ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ú©Ø±Ù†Û’ Ú©Û’ Ø¨Ø¹Ø¯ ØªØ¨ØµØ±Û’ ÛŒÛØ§Úº Ø¸Ø§ÛØ± ÛÙˆÚº Ú¯Û’';
 
   @override
-  String get approved => 'منظور شدہ';
+  String get approved => 'Ù…Ù†Ø¸ÙˆØ± Ø´Ø¯Û';
 
   @override
-  String get total => 'کل';
+  String get total => 'Ú©Ù„';
 
   @override
-  String get failedToLoadVideo => 'ویڈیو لوڈ کرنے میں ناکامی';
+  String get failedToLoadVideo =>
+      'ÙˆÛŒÚˆÛŒÙˆ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get payoutAmount => 'ادائیگی کی رقم';
+  String get payoutAmount => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø±Ù‚Ù…';
 
   @override
-  String get bankAccountDetails => 'بینک اکاؤنٹ کی تفصیلات';
+  String get bankAccountDetails => 'Ø¨ÛŒÙ†Ú© Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get approve => 'منظور کریں';
+  String get approve => 'Ù…Ù†Ø¸ÙˆØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get rejectPayout => 'ادائیگی مسترد کریں';
+  String get rejectPayout => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get payoutApproved => 'ادائیگی منظور ہو گئی';
+  String get payoutApproved => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ù†Ø¸ÙˆØ± ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get approvePayout => 'ادائیگی منظور کریں';
+  String get approvePayout => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ù†Ø¸ÙˆØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get fileRequired => 'فائل ضروری ہے';
+  String get fileRequired => 'ÙØ§Ø¦Ù„ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’';
 
   @override
-  String get transactionNumberRequired => 'トランザクション番号が必要です';
+  String get transactionNumberRequired =>
+      'ãƒˆãƒ©ãƒ³ã‚¶ã‚¯ã‚·ãƒ§ãƒ³ç•ªå·ãŒå¿…è¦ã§ã™';
 
   @override
-  String get viewAndManageEarnings => 'آمدنی دیکھیں اور ان کا انتظام کریں';
+  String get viewAndManageEarnings =>
+      'Ø¢Ù…Ø¯Ù†ÛŒ Ø¯ÛŒÚ©Ú¾ÛŒÚº Ø§ÙˆØ± Ø§Ù† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get supportedFormats => 'معاون فارمیٹس:';
+  String get supportedFormats => 'Ù…Ø¹Ø§ÙˆÙ† ÙØ§Ø±Ù…ÛŒÙ¹Ø³:';
 
   @override
-  String get lifetimeTips => 'تاحیات ٹپس';
+  String get lifetimeTips => 'ØªØ§Ø­ÛŒØ§Øª Ù¹Ù¾Ø³';
 
   @override
   String get pleaseProvideTransactionDetails =>
-      'اس ادائیگی کی درخواست کو منظور کرنے کے لیے براہ کرم ٹرانزیکشن کی تفصیلات فراہم کریں۔';
+      'Ø§Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ùˆ Ù…Ù†Ø¸ÙˆØ± Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª ÙØ±Ø§ÛÙ… Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get pdfImageOrDocument => 'پی ڈی ایف، تصویر، یا دستاویز';
+  String get pdfImageOrDocument =>
+      'Ù¾ÛŒ ÚˆÛŒ Ø§ÛŒÙØŒ ØªØµÙˆÛŒØ±ØŒ ÛŒØ§ Ø¯Ø³ØªØ§ÙˆÛŒØ²';
 
   @override
-  String get tapToSelectFile => 'فائل منتخب کرنے کے لیے تھپتھپائیں';
+  String get tapToSelectFile =>
+      'ÙØ§Ø¦Ù„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get lifetimeEarnings => 'تاحیات آمدنی';
+  String get lifetimeEarnings => 'ØªØ§Ø­ÛŒØ§Øª Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get uploadProof => 'ثبوت اپ لوڈ کریں';
+  String get uploadProof => 'Ø«Ø¨ÙˆØª Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
   String get notenoughtipstorequestpayoutminSAR10 =>
-      'ادائیگی کی درخواست کے لیے کافی ٹپس نہیں ہیں (کم از کم 10 ریال)';
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Û’ Ù„ÛŒÛ’ Ú©Ø§ÙÛŒ Ù¹Ù¾Ø³ Ù†ÛÛŒÚº ÛÛŒÚº (Ú©Ù… Ø§Ø² Ú©Ù… 10 Ø±ÛŒØ§Ù„)';
 
   @override
-  String get requestTipPayout => 'ٹپ کی ادائیگی کی درخواست کریں';
+  String get requestTipPayout =>
+      'Ù¹Ù¾ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚº';
 
   @override
-  String get errorRequestingPayout => 'ادائیگی کی درخواست کرنے میں خرابی';
+  String get errorRequestingPayout =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get payoutRequestSubmittedSuccessfully =>
-      'ادائیگی کی درخواست کامیابی سے جمع ہو گئی';
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¬Ù…Ø¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get areYouSureYouWantToRequestAPayoutForTheAccumulatedTips =>
-      'کیا آپ واقعی جمع شدہ ٹپس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø¬Ù…Ø¹ Ø´Ø¯Û Ù¹Ù¾Ø³ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get transactionNumber => 'ٹرانزیکشن نمبر';
+  String get transactionNumber => 'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ù†Ù…Ø¨Ø±';
 
   @override
   String get tipspayoutisdoneseparately =>
-      'ٹپس کی ادائیگی علیحدہ سے کی جاتی ہے';
+      'Ù¹Ù¾Ø³ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø¹Ù„ÛŒØ­Ø¯Û Ø³Û’ Ú©ÛŒ Ø¬Ø§ØªÛŒ ÛÛ’';
 
   @override
   String get pleaseProvideARejectionReason =>
-      'براہ کرم مسترد کرنے کی وجہ فراہم کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û ÙØ±Ø§ÛÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterTransactionNumber => 'ٹرانزیکشن نمبر درج کریں';
+  String get enterTransactionNumber =>
+      'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get youHaveNoPayoutAccountsgotoprofilesectionandaddanaccount =>
-      'آپ کا کوئی ادائیگی اکاؤنٹ نہیں ہے۔ پروفائل سیکشن میں جائیں اور ایک اکاؤنٹ شامل کریں۔';
+      'Ø¢Ù¾ Ú©Ø§ Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù†ÛÛŒÚº ÛÛ’Û” Ù¾Ø±ÙˆÙØ§Ø¦Ù„ Ø³ÛŒÚ©Ø´Ù† Ù…ÛŒÚº Ø¬Ø§Ø¦ÛŒÚº Ø§ÙˆØ± Ø§ÛŒÚ© Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get payoutRejectedSuccessfully => 'ادائیگی کامیابی سے مسترد کر دی گئی';
+  String get payoutRejectedSuccessfully =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get payoutRejected => 'ادائیگی مسترد کر دی گئی';
+  String get payoutRejected => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get rejectConfirmation =>
-      'کیا آپ واقعی اس ادائیگی کی درخواست کو مسترد کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get reason => 'وجہ';
+  String get reason => 'ÙˆØ¬Û';
 
   @override
   String get enterTheReason =>
-      'اس ادائیگی کی درخواست کو مسترد کرنے کی وجہ درج کریں';
+      'Ø§Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get payoutRequests => 'ادائیگی کی درخواستیں';
+  String get payoutRequests => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº';
 
   @override
-  String get status => 'صورتحال';
+  String get status => 'ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get noPayoutRequestsFound => 'کوئی ادائیگی کی درخواست نہیں ملی';
+  String get noPayoutRequestsFound =>
+      'Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù†ÛÛŒÚº Ù…Ù„ÛŒ';
 
   @override
-  String get payoutRequestCancelled => 'ادائیگی کی درخواست منسوخ ہو گئی';
+  String get payoutRequestCancelled =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get areYouSureYouWantToCancelThisPayoutRequest =>
-      'کیا آپ واقعی اس ادائیگی کی درخواست کو منسوخ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get addAnAccountToReceivePayments =>
-      'ادائیگیاں وصول کرنے کے لیے ایک اکاؤنٹ شامل کریں';
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº ÙˆØµÙˆÙ„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§ÛŒÚ© Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addAccount => 'اکاؤنٹ شامل کریں';
+  String get addAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountNumber => 'اکاؤنٹ نمبر';
+  String get accountNumber => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù†Ù…Ø¨Ø±';
 
   @override
-  String get ifscCode => 'آئی بی اے این (IBAN)';
+  String get ifscCode => 'Ø¢Ø¦ÛŒ Ø¨ÛŒ Ø§Û’ Ø§ÛŒÙ† (IBAN)';
 
   @override
-  String get addFirstAccount => 'اپنا پہلا اکاؤنٹ شامل کریں';
+  String get addFirstAccount =>
+      'Ø§Ù¾Ù†Ø§ Ù¾ÛÙ„Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterAccountDetails => 'اکاؤنٹ کی تفصیلات درج کریں';
+  String get enterAccountDetails =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageBankAccounts => 'بینک اکاؤنٹس کا انتظام کریں';
+  String get manageBankAccounts =>
+      'Ø¨ÛŒÙ†Ú© Ø§Ú©Ø§Ø¤Ù†Ù¹Ø³ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
   String get addAndManageYourPayoutAccounts =>
-      'اپنے ادائیگی کے اکاؤنٹس شامل کریں اور ان کا انتظام کریں';
+      'Ø§Ù¾Ù†Û’ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ø§Ú©Ø§Ø¤Ù†Ù¹Ø³ Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº Ø§ÙˆØ± Ø§Ù† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get updateAccountDetails => 'اکاؤنٹ کی تفصیلات اپ ڈیٹ کریں';
+  String get updateAccountDetails =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountType => 'اکاؤنٹ کی قسم';
+  String get accountType => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ Ù‚Ø³Ù…';
 
   @override
-  String get primaryAccountUpdated => 'بنیادی اکاؤنٹ اپ ڈیٹ ہو گیا';
+  String get primaryAccountUpdated =>
+      'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
   String get deleteAccountConfirmation =>
-      'کیا آپ واقعی اس اکاؤنٹ کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get accountDeletedSuccessfully => 'اکاؤنٹ کامیابی سے حذف ہو گیا';
+  String get accountDeletedSuccessfully =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø­Ø°Ù ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get editAccount => 'اکاؤنٹ میں ترمیم کریں';
+  String get editAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterAccountNumber => 'براہ کرم اکاؤنٹ نمبر درج کریں';
+  String get pleaseEnterAccountNumber =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountHolderName => 'اکاؤنٹ ہولڈر کا نام';
+  String get accountHolderName => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ ÛÙˆÙ„ÚˆØ± Ú©Ø§ Ù†Ø§Ù…';
 
   @override
   String get nameMustBeAtLeast3Chars =>
-      'نام کم از کم 3 حروف پر مشتمل ہونا چاہیے';
+      'Ù†Ø§Ù… Ú©Ù… Ø§Ø² Ú©Ù… 3 Ø­Ø±ÙˆÙ Ù¾Ø± Ù…Ø´ØªÙ…Ù„ ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
   String get pleaseEnterAccountHolderName =>
-      'براہ کرم اکاؤنٹ ہولڈر کا نام درج کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ú©Ø§Ø¤Ù†Ù¹ ÛÙˆÙ„ÚˆØ± Ú©Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get bankName => 'بینک کا نام';
+  String get bankName => 'Ø¨ÛŒÙ†Ú© Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get updateAccount => 'اکاؤنٹ اپ ڈیٹ کریں';
+  String get updateAccount => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get setPrimary => 'بنیادی سیٹ کریں';
+  String get setPrimary => 'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø³ÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountAddedSuccessfully => 'اکاؤنٹ کامیابی سے شامل ہو گیا';
+  String get accountAddedSuccessfully =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get accountUpdatedSuccessfully => 'اکاؤنٹ کامیابی سے اپ ڈیٹ ہو گیا';
+  String get accountUpdatedSuccessfully =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get savings => 'سیونگز (Savings)';
+  String get savings => 'Ø³ÛŒÙˆÙ†Ú¯Ø² (Savings)';
 
   @override
-  String get enterAccountHolderName => 'اکاؤنٹ ہولڈر کا نام درج کریں';
+  String get enterAccountHolderName =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ ÛÙˆÙ„ÚˆØ± Ú©Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterifscCode => 'آئی بی اے این (IBAN) درج کریں';
+  String get enterifscCode => 'Ø¢Ø¦ÛŒ Ø¨ÛŒ Ø§Û’ Ø§ÛŒÙ† (IBAN) Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterBankName => 'بینک کا نام درج کریں';
+  String get enterBankName => 'Ø¨ÛŒÙ†Ú© Ú©Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterAccountNumber => 'اکاؤنٹ نمبر درج کریں';
+  String get enterAccountNumber => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get setAsPrimaryAccount => 'بنیادی اکاؤنٹ کے طور پر سیٹ کریں';
+  String get setAsPrimaryAccount =>
+      'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ø³ÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterBankName => 'براہ کرم بینک کا نام درج کریں';
+  String get pleaseEnterBankName =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¨ÛŒÙ†Ú© Ú©Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterIfscCode => 'براہ کرم آئی بی اے این (IBAN) درج کریں';
+  String get pleaseEnterIfscCode =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¢Ø¦ÛŒ Ø¨ÛŒ Ø§Û’ Ø§ÛŒÙ† (IBAN) Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get copyId => 'آئی ڈی کاپی کریں';
+  String get copyId => 'Ø¢Ø¦ÛŒ ÚˆÛŒ Ú©Ø§Ù¾ÛŒ Ú©Ø±ÛŒÚº';
 
   @override
-  String get notSelected => 'منتخب نہیں کیا گیا';
+  String get notSelected => 'Ù…Ù†ØªØ®Ø¨ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get quickActions => 'فوری اقدامات';
+  String get quickActions => 'ÙÙˆØ±ÛŒ Ø§Ù‚Ø¯Ø§Ù…Ø§Øª';
 
   @override
-  String get refresh => 'ریفریش کریں';
+  String get refresh => 'Ø±ÛŒÙØ±ÛŒØ´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get loadingCustomers => 'صارفین لوڈ ہو رہے ہیں...';
+  String get loadingCustomers => 'ØµØ§Ø±ÙÛŒÙ† Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
-  String get processing => 'کارروائی جاری ہے...';
+  String get processing => 'Ú©Ø§Ø±Ø±ÙˆØ§Ø¦ÛŒ Ø¬Ø§Ø±ÛŒ ÛÛ’...';
 
   @override
-  String get allReviews => 'تمام تبصرے';
+  String get allReviews => 'ØªÙ…Ø§Ù… ØªØ¨ØµØ±Û’';
 
   @override
-  String get service => 'سروس';
+  String get service => 'Ø³Ø±ÙˆØ³';
 
   @override
-  String get ratingDistribution => 'درجہ بندی کی تقسیم';
+  String get ratingDistribution => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ú©ÛŒ ØªÙ‚Ø³ÛŒÙ…';
 
   @override
-  String get payoutRequestSuccessful => 'ادائیگی کی درخواست کامیاب';
+  String get payoutRequestSuccessful =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø§Ù…ÛŒØ§Ø¨';
 
   @override
-  String get rejectedBy => 'مسترد شدہ بذریعہ';
+  String get rejectedBy => 'Ù…Ø³ØªØ±Ø¯ Ø´Ø¯Û Ø¨Ø°Ø±ÛŒØ¹Û';
 
   @override
-  String get rejectedOn => 'مسترد ہوا بروز';
+  String get rejectedOn => 'Ù…Ø³ØªØ±Ø¯ ÛÙˆØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get acceptedOn => 'تصدیق شدہ بروز';
+  String get acceptedOn => 'ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û Ø¨Ø±ÙˆØ²';
 
   @override
-  String get acceptedBy => 'تصدیق شدہ بذریعہ';
+  String get acceptedBy => 'ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û Ø¨Ø°Ø±ÛŒØ¹Û';
 
   @override
-  String get completedOn => 'مکمل ہوا بروز';
+  String get completedOn => 'Ù…Ú©Ù…Ù„ ÛÙˆØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get completedBy => 'مکمل شدہ بذریعہ';
+  String get completedBy => 'Ù…Ú©Ù…Ù„ Ø´Ø¯Û Ø¨Ø°Ø±ÛŒØ¹Û';
 
   @override
-  String get confirmDetails => 'تفصیلات کی تصدیق کریں';
+  String get confirmDetails => 'ØªÙØµÛŒÙ„Ø§Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get loadingCategories => 'زمرے لوڈ ہو رہے ہیں...';
+  String get loadingCategories => 'Ø²Ù…Ø±Û’ Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
-  String get pleaseUploadFiles => 'براہ کرم فائلیں اپ لوڈ کریں';
+  String get pleaseUploadFiles =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ÙØ§Ø¦Ù„ÛŒÚº Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get confirmCompletion => 'تکمیل کی تصدیق کریں';
+  String get confirmCompletion => 'ØªÚ©Ù…ÛŒÙ„ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get uploadFilesTitle => 'تکمیل کا ثبوت / معاون دستاویزات';
+  String get uploadFilesTitle =>
+      'ØªÚ©Ù…ÛŒÙ„ Ú©Ø§ Ø«Ø¨ÙˆØª / Ù…Ø¹Ø§ÙˆÙ† Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª';
 
   @override
   String get uploadHint =>
-      'مکمل کام یا خریدی گئی اشیاء کو ظاہر کرنے والی تصویر یا بل اپ لوڈ کریں';
+      'Ù…Ú©Ù…Ù„ Ú©Ø§Ù… ÛŒØ§ Ø®Ø±ÛŒØ¯ÛŒ Ú¯Ø¦ÛŒ Ø§Ø´ÛŒØ§Ø¡ Ú©Ùˆ Ø¸Ø§ÛØ± Ú©Ø±Ù†Û’ ÙˆØ§Ù„ÛŒ ØªØµÙˆÛŒØ± ÛŒØ§ Ø¨Ù„ Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseUploadFilesMessage =>
-      'براہ کرم تکمیل کا کم از کم ایک ثبوت / معاون دستاویز اپ لوڈ کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªÚ©Ù…ÛŒÙ„ Ú©Ø§ Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø«Ø¨ÙˆØª / Ù…Ø¹Ø§ÙˆÙ† Ø¯Ø³ØªØ§ÙˆÛŒØ² Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
   String get confirmCompletionMessage =>
-      'کیا آپ واقعی اس بکنگ کی تکمیل کی تصدیق کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªÚ©Ù…ÛŒÙ„ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get cannotCancel =>
-      'ٹریکنگ فعال ہونے کے دوران یہ بکنگ منسوخ نہیں کی جا سکتی۔ براہ کرم پہلے ٹریکنگ روکیں، پھر آپ بکنگ منسوخ کر سکتے ہیں۔';
+      'Ù¹Ø±ÛŒÚ©Ù†Ú¯ ÙØ¹Ø§Ù„ ÛÙˆÙ†Û’ Ú©Û’ Ø¯ÙˆØ±Ø§Ù† ÛŒÛ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ù†ÛÛŒÚº Ú©ÛŒ Ø¬Ø§ Ø³Ú©ØªÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù¾ÛÙ„Û’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©ÛŒÚºØŒ Ù¾Ú¾Ø± Ø¢Ù¾ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø³Ú©ØªÛ’ ÛÛŒÚºÛ”';
 
   @override
   String get cannotCompleteBookingWhileTracking =>
-      'ٹریکنگ فعال ہونے کے دوران یہ کام مکمل نہیں کیا جا سکتا۔ براہ کرم پہلے ٹریکنگ روکیں، پھر آپ کام مکمل کر سکتے ہیں۔';
+      'Ù¹Ø±ÛŒÚ©Ù†Ú¯ ÙØ¹Ø§Ù„ ÛÙˆÙ†Û’ Ú©Û’ Ø¯ÙˆØ±Ø§Ù† ÛŒÛ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù¾ÛÙ„Û’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©ÛŒÚºØŒ Ù¾Ú¾Ø± Ø¢Ù¾ Ú©Ø§Ù… Ù…Ú©Ù…Ù„ Ú©Ø± Ø³Ú©ØªÛ’ ÛÛŒÚºÛ”';
 
   @override
-  String get editSelection => 'انتخاب میں ترمیم کریں';
+  String get editSelection => 'Ø§Ù†ØªØ®Ø§Ø¨ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get noRecipientsSelected => 'کوئی موصول کنندہ منتخب نہیں کیا گیا';
+  String get noRecipientsSelected =>
+      'Ú©ÙˆØ¦ÛŒ Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Û Ù…Ù†ØªØ®Ø¨ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get apply => 'لاگو کریں';
+  String get apply => 'Ù„Ø§Ú¯Ùˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get tapToUploadFiles => 'فائلیں اپ لوڈ کرنے کے لیے تھپتھپائیں';
+  String get tapToUploadFiles =>
+      'ÙØ§Ø¦Ù„ÛŒÚº Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get addRecipients => 'موصول کنندگان شامل کریں';
+  String get addRecipients => 'Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Ú¯Ø§Ù† Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get serviceItemsCalculationNote =>
-      'کل لاگت کا حساب خودکار طور پر ہر آئٹم کے لیے (مقدار × قیمت) کے طور پر کیا جائے گا اور اسے معائنہ فیس میں شامل کیا جائے گا۔';
+      'Ú©Ù„ Ù„Ø§Ú¯Øª Ú©Ø§ Ø­Ø³Ø§Ø¨ Ø®ÙˆØ¯Ú©Ø§Ø± Ø·ÙˆØ± Ù¾Ø± ÛØ± Ø¢Ø¦Ù¹Ù… Ú©Û’ Ù„ÛŒÛ’ (Ù…Ù‚Ø¯Ø§Ø± Ã— Ù‚ÛŒÙ…Øª) Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ú©ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§ Ø§ÙˆØ± Ø§Ø³Û’ Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³ Ù…ÛŒÚº Ø´Ø§Ù…Ù„ Ú©ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§Û”';
 
   @override
-  String get addMoreFiles => 'مزید فائلیں شامل کریں';
+  String get addMoreFiles => 'Ù…Ø²ÛŒØ¯ ÙØ§Ø¦Ù„ÛŒÚº Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get allowedFileTypes =>
-      'معاون فائل کی اقسام: jpg, jpeg, png, pdf, doc';
+      'Ù…Ø¹Ø§ÙˆÙ† ÙØ§Ø¦Ù„ Ú©ÛŒ Ø§Ù‚Ø³Ø§Ù…: jpg, jpeg, png, pdf, doc';
 
   @override
-  String get uploadFiles => 'فائلیں اپ لوڈ کریں';
+  String get uploadFiles => 'ÙØ§Ø¦Ù„ÛŒÚº Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get filesAttached => 'فائلیں منسلک کر دی گئیں';
+  String get filesAttached => 'ÙØ§Ø¦Ù„ÛŒÚº Ù…Ù†Ø³Ù„Ú© Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒÚº';
 
   @override
-  String get costBreakdown => 'لاگت کی تفصیل';
+  String get costBreakdown => 'Ù„Ø§Ú¯Øª Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get removeItem => 'آئٹم حذف کریں';
+  String get removeItem => 'Ø¢Ø¦Ù¹Ù… Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
   String get removeItemConfirmation =>
-      'کیا آپ واقعی اس آئٹم کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø¢Ø¦Ù¹Ù… Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get remove => 'حذف کریں';
+  String get remove => 'Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get noBannersAAddedYet => 'अभी تک کوئی بینر شامل نہیں کیا گیا';
+  String get noBannersAAddedYet =>
+      'à¤…à¤­à¥€ ØªÚ© Ú©ÙˆØ¦ÛŒ Ø¨ÛŒÙ†Ø± Ø´Ø§Ù…Ù„ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get availableRoles => 'دستیاب کردار';
+  String get availableRoles => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ú©Ø±Ø¯Ø§Ø±';
 
   @override
   String get fifteenpercentBonusOnEarningsandASpecialBadge =>
-      'آمدنی پر 15% بونس + ایک خصوصی بیج';
+      'Ø¢Ù…Ø¯Ù†ÛŒ Ù¾Ø± 15% Ø¨ÙˆÙ†Ø³ + Ø§ÛŒÚ© Ø®ØµÙˆØµÛŒ Ø¨ÛŒØ¬';
 
   @override
-  String get tenpercentBonusOnEarnings => 'آمدنی پر 10% بونس';
+  String get tenpercentBonusOnEarnings => 'Ø¢Ù…Ø¯Ù†ÛŒ Ù¾Ø± 10% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get fivepercentBonusOnEarnings => 'آمدنی پر 5% بونس';
+  String get fivepercentBonusOnEarnings => 'Ø¢Ù…Ø¯Ù†ÛŒ Ù¾Ø± 5% Ø¨ÙˆÙ†Ø³';
 
   @override
-  String get invalidAccountNumberLength => 'اکاؤنٹ نمبر کی لمبائی غلط ہے';
+  String get invalidAccountNumberLength =>
+      'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù†Ù…Ø¨Ø± Ú©ÛŒ Ù„Ù…Ø¨Ø§Ø¦ÛŒ ØºÙ„Ø· ÛÛ’';
 
   @override
   String doneSelectedCount(int count) {
-    return 'ہو گیا ($count منتخب)';
+    return 'ÛÙˆ Ú¯ÛŒØ§ ($count Ù…Ù†ØªØ®Ø¨)';
   }
 
   @override
@@ -3549,518 +3791,561 @@ class AppLocalizationsUr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ٹیکنیشنز منتخب کیے گئے',
-      one: '1 ٹیکنیشن منتخب کیا گیا',
-      zero: 'کوئی ٹیکنیشن منتخب نہیں کیا گیا',
+      other: '$count Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù…Ù†ØªØ®Ø¨ Ú©ÛŒÛ’ Ú¯Ø¦Û’',
+      one: '1 Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©ÛŒØ§ Ú¯ÛŒØ§',
+      zero: 'Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§',
     );
     return '$_temp0';
   }
 
   @override
   String payoutRequestSuccessfulMessage(String amount) {
-    return '\'$amount سعودی ریال کی ادائیگی کی درخواست جمع کر دی گئی\',';
+    return '\'$amount Ø³Ø¹ÙˆØ¯ÛŒ Ø±ÛŒØ§Ù„ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¬Ù…Ø¹ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ\',';
   }
 
   @override
   String cashPaymentsMessage(String amount) {
-    return 'نقد ادائیگیاں ($amount سعودی ریال) پہلے سے ہی آپ کے پاس ہیں';
+    return 'Ù†Ù‚Ø¯ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒØ§Úº ($amount Ø³Ø¹ÙˆØ¯ÛŒ Ø±ÛŒØ§Ù„) Ù¾ÛÙ„Û’ Ø³Û’ ÛÛŒ Ø¢Ù¾ Ú©Û’ Ù¾Ø§Ø³ ÛÛŒÚº';
   }
 
   @override
   String cannotDeleteLastContact(String contactType) {
-    return 'آخری $contactType رابطہ حذف نہیں کیا جا سکتا۔ کم از کم ایک رابطہ ضروری ہے۔';
+    return 'Ø¢Ø®Ø±ÛŒ $contactType Ø±Ø§Ø¨Ø·Û Ø­Ø°Ù Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§Û” Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø±Ø§Ø¨Ø·Û Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’Û”';
   }
 
   @override
-  String get personalInfo => 'ذاتی معلومات';
+  String get personalInfo => 'Ø°Ø§ØªÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get batteryOptimization => 'بیٹری آپٹیمائزیشن';
+  String get batteryOptimization => 'Ø¨ÛŒÙ¹Ø±ÛŒ Ø¢Ù¾Ù¹ÛŒÙ…Ø§Ø¦Ø²ÛŒØ´Ù†';
 
   @override
-  String get locationError => 'مقام کی خرابی';
+  String get locationError => 'Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get locationServicesIos =>
-      'یہ آئی او ایس (iOS) کے مقام کی اجازت کی خرابی ہے۔ براہ کرم اپنی مقام کی ترتیبات چیک کریں۔';
+      'ÛŒÛ Ø¢Ø¦ÛŒ Ø§Ùˆ Ø§ÛŒØ³ (iOS) Ú©Û’ Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†ÛŒ Ù…Ù‚Ø§Ù… Ú©ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ú†ÛŒÚ© Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get locationServices =>
-      'براہ کرم اپنے آلے کی ترتیبات میں مقام کی خدمات فعال کریں۔';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Û’ Ø¢Ù„Û’ Ú©ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ù…ÛŒÚº Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get locationPermission =>
-      'براہ کرم ترتیبات میں مقام کی اجازت دیں اور بیک گراؤنڈ ٹریکنگ کے لیے \"ہمیشہ اجازت دیں\" کو منتخب کریں۔';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ±ØªÛŒØ¨Ø§Øª Ù…ÛŒÚº Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒÚº Ø§ÙˆØ± Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ \"ÛÙ…ÛŒØ´Û Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒÚº\" Ú©Ùˆ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get batteryOptimizationWarning =>
-      'قابل اعتماد بیک گراؤنڈ لوکیشن ٹریکنگ کے لیے، براہ کرم اس ایپ کے لیے بیٹری آپٹیمائزیشن کو غیر فعال کریں۔ یہ اس بات کو یقینی بناتا ہے کہ ایپ بیک گراؤنڈ میں ہونے پر بھی لوکیشن اپ ڈیٹس جاری رہیں۔';
+      'Ù‚Ø§Ø¨Ù„ Ø§Ø¹ØªÙ…Ø§Ø¯ Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Û’ Ù„ÛŒÛ’ØŒ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø³ Ø§ÛŒÙ¾ Ú©Û’ Ù„ÛŒÛ’ Ø¨ÛŒÙ¹Ø±ÛŒ Ø¢Ù¾Ù¹ÛŒÙ…Ø§Ø¦Ø²ÛŒØ´Ù† Ú©Ùˆ ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºÛ” ÛŒÛ Ø§Ø³ Ø¨Ø§Øª Ú©Ùˆ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§ØªØ§ ÛÛ’ Ú©Û Ø§ÛŒÙ¾ Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù…ÛŒÚº ÛÙˆÙ†Û’ Ù¾Ø± Ø¨Ú¾ÛŒ Ù„ÙˆÚ©ÛŒØ´Ù† Ø§Ù¾ ÚˆÛŒÙ¹Ø³ Ø¬Ø§Ø±ÛŒ Ø±ÛÛŒÚºÛ”';
 
   @override
-  String get bookingHistory => 'بکنگ کی تاریخ';
+  String get bookingHistory => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
   String get pleaseSelectAtLeastOneRecipient =>
-      'براہ کرم کم از کم ایک موصول کنندہ منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get fillInAtLeastEnglishOrArabicMessageContent =>
-      'براہ کرم کم از کم انگریزی یا عربی پیغام کا مواد پُر کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§Ù†Ú¯Ø±ÛŒØ²ÛŒ ÛŒØ§ Ø¹Ø±Ø¨ÛŒ Ù¾ÛŒØºØ§Ù… Ú©Ø§ Ù…ÙˆØ§Ø¯ Ù¾ÙØ± Ú©Ø±ÛŒÚº';
 
   @override
-  String get searchByNameEmailOrPhone => 'نام، ای میل، یا فون سے تلاش کریں...';
+  String get searchByNameEmailOrPhone =>
+      'Ù†Ø§Ù…ØŒ Ø§ÛŒ Ù…ÛŒÙ„ØŒ ÛŒØ§ ÙÙˆÙ† Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº...';
 
   @override
-  String get noFcmTokenAvailable => 'کوئی ایف سی ایم (FCM) ٹوکن دستیاب نہیں ہے';
+  String get noFcmTokenAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ø§ÛŒÙ Ø³ÛŒ Ø§ÛŒÙ… (FCM) Ù¹ÙˆÚ©Ù† Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get selectRecipients => 'موصول کنندگان منتخب کریں';
+  String get selectRecipients =>
+      'Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Ú¯Ø§Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get removeAll => 'سب حذف کریں';
+  String get removeAll => 'Ø³Ø¨ Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get documents => 'اپ لوڈ کردہ دستاویزات';
+  String get documents => 'Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ø¯Û Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª';
 
   @override
-  String get allData => 'تمام متعلقہ ڈیٹا';
+  String get allData => 'ØªÙ…Ø§Ù… Ù…ØªØ¹Ù„Ù‚Û ÚˆÛŒÙ¹Ø§';
 
   @override
-  String get networkError => 'نیٹ ورک کی خرابی';
+  String get networkError => 'Ù†ÛŒÙ¹ ÙˆØ±Ú© Ú©ÛŒ Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get biometricEnabled => 'بائیومیٹرک تصدیق فعال ہے';
+  String get biometricEnabled =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØªØµØ¯ÛŒÙ‚ ÙØ¹Ø§Ù„ ÛÛ’';
 
   @override
-  String get biometricDisabled => 'بائیومیٹرک تصدیق غیر فعال ہے';
+  String get biometricDisabled =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØªØµØ¯ÛŒÙ‚ ØºÛŒØ± ÙØ¹Ø§Ù„ ÛÛ’';
 
   @override
   String get disableBiometricWarning =>
-      'بائیومیٹرک تصدیق کو غیر فعال کرنے سے آپ فنگر پرنٹ کا استعمال کرتے ہوئے لاگ ان نہیں کر سکیں گے۔';
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØªØµØ¯ÛŒÙ‚ Ú©Ùˆ ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø±Ù†Û’ Ø³Û’ Ø¢Ù¾ ÙÙ†Ú¯Ø± Ù¾Ø±Ù†Ù¹ Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ØªÛ’ ÛÙˆØ¦Û’ Ù„Ø§Ú¯ Ø§Ù† Ù†ÛÛŒÚº Ú©Ø± Ø³Ú©ÛŒÚº Ú¯Û’Û”';
 
   @override
   String get youWillNeedPhoneOtp =>
-      'آپ کو لاگ ان کرنے کے لیے اپنے فون نمبر اور او ٹی پی (OTP) کو استعمال کرنے کی ضرورت ہوگی۔';
+      'Ø¢Ù¾ Ú©Ùˆ Ù„Ø§Ú¯ Ø§Ù† Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ù¾Ù†Û’ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø§ÙˆØ± Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ú©Ùˆ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±Ù†Û’ Ú©ÛŒ Ø¶Ø±ÙˆØ±Øª ÛÙˆÚ¯ÛŒÛ”';
 
   @override
-  String get whatWillBeDeleted => 'کیا حذف کر دیا جائے گا:';
+  String get whatWillBeDeleted => 'Ú©ÛŒØ§ Ø­Ø°Ù Ú©Ø± Ø¯ÛŒØ§ Ø¬Ø§Ø¦Û’ Ú¯Ø§:';
 
   @override
-  String get disable => 'غیر فعال کریں';
+  String get disable => 'ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get disableBiometric => 'بائیومیٹرک غیر فعال کریں؟';
+  String get disableBiometric =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØºÛŒØ± ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚºØŸ';
 
   @override
-  String get optional => 'اختیاری';
+  String get optional => 'Ø§Ø®ØªÛŒØ§Ø±ÛŒ';
 
   @override
-  String get province => 'صوبہ';
+  String get province => 'ØµÙˆØ¨Û';
 
   @override
-  String get pleaseSelectCity => 'براہ کرم شہر منتخب کریں';
+  String get pleaseSelectCity => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø´ÛØ± Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseSelectGovernorate => 'براہ کرم گورنریٹ منتخب کریں';
+  String get pleaseSelectGovernorate =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú¯ÙˆØ±Ù†Ø±ÛŒÙ¹ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get governorate => 'گورنریٹ';
+  String get governorate => 'Ú¯ÙˆØ±Ù†Ø±ÛŒÙ¹';
 
   @override
-  String get neighborhood => 'علاقہ';
+  String get neighborhood => 'Ø¹Ù„Ø§Ù‚Û';
 
   @override
-  String get pleaseSelectNeighborhood => 'براہ کرم علاقہ منتخب کریں';
+  String get pleaseSelectNeighborhood =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ù„Ø§Ù‚Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseSelectProvince => 'براہ کرم صوبہ منتخب کریں';
+  String get pleaseSelectProvince =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØµÙˆØ¨Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get otpExpired => 'او ٹی پی (OTP) ختم ہو گیا';
+  String get otpExpired => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get invalidOTP => 'غلط او ٹی پی (OTP)';
+  String get invalidOTP => 'ØºÙ„Ø· Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP)';
 
   @override
-  String get invalidPhoneNumber => 'غلط فون نمبر';
+  String get invalidPhoneNumber => 'ØºÙ„Ø· ÙÙˆÙ† Ù†Ù…Ø¨Ø±';
 
   @override
-  String get otpSentSuccessfully => 'او ٹی پی (OTP) کامیابی سے بھیج دیا گیا';
+  String get otpSentSuccessfully =>
+      'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get otpCode => 'او ٹی پی (OTP) کوڈ';
+  String get otpCode => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ú©ÙˆÚˆ';
 
   @override
   String get registerAsTechinicianInfo =>
-      'ٹیکنیشن اکاؤنٹ بنانے کے لیے اپنا فون نمبر رجسٹر کریں';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù†Ø§Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ù¾Ù†Ø§ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø±Ø¬Ø³Ù¹Ø± Ú©Ø±ÛŒÚº';
 
   @override
-  String get phoneAlreadyRegistered => 'فون نمبر پہلے سے رجسٹرڈ ہے';
+  String get phoneAlreadyRegistered =>
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ù¾ÛÙ„Û’ Ø³Û’ Ø±Ø¬Ø³Ù¹Ø±Úˆ ÛÛ’';
 
   @override
-  String get invalidOtpCode => 'غلط او ٹی پی (OTP) کوڈ';
+  String get invalidOtpCode => 'ØºÙ„Ø· Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ú©ÙˆÚˆ';
 
   @override
-  String get quotaExceeded => 'کوٹہ ختم ہو گیا';
+  String get quotaExceeded => 'Ú©ÙˆÙ¹Û Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get internalError => 'اندرونی خرابی';
+  String get internalError => 'Ø§Ù†Ø¯Ø±ÙˆÙ†ÛŒ Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get resend => 'دوبارہ بھیجیں';
+  String get resend => 'Ø¯ÙˆØ¨Ø§Ø±Û Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
-  String get or => 'یا';
+  String get or => 'ÛŒØ§';
 
   @override
-  String get loginWithBiometric => 'بائیومیٹرک کے ساتھ لاگ ان کریں';
+  String get loginWithBiometric =>
+      'Ø¨Ø§Ø¦ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© Ú©Û’ Ø³Ø§ØªÚ¾ Ù„Ø§Ú¯ Ø§Ù† Ú©Ø±ÛŒÚº';
 
   @override
-  String get migratingData => 'ڈیٹا منتقل کیا جا رہا ہے';
+  String get migratingData => 'ÚˆÛŒÙ¹Ø§ Ù…Ù†ØªÙ‚Ù„ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get weAreMigratingYourData => 'ہم آپ کا ڈیٹا منتقل کر رہے ہیں';
+  String get weAreMigratingYourData =>
+      'ÛÙ… Ø¢Ù¾ Ú©Ø§ ÚˆÛŒÙ¹Ø§ Ù…Ù†ØªÙ‚Ù„ Ú©Ø± Ø±ÛÛ’ ÛÛŒÚº';
 
   @override
-  String get pleaseDontCloseTheApp => 'براہ کرم ایپ بند نہ کریں';
+  String get pleaseDontCloseTheApp =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§ÛŒÙ¾ Ø¨Ù†Ø¯ Ù†Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get transferringData => 'ڈیٹا کی منتقلی';
+  String get transferringData => 'ÚˆÛŒÙ¹Ø§ Ú©ÛŒ Ù…Ù†ØªÙ‚Ù„ÛŒ';
 
   @override
-  String get fullName => 'مکمل نام';
+  String get fullName => 'Ù…Ú©Ù…Ù„ Ù†Ø§Ù…';
 
   @override
-  String get sendingOTP => 'او ٹی پی (OTP) بھیجا جا رہا ہے';
+  String get sendingOTP => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ø¨Ú¾ÛŒØ¬Ø§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get cancelRegistration => 'رجسٹریشن منسوخ کریں';
+  String get cancelRegistration => 'Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get loggingIn => 'لاگ ان کیا جا رہا ہے...';
+  String get loggingIn => 'Ù„Ø§Ú¯ Ø§Ù† Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get didNotReceiveOTP => 'او ٹی پی (OTP) موصول نہیں ہوا؟';
+  String get didNotReceiveOTP =>
+      'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ù…ÙˆØµÙˆÙ„ Ù†ÛÛŒÚº ÛÙˆØ§ØŸ';
 
   @override
   String get cancelRegistrationConfirmation =>
-      'کیا آپ واقعی رجسٹریشن منسوخ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get registrationSuccessful => 'رجسٹریشن کامیاب';
+  String get registrationSuccessful => 'Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ú©Ø§Ù…ÛŒØ§Ø¨';
 
   @override
-  String get otpMustBe6Digits => 'او ٹی پی (OTP) 6 ہندسوں پر مشتمل ہونا چاہیے';
+  String get otpMustBe6Digits =>
+      'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) 6 ÛÙ†Ø¯Ø³ÙˆÚº Ù¾Ø± Ù…Ø´ØªÙ…Ù„ ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pleaseEnterOTP => 'براہ کرم او ٹی پی (OTP) درج کریں';
+  String get pleaseEnterOTP =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get resendOTP => 'او ٹی پی (OTP) دوبارہ بھیجیں';
+  String get resendOTP => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ø¯ÙˆØ¨Ø§Ø±Û Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
-  String get enterReasonForCancel => 'منسوخی کی وجہ درج کریں';
+  String get enterReasonForCancel => 'Ù…Ù†Ø³ÙˆØ®ÛŒ Ú©ÛŒ ÙˆØ¬Û Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterReasonForReject => 'مسترد کرنے کی وجہ درج کریں';
+  String get enterReasonForReject =>
+      'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noWarrantyRequests => 'کوئی وارنٹی درخواستیں نہیں ہیں';
+  String get noWarrantyRequests =>
+      'Ú©ÙˆØ¦ÛŒ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get completeWarrantyRepair => 'وارنٹی مرمت مکمل کریں';
+  String get completeWarrantyRepair =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToCompleteThisWarrantyRepairThisIsAFreeService =>
-      'کیا آپ واقعی یہ وارنٹی مرمت مکمل کرنا چاہتے ہیں؟ یہ ایک مفت خدمت ہے۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ ÛŒÛ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ù…Ú©Ù…Ù„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ÛŒÛ Ø§ÛŒÚ© Ù…ÙØª Ø®Ø¯Ù…Øª ÛÛ’Û”';
 
   @override
   String get areYouSureYouWantToStopTrackingThisWarrantyRepair =>
-      'کیا آپ واقعی اس وارنٹی مرمت کے لیے ٹریکنگ روکنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get areYouSureYouWantToStartTrackingThisWarrantyRepair =>
-      'کیا آپ واقعی اس وارنٹی مرمت کے لیے ٹریکنگ شروع کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get anotherBookingIsAlreadyBeingTracked =>
-      'ایک اور بکنگ پہلے ہی ٹریک کی جا رہی ہے۔ براہ کرم نیا شروع کرنے سے پہلے موجودہ ٹریکنگ کو مکمل کریں یا روک دیں۔';
+      'Ø§ÛŒÚ© Ø§ÙˆØ± Ø¨Ú©Ù†Ú¯ Ù¾ÛÙ„Û’ ÛÛŒ Ù¹Ø±ÛŒÚ© Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù†ÛŒØ§ Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Û’ Ø³Û’ Ù¾ÛÙ„Û’ Ù…ÙˆØ¬ÙˆØ¯Û Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ùˆ Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº ÛŒØ§ Ø±ÙˆÚ© Ø¯ÛŒÚºÛ”';
 
   @override
-  String get requested => 'درخواست کی گئی';
+  String get requested => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String
   get areYouSureYouWantToCancelThisWarrantyRepairThisActionCannotBeUndone =>
-      'کیا آپ واقعی اس وارنٹی مرمت کو منسوخ کرنا چاہتے ہیں؟ یہ عمل واپس نہیں لیا جا سکتا۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ÛŒÛ Ø¹Ù…Ù„ ÙˆØ§Ù¾Ø³ Ù†ÛÛŒÚº Ù„ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§Û”';
 
   @override
   String get reasonMustBeAtLeast10Characters =>
-      'وجہ کم از کم 10 حروف پر مشتمل ہونی چاہیے';
+      'ÙˆØ¬Û Ú©Ù… Ø§Ø² Ú©Ù… 10 Ø­Ø±ÙˆÙ Ù¾Ø± Ù…Ø´ØªÙ…Ù„ ÛÙˆÙ†ÛŒ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get cancelWarrantyRepair => 'وارنٹی مرمت منسوخ کریں';
+  String get cancelWarrantyRepair =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù…Ø±Ù…Øª Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToDeleteThisFile =>
-      'کیا آپ واقعی اس فائل کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙØ§Ø¦Ù„ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get sendOtp => 'او ٹی پی (OTP) بھیجیں';
+  String get sendOtp => 'Ø§Ùˆ Ù¹ÛŒ Ù¾ÛŒ (OTP) Ø¨Ú¾ÛŒØ¬ÛŒÚº';
 
   @override
   String get rejectWarrantyClaimMessage =>
-      'براہ کرم اس وارنٹی کلیم کو مسترد کرنے کی وجہ فراہم کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û ÙØ±Ø§ÛÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get invalidPhoneNumberLength => 'فون نمبر کی لمبائی غلط ہے';
+  String get invalidPhoneNumberLength =>
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ú©ÛŒ Ù„Ù…Ø¨Ø§Ø¦ÛŒ ØºÙ„Ø· ÛÛ’';
 
   @override
   String get phoneNumberMustIncludeCountryCode =>
-      'فون نمبر میں ملک کا کوڈ شامل ہونا چاہیے';
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ù…ÛŒÚº Ù…Ù„Ú© Ú©Ø§ Ú©ÙˆÚˆ Ø´Ø§Ù…Ù„ ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get pleaseEnterPhoneNumber => 'براہ کرم فون نمبر درج کریں';
+  String get pleaseEnterPhoneNumber =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get fileTooLarge => 'فائل بہت بڑی ہے (زیادہ سے زیادہ 10 ایم بی)';
+  String get fileTooLarge =>
+      'ÙØ§Ø¦Ù„ Ø¨ÛØª Ø¨Ú‘ÛŒ ÛÛ’ (Ø²ÛŒØ§Ø¯Û Ø³Û’ Ø²ÛŒØ§Ø¯Û 10 Ø§ÛŒÙ… Ø¨ÛŒ)';
 
   @override
-  String get warrantyClaimRejected => 'وارنٹی کلیم مسترد کر دیا گیا';
+  String get warrantyClaimRejected =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get rejectWarrantyClaim => 'وارنٹی کلیم مسترد کریں';
+  String get rejectWarrantyClaim => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù…Ø³ØªØ±Ø¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get workCompleted => 'کام مکمل ہو گیا';
+  String get workCompleted => 'Ú©Ø§Ù… Ù…Ú©Ù…Ù„ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get resetFilters => 'فلٹرز ری سیٹ کریں';
+  String get resetFilters => 'ÙÙ„Ù¹Ø±Ø² Ø±ÛŒ Ø³ÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
-  String get technician => 'ٹیکنیشن';
+  String get technician => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
   String get noBankAccountDetailsAvailable =>
-      'بینک اکاؤنٹ کی کوئی تفصیلات دستیاب نہیں ہیں';
+      'Ø¨ÛŒÙ†Ú© Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©ÛŒ Ú©ÙˆØ¦ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get acceptWarrantyClaim => 'وارنٹی کلیم قبول کریں';
+  String get acceptWarrantyClaim => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù‚Ø¨ÙˆÙ„ Ú©Ø±ÛŒÚº';
 
   @override
   String get areYouSureYouWantToRejectThisWarrantyClaim =>
-      'کیا آپ واقعی اس وارنٹی کلیم کو مسترد کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ú©Ùˆ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get acceptWarrantyClaimMessage =>
-      'کیا آپ یہ وارنٹی کلیم قبول کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÛŒÛ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù‚Ø¨ÙˆÙ„ Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get completeWorkMessage =>
-      'کیا آپ واقعی اس وارنٹی کام کو مکمل شدہ قرار دینا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ø§Ù… Ú©Ùˆ Ù…Ú©Ù…Ù„ Ø´Ø¯Û Ù‚Ø±Ø§Ø± Ø¯ÛŒÙ†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
   String get startWorkMessage =>
-      'کیا آپ اس وارنٹی کلیم پر کام شروع کرنے کے لیے تیار ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù¾Ø± Ú©Ø§Ù… Ø´Ø±ÙˆØ¹ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÛŒØ§Ø± ÛÛŒÚºØŸ';
 
   @override
   String get stopTrackingMessage =>
-      'کیا آپ اس وارنٹی کام کے لیے ٹریکنگ روکنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ø§Ù… Ú©Û’ Ù„ÛŒÛ’ Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ø±ÙˆÚ©Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get warrantyClaimCancelled => 'وارنٹی کلیم منسوخ ہو گیا';
+  String get warrantyClaimCancelled =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get cancelWarrantyClaim => 'وارنٹی کلیم منسوخ کریں';
+  String get cancelWarrantyClaim => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get cancelWork => 'کام منسوخ کریں';
+  String get cancelWork => 'Ú©Ø§Ù… Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
   String get cancelWarrantyClaimMessage =>
-      'براہ کرم اس وارنٹی کام کو منسوخ کرنے کی وجہ فراہم کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø³ ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ø§Ù… Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û ÙØ±Ø§ÛÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get cropDocument => 'دستاویز کراپ کریں';
+  String get cropDocument => 'Ø¯Ø³ØªØ§ÙˆÛŒØ² Ú©Ø±Ø§Ù¾ Ú©Ø±ÛŒÚº';
 
   @override
-  String get tapToRetry => 'دوبارہ کوشش کرنے کے لیے تھپتھپائیں';
+  String get tapToRetry =>
+      'Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get completeRegistration => 'رجسٹریشن مکمل کریں';
+  String get completeRegistration => 'Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get chooseFromList => 'فہرست میں سے منتخب کریں';
+  String get chooseFromList => 'ÙÛØ±Ø³Øª Ù…ÛŒÚº Ø³Û’ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get nameTooShort => 'نام بہت چھوٹا ہے';
+  String get nameTooShort => 'Ù†Ø§Ù… Ø¨ÛØª Ú†Ú¾ÙˆÙ¹Ø§ ÛÛ’';
 
   @override
-  String get pleaseEnterYourName => 'براہ کرم اپنا نام درج کریں';
+  String get pleaseEnterYourName =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get uploadCertifications => 'سرٹیفیکیشنز اپ لوڈ کریں';
+  String get uploadCertifications =>
+      'Ø³Ø±Ù¹ÛŒÙÛŒÚ©ÛŒØ´Ù†Ø² Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get certifications => 'سرٹیفیکیشنز';
+  String get certifications => 'Ø³Ø±Ù¹ÛŒÙÛŒÚ©ÛŒØ´Ù†Ø²';
 
   @override
-  String get certificate => 'سرٹیفکیٹ';
+  String get certificate => 'Ø³Ø±Ù¹ÛŒÙÚ©ÛŒÙ¹';
 
   @override
-  String get idDocumentUploaded => 'شناختی دستاویز اپ لوڈ کر دی گئی';
+  String get idDocumentUploaded =>
+      'Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get uploadIdDocument => 'شناختی دستاویز اپ لوڈ کریں';
+  String get uploadIdDocument =>
+      'Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get idDocument => 'شناختی دستاویز';
+  String get idDocument => 'Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²';
 
   @override
-  String get pleaseUploadIdDocument => 'براہ کرم شناختی دستاویز اپ لوڈ کریں';
+  String get pleaseUploadIdDocument =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseSelectLocation => 'براہ کرم مقام منتخب کریں';
+  String get pleaseSelectLocation =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get creatingAccount => 'آپ کا اکاؤنٹ بنایا جا رہا ہے';
+  String get creatingAccount =>
+      'Ø¢Ù¾ Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù†Ø§ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’';
 
   @override
-  String get pleaseWait => 'براہ کرم انتظار کریں...';
+  String get pleaseWait => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†ØªØ¸Ø§Ø± Ú©Ø±ÛŒÚº...';
 
   @override
-  String get noJobCategoriesAvailable => 'کوئی جاب کیٹیگریز دستیاب نہیں ہیں';
+  String get noJobCategoriesAvailable =>
+      'Ú©ÙˆØ¦ÛŒ Ø¬Ø§Ø¨ Ú©ÛŒÙ¹ÛŒÚ¯Ø±ÛŒØ² Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get availabilityStatus => 'دستیابی کی صورتحال';
+  String get availabilityStatus => 'Ø¯Ø³ØªÛŒØ§Ø¨ÛŒ Ú©ÛŒ ØµÙˆØ±ØªØ­Ø§Ù„';
 
   @override
-  String get youAreNowOnline => 'اب آپ آن لائن ہیں';
+  String get youAreNowOnline => 'Ø§Ø¨ Ø¢Ù¾ Ø¢Ù† Ù„Ø§Ø¦Ù† ÛÛŒÚº';
 
   @override
-  String get youAreNowOffline => 'اب آپ آف لائن ہیں';
+  String get youAreNowOffline => 'Ø§Ø¨ Ø¢Ù¾ Ø¢Ù Ù„Ø§Ø¦Ù† ÛÛŒÚº';
 
   @override
   String get youAreCurrentlyUnavailable =>
-      'آپ فی الحال درخواستوں کے لیے دستیاب نہیں ہیں';
+      'Ø¢Ù¾ ÙÛŒ Ø§Ù„Ø­Ø§Ù„ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÙˆÚº Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚº';
 
   @override
-  String get youAreAvailableForRequests => 'آپ درخواستوں کے لیے دستیاب ہیں';
+  String get youAreAvailableForRequests =>
+      'Ø¢Ù¾ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÙˆÚº Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨ ÛÛŒÚº';
 
   @override
-  String get files => 'فائلیں';
+  String get files => 'ÙØ§Ø¦Ù„ÛŒÚº';
 
   @override
-  String get phoneNumberAlreadyUpdated => 'فون نمبر پہلے ہی اپ ڈیٹ ہو چکا ہے';
+  String get phoneNumberAlreadyUpdated =>
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ù¾ÛÙ„Û’ ÛÛŒ Ø§Ù¾ ÚˆÛŒÙ¹ ÛÙˆ Ú†Ú©Ø§ ÛÛ’';
 
   @override
-  String get phoneNumberFormatHint => 'فون نمبر 05 سے شروع ہونا چاہیے';
+  String get phoneNumberFormatHint =>
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± 05 Ø³Û’ Ø´Ø±ÙˆØ¹ ÛÙˆÙ†Ø§ Ú†Ø§ÛÛŒÛ’';
 
   @override
-  String get manageTransactions => 'لین دین کا انتظام کریں';
+  String get manageTransactions => 'Ù„ÛŒÙ† Ø¯ÛŒÙ† Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get noTransactionsFound => 'کوئی لین دین نہیں ملا';
+  String get noTransactionsFound => 'Ú©ÙˆØ¦ÛŒ Ù„ÛŒÙ† Ø¯ÛŒÙ† Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get tooManyAttempts => 'بہت زیادہ کوششیں';
+  String get tooManyAttempts => 'Ø¨ÛØª Ø²ÛŒØ§Ø¯Û Ú©ÙˆØ´Ø´ÛŒÚº';
 
   @override
-  String get cash => 'نقد';
+  String get cash => 'Ù†Ù‚Ø¯';
 
   @override
-  String get transactions => 'لین دین';
+  String get transactions => 'Ù„ÛŒÙ† Ø¯ÛŒÙ†';
 
   @override
-  String get transactionDetails => 'لین دین کی تفصیلات';
+  String get transactionDetails => 'Ù„ÛŒÙ† Ø¯ÛŒÙ† Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
   String get pleaseSelectAllLocationFields =>
-      'براہ کرم مقام کے تمام فیلڈز منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ù‚Ø§Ù… Ú©Û’ ØªÙ…Ø§Ù… ÙÛŒÙ„ÚˆØ² Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get bookingName => 'بکنگ کا نام';
+  String get bookingName => 'Ø¨Ú©Ù†Ú¯ Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get technicianName => 'ٹیکنیشن کا نام';
+  String get technicianName => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get changeIdDocument => 'شناختی دستاویز تبدیل کریں';
+  String get changeIdDocument =>
+      'Ø´Ù†Ø§Ø®ØªÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ² ØªØ¨Ø¯ÛŒÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get notAssigned => 'تفویض نہیں کیا گیا';
+  String get notAssigned => 'ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get date => 'تاریخ';
+  String get date => 'ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get removeFile => 'فائل حذف کریں';
+  String get removeFile => 'ÙØ§Ø¦Ù„ Ø­Ø°Ù Ú©Ø±ÛŒÚº';
 
   @override
   String get removeFileConfirmation =>
-      'کیا آپ واقعی اس فائل کو حذف کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ ÙØ§Ø¦Ù„ Ú©Ùˆ Ø­Ø°Ù Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get errorSendingNotifications => 'اطلاعات بھیجنے میں خرابی';
+  String get errorSendingNotifications =>
+      'Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
   String get fillInBothEnglishAndArabicMessageContent =>
-      'براہ کرم انگریزی اور عربی دونوں پیغام کا مواد پُر کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†Ú¯Ø±ÛŒØ²ÛŒ Ø§ÙˆØ± Ø¹Ø±Ø¨ÛŒ Ø¯ÙˆÙ†ÙˆÚº Ù¾ÛŒØºØ§Ù… Ú©Ø§ Ù…ÙˆØ§Ø¯ Ù¾ÙØ± Ú©Ø±ÛŒÚº';
 
   @override
   String notificationSenttoTechnicians(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ٹیکنیشنز کو اطلاع بھیج دی گئی۔',
-      one: '1 ٹیکنیشن کو اطلاع بھیج دی گئی۔',
+      other: '$count Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒ Ú¯Ø¦ÛŒÛ”',
+      one: '1 Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ø§Ø·Ù„Ø§Ø¹ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒ Ú¯Ø¦ÛŒÛ”',
     );
     return '$_temp0';
   }
 
   @override
-  String get locationTracking => 'لوکیشن ٹریکنگ';
+  String get locationTracking => 'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯';
 
   @override
-  String get trackingInactive => 'ٹریکنگ غیر فعال';
+  String get trackingInactive => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ ØºÛŒØ± ÙØ¹Ø§Ù„';
 
   @override
-  String get trackingActive => 'ٹریکنگ فعال';
+  String get trackingActive => 'Ù¹Ø±ÛŒÚ©Ù†Ú¯ ÙØ¹Ø§Ù„';
 
   @override
-  String get fix => 'ٹھیک کریں';
+  String get fix => 'Ù¹Ú¾ÛŒÚ© Ú©Ø±ÛŒÚº';
 
   @override
   String get locationTrackingStartedSuccessfully =>
-      'لوکیشن ٹریکنگ کامیابی سے شروع ہو گئی';
+      'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø±ÙˆØ¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get locationTrackingHelpText =>
-      'لوکیشن ٹریکنگ صارفین کو آپ کی پیش رفت ٹریک کرنے میں مدد دیتی ہے۔ مقام کی خدمات کو فعال رکھنا یقینی بنائیں۔';
+      'Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ ØµØ§Ø±ÙÛŒÙ† Ú©Ùˆ Ø¢Ù¾ Ú©ÛŒ Ù¾ÛŒØ´ Ø±ÙØª Ù¹Ø±ÛŒÚ© Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù…Ø¯Ø¯ Ø¯ÛŒØªÛŒ ÛÛ’Û” Ù…Ù‚Ø§Ù… Ú©ÛŒ Ø®Ø¯Ù…Ø§Øª Ú©Ùˆ ÙØ¹Ø§Ù„ Ø±Ú©Ú¾Ù†Ø§ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ø¦ÛŒÚºÛ”';
 
   @override
   String get batteryOptimizationEnabled =>
-      'بیٹری آپٹیمائزیشن فعال ہے۔ یہ بیک گراؤنڈ لوکیشن ٹریکنگ کو متاثر کر سکتا ہے۔';
+      'Ø¨ÛŒÙ¹Ø±ÛŒ Ø¢Ù¾Ù¹ÛŒÙ…Ø§Ø¦Ø²ÛŒØ´Ù† ÙØ¹Ø§Ù„ ÛÛ’Û” ÛŒÛ Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ù„ÙˆÚ©ÛŒØ´Ù† Ù¹Ø±ÛŒÚ©Ù†Ú¯ Ú©Ùˆ Ù…ØªØ§Ø«Ø± Ú©Ø± Ø³Ú©ØªØ§ ÛÛ’Û”';
 
   @override
-  String get agentAssignedSuccessfully => 'ٹیکنیشن کامیابی سے تفویض ہو گیا';
+  String get agentAssignedSuccessfully =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ ØªÙÙˆÛŒØ¶ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get orderRejectedSuccessfully => 'آرڈر کامیابی سے مسترد کر دیا گیا';
+  String get orderRejectedSuccessfully =>
+      'Ø¢Ø±ÚˆØ± Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get copiedToClipboard => 'کلپ بورڈ پر کاپی ہو گیا';
+  String get copiedToClipboard => 'Ú©Ù„Ù¾ Ø¨ÙˆØ±Úˆ Ù¾Ø± Ú©Ø§Ù¾ÛŒ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get couldNotLaunchPhone => 'فون ایپ نہیں کھولی جا سکی';
+  String get couldNotLaunchPhone =>
+      'ÙÙˆÙ† Ø§ÛŒÙ¾ Ù†ÛÛŒÚº Ú©Ú¾ÙˆÙ„ÛŒ Ø¬Ø§ Ø³Ú©ÛŒ';
 
   @override
   String minutesAgo(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count منٹ پہلے',
-      one: '$count منٹ پہلے',
+      other: '$count Ù…Ù†Ù¹ Ù¾ÛÙ„Û’',
+      one: '$count Ù…Ù†Ù¹ Ù¾ÛÙ„Û’',
     );
     return '$_temp0';
   }
@@ -4070,8 +4355,8 @@ class AppLocalizationsUr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count دن پہلے',
-      one: '$count دن پہلے',
+      other: '$count Ø¯Ù† Ù¾ÛÙ„Û’',
+      one: '$count Ø¯Ù† Ù¾ÛÙ„Û’',
     );
     return '$_temp0';
   }
@@ -4081,488 +4366,515 @@ class AppLocalizationsUr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count گھنٹے پہلے',
-      one: '$count گھنٹہ پہلے',
+      other: '$count Ú¯Ú¾Ù†Ù¹Û’ Ù¾ÛÙ„Û’',
+      one: '$count Ú¯Ú¾Ù†Ù¹Û Ù¾ÛÙ„Û’',
     );
     return '$_temp0';
   }
 
   @override
-  String get paymentCompletedAt => 'ادائیگی مکمل ہوئی بروز';
+  String get paymentCompletedAt => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ù…Ú©Ù…Ù„ ÛÙˆØ¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get more => 'مزید';
+  String get more => 'Ù…Ø²ÛŒØ¯';
 
   @override
-  String get amountToBePaid => 'ادا کی جانے والی رقم';
+  String get amountToBePaid => 'Ø§Ø¯Ø§ Ú©ÛŒ Ø¬Ø§Ù†Û’ ÙˆØ§Ù„ÛŒ Ø±Ù‚Ù…';
 
   @override
   String get cannotRequestPayoutPendingRequest =>
-      'آپ کی ایک ادائیگی کی درخواست پہلے ہی زیر التوا ہے۔ براہ کرم اس کے منظور یا مسترد ہونے تک انتظار کریں۔';
+      'Ø¢Ù¾ Ú©ÛŒ Ø§ÛŒÚ© Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù¾ÛÙ„Û’ ÛÛŒ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ø³ Ú©Û’ Ù…Ù†Ø¸ÙˆØ± ÛŒØ§ Ù…Ø³ØªØ±Ø¯ ÛÙˆÙ†Û’ ØªÚ© Ø§Ù†ØªØ¸Ø§Ø± Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get paidAmount => 'ادا شدہ رقم';
+  String get paidAmount => 'Ø§Ø¯Ø§ Ø´Ø¯Û Ø±Ù‚Ù…';
 
   @override
-  String get customerInformation => 'صارف کی معلومات';
+  String get customerInformation => 'ØµØ§Ø±Ù Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get serviceInformation => 'سروس کی معلومات';
+  String get serviceInformation => 'Ø³Ø±ÙˆØ³ Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get termsAndConditions => 'شرائط و ضوابط';
+  String get termsAndConditions => 'Ø´Ø±Ø§Ø¦Ø· Ùˆ Ø¶ÙˆØ§Ø¨Ø·';
 
   @override
-  String get termsOfUse => 'استعمال کی شرائط';
+  String get termsOfUse => 'Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©ÛŒ Ø´Ø±Ø§Ø¦Ø·';
 
   @override
-  String get privacyPolicy => 'رازداری کی پالیسی';
+  String get privacyPolicy => 'Ø±Ø§Ø²Ø¯Ø§Ø±ÛŒ Ú©ÛŒ Ù¾Ø§Ù„ÛŒØ³ÛŒ';
 
   @override
-  String get and => 'اور';
+  String get and => 'Ø§ÙˆØ±';
 
   @override
-  String get copy => 'کاپی کریں';
+  String get copy => 'Ú©Ø§Ù¾ÛŒ Ú©Ø±ÛŒÚº';
 
   @override
-  String get introduction => 'تعارف';
+  String get introduction => 'ØªØ¹Ø§Ø±Ù';
 
   @override
-  String get policy1title => 'ڈیٹا جو ہم جمع کرتے ہیں';
+  String get policy1title => 'ÚˆÛŒÙ¹Ø§ Ø¬Ùˆ ÛÙ… Ø¬Ù…Ø¹ Ú©Ø±ØªÛ’ ÛÛŒÚº';
 
   @override
-  String get policy2title => 'ہم اسے کیسے استعمال کرتے ہیں';
+  String get policy2title =>
+      'ÛÙ… Ø§Ø³Û’ Ú©ÛŒØ³Û’ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ØªÛ’ ÛÛŒÚº';
 
   @override
-  String get policy3title => 'ڈیٹا کا اشتراک';
+  String get policy3title => 'ÚˆÛŒÙ¹Ø§ Ú©Ø§ Ø§Ø´ØªØ±Ø§Ú©';
 
   @override
-  String get terms1title => 'درخواست کی ذمہ داری';
+  String get terms1title => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ Ø°Ù…Û Ø¯Ø§Ø±ÛŒ';
 
   @override
-  String get terms2title => 'معائنہ فیس';
+  String get terms2title => 'Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³';
 
   @override
-  String get terms3title => 'ادائیگی اور حتمی لاگت';
+  String get terms3title => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø§ÙˆØ± Ø­ØªÙ…ÛŒ Ù„Ø§Ú¯Øª';
 
   @override
-  String get terms4title => 'وارنٹی (گارنٹی)';
+  String get terms4title => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ (Ú¯Ø§Ø±Ù†Ù¹ÛŒ)';
 
   @override
-  String get terms5title => 'درجہ بندی';
+  String get terms5title => 'Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ';
 
   @override
-  String get searchByCustomerName => 'صارف کے نام سے تلاش کریں';
+  String get searchByCustomerName =>
+      'ØµØ§Ø±Ù Ú©Û’ Ù†Ø§Ù… Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
   String get phoneNumberUpdateInfo =>
-      'فون نمبر اپ ڈیٹ کرنے کے لیے \'05\' سے شروع ہونے والا فون نمبر درج کریں';
+      'ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ \'05\' Ø³Û’ Ø´Ø±ÙˆØ¹ ÛÙˆÙ†Û’ ÙˆØ§Ù„Ø§ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get termsIntroduction =>
-      'آپ کا اس ایپلیکیشن کا استعمال ان شرائط کی مکمل اور غیر مشروط قبولیت ہے۔ ایپلیکیشن صرف ایک الیکٹرانک درمیانی پلیٹ فارم کے طور پر کام کرتی ہے جو آپ کو سروس فراہم کرنے والوں (ٹیکنیشنز) سے جوڑتی ہے۔';
+      'Ø¢Ù¾ Ú©Ø§ Ø§Ø³ Ø§ÛŒÙ¾Ù„ÛŒÚ©ÛŒØ´Ù† Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ø§Ù† Ø´Ø±Ø§Ø¦Ø· Ú©ÛŒ Ù…Ú©Ù…Ù„ Ø§ÙˆØ± ØºÛŒØ± Ù…Ø´Ø±ÙˆØ· Ù‚Ø¨ÙˆÙ„ÛŒØª ÛÛ’Û” Ø§ÛŒÙ¾Ù„ÛŒÚ©ÛŒØ´Ù† ØµØ±Ù Ø§ÛŒÚ© Ø§Ù„ÛŒÚ©Ù¹Ø±Ø§Ù†Ú© Ø¯Ø±Ù…ÛŒØ§Ù†ÛŒ Ù¾Ù„ÛŒÙ¹ ÙØ§Ø±Ù… Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ú©Ø§Ù… Ú©Ø±ØªÛŒ ÛÛ’ Ø¬Ùˆ Ø¢Ù¾ Ú©Ùˆ Ø³Ø±ÙˆØ³ ÙØ±Ø§ÛÙ… Ú©Ø±Ù†Û’ ÙˆØ§Ù„ÙˆÚº (Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø²) Ø³Û’ Ø¬ÙˆÚ‘ØªÛŒ ÛÛ’Û”';
 
   @override
   String get terms1 =>
-      'درخواست کی ذمہ داری: آپ مسئلے کی درست اور کافی تفصیل (متن، تصویر، ویڈیو) اور سروس کے مقام فراہم کرنے کے پابند ہیں تاکہ ٹیکنیشن جواب دے سکے۔';
+      'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ Ø°Ù…Û Ø¯Ø§Ø±ÛŒ: Ø¢Ù¾ Ù…Ø³Ø¦Ù„Û’ Ú©ÛŒ Ø¯Ø±Ø³Øª Ø§ÙˆØ± Ú©Ø§ÙÛŒ ØªÙØµÛŒÙ„ (Ù…ØªÙ†ØŒ ØªØµÙˆÛŒØ±ØŒ ÙˆÛŒÚˆÛŒÙˆ) Ø§ÙˆØ± Ø³Ø±ÙˆØ³ Ú©Û’ Ù…Ù‚Ø§Ù… ÙØ±Ø§ÛÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù¾Ø§Ø¨Ù†Ø¯ ÛÛŒÚº ØªØ§Ú©Û Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ø¬ÙˆØ§Ø¨ Ø¯Û’ Ø³Ú©Û’Û”';
 
   @override
   String get terms2 =>
-      'معائنہ فیس: آپ ٹیکنیشن کے درخواست قبول کرنے اور مقام پر جانے کے فوراً بعد طے شدہ معائنہ/کال آؤٹ فیس (اگر قابل اطلاق ہو) ادا کرنے کے ذمہ دار ہیں۔ یہ فیس عام طور پر ناقابل واپسی ہوتی ہے۔';
+      'Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³: Ø¢Ù¾ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù‚Ø¨ÙˆÙ„ Ú©Ø±Ù†Û’ Ø§ÙˆØ± Ù…Ù‚Ø§Ù… Ù¾Ø± Ø¬Ø§Ù†Û’ Ú©Û’ ÙÙˆØ±Ø§Ù‹ Ø¨Ø¹Ø¯ Ø·Û’ Ø´Ø¯Û Ù…Ø¹Ø§Ø¦Ù†Û/Ú©Ø§Ù„ Ø¢Ø¤Ù¹ ÙÛŒØ³ (Ø§Ú¯Ø± Ù‚Ø§Ø¨Ù„ Ø§Ø·Ù„Ø§Ù‚ ÛÙˆ) Ø§Ø¯Ø§ Ú©Ø±Ù†Û’ Ú©Û’ Ø°Ù…Û Ø¯Ø§Ø± ÛÛŒÚºÛ” ÛŒÛ ÙÛŒØ³ Ø¹Ø§Ù… Ø·ÙˆØ± Ù¾Ø± Ù†Ø§Ù‚Ø§Ø¨Ù„ ÙˆØ§Ù¾Ø³ÛŒ ÛÙˆØªÛŒ ÛÛ’Û”';
 
   @override
   String get terms3 =>
-      'ادائیگی اور حتمی لاگت: سروس کی کل لاگت معائنے کے بعد براہ راست ٹیکنیشن کے ساتھ طے کی جاتی ہے، اور کام شروع ہونے سے پہلے ایپلیکیشن کے ذریعے منظور ہونی چاہیے۔ آپ طے شدہ رقم پوری ادا کرنے کے ذمہ دار ہیں۔';
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø§ÙˆØ± Ø­ØªÙ…ÛŒ Ù„Ø§Ú¯Øª: Ø³Ø±ÙˆØ³ Ú©ÛŒ Ú©Ù„ Ù„Ø§Ú¯Øª Ù…Ø¹Ø§Ø¦Ù†Û’ Ú©Û’ Ø¨Ø¹Ø¯ Ø¨Ø±Ø§Û Ø±Ø§Ø³Øª Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø³Ø§ØªÚ¾ Ø·Û’ Ú©ÛŒ Ø¬Ø§ØªÛŒ ÛÛ’ØŒ Ø§ÙˆØ± Ú©Ø§Ù… Ø´Ø±ÙˆØ¹ ÛÙˆÙ†Û’ Ø³Û’ Ù¾ÛÙ„Û’ Ø§ÛŒÙ¾Ù„ÛŒÚ©ÛŒØ´Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ù…Ù†Ø¸ÙˆØ± ÛÙˆÙ†ÛŒ Ú†Ø§ÛÛŒÛ’Û” Ø¢Ù¾ Ø·Û’ Ø´Ø¯Û Ø±Ù‚Ù… Ù¾ÙˆØ±ÛŒ Ø§Ø¯Ø§ Ú©Ø±Ù†Û’ Ú©Û’ Ø°Ù…Û Ø¯Ø§Ø± ÛÛŒÚºÛ”';
 
   @override
-  String get terms4p1 => 'وارنٹی (گارنٹی): مکمل شدہ کام پلیٹ فارم کی';
+  String get terms4p1 =>
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ (Ú¯Ø§Ø±Ù†Ù¹ÛŒ): Ù…Ú©Ù…Ù„ Ø´Ø¯Û Ú©Ø§Ù… Ù¾Ù„ÛŒÙ¹ ÙØ§Ø±Ù… Ú©ÛŒ';
 
   @override
-  String get warrantyPolicy => 'وارنٹی پالیسی';
+  String get warrantyPolicy => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù¾Ø§Ù„ÛŒØ³ÛŒ';
 
   @override
   String get terms4p2 =>
-      'کے تابع ہے، جس کی مکمل تفصیلات وقف شدہ لنک کے ذریعے دیکھی جا سکتی ہیں۔';
+      'Ú©Û’ ØªØ§Ø¨Ø¹ ÛÛ’ØŒ Ø¬Ø³ Ú©ÛŒ Ù…Ú©Ù…Ù„ ØªÙØµÛŒÙ„Ø§Øª ÙˆÙ‚Ù Ø´Ø¯Û Ù„Ù†Ú© Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø¯ÛŒÚ©Ú¾ÛŒ Ø¬Ø§ Ø³Ú©ØªÛŒ ÛÛŒÚºÛ”';
 
   @override
   String get terms5 =>
-      'آپ کو سروس مکمل ہونے کے بعد ٹیکنیشن کی کارکردگی کی درجہ بندی کرنے کا حق ہے، اور آپ کو یقینی بنانا چاہیے کہ درجہ بندی دیانتدارانہ اور غیر جانبدارانہ ہو۔';
+      'Ø¢Ù¾ Ú©Ùˆ Ø³Ø±ÙˆØ³ Ù…Ú©Ù…Ù„ ÛÙˆÙ†Û’ Ú©Û’ Ø¨Ø¹Ø¯ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ú©Ø§Ø±Ú©Ø±Ø¯Ú¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ú©Ø±Ù†Û’ Ú©Ø§ Ø­Ù‚ ÛÛ’ØŒ Ø§ÙˆØ± Ø¢Ù¾ Ú©Ùˆ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ù†Ø§ Ú†Ø§ÛÛŒÛ’ Ú©Û Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¯ÛŒØ§Ù†ØªØ¯Ø§Ø±Ø§Ù†Û Ø§ÙˆØ± ØºÛŒØ± Ø¬Ø§Ù†Ø¨Ø¯Ø§Ø±Ø§Ù†Û ÛÙˆÛ”';
 
   @override
   String get policy1 =>
-      'نام، فون نمبر، ای میل ایڈریس، درست سروس لوکیشن ایڈریس، آرڈر کی تاریخ، اور ٹیکنیشن کی درجہ بندی۔';
+      'Ù†Ø§Ù…ØŒ ÙÙˆÙ† Ù†Ù…Ø¨Ø±ØŒ Ø§ÛŒ Ù…ÛŒÙ„ Ø§ÛŒÚˆØ±ÛŒØ³ØŒ Ø¯Ø±Ø³Øª Ø³Ø±ÙˆØ³ Ù„ÙˆÚ©ÛŒØ´Ù† Ø§ÛŒÚˆØ±ÛŒØ³ØŒ Ø¢Ø±ÚˆØ± Ú©ÛŒ ØªØ§Ø±ÛŒØ®ØŒ Ø§ÙˆØ± Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒÛ”';
 
   @override
   String get policy2 =>
-      'آپ کو ٹیکنیشنز کے ساتھ ملانے، بکنگ اور ادائیگی کے عمل کو آسان بنانے، اور آرڈر کی اطلاعات بھیجنے کے لیے استعمال کیا جاتا ہے۔';
+      'Ø¢Ù¾ Ú©Ùˆ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Û’ Ø³Ø§ØªÚ¾ Ù…Ù„Ø§Ù†Û’ØŒ Ø¨Ú©Ù†Ú¯ Ø§ÙˆØ± Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Û’ Ø¹Ù…Ù„ Ú©Ùˆ Ø¢Ø³Ø§Ù† Ø¨Ù†Ø§Ù†Û’ØŒ Ø§ÙˆØ± Ø¢Ø±ÚˆØ± Ú©ÛŒ Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø¨Ú¾ÛŒØ¬Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©ÛŒØ§ Ø¬Ø§ØªØ§ ÛÛ’Û”';
 
   @override
   String get policy3 =>
-      'آپ کا نام، فون نمبر، اور مقام کا پتہ صرف اس ٹیکنیشن کے ساتھ شیئر کیا جاتا ہے جس نے سروس کی فراہمی کے لیے آپ کی درخواست قبول کی ہو۔';
+      'Ø¢Ù¾ Ú©Ø§ Ù†Ø§Ù…ØŒ ÙÙˆÙ† Ù†Ù…Ø¨Ø±ØŒ Ø§ÙˆØ± Ù…Ù‚Ø§Ù… Ú©Ø§ Ù¾ØªÛ ØµØ±Ù Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø³Ø§ØªÚ¾ Ø´ÛŒØ¦Ø± Ú©ÛŒØ§ Ø¬Ø§ØªØ§ ÛÛ’ Ø¬Ø³ Ù†Û’ Ø³Ø±ÙˆØ³ Ú©ÛŒ ÙØ±Ø§ÛÙ…ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ø¢Ù¾ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù‚Ø¨ÙˆÙ„ Ú©ÛŒ ÛÙˆÛ”';
 
   @override
-  String get waitingForAdminAction => 'ایڈمن کی کارروائی کا انتظار ہے';
+  String get waitingForAdminAction =>
+      'Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ Ú©Ø§Ø±Ø±ÙˆØ§Ø¦ÛŒ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get whatsCovered => 'کیا شامل ہے';
+  String get whatsCovered => 'Ú©ÛŒØ§ Ø´Ø§Ù…Ù„ ÛÛ’';
 
   @override
-  String get issueone => 'غلط تنصیب یا ناقص کاریگری';
+  String get issueone => 'ØºÙ„Ø· ØªÙ†ØµÛŒØ¨ ÛŒØ§ Ù†Ø§Ù‚Øµ Ú©Ø§Ø±ÛŒÚ¯Ø±ÛŒ';
 
   @override
-  String get issuetwo => 'ٹیکنیشن کی غیر معیاری کارکردگی';
+  String get issuetwo =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ ØºÛŒØ± Ù…Ø¹ÛŒØ§Ø±ÛŒ Ú©Ø§Ø±Ú©Ø±Ø¯Ú¯ÛŒ';
 
   @override
-  String get issuethree => 'وہی اصل خرابی جو ٹھیک کی گئی تھی';
+  String get issuethree =>
+      'ÙˆÛÛŒ Ø§ØµÙ„ Ø®Ø±Ø§Ø¨ÛŒ Ø¬Ùˆ Ù¹Ú¾ÛŒÚ© Ú©ÛŒ Ú¯Ø¦ÛŒ ØªÚ¾ÛŒ';
 
   @override
   String get issuefour =>
-      'ایک بار کے لیے موزوں، تکمیل کی تاریخ سے 7 دنوں کے اندر';
+      'Ø§ÛŒÚ© Ø¨Ø§Ø± Ú©Û’ Ù„ÛŒÛ’ Ù…ÙˆØ²ÙˆÚºØŒ ØªÚ©Ù…ÛŒÙ„ Ú©ÛŒ ØªØ§Ø±ÛŒØ® Ø³Û’ 7 Ø¯Ù†ÙˆÚº Ú©Û’ Ø§Ù†Ø¯Ø±';
 
   @override
-  String get whatsNotCovered => 'کیا شامل نہیں ہے';
+  String get whatsNotCovered => 'Ú©ÛŒØ§ Ø´Ø§Ù…Ù„ Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get notissueone => 'ناقص اسپیئر پارٹس یا مواد';
+  String get notissueone => 'Ù†Ø§Ù‚Øµ Ø§Ø³Ù¾ÛŒØ¦Ø± Ù¾Ø§Ø±Ù¹Ø³ ÛŒØ§ Ù…ÙˆØ§Ø¯';
 
   @override
-  String get notissuetwo => 'سروس کے بعد غلط استعمال یا چھیڑ چھاڑ';
+  String get notissuetwo =>
+      'Ø³Ø±ÙˆØ³ Ú©Û’ Ø¨Ø¹Ø¯ ØºÙ„Ø· Ø§Ø³ØªØ¹Ù…Ø§Ù„ ÛŒØ§ Ú†Ú¾ÛŒÚ‘ Ú†Ú¾Ø§Ú‘';
 
   @override
-  String get notissuethree => 'فریق ثالث کی مداخلت';
+  String get notissuethree => 'ÙØ±ÛŒÙ‚ Ø«Ø§Ù„Ø« Ú©ÛŒ Ù…Ø¯Ø§Ø®Ù„Øª';
 
   @override
-  String get notissuefour => 'بجلی کا اتار چڑھاؤ، پانی کا رساؤ، قدرتی آفات';
+  String get notissuefour =>
+      'Ø¨Ø¬Ù„ÛŒ Ú©Ø§ Ø§ØªØ§Ø± Ú†Ú‘Ú¾Ø§Ø¤ØŒ Ù¾Ø§Ù†ÛŒ Ú©Ø§ Ø±Ø³Ø§Ø¤ØŒ Ù‚Ø¯Ø±ØªÛŒ Ø¢ÙØ§Øª';
 
   @override
-  String get notissuefive => 'عام توڑ پھوڑ';
+  String get notissuefive => 'Ø¹Ø§Ù… ØªÙˆÚ‘ Ù¾Ú¾ÙˆÚ‘';
 
   @override
-  String get showMore => 'مزید دکھائیں';
+  String get showMore => 'Ù…Ø²ÛŒØ¯ Ø¯Ú©Ú¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get loading => 'لوڈ ہو رہا ہے...';
+  String get loading => 'Ù„ÙˆÚˆ ÛÙˆ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get wallet => 'بٹوے';
+  String get wallet => 'Ø¨Ù¹ÙˆÛ’';
 
   @override
-  String get walletSynced => 'والٹ کامیابی سے ہم آہنگ (Sync) ہو گیا';
+  String get walletSynced =>
+      'ÙˆØ§Ù„Ù¹ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ ÛÙ… Ø¢ÛÙ†Ú¯ (Sync) ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get payoutRequested => 'ادائیگی کی درخواست کامیابی سے جمع ہو گئی';
+  String get payoutRequested =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø¬Ù…Ø¹ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get balanceBreakdown => 'بیلنس کی تفصیل';
+  String get balanceBreakdown => 'Ø¨ÛŒÙ„Ù†Ø³ Ú©ÛŒ ØªÙØµÛŒÙ„';
 
   @override
-  String get selectAmounts => 'رقوم منتخب کریں';
+  String get selectAmounts => 'Ø±Ù‚ÙˆÙ… Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get available => 'دستیاب';
+  String get available => 'Ø¯Ø³ØªÛŒØ§Ø¨';
 
   @override
-  String get paid => 'ادا شدہ';
+  String get paid => 'Ø§Ø¯Ø§ Ø´Ø¯Û';
 
   @override
-  String get tips => 'ٹپس';
+  String get tips => 'Ù¹Ù¾Ø³';
 
   @override
-  String get payoutPending => 'ادائیگی زیر التوا';
+  String get payoutPending => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§';
 
   @override
-  String get requestedAmount => 'درخواست کردہ رقم';
+  String get requestedAmount => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±Ø¯Û Ø±Ù‚Ù…';
 
   @override
   String get payoutNote =>
-      'نوٹ: یہ درخواست منظوری کے لیے ایڈمن کو بھیجی جائے گی۔ کل دستیاب بیلنس کی درخواست کی جائے گی۔';
+      'Ù†ÙˆÙ¹: ÛŒÛ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ù†Ø¸ÙˆØ±ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ Ø¨Ú¾ÛŒØ¬ÛŒ Ø¬Ø§Ø¦Û’ Ú¯ÛŒÛ” Ú©Ù„ Ø¯Ø³ØªÛŒØ§Ø¨ Ø¨ÛŒÙ„Ù†Ø³ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ Ø¬Ø§Ø¦Û’ Ú¯ÛŒÛ”';
 
   @override
-  String get noPayoutRequests => 'ابھی تک کوئی ادائیگی کی درخواست نہیں ہے';
+  String get noPayoutRequests =>
+      'Ø§Ø¨Ú¾ÛŒ ØªÚ© Ú©ÙˆØ¦ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù†ÛÛŒÚº ÛÛ’';
 
   @override
-  String get max => 'زیادہ سے زیادہ';
+  String get max => 'Ø²ÛŒØ§Ø¯Û Ø³Û’ Ø²ÛŒØ§Ø¯Û';
 
   @override
-  String get min => 'کم از کم';
+  String get min => 'Ú©Ù… Ø§Ø² Ú©Ù…';
 
   @override
-  String get useMax => 'زیادہ سے زیادہ استعمال کریں';
+  String get useMax => 'Ø²ÛŒØ§Ø¯Û Ø³Û’ Ø²ÛŒØ§Ø¯Û Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get searchByWorkerName => 'ورکر کے نام سے تلاش کریں';
+  String get searchByWorkerName =>
+      'ÙˆØ±Ú©Ø± Ú©Û’ Ù†Ø§Ù… Ø³Û’ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get noResultsFound => 'کوئی نتائج نہیں ملے';
+  String get noResultsFound => 'Ú©ÙˆØ¦ÛŒ Ù†ØªØ§Ø¦Ø¬ Ù†ÛÛŒÚº Ù…Ù„Û’';
 
   @override
-  String get totalAmount => 'کل رقم';
+  String get totalAmount => 'Ú©Ù„ Ø±Ù‚Ù…';
 
   @override
-  String get payoutDetails => 'ادائیگی کی تفصیلات';
+  String get payoutDetails => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get workerName => 'ورکر کا نام';
+  String get workerName => 'ÙˆØ±Ú©Ø± Ú©Ø§ Ù†Ø§Ù…';
 
   @override
-  String get payoutAccount => 'ادائیگی کا اکاؤنٹ';
+  String get payoutAccount => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹';
 
   @override
-  String get requestDate => 'درخواست کی تاریخ';
+  String get requestDate => 'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
-  String get rejectionReason => 'مسترد کرنے کی وجہ';
+  String get rejectionReason => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û';
 
   @override
-  String get enterTransactionId => 'ٹرانزیکشن آئی ڈی درج کریں';
+  String get enterTransactionId =>
+      'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ø¢Ø¦ÛŒ ÚˆÛŒ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get uploadPaymentProof => 'ادائیگی کا ثبوت اپ لوڈ کریں';
+  String get uploadPaymentProof =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø«Ø¨ÙˆØª Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get proofUploaded => 'ثبوت کامیابی سے اپ لوڈ ہو گیا';
+  String get proofUploaded =>
+      'Ø«Ø¨ÙˆØª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø§Ù¾ Ù„ÙˆÚˆ ÛÙˆ Ú¯ÛŒØ§';
 
   @override
-  String get enterReason => 'وجہ درج کریں';
+  String get enterReason => 'ÙˆØ¬Û Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String get cancelPayoutConfirmation =>
-      'کیا آپ واقعی اس ادائیگی کی درخواست کو منسوخ کرنا چاہتے ہیں؟';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§Ø³ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ùˆ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
 
   @override
-  String get payoutCancelled => 'ادائیگی کی درخواست کامیابی سے منسوخ ہو گئی';
+  String get payoutCancelled =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
   String get confirmPayoutRequest =>
-      'آپ اپنے کل دستیاب بیلنس کی ادائیگی کی درخواست کر رہے ہیں';
+      'Ø¢Ù¾ Ø§Ù¾Ù†Û’ Ú©Ù„ Ø¯Ø³ØªÛŒØ§Ø¨ Ø¨ÛŒÙ„Ù†Ø³ Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø± Ø±ÛÛ’ ÛÛŒÚº';
 
   @override
   String get bonusIncludedInWallet =>
-      'بونس آپ کے متحد بٹوے میں شامل ہے۔ آمدنی (Earnings) پیج سے ادائیگی کی درخواست کریں۔';
+      'Ø¨ÙˆÙ†Ø³ Ø¢Ù¾ Ú©Û’ Ù…ØªØ­Ø¯ Ø¨Ù¹ÙˆÛ’ Ù…ÛŒÚº Ø´Ø§Ù…Ù„ ÛÛ’Û” Ø¢Ù…Ø¯Ù†ÛŒ (Earnings) Ù¾ÛŒØ¬ Ø³Û’ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get claimText =>
-      'وارنٹی کلیم کرنے کے لیے، سروس مکمل ہونے کے 7 دنوں کے اندر ایپ کے ذریعے درخواست جمع کرائیں۔ وارنٹی کلیم صرف ایک بار کیا جا سکتا ہے۔';
+      'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ØŒ Ø³Ø±ÙˆØ³ Ù…Ú©Ù…Ù„ ÛÙˆÙ†Û’ Ú©Û’ 7 Ø¯Ù†ÙˆÚº Ú©Û’ Ø§Ù†Ø¯Ø± Ø§ÛŒÙ¾ Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒÚºÛ” ÙˆØ§Ø±Ù†Ù¹ÛŒ Ú©Ù„ÛŒÙ… ØµØ±Ù Ø§ÛŒÚ© Ø¨Ø§Ø± Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§ ÛÛ’Û”';
 
   @override
-  String get syncWallet => 'والٹ ہم آہنگ کریں';
+  String get syncWallet => 'ÙˆØ§Ù„Ù¹ ÛÙ… Ø¢ÛÙ†Ú¯ Ú©Ø±ÛŒÚº';
 
   @override
-  String get alreadyInHand => 'پہلے سے پاس موجود ہے';
+  String get alreadyInHand => 'Ù¾ÛÙ„Û’ Ø³Û’ Ù¾Ø§Ø³ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’';
 
   @override
-  String get minimumPayoutAmount => 'ادائیگی کی کم از کم رقم 10 سعودی ریال ہے';
+  String get minimumPayoutAmount =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ú©Ù… Ø§Ø² Ú©Ù… Ø±Ù‚Ù… 10 Ø³Ø¹ÙˆØ¯ÛŒ Ø±ÛŒØ§Ù„ ÛÛ’';
 
   @override
-  String get enableAvailability => 'دستیابی فعال کریں';
+  String get enableAvailability => 'Ø¯Ø³ØªÛŒØ§Ø¨ÛŒ ÙØ¹Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get welcomeDescription =>
-      'ہمیں آپ کو ابو جلمبو ٹیم میں شامل کرنے پر خوشی ہے۔\n\n• ہر سروس کے لیے ایک ہفتے کی وارنٹی\n• اعلی درجہ بندی مستقبل میں انتخاب کے امکانات کو بڑھاتی ہے\n• اعلی کارکردگی دکھانے والے ٹیکنیشنز کے لیے خصوصی انعامات';
+      'ÛÙ…ÛŒÚº Ø¢Ù¾ Ú©Ùˆ Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ Ù¹ÛŒÙ… Ù…ÛŒÚº Ø´Ø§Ù…Ù„ Ú©Ø±Ù†Û’ Ù¾Ø± Ø®ÙˆØ´ÛŒ ÛÛ’Û”\n\nâ€¢ ÛØ± Ø³Ø±ÙˆØ³ Ú©Û’ Ù„ÛŒÛ’ Ø§ÛŒÚ© ÛÙØªÛ’ Ú©ÛŒ ÙˆØ§Ø±Ù†Ù¹ÛŒ\nâ€¢ Ø§Ø¹Ù„ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ù…Ø³ØªÙ‚Ø¨Ù„ Ù…ÛŒÚº Ø§Ù†ØªØ®Ø§Ø¨ Ú©Û’ Ø§Ù…Ú©Ø§Ù†Ø§Øª Ú©Ùˆ Ø¨Ú‘Ú¾Ø§ØªÛŒ ÛÛ’\nâ€¢ Ø§Ø¹Ù„ÛŒ Ú©Ø§Ø±Ú©Ø±Ø¯Ú¯ÛŒ Ø¯Ú©Ú¾Ø§Ù†Û’ ÙˆØ§Ù„Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Û’ Ù„ÛŒÛ’ Ø®ØµÙˆØµÛŒ Ø§Ù†Ø¹Ø§Ù…Ø§Øª';
 
   @override
   String welcomeToAboGlumboTechnician(String name) {
-    return 'خوش آمدید $name';
+    return 'Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯ $name';
   }
 
   @override
   String get onlyMainAdminCanManageAdminAccess =>
-      'صرف مین ایڈمن ہی ایڈمن رسائی کا انتظام کر سکتا ہے';
+      'ØµØ±Ù Ù…ÛŒÙ† Ø§ÛŒÚˆÙ…Ù† ÛÛŒ Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø± Ø³Ú©ØªØ§ ÛÛ’';
 
   @override
   String get cannotModifyMainAdminAccount =>
-      'مین ایڈمن اکاؤنٹ میں ترمیم نہیں کی جا سکتی';
+      'Ù…ÛŒÙ† Ø§ÛŒÚˆÙ…Ù† Ø§Ú©Ø§Ø¤Ù†Ù¹ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ù†ÛÛŒÚº Ú©ÛŒ Ø¬Ø§ Ø³Ú©ØªÛŒ';
 
   @override
-  String get adminAccessRevokedFor => 'ایڈمن رسائی منسوخ کر دی گئی برائے';
+  String get adminAccessRevokedFor =>
+      'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ Ø¨Ø±Ø§Ø¦Û’';
 
   @override
-  String get adminAccess => 'ایڈمن رسائی';
+  String get adminAccess => 'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ';
 
   @override
-  String get selectAdminAccessLevelFor => 'ایڈمن رسائی کی سطح منتخب کریں برائے';
+  String get selectAdminAccessLevelFor =>
+      'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ú©ÛŒ Ø³Ø·Ø­ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº Ø¨Ø±Ø§Ø¦Û’';
 
   @override
-  String get fullAdmin => 'مکمل ایڈمن';
+  String get fullAdmin => 'Ù…Ú©Ù…Ù„ Ø§ÛŒÚˆÙ…Ù†';
 
   @override
-  String get customerService => 'کسٹمر سروس';
+  String get customerService => 'Ú©Ø³Ù¹Ù…Ø± Ø³Ø±ÙˆØ³';
 
   @override
-  String get grantAccess => 'رسائی دیں';
+  String get grantAccess => 'Ø±Ø³Ø§Ø¦ÛŒ Ø¯ÛŒÚº';
 
   @override
-  String get grantingAdminAccess => 'ایڈمن رسائی دی جا رہی ہے';
+  String get grantingAdminAccess =>
+      'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ø¯ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get adminAccessGrantedTo => 'ایڈمن رسائی دے دی گئی کو';
+  String get adminAccessGrantedTo =>
+      'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ø¯Û’ Ø¯ÛŒ Ú¯Ø¦ÛŒ Ú©Ùˆ';
 
   @override
-  String get revokeAdminAccess => 'ایڈمن رسائی منسوخ کریں';
+  String get revokeAdminAccess => 'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get revokingAdminAccess => 'ایڈمن رسائی منسوخ کی جا رہی ہے';
+  String get revokingAdminAccess =>
+      'Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ Ø¬Ø§ Ø±ÛÛŒ ÛÛ’';
 
   @override
-  String get revoke => 'منسوخ کریں';
+  String get revoke => 'Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get switchToAdmin => 'ایڈمن پر سوئچ کریں';
+  String get switchToAdmin => 'Ø§ÛŒÚˆÙ…Ù† Ù¾Ø± Ø³ÙˆØ¦Ú† Ú©Ø±ÛŒÚº';
 
   @override
-  String get manageAdmins => 'ایڈمنز کا انتظام کریں';
+  String get manageAdmins => 'Ø§ÛŒÚˆÙ…Ù†Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù… Ú©Ø±ÛŒÚº';
 
   @override
-  String get searchAdmins => 'ایڈمنز تلاش کریں...';
+  String get searchAdmins => 'Ø§ÛŒÚˆÙ…Ù†Ø² ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº...';
 
   @override
-  String get aboutUs => 'ہمارے بارے میں';
+  String get aboutUs => 'ÛÙ…Ø§Ø±Û’ Ø¨Ø§Ø±Û’ Ù…ÛŒÚº';
 
   @override
-  String get noAdminsFound => 'کوئی ایڈمن نہیں ملا';
+  String get noAdminsFound => 'Ú©ÙˆØ¦ÛŒ Ø§ÛŒÚˆÙ…Ù† Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get loadingAdmins => 'ایڈمنز لوڈ ہو رہے ہیں...';
+  String get loadingAdmins => 'Ø§ÛŒÚˆÙ…Ù†Ø² Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
   String get noAdminsMatchYourFilters =>
-      'کوئی ایڈمن آپ کے فلٹرز سے مطابقت نہیں رکھتا';
+      'Ú©ÙˆØ¦ÛŒ Ø§ÛŒÚˆÙ…Ù† Ø¢Ù¾ Ú©Û’ ÙÙ„Ù¹Ø±Ø² Ø³Û’ Ù…Ø·Ø§Ø¨Ù‚Øª Ù†ÛÛŒÚº Ø±Ú©Ú¾ØªØ§';
 
   @override
-  String get grantedOn => 'دیا گیا بروز';
+  String get grantedOn => 'Ø¯ÛŒØ§ Ú¯ÛŒØ§ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get selectRecipientType => 'موصول کنندہ کی قسم منتخب کریں';
+  String get selectRecipientType =>
+      'Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Û Ú©ÛŒ Ù‚Ø³Ù… Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get recipientsSelected => 'موصول کنندگان منتخب کیے گئے';
+  String get recipientsSelected =>
+      'Ù…ÙˆØµÙˆÙ„ Ú©Ù†Ù†Ø¯Ú¯Ø§Ù† Ù…Ù†ØªØ®Ø¨ Ú©ÛŒÛ’ Ú¯Ø¦Û’';
 
   @override
   String get areYouSureYouWantToRevokeAdminAccessFor =>
-      'کیا آپ واقعی ایڈمن رسائی منسوخ کرنا چاہتے ہیں برائے';
+      'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚº Ø¨Ø±Ø§Ø¦Û’';
 
   @override
   String get onlyTheMainAdminCanRevokeAdminAccess =>
-      'صرف مین ایڈمن ہی ایڈمن رسائی منسوخ کر سکتا ہے';
+      'ØµØ±Ù Ù…ÛŒÙ† Ø§ÛŒÚˆÙ…Ù† ÛÛŒ Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø³Ú©ØªØ§ ÛÛ’';
 
   @override
   String get accessToAllAdminFeaturesExceptManagingOtherAdmins =>
-      'دوسرے ایڈمنز کے انتظام کے علاوہ تمام ایڈمن فیچرز تک رسائی';
+      'Ø¯ÙˆØ³Ø±Û’ Ø§ÛŒÚˆÙ…Ù†Ø² Ú©Û’ Ø§Ù†ØªØ¸Ø§Ù… Ú©Û’ Ø¹Ù„Ø§ÙˆÛ ØªÙ…Ø§Ù… Ø§ÛŒÚˆÙ…Ù† ÙÛŒÚ†Ø±Ø² ØªÚ© Ø±Ø³Ø§Ø¦ÛŒ';
 
   @override
   String get viewOnlyAccessToCustomersTechniciansAndSupport =>
-      'صارفین، ٹیکنیشنز اور سپورٹ تک صرف دیکھنے کی رسائی';
+      'ØµØ§Ø±ÙÛŒÙ†ØŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ø§ÙˆØ± Ø³Ù¾ÙˆØ±Ù¹ ØªÚ© ØµØ±Ù Ø¯ÛŒÚ©Ú¾Ù†Û’ Ú©ÛŒ Ø±Ø³Ø§Ø¦ÛŒ';
 
   @override
   String get loginDescription =>
-      'کام کے لیے تیار؟ قریبی جابز اور بہتر آمدنی آپ کا انتظار کر رہی ہے۔';
+      'Ú©Ø§Ù… Ú©Û’ Ù„ÛŒÛ’ ØªÛŒØ§Ø±ØŸ Ù‚Ø±ÛŒØ¨ÛŒ Ø¬Ø§Ø¨Ø² Ø§ÙˆØ± Ø¨ÛØªØ± Ø¢Ù…Ø¯Ù†ÛŒ Ø¢Ù¾ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± Ú©Ø± Ø±ÛÛŒ ÛÛ’Û”';
 
   @override
-  String get aboutUsTitle => 'ہمارے بارے میں';
+  String get aboutUsTitle => 'ÛÙ…Ø§Ø±Û’ Ø¨Ø§Ø±Û’ Ù…ÛŒÚº';
 
   @override
   String get aboutUsHeadline =>
-      'پیشہ ورانہ ترقی کا آپ کا سفر یہاں سے شروع ہوتا ہے';
+      'Ù¾ÛŒØ´Û ÙˆØ±Ø§Ù†Û ØªØ±Ù‚ÛŒ Ú©Ø§ Ø¢Ù¾ Ú©Ø§ Ø³ÙØ± ÛŒÛØ§Úº Ø³Û’ Ø´Ø±ÙˆØ¹ ÛÙˆØªØ§ ÛÛ’';
 
   @override
   String get aboutUsIntro =>
-      'ہمارے تصدیق شدہ ٹیکنیشنز کے نیٹ ورک میں شامل ہوں اور مالی آزادی اور پیشہ ورانہ فضیلت کی طرف اپنا اگلا قدم اٹھائیں۔ ہم آپ کو صرف ایک جاب نہیں پیش کرتے؛ ہم آپ کو ایک ایسا پارٹنر پیش کرتے ہیں جو آپ کی کامیابی کو یقینی بنانے کے لیے وقف ہے۔';
+      'ÛÙ…Ø§Ø±Û’ ØªØµØ¯ÛŒÙ‚ Ø´Ø¯Û Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Û’ Ù†ÛŒÙ¹ ÙˆØ±Ú© Ù…ÛŒÚº Ø´Ø§Ù…Ù„ ÛÙˆÚº Ø§ÙˆØ± Ù…Ø§Ù„ÛŒ Ø¢Ø²Ø§Ø¯ÛŒ Ø§ÙˆØ± Ù¾ÛŒØ´Û ÙˆØ±Ø§Ù†Û ÙØ¶ÛŒÙ„Øª Ú©ÛŒ Ø·Ø±Ù Ø§Ù¾Ù†Ø§ Ø§Ú¯Ù„Ø§ Ù‚Ø¯Ù… Ø§Ù¹Ú¾Ø§Ø¦ÛŒÚºÛ” ÛÙ… Ø¢Ù¾ Ú©Ùˆ ØµØ±Ù Ø§ÛŒÚ© Ø¬Ø§Ø¨ Ù†ÛÛŒÚº Ù¾ÛŒØ´ Ú©Ø±ØªÛ’Ø› ÛÙ… Ø¢Ù¾ Ú©Ùˆ Ø§ÛŒÚ© Ø§ÛŒØ³Ø§ Ù¾Ø§Ø±Ù¹Ù†Ø± Ù¾ÛŒØ´ Ú©Ø±ØªÛ’ ÛÛŒÚº Ø¬Ùˆ Ø¢Ù¾ Ú©ÛŒ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ú©Ùˆ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ÙˆÙ‚Ù ÛÛ’Û”';
 
   @override
-  String get aboutRewardsTitle => 'آپ کے انعامات اور مراعات';
+  String get aboutRewardsTitle =>
+      'Ø¢Ù¾ Ú©Û’ Ø§Ù†Ø¹Ø§Ù…Ø§Øª Ø§ÙˆØ± Ù…Ø±Ø§Ø¹Ø§Øª';
 
   @override
-  String get aboutIncentiveTitle => 'مالی ترغیبی نظام';
+  String get aboutIncentiveTitle => 'Ù…Ø§Ù„ÛŒ ØªØ±ØºÛŒØ¨ÛŒ Ù†Ø¸Ø§Ù…';
 
   @override
   String get aboutIncentiveDesc =>
-      'ہمارے ٹائرڈ سسٹم (کانسی، چاندی، سونا، پلاٹینم) کے ذریعے ترقی کریں۔ آپ جتنی زیادہ جابز مکمل کریں گے اور آپ کی درجہ بندی جتنی زیادہ ہوگی (پلاٹینم کے لیے 4.8+)، آپ اتنا ہی زیادہ بونس فیصد کمائیں گے (15% بونس تک)۔';
+      'ÛÙ…Ø§Ø±Û’ Ù¹Ø§Ø¦Ø±Úˆ Ø³Ø³Ù¹Ù… (Ú©Ø§Ù†Ø³ÛŒØŒ Ú†Ø§Ù†Ø¯ÛŒØŒ Ø³ÙˆÙ†Ø§ØŒ Ù¾Ù„Ø§Ù¹ÛŒÙ†Ù…) Ú©Û’ Ø°Ø±ÛŒØ¹Û’ ØªØ±Ù‚ÛŒ Ú©Ø±ÛŒÚºÛ” Ø¢Ù¾ Ø¬ØªÙ†ÛŒ Ø²ÛŒØ§Ø¯Û Ø¬Ø§Ø¨Ø² Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº Ú¯Û’ Ø§ÙˆØ± Ø¢Ù¾ Ú©ÛŒ Ø¯Ø±Ø¬Û Ø¨Ù†Ø¯ÛŒ Ø¬ØªÙ†ÛŒ Ø²ÛŒØ§Ø¯Û ÛÙˆÚ¯ÛŒ (Ù¾Ù„Ø§Ù¹ÛŒÙ†Ù… Ú©Û’ Ù„ÛŒÛ’ 4.8+)ØŒ Ø¢Ù¾ Ø§ØªÙ†Ø§ ÛÛŒ Ø²ÛŒØ§Ø¯Û Ø¨ÙˆÙ†Ø³ ÙÛŒØµØ¯ Ú©Ù…Ø§Ø¦ÛŒÚº Ú¯Û’ (15% Ø¨ÙˆÙ†Ø³ ØªÚ©)Û”';
 
   @override
-  String get aboutEarningsTitle => 'شفاف ماہانہ آمدنی';
+  String get aboutEarningsTitle => 'Ø´ÙØ§Ù Ù…Ø§ÛØ§Ù†Û Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
   String get aboutEarningsDesc =>
-      'اپنی ماہانہ آمدنی کو ٹریک کریں اور \"ادائیگی کی درخواست کریں\" بٹن کا استعمال کرتے ہوئے آسانی سے اپنی ادائیگی کی درخواست کریں۔';
+      'Ø§Ù¾Ù†ÛŒ Ù…Ø§ÛØ§Ù†Û Ø¢Ù…Ø¯Ù†ÛŒ Ú©Ùˆ Ù¹Ø±ÛŒÚ© Ú©Ø±ÛŒÚº Ø§ÙˆØ± \"Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚº\" Ø¨Ù¹Ù† Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ØªÛ’ ÛÙˆØ¦Û’ Ø¢Ø³Ø§Ù†ÛŒ Ø³Û’ Ø§Ù¾Ù†ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get aboutSupportTitle => 'کارکردگی اور تعاون';
+  String get aboutSupportTitle => 'Ú©Ø§Ø±Ú©Ø±Ø¯Ú¯ÛŒ Ø§ÙˆØ± ØªØ¹Ø§ÙˆÙ†';
 
   @override
-  String get aboutFlexibilityTitle => 'مکمل لچک';
+  String get aboutFlexibilityTitle => 'Ù…Ú©Ù…Ù„ Ù„Ú†Ú©';
 
   @override
   String get aboutFlexibilityDesc =>
-      'آپ اپنے کام کے اوقات اور ان علاقوں کا تعین خود کرتے ہیں جن کا آپ احاطہ کرتے ہیں۔ ہم آپ کی ترجیحات کی بنیاد پر آپ کو سروس کی درخواستیں فراہم کرنے کے لیے کام کرتے ہیں۔';
+      'Ø¢Ù¾ Ø§Ù¾Ù†Û’ Ú©Ø§Ù… Ú©Û’ Ø§ÙˆÙ‚Ø§Øª Ø§ÙˆØ± Ø§Ù† Ø¹Ù„Ø§Ù‚ÙˆÚº Ú©Ø§ ØªØ¹ÛŒÙ† Ø®ÙˆØ¯ Ú©Ø±ØªÛ’ ÛÛŒÚº Ø¬Ù† Ú©Ø§ Ø¢Ù¾ Ø§Ø­Ø§Ø·Û Ú©Ø±ØªÛ’ ÛÛŒÚºÛ” ÛÙ… Ø¢Ù¾ Ú©ÛŒ ØªØ±Ø¬ÛŒØ­Ø§Øª Ú©ÛŒ Ø¨Ù†ÛŒØ§Ø¯ Ù¾Ø± Ø¢Ù¾ Ú©Ùˆ Ø³Ø±ÙˆØ³ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº ÙØ±Ø§ÛÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ú©Ø§Ù… Ú©Ø±ØªÛ’ ÛÛŒÚºÛ”';
 
   @override
-  String get aboutNoHuntingTitle => 'زیرو کسٹمر ہنٹنگ';
+  String get aboutNoHuntingTitle => 'Ø²ÛŒØ±Ùˆ Ú©Ø³Ù¹Ù…Ø± ÛÙ†Ù¹Ù†Ú¯';
 
   @override
   String get aboutNoHuntingDesc =>
-      'کلائنٹس کے پیچھے بھاگنے کو الوداع کہیں۔ ہم آپ کو قابل اعتماد صارفین کی طرف سے تیار جاب کی درخواستیں فراہم کرتے ہیں، جو کام کے مسلسل بہاؤ کو یقینی بناتی ہیں۔';
+      'Ú©Ù„Ø§Ø¦Ù†Ù¹Ø³ Ú©Û’ Ù¾ÛŒÚ†Ú¾Û’ Ø¨Ú¾Ø§Ú¯Ù†Û’ Ú©Ùˆ Ø§Ù„ÙˆØ¯Ø§Ø¹ Ú©ÛÛŒÚºÛ” ÛÙ… Ø¢Ù¾ Ú©Ùˆ Ù‚Ø§Ø¨Ù„ Ø§Ø¹ØªÙ…Ø§Ø¯ ØµØ§Ø±ÙÛŒÙ† Ú©ÛŒ Ø·Ø±Ù Ø³Û’ ØªÛŒØ§Ø± Ø¬Ø§Ø¨ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒÚº ÙØ±Ø§ÛÙ… Ú©Ø±ØªÛ’ ÛÛŒÚºØŒ Ø¬Ùˆ Ú©Ø§Ù… Ú©Û’ Ù…Ø³Ù„Ø³Ù„ Ø¨ÛØ§Ø¤ Ú©Ùˆ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§ØªÛŒ ÛÛŒÚºÛ”';
 
   @override
-  String get aboutTransparencyTitle => 'ضمانت شدہ شفافیت';
+  String get aboutTransparencyTitle => 'Ø¶Ù…Ø§Ù†Øª Ø´Ø¯Û Ø´ÙØ§ÙÛŒØª';
 
   @override
   String get aboutTransparencyDesc =>
-      'تمام سروس کی تفصیلات اور قیمتیں پہلے سے دستاویزی ہوتی ہیں، جو آپ اور صارف کے درمیان تمام مالی معاملات میں وضاحت کو یقینی بناتی ہیں۔';
+      'ØªÙ…Ø§Ù… Ø³Ø±ÙˆØ³ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø§ÙˆØ± Ù‚ÛŒÙ…ØªÛŒÚº Ù¾ÛÙ„Û’ Ø³Û’ Ø¯Ø³ØªØ§ÙˆÛŒØ²ÛŒ ÛÙˆØªÛŒ ÛÛŒÚºØŒ Ø¬Ùˆ Ø¢Ù¾ Ø§ÙˆØ± ØµØ§Ø±Ù Ú©Û’ Ø¯Ø±Ù…ÛŒØ§Ù† ØªÙ…Ø§Ù… Ù…Ø§Ù„ÛŒ Ù…Ø¹Ø§Ù…Ù„Ø§Øª Ù…ÛŒÚº ÙˆØ¶Ø§Ø­Øª Ú©Ùˆ ÛŒÙ‚ÛŒÙ†ÛŒ Ø¨Ù†Ø§ØªÛŒ ÛÛŒÚºÛ”';
 
   @override
   String locationNumber(int number) {
-    return 'مقام $number';
+    return 'Ù…Ù‚Ø§Ù… $number';
   }
 
   @override
-  String get selectedLocation => 'منتخب مقام';
+  String get selectedLocation => 'Ù…Ù†ØªØ®Ø¨ Ù…Ù‚Ø§Ù…';
 
   @override
   String get mapPickerInstructions =>
-      '• نیا علاقہ بنانے کے لیے \'علاقہ شامل کریں\' پر کلک کریں\n• باؤنڈری پوائنٹس شامل کرنے کے لیے نقشے پر تھپتھپائیں (کم از کم 4 پوائنٹس درکار ہیں)\n• مکمل ہونے پر \'علاقہ مکمل کریں\' پر کلک کریں\n• مقام کی تفصیلات درج کریں اور تصدیق کریں\n• تفصیلات کو اپ ڈیٹ کرنے کے لیے ترمیم آئیکن کا استعمال کریں یا علاقے کو ہٹانے کے لیے سرخ X کا استعمال کریں';
+      'â€¢ Ù†ÛŒØ§ Ø¹Ù„Ø§Ù‚Û Ø¨Ù†Ø§Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ \'Ø¹Ù„Ø§Ù‚Û Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº\' Ù¾Ø± Ú©Ù„Ú© Ú©Ø±ÛŒÚº\nâ€¢ Ø¨Ø§Ø¤Ù†ÚˆØ±ÛŒ Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³ Ø´Ø§Ù…Ù„ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ù†Ù‚Ø´Û’ Ù¾Ø± ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº (Ú©Ù… Ø§Ø² Ú©Ù… 4 Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³ Ø¯Ø±Ú©Ø§Ø± ÛÛŒÚº)\nâ€¢ Ù…Ú©Ù…Ù„ ÛÙˆÙ†Û’ Ù¾Ø± \'Ø¹Ù„Ø§Ù‚Û Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº\' Ù¾Ø± Ú©Ù„Ú© Ú©Ø±ÛŒÚº\nâ€¢ Ù…Ù‚Ø§Ù… Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº Ø§ÙˆØ± ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº\nâ€¢ ØªÙØµÛŒÙ„Ø§Øª Ú©Ùˆ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªØ±Ù…ÛŒÙ… Ø¢Ø¦ÛŒÚ©Ù† Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚº ÛŒØ§ Ø¹Ù„Ø§Ù‚Û’ Ú©Ùˆ ÛÙ¹Ø§Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø³Ø±Ø® X Ú©Ø§ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get tapOnMapToDrawPolygonPoints =>
-      'پولی گون پوائنٹس کھینچنے کے لیے نقشے پر تھپتھپائیں';
+      'Ù¾ÙˆÙ„ÛŒ Ú¯ÙˆÙ† Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³ Ú©Ú¾ÛŒÙ†Ú†Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ù†Ù‚Ø´Û’ Ù¾Ø± ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get addRegion => 'علاقہ شامل کریں';
+  String get addRegion => 'Ø¹Ù„Ø§Ù‚Û Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
   String get regionMustHaveAtLeast4Points =>
-      'ایک علاقے کو مکمل ہونے کے لیے کم از کم 4 پوائنٹس کا ہونا ضروری ہے۔';
+      'Ø§ÛŒÚ© Ø¹Ù„Ø§Ù‚Û’ Ú©Ùˆ Ù…Ú©Ù…Ù„ ÛÙˆÙ†Û’ Ú©Û’ Ù„ÛŒÛ’ Ú©Ù… Ø§Ø² Ú©Ù… 4 Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³ Ú©Ø§ ÛÙˆÙ†Ø§ Ø¶Ø±ÙˆØ±ÛŒ ÛÛ’Û”';
 
   @override
   String completeRegionWithPts(int count) {
-    return 'علاقہ مکمل کریں ($count پوائنٹس)';
+    return 'Ø¹Ù„Ø§Ù‚Û Ù…Ú©Ù…Ù„ Ú©Ø±ÛŒÚº ($count Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³)';
   }
 
   @override
-  String get clearDrawing => 'ڈرائنگ صاف کریں';
+  String get clearDrawing => 'ÚˆØ±Ø§Ø¦Ù†Ú¯ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseDrawPolygonFirst => 'براہ کرم پہلے پولی گون کھینچیں';
+  String get pleaseDrawPolygonFirst =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù¾ÛÙ„Û’ Ù¾ÙˆÙ„ÛŒ Ú¯ÙˆÙ† Ú©Ú¾ÛŒÙ†Ú†ÛŒÚº';
 
   @override
   String get pleaseDrawPolygonAreaFirst =>
-      'براہ کرم پہلے نقشے پر پولی گون کا علاقہ کھینچیں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù¾ÛÙ„Û’ Ù†Ù‚Ø´Û’ Ù¾Ø± Ù¾ÙˆÙ„ÛŒ Ú¯ÙˆÙ† Ú©Ø§ Ø¹Ù„Ø§Ù‚Û Ú©Ú¾ÛŒÙ†Ú†ÛŒÚº';
 
   @override
-  String get priority => 'ترجیح';
+  String get priority => 'ØªØ±Ø¬ÛŒØ­';
 
   @override
-  String get enterPriority => 'ترجیح درج کریں';
+  String get enterPriority => 'ØªØ±Ø¬ÛŒØ­ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterPriority => 'براہ کرم ترجیح درج کریں';
+  String get pleaseEnterPriority =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªØ±Ø¬ÛŒØ­ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
   String pointsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count پوائنٹس',
-      one: '1 پوائنٹ',
+      other: '$count Ù¾ÙˆØ§Ø¦Ù†Ù¹Ø³',
+      one: '1 Ù¾ÙˆØ§Ø¦Ù†Ù¹',
     );
     return '$_temp0';
   }
@@ -4572,369 +4884,396 @@ class AppLocalizationsUr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count مقامات منتخب کیے گئے',
-      one: '$count مقام منتخب کیا گیا',
+      other: '$count Ù…Ù‚Ø§Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©ÛŒÛ’ Ú¯Ø¦Û’',
+      one: '$count Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ú©ÛŒØ§ Ú¯ÛŒØ§',
     );
     return '$_temp0';
   }
 
   @override
-  String get addCurrentLocation => 'موجودہ مقام شامل کریں';
+  String get addCurrentLocation => 'Ù…ÙˆØ¬ÙˆØ¯Û Ù…Ù‚Ø§Ù… Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get howToUse => 'استعمال کا طریقہ';
+  String get howToUse => 'Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø§ Ø·Ø±ÛŒÙ‚Û';
 
   @override
-  String get searchForAPlace => 'جگہ تلاش کریں';
+  String get searchForAPlace => 'Ø¬Ú¯Û ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get myLocation => 'میرا مقام';
+  String get myLocation => 'Ù…ÛŒØ±Ø§ Ù…Ù‚Ø§Ù…';
 
   @override
-  String get noLocationSelected => 'کوئی مقام منتخب نہیں کیا گیا';
+  String get noLocationSelected =>
+      'Ú©ÙˆØ¦ÛŒ Ù…Ù‚Ø§Ù… Ù…Ù†ØªØ®Ø¨ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get tapOnMapToSelect => 'منتخب کرنے کے لیے نقشے پر تھپتھپائیں';
+  String get tapOnMapToSelect =>
+      'Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ù†Ù‚Ø´Û’ Ù¾Ø± ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº';
 
   @override
-  String get confirmLocations => 'مقامات کی تصدیق کریں';
+  String get confirmLocations => 'Ù…Ù‚Ø§Ù…Ø§Øª Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get radius => 'ریڈیئس';
+  String get radius => 'Ø±ÛŒÚˆÛŒØ¦Ø³';
 
   @override
-  String get locationAlreadyAdded => 'مقام پہلے ہی شامل ہو چکا ہے';
+  String get locationAlreadyAdded =>
+      'Ù…Ù‚Ø§Ù… Ù¾ÛÙ„Û’ ÛÛŒ Ø´Ø§Ù…Ù„ ÛÙˆ Ú†Ú©Ø§ ÛÛ’';
 
   @override
-  String get locationAddedToList => 'مقام فہرست میں شامل کر دیا گیا';
+  String get locationAddedToList =>
+      'Ù…Ù‚Ø§Ù… ÙÛØ±Ø³Øª Ù…ÛŒÚº Ø´Ø§Ù…Ù„ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§';
 
   @override
-  String get locationNotFound => 'مقام نہیں ملا';
+  String get locationNotFound => 'Ù…Ù‚Ø§Ù… Ù†ÛÛŒÚº Ù…Ù„Ø§';
 
   @override
-  String get errorFindingLocation => 'مقام تلاش کرنے میں خرابی';
+  String get errorFindingLocation =>
+      'Ù…Ù‚Ø§Ù… ØªÙ„Ø§Ø´ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get editLocation => 'مقام میں ترمیم کریں';
+  String get editLocation => 'Ù…Ù‚Ø§Ù… Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
-  String get addLocation => 'مقام شامل کریں';
+  String get addLocation => 'Ù…Ù‚Ø§Ù… Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get englishName => 'انگریزی نام';
+  String get englishName => 'Ø§Ù†Ú¯Ø±ÛŒØ²ÛŒ Ù†Ø§Ù…';
 
   @override
-  String get pleaseEnterEnglishName => 'براہ کرم انگریزی نام درج کریں';
+  String get pleaseEnterEnglishName =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù†Ú¯Ø±ÛŒØ²ÛŒ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get arabicName => 'عربی نام';
+  String get arabicName => 'Ø¹Ø±Ø¨ÛŒ Ù†Ø§Ù…';
 
   @override
-  String get pleaseEnterArabicName => 'براہ کرم عربی نام درج کریں';
+  String get pleaseEnterArabicName =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¹Ø±Ø¨ÛŒ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterArabicNameOnly => 'براہ کرم صرف عربی نام درج کریں';
+  String get pleaseEnterArabicNameOnly =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØµØ±Ù Ø¹Ø±Ø¨ÛŒ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get radiusInMeters => 'میٹر میں ریڈیئس';
+  String get radiusInMeters => 'Ù…ÛŒÙ¹Ø± Ù…ÛŒÚº Ø±ÛŒÚˆÛŒØ¦Ø³';
 
   @override
-  String get enterRadiusInMeters => 'میٹر میں ریڈیئس درج کریں';
+  String get enterRadiusInMeters =>
+      'Ù…ÛŒÙ¹Ø± Ù…ÛŒÚº Ø±ÛŒÚˆÛŒØ¦Ø³ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get meters => 'میٹر';
+  String get meters => 'Ù…ÛŒÙ¹Ø±';
 
   @override
-  String get pleaseEnterRadius => 'براہ کرم ریڈیئس درج کریں';
+  String get pleaseEnterRadius =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø±ÛŒÚˆÛŒØ¦Ø³ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addArea => 'علاقہ شامل کریں';
+  String get addArea => 'Ø¹Ù„Ø§Ù‚Û Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get gettingAddress => 'پتہ حاصل کیا جا رہا ہے...';
+  String get gettingAddress => 'Ù¾ØªÛ Ø­Ø§ØµÙ„ Ú©ÛŒØ§ Ø¬Ø§ Ø±ÛØ§ ÛÛ’...';
 
   @override
-  String get serviceRadius => 'سروس ریڈیئس';
+  String get serviceRadius => 'Ø³Ø±ÙˆØ³ Ø±ÛŒÚˆÛŒØ¦Ø³';
 
   @override
-  String get km => 'کلومیٹر';
+  String get km => 'Ú©Ù„ÙˆÙ…ÛŒÙ¹Ø±';
 
   @override
   String get tapOnMapOrSearchToAddLocations =>
-      'مقامات شامل کرنے کے نقشے پر تھپتھپائیں یا تلاش کریں';
+      'Ù…Ù‚Ø§Ù…Ø§Øª Ø´Ø§Ù…Ù„ Ú©Ø±Ù†Û’ Ú©Û’ Ù†Ù‚Ø´Û’ Ù¾Ø± ØªÚ¾Ù¾ØªÚ¾Ù¾Ø§Ø¦ÛŒÚº ÛŒØ§ ØªÙ„Ø§Ø´ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectedLocations => 'منتخب مقامات';
+  String get selectedLocations => 'Ù…Ù†ØªØ®Ø¨ Ù…Ù‚Ø§Ù…Ø§Øª';
 
   @override
   String get profileSentForVerification =>
-      'آپ کا پروفائل تصدیق کے لیے بھیج دیا گیا ہے!';
+      'Ø¢Ù¾ Ú©Ø§ Ù¾Ø±ÙˆÙØ§Ø¦Ù„ ØªØµØ¯ÛŒÙ‚ Ú©Û’ Ù„ÛŒÛ’ Ø¨Ú¾ÛŒØ¬ Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’!';
 
   @override
-  String get verificationPending => 'تصدیق زیر التوا ہے';
+  String get verificationPending => 'ØªØµØ¯ÛŒÙ‚ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§ ÛÛ’';
 
   @override
   String get waitingForTechnicianVerification =>
-      'ٹیکنیشن کے ذریعے ادائیگی کی تصدیق کا انتظار ہے';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’';
 
   @override
-  String get verifyPayment => 'ادائیگی کی تصدیق کریں';
+  String get verifyPayment => 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
-  String get confirmPaymentReceipt => 'ادائیگی کی وصولی کی تصدیق کریں';
+  String get confirmPaymentReceipt =>
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ ÙˆØµÙˆÙ„ÛŒ Ú©ÛŒ ØªØµØ¯ÛŒÙ‚ Ú©Ø±ÛŒÚº';
 
   @override
   String get uploadTechnicianPaymentProof =>
-      'ٹیکنیشن کی ادائیگی کا ثبوت اپ لوڈ کریں';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø«Ø¨ÙˆØª Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
   String get paymentVerifiedSuccessfully =>
-      'ادائیگی کی کامیابی سے تصدیق ہو گئی';
+      'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©ÛŒ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get selectFiles => 'فائلیں منتخب کریں';
+  String get selectFiles => 'ÙØ§Ø¦Ù„ÛŒÚº Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseSelectAtLeastOneFile =>
-      'براہ کرم کم از کم ایک فائل منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© ÙØ§Ø¦Ù„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get errorUploading => 'اپ لوڈ کرنے میں خرابی';
+  String get errorUploading => 'Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ';
 
   @override
-  String get warranty => 'وارنٹی';
+  String get warranty => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ';
 
   @override
-  String get warrantyAppliedOn => 'وارنٹی لاگو ہوئی بروز';
+  String get warrantyAppliedOn => 'ÙˆØ§Ø±Ù†Ù¹ÛŒ Ù„Ø§Ú¯Ùˆ ÛÙˆØ¦ÛŒ Ø¨Ø±ÙˆØ²';
 
   @override
-  String get bookingIdCopied => 'بکنگ آئی ڈی کاپی ہو گئی';
+  String get bookingIdCopied => 'Ø¨Ú©Ù†Ú¯ Ø¢Ø¦ÛŒ ÚˆÛŒ Ú©Ø§Ù¾ÛŒ ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get selectTime => 'وقت منتخب کریں';
+  String get selectTime => 'ÙˆÙ‚Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get submitCounterOffer => 'جوابی پیشکش جمع کرائیں';
+  String get submitCounterOffer => 'Ø¬ÙˆØ§Ø¨ÛŒ Ù¾ÛŒØ´Ú©Ø´ Ø¬Ù…Ø¹ Ú©Ø±Ø§Ø¦ÛŒÚº';
 
   @override
   String get pleaseSelectALaterTime =>
-      'براہ کرم موجودہ بکنگ کے وقت سے بعد کا وقت منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…ÙˆØ¬ÙˆØ¯Û Ø¨Ú©Ù†Ú¯ Ú©Û’ ÙˆÙ‚Øª Ø³Û’ Ø¨Ø¹Ø¯ Ú©Ø§ ÙˆÙ‚Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get listeningForSms => 'ایس ایم ایس کا انتظار ہے...';
+  String get listeningForSms =>
+      'Ø§ÛŒØ³ Ø§ÛŒÙ… Ø§ÛŒØ³ Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ø± ÛÛ’...';
 
   @override
-  String get earningsInfoOnly => 'صرف معلوماتی مقاصد کے لیے';
+  String get earningsInfoOnly =>
+      'ØµØ±Ù Ù…Ø¹Ù„ÙˆÙ…Ø§ØªÛŒ Ù…Ù‚Ø§ØµØ¯ Ú©Û’ Ù„ÛŒÛ’';
 
   @override
-  String get throughApp => 'ایپ کے ذریعے';
+  String get throughApp => 'Ø§ÛŒÙ¾ Ú©Û’ Ø°Ø±ÛŒØ¹Û’';
 
   @override
-  String get rebookTechnician => 'ٹیکنیشن کو دوبارہ بک کریں';
+  String get rebookTechnician =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ø¯ÙˆØ¨Ø§Ø±Û Ø¨Ú© Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectService => 'سروس منتخب کریں';
+  String get selectService => 'Ø³Ø±ÙˆØ³ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get rejectionProfessionalMessage =>
-      'کیا آپ اس اپوائنٹمنٹ کے لیے دستیاب نہیں ہیں؟ مسترد کرنے کے بجائے، آپ کسٹمر کے لیے زیادہ مناسب وقت تجویز کر سکتے ہیں۔';
+      'Ú©ÛŒØ§ Ø¢Ù¾ Ø§Ø³ Ø§Ù¾ÙˆØ§Ø¦Ù†Ù¹Ù…Ù†Ù¹ Ú©Û’ Ù„ÛŒÛ’ Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº ÛÛŒÚºØŸ Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©Û’ Ø¨Ø¬Ø§Ø¦Û’ØŒ Ø¢Ù¾ Ú©Ø³Ù¹Ù…Ø± Ú©Û’ Ù„ÛŒÛ’ Ø²ÛŒØ§Ø¯Û Ù…Ù†Ø§Ø³Ø¨ ÙˆÙ‚Øª ØªØ¬ÙˆÛŒØ² Ú©Ø± Ø³Ú©ØªÛ’ ÛÛŒÚºÛ”';
 
   @override
-  String get proposeAlternativeTime => 'متبادل وقت تجویز کریں';
+  String get proposeAlternativeTime =>
+      'Ù…ØªØ¨Ø§Ø¯Ù„ ÙˆÙ‚Øª ØªØ¬ÙˆÛŒØ² Ú©Ø±ÛŒÚº';
 
   @override
-  String get areYouSure => 'کیا آپ کو یقین ہے؟';
+  String get areYouSure => 'Ú©ÛŒØ§ Ø¢Ù¾ Ú©Ùˆ ÛŒÙ‚ÛŒÙ† ÛÛ’ØŸ';
 
   @override
-  String get notes => 'ملاحظات';
+  String get notes => 'Ù…Ù„Ø§Ø­Ø¸Ø§Øª';
 
   @override
-  String get time => 'وقت';
+  String get time => 'ÙˆÙ‚Øª';
 
   @override
-  String get appointmentDetails => 'تقرری کی تفصیلات';
+  String get appointmentDetails => 'ØªÙ‚Ø±Ø±ÛŒ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª';
 
   @override
-  String get residenceIDImage => 'رہائشی شناختی کارڈ کی تصویر';
+  String get residenceIDImage =>
+      'Ø±ÛØ§Ø¦Ø´ÛŒ Ø´Ù†Ø§Ø®ØªÛŒ Ú©Ø§Ø±Úˆ Ú©ÛŒ ØªØµÙˆÛŒØ±';
 
   @override
-  String get sponsorWorkPermit => 'سپانسر ورک پرمٹ';
+  String get sponsorWorkPermit => 'Ø³Ù¾Ø§Ù†Ø³Ø± ÙˆØ±Ú© Ù¾Ø±Ù…Ù¹';
 
   @override
-  String get chamberOfCommerceApproval => 'چیمبر آف کامرس کی منظوری';
+  String get chamberOfCommerceApproval =>
+      'Ú†ÛŒÙ…Ø¨Ø± Ø¢Ù Ú©Ø§Ù…Ø±Ø³ Ú©ÛŒ Ù…Ù†Ø¸ÙˆØ±ÛŒ';
 
   @override
   String get certificatesOrTrainingCoursesOptional =>
-      'سرٹیفکیٹ یا تربیتی کورسز (اختیاری)';
+      'Ø³Ø±Ù¹ÛŒÙÚ©ÛŒÙ¹ ÛŒØ§ ØªØ±Ø¨ÛŒØªÛŒ Ú©ÙˆØ±Ø³Ø² (Ø§Ø®ØªÛŒØ§Ø±ÛŒ)';
 
   @override
-  String get uploadCertificates => 'سرٹیفکیٹ اپ لوڈ کریں';
+  String get uploadCertificates => 'Ø³Ø±Ù¹ÛŒÙÚ©ÛŒÙ¹ Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get refreshLocation => 'مقام کو ریفریش کریں';
+  String get refreshLocation => 'Ù…Ù‚Ø§Ù… Ú©Ùˆ Ø±ÛŒÙØ±ÛŒØ´ Ú©Ø±ÛŒÚº';
 
   @override
   String get selectJobRolesDescription =>
-      'وہ خدمات منتخب کریں جنہیں فراہم کرنے کے آپ اہل ہیں۔';
+      'ÙˆÛ Ø®Ø¯Ù…Ø§Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº Ø¬Ù†ÛÛŒÚº ÙØ±Ø§ÛÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ø¢Ù¾ Ø§ÛÙ„ ÛÛŒÚºÛ”';
 
   @override
-  String get updateDocuments => 'دستاویزات اپ ڈیٹ کریں';
+  String get updateDocuments => 'Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseSelectAtLeastOneDocumentToUpdate =>
-      'براہ کرم دوبارہ اپ لوڈ کرنے کے لیے کم از کم ایک دستاویز کو ہٹائیں اور نئی فائل منتخب کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø¯Ø³ØªØ§ÙˆÛŒØ² Ú©Ùˆ ÛÙ¹Ø§Ø¦ÛŒÚº Ø§ÙˆØ± Ù†Ø¦ÛŒ ÙØ§Ø¦Ù„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String reuploadFailed(String error) {
-    return 'دوبارہ اپ لوڈ کرنے میں ناکامی: $error';
+    return 'Ø¯ÙˆØ¨Ø§Ø±Û Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ: $error';
   }
 
   @override
-  String get selectFile => 'فائل منتخب کریں';
+  String get selectFile => 'ÙØ§Ø¦Ù„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get accountBlocked => 'اکاؤنٹ بلاک کر دیا گیا ہے';
+  String get accountBlocked => 'Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø¨Ù„Ø§Ú© Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’';
 
   @override
   String get accountBlockedMessage =>
-      'آپ کے اکاؤنٹ کو ایڈمن نے بلاک کر دیا ہے۔ مزید معلومات کے لیے براہ کرم سپورٹ سے رابطہ کریں۔';
+      'Ø¢Ù¾ Ú©Û’ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ú©Ùˆ Ø§ÛŒÚˆÙ…Ù† Ù†Û’ Ø¨Ù„Ø§Ú© Ú©Ø± Ø¯ÛŒØ§ ÛÛ’Û” Ù…Ø²ÛŒØ¯ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ú©Û’ Ù„ÛŒÛ’ Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø³Ù¾ÙˆØ±Ù¹ Ø³Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get contactSupport => 'سپورٹ سے رابطہ کریں';
+  String get contactSupport => 'Ø³Ù¾ÙˆØ±Ù¹ Ø³Û’ Ø±Ø§Ø¨Ø·Û Ú©Ø±ÛŒÚº';
 
   @override
-  String get applicationRejected => 'درخواست مسترد کر دی گئی';
+  String get applicationRejected =>
+      'Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get applicationRejectedMessage =>
-      'بدقسمتی سے، آپ کی درخواست جائزہ لینے کے بعد مسترد کر دی گئی ہے۔ آپ نیچے وجہ دیکھ سکتے ہیں اور دوبارہ کوشش کرنے کے لیے اپنی دستاویزات کو اپ ڈیٹ کر سکتے ہیں۔';
+      'Ø¨Ø¯Ù‚Ø³Ù…ØªÛŒ Ø³Û’ØŒ Ø¢Ù¾ Ú©ÛŒ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø¬Ø§Ø¦Ø²Û Ù„ÛŒÙ†Û’ Ú©Û’ Ø¨Ø¹Ø¯ Ù…Ø³ØªØ±Ø¯ Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ ÛÛ’Û” Ø¢Ù¾ Ù†ÛŒÚ†Û’ ÙˆØ¬Û Ø¯ÛŒÚ©Ú¾ Ø³Ú©ØªÛ’ ÛÛŒÚº Ø§ÙˆØ± Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø§Ù¾Ù†ÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª Ú©Ùˆ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø± Ø³Ú©ØªÛ’ ÛÛŒÚºÛ”';
 
   @override
-  String get reasonForRejection => 'مسترد کرنے کی وجہ:';
+  String get reasonForRejection => 'Ù…Ø³ØªØ±Ø¯ Ú©Ø±Ù†Û’ Ú©ÛŒ ÙˆØ¬Û:';
 
   @override
-  String get noReasonProvided => 'کوئی وجہ فراہم نہیں کی گئی';
+  String get noReasonProvided =>
+      'Ú©ÙˆØ¦ÛŒ ÙˆØ¬Û ÙØ±Ø§ÛÙ… Ù†ÛÛŒÚº Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
   String get failedResendOtp =>
-      'OTP دوبارہ بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔';
+      'OTP Ø¯ÙˆØ¨Ø§Ø±Û Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒÛ” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get verificationIdNotFound =>
-      'تصدیقی شناختی کارڈ نہیں ملا۔ براہ کرم دوبارہ کوشش کریں۔';
+      'ØªØµØ¯ÛŒÙ‚ÛŒ Ø´Ù†Ø§Ø®ØªÛŒ Ú©Ø§Ø±Úˆ Ù†ÛÛŒÚº Ù…Ù„Ø§Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get pleaseFetchLocation => 'براہ کرم اپنا موجودہ مقام حاصل کریں';
+  String get pleaseFetchLocation =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†Ø§ Ù…ÙˆØ¬ÙˆØ¯Û Ù…Ù‚Ø§Ù… Ø­Ø§ØµÙ„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseSelectRole => 'براہ کرم کم از کم ایک جاب رول منتخب کریں';
+  String get pleaseSelectRole =>
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©Ù… Ø§Ø² Ú©Ù… Ø§ÛŒÚ© Ø¬Ø§Ø¨ Ø±ÙˆÙ„ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
   String get pleaseUploadDocuments =>
-      'براہ کرم تمام ضروری دستاویزات اپ لوڈ کریں';
+      'Ø¨Ø±Ø§Û Ú©Ø±Ù… ØªÙ…Ø§Ù… Ø¶Ø±ÙˆØ±ÛŒ Ø¯Ø³ØªØ§ÙˆÛŒØ²Ø§Øª Ø§Ù¾ Ù„ÙˆÚˆ Ú©Ø±ÛŒÚº';
 
   @override
-  String get revokeAccess => 'رسائی منسوخ کریں';
+  String get revokeAccess => 'Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get coreAdminCannotRemove => 'بنیادی ایڈمن کو ہٹایا نہیں جا سکتا۔';
+  String get coreAdminCannotRemove =>
+      'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ ÛÙ¹Ø§ÛŒØ§ Ù†ÛÛŒÚº Ø¬Ø§ Ø³Ú©ØªØ§Û”';
 
   @override
   String get onlyCoreAdminCanAdd =>
-      'صرف بنیادی ایڈمن ہی نئے ایڈمنز شامل کر سکتا ہے۔';
+      'ØµØ±Ù Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø§ÛŒÚˆÙ…Ù† ÛÛŒ Ù†Ø¦Û’ Ø§ÛŒÚˆÙ…Ù†Ø² Ø´Ø§Ù…Ù„ Ú©Ø± Ø³Ú©ØªØ§ ÛÛ’Û”';
 
   @override
   String get adminAddedSuccessfully =>
-      'ایڈمن کو زیر التواء دعوت ناموں میں کامیابی سے شامل کر دیا گیا۔';
+      'Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ Ø²ÛŒØ± Ø§Ù„ØªÙˆØ§Ø¡ Ø¯Ø¹ÙˆØª Ù†Ø§Ù…ÙˆÚº Ù…ÛŒÚº Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø´Ø§Ù…Ù„ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§Û”';
 
   @override
   String get failedUpdateTechStatus =>
-      'ٹیکنیشن کی حیثیت اپ ڈیٹ کرنے میں ناکامی';
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ø­ÛŒØ«ÛŒØª Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get offerAcceptedSuccessfully => 'پیشکش کامیابی سے قبول کر لی گئی';
+  String get offerAcceptedSuccessfully =>
+      'Ù¾ÛŒØ´Ú©Ø´ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ù‚Ø¨ÙˆÙ„ Ú©Ø± Ù„ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get failedToSendCounter => 'جوابی پیشکش بھیجنے میں ناکامی';
+  String get failedToSendCounter =>
+      'Ø¬ÙˆØ§Ø¨ÛŒ Ù¾ÛŒØ´Ú©Ø´ Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ';
 
   @override
-  String get couldNotLaunchEmail => 'ای میل کلائنٹ شروع نہیں کیا جا سکا';
+  String get couldNotLaunchEmail =>
+      'Ø§ÛŒ Ù…ÛŒÙ„ Ú©Ù„Ø§Ø¦Ù†Ù¹ Ø´Ø±ÙˆØ¹ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©Ø§';
 
   @override
-  String get couldNotLaunchWhatsapp => 'واٹس ایپ شروع نہیں کیا جا سکا';
+  String get couldNotLaunchWhatsapp =>
+      'ÙˆØ§Ù¹Ø³ Ø§ÛŒÙ¾ Ø´Ø±ÙˆØ¹ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©Ø§';
 
   @override
-  String get cancelLower => 'منسوخ کریں';
+  String get cancelLower => 'Ù…Ù†Ø³ÙˆØ® Ú©Ø±ÛŒÚº';
 
   @override
-  String get invited => 'مدعو';
+  String get invited => 'Ù…Ø¯Ø¹Ùˆ';
 
   @override
-  String get accessLevelUpper => 'رسائی کی سطح';
+  String get accessLevelUpper => 'Ø±Ø³Ø§Ø¦ÛŒ Ú©ÛŒ Ø³Ø·Ø­';
 
   @override
-  String get phoneUpper => 'فون';
+  String get phoneUpper => 'ÙÙˆÙ†';
 
   @override
-  String get invoiceTitle => 'سروس بکنگ انوائس';
+  String get invoiceTitle => 'Ø³Ø±ÙˆØ³ Ø¨Ú©Ù†Ú¯ Ø§Ù†ÙˆØ§Ø¦Ø³';
 
   @override
-  String get invoiceWord => 'انوائس';
+  String get invoiceWord => 'Ø§Ù†ÙˆØ§Ø¦Ø³';
 
   @override
-  String get statusPaid => 'حیثیت: ادا شدہ';
+  String get statusPaid => 'Ø­ÛŒØ«ÛŒØª: Ø§Ø¯Ø§ Ø´Ø¯Û';
 
   @override
-  String get billTo => 'بل بھیجیں:';
+  String get billTo => 'Ø¨Ù„ Ø¨Ú¾ÛŒØ¬ÛŒÚº:';
 
   @override
-  String get bookingDetailsInvoice => 'بکنگ کی تفصیلات:';
+  String get bookingDetailsInvoice => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª:';
 
   @override
-  String get subtotal => 'مجموعی ذیلی:';
+  String get subtotal => 'Ù…Ø¬Ù…ÙˆØ¹ÛŒ Ø°ÛŒÙ„ÛŒ:';
 
   @override
-  String get inspectionFeeLabel => 'معائنہ فیس:';
+  String get inspectionFeeLabel => 'Ù…Ø¹Ø§Ø¦Ù†Û ÙÛŒØ³:';
 
   @override
-  String get totalLabel => 'کل:';
+  String get totalLabel => 'Ú©Ù„:';
 
   @override
-  String get thankYouInvoice => 'ابو جلمبو منتخب کرنے کے لیے آپ کا شکریہ!';
+  String get thankYouInvoice =>
+      'Ø§Ø¨Ùˆ Ø¬Ù„Ù…Ø¨Ùˆ Ù…Ù†ØªØ®Ø¨ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¢Ù¾ Ú©Ø§ Ø´Ú©Ø±ÛŒÛ!';
 
   @override
   String invoiceNumber(String number) {
-    return 'انوائس نمبر: $number';
+    return 'Ø§Ù†ÙˆØ§Ø¦Ø³ Ù†Ù…Ø¨Ø±: $number';
   }
 
   @override
   String dateString(String date) {
-    return 'تاریخ: $date';
+    return 'ØªØ§Ø±ÛŒØ®: $date';
   }
 
   @override
   String serviceLabel(String name) {
-    return 'سروس: $name';
+    return 'Ø³Ø±ÙˆØ³: $name';
   }
 
   @override
   String completedAtLabel(String date) {
-    return 'مکمل ہونے کی تاریخ: $date';
+    return 'Ù…Ú©Ù…Ù„ ÛÙˆÙ†Û’ Ú©ÛŒ ØªØ§Ø±ÛŒØ®: $date';
   }
 
   @override
   String paymentModeLabel(String mode) {
-    return 'ادائیگی کا طریقہ: $mode';
+    return 'Ø§Ø¯Ø§Ø¦ÛŒÚ¯ÛŒ Ú©Ø§ Ø·Ø±ÛŒÙ‚Û: $mode';
   }
 
   @override
   String transactionIdLabel(String id) {
-    return 'ٹرانزیکشن آئی ڈی: $id';
+    return 'Ù¹Ø±Ø§Ù†Ø²ÛŒÚ©Ø´Ù† Ø¢Ø¦ÛŒ ÚˆÛŒ: $id';
   }
 
   @override
   String warrantyLabel(String duration) {
-    return 'وارنٹی: $duration';
+    return 'ÙˆØ§Ø±Ù†Ù¹ÛŒ: $duration';
   }
 
   @override
@@ -4943,248 +5282,261 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get onHour => 'فی گھنٹہ بکنگ';
+  String get onHour => 'ÙÛŒ Ú¯Ú¾Ù†Ù¹Û Ø¨Ú©Ù†Ú¯';
 
   @override
-  String get offHour => 'آف آور بکنگ';
+  String get offHour => 'Ø¢Ù Ø¢ÙˆØ± Ø¨Ú©Ù†Ú¯';
 
   @override
-  String get inAppEarnings => 'ان ایپ آمدنی';
+  String get inAppEarnings => 'Ø§Ù† Ø§ÛŒÙ¾ Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get outsideAppEarnings => 'خارج ایپ آمدنی';
+  String get outsideAppEarnings => 'Ø®Ø§Ø±Ø¬ Ø§ÛŒÙ¾ Ø¢Ù…Ø¯Ù†ÛŒ';
 
   @override
-  String get earningsPeriod => 'آمدنی کا دورانیہ';
+  String get earningsPeriod => 'Ø¢Ù…Ø¯Ù†ÛŒ Ú©Ø§ Ø¯ÙˆØ±Ø§Ù†ÛŒÛ';
 
   @override
-  String get selectPeriod => 'دورانیہ منتخب کریں';
+  String get selectPeriod => 'Ø¯ÙˆØ±Ø§Ù†ÛŒÛ Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get selectMonth => 'مہینہ منتخب کریں';
+  String get selectMonth => 'Ù…ÛÛŒÙ†Û Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get customDateRange => 'حسب ضرورت تاریخ کا انتخاب';
+  String get customDateRange =>
+      'Ø­Ø³Ø¨ Ø¶Ø±ÙˆØ±Øª ØªØ§Ø±ÛŒØ® Ú©Ø§ Ø§Ù†ØªØ®Ø§Ø¨';
 
   @override
-  String get allTime => 'ہر وقت';
+  String get allTime => 'ÛØ± ÙˆÙ‚Øª';
 
   @override
-  String get thisMonth => 'اس مہینے';
+  String get thisMonth => 'Ø§Ø³ Ù…ÛÛŒÙ†Û’';
 
   @override
-  String get inApp => 'ان ایپ';
+  String get inApp => 'Ø§Ù† Ø§ÛŒÙ¾';
 
   @override
-  String get clearWalletBalances => 'والٹ کا بیلنس صاف کریں';
+  String get clearWalletBalances => 'ÙˆØ§Ù„Ù¹ Ú©Ø§ Ø¨ÛŒÙ„Ù†Ø³ ØµØ§Ù Ú©Ø±ÛŒÚº';
 
   @override
   String clearWalletConfirmation(String name) {
-    return 'کیا آپ واقعی $name کے والٹ بیلنس کو مکمل طور پر صاف اور دوبارہ ترتیب دینا چاہتے ہیں؟ یہ عمل ناقابل واپسی ہے۔';
+    return 'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ $name Ú©Û’ ÙˆØ§Ù„Ù¹ Ø¨ÛŒÙ„Ù†Ø³ Ú©Ùˆ Ù…Ú©Ù…Ù„ Ø·ÙˆØ± Ù¾Ø± ØµØ§Ù Ø§ÙˆØ± Ø¯ÙˆØ¨Ø§Ø±Û ØªØ±ØªÛŒØ¨ Ø¯ÛŒÙ†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ ÛŒÛ Ø¹Ù…Ù„ Ù†Ø§Ù‚Ø§Ø¨Ù„ ÙˆØ§Ù¾Ø³ÛŒ ÛÛ’Û”';
   }
 
   @override
   String errorClearingWallet(String error) {
-    return 'والٹ صاف کرنے میں خرابی: $error';
+    return 'ÙˆØ§Ù„Ù¹ ØµØ§Ù Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ: $error';
   }
 
   @override
-  String get bookingDate => 'بکنگ کی تاریخ';
+  String get bookingDate => 'Ø¨Ú©Ù†Ú¯ Ú©ÛŒ ØªØ§Ø±ÛŒØ®';
 
   @override
   String get yourAccountIsBeingVerified =>
-      'آپ کا اکاؤنٹ ایڈمن کے ذریعے تصدیق ہو رہا ہے۔ براہ کرم بعد میں دوبارہ چیک کریں۔';
+      'Ø¢Ù¾ Ú©Ø§ Ø§Ú©Ø§Ø¤Ù†Ù¹ Ø§ÛŒÚˆÙ…Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ ØªØµØ¯ÛŒÙ‚ ÛÙˆ Ø±ÛØ§ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¨Ø¹Ø¯ Ù…ÛŒÚº Ø¯ÙˆØ¨Ø§Ø±Û Ú†ÛŒÚ© Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get aboGlumboWorker => 'ابو گلمبو ٹیکنیشن';
+  String get aboGlumboWorker => 'Ø§Ø¨Ùˆ Ú¯Ù„Ù…Ø¨Ùˆ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
   String get workerCannotBeAssignedMultipleTimes =>
-      'ایک ہی ٹیکنیشن کو ایک ہی وقت میں ایک سے زیادہ بکنگ پر تفویض نہیں کیا جا سکتا۔ براہ کرم مختلف وقت یا دوسرا ٹیکنیشن منتخب کریں۔';
+      'Ø§ÛŒÚ© ÛÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ Ø§ÛŒÚ© ÛÛŒ ÙˆÙ‚Øª Ù…ÛŒÚº Ø§ÛŒÚ© Ø³Û’ Ø²ÛŒØ§Ø¯Û Ø¨Ú©Ù†Ú¯ Ù¾Ø± ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù…Ø®ØªÙ„Ù ÙˆÙ‚Øª ÛŒØ§ Ø¯ÙˆØ³Ø±Ø§ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get unknownWorker => 'نامعلوم ٹیکنیشن';
+  String get unknownWorker => 'Ù†Ø§Ù…Ø¹Ù„ÙˆÙ… Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†';
 
   @override
-  String get workerCancelled => 'بکنگ ٹیکنیشن کے ذریعے منسوخ کی گئی';
+  String get workerCancelled =>
+      'Ø¨Ú©Ù†Ú¯ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ Ú¯Ø¦ÛŒ';
 
   @override
-  String get cancelledByWorker => 'ٹیکنیشن کے ذریعے منسوخ';
+  String get cancelledByWorker => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Û’ Ø°Ø±ÛŒØ¹Û’ Ù…Ù†Ø³ÙˆØ®';
 
   @override
-  String get workerPreviouslyCancelled => 'ٹیکنیشن نے پہلے منسوخ کیا';
+  String get workerPreviouslyCancelled =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§';
 
   @override
   String get workerCancelledAtTime =>
-      'اس ٹیکنیشن نے ایک ہی وقت میں پہلے بکنگ منسوخ کی تھی۔ بہتر قابل اعتمادی کے لیے کسی اور ٹیکنیشن کو تفویض کرنے کی سفارش کی جاتی ہے۔';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ø§ÛŒÚ© ÛÛŒ ÙˆÙ‚Øª Ù…ÛŒÚº Ù¾ÛÙ„Û’ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ØªÚ¾ÛŒÛ” Ø¨ÛØªØ± Ù‚Ø§Ø¨Ù„ Ø§Ø¹ØªÙ…Ø§Ø¯ÛŒ Ú©Û’ Ù„ÛŒÛ’ Ú©Ø³ÛŒ Ø§ÙˆØ± Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ú©Ø±Ù†Û’ Ú©ÛŒ Ø³ÙØ§Ø±Ø´ Ú©ÛŒ Ø¬Ø§ØªÛŒ ÛÛ’Û”';
 
   @override
-  String get workerRestrictedTitle => 'ٹیکنیشن پابند';
+  String get workerRestrictedTitle => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù¾Ø§Ø¨Ù†Ø¯';
 
   @override
   String get cannotAssignCancelledWorker =>
-      'ایسے ٹیکنیشن کو تفویض نہیں کیا جا سکتا جس نے پہلے منسوخ کیا ہو';
+      'Ø§ÛŒØ³Û’ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©Ùˆ ØªÙÙˆÛŒØ¶ Ù†ÛÛŒÚº Ú©ÛŒØ§ Ø¬Ø§ Ø³Ú©ØªØ§ Ø¬Ø³ Ù†Û’ Ù¾ÛÙ„Û’ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒØ§ ÛÙˆ';
 
   @override
   String get workerCancelledRestrictionMessage =>
-      'اس ٹیکنیشن نے پہلے بکنگ منسوخ کی ہے اور اب نئی تفویض سے محدود ہے۔ براہ کرم کوئی اور ٹیکنیشن منتخب کریں۔';
+      'Ø§Ø³ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù†Û’ Ù¾ÛÙ„Û’ Ø¨Ú©Ù†Ú¯ Ù…Ù†Ø³ÙˆØ® Ú©ÛŒ ÛÛ’ Ø§ÙˆØ± Ø§Ø¨ Ù†Ø¦ÛŒ ØªÙÙˆÛŒØ¶ Ø³Û’ Ù…Ø­Ø¯ÙˆØ¯ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ú©ÙˆØ¦ÛŒ Ø§ÙˆØ± Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚºÛ”';
 
   @override
-  String get managefaqs => 'اکثر پوچھے گئے سوالات کا انتظام';
+  String get managefaqs =>
+      'Ø§Ú©Ø«Ø± Ù¾ÙˆÚ†Ú¾Û’ Ú¯Ø¦Û’ Ø³ÙˆØ§Ù„Ø§Øª Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù…';
 
   @override
-  String get manageWorkers => 'ٹیکنیشنز کا انتظام';
+  String get manageWorkers => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ú©Ø§ Ø§Ù†ØªØ¸Ø§Ù…';
 
   @override
   String get noWorkersMatchYourFilters =>
-      'آپ کی تلاش کے معیار سے کوئی ٹیکنیشن مطابقت نہیں رکھتا';
+      'Ø¢Ù¾ Ú©ÛŒ ØªÙ„Ø§Ø´ Ú©Û’ Ù…Ø¹ÛŒØ§Ø± Ø³Û’ Ú©ÙˆØ¦ÛŒ Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ù…Ø·Ø§Ø¨Ù‚Øª Ù†ÛÛŒÚº Ø±Ú©Ú¾ØªØ§';
 
   @override
-  String get workerInformation => 'ٹیکنیشن کی معلومات';
+  String get workerInformation => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù† Ú©ÛŒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª';
 
   @override
-  String get loadingWorkers => 'ٹیکنیشنز لوڈ ہو رہے ہیں...';
+  String get loadingWorkers => 'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù„ÙˆÚˆ ÛÙˆ Ø±ÛÛ’ ÛÛŒÚº...';
 
   @override
-  String get serviceDeletedSuccessfully => 'سروس کامیابی سے حذف ہو گئی';
+  String get serviceDeletedSuccessfully =>
+      'Ø³Ø±ÙˆØ³ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ø³Û’ Ø­Ø°Ù ÛÙˆ Ú¯Ø¦ÛŒ';
 
   @override
-  String get netTechnicianror => 'ٹیکنیشنز لوڈ کرتے وقت خرابی پیش آئی';
+  String get netTechnicianror =>
+      'Ù¹ÛŒÚ©Ù†ÛŒØ´Ù†Ø² Ù„ÙˆÚˆ Ú©Ø±ØªÛ’ ÙˆÙ‚Øª Ø®Ø±Ø§Ø¨ÛŒ Ù¾ÛŒØ´ Ø¢Ø¦ÛŒ';
 
   @override
-  String get urdu => 'اردو';
+  String get urdu => 'Ø§Ø±Ø¯Ùˆ';
 
   @override
   String errorOccurred(String error) {
-    return 'خرابی: $error';
+    return 'Ø®Ø±Ø§Ø¨ÛŒ: $error';
   }
 
   @override
   String cannotOpenFile(String path) {
-    return 'فائل نہیں کھولی جا سکی: $path';
+    return 'ÙØ§Ø¦Ù„ Ù†ÛÛŒÚº Ú©Ú¾ÙˆÙ„ÛŒ Ø¬Ø§ Ø³Ú©ÛŒ: $path';
   }
 
   @override
   String failedToSendMessage(String error) {
-    return 'پیغام بھیجنے میں ناکام: $error';
+    return 'Ù¾ÛŒØºØ§Ù… Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…: $error';
   }
 
   @override
   String failedToRetryMessage(String error) {
-    return 'پیغام دوبارہ بھیجنے میں ناکام: $error';
+    return 'Ù¾ÛŒØºØ§Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ø¨Ú¾ÛŒØ¬Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…: $error';
   }
 
   @override
   String errorFetchingLocation(String error) {
-    return 'مقام لانے میں خرابی: $error';
+    return 'Ù…Ù‚Ø§Ù… Ù„Ø§Ù†Û’ Ù…ÛŒÚº Ø®Ø±Ø§Ø¨ÛŒ: $error';
   }
 
   @override
   String confirmRemoveAdmin(String name) {
-    return 'کیا آپ واقعی $name کی ایڈمن رسائی ختم کرنا چاہتے ہیں؟';
+    return 'Ú©ÛŒØ§ Ø¢Ù¾ ÙˆØ§Ù‚Ø¹ÛŒ $name Ú©ÛŒ Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ø®ØªÙ… Ú©Ø±Ù†Ø§ Ú†Ø§ÛØªÛ’ ÛÛŒÚºØŸ';
   }
 
   @override
   String adminAccessRevoked(String name) {
-    return '$name کی ایڈمن رسائی منسوخ کر دی گئی';
+    return '$name Ú©ÛŒ Ø§ÛŒÚˆÙ…Ù† Ø±Ø³Ø§Ø¦ÛŒ Ù…Ù†Ø³ÙˆØ® Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
   }
 
   @override
   String inviteDeleted(String name) {
-    return '$name کی دعوت حذف کر دی گئی';
+    return '$name Ú©ÛŒ Ø¯Ø¹ÙˆØª Ø­Ø°Ù Ú©Ø± Ø¯ÛŒ Ú¯Ø¦ÛŒ';
   }
 
   @override
-  String get biometricError => '❌ بایومیٹرک غلطی';
+  String get biometricError => 'âŒ Ø¨Ø§ÛŒÙˆÙ…ÛŒÙ¹Ø±Ú© ØºÙ„Ø·ÛŒ';
 
   @override
-  String get unknownError => 'نامعلوم غلطی';
+  String get unknownError => 'Ù†Ø§Ù…Ø¹Ù„ÙˆÙ… ØºÙ„Ø·ÛŒ';
 
   @override
-  String get errorDuringLogin => 'لاگ ان کے دوران غلطی';
+  String get errorDuringLogin => 'Ù„Ø§Ú¯ Ø§Ù† Ú©Û’ Ø¯ÙˆØ±Ø§Ù† ØºÙ„Ø·ÛŒ';
 
   @override
-  String get filterAll => 'تمام';
+  String get filterAll => 'ØªÙ…Ø§Ù…';
 
   @override
-  String get coreAdmin => 'بنیادی ایڈمن';
+  String get coreAdmin => 'Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ø§ÛŒÚˆÙ…Ù†';
 
   @override
-  String get addAdmin => 'ایڈمن شامل کریں';
+  String get addAdmin => 'Ø§ÛŒÚˆÙ…Ù† Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get saveChanges => 'تبدیلیاں محفوظ کریں';
+  String get saveChanges => 'ØªØ¨Ø¯ÛŒÙ„ÛŒØ§Úº Ù…Ø­ÙÙˆØ¸ Ú©Ø±ÛŒÚº';
 
   @override
-  String get addNewAdmin => 'نیا ایڈمن شامل کریں';
+  String get addNewAdmin => 'Ù†ÛŒØ§ Ø§ÛŒÚˆÙ…Ù† Ø´Ø§Ù…Ù„ Ú©Ø±ÛŒÚº';
 
   @override
-  String get editAdmin => 'ایڈمن میں ترمیم کریں';
+  String get editAdmin => 'Ø§ÛŒÚˆÙ…Ù† Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚº';
 
   @override
   String get enterAdminDetails =>
-      'ایڈمن کو پلیٹ فارم پر مدعو کرنے کے لیے تفصیلات درج کریں۔';
+      'Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ Ù¾Ù„ÛŒÙ¹ ÙØ§Ø±Ù… Ù¾Ø± Ù…Ø¯Ø¹Ùˆ Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ØªÙØµÛŒÙ„Ø§Øª Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get editAdminDetails =>
-      'ایڈمن کی تفصیلات اور رسائی کی سطح میں ترمیم کریں۔';
+      'Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø§ÙˆØ± Ø±Ø³Ø§Ø¦ÛŒ Ú©ÛŒ Ø³Ø·Ø­ Ù…ÛŒÚº ØªØ±Ù…ÛŒÙ… Ú©Ø±ÛŒÚºÛ”';
 
   @override
   String get adminUpdatedSuccessfully =>
-      'ایڈمن کو کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے۔';
+      'Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ Ú©Ø§Ù…ÛŒØ§Ø¨ÛŒ Ú©Û’ Ø³Ø§ØªÚ¾ Ø§Ù¾ ÚˆÛŒÙ¹ Ú©Ø± Ø¯ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’Û”';
 
   @override
-  String get adminPhoneExists => 'اس فون نمبر کے ساتھ ایڈمن پہلے ہی موجود ہے۔';
+  String get adminPhoneExists =>
+      'Ø§Ø³ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ú©Û’ Ø³Ø§ØªÚ¾ Ø§ÛŒÚˆÙ…Ù† Ù¾ÛÙ„Û’ ÛÛŒ Ù…ÙˆØ¬ÙˆØ¯ ÛÛ’Û”';
 
   @override
   String get adminPhoneInvited =>
-      'اس فون نمبر کے ساتھ ایڈمن کو پہلے ہی مدعو کیا گیا ہے۔';
+      'Ø§Ø³ ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ú©Û’ Ø³Ø§ØªÚ¾ Ø§ÛŒÚˆÙ…Ù† Ú©Ùˆ Ù¾ÛÙ„Û’ ÛÛŒ Ù…Ø¯Ø¹Ùˆ Ú©ÛŒØ§ Ú¯ÛŒØ§ ÛÛ’Û”';
 
   @override
-  String get enterFullName => 'پورا نام درج کریں';
+  String get enterFullName => 'Ù¾ÙˆØ±Ø§ Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get pleaseEnterName => 'براہ کرم نام درج کریں';
+  String get pleaseEnterName => 'Ø¨Ø±Ø§Û Ú©Ø±Ù… Ù†Ø§Ù… Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get enterEmailAddress => 'ای میل ایڈریس درج کریں';
+  String get enterEmailAddress => 'Ø§ÛŒ Ù…ÛŒÙ„ Ø§ÛŒÚˆØ±ÛŒØ³ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº';
 
   @override
-  String get egPhoneNumber => 'مثال +9665XXXXXXXX';
+  String get egPhoneNumber => 'Ù…Ø«Ø§Ù„ +9665XXXXXXXX';
 
   @override
-  String get accessLevelTitle => 'رسائی کی سطح';
+  String get accessLevelTitle => 'Ø±Ø³Ø§Ø¦ÛŒ Ú©ÛŒ Ø³Ø·Ø­';
 
   @override
-  String get customerServiceOnly => 'صرف کسٹمر سروس';
+  String get customerServiceOnly => 'ØµØ±Ù Ú©Ø³Ù¹Ù…Ø± Ø³Ø±ÙˆØ³';
 
   @override
   String get customerServiceDesc =>
-      'بکنگ اور انتظام کے حصوں تک صرف دیکھنے کی رسائی۔';
+      'Ø¨Ú©Ù†Ú¯ Ø§ÙˆØ± Ø§Ù†ØªØ¸Ø§Ù… Ú©Û’ Ø­ØµÙˆÚº ØªÚ© ØµØ±Ù Ø¯ÛŒÚ©Ú¾Ù†Û’ Ú©ÛŒ Ø±Ø³Ø§Ø¦ÛŒÛ”';
 
   @override
-  String get fullAdminAccess => 'مکمل ایڈمن کی رسائی';
+  String get fullAdminAccess => 'Ù…Ú©Ù…Ù„ Ø§ÛŒÚˆÙ…Ù† Ú©ÛŒ Ø±Ø³Ø§Ø¦ÛŒ';
 
   @override
-  String get fullAdminDesc => 'دوسرے ایڈمنز کے انتظام کے علاوہ مکمل رسائی۔';
+  String get fullAdminDesc =>
+      'Ø¯ÙˆØ³Ø±Û’ Ø§ÛŒÚˆÙ…Ù†Ø² Ú©Û’ Ø§Ù†ØªØ¸Ø§Ù… Ú©Û’ Ø¹Ù„Ø§ÙˆÛ Ù…Ú©Ù…Ù„ Ø±Ø³Ø§Ø¦ÛŒÛ”';
 
   @override
   String get phoneNoteWithCountryCode =>
-      '(فون نمبر ملک کے کوڈ کے ساتھ درج کریں مثال : 966+)';
+      '(ÙÙˆÙ† Ù†Ù…Ø¨Ø± Ù…Ù„Ú© Ú©Û’ Ú©ÙˆÚˆ Ú©Û’ Ø³Ø§ØªÚ¾ Ø¯Ø±Ø¬ Ú©Ø±ÛŒÚº Ù…Ø«Ø§Ù„ : 966+)';
 
   @override
   String get selectNewDateAppointment =>
-      'ملاقات کے لیے نئی تاریخ اور وقت منتخب کریں';
+      'Ù…Ù„Ø§Ù‚Ø§Øª Ú©Û’ Ù„ÛŒÛ’ Ù†Ø¦ÛŒ ØªØ§Ø±ÛŒØ® Ø§ÙˆØ± ÙˆÙ‚Øª Ù…Ù†ØªØ®Ø¨ Ú©Ø±ÛŒÚº';
 
   @override
-  String get notAvailable => 'دستیاب نہیں';
+  String get notAvailable => 'Ø¯Ø³ØªÛŒØ§Ø¨ Ù†ÛÛŒÚº';
 
   @override
-  String get noAdditionalDescription => 'کوئی اضافی تفصیل نہیں';
+  String get noAdditionalDescription =>
+      'Ú©ÙˆØ¦ÛŒ Ø§Ø¶Ø§ÙÛŒ ØªÙØµÛŒÙ„ Ù†ÛÛŒÚº';
 
   @override
-  String get distance => 'فاصلہ';
+  String get distance => 'ÙØ§ØµÙ„Û';
 
   @override
-  String get discountAmount => 'رعایتی رقم';
+  String get discountAmount => 'Ø±Ø¹Ø§ÛŒØªÛŒ Ø±Ù‚Ù…';
+
+  @override
+  String get discountAppliesToInspectionFeeOnly =>
+      'رعایت صرف معائنہ فیس پر لاگو ہوتی ہے۔';
 }

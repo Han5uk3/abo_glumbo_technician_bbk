@@ -268,36 +268,52 @@ class _OtpPageState extends State<OtpPage> {
         _showMigrationDialog();
       }
 
-      final oldCustomerDoc = await AppFirestore.customersCollectionRef
+      // Migrate from users collection
+      final oldUserDoc = await AppFirestore.usersCollectionRef
           .doc(oldUid)
           .get();
-      if (oldCustomerDoc.exists) {
-        final oldData = oldCustomerDoc.data() as Map<String, dynamic>;
+      if (oldUserDoc.exists) {
+        final oldData = oldUserDoc.data() as Map<String, dynamic>;
         final newData = <String, dynamic>{
           ...oldData,
           'uid': newUid,
           'phone': newPhone,
           'updatedAt': FieldValue.serverTimestamp(),
         };
-        await AppFirestore.customersCollectionRef.doc(newUid).set(newData);
+        await AppFirestore.usersCollectionRef.doc(newUid).set(newData);
+        await AppFirestore.usersCollectionRef.doc(oldUid).delete();
       }
 
+      // Migrate from admins collection
+      final oldAdminDoc = await AppFirestore.adminsCollectionRef
+          .doc(oldUid)
+          .get();
+      if (oldAdminDoc.exists) {
+        final oldData = oldAdminDoc.data() as Map<String, dynamic>;
+        final newData = <String, dynamic>{
+          ...oldData,
+          'uid': newUid,
+          'phone': newPhone,
+          'updatedAt': FieldValue.serverTimestamp(),
+        };
+        await AppFirestore.adminsCollectionRef.doc(newUid).set(newData);
+        await AppFirestore.adminsCollectionRef.doc(oldUid).delete();
+      }
+
+      // Update bookings where this user is the agent
       final bookingsQuery = await AppFirestore.bookingsCollectionRef
-          .where('customer.uid', isEqualTo: oldUid)
+          .where('agent.uid', isEqualTo: oldUid)
           .get();
       if (bookingsQuery.docs.isNotEmpty) {
         for (final bookingDoc in bookingsQuery.docs) {
-          final Map<String, dynamic> updatedCustomer =
-              Map<String, dynamic>.from(bookingDoc['customer'] ?? {});
-          updatedCustomer['uid'] = newUid;
-          updatedCustomer['phone'] = newPhone;
-          updatedCustomer['updatedAt'] = FieldValue.serverTimestamp();
+          final Map<String, dynamic> updatedAgent =
+              Map<String, dynamic>.from(bookingDoc['agent'] ?? {});
+          updatedAgent['uid'] = newUid;
+          updatedAgent['phone'] = newPhone;
+          updatedAgent['updatedAt'] = FieldValue.serverTimestamp();
 
           await AppFirestore.bookingsCollectionRef.doc(bookingDoc.id).update({
-            'customer': updatedCustomer,
-            'phone': newPhone,
-            'uid': newUid,
-            'updatedAt': FieldValue.serverTimestamp(),
+            'agent': updatedAgent,
           });
         }
       }
@@ -309,11 +325,9 @@ class _OtpPageState extends State<OtpPage> {
         for (final notificationDoc in notificationQuery.docs) {
           await AppFirestore.notificationsCollectionRef
               .doc(notificationDoc.id)
-              .delete();
+              .update({'userId': newUid});
         }
       }
-
-      await AppFirestore.customersCollectionRef.doc(oldUid).delete();
 
       if (mounted) {
         setState(() => _isMigratingCustomerData = false);

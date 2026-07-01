@@ -117,7 +117,7 @@ class TipsDataSheet extends StatelessWidget {
                         'Tip Information',
                     children: [
                       _buildDetailRow(
-                        AppLocalizations.of(context)!.cardTips,
+                        AppLocalizations.of(context)!.tips,
                         "${tip.cardtip?.toStringAsFixed(2) ?? '0.00'} ${AppLocalizations.of(context)!.sar}",
                         valueColor: Colors.green.shade700,
                         isHighlighted: true,

@@ -63,6 +63,9 @@ class BookingModel {
   /// Written by the customer app; read here by the technician/admin app.
   BookingServiceLocation? serviceLocation;
 
+  final String? invoiceId;
+  final String? invoicePdfUrl;
+
   /// Returns the correct inspection fee based on the on-hour/off-hour status
   double get effectiveInspectionFee {
     if (isOnHour == true) {
@@ -154,6 +157,8 @@ class BookingModel {
     this.counterProposalAcceptedAt,
     this.counterProposalStartedAt,
     this.rebookTechnicianId, // ✅ Added
+    this.invoiceId,
+    this.invoicePdfUrl,
   });
 
   BookingModel.fromMap(Map<String, dynamic> data)
@@ -223,7 +228,9 @@ class BookingModel {
       cancelledAt = data['cancelledAt'] as Timestamp?,
       counterProposalAcceptedAt = data['counterProposalAcceptedAt'] as Timestamp?,
       counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?,
-      rebookTechnicianId = data['rebookTechnicianId'] as String?; // ✅ Added
+      rebookTechnicianId = data['rebookTechnicianId'] as String?,
+      invoiceId = data['invoiceId'] as String?,
+      invoicePdfUrl = data['invoicePdfUrl'] as String?;
 
   factory BookingModel.fromQueryDocumentSnapshot(
     QueryDocumentSnapshot snapshot,
@@ -277,6 +284,8 @@ class BookingModel {
       'autoAssignmentStatus': autoAssignmentStatus, // ✅ Added
       'assignmentScheduledTime': assignmentScheduledTime,
       'rebookTechnicianId': rebookTechnicianId, // ✅ Added
+      'invoiceId': invoiceId,
+      'invoicePdfUrl': invoicePdfUrl,
     };
 
     map['id'] = id;

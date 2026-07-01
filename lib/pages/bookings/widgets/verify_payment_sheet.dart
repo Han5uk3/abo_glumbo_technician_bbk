@@ -3,6 +3,7 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
+import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
@@ -138,11 +139,15 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
           ? widget.booking.orderId!
           : "ORDER_CASH_${widget.booking.id}";
 
+      final invoiceId =
+          '${widget.booking.newBookingId ?? widget.booking.id}_${widget.booking.customer.uid}';
+
       final transaction = TransactionModel(
         Timestamp.now(),
         amount: totalAmount,
         paymentStatus: "completed",
-        paymentMethod: widget.booking.completionData?.paymentMethod.isNotEmpty == true
+        paymentMethod:
+            widget.booking.completionData?.paymentMethod.isNotEmpty == true
             ? widget.booking.completionData!.paymentMethod
             : "Outside App - Cash",
         createdAt: Timestamp.now(),
@@ -150,11 +155,15 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         customerId: widget.booking.customer.uid,
         workerId: widget.booking.agent?.uid ?? "",
         bookingId: widget.booking.id,
+        invoiceId: invoiceId,
       );
 
       await AppFirestore.transactionsCollectionRef
           .doc(orderId)
           .set(transaction.toMap());
+
+      // Eagerly generate and upload the invoice in the background
+      await InvoiceService.generateAndUploadInvoice(context, widget.booking);
 
       // Update wallet with outside-app earnings for lifetime tracking
       // Only for full service (mode 1) — inspection fees are excluded
@@ -170,9 +179,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const Home(newIndex: 1),
-          ),
+          MaterialPageRoute(builder: (context) => const Home(newIndex: 1)),
           (route) => false,
         );
         ScaffoldMessenger.of(context).showSnackBar(
@@ -232,7 +239,9 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
               ),
               IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: _isUploading ? null : () => Navigator.of(context).pop(),
+                onPressed: _isUploading
+                    ? null
+                    : () => Navigator.of(context).pop(),
               ),
             ],
           ),
@@ -259,9 +268,11 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
                 itemCount: _selectedFiles.length,
                 itemBuilder: (context, index) {
                   final file = _selectedFiles[index];
-                  final isImage = ['jpg', 'jpeg', 'png'].contains(
-                    file.path.split('.').last.toLowerCase(),
-                  );
+                  final isImage = [
+                    'jpg',
+                    'jpeg',
+                    'png',
+                  ].contains(file.path.split('.').last.toLowerCase());
 
                   return Stack(
                     children: [
@@ -292,7 +303,11 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

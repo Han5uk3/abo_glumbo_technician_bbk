@@ -24,6 +24,7 @@ import 'package:aboglumbo_bbk_panel/common_widget/animated_expanding_nav_bar.dar
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/styles/icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 class Home extends StatefulWidget {
@@ -625,8 +626,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
-  void _showExitDialog(BuildContext context, AppLocalizations? locale) {
-    showDialog(
+  Future<void> _showExitDialog(BuildContext context, AppLocalizations? locale) async {
+    final shouldExit = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.bgWhite,
@@ -652,5 +653,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         ],
       ),
     );
+
+    if (shouldExit == true) {
+      SystemNavigator.pop();
+    }
   }
 }

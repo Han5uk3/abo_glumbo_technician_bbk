@@ -20,6 +20,14 @@ class ManageFaq extends StatefulWidget {
 class _ManageFaqState extends State<ManageFaq> {
   // Tracks whether the delete confirmation/loading dialog is currently shown.
   bool _isDeletingDialogShowing = false;
+  late Stream<List<FaqModel>> _faqStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _faqStream = AppServices.getFaqStream();
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isEnglish = Directionality.of(context) == TextDirection.ltr;
@@ -102,7 +110,7 @@ class _ManageFaqState extends State<ManageFaq> {
           }
         },
         child: StreamBuilder<List<FaqModel>>(
-          stream: AppServices.getFaqStream(),
+          stream: _faqStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: Loader());
@@ -213,8 +221,11 @@ class _ManageFaqState extends State<ManageFaq> {
                                       AddFaqPage(faq: entry, isEdit: true),
                                 ),
                               ),
-                              icon: Icon(Icons.edit_outlined,
-                                  size: 18, color: AppColors.primary),
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size: 18,
+                                color: AppColors.primary,
+                              ),
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
                             ),
@@ -227,8 +238,11 @@ class _ManageFaqState extends State<ManageFaq> {
                                       confirmDeleteDialog(entry),
                                 );
                               },
-                              icon: const Icon(Icons.delete_outline,
-                                  size: 18, color: Colors.red),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 18,
+                                color: Colors.red,
+                              ),
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
                             ),

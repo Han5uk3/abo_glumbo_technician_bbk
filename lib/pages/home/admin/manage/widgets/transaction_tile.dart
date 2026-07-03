@@ -143,7 +143,12 @@ class _TransactionTileState extends State<TransactionTile> {
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                widget.transaction.paymentMethod.toLowerCase().contains('cash') || widget.transaction.paymentMethod.toLowerCase().contains('outside')
+                widget.transaction.paymentMethod.toLowerCase().contains(
+                          'cash',
+                        ) ||
+                        widget.transaction.paymentMethod.toLowerCase().contains(
+                          'outside',
+                        )
                     ? AppLocalizations.of(context)!.outsideApp
                     : AppLocalizations.of(context)!.inApp,
                 style: TextStyle(
@@ -432,7 +437,8 @@ class _TransactionTileState extends State<TransactionTile> {
                           _buildDetailRow(
                             context,
                             AppLocalizations.of(context)!.bookingId,
-                            booking.newBookingId ?? widget.transaction.bookingId,
+                            booking.newBookingId ??
+                                widget.transaction.bookingId,
                             copyable: true,
                           ),
                           _buildDetailRow(
@@ -445,8 +451,9 @@ class _TransactionTileState extends State<TransactionTile> {
                             context,
                             AppLocalizations.of(context)!.bookingName,
                             booking.service.nameLocalized(
-                                  languageCode: Localizations.localeOf(context)
-                                      .languageCode,
+                                  languageCode: Localizations.localeOf(
+                                    context,
+                                  ).languageCode,
                                 ) ??
                                 booking.service.name ??
                                 "",
@@ -546,7 +553,9 @@ class _TransactionTileState extends State<TransactionTile> {
 
   String getPaymentMethodText(BuildContext context, String method) {
     final lowerMethod = method.toLowerCase();
-    if (lowerMethod.contains('outside') || lowerMethod.contains('cash') || lowerMethod.contains('hand')) {
+    if (lowerMethod.contains('outside') ||
+        lowerMethod.contains('cash') ||
+        lowerMethod.contains('hand')) {
       return AppLocalizations.of(context)!.outsideApp;
     } else {
       return AppLocalizations.of(context)!.inApp;

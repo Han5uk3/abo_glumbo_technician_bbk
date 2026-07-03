@@ -9,8 +9,25 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
 import 'package:flutter/material.dart';
 
-class ManageServices extends StatelessWidget {
+class ManageServices extends StatefulWidget {
   const ManageServices({super.key});
+
+  @override
+  State<ManageServices> createState() => _ManageServicesState();
+}
+
+class _ManageServicesState extends State<ManageServices> {
+  late Stream<List<CategoryModel>> _categoriesStream;
+  late Stream<List<ServiceModel>> _servicesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesStream = AppFirestore.categoriesCollectionRef.snapshots().map(
+      (s) => s.docs.map((d) => CategoryModel.fromQuerySnapshot(d)).toList(),
+    );
+    _servicesStream = AppServices.getAllServicesStream();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +53,12 @@ class ManageServices extends StatelessWidget {
         shape: Border.all(style: BorderStyle.none),
       ),
       body: StreamBuilder<List<CategoryModel>>(
-        stream: AppFirestore.categoriesCollectionRef.snapshots().map(
-          (s) => s.docs.map((d) => CategoryModel.fromQuerySnapshot(d)).toList(),
-        ),
+        stream: _categoriesStream,
         builder: (context, catSnapshot) {
           final categories = catSnapshot.data ?? [];
 
           return StreamBuilder<List<ServiceModel>>(
-            stream: AppServices.getAllServicesStream(),
+            stream: _servicesStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
@@ -59,7 +74,14 @@ class ManageServices extends StatelessWidget {
               }
 
               if (snapshot.hasError) {
-                return Center(child: Text(AppLocalizations.of(context)?.errorOccurred(snapshot.error.toString()) ?? 'Error: ${snapshot.error}'));
+                return Center(
+                  child: Text(
+                    AppLocalizations.of(
+                          context,
+                        )?.errorOccurred(snapshot.error.toString()) ??
+                        'Error: ${snapshot.error}',
+                  ),
+                );
               }
 
               final services = snapshot.data ?? [];

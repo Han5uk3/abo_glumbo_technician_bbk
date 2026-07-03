@@ -69,9 +69,7 @@ class _ManageCustomerSupportState extends State<ManageCustomerSupport> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.black.withOpacity(0.08),
-                  ),
+                  border: Border.all(color: Colors.black.withOpacity(0.08)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.02),

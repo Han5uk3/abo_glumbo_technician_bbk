@@ -5,8 +5,21 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/category_til
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:flutter/material.dart';
 
-class ManageCategories extends StatelessWidget {
+class ManageCategories extends StatefulWidget {
   const ManageCategories({super.key});
+
+  @override
+  State<ManageCategories> createState() => _ManageCategoriesState();
+}
+
+class _ManageCategoriesState extends State<ManageCategories> {
+  late Stream<dynamic> _categoriesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesStream = AppServices.getAllCategoriesStream();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +45,7 @@ class ManageCategories extends StatelessWidget {
         shape: Border.all(style: BorderStyle.none),
       ),
       body: StreamBuilder(
-        stream: AppServices.getAllCategoriesStream(),
+        stream: _categoriesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(

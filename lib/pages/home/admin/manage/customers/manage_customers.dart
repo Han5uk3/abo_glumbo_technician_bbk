@@ -25,10 +25,12 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
   int _selectedFilter = 0;
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
+  late Stream<List<dynamic>> _customersStream;
 
   @override
   void initState() {
     super.initState();
+    _customersStream = AppServices.getAllCustomersStream();
     _fabAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -148,7 +150,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<ManageAppBloc, ManageAppState>(
       listener: (context, state) {
         if (state is BlockUnblockCustomer) {
@@ -224,8 +225,11 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
           scrolledUnderElevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon:
-                const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
           title: Text(
             AppLocalizations.of(context)!.manageCustomers,
@@ -273,8 +277,9 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                     });
                   },
                   decoration: InputDecoration(
-                    hintText:
-                        AppLocalizations.of(context)!.searchByCustomerName,
+                    hintText: AppLocalizations.of(
+                      context,
+                    )!.searchByCustomerName,
                     hintStyle: TextStyle(
                       color: Colors.grey.shade400,
                       fontSize: 14,
@@ -352,7 +357,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
             // Customers List
             Expanded(
               child: StreamBuilder(
-                stream: AppServices.getAllCustomersStream(),
+                stream: _customersStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: Loader());
@@ -405,10 +410,12 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                     return _buildEmptyState(
                       context: context,
                       icon: Icons.search_off_rounded,
-                      title: AppLocalizations.of(context)!
-                          .noCustomersMatchYourSearch,
-                      subtitle: AppLocalizations.of(context)!
-                          .tryAdjustingYourSearchCriteria,
+                      title: AppLocalizations.of(
+                        context,
+                      )!.noCustomersMatchYourSearch,
+                      subtitle: AppLocalizations.of(
+                        context,
+                      )!.tryAdjustingYourSearchCriteria,
                       color: AppColors.primary,
                     );
                   }
@@ -593,24 +600,25 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                           ? AppLocalizations.of(context)!.unblockCustomer
                           : AppLocalizations.of(context)!.blockCustomer,
                       message: isBlocked
-                          ? AppLocalizations.of(context)!
-                              .areYouSureYouWantToUnBlockThisCustomer
-                          : AppLocalizations.of(context)!
-                              .areYouSureYouWantToBlockThisCustomer,
+                          ? AppLocalizations.of(
+                              context,
+                            )!.areYouSureYouWantToUnBlockThisCustomer
+                          : AppLocalizations.of(
+                              context,
+                            )!.areYouSureYouWantToBlockThisCustomer,
                       isBlocking: !isBlocked,
                     );
 
                     if (confirmed == true && context.mounted) {
                       context.read<ManageAppBloc>().add(
-                            CustomerBlockUnblockEvent(
-                              customer.uid,
-                              !isBlocked,
-                            ),
-                          );
+                        CustomerBlockUnblockEvent(customer.uid, !isBlocked),
+                      );
                     }
                   },
                   icon: Icon(
-                    isBlocked ? Icons.check_circle_outline : Icons.block_rounded,
+                    isBlocked
+                        ? Icons.check_circle_outline
+                        : Icons.block_rounded,
                     color: isBlocked ? Colors.green : Colors.red,
                   ),
                 ),

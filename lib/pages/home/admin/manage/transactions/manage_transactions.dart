@@ -26,6 +26,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   String _periodLabel = 'All Time';
   StreamSubscription? _bookingsSub;
   final Map<String, BookingModel> _bookingsMap = {};
+  late Stream<List<TransactionModel>> _transactionsStream;
 
   String get _displayPeriodLabel {
     if (_startDate == null && _endDate == null) {
@@ -37,6 +38,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   @override
   void initState() {
     super.initState();
+    _transactionsStream = AppServices.getAllTransactionsStream();
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -365,357 +367,373 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
           setState(() {});
         },
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: ClampingScrollPhysics(),
+          ),
           child: Column(
-        children: [
-          // Stats Overview Section
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: StreamBuilder<List<TransactionModel>>(
-              stream: AppServices.getAllTransactionsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final transactions = snapshot.data ?? [];
-                  final filtered = _getFilteredTransactions(transactions);
-                  final total = filtered.length;
-                  final totalAmount = filtered.fold<double>(
-                    0.0,
-                    (sum, t) => sum + t.amount,
-                  );
+            children: [
+              // Stats Overview Section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: StreamBuilder<List<TransactionModel>>(
+                  stream: _transactionsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final transactions = snapshot.data ?? [];
+                      final filtered = _getFilteredTransactions(transactions);
+                      final total = filtered.length;
+                      final totalAmount = filtered.fold<double>(
+                        0.0,
+                        (sum, t) => sum + t.amount,
+                      );
 
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          AppLocalizations.of(context)!.total,
-                          total.toString(),
-                          Icons.receipt_long_outlined,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          AppLocalizations.of(context)!.amount,
-                          totalAmount.toStringAsFixed(2),
-                          Icons.payments_outlined,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-                return _buildStatsShimmer();
-              },
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Hero(
-              tag: 'search_bar',
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value.toLowerCase();
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.searchByBookingId,
-                      hintStyle: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 15,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear_rounded,
-                                color: Colors.grey.shade600,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _searchController.clear();
-                                  _searchQuery = '';
-                                });
-                              },
-                              tooltip: AppLocalizations.of(context)!.clear,
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              AppLocalizations.of(context)!.total,
+                              total.toString(),
+                              Icons.receipt_long_outlined,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              AppLocalizations.of(context)!.amount,
+                              totalAmount.toStringAsFixed(2),
+                              Icons.payments_outlined,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return _buildStatsShimmer();
+                  },
                 ),
               ),
-            ),
-          ),
 
-          // Search Bar Section
-          // Padding(
-          //   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          //   child: TextField(
-          //     controller: _searchController,
-          //     decoration: InputDecoration(
-          //       hintText: AppLocalizations.of(context)!.searchByBookingId,
-          //       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          //       prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-          //       suffixIcon: _searchQuery.isNotEmpty
-          //           ? IconButton(
-          //               icon: Icon(Icons.clear, color: Colors.grey[600]),
-          //               onPressed: () {
-          //                 _searchController.clear();
-          //               },
-          //             )
-          //           : null,
-          //       filled: true,
-          //       fillColor: Colors.white,
-          //       border: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(12),
-          //         borderSide: BorderSide(color: Colors.grey[300]!),
-          //       ),
-          //       enabledBorder: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(12),
-          //         borderSide: BorderSide(color: Colors.grey[300]!),
-          //       ),
-          //       focusedBorder: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(12),
-          //         borderSide: BorderSide(color: AppColors.primary, width: 2),
-          //       ),
-          //       contentPadding: const EdgeInsets.symmetric(
-          //         horizontal: 16,
-          //         vertical: 14,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-
-          // Filter Chips Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SingleChildScrollView(
-              physics: ClampingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: [
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)!.all,
-                    'all',
-                  ),
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)?.inApp ?? 'In-App',
-                    'inApp',
-                  ),
-                  _buildFilterChip(
-                    context,
-                    AppLocalizations.of(context)?.outsideApp ?? 'Outside-App',
-                    'outsideApp',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Period Filter Card
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withOpacity(0.05),
-                    AppColors.primary.withOpacity(0.12),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withOpacity(0.15)),
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _showPeriodSelectorSheet(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Hero(
+                  tag: 'search_bar',
+                  child: Material(
+                    color: Colors.transparent,
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 10,
-                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          width: 1.0,
-                          color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchByBookingId,
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 15,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear_rounded,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                  tooltip: AppLocalizations.of(context)!.clear,
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.tune_rounded,
-                            size: 22,
-                            color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Search Bar Section
+              // Padding(
+              //   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              //   child: TextField(
+              //     controller: _searchController,
+              //     decoration: InputDecoration(
+              //       hintText: AppLocalizations.of(context)!.searchByBookingId,
+              //       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              //       prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+              //       suffixIcon: _searchQuery.isNotEmpty
+              //           ? IconButton(
+              //               icon: Icon(Icons.clear, color: Colors.grey[600]),
+              //               onPressed: () {
+              //                 _searchController.clear();
+              //               },
+              //             )
+              //           : null,
+              //       filled: true,
+              //       fillColor: Colors.white,
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: Colors.grey[300]!),
+              //       ),
+              //       enabledBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: Colors.grey[300]!),
+              //       ),
+              //       focusedBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.primary, width: 2),
+              //       ),
+              //       contentPadding: const EdgeInsets.symmetric(
+              //         horizontal: 16,
+              //         vertical: 14,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+
+              // Filter Chips Section
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: SingleChildScrollView(
+                  physics: ClampingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: [
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)!.all,
+                        'all',
+                      ),
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)?.inApp ?? 'In-App',
+                        'inApp',
+                      ),
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)?.outsideApp ??
+                            'Outside-App',
+                        'outsideApp',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Period Filter Card
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withOpacity(0.05),
+                        AppColors.primary.withOpacity(0.12),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.15),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => _showPeriodSelectorSheet(context),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
                           ),
-                          Text(
-                            AppLocalizations.of(context)?.filter ?? "Filter",
-                            style: TextStyle(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              width: 1.0,
                               color: AppColors.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.tune_rounded,
+                                size: 22,
+                                color: AppColors.primary,
+                              ),
+                              Text(
+                                AppLocalizations.of(context)?.filter ??
+                                    "Filter",
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      Spacer(),
+
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)?.earningsPeriod ??
+                                "Earnings Period",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _displayPeriodLabel,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-
-                  Spacer(),
-
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)?.earningsPeriod ??
-                            "Earnings Period",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _displayPeriodLabel,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          StreamBuilder<List<TransactionModel>>(
-            stream: AppServices.getAllTransactionsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: SizedBox(height: 24, child: Loader()));
-                }
+              StreamBuilder<List<TransactionModel>>(
+                stream: _transactionsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: SizedBox(height: 24, child: Loader()));
+                  }
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final allTransactions = snapshot.data ?? [];
-                final filteredTransactions = _getFilteredTransactions(
-                  allTransactions,
-                );
-
-                if (filteredTransactions.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inbox_outlined,
-                          size: 80,
-                          color: Colors.grey[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)!.noTransactionsFound,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _selectedFilter == 'all'
-                              ? AppLocalizations.of(context)!.noTransactionsYet
-                              : '${AppLocalizations.of(context)!.no} ${_getFilterLabel(_selectedFilter)} ${AppLocalizations.of(context)!.transactions}',
-                          style: TextStyle(
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
                             color: Colors.grey[400],
-                            fontSize: 14,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                          const SizedBox(height: 16),
+                          Text(
+                            '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: filteredTransactions.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final transaction = filteredTransactions[index];
-                    return TransactionTile(transaction: transaction);
-                  },
-                );
-              },
-            ),
-        ],
-      ),
-      ),
+                  final allTransactions = snapshot.data ?? [];
+                  final filteredTransactions = _getFilteredTransactions(
+                    allTransactions,
+                  );
+
+                  if (filteredTransactions.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inbox_outlined,
+                            size: 80,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context)!.noTransactionsFound,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _selectedFilter == 'all'
+                                ? AppLocalizations.of(
+                                    context,
+                                  )!.noTransactionsYet
+                                : '${AppLocalizations.of(context)!.no} ${_getFilterLabel(_selectedFilter)} ${AppLocalizations.of(context)!.transactions}',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredTransactions.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final transaction = filteredTransactions[index];
+                      return TransactionTile(transaction: transaction);
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

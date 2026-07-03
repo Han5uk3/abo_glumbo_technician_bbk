@@ -262,7 +262,9 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                   ),
                                 ],
                               ),
-                              if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true) ...[
+                              if (LocalStore.getCachedAdminData()
+                                      ?.hasFullAccess ??
+                                  true) ...[
                                 const SizedBox(height: 12),
                                 const Divider(height: 1, thickness: 1),
                                 const SizedBox(height: 12),
@@ -287,7 +289,9 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                             size: 18,
                                           ),
                                           label: Text(
-                                            AppLocalizations.of(context)!.delete,
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.delete,
                                           ),
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: isLastItem
@@ -301,9 +305,8 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                                     ),
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                8,
-                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 16,
@@ -331,7 +334,9 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                                         foregroundColor: Colors.white,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 16,

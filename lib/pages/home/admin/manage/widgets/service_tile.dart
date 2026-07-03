@@ -64,9 +64,10 @@ class ServiceTileDevWidget extends StatelessWidget {
                                 Text(
                                   service.nameLocalized(
                                         languageCode:
-                                            AppLocalizations.of(context)
-                                                    ?.localeName ??
-                                                'en',
+                                            AppLocalizations.of(
+                                              context,
+                                            )?.localeName ??
+                                            'en',
                                       ) ??
                                       service.name ??
                                       "",
@@ -82,9 +83,10 @@ class ServiceTileDevWidget extends StatelessWidget {
                                 Text(
                                   service.descriptionLocalized(
                                         languageCode:
-                                            AppLocalizations.of(context)
-                                                    ?.localeName ??
-                                                'en',
+                                            AppLocalizations.of(
+                                              context,
+                                            )?.localeName ??
+                                            'en',
                                       ) ??
                                       service.description ??
                                       "",
@@ -107,16 +109,22 @@ class ServiceTileDevWidget extends StatelessWidget {
                                     AddServicesDevPage(service: service),
                               ),
                             ),
-                            icon: Icon(Icons.edit_outlined,
-                                size: 18, color: AppColors.primary),
+                            icon: Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
                           const SizedBox(width: 4),
                           IconButton(
                             onPressed: () => _showDeleteConfirmDialog(context),
-                            icon: const Icon(CupertinoIcons.delete,
-                                size: 18, color: Colors.red),
+                            icon: const Icon(
+                              CupertinoIcons.delete,
+                              size: 18,
+                              color: Colors.red,
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),

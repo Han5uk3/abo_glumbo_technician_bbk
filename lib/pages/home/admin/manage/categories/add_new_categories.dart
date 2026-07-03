@@ -384,9 +384,7 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
                   child: TextFormField(
                     controller: nameUrController,
                     enabled: !isLoading,
-                    decoration: const InputDecoration(
-                      labelText: 'Name (Urdu)',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Name (Urdu)'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter name in Urdu';

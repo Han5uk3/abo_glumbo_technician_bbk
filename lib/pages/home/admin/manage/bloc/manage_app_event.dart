@@ -12,7 +12,12 @@ class ClearTipWalletEvent extends ManageAppEvent {
   final String transactionId;
   final XFile? image;
   final TippingModel? tippingModel;
-  const ClearTipWalletEvent(this.agentId, this.transactionId, this.image, this.tippingModel);
+  const ClearTipWalletEvent(
+    this.agentId,
+    this.transactionId,
+    this.image,
+    this.tippingModel,
+  );
 
   @override
   List<Object> get props => [agentId];
@@ -150,7 +155,6 @@ class SetPrimaryCustomerServiceContactEvent extends ManageAppEvent {
   List<Object> get props => [selectedContact, allContactsOfType];
 }
 
-
 class ApprovePayoutEvent extends ManageAppEvent {
   final String payoutRequestId;
   final String transactionNumber;
@@ -178,6 +182,7 @@ class RejectPayoutEvent extends ManageAppEvent {
   @override
   List<Object> get props => [payoutRequestId, reason];
 }
+
 class DeleteCategoryEvent extends ManageAppEvent {
   final String categoryId;
   const DeleteCategoryEvent(this.categoryId);
@@ -185,6 +190,7 @@ class DeleteCategoryEvent extends ManageAppEvent {
   @override
   List<Object> get props => [categoryId];
 }
+
 class DeleteServiceEvent extends ManageAppEvent {
   final String serviceId;
   const DeleteServiceEvent(this.serviceId);
@@ -201,4 +207,3 @@ class ToggleServiceStatusEvent extends ManageAppEvent {
   @override
   List<Object> get props => [service, isActive];
 }
-

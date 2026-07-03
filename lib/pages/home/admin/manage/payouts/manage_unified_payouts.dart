@@ -22,6 +22,19 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
       'P'; // P = Pending, A = Approved, R = Rejected, All = All
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  late Stream<List<UnifiedPayoutRequestModel>> _payoutsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateStream();
+  }
+
+  void _updateStream() {
+    _payoutsStream = _selectedFilter == 'All'
+        ? UnifiedPayoutServices.getAllPayoutRequests()
+        : UnifiedPayoutServices.getAllPayoutRequests(status: _selectedFilter);
+  }
 
   @override
   void dispose() {
@@ -71,10 +84,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
         future: UnifiedPayoutServices.getPayoutStatistics(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return  SizedBox(
-              height: 100,
-              child: Center(child: Loader()),
-            );
+            return SizedBox(height: 100, child: Center(child: Loader()));
           }
           if (!snapshot.hasData) {
             return SizedBox(
@@ -213,7 +223,12 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   }) {
     final isSelected = _selectedFilter == value;
     return InkWell(
-      onTap: () => setState(() => _selectedFilter = value),
+      onTap: () {
+        setState(() {
+          _selectedFilter = value;
+          _updateStream();
+        });
+      },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -227,11 +242,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? color : Colors.grey,
-            ),
+            Icon(icon, size: 16, color: isSelected ? color : Colors.grey),
             const SizedBox(width: 8),
             Text(
               label,
@@ -292,12 +303,10 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
 
   Widget _buildPayoutsList() {
     return StreamBuilder<List<UnifiedPayoutRequestModel>>(
-      stream: _selectedFilter == 'All'
-          ? UnifiedPayoutServices.getAllPayoutRequests()
-          : UnifiedPayoutServices.getAllPayoutRequests(status: _selectedFilter),
+      stream: _payoutsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return  Center(child: Loader());
+          return Center(child: Loader());
         }
 
         if (snapshot.hasError) {
@@ -321,8 +330,11 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long_rounded,
-                    size: 64, color: Colors.grey[300]),
+                Icon(
+                  Icons.receipt_long_rounded,
+                  size: 64,
+                  color: Colors.grey[300],
+                ),
                 const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context)!.noPayoutRequests,
@@ -348,8 +360,11 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.search_off_rounded,
-                    size: 64, color: Colors.grey[300]),
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 64,
+                  color: Colors.grey[300],
+                ),
                 const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context)!.noResultsFound,
@@ -532,7 +547,8 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                   ),
                 ],
               ),
-              if (request.status == 'P' && (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)) ...[
+              if (request.status == 'P' &&
+                  (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -544,13 +560,17 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                            side: BorderSide(
+                              color: Colors.red.withOpacity(0.2),
+                            ),
                           ),
                         ),
                         child: Text(
                           AppLocalizations.of(context)!.reject,
                           style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -570,7 +590,9 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                         child: Text(
                           AppLocalizations.of(context)!.approve,
                           style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -1276,7 +1298,13 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

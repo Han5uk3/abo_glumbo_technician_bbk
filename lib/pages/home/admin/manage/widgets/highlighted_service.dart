@@ -54,8 +54,11 @@ class HighlightedServiceWidget extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.edit_outlined,
-                        size: 20, color: AppColors.primary),
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
                     onPressed: editCallback,
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
@@ -94,15 +97,14 @@ class HighlightedServiceWidget extends StatelessWidget {
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: Colors.black.withOpacity(0.05)),
+                          border: Border.all(
+                            color: Colors.black.withOpacity(0.05),
+                          ),
                         ),
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
-                            SizedBox.expand(
-                              child: _buildServiceImage(service),
-                            ),
+                            SizedBox.expand(child: _buildServiceImage(service)),
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(8),
@@ -117,7 +119,9 @@ class HighlightedServiceWidget extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                service.nameLocalized(languageCode: currentLanguage) ??
+                                service.nameLocalized(
+                                      languageCode: currentLanguage,
+                                    ) ??
                                     service.name ??
                                     "",
                                 style: const TextStyle(

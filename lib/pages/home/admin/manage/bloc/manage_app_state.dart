@@ -256,6 +256,7 @@ final class CustomerSupportAddError extends ManageAppState {
   @override
   List<Object> get props => [error];
 }
+
 final class SettingPrimaryCustomerSupport extends ManageAppState {
   @override
   List<Object> get props => []; // Changed from List<Object?>
@@ -299,8 +300,6 @@ final class PayoutRejectionError extends ManageAppState {
   List<Object> get props => [error];
 }
 
-
-
 final class DeletingCategory extends ManageAppState {}
 
 final class CategoryDeleted extends ManageAppState {
@@ -318,6 +317,7 @@ final class CategoryDeleteError extends ManageAppState {
   @override
   List<Object> get props => [error];
 }
+
 final class DeletingService extends ManageAppState {}
 
 final class ServiceDeleted extends ManageAppState {
@@ -337,11 +337,12 @@ final class ServiceDeleteError extends ManageAppState {
 }
 
 final class UpdatingServiceStatus extends ManageAppState {}
+
 final class ServiceStatusUpdated extends ManageAppState {}
+
 final class ServiceStatusUpdateError extends ManageAppState {
   final String error;
   const ServiceStatusUpdateError(this.error);
   @override
   List<Object> get props => [error];
 }
-

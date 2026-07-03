@@ -286,9 +286,10 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                             title: Text(
                               service.nameLocalized(
                                     languageCode:
-                                        AppLocalizations.of(context)
-                                                ?.localeName ??
-                                            'en',
+                                        AppLocalizations.of(
+                                          context,
+                                        )?.localeName ??
+                                        'en',
                                   ) ??
                                   service.name ??
                                   '',
@@ -502,9 +503,10 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                                   child: Text(
                                     service.nameLocalized(
                                           languageCode:
-                                              AppLocalizations.of(context)
-                                                      ?.localeName ??
-                                                  'en',
+                                              AppLocalizations.of(
+                                                context,
+                                              )?.localeName ??
+                                              'en',
                                         ) ??
                                         service.name ??
                                         '',

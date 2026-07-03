@@ -47,7 +47,7 @@ class AgentTileMinimal extends StatelessWidget {
             style: textTheme.bodyMedium,
           ),
           actions: [
-                 eButton(
+            eButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
@@ -65,7 +65,6 @@ class AgentTileMinimal extends StatelessWidget {
               textColor: Colors.white,
               backgroundColor: Colors.green,
             ),
-       
           ],
         );
       },

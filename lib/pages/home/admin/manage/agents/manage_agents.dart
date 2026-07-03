@@ -39,10 +39,18 @@ class _ManageAgentsState extends State<ManageAgents>
 
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
+  late Stream<Map<String, dynamic>> _agentsTransactionsStream;
 
   @override
   void initState() {
     super.initState();
+    _agentsTransactionsStream = Rx.combineLatest2(
+      AppServices.getAllAgentsStream(),
+      AppServices.getAllTransactionsStream(),
+      (List<UserModel> agents, List<TransactionModel> transactions) {
+        return {'agents': agents, 'transactions': transactions};
+      },
+    );
     _fabAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -469,111 +477,105 @@ class _ManageAgentsState extends State<ManageAgents>
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: Column(
-          children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black.withOpacity(0.08)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value.toLowerCase();
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(
-                      context,
-                    )!.searchByTechnicianName,
-                    hintStyle: TextStyle(
-                      color: Colors.grey.shade400,
-                      fontSize: 14,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear_rounded,
-                              color: Colors.grey.shade400,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                _searchQuery = '';
-                              });
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.black.withOpacity(0.08)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  style: const TextStyle(fontSize: 14),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(
+                        context,
+                      )!.searchByTechnicianName,
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear_rounded,
+                                color: Colors.grey.shade400,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ),
               ),
-            ),
 
-            // Filter Chips Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                child: Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: [
-                    _buildFilterChip(
-                      context,
-                      AppLocalizations.of(context)!.all,
-                      0,
-                    ),
-                    _buildFilterChip(
-                      context,
-                      AppLocalizations.of(context)!.verified,
-                      1,
-                    ),
-                    _buildFilterChip(
-                      context,
-                      AppLocalizations.of(context)!.pending,
-                      2,
-                    ),
-                  ],
+              // Filter Chips Section
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const ClampingScrollPhysics(),
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: [
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)!.all,
+                        0,
+                      ),
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)!.verified,
+                        1,
+                      ),
+                      _buildFilterChip(
+                        context,
+                        AppLocalizations.of(context)!.pending,
+                        2,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // Agents List & Period Filter
-            StreamBuilder<Map<String, dynamic>>(
-              stream: Rx.combineLatest2(
-                  AppServices.getAllAgentsStream(),
-                  AppServices.getAllTransactionsStream(),
-                  (
-                    List<UserModel> agents,
-                    List<TransactionModel> transactions,
-                  ) {
-                    return {'agents': agents, 'transactions': transactions};
-                  },
-                ),
+              // Agents List & Period Filter
+              StreamBuilder<Map<String, dynamic>>(
+                stream: _agentsTransactionsStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: Loader());
@@ -822,8 +824,8 @@ class _ManageAgentsState extends State<ManageAgents>
                   );
                 },
               ),
-          ],
-        ),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

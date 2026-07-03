@@ -551,7 +551,9 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
     emit(UpdatingServiceStatus());
     try {
       final batch = FirebaseFirestore.instance.batch();
-      final serviceRef = AppFirestore.servicesCollectionRef.doc(event.service.id);
+      final serviceRef = AppFirestore.servicesCollectionRef.doc(
+        event.service.id,
+      );
 
       if (event.isActive) {
         // If turning ON, find all other active services in the same category

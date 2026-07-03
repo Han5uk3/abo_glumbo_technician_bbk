@@ -23,6 +23,7 @@ class _ManageAdminsState extends State<ManageAdmins>
   int _selectedFilter = 0; // 0 = All, 1 = Customer Service, 2 = Full Admin
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
+  late Stream<List<AdminModel>> _adminsStream;
 
   @override
   void initState() {
@@ -36,6 +37,17 @@ class _ManageAdminsState extends State<ManageAdmins>
       curve: Curves.easeInOut,
     );
     _fabAnimationController.forward();
+    _adminsStream = Rx.combineLatest2(
+      AppServices.getAdminsStream(),
+      AppServices.getPendingAdminsStream(),
+      (List<AdminModel> active, List<AdminModel> pending) {
+        // Mark pending admins as pending for UI
+        final pWithFlag = pending
+            .map((e) => e.copyWith(uid: 'pending_${e.uid}'))
+            .toList();
+        return [...active, ...pWithFlag];
+      },
+    );
   }
 
   @override
@@ -55,13 +67,23 @@ class _ManageAdminsState extends State<ManageAdmins>
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: AppColors.bgWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(AppLocalizations.of(context)?.revokeAccess ?? 'Revoke Access'),
-          content: Text(AppLocalizations.of(context)?.confirmRemoveAdmin(adminName) ?? 'Are you sure you want to remove admin access for $adminName?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Text(
+            AppLocalizations.of(context)?.revokeAccess ?? 'Revoke Access',
+          ),
+          content: Text(
+            AppLocalizations.of(context)?.confirmRemoveAdmin(adminName) ??
+                'Are you sure you want to remove admin access for $adminName?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(AppLocalizations.of(context)?.cancelLower ?? 'Cancel', style: const TextStyle(color: Colors.grey)),
+              child: Text(
+                AppLocalizations.of(context)?.cancelLower ?? 'Cancel',
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
             eButton(
               text: 'Revoke',
@@ -79,7 +101,13 @@ class _ManageAdminsState extends State<ManageAdmins>
   Future<void> _revokeAdminAccess(AdminModel admin) async {
     if (admin.isSuperAdmin) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)?.coreAdminCannotRemove ?? 'Core admin cannot be removed.'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.coreAdminCannotRemove ??
+                'Core admin cannot be removed.',
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -88,30 +116,52 @@ class _ManageAdminsState extends State<ManageAdmins>
       await AppFirestore.adminsCollectionRef.doc(admin.uid).delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.adminAccessRevoked(admin.name) ?? 'Admin access revoked for ${admin.name}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.adminAccessRevoked(admin.name) ??
+                  'Admin access revoked for ${admin.name}',
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
 
   Future<void> _deletePendingInvite(AdminModel admin) async {
-     try {
+    try {
       await AppFirestore.pendingAdminsCollectionRef.doc(admin.uid).delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.inviteDeleted(admin.name) ?? 'Invite deleted for ${admin.name}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.inviteDeleted(admin.name) ??
+                  'Invite deleted for ${admin.name}',
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -164,7 +214,9 @@ class _ManageAdminsState extends State<ManageAdmins>
                 onChanged: (value) =>
                     setState(() => _searchQuery = value.toLowerCase()),
                 decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)?.searchAdmins ?? 'Search admins...',
+                  hintText:
+                      AppLocalizations.of(context)?.searchAdmins ??
+                      'Search admins...',
                   hintStyle: TextStyle(
                     color: Colors.grey.shade400,
                     fontSize: 14,
@@ -195,11 +247,22 @@ class _ManageAdminsState extends State<ManageAdmins>
               child: Wrap(
                 spacing: 8.0,
                 children: [
-                  _buildFilterChip(0, AppLocalizations.of(context)?.filterAll ?? 'All', Icons.apps_rounded),
                   _buildFilterChip(
-                      1, AppLocalizations.of(context)?.customerService ?? 'Customer Service', Icons.support_agent_rounded),
+                    0,
+                    AppLocalizations.of(context)?.filterAll ?? 'All',
+                    Icons.apps_rounded,
+                  ),
                   _buildFilterChip(
-                      2, AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin', Icons.admin_panel_settings_rounded),
+                    1,
+                    AppLocalizations.of(context)?.customerService ??
+                        'Customer Service',
+                    Icons.support_agent_rounded,
+                  ),
+                  _buildFilterChip(
+                    2,
+                    AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin',
+                    Icons.admin_panel_settings_rounded,
+                  ),
                 ],
               ),
             ),
@@ -207,24 +270,19 @@ class _ManageAdminsState extends State<ManageAdmins>
 
           Expanded(
             child: StreamBuilder<List<AdminModel>>(
-              stream: Rx.combineLatest2(
-                AppServices.getAdminsStream(),
-                AppServices.getPendingAdminsStream(),
-                (List<AdminModel> active, List<AdminModel> pending) {
-                  // Mark pending admins as pending for UI
-                  final pWithFlag = pending
-                      .map((e) => e.copyWith(uid: 'pending_${e.uid}'))
-                      .toList();
-                  return [...active, ...pWithFlag];
-                },
-              ),
+              stream: _adminsStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text(AppLocalizations.of(context)?.noAdminsFound ?? 'No admins found.'));
+                  return Center(
+                    child: Text(
+                      AppLocalizations.of(context)?.noAdminsFound ??
+                          'No admins found.',
+                    ),
+                  );
                 }
 
                 final allAdmins = snapshot.data!.where((admin) {
@@ -232,12 +290,13 @@ class _ManageAdminsState extends State<ManageAdmins>
 
                   final matchesSearch =
                       admin.name.toLowerCase().contains(_searchQuery) ||
-                          admin.phoneNumber.contains(_searchQuery) ||
-                          admin.email.toLowerCase().contains(_searchQuery);
+                      admin.phoneNumber.contains(_searchQuery) ||
+                      admin.email.toLowerCase().contains(_searchQuery);
 
                   final effectiveAccessLevel = admin.hasFullAccess ? 2 : 1;
                   final matchesFilter =
-                      _selectedFilter == 0 || effectiveAccessLevel == _selectedFilter;
+                      _selectedFilter == 0 ||
+                      effectiveAccessLevel == _selectedFilter;
 
                   return matchesSearch && matchesFilter;
                 }).toList();
@@ -260,8 +319,10 @@ class _ManageAdminsState extends State<ManageAdmins>
       ),
       floatingActionButton: isCoreAdmin
           ? FloatingActionButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const AddAdminPage())),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddAdminPage()),
+              ),
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add_rounded, color: Colors.white),
             )
@@ -282,7 +343,9 @@ class _ManageAdminsState extends State<ManageAdmins>
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.black.withOpacity(0.08),
+            color: isSelected
+                ? AppColors.primary
+                : Colors.black.withOpacity(0.08),
           ),
         ),
         child: Row(
@@ -337,9 +400,10 @@ class _ManageAdminsState extends State<ManageAdmins>
                   child: Text(
                     admin.name.isNotEmpty ? admin.name[0].toUpperCase() : 'A',
                     style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -363,15 +427,22 @@ class _ManageAdminsState extends State<ManageAdmins>
                           if (isPending)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                  color: Colors.orange.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6)),
-                              child: Text(AppLocalizations.of(context)?.invited ?? 'INVITED',
-                                  style: const TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold)),
+                                color: Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)?.invited ??
+                                    'INVITED',
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                         ],
                       ),
@@ -398,18 +469,31 @@ class _ManageAdminsState extends State<ManageAdmins>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)?.accessLevelUpper ?? 'ACCESS LEVEL',
-                          style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        AppLocalizations.of(context)?.accessLevelUpper ??
+                            'ACCESS LEVEL',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         admin.isSuperAdmin
-                            ? (AppLocalizations.of(context)?.coreAdmin ?? 'Core Admin')
-                            : (admin.hasFullAccess ? (AppLocalizations.of(context)?.fullAdmin ?? 'Full Admin') : (AppLocalizations.of(context)?.customerService ?? 'Customer Service')),
+                            ? (AppLocalizations.of(context)?.coreAdmin ??
+                                  'Core Admin')
+                            : (admin.hasFullAccess
+                                  ? (AppLocalizations.of(context)?.fullAdmin ??
+                                        'Full Admin')
+                                  : (AppLocalizations.of(
+                                          context,
+                                        )?.customerService ??
+                                        'Customer Service')),
                         style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w500),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -418,17 +502,22 @@ class _ManageAdminsState extends State<ManageAdmins>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)?.phoneUpper ?? 'PHONE',
-                          style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        AppLocalizations.of(context)?.phoneUpper ?? 'PHONE',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         admin.phoneNumber,
                         textDirection: TextDirection.ltr,
                         style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w500),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -449,8 +538,11 @@ class _ManageAdminsState extends State<ManageAdmins>
                         ),
                       );
                     },
-                    icon: Icon(Icons.edit_outlined,
-                        color: AppColors.primary, size: 20),
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
                   ),
@@ -458,20 +550,28 @@ class _ManageAdminsState extends State<ManageAdmins>
                   IconButton(
                     onPressed: () async {
                       final confirm = await _showRevokeConfirmationDialog(
-                          context: context, adminName: admin.name);
+                        context: context,
+                        adminName: admin.name,
+                      );
                       if (confirm == true) {
                         if (isPending) {
-                          final actualId =
-                              admin.uid!.replaceFirst('pending_', '');
+                          final actualId = admin.uid!.replaceFirst(
+                            'pending_',
+                            '',
+                          );
                           await _deletePendingInvite(
-                              admin.copyWith(uid: actualId));
+                            admin.copyWith(uid: actualId),
+                          );
                         } else {
                           await _revokeAdminAccess(admin);
                         }
                       }
                     },
-                    icon: Icon(Icons.delete_outline_rounded,
-                        color: Colors.red.shade400, size: 20),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red.shade400,
+                      size: 20,
+                    ),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
                   ),

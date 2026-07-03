@@ -39,8 +39,11 @@ class ManageBanners extends StatelessWidget {
           scrolledUnderElevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon:
-                const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
           title: Text(
             AppLocalizations.of(context)?.manageBanners ?? 'Manage Banners',

@@ -1286,30 +1286,13 @@ class _BookingInfoState extends State<BookingInfo> {
                                         children: [
                                           const SizedBox(width: 10),
                                           Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  AppLocalizations.of(
-                                                    context,
-                                                  )!.bookingId,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "#${currentBooking.newBookingId ?? currentBooking.id}",
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ],
+                                            child: Text(
+                                              "${AppLocalizations.of(context)!.bookingId} #${currentBooking.newBookingId ?? currentBooking.id}",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(width: 8),

@@ -18,6 +18,7 @@ import 'package:aboglumbo_bbk_panel/models/banner.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/categories.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
+import 'package:aboglumbo_bbk_panel/models/counter_offer.dart';
 import 'package:aboglumbo_bbk_panel/models/customer_support.dart';
 import 'package:aboglumbo_bbk_panel/models/faq.dart';
 import 'package:aboglumbo_bbk_panel/models/highlighted_services.dart';
@@ -2688,8 +2689,32 @@ class AppServices {
     required String customerId,
   }) async {
     try {
+      // If bookingId might be a request ID, resolve from the offer
+      String resolvedBookingId = bookingId;
       if (offerId != null) {
-        // Update Job Offer with counter proposal
+        final offerDoc = await AppFirestore.jobOffersCollectionRef.doc(offerId).get();
+        if (offerDoc.exists) {
+          final data = offerDoc.data() as Map<String, dynamic>?;
+          if (data != null && data.containsKey('bookingId')) {
+            resolvedBookingId = data['bookingId'] ?? bookingId;
+          }
+        }
+      }
+
+      // Create counter offer document
+      final docRef = AppFirestore.counterOffersCollectionRef.doc();
+      final counterOffer = CounterOfferModel(
+        id: docRef.id,
+        bookingId: resolvedBookingId,
+        proposedBy: proposedBy,
+        proposedByUid: proposedByUid,
+        proposedByName: proposedByName,
+        proposedTime: proposedTime,
+        status: 'pending',
+        createdAt: Timestamp.now(),
+      );
+
+      if (offerId != null) {
         await AppFirestore.jobOffersCollectionRef.doc(offerId).update({
           'proposedTime': proposedTime,
           'status': 'counter_offered',
@@ -2698,25 +2723,38 @@ class AppServices {
         });
       }
 
-      // We still update the booking to notify the customer app and record the process
-      await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
+      // Update booking with activeCounterOffer
+      Map<String, dynamic> updateData = {
+        'activeCounterOffer': counterOffer.toMap(),
         'updatedAt': FieldValue.serverTimestamp(),
-        // We'll keep a reference in the booking for easier customer-side lookup if needed,
-        // but the main data now lives in the offer or the booking itself as flat fields
-        'proposedTime': proposedTime,
-        'counterOfferedBy': proposedBy,
-      });
+      };
+
+      // Set counterProposalStartedAt if not already set
+      final bookingDoc = await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).get();
+      if (bookingDoc.exists) {
+        final data = bookingDoc.data() as Map<String, dynamic>?;
+        if (data?['counterProposalStartedAt'] == null) {
+          updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
+        }
+      }
+
+      await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).update(updateData);
+
+      // Write to counter_offers collection (triggers Cloud Function notifications)
+      await docRef.set(counterOffer.toMap());
 
       // Send notification to customer
-      await _recordCustomerNotification(
-        customerId: customerId,
-        titleEn: 'Update Regarding Your Request',
-        titleAr: 'تحديث بخصوص طلبك',
-        bodyEn: 'Technician has proposed a new time for your booking.',
-        bodyAr: 'اقترح الفني موعداً جديداً لحجزك.',
-        type: 'counter_offer',
-        data: {'bookingId': bookingId, 'offerId': offerId},
-      );
+      if (customerId.isNotEmpty) {
+        await _recordCustomerNotification(
+          customerId: customerId,
+          titleEn: 'Update Regarding Your Request',
+          titleAr: 'تحديث بخصوص طلبك',
+          bodyEn: 'Technician has proposed a new time for your booking.',
+          bodyAr: 'اقترح الفني موعداً جديداً لحجزك.',
+          type: 'counter_offer',
+          data: {'bookingId': resolvedBookingId, 'offerId': offerId},
+        );
+      }
 
       return true;
     } catch (e) {
@@ -2725,58 +2763,6 @@ class AppServices {
     }
   }
 
-  static Future<bool> respondToCounterOffer({
-    required BookingModel booking,
-    required String response, // 'accepted' or 'rejected'
-  }) async {
-    try {
-      final bookingId = booking.id;
-      final activeCounterOffer = booking.activeCounterOffer;
-      if (activeCounterOffer == null) return false;
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
-        final offerRef = AppFirestore.counterOffersCollectionRef.doc(
-          activeCounterOffer.id!,
-        );
-
-        if (response == 'accepted') {
-          transaction.update(bookingRef, {
-            'bookingDateTime': activeCounterOffer.proposedTime,
-            'activeCounterOffer.status': response,
-            'counterProposalAcceptedAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        } else {
-          transaction.update(bookingRef, {
-            'activeCounterOffer.status': response,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-
-        transaction.update(offerRef, {
-          'status': response,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      });
-
-      await _recordCustomerNotification(
-        customerId: booking.customer.uid,
-        titleEn: 'Counter Offer Response',
-        titleAr: 'الرد على الاقتراح البديل',
-        bodyEn: 'Technician has $response your proposed time.',
-        bodyAr:
-            'قام الفني بـ ${response == 'accepted' ? 'قبول' : 'رفض'} موعدك المقترح.',
-        type: 'counter_offer_response',
-        data: {'bookingId': bookingId, 'status': response},
-      );
-
-      return true;
-    } catch (e) {
-      debugPrint('Error responding to counter offer: $e');
-      return false;
-    }
-  }
 
   static Future<void> _recordCustomerNotification({
     required String customerId,
@@ -3048,9 +3034,6 @@ class AppServices {
       if (bookingDoc.exists) {
         final bookingData = bookingDoc.data() as Map<String, dynamic>;
         final customerId = bookingData['customerId'];
-        final isRebook = offerRef
-            .id
-            .isNotEmpty; // Just for context, we can assume auto-assign or direct
         if (customerId != null) {
           await _recordCustomerNotification(
             customerId: customerId,
@@ -3077,7 +3060,6 @@ class AppServices {
 
       final data = offerDoc.data() as Map<String, dynamic>;
       final bool isRebook = data['isRebook'] == true;
-      final String? bookingId = data['bookingId'];
 
       final batch = FirebaseFirestore.instance.batch();
 

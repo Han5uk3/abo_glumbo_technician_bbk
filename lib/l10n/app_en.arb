@@ -1,4 +1,4 @@
-﻿{
+{
   "assign": "Assign",
   "later": "Later",
   "change": "Change",
@@ -1570,7 +1570,7 @@
   "listeningForSms": "Listening for SMS...",
   "earningsInfoOnly": "For informational purposes only",
   "throughApp": "Through App",
-  "rebookTechnician": "Rebook Technician",
+  "rebookTechnician": "Rebooking",
   "selectService": "Select Service",
   "rejectionProfessionalMessage": "If you are unavailable at the requested time, please propose an alternative date and time to the customer instead of canceling the appointment.",
   "proposeAlternativeTime": "Propose New Time",

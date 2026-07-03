@@ -8,7 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
@@ -23,7 +22,6 @@ class BroadcastOfferInfo extends StatefulWidget {
 }
 
 class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
-  bool _isLoading = false;
   Timer? _countdownTimer;
   int _secondsRemaining = 0;
 
@@ -69,116 +67,6 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
     });
   }
 
-  Future<void> _acceptOffer() async {
-    setState(() => _isLoading = true);
-    try {
-      final technician = LocalStore.getCachedUserData();
-      if (technician == null) throw Exception('Technician data not found');
-
-      await AppServices.acceptJobOffer(
-        bookingId: widget.offer.booking?.id,
-        requestId: widget.offer.requestId,
-        offerId: widget.offer.offerId,
-        technician: technician,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.offerAcceptedSuccessfully ?? 'Offer accepted successfully')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _showProfessionalRejectionDialog() async {
-    final l10n = AppLocalizations.of(context)!;
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          l10n.areYouSure,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          l10n.rejectionProfessionalMessage,
-          style: TextStyle(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _declineOffer();
-            },
-            child: Text(
-              l10n.rejectOffer,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showCounterOfferPicker();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              l10n.proposeAlternativeTime,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCounterOfferPicker() {
-    final data = widget.offer.offerData;
-    final booking = widget.offer.booking;
-    final bookingDateTime = data['bookingDateTime'] as Timestamp? ??
-        booking?.bookingDateTime;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CounterProposeSheet(
-        booking: booking,
-        requestId: widget.offer.requestId,
-        offerId: widget.offer.offerId,
-        customerId: data['customerId'] ?? booking?.customer.uid,
-        currentBookingTime: bookingDateTime?.toDate() ?? DateTime.now(),
-      ),
-    );
-  }
-
-  Future<void> _declineOffer() async {
-    setState(() => _isLoading = true);
-    try {
-      await AppServices.declineJobOffer(widget.offer.offerId);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
@@ -196,34 +84,40 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
               booking?.service.name ??
               '')
         : locale == 'ar'
-            ? (data['serviceNameAr'] ??
-                  booking?.service.name_ar ??
-                  data['serviceName'] ??
-                  booking?.service.name ??
-                  '')
-            : (data['serviceName'] ?? booking?.service.name ?? '');
+        ? (data['serviceNameAr'] ??
+              booking?.service.name_ar ??
+              data['serviceName'] ??
+              booking?.service.name ??
+              '')
+        : (data['serviceName'] ?? booking?.service.name ?? '');
 
     final customerName =
         data['customerName'] ?? booking?.customer.name ?? localization.customer;
 
-    final selectedAddress = booking?.customer.addresses.where((a) => a.isSelected == true).firstOrNull ?? booking?.customer.addresses.firstOrNull;
-    final displayAddress = selectedAddress?.displayAddress.isNotEmpty == true ? selectedAddress!.displayAddress : null;
+    final selectedAddress =
+        booking?.customer.addresses
+            .where((a) => a.isSelected == true)
+            .firstOrNull ??
+        booking?.customer.addresses.firstOrNull;
+    final displayAddress = selectedAddress?.displayAddress.isNotEmpty == true
+        ? selectedAddress!.displayAddress
+        : null;
     final selectedText = booking?.customerSelectedAddressText ?? '';
 
     final address = selectedText.isNotEmpty
         ? selectedText
         : data['serviceLocation']?['fullAddress'] ??
-          data['serviceLocation']?['streetName'] ??
-          displayAddress ??
-          booking?.customer.location?.fullAddress ??
-          localization.notAvailable;
+              data['serviceLocation']?['streetName'] ??
+              displayAddress ??
+              booking?.customer.location?.fullAddress ??
+              localization.notAvailable;
 
     final notes =
         data['notes'] ?? booking?.notes ?? localization.noAdditionalDescription;
     final issueImage = data['issueImage'] ?? booking?.issueImage;
     final issueVideo = data['issueVideo'] ?? booking?.issueVideo;
-    final bookingDateTime = data['bookingDateTime'] as Timestamp? ??
-        booking?.bookingDateTime;
+    final bookingDateTime =
+        data['bookingDateTime'] as Timestamp? ?? booking?.bookingDateTime;
 
     final minutes = _secondsRemaining ~/ 60;
     final seconds = _secondsRemaining % 60;
@@ -241,10 +135,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
         ),
         title: Text(
           serviceName,
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
           if (data['status'] != 'accepted_by_technician')
@@ -291,11 +182,17 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 [
                   _buildDetailRow(
                     localization.date,
-                    DateFormat('EEEE, d MMMM yyyy', locale).format(bookingDateTime.toDate()),
+                    DateFormat(
+                      'EEEE, d MMMM yyyy',
+                      locale,
+                    ).format(bookingDateTime.toDate()),
                   ),
                   _buildDetailRow(
                     localization.time,
-                    DateFormat('hh:mm a', locale).format(bookingDateTime.toDate()),
+                    DateFormat(
+                      'hh:mm a',
+                      locale,
+                    ).format(bookingDateTime.toDate()),
                   ),
                 ],
               ),
@@ -306,10 +203,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
             if (notes.isNotEmpty) ...[
               Text(
                 localization.notes,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
               Container(
@@ -322,10 +216,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 ),
                 child: Text(
                   notes,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[800],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[800]),
                 ),
               ),
               const SizedBox(height: 24),
@@ -336,10 +227,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                 (issueVideo != null && issueVideo.isNotEmpty)) ...[
               Text(
                 localization.issueMedia,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
               if (issueImage != null && issueImage.isNotEmpty)
@@ -367,7 +255,6 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
         ),
       ),
       bottomNavigationBar: null,
-
     );
   }
 
@@ -396,10 +283,7 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ],
           ),
@@ -420,20 +304,14 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
         ],

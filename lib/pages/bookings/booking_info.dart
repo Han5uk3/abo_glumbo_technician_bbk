@@ -13,7 +13,6 @@ import 'package:aboglumbo_bbk_panel/models/customer.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/verify_payment_sheet.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
@@ -23,8 +22,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
+
 import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
@@ -359,113 +357,6 @@ class _BookingInfoState extends State<BookingInfo> {
     } catch (e) {
       debugPrint('Error loading offer expiry: $e');
     }
-  }
-
-  Future<void> _acceptJobOffer(BookingModel booking) async {
-    if (_offerId == null) return;
-    setState(() => _isOfferLoading = true);
-    try {
-      final technician = LocalStore.getCachedUserData();
-      if (technician == null) throw Exception('Technician data not found');
-
-      await AppServices.acceptJobOffer(
-        bookingId: booking.id,
-        offerId: _offerId!,
-        technician: technician,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.offerAcceptedSuccessfully ??
-                  'Offer accepted successfully',
-            ),
-          ),
-        );
-        setState(() => _offerId = null); // Refresh UI
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
-                  'Error: ${e.toString()}',
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isOfferLoading = false);
-    }
-  }
-
-  Future<void> _showProfessionalRejectionDialog() async {
-    final l10n = AppLocalizations.of(context)!;
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          l10n.areYouSure,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(l10n.rejectionProfessionalMessage, style: TextStyle()),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _declineJobOffer();
-            },
-            child: Text(
-              l10n.rejectOffer,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showCounterOfferPicker();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              l10n.proposeAlternativeTime,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCounterOfferPicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CounterProposeSheet(
-        booking: widget.booking,
-        offerId: _offerId,
-        currentBookingTime: widget.booking.bookingDateTime.toDate(),
-      ),
-    );
-  }
-
-  void _showCounterOfferDatePicker(BookingModel booking, [String? offerId]) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CounterProposeSheet(
-        booking: booking,
-        offerId: offerId,
-        currentBookingTime: booking.bookingDateTime.toDate(),
-      ),
-    );
   }
 
   Future<void> _declineJobOffer() async {
@@ -818,20 +709,24 @@ class _BookingInfoState extends State<BookingInfo> {
     final List<String> parts = [];
     if (customer.buildingNumber != null &&
         customer.buildingNumber!.isNotEmpty &&
-        customer.buildingNumber != 'N/A')
+        customer.buildingNumber != 'N/A') {
       parts.add(customer.buildingNumber!);
+    }
     if (customer.streetName != null &&
         customer.streetName!.isNotEmpty &&
-        customer.streetName != 'N/A')
+        customer.streetName != 'N/A') {
       parts.add(customer.streetName!);
+    }
     if (customer.districtName != null &&
         customer.districtName!.isNotEmpty &&
-        customer.districtName != 'N/A')
+        customer.districtName != 'N/A') {
       parts.add(customer.districtName!);
+    }
     if (customer.cityName != null &&
         customer.cityName!.isNotEmpty &&
-        customer.cityName != 'N/A')
+        customer.cityName != 'N/A') {
       parts.add(customer.cityName!);
+    }
 
     final fallback = parts.join(', ');
     if (fallback.isNotEmpty) return fallback;
@@ -1586,40 +1481,6 @@ class _BookingInfoState extends State<BookingInfo> {
               colorScheme,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _viewInfoImage(String url, BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              iconSize: 18,
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: Text(
-              AppLocalizations.of(context)!.image,
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-          body: Center(
-            child: InteractiveViewer(
-              child: CachedNetworkImage(
-                imageUrl: url,
-                placeholder: (context, url) => Center(child: Loader()),
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -3454,35 +3315,6 @@ class _BookingInfoState extends State<BookingInfo> {
     );
   }
 
-  Widget _buildCostRow(
-    BuildContext context, {
-    required String label,
-    required double amount,
-    required ColorScheme colorScheme,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onSurface.withOpacity(0.7),
-          ),
-        ),
-        Text(
-          '${amount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
-
   List<Widget> _buildFileLinks(
     BuildContext context,
     List<String> fileUrls,
@@ -3742,163 +3574,43 @@ class _BookingInfoState extends State<BookingInfo> {
 
     if (activeOffer != null) {
       if (activeOffer.status == 'pending') {
-        if (activeOffer.proposedBy == 'customer') {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.shade200),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.event_repeat_rounded,
-                      color: Colors.orange.shade700,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.customerProposedNewTime,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.orange.shade900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.shade100),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.hourglass_empty_rounded,
+                    color: Colors.blue.shade700,
+                    size: 22,
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_filled,
-                        size: 16,
-                        color: Colors.orange.shade400,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          formatDateTimeDay(
-                            activeOffer.proposedTime.toDate(),
-                            locale,
-                          ),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (!widget.isAdmin)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => _handleCounterOfferResponse(
-                            context,
-                            booking,
-                            'rejected',
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(l10n.rejectOffer),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => _handleCounterConfirm(
-                            context,
-                            booking,
-                            'accepted',
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(l10n.acceptOffer),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          );
-        } else {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.hourglass_empty_rounded,
-                      color: Colors.blue.shade700,
-                      size: 22,
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.waitingForCustomer,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.blue.shade900,
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      l10n.waitingForCustomer,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.blue.shade900,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "${l10n.newProposedTime}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
-                  style: TextStyle(fontSize: 13, color: Colors.grey[800]!),
-                ),
-              ],
-            ),
-          );
-        }
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "${l10n.newProposedTime}: ${formatDateTimeDay(activeOffer.proposedTime.toDate(), locale)}",
+                style: TextStyle(fontSize: 13, color: Colors.grey[800]!),
+              ),
+            ],
+          ),
+        );
       } else {
         final bool isRejected = activeOffer.status == 'rejected';
         return Container(
@@ -3937,27 +3649,8 @@ class _BookingInfoState extends State<BookingInfo> {
               const SizedBox(height: 8),
               if (isRejected) ...[
                 Text(
-                  activeOffer.proposedBy == 'technician'
-                      ? l10n.customerRejectedProposal
-                      : l10n.youRejectedProposal,
+                  l10n.customerRejectedProposal,
                   style: TextStyle(fontSize: 13, color: Colors.grey[700]!),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () =>
-                        _showCounterOfferDatePicker(booking, _offerId),
-                    icon: const Icon(Icons.history_toggle_off, size: 18),
-                    label: Text(l10n.proposeNewTime),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
                 ),
               ] else ...[
                 Text(
@@ -3969,11 +3662,6 @@ class _BookingInfoState extends State<BookingInfo> {
           ),
         );
       }
-    }
-
-    if (activeOffer == null) {
-      // Propose New Time button removed as per request
-      return const SizedBox.shrink();
     }
 
     return const SizedBox.shrink();
@@ -4226,349 +3914,6 @@ class _BookingInfoState extends State<BookingInfo> {
 
   Widget _buildJobOfferControls(BuildContext context, BookingModel booking) {
     return const SizedBox.shrink();
-    if (_isOfferLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-    final l10n = AppLocalizations.of(context)!;
-    final minutes = _offerSecondsRemaining ~/ 60;
-    final seconds = _offerSecondsRemaining % 60;
-    final timerText =
-        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    final timerProgress = _offerSecondsRemaining / 120; // 2 min = 120 seconds
-    final isUrgent = _offerSecondsRemaining <= 30;
-    final timerColor = isUrgent ? Colors.red : AppColors.primary;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isUrgent
-              ? Colors.red.withOpacity(0.3)
-              : AppColors.primary.withOpacity(0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isUrgent ? Colors.red : AppColors.primary).withOpacity(
-              0.05,
-            ),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            l10n.acceptOffer,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Countdown timer
-          SizedBox(
-            width: 80,
-            height: 80,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                CircularProgressIndicator(
-                  value: timerProgress.clamp(0.0, 1.0),
-                  strokeWidth: 5,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(timerColor),
-                ),
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.timer_outlined, size: 16, color: timerColor),
-                      const SizedBox(height: 2),
-                      Text(
-                        timerText,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: timerColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            Localizations.localeOf(context).languageCode == 'ar'
-                ? 'وقت الرد'
-                : Localizations.localeOf(context).languageCode == 'ur'
-                ? 'جواب دینے کا وقت'
-                : 'Time to respond',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: _showProfessionalRejectionDialog,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.reject,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () => _acceptJobOffer(booking),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.accept,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAcceptConfirmationDialog(
-    BuildContext context,
-    BookingModel booking,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          l10n.acceptBooking,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        content: Text(
-          l10n.areYouSureYouWantToAcceptThisBooking,
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              try {
-                await AppFirestore.bookingsCollectionRef
-                    .doc(booking.id)
-                    .update({
-                      'bookingStatusCode': 'A',
-                      'acceptedAt': FieldValue.serverTimestamp(),
-                      'updatedAt': FieldValue.serverTimestamp(),
-                    });
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.anErrorOccurred),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRejectBookingDialog(BuildContext context, BookingModel booking) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          l10n.rejectBooking,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        content: Text(
-          l10n.areYouSureYouWantToRejectThisBooking,
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.read<BookingBloc>().add(
-                        CancelBooking(
-                          bookingId: booking.id,
-                          agentUid: booking.agent?.uid ?? '',
-                          agentName: booking.agent?.name ?? '',
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.reject,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      l10n.cancel,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _handleCounterConfirm(
-    BuildContext context,
-    BookingModel booking,
-    String response,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.acceptOffer),
-        content: Text(l10n.rescheduleBookingTimeConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.no, style: const TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.yes,
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true && mounted) {
-      if (response == 'accepted' && _offerId != null) {
-        await _acceptJobOffer(booking);
-      }
-      await _handleCounterOfferResponse(context, booking, response);
-    }
-  }
-
-  Future<void> _handleCounterOfferResponse(
-    BuildContext context,
-    BookingModel booking,
-    String response,
-  ) async {
-    final success = await AppServices.respondToCounterOffer(
-      booking: booking,
-      response: response,
-    );
-    if (success) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.completed)),
-      );
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.anErrorOccurred),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   Widget _buildTimestampText(BuildContext context, BookingModel booking) {
@@ -4586,7 +3931,8 @@ class _BookingInfoState extends State<BookingInfo> {
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",
       );
     }
-    final dateToUse = booking.assignedAt ?? booking.acceptedAt ?? booking.createdAt;
+    final dateToUse =
+        booking.assignedAt ?? booking.acceptedAt ?? booking.createdAt;
     if (dateToUse != null && booking.bookingStatusCode == "A") {
       return _timestampText(
         "${AppLocalizations.of(context)!.acceptedAt} : ${formatBookingDateTime(dateToUse.toDate(), locale)}",

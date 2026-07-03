@@ -207,6 +207,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = MediaQueryData.fromView(
+      View.of(context),
+    ).padding.bottom;
+    final bool isThickNavBar = bottomPadding > 24.0;
     return BlocProvider(
       create: (context) => AccountBloc(),
       child: BlocBuilder<AccountBloc, AccountState>(
@@ -215,6 +219,7 @@ class MyApp extends StatelessWidget {
             providers: providers,
             child: SafeArea(
               top: false,
+              bottom: Platform.isAndroid ? isThickNavBar : false,
               child: MaterialApp(
                 key: ValueKey(state.locale.languageCode),
                 navigatorKey: navigatorKey,
@@ -257,10 +262,7 @@ class MyApp extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         );
                       }
-                      return TextStyle(
-                        color: AppColors.grey,
-                        fontSize: 10,
-                      );
+                      return TextStyle(color: AppColors.grey, fontSize: 10);
                     }),
                   ),
                   dialogTheme: DialogThemeData(

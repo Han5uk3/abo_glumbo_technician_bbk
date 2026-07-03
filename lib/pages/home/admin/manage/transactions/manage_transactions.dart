@@ -523,7 +523,8 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
               // ),
 
               // Filter Chips Section
-              Padding(
+              Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,

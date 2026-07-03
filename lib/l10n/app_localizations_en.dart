@@ -4714,7 +4714,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get throughApp => 'Through App';
 
   @override
-  String get rebookTechnician => 'Rebook Technician';
+  String get rebookTechnician => 'Rebooking';
 
   @override
   String get selectService => 'Select Service';

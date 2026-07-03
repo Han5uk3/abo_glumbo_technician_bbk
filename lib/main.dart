@@ -225,21 +225,6 @@ class MyApp extends StatelessWidget {
                 navigatorKey: navigatorKey,
                 title: 'Abo Glumbo - Technician',
                 debugShowCheckedModeBanner: false,
-                builder: (context, child) {
-                  final mq = MediaQuery.of(context);
-                  final bottom = mq.padding.bottom;
-
-                  // Samsung OneUI gesture nav bug → returns 0 bottom inset
-                  final fixedBottom = bottom == 0 ? 16.0 : bottom;
-
-                  return MediaQuery(
-                    data: mq.copyWith(
-                      padding: mq.padding.copyWith(bottom: fixedBottom),
-                    ),
-                    child: child!,
-                  );
-                },
-
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 locale: state.locale,
                 supportedLocales: AppLocalizations.supportedLocales,

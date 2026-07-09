@@ -2729,16 +2729,38 @@ class AppServices {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      // Set counterProposalStartedAt if not already set
+      // Set counterProposalStartedAt if not already set by checking multiple collections
       final bookingDoc = await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).get();
       if (bookingDoc.exists) {
         final data = bookingDoc.data() as Map<String, dynamic>?;
         if (data?['counterProposalStartedAt'] == null) {
           updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
         }
+        await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).update(updateData);
+      } else {
+        // Fallback to job_requests
+        final jobReqDoc = await AppFirestore.jobRequestsCollectionRef.doc(resolvedBookingId).get();
+        if (jobReqDoc.exists) {
+          final data = jobReqDoc.data() as Map<String, dynamic>?;
+          if (data?['counterProposalStartedAt'] == null) {
+            updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
+          }
+          await AppFirestore.jobRequestsCollectionRef.doc(resolvedBookingId).update(updateData);
+        } else {
+          // Fallback to booking_request
+          final bookingReqDoc = await AppFirestore.bookingRequestsCollectionRef.doc(resolvedBookingId).get();
+          if (bookingReqDoc.exists) {
+            final data = bookingReqDoc.data() as Map<String, dynamic>?;
+            if (data?['counterProposalStartedAt'] == null) {
+              updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
+            }
+            await AppFirestore.bookingRequestsCollectionRef.doc(resolvedBookingId).update(updateData);
+          } else {
+            // Document doesn't exist anywhere we expect it to
+            debugPrint('Warning: resolvedBookingId $resolvedBookingId not found in bookings, job_requests, or booking_request collections');
+          }
+        }
       }
-
-      await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).update(updateData);
 
       // Write to counter_offers collection (triggers Cloud Function notifications)
       await docRef.set(counterOffer.toMap());
@@ -3088,6 +3110,7 @@ class AppServices {
       }
     } catch (e) {
       debugPrint('Error declining job offer: $e');
+      throw e;
     }
   }
 

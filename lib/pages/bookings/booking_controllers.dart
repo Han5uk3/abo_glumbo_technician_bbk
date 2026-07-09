@@ -132,7 +132,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                   ? SnackBarAction(
                       label: AppLocalizations.of(context)!.openSettings,
                       textColor: Colors.white,
-                      onPressed: () => Permission.locationAlways.request(),
+                      onPressed: () => openAppSettings(),
                     )
                   : null,
             ),

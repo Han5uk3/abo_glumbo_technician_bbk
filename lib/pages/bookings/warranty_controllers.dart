@@ -141,7 +141,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                   ? SnackBarAction(
                       label: AppLocalizations.of(context)!.openSettings,
                       textColor: Colors.white,
-                      onPressed: () => Permission.locationAlways.request(),
+                      onPressed: () => openAppSettings(),
                     )
                   : null,
             ),

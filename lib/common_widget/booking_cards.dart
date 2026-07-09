@@ -356,7 +356,14 @@ class BookingListTileWidget extends StatelessWidget {
             // Footer Section
             Row(
               children: [
-                Expanded(child: _buildTimestamp(context)),
+                Expanded(
+                  child: _buildTimestamp(
+                    context,
+                    currentTechCancelled,
+                    isCurrentlyAssignedToMe,
+                    localization,
+                  ),
+                ),
 
                 // Action Buttons or Status Badge
                 if (actionOverride != null)
@@ -507,7 +514,7 @@ class BookingListTileWidget extends StatelessWidget {
     }
 
     if (currentTechCancelled && !isCurrentlyAssignedToMe) {
-      return _statusBadge(localization.rejected.toUpperCase(), Colors.red);
+      return _statusBadge(localization.canceled.toUpperCase(), Colors.red);
     }
 
     String label = '';
@@ -627,9 +634,44 @@ class BookingListTileWidget extends StatelessWidget {
     return difference < 0 ? 0 : difference;
   }
 
-  Widget _buildTimestamp(BuildContext context) {
+  Widget _buildTimestamp(
+    BuildContext context,
+    bool currentTechCancelled,
+    bool isCurrentlyAssignedToMe,
+    AppLocalizations localization,
+  ) {
     String text = '';
-    if (isWarranty) {
+    String? prefix;
+
+    if (currentTechCancelled && !isCurrentlyAssignedToMe) {
+      if (isWarranty) {
+        if (booking.warranty?.rejectedAt != null) {
+          text = LocalizationHelper().formatDateTimeCompact(
+            booking.warranty!.rejectedAt!.toDate(),
+            context,
+          );
+        } else if (booking.warranty?.createdAt != null) {
+          text = LocalizationHelper().formatDateTimeCompact(
+            booking.warranty!.createdAt!.toDate(),
+            context,
+          );
+          prefix = localization.bookedOn;
+        }
+      } else {
+        if (booking.cancelledAt != null) {
+          text = LocalizationHelper().formatDateTimeCompact(
+            booking.cancelledAt!.toDate(),
+            context,
+          );
+        } else if (booking.createdAt != null) {
+          text = LocalizationHelper().formatDateTimeCompact(
+            booking.createdAt!.toDate(),
+            context,
+          );
+          prefix = localization.bookedOn;
+        }
+      }
+    } else if (isWarranty) {
       final warranty = booking.warranty;
       if (warranty != null) {
         final statusCode = warranty.warrantyStatusCode;
@@ -705,7 +747,7 @@ class BookingListTileWidget extends StatelessWidget {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            text,
+            prefix != null ? "$prefix: $text" : text,
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 10,
@@ -1055,6 +1097,17 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     setState(() => _isLoading = true);
     try {
       await AppServices.declineJobOffer(widget.offer.offerId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.orderRejectedSuccessfully ??
+                  'Offer rejected successfully',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1063,6 +1116,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
               AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
                   'Error: ${e.toString()}',
             ),
+            backgroundColor: Colors.red,
           ),
         );
       }

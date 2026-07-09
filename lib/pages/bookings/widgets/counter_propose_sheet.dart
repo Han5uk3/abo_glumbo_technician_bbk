@@ -36,13 +36,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final originalDateTime = widget.currentBookingTime;
     
-    // Start with the later of now or original booking time
-    DateTime baseTime = now.isAfter(originalDateTime) ? now : originalDateTime;
-    
-    // Add 30 mins to ensure it's "after"
-    baseTime = baseTime.add(const Duration(minutes: 30));
+    // Start with now + 30 mins
+    DateTime baseTime = now.add(const Duration(minutes: 30));
 
     _selectedDate = baseTime;
     
@@ -75,7 +71,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      lastDate: widget.currentBookingTime.isAfter(DateTime.now()) 
+          ? widget.currentBookingTime 
+          : DateTime.now().add(const Duration(days: 30)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -157,8 +155,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                     final isSelected = _selectedTime?.hour == slot.hour && 
                                      _selectedTime?.minute == slot.minute;
                     
-                    // Check if slot is valid (after original booking time)
+                    // Check if slot is valid (after now and before original booking time)
                     final bookingDate = widget.currentBookingTime;
+                    final now = DateTime.now();
                     final selectedSlotDateTime = DateTime(
                       _selectedDate!.year,
                       _selectedDate!.month,
@@ -167,7 +166,8 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                       slot.minute,
                     );
                     
-                    final isValid = selectedSlotDateTime.isAfter(bookingDate);
+                    final isValid = selectedSlotDateTime.isAfter(now) && 
+                                    selectedSlotDateTime.isBefore(bookingDate);
                     
                     return InkWell(
                       onTap: isValid ? () => Navigator.pop(context, slot) : null,
@@ -224,11 +224,12 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
     );
 
     final originalDateTime = widget.currentBookingTime;
+    final now = DateTime.now();
 
-    if (!selectedDateTime.isAfter(originalDateTime)) {
+    if (!selectedDateTime.isAfter(now) || !selectedDateTime.isBefore(originalDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.pleaseSelectALaterTime),
+          content: const Text('Please select a valid time between now and original booking time'),
           backgroundColor: Colors.red,
         ),
       );

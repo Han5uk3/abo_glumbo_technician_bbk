@@ -221,6 +221,12 @@ class _BookingInfoState extends State<BookingInfo> {
         );
       }
       log('❌ Chat error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isInitiatingChat = false;
+        });
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/categories.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/categories/add_new_categories.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -41,9 +42,7 @@ class CategoryTileDevWidget extends StatelessWidget {
               height: 60,
               width: 60,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Center(
-                child: Loader(size: 20, color: Colors.grey.withOpacity(0.5)),
-              ),
+              placeholder: (context, url) => const ImageShimmer(),
               errorWidget: (context, url, error) =>
                   Icon(Icons.error, color: Colors.red.withOpacity(0.7)),
             ),
@@ -133,13 +132,12 @@ class CategoryTileDevWidget extends StatelessWidget {
             AppLocalizations.of(context)!.deleteCategoryConfirmation,
           ),
           actions: [
-            eButton(
-              text: "",
+            TextButton(
               onPressed: isDeleting ? null : () => Navigator.pop(context),
-              widget: Text(AppLocalizations.of(context)!.cancel),
-              context: context,
-              textColor: Colors.black,
-              backgroundColor: AppColors.bgWhite,
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: TextStyle(color: Colors.black),
+              ),
             ),
             eButton(
               text: "",
@@ -155,9 +153,12 @@ class CategoryTileDevWidget extends StatelessWidget {
                   ? SizedBox(
                       width: 30,
                       height: 20,
-                      child: Loader(size: 12, color: AppColors.primary),
+                      child: Loader(size: 12, color: Colors.white),
                     )
-                  : Text(AppLocalizations.of(context)!.delete),
+                  : Text(
+                      AppLocalizations.of(context)!.delete,
+                      style: TextStyle(color: Colors.white),
+                    ),
               context: context,
               textColor: Colors.white,
               backgroundColor: Colors.red,

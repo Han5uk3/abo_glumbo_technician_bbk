@@ -52,7 +52,6 @@ class _LoaderState extends State<Loader> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    double margin = (widget.size - 12) / 8;
     return SizedBox(
       width: widget.size,
       height: widget.height ?? widget.size,
@@ -64,7 +63,7 @@ class _LoaderState extends State<Loader> with TickerProviderStateMixin {
             animation: _animations[index],
             builder: (context, child) {
               return Container(
-                margin: EdgeInsets.symmetric(horizontal: margin),
+                margin: EdgeInsets.symmetric(horizontal: 0.5),
                 width: 3,
                 height: widget.size * _animations[index].value,
                 decoration: BoxDecoration(

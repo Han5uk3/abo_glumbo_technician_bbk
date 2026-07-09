@@ -47,7 +47,6 @@ class TextFormWidget extends StatelessWidget {
         Text(label, style: TextStyle(fontSize: 16)),
         const SizedBox(height: 5),
         TextFormField(
-
           textDirection: forceLtr ? TextDirection.ltr : null,
           textAlign: forceLtr ? TextAlign.end : TextAlign.start,
           obscureText: obscureText,
@@ -104,7 +103,6 @@ class TextFormWidget extends StatelessWidget {
               : validator,
           onTap: onTap,
           readOnly: readOnly ?? onTap != null,
-          
         ),
       ],
     );

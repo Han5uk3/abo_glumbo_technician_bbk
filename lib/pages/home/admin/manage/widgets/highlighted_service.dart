@@ -1,8 +1,8 @@
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/highlighted_services.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,9 +13,11 @@ class HighlightedServiceWidget extends StatelessWidget {
     super.key,
     required this.data,
     required this.editCallback,
+    this.deleteCallback,
   });
   final HighlightedServicesModel data;
   final VoidCallback editCallback;
+  final VoidCallback? deleteCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +55,32 @@ class HighlightedServiceWidget extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      size: 20,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: editCallback,
-                    constraints: const BoxConstraints(),
-                    padding: EdgeInsets.zero,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: editCallback,
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                      ),
+                      if (deleteCallback != null) ...[
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 20,
+                            color: Colors.red,
+                          ),
+                          onPressed: deleteCallback,
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -150,15 +169,8 @@ class HighlightedServiceWidget extends StatelessWidget {
   // Helper method to build loading container
   Widget _buildLoadingContainer(bool isRtlLanguage) {
     return Container(
-      height: 127,
-      width: 127,
-      alignment: Alignment.center,
       margin: const EdgeInsetsDirectional.only(end: 13),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Loader(size: 14, color: AppColors.primary),
+      child: const ImageShimmer(width: 127, height: 127, borderRadius: 4),
     );
   }
 
@@ -209,10 +221,7 @@ class HighlightedServiceWidget extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Container(
-        color: Colors.grey[100],
-        child: Center(child: Loader(size: 20)),
-      ),
+      placeholder: (context, url) => const ImageShimmer(),
       errorWidget: (context, url, error) => Container(
         color: Colors.grey[300],
         child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),

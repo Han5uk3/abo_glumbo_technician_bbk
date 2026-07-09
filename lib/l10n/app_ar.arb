@@ -1840,5 +1840,14 @@
   "resolveIssue": "حل المشكلة",
   "whatWasDoneToResolve": "ما الذي تم فعله لحل المشكلة؟",
   "resolutionTextRequired": "نص الحل مطلوب",
-  "submit": "إرسال"
+  "urduName": "الاسم بالأردية",
+  "enterUrduName": "أدخل الاسم بالأردية",
+  "pleaseEnterUrduName": "يرجى إدخال الاسم بالأردية",
+  "pleaseEnterUrduNameOnly": "يرجى إدخال الاسم بالأردية فقط",
+  "searchForZones": "البحث عن المناطق",
+  "failedToSearchForZones": "فشل البحث عن المناطق. يرجى المحاولة مرة أخرى."
+,
+  "zoneNameAlreadyExists": "??? ??????? ????? ??????"
+,
+  "zoneType": "??? ???????"
 }

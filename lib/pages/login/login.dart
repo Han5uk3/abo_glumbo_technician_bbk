@@ -227,10 +227,12 @@ class _LoginPageState extends State<LoginPage> {
           if (exception.message?.toLowerCase().contains('canceled') == true) {
             return;
           }
-          final errorPrefix = AppLocalizations.of(context)?.biometricError ?? '❌ Biometric error';
-          final unknownError = AppLocalizations.of(context)?.unknownError ?? 'Unknown error';
-          message =
-              '$errorPrefix: ${exception.message ?? unknownError}';
+          final errorPrefix =
+              AppLocalizations.of(context)?.biometricError ??
+              '❌ Biometric error';
+          final unknownError =
+              AppLocalizations.of(context)?.unknownError ?? 'Unknown error';
+          message = '$errorPrefix: ${exception.message ?? unknownError}';
       }
 
       if (message.isNotEmpty) {
@@ -273,28 +275,33 @@ class _LoginPageState extends State<LoginPage> {
           String errorMessage;
           switch (state.error) {
             case 'too-many-requests':
-              errorMessage = AppLocalizations.of(context)?.tooManyRequests ??
+              errorMessage =
+                  AppLocalizations.of(context)?.tooManyRequests ??
                   'Too many requests. Please wait and try again.';
               break;
             case 'invalid-phone-number':
-              errorMessage = AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
+              errorMessage =
+                  AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
                   'Please enter a valid phone number';
               break;
             case 'quota-exceeded':
-              errorMessage = AppLocalizations.of(context)?.quotaExceeded ??
+              errorMessage =
+                  AppLocalizations.of(context)?.quotaExceeded ??
                   'SMS quota exceeded. Try again later.';
               break;
             case 'network-request-failed':
-              errorMessage = AppLocalizations.of(context)?.networkError ??
+              errorMessage =
+                  AppLocalizations.of(context)?.networkError ??
                   'Network error. Please check your connection.';
               break;
             case 'internal-error':
-              errorMessage = AppLocalizations.of(context)?.internalError ??
+              errorMessage =
+                  AppLocalizations.of(context)?.internalError ??
                   'An internal error occurred. Please try again later.';
               break;
             case 'timeout':
-              errorMessage = AppLocalizations.of(context)?.timedOut ??
-                  'Timed Out';
+              errorMessage =
+                  AppLocalizations.of(context)?.timedOut ?? 'Timed Out';
               break;
             default:
               errorMessage = state.error;
@@ -304,9 +311,7 @@ class _LoginPageState extends State<LoginPage> {
           // No account found → navigate to create account page
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (context) => Signup(uid: state.uid),
-            ),
+            MaterialPageRoute(builder: (context) => Signup(uid: state.uid)),
             (route) => false,
           );
         } else if (state is LoginFailure) {

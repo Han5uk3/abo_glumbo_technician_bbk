@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/agents/agent_info.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,7 @@ class _ManageAgentsState extends State<ManageAgents>
     );
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
+  Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -191,6 +192,7 @@ class _ManageAgentsState extends State<ManageAgents>
     );
 
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _startDate = DateTime(
           picked.start.year,
@@ -211,11 +213,14 @@ class _ManageAgentsState extends State<ManageAgents>
     }
   }
 
-  Future<void> _selectMonth(BuildContext context) async {
+  Future<void> _selectMonth() async {
     final now = DateTime.now();
     final months = List.generate(12, (index) {
       return DateTime(now.year, now.month - index, 1);
     });
+
+    if (!mounted) return;
+    final languageCode = Localizations.localeOf(context).languageCode;
 
     final selected = await showDialog<DateTime>(
       context: context,
@@ -238,7 +243,7 @@ class _ManageAgentsState extends State<ManageAgents>
                 final monthDate = months[index];
                 final label = DateFormat(
                   'MMMM yyyy',
-                  Localizations.localeOf(context).languageCode,
+                  languageCode,
                 ).format(monthDate);
                 return ListTile(
                   title: Text(
@@ -256,13 +261,11 @@ class _ManageAgentsState extends State<ManageAgents>
     );
 
     if (selected != null) {
+      if (!mounted) return;
       setState(() {
         _startDate = DateTime(selected.year, selected.month, 1);
         _endDate = DateTime(selected.year, selected.month + 1, 0, 23, 59, 59);
-        _periodLabel = DateFormat(
-          'MMMM yyyy',
-          Localizations.localeOf(context).languageCode,
-        ).format(selected);
+        _periodLabel = DateFormat('MMMM yyyy', languageCode).format(selected);
       });
     }
   }
@@ -368,7 +371,7 @@ class _ManageAgentsState extends State<ManageAgents>
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _selectMonth(context);
+                  _selectMonth();
                 },
               ),
               ListTile(
@@ -390,7 +393,7 @@ class _ManageAgentsState extends State<ManageAgents>
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _selectDateRange(context);
+                  _selectDateRange();
                 },
               ),
               const SizedBox(height: 12),
@@ -463,16 +466,6 @@ class _ManageAgentsState extends State<ManageAgents>
             ),
           ),
           shape: Border.all(style: BorderStyle.none),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: Colors.black),
-              onPressed: () {
-                setState(() {});
-              },
-              tooltip: AppLocalizations.of(context)!.refresh,
-            ),
-            const SizedBox(width: 8),
-          ],
         ),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
@@ -546,30 +539,26 @@ class _ManageAgentsState extends State<ManageAgents>
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const ClampingScrollPhysics(),
-                  child: Wrap(
-                    spacing: 8.0,
-                    runSpacing: 8.0,
-                    children: [
-                      _buildFilterChip(
-                        context,
-                        AppLocalizations.of(context)!.all,
-                        0,
-                      ),
-                      _buildFilterChip(
-                        context,
-                        AppLocalizations.of(context)!.verified,
-                        1,
-                      ),
-                      _buildFilterChip(
-                        context,
-                        AppLocalizations.of(context)!.pending,
-                        2,
-                      ),
-                    ],
-                  ),
+                child: Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.all,
+                      0,
+                    ),
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.verified,
+                      1,
+                    ),
+                    _buildFilterChip(
+                      context,
+                      AppLocalizations.of(context)!.pending,
+                      2,
+                    ),
+                  ],
                 ),
               ),
 
@@ -578,7 +567,7 @@ class _ManageAgentsState extends State<ManageAgents>
                 stream: _agentsTransactionsStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: Loader());
+                    return const ManageShimmerLoading();
                   }
 
                   if (snapshot.hasError) {
@@ -631,31 +620,6 @@ class _ManageAgentsState extends State<ManageAgents>
                     }
                     return matchesSearch && matchesVerification;
                   }).toList();
-
-                  // Calculate combined totals for the selected period
-                  double combinedInApp = 0.0;
-                  double combinedOutside = 0.0;
-                  for (var t in allTransactions) {
-                    final isCompleted =
-                        t.paymentStatus.toLowerCase() == 'completed' ||
-                        t.paymentStatus.toLowerCase() == 'paid';
-                    if (!isCompleted) continue;
-
-                    final date = t.createdAt.toDate();
-                    if (_startDate != null && date.isBefore(_startDate!))
-                      continue;
-                    if (_endDate != null && date.isAfter(_endDate!)) continue;
-
-                    final isOutside =
-                        t.paymentMethod.toLowerCase().contains('outside') ||
-                        t.paymentMethod.toLowerCase().contains('cash') ||
-                        t.paymentMethod.toLowerCase().contains('hand');
-                    if (isOutside) {
-                      combinedOutside += t.amount;
-                    } else {
-                      combinedInApp += t.amount;
-                    }
-                  }
 
                   return Column(
                     children: [
@@ -779,6 +743,8 @@ class _ManageAgentsState extends State<ManageAgents>
                             // Calculate earnings for this specific agent
                             double inApp = 0.0;
                             double outside = 0.0;
+                            double totalInApp = 0.0;
+                            double totalOutside = 0.0;
                             for (var t in allTransactions) {
                               if (t.workerId != agent.uid) continue;
                               final isCompleted =
@@ -786,13 +752,6 @@ class _ManageAgentsState extends State<ManageAgents>
                                       'completed' ||
                                   t.paymentStatus.toLowerCase() == 'paid';
                               if (!isCompleted) continue;
-
-                              final date = t.createdAt.toDate();
-                              if (_startDate != null &&
-                                  date.isBefore(_startDate!))
-                                continue;
-                              if (_endDate != null && date.isAfter(_endDate!))
-                                continue;
 
                               final isOutside =
                                   t.paymentMethod.toLowerCase().contains(
@@ -804,6 +763,20 @@ class _ManageAgentsState extends State<ManageAgents>
                                   t.paymentMethod.toLowerCase().contains(
                                     'hand',
                                   );
+
+                              if (isOutside) {
+                                totalOutside += t.amount;
+                              } else {
+                                totalInApp += t.amount;
+                              }
+
+                              final date = t.createdAt.toDate();
+                              if (_startDate != null &&
+                                  date.isBefore(_startDate!))
+                                continue;
+                              if (_endDate != null && date.isAfter(_endDate!))
+                                continue;
+
                               if (isOutside) {
                                 outside += t.amount;
                               } else {
@@ -817,6 +790,8 @@ class _ManageAgentsState extends State<ManageAgents>
                               index: index,
                               inAppEarnings: inApp,
                               outsideAppEarnings: outside,
+                              totalInAppEarnings: totalInApp,
+                              totalOutsideAppEarnings: totalOutside,
                             );
                           },
                         ),
@@ -826,17 +801,6 @@ class _ManageAgentsState extends State<ManageAgents>
               ),
             ],
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _searchController.clear();
-              _searchQuery = '';
-              _selectedFilter = 0;
-            });
-          },
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.refresh_rounded, color: Colors.white),
         ),
       ),
     );
@@ -878,6 +842,8 @@ class _ManageAgentsState extends State<ManageAgents>
     required int index,
     required double inAppEarnings,
     required double outsideAppEarnings,
+    required double totalInAppEarnings,
+    required double totalOutsideAppEarnings,
   }) {
     final isVerified = agent.isVerified ?? false;
 
@@ -902,10 +868,10 @@ class _ManageAgentsState extends State<ManageAgents>
             builder: (context) => AgentInfo(
               agent: agent,
               isMainAdmin: widget.isMainAdmin,
-              startDate: _startDate,
-              endDate: _endDate,
-              initialInAppEarnings: inAppEarnings,
-              initialOutsideAppEarnings: outsideAppEarnings,
+              startDate: null,
+              endDate: null,
+              initialInAppEarnings: totalInAppEarnings,
+              initialOutsideAppEarnings: totalOutsideAppEarnings,
             ),
           ),
         ),
@@ -1027,6 +993,7 @@ class _ManageAgentsState extends State<ManageAgents>
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
+                              backgroundColor: Colors.white,
                               title: Text(
                                 isCurrentlyBlocked
                                     ? l10n.unblockAccount
@@ -1037,19 +1004,24 @@ class _ManageAgentsState extends State<ManageAgents>
                                     ? l10n.areYouSureYouWantToUnblockThisAccount
                                     : l10n.areYouSureYouWantToSuspendThisAccount,
                               ),
+                              actionsAlignment: MainAxisAlignment.start,
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(context, false),
-                                  child: Text(l10n.cancel),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
                                   child: Text(
-                                    isCurrentlyBlocked
-                                        ? l10n.unblock
-                                        : l10n.suspendAccount,
+                                    AppLocalizations.of(context)!.cancel,
+                                    style: TextStyle(color: Colors.black),
                                   ),
+                                ),
+                                eButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  textColor: Colors.white,
+                                  context: context,
+                                  backgroundColor: AppColors.red,
+                                  text: isCurrentlyBlocked
+                                      ? l10n.unblock
+                                      : l10n.suspendAccount,
                                 ),
                               ],
                             ),

@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:aboglumbo_bbk_panel/common_widget/crop_confirm_dialog.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/delete_confirm_dialog.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/removable_image.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/regex.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -12,7 +9,9 @@ import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_cropper/image_cropper.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:aboglumbo_bbk_panel/helpers/image_picker_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddNewCategories extends StatefulWidget {
@@ -26,14 +25,14 @@ class AddNewCategories extends StatefulWidget {
 class _AddNewCategoriesState extends State<AddNewCategories> {
   final _formKey = GlobalKey<FormState>();
   bool isActive = false;
-  bool shouldRemoveExistingImage = false;
+  XFile? selectedImage;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController nameArController = TextEditingController();
   final TextEditingController nameUrController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController descriptionArController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
-  XFile? selectedImage;
+
   @override
   void initState() {
     _fillOutFields();
@@ -49,39 +48,15 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
     }
   }
 
-  Future pickImage() async {
+  Future<void> _pickImage() async {
     try {
-      final image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 512,
-        maxHeight: 512,
-      );
+      final image = await ImagePickerConfigs.pickCategoryImage(context);
 
-      if (image != null) {
-        // Check if file exists
-        final file = File(image.path);
-        if (!await file.exists()) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)?.selectedFileCouldNotBeFound ??
-                      'Selected file could not be found. Please try again.',
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-          return;
-        }
+      if (image == null) return;
 
-        setState(() {
-          selectedImage = image;
-          shouldRemoveExistingImage = false;
-        });
-        await cropImage();
-      }
+      setState(() {
+        selectedImage = image;
+      });
     } catch (e) {
       debugPrint('Error picking image: $e');
       if (mounted) {
@@ -99,89 +74,13 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
     }
   }
 
-  Future cropImage() async {
-    try {
-      CroppedFile? res = await ImageCropper().cropImage(
-        sourcePath: selectedImage!.path,
-        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle:
-                AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-            toolbarColor: AppColors.primary,
-            toolbarWidgetColor: Colors.white,
-          ),
-          IOSUiSettings(
-            title: AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-            cancelButtonTitle: AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            doneButtonTitle: AppLocalizations.of(context)?.done ?? 'Done',
-          ),
-        ],
-      );
-
-      if (res != null) {
-        setState(() {
-          selectedImage = XFile(res.path);
-          shouldRemoveExistingImage = false; // Ensure this is reset
-        });
-      } else {
-        final bool? shouldKeepImage = await showCropConfirmDialog(context);
-
-        if (shouldKeepImage != true) {
-          setState(() {
-            selectedImage = null;
-            shouldRemoveExistingImage = false; // Reset this too
-          });
-        }
-        // If shouldKeepImage is true, we keep the original selectedImage as is
-        // and ensure shouldRemoveExistingImage is false
-        else {
-          setState(() {
-            shouldRemoveExistingImage = false;
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.imageCropError ??
-                  'Error cropping image',
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  void _removeImage() {
-    showDeleteConfirmDialog(context)
-        .then((shouldDelete) {
-          if (shouldDelete == true && mounted) {
-            setState(() {
-              if (selectedImage != null) {
-                selectedImage = null;
-              } else if (widget.category?.svg != null) {
-                shouldRemoveExistingImage = true;
-              }
-            });
-          }
-        })
-        .catchError((error) {
-          debugPrint('Error showing delete confirmation dialog: $error');
-        });
-  }
-
   void _saveCategory() async {
     final isLoading =
         context.read<ManageAppBloc>().state is AddingCategory ||
         context.read<ManageAppBloc>().state is UpdatingCategory;
     if (isLoading) return;
 
-    final hasImage =
-        selectedImage != null ||
-        (widget.category?.svg != null && !shouldRemoveExistingImage);
+    final hasImage = selectedImage != null || widget.category?.svg != null;
 
     if (!hasImage) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -310,143 +209,208 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
       builder: (context, state) {
         final isLoading = state is AddingCategory || state is UpdatingCategory;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              widget.category == null
-                  ? AppLocalizations.of(context)!.addCategory
-                  : AppLocalizations.of(context)!.editCategory,
-            ),
-            actions: [
-              if (!isLoading)
-                IconButton(
-                  icon: const Icon(Icons.save),
-                  onPressed: _saveCategory,
+        return PopScope(
+          canPop: !isLoading,
+          child: AbsorbPointer(
+            absorbing: isLoading,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  widget.category == null
+                      ? AppLocalizations.of(context)!.addCategory
+                      : AppLocalizations.of(context)!.editCategory,
                 ),
-              if (isLoading)
-                Padding(
-                  padding: EdgeInsets.only(right: 16, left: 16),
-                  child: Loader(size: 10, color: Colors.white),
-                ),
-            ],
-          ),
-          body: Form(
-            key: _formKey,
-            child: ListView(
-              padding: EdgeInsets.only(
-                top: 16,
-                left: 16,
-                right: 16,
-                bottom: safePadding.bottom,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.save),
+                    onPressed: isLoading ? null : _saveCategory,
+                  ),
+                ],
               ),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: TextFormField(
-                    controller: nameController,
-                    enabled: !isLoading,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.name ?? 'Name',
+              body: SavingStackWidget(
+                isSaving: isLoading,
+                isLoading: false,
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: EdgeInsets.only(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      bottom: safePadding.bottom,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)?.pleaseEnterAName;
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: TextFormField(
-                    controller: nameArController,
-                    enabled: !isLoading,
-                    decoration: InputDecoration(
-                      labelText:
-                          AppLocalizations.of(context)?.nameArabic ??
-                          'Name (Arabic)',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        )!.pleaseEnterNameInArabic;
-                      } else if (!Regex.arabicFullRegex.hasMatch(value)) {
-                        return AppLocalizations.of(context)!.textMustBeInArabic;
-                      }
-
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: TextFormField(
-                    controller: nameUrController,
-                    enabled: !isLoading,
-                    decoration: const InputDecoration(labelText: 'Name (Urdu)'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter name in Urdu';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          AppLocalizations.of(context)?.active ?? 'Active',
-                          style: Theme.of(context).textTheme.titleMedium,
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: TextFormField(
+                          controller: nameController,
+                          enabled: !isLoading,
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)?.name ?? 'Name',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return AppLocalizations.of(
+                                context,
+                              )?.pleaseEnterAName;
+                            }
+                            return null;
+                          },
                         ),
                       ),
-                      Switch(
-                        activeThumbColor: AppColors.primary,
-                        value: isActive,
-                        onChanged: isLoading
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  isActive = value;
-                                });
-                              },
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: TextFormField(
+                          controller: nameArController,
+                          enabled: !isLoading,
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)?.nameArabic ??
+                                'Name (Arabic)',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return AppLocalizations.of(
+                                context,
+                              )!.pleaseEnterNameInArabic;
+                            } else if (!Regex.arabicFullRegex.hasMatch(value)) {
+                              return AppLocalizations.of(
+                                context,
+                              )!.textMustBeInArabic;
+                            }
+
+                            return null;
+                          },
+                        ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: TextFormField(
+                          controller: nameUrController,
+                          enabled: !isLoading,
+                          decoration: const InputDecoration(
+                            labelText: 'Name (Urdu)',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter name in Urdu';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                AppLocalizations.of(context)?.active ??
+                                    'Active',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                            Switch(
+                              activeThumbColor: AppColors.primary,
+                              value: isActive,
+                              onChanged: isLoading
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        isActive = value;
+                                      });
+                                    },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        AppLocalizations.of(context)?.image ?? 'Image',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment:
+                            Directionality.of(context) == TextDirection.rtl
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: GestureDetector(
+                            onTap: isLoading ? null : _pickImage,
+                            child: DottedBorder(
+                              color: Colors.grey.withOpacity(0.5),
+                              strokeWidth: 1.5,
+                              dashPattern: const [6, 4],
+                              borderType: BorderType.RRect,
+                              radius: const Radius.circular(12),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  width: 130,
+                                  height: 130,
+                                  color: Colors.grey.withOpacity(0.05),
+                                  child: selectedImage != null
+                                      ? Image.file(
+                                          File(selectedImage!.path),
+                                          fit: BoxFit.cover,
+                                          width: 130,
+                                          height: 130,
+                                        )
+                                      : widget.category?.svg != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: widget.category?.svg ?? "",
+                                          fit: BoxFit.cover,
+                                          width: 130,
+                                          height: 130,
+                                          placeholder: (context, url) =>
+                                              const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(Icons.error),
+                                        )
+                                      : Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons
+                                                  .add_photo_alternate_outlined,
+                                              size: 32,
+                                              color: Colors.grey[400],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              AppLocalizations.of(
+                                                    context,
+                                                  )?.pickImage ??
+                                                  'Pick Image',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: FilledButton.icon(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                        AppColors.primary,
-                      ),
-                    ),
-                    onPressed: isLoading ? null : () => pickImage(),
-                    icon: const Icon(Icons.image),
-                    label: Text(
-                      AppLocalizations.of(context)?.pickImage ?? 'Pick Image',
-                    ),
-                  ),
-                ),
-                if ((selectedImage != null) ||
-                    (widget.category?.svg != null &&
-                        !shouldRemoveExistingImage))
-                  RemovableImageWidget(
-                    key: ValueKey(
-                      '${selectedImage?.path}_${shouldRemoveExistingImage}_${widget.category?.svg}',
-                    ),
-                    selectedImage: selectedImage,
-                    networkImageUrl: !shouldRemoveExistingImage
-                        ? widget.category?.svg
-                        : null,
-                    onRemove: isLoading ? null : _removeImage,
-                  ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
           ),
         );

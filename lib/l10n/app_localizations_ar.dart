@@ -5111,4 +5111,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resolutionTextRequired => 'نص الحل مطلوب';
+
+  @override
+  String get urduName => 'الاسم بالأردية';
+
+  @override
+  String get enterUrduName => 'أدخل الاسم بالأردية';
+
+  @override
+  String get pleaseEnterUrduName => 'يرجى إدخال الاسم بالأردية';
+
+  @override
+  String get pleaseEnterUrduNameOnly => 'يرجى إدخال الاسم بالأردية فقط';
+
+  @override
+  String get searchForZones => 'البحث عن المناطق';
+
+  @override
+  String get failedToSearchForZones =>
+      'فشل البحث عن المناطق. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get zoneNameAlreadyExists => '??? ??????? ????? ??????';
+
+  @override
+  String get zoneType => '??? ???????';
 }

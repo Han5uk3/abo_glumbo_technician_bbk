@@ -276,7 +276,9 @@ class AppServices {
       if (isAdmin) {
         AdminModel? cachedAdmin = LocalStore.getCachedAdminData();
         if (cachedAdmin != null) {
-          await LocalStore.storeAdminData(cachedAdmin.copyWith(lanCode: language));
+          await LocalStore.storeAdminData(
+            cachedAdmin.copyWith(lanCode: language),
+          );
         }
       }
     } catch (e) {
@@ -2480,7 +2482,11 @@ class AppServices {
         .onErrorReturn([]);
 
     final jobOffers = getJobOffersStream(isAdmin: true)
-        .map((offers) => offers.map((o) => o.booking?.id ?? o.requestId ?? o.offerId).toList())
+        .map(
+          (offers) => offers
+              .map((o) => o.booking?.id ?? o.requestId ?? o.offerId)
+              .toList(),
+        )
         .onErrorReturn([]);
 
     final rawJobRequests = AppFirestore.jobRequestsCollectionRef
@@ -2601,6 +2607,7 @@ class AppServices {
 
         for (var booking in bookings) {
           final date =
+              booking.paymentVerifiedAt?.toDate() ??
               booking.paymentCompletedAt?.toDate() ??
               booking.completedAt?.toDate();
           if (date != null) {
@@ -2692,7 +2699,9 @@ class AppServices {
       // If bookingId might be a request ID, resolve from the offer
       String resolvedBookingId = bookingId;
       if (offerId != null) {
-        final offerDoc = await AppFirestore.jobOffersCollectionRef.doc(offerId).get();
+        final offerDoc = await AppFirestore.jobOffersCollectionRef
+            .doc(offerId)
+            .get();
         if (offerDoc.exists) {
           final data = offerDoc.data() as Map<String, dynamic>?;
           if (data != null && data.containsKey('bookingId')) {
@@ -2730,34 +2739,50 @@ class AppServices {
       };
 
       // Set counterProposalStartedAt if not already set by checking multiple collections
-      final bookingDoc = await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).get();
+      final bookingDoc = await AppFirestore.bookingsCollectionRef
+          .doc(resolvedBookingId)
+          .get();
       if (bookingDoc.exists) {
         final data = bookingDoc.data() as Map<String, dynamic>?;
         if (data?['counterProposalStartedAt'] == null) {
           updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
         }
-        await AppFirestore.bookingsCollectionRef.doc(resolvedBookingId).update(updateData);
+        await AppFirestore.bookingsCollectionRef
+            .doc(resolvedBookingId)
+            .update(updateData);
       } else {
         // Fallback to job_requests
-        final jobReqDoc = await AppFirestore.jobRequestsCollectionRef.doc(resolvedBookingId).get();
+        final jobReqDoc = await AppFirestore.jobRequestsCollectionRef
+            .doc(resolvedBookingId)
+            .get();
         if (jobReqDoc.exists) {
           final data = jobReqDoc.data() as Map<String, dynamic>?;
           if (data?['counterProposalStartedAt'] == null) {
-            updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
+            updateData['counterProposalStartedAt'] =
+                FieldValue.serverTimestamp();
           }
-          await AppFirestore.jobRequestsCollectionRef.doc(resolvedBookingId).update(updateData);
+          await AppFirestore.jobRequestsCollectionRef
+              .doc(resolvedBookingId)
+              .update(updateData);
         } else {
           // Fallback to booking_request
-          final bookingReqDoc = await AppFirestore.bookingRequestsCollectionRef.doc(resolvedBookingId).get();
+          final bookingReqDoc = await AppFirestore.bookingRequestsCollectionRef
+              .doc(resolvedBookingId)
+              .get();
           if (bookingReqDoc.exists) {
             final data = bookingReqDoc.data() as Map<String, dynamic>?;
             if (data?['counterProposalStartedAt'] == null) {
-              updateData['counterProposalStartedAt'] = FieldValue.serverTimestamp();
+              updateData['counterProposalStartedAt'] =
+                  FieldValue.serverTimestamp();
             }
-            await AppFirestore.bookingRequestsCollectionRef.doc(resolvedBookingId).update(updateData);
+            await AppFirestore.bookingRequestsCollectionRef
+                .doc(resolvedBookingId)
+                .update(updateData);
           } else {
             // Document doesn't exist anywhere we expect it to
-            debugPrint('Warning: resolvedBookingId $resolvedBookingId not found in bookings, job_requests, or booking_request collections');
+            debugPrint(
+              'Warning: resolvedBookingId $resolvedBookingId not found in bookings, job_requests, or booking_request collections',
+            );
           }
         }
       }
@@ -2784,7 +2809,6 @@ class AppServices {
       return false;
     }
   }
-
 
   static Future<void> _recordCustomerNotification({
     required String customerId,
@@ -2908,7 +2932,8 @@ class AppServices {
             if (booking != null) {
               if (booking.bookingStatusCode == 'P' ||
                   booking.bookingStatusCode == 'SR' ||
-                  (booking.bookingStatusCode == 'R' && booking.rejectedBy != 'Admin') ||
+                  (booking.bookingStatusCode == 'R' &&
+                      booking.rejectedBy != 'Admin') ||
                   booking.bookingStatusCode == 'A') {
                 // If booking is 'A' (Assigned), it should only show for the assigned technician
                 if (booking.bookingStatusCode == 'A' &&

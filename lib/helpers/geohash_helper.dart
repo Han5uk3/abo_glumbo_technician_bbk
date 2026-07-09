@@ -1,8 +1,11 @@
-
 class GeohashHelper {
   static const String _base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
-  static String encode(double latitude, double longitude, {int precision = 10}) {
+  static String encode(
+    double latitude,
+    double longitude, {
+    int precision = 10,
+  }) {
     var latMin = -90.0, latMax = 90.0;
     var lonMin = -180.0, lonMax = 180.0;
     var geohash = StringBuffer();

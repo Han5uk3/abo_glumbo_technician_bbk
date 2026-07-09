@@ -95,9 +95,8 @@ class AppFirestore {
       .collection('booking_request');
 
   // auto-assignment_requests collection
-  static CollectionReference autoAssignmentRequestsCollectionRef = FirebaseFirestore
-      .instance
-      .collection('auto-assignment_requests');
+  static CollectionReference autoAssignmentRequestsCollectionRef =
+      FirebaseFirestore.instance.collection('auto-assignment_requests');
 }
 
 class AppFireStorage {

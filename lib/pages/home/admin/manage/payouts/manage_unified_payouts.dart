@@ -1,4 +1,6 @@
+import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
@@ -84,7 +86,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
         future: UnifiedPayoutServices.getPayoutStatistics(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return SizedBox(height: 100, child: Center(child: Loader()));
+            return _buildShimmerStats();
           }
           if (!snapshot.hasData) {
             return SizedBox(
@@ -172,6 +174,66 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerStats() {
+    return Row(
+      children: [
+        Expanded(child: _buildShimmerStatCard()),
+        const SizedBox(width: 12),
+        Expanded(child: _buildShimmerStatCard()),
+      ],
+    );
+  }
+
+  Widget _buildShimmerStatCard() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 60,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 29,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -306,7 +368,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
       stream: _payoutsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: Loader());
+          return const ManageShimmerLoading();
         }
 
         if (snapshot.hasError) {

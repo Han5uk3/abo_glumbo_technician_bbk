@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/customer_support.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,16 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+
+  late Stream<List<CustomerSupportModel>> _customerSupportStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _customerSupportStream = AppServices.getCustomerServiceStreamByType(
+      getTypeName(),
+    );
+  }
 
   @override
   void dispose() {
@@ -90,7 +101,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
         }
       },
       child: StreamBuilder<List<CustomerSupportModel>>(
-        stream: AppServices.getCustomerServiceStreamByType(getTypeName()),
+        stream: _customerSupportStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -104,16 +115,7 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                     ),
                 ],
               ),
-              body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(height: 24, child: Loader()),
-                    SizedBox(height: 10),
-                    Text(AppLocalizations.of(context)!.loading),
-                  ],
-                ),
-              ),
+              body: const ManageShimmerLoading(),
             );
           }
 
@@ -156,198 +158,204 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
                     itemCount: snapshot.data?.length ?? 0,
                     itemBuilder: (context, index) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: snapshot.data![index].isActive ?? false
-                                ? AppColors.primary.withOpacity(0.4)
-                                : AppColors.primary.withOpacity(0.15),
-                            width: snapshot.data![index].isActive ?? false
-                                ? 2
-                                : 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: snapshot.data![index].isActive ?? false
-                                  ? AppColors.primary.withOpacity(0.1)
-                                  : Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                      child: Material(
+                        elevation: 1,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: snapshot.data![index].isActive == true
+                                  ? AppColors.primary
+                                  : Colors.white,
                             ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                snapshot.data?[index].name ??
-                                                    '',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16,
-                                                  color: Colors.black87,
-                                                  letterSpacing: -0.2,
-                                                ),
-                                              ),
-                                            ),
-                                            if (snapshot
-                                                    .data![index]
-                                                    .isActive ??
-                                                false) ...[
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 3,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.primary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
                                                 child: Text(
-                                                  AppLocalizations.of(
-                                                    context,
-                                                  )!.primary,
+                                                  snapshot.data?[index].name ??
+                                                      '',
                                                   style: TextStyle(
-                                                    fontSize: 10,
                                                     fontWeight: FontWeight.w600,
-                                                    color: Colors.white,
-                                                    letterSpacing: 0.3,
+                                                    fontSize: 16,
+                                                    color: Colors.black87,
+                                                    letterSpacing: -0.2,
                                                   ),
                                                 ),
                                               ),
-                                            ],
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary
-                                                .withOpacity(0.08),
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            snapshot.data?[index].detail ?? '',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 13,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (LocalStore.getCachedAdminData()
-                                      ?.hasFullAccess ??
-                                  true) ...[
-                                const SizedBox(height: 12),
-                                const Divider(height: 1, thickness: 1),
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    BlocBuilder<ManageAppBloc, ManageAppState>(
-                                      builder: (context, state) {
-                                        final isDeleting =
-                                            state is DeletingCustomerSupport;
-                                        final isLastItem =
-                                            (snapshot.data?.length ?? 0) <= 1;
-                                        return OutlinedButton.icon(
-                                          onPressed: (isDeleting || isLastItem)
-                                              ? null
-                                              : () => _showDeleteConfirmation(
-                                                  context,
-                                                  snapshot.data![index],
-                                                ),
-                                          icon: Icon(
-                                            Icons.delete_outline_rounded,
-                                            size: 18,
-                                          ),
-                                          label: Text(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.delete,
-                                          ),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: isLastItem
-                                                ? Colors.grey
-                                                : AppColors.red,
-                                            side: BorderSide(
-                                              color: isLastItem
-                                                  ? Colors.grey.withOpacity(0.5)
-                                                  : AppColors.red.withOpacity(
-                                                      0.5,
+                                              if (snapshot
+                                                      .data![index]
+                                                      .isActive ??
+                                                  false) ...[
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 3,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.primary,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.primary,
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.3,
                                                     ),
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 10,
+                                              horizontal: 10,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary
+                                                  .withOpacity(0.08),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              snapshot.data?[index].detail ??
+                                                  '',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 13,
+                                                color: AppColors.primary,
+                                              ),
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        detailDialog(
-                                          true,
-                                          contact: snapshot.data?[index],
-                                          allContacts: snapshot.data!,
-                                        );
-                                      },
-                                      icon: Icon(Icons.edit_outlined, size: 18),
-                                      label: Text(
-                                        AppLocalizations.of(context)!.edit,
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: Colors.white,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 10,
-                                        ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
+                                if (LocalStore.getCachedAdminData()
+                                        ?.hasFullAccess ??
+                                    true) ...[
+                                  const SizedBox(height: 12),
+                                  const Divider(height: 1, thickness: 1),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      BlocBuilder<
+                                        ManageAppBloc,
+                                        ManageAppState
+                                      >(
+                                        builder: (context, state) {
+                                          final isDeleting =
+                                              state is DeletingCustomerSupport;
+                                          final isLastItem =
+                                              (snapshot.data?.length ?? 0) <= 1;
+                                          return OutlinedButton.icon(
+                                            onPressed:
+                                                (isDeleting || isLastItem)
+                                                ? null
+                                                : () => _showDeleteConfirmation(
+                                                    context,
+                                                    snapshot.data![index],
+                                                  ),
+                                            icon: Icon(
+                                              Icons.delete_outline_rounded,
+                                              size: 18,
+                                            ),
+                                            label: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.delete,
+                                            ),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: isLastItem
+                                                  ? Colors.grey
+                                                  : AppColors.red,
+                                              side: BorderSide(
+                                                color: isLastItem
+                                                    ? Colors.grey.withOpacity(
+                                                        0.5,
+                                                      )
+                                                    : AppColors.red.withOpacity(
+                                                        0.5,
+                                                      ),
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 10,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          detailDialog(
+                                            true,
+                                            contact: snapshot.data?[index],
+                                            allContacts: snapshot.data!,
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.edit_outlined,
+                                          size: 18,
+                                        ),
+                                        label: Text(
+                                          AppLocalizations.of(context)!.edit,
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),

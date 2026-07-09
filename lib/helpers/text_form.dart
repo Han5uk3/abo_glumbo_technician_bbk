@@ -40,12 +40,7 @@ class TextFormWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-        if (isNeedLabel)
-          Text(
-            label,
-            style: TextStyle(fontSize: 16),
-          ),
+        if (isNeedLabel) Text(label, style: TextStyle(fontSize: 16)),
         const SizedBox(height: 5),
         TextFormField(
           inputFormatters: inputFormatters,
@@ -82,7 +77,7 @@ class TextFormWidget extends StatelessWidget {
           validator: validator,
           onTap: onTap,
           readOnly: readOnly ?? onTap != null,
-        )
+        ),
       ],
     );
   }

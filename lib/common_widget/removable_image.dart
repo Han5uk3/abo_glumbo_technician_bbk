@@ -64,7 +64,8 @@ class RemovableImageWidget extends StatelessWidget {
                 child: _buildImageWidget(),
               ),
             ),
-            if (showRemoveButton && onRemove != null) _buildRemoveButton(context),
+            if (showRemoveButton && onRemove != null)
+              _buildRemoveButton(context),
           ],
         ),
       ),
@@ -235,7 +236,8 @@ class RemovableImageWidgetEnhanced extends StatelessWidget {
                 ),
               ),
             ),
-            if (showRemoveButton && onRemove != null) _buildRemoveButton(context),
+            if (showRemoveButton && onRemove != null)
+              _buildRemoveButton(context),
           ],
         ),
       ),

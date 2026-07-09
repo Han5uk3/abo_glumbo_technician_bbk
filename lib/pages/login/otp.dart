@@ -306,8 +306,9 @@ class _OtpPageState extends State<OtpPage> {
           .get();
       if (bookingsQuery.docs.isNotEmpty) {
         for (final bookingDoc in bookingsQuery.docs) {
-          final Map<String, dynamic> updatedAgent =
-              Map<String, dynamic>.from(bookingDoc['agent'] ?? {});
+          final Map<String, dynamic> updatedAgent = Map<String, dynamic>.from(
+            bookingDoc['agent'] ?? {},
+          );
           updatedAgent['uid'] = newUid;
           updatedAgent['phone'] = newPhone;
           updatedAgent['updatedAt'] = FieldValue.serverTimestamp();

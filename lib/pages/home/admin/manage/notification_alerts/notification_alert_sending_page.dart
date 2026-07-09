@@ -246,10 +246,22 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.people,
-                                color: AppColors.primary,
-                                size: 24,
+                              Material(
+                                elevation: 1,
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.people,
+                                    color: Colors.black,
+                                    size: 24,
+                                  ),
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -263,7 +275,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
+                                        color: Colors.black,
                                       ),
                                     ),
                                     if (selectedRecipientIds.isNotEmpty)
@@ -357,6 +369,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                                     .contains(user.uid);
 
                                 return CheckboxListTile(
+                                  activeColor: AppColors.primary,
                                   value: isSelected,
                                   onChanged: (value) {
                                     setModalState(() {
@@ -581,8 +594,9 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
 
   Widget _buildRecipientTypeSelector() {
     return Card(
+      color: Colors.white,
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -590,16 +604,17 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.translate,
-                    color: AppColors.primary,
-                    size: 24,
+                Material(
+                  elevation: 1,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.translate, color: Colors.black, size: 24),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -608,7 +623,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -618,32 +633,37 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
             Row(
               children: [
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_recipientType != 'technician') {
-                        setState(() {
-                          _recipientType = 'technician';
-                          selectedRecipientIds.clear();
-                        });
-                        _loadUsers();
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _recipientType == 'technician'
-                            ? AppColors.primary
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.technician,
-                          style: TextStyle(
-                            color: _recipientType == 'technician'
-                                ? Colors.white
-                                : AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                  child: Material(
+                    elevation: 1,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_recipientType != 'technician') {
+                          setState(() {
+                            _recipientType = 'technician';
+                            selectedRecipientIds.clear();
+                          });
+                          _loadUsers();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _recipientType == 'technician'
+                              ? AppColors.primary
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            AppLocalizations.of(context)!.technician,
+                            style: TextStyle(
+                              color: _recipientType == 'technician'
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -652,32 +672,37 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_recipientType != 'customer') {
-                        setState(() {
-                          _recipientType = 'customer';
-                          selectedRecipientIds.clear();
-                        });
-                        _loadUsers();
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _recipientType == 'customer'
-                            ? AppColors.primary
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.customer,
-                          style: TextStyle(
-                            color: _recipientType == 'customer'
-                                ? Colors.white
-                                : AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                  child: Material(
+                    elevation: 1,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_recipientType != 'customer') {
+                          setState(() {
+                            _recipientType = 'customer';
+                            selectedRecipientIds.clear();
+                          });
+                          _loadUsers();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _recipientType == 'customer'
+                              ? AppColors.primary
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            AppLocalizations.of(context)!.customer,
+                            style: TextStyle(
+                              color: _recipientType == 'customer'
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -694,8 +719,9 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
 
   Widget _buildLanguageTabs() {
     return Card(
+      color: Colors.white,
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -703,25 +729,26 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.translate,
-                    color: AppColors.primary,
-                    size: 24,
+                Material(
+                  elevation: 1,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.translate, color: Colors.black, size: 24),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.previewLanguage,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -730,58 +757,68 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
             Row(
               children: [
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _previewLanguage = 'en'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _previewLanguage == 'en'
-                            ? AppColors.primary
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.english,
-                            style: TextStyle(
-                              color: _previewLanguage == 'en'
-                                  ? Colors.white
-                                  : AppColors.primary,
-                              fontWeight: FontWeight.w600,
+                  child: Material(
+                    elevation: 1,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _previewLanguage = 'en'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _previewLanguage == 'en'
+                              ? AppColors.primary
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.english,
+                              style: TextStyle(
+                                color: _previewLanguage == 'en'
+                                    ? Colors.white
+                                    : AppColors.black1,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _previewLanguage = 'ar'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _previewLanguage == 'ar'
-                            ? AppColors.primary
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.arabic,
-                            style: TextStyle(
-                              color: _previewLanguage == 'ar'
-                                  ? Colors.white
-                                  : AppColors.primary,
-                              fontWeight: FontWeight.w600,
+                  child: Material(
+                    elevation: 1,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _previewLanguage = 'ar'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _previewLanguage == 'ar'
+                              ? AppColors.primary
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.arabic,
+                              style: TextStyle(
+                                color: _previewLanguage == 'ar'
+                                    ? Colors.white
+                                    : AppColors.black1,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -796,6 +833,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
 
   Widget _buildMessageCompositionCard() {
     return Card(
+      color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -805,13 +843,18 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                Material(
+                  elevation: 1,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.edit, color: Colors.black, size: 24),
                   ),
-                  child: Icon(Icons.edit, color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -819,7 +862,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -872,7 +915,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
+                  color: Colors.black,
                 ),
               ),
             ],
@@ -880,6 +923,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         ),
         // Title Field
         TextField(
+          cursorColor: Colors.black,
           controller: titleController,
           maxLength: 80,
           maxLines: 1,
@@ -888,7 +932,18 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)!.notificationTitle,
             labelText: AppLocalizations.of(context)!.title,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
             prefixIcon: isArabic ? null : const Icon(Icons.subject),
             suffixIcon: isArabic ? const Icon(Icons.subject) : null,
             counterText: '${titleController.text.length}/80',
@@ -897,6 +952,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         const SizedBox(height: 12),
         // Body Field
         TextField(
+          cursorColor: Colors.black,
           controller: bodyController,
           maxLength: 500,
           maxLines: 4,
@@ -907,7 +963,18 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
               context,
             )!.enterYourNotificationMessageHere,
             labelText: AppLocalizations.of(context)!.message,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.black),
+            ),
             alignLabelWithHint: true,
             prefixIcon: isArabic ? null : const Icon(Icons.message),
             suffixIcon: isArabic ? const Icon(Icons.message) : null,
@@ -929,6 +996,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
     final hasContent = titleText.isNotEmpty || bodyText.isNotEmpty;
 
     return Card(
+      color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -938,16 +1006,21 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.visibility,
-                    color: AppColors.primary,
-                    size: 24,
+                Material(
+                  elevation: 1,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.visibility,
+                      color: Colors.black,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -956,7 +1029,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -1174,22 +1247,28 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         .toList();
 
     return Card(
+      color: Colors.white,
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                Material(
+                  elevation: 1,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.people, color: Colors.black, size: 24),
                   ),
-                  child: Icon(Icons.people, color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1201,14 +1280,14 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: Colors.black,
                         ),
                       ),
                       Text(
                         '${selectedRecipientIds.length} ${AppLocalizations.of(context)!.recipientsSelected}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.primary,
+                          color: Colors.grey.shade700,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

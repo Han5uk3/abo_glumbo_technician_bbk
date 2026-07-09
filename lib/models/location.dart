@@ -35,7 +35,8 @@ class LocationModel {
 
     final city = _nonEmpty(placemark.locality);
     final province = _nonEmpty(placemark.administrativeArea);
-    final street = _nonEmpty(placemark.thoroughfare) ??
+    final street =
+        _nonEmpty(placemark.thoroughfare) ??
         _nonEmpty(placemark.subThoroughfare);
     final neighborhood = _nonEmpty(placemark.subLocality);
 

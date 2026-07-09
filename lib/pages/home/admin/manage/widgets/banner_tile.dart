@@ -1,5 +1,6 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/banner.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -125,10 +126,7 @@ class BannerTile extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Container(
-        color: Colors.grey[100],
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      ),
+      placeholder: (context, url) => const ImageShimmer(),
       errorWidget: (context, url, error) => Container(
         color: Colors.grey[200],
         child: Column(

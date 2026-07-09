@@ -1840,5 +1840,14 @@
   "resolveIssue": "Resolve Issue",
   "whatWasDoneToResolve": "What was done to resolve the issue?",
   "resolutionTextRequired": "Resolution text is required",
-  "submit": "Submit"
+  "urduName": "Urdu Name",
+  "enterUrduName": "Enter Urdu name",
+  "pleaseEnterUrduName": "Please enter Urdu name",
+  "pleaseEnterUrduNameOnly": "Please enter Urdu name only",
+  "searchForZones": "Search for zones",
+  "failedToSearchForZones": "Failed to search for zones. Please try again."
+,
+  "zoneNameAlreadyExists": "Zone name already exists"
+,
+  "zoneType": "Zone Type"
 }

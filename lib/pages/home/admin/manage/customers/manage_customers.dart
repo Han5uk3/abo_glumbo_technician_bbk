@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/customers/customer_management.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
@@ -240,16 +240,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
             ),
           ),
           shape: Border.all(style: BorderStyle.none),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: Colors.black),
-              onPressed: () {
-                setState(() {});
-              },
-              tooltip: AppLocalizations.of(context)!.refresh,
-            ),
-            const SizedBox(width: 8),
-          ],
         ),
         body: Column(
           children: [
@@ -360,7 +350,7 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
                 stream: _customersStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: Loader());
+                    return const ManageShimmerLoading();
                   }
 
                   if (snapshot.hasError) {
@@ -441,17 +431,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
               ),
             ),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _searchController.clear();
-              _searchQuery = '';
-              _selectedFilter = 0;
-            });
-          },
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.refresh_rounded, color: Colors.white),
         ),
       ),
     );

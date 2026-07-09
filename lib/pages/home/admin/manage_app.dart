@@ -37,7 +37,8 @@ class _ManageAppState extends State<ManageApp> {
     final adminData = LocalStore.getCachedAdminData();
 
     // Check if user is main/core admin (level 0 or isCoreAdmin flag)
-    _isCoreAdmin = (adminData?.isCoreAdmin ?? false) || (adminData?.accessLevel == 0);
+    _isCoreAdmin =
+        (adminData?.isCoreAdmin ?? false) || (adminData?.accessLevel == 0);
 
     // Check if user is customer service (restricted access)
     _isCustomerService = !(adminData?.hasFullAccess ?? true);

@@ -85,17 +85,17 @@ class _SignupState extends State<Signup> {
         final data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           final user = UserModel.fromJson(data);
-          
+
           nameController.text = user.name ?? '';
           if (user.phone != null && user.phone!.isNotEmpty) {
             phoneController.text = user.phone!;
           }
           emailController.text = user.email ?? '';
-          
+
           if (user.jobRoles != null) {
             selectedJobRoles = List<String>.from(user.jobRoles!);
           }
-          
+
           existingProfileUrl = user.profileUrl;
           existingResidenceIdUrl = user.residenceIdUrl;
           existingSponsorWorkPermitUrl = user.sponsorWorkPermitUrl;
@@ -104,8 +104,10 @@ class _SignupState extends State<Signup> {
             existingCertifications = List<String>.from(user.certifications!);
           }
           existingCreatedAt = user.createdAt;
-          
-          if (user.location != null && user.location!.lat != null && user.location!.lon != null) {
+
+          if (user.location != null &&
+              user.location!.lat != null &&
+              user.location!.lon != null) {
             _currentPosition = Position(
               latitude: user.location!.lat!,
               longitude: user.location!.lon!,
@@ -168,19 +170,22 @@ class _SignupState extends State<Signup> {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        throw AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+        throw AppLocalizations.of(context)?.locationServicesDisabled ??
+            'Location services are disabled.';
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          throw AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+          throw AppLocalizations.of(context)?.locationPermissionDenied ??
+              'Location permissions are denied';
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        throw AppLocalizations.of(context)?.locationPermissionDeniedForever ?? 'Location permissions are permanently denied.';
+        throw AppLocalizations.of(context)?.locationPermissionDeniedForever ??
+            'Location permissions are permanently denied.';
       }
 
       final position = await Geolocator.getCurrentPosition();
@@ -209,24 +214,34 @@ class _SignupState extends State<Signup> {
         String errorMessage = e.toString();
         SnackBarAction? snackBarAction;
 
-        if (e is LocationServiceDisabledException || errorMessage.contains('Location services are disabled')) {
-          errorMessage = AppLocalizations.of(context)?.locationServicesDisabled ?? 'Location services are disabled.';
+        if (e is LocationServiceDisabledException ||
+            errorMessage.contains('Location services are disabled')) {
+          errorMessage =
+              AppLocalizations.of(context)?.locationServicesDisabled ??
+              'Location services are disabled.';
           snackBarAction = SnackBarAction(
             label: AppLocalizations.of(context)?.openSettings ?? 'Settings',
             onPressed: () => Geolocator.openLocationSettings(),
           );
-        } else if (e is PermissionDeniedException || errorMessage.contains('User denied permissions') || errorMessage.contains('Permission denied')) {
-          errorMessage = AppLocalizations.of(context)?.locationPermissionDenied ?? 'Location permissions are denied';
+        } else if (e is PermissionDeniedException ||
+            errorMessage.contains('User denied permissions') ||
+            errorMessage.contains('Permission denied')) {
+          errorMessage =
+              AppLocalizations.of(context)?.locationPermissionDenied ??
+              'Location permissions are denied';
           snackBarAction = SnackBarAction(
             label: AppLocalizations.of(context)?.openSettings ?? 'Settings',
             onPressed: () => Geolocator.openAppSettings(),
           );
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)?.errorFetchingLocation(errorMessage) ?? 'Error fetching location: $errorMessage',
+              AppLocalizations.of(
+                    context,
+                  )?.errorFetchingLocation(errorMessage) ??
+                  'Error fetching location: $errorMessage',
             ),
             action: snackBarAction,
           ),
@@ -382,7 +397,9 @@ class _SignupState extends State<Signup> {
         GestureDetector(
           onTap: hasFile
               ? () => _previewFile(path, isImage)
-              : (hasRemote ? () => _previewFile(existingUrl, isImage, isRemote: true) : onTap),
+              : (hasRemote
+                    ? () => _previewFile(existingUrl, isImage, isRemote: true)
+                    : onTap),
           child: Container(
             width: double.infinity,
             height: (hasFile || hasRemote) ? 70 : 140,
@@ -408,10 +425,7 @@ class _SignupState extends State<Signup> {
                       const SizedBox(height: 8),
                       Text(
                         'Upload File or Image',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
                       ),
                     ],
                   )
@@ -437,7 +451,9 @@ class _SignupState extends State<Signup> {
                         Expanded(
                           child: Text(
                             hasFile
-                                ? (fileOrImage is XFile ? fileOrImage.name : fileOrImage.name)
+                                ? (fileOrImage is XFile
+                                      ? fileOrImage.name
+                                      : fileOrImage.name)
                                 : title,
                             style: TextStyle(
                               fontSize: 14,
@@ -537,9 +553,17 @@ class _SignupState extends State<Signup> {
       return;
     }
 
-    final hasResidenceId = residenceIdImage != null || (existingResidenceIdUrl != null && existingResidenceIdUrl!.isNotEmpty);
-    final hasSponsorWorkPermit = sponsorWorkPermitFile != null || (existingSponsorWorkPermitUrl != null && existingSponsorWorkPermitUrl!.isNotEmpty);
-    final hasChamberOfCommerce = chamberOfCommerceFile != null || (existingChamberOfCommerceUrl != null && existingChamberOfCommerceUrl!.isNotEmpty);
+    final hasResidenceId =
+        residenceIdImage != null ||
+        (existingResidenceIdUrl != null && existingResidenceIdUrl!.isNotEmpty);
+    final hasSponsorWorkPermit =
+        sponsorWorkPermitFile != null ||
+        (existingSponsorWorkPermitUrl != null &&
+            existingSponsorWorkPermitUrl!.isNotEmpty);
+    final hasChamberOfCommerce =
+        chamberOfCommerceFile != null ||
+        (existingChamberOfCommerceUrl != null &&
+            existingChamberOfCommerceUrl!.isNotEmpty);
 
     if (!hasResidenceId || !hasSponsorWorkPermit || !hasChamberOfCommerce) {
       debugPrint('Signup Error: Missing mandatory documents');
@@ -698,10 +722,7 @@ class _SignupState extends State<Signup> {
         elevation: 0,
         title: Text(
           localization.createAccount,
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -718,10 +739,15 @@ class _SignupState extends State<Signup> {
                     backgroundColor: Colors.grey[100],
                     backgroundImage: profileImage != null
                         ? FileImage(File(profileImage!.path))
-                        : (existingProfileUrl != null && existingProfileUrl!.isNotEmpty
-                            ? NetworkImage(existingProfileUrl!) as ImageProvider
-                            : null),
-                    child: (profileImage == null && (existingProfileUrl == null || existingProfileUrl!.isEmpty))
+                        : (existingProfileUrl != null &&
+                                  existingProfileUrl!.isNotEmpty
+                              ? NetworkImage(existingProfileUrl!)
+                                    as ImageProvider
+                              : null),
+                    child:
+                        (profileImage == null &&
+                            (existingProfileUrl == null ||
+                                existingProfileUrl!.isEmpty))
                         ? Icon(
                             Icons.person_outline,
                             size: 50,
@@ -809,10 +835,7 @@ class _SignupState extends State<Signup> {
                   vertical: 16,
                 ),
               ),
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
 
             _buildSectionTitle(localization.email),
@@ -946,8 +969,9 @@ class _SignupState extends State<Signup> {
                           '${localization.certificate} ${entry.key + 1}',
                           style: const TextStyle(fontSize: 11),
                         ),
-                        onDeleted: () =>
-                            setState(() => existingCertifications.removeAt(entry.key)),
+                        onDeleted: () => setState(
+                          () => existingCertifications.removeAt(entry.key),
+                        ),
                         deleteIcon: const Icon(Icons.close, size: 14),
                         backgroundColor: Colors.grey[100],
                       );

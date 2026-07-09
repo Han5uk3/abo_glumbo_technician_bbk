@@ -96,14 +96,12 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         ),
       );
 
-      final rejectedTechsList = rejectedTechs
-          .map((e) => e.toJson())
-          .toList();
+      final rejectedTechsList = rejectedTechs.map((e) => e.toJson()).toList();
 
       // Check if warranty period is still valid
       final expiredOn = booking.warranty?.expiredOn;
-      final isWarrantyExpired = expiredOn != null &&
-          expiredOn.toDate().isBefore(DateTime.now());
+      final isWarrantyExpired =
+          expiredOn != null && expiredOn.toDate().isBefore(DateTime.now());
 
       if (isWarrantyExpired) {
         // Warranty has expired — close the claim

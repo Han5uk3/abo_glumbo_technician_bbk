@@ -9682,6 +9682,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolution text is required'**
   String get resolutionTextRequired;
+
+  /// No description provided for @urduName.
+  ///
+  /// In en, this message translates to:
+  /// **'Urdu Name'**
+  String get urduName;
+
+  /// No description provided for @enterUrduName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Urdu name'**
+  String get enterUrduName;
+
+  /// No description provided for @pleaseEnterUrduName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Urdu name'**
+  String get pleaseEnterUrduName;
+
+  /// No description provided for @pleaseEnterUrduNameOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Urdu name only'**
+  String get pleaseEnterUrduNameOnly;
+
+  /// No description provided for @searchForZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for zones'**
+  String get searchForZones;
+
+  /// No description provided for @failedToSearchForZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to search for zones. Please try again.'**
+  String get failedToSearchForZones;
+
+  /// No description provided for @zoneNameAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone name already exists'**
+  String get zoneNameAlreadyExists;
+
+  /// No description provided for @zoneType.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone Type'**
+  String get zoneType;
 }
 
 class _AppLocalizationsDelegate

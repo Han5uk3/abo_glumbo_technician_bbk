@@ -534,7 +534,6 @@ class _RewardsPageState extends State<RewardsPage> {
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -550,7 +549,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               color: Colors.white,
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
-                              
+
                               height: 1,
                             ),
                           ),
@@ -561,7 +560,6 @@ class _RewardsPageState extends State<RewardsPage> {
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              
                             ),
                           ),
                         ],
@@ -587,7 +585,6 @@ class _RewardsPageState extends State<RewardsPage> {
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
-                        
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

@@ -18,15 +18,12 @@ import 'package:intl/intl.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
 import 'package:aboglumbo_bbk_panel/services/location_services.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+
 class DashboardScreen extends StatefulWidget {
   final UserModel workerData;
   final Function(int tabIndex, {String? bookingStatus})? onNavigate;
 
-  const DashboardScreen({
-    super.key,
-    required this.workerData,
-    this.onNavigate,
-  });
+  const DashboardScreen({super.key, required this.workerData, this.onNavigate});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -199,7 +196,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -327,7 +323,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.white,
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
-                        
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -695,11 +690,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => const Center(child: CircularProgressIndicator()),
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
                 );
 
                 try {
-                  final doc = await AppFirestore.bookingsCollectionRef.doc(bookingId).get();
+                  final doc = await AppFirestore.bookingsCollectionRef
+                      .doc(bookingId)
+                      .get();
                   if (context.mounted) {
                     Navigator.pop(context); // hide loading
                     if (doc.exists) {
@@ -709,7 +707,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BookingInfo(booking: booking, isAdmin: false),
+                          builder: (context) =>
+                              BookingInfo(booking: booking, isAdmin: false),
                         ),
                       );
                     }

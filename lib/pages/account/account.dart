@@ -241,10 +241,7 @@ class _AccountPageState extends State<AccountPage> {
         children: [
           Text(
             currentWorkerData?.name ?? '',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             currentWorkerData?.email ?? '',
@@ -302,15 +299,15 @@ class _AccountPageState extends State<AccountPage> {
     final displayLanguage = currentLanguage == 'ar'
         ? 'عربي'
         : currentLanguage == 'ur'
-            ? 'اردو'
-            : 'English';
+        ? 'اردو'
+        : 'English';
 
     final currentNotifLanguage = currentWorkerData?.lanCode ?? 'en';
     final displayNotifLanguage = currentNotifLanguage == 'ar'
         ? 'عربي'
         : currentNotifLanguage == 'ur'
-            ? 'اردو'
-            : 'English';
+        ? 'اردو'
+        : 'English';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -362,13 +359,15 @@ class _AccountPageState extends State<AccountPage> {
           AccountListTile.withArrow(
             leading: const Icon(Icons.info_outline),
             title: AppLocalizations.of(context)?.aboutUs ?? '',
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => const AboutUsPage())),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AboutUsPage()),
+            ),
           ),
           AccountListTile.withArrow(
             leading: const Icon(Icons.support_agent),
-            title: AppLocalizations.of(context)?.contactSupport ?? 'Contact Support',
+            title:
+                AppLocalizations.of(context)?.contactSupport ??
+                'Contact Support',
             onTap: _showSupportBottomSheet,
           ),
         ],
@@ -483,7 +482,8 @@ class _AccountPageState extends State<AccountPage> {
       context: context,
       builder: (context) {
         return LanguageSelectionDialog(
-          title: AppLocalizations.of(context)?.selectLanguage ?? 'Select Language',
+          title:
+              AppLocalizations.of(context)?.selectLanguage ?? 'Select Language',
           currentLanguageCode: currentLanguage,
           onEnglishSelected: () => _updateLanguage('en', isForNotification),
           onArabicSelected: () => _updateLanguage('ar', isForNotification),
@@ -496,12 +496,10 @@ class _AccountPageState extends State<AccountPage> {
   void _updateLanguage(String code, bool isForNotification) {
     if (isForNotification) {
       context.read<AccountBloc>().add(
-            UpdateWorkerNotificationLanguageEvent(code),
-          );
+        UpdateWorkerNotificationLanguageEvent(code),
+      );
     } else {
-      context.read<AccountBloc>().add(
-            ChangeLanguageEvent(code),
-          );
+      context.read<AccountBloc>().add(ChangeLanguageEvent(code));
     }
   }
 
@@ -536,10 +534,7 @@ class _AccountPageState extends State<AccountPage> {
               Text(
                 AppLocalizations.of(dialogContext)?.deleteAccountWarning ??
                     'This action cannot be undone. All your data will be permanently deleted.',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
               Container(
@@ -638,10 +633,7 @@ class _AccountPageState extends State<AccountPage> {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.red.shade700,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.red.shade700),
             ),
           ),
         ],
@@ -825,10 +817,7 @@ class _AccountPageState extends State<AccountPage> {
                   child: Text(
                     AppLocalizations.of(dialogContext)?.disableBiometric ??
                         'Disable Biometric?',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

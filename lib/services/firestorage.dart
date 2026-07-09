@@ -114,7 +114,12 @@ class UploadToFireStorage {
     try {
       compressedFile = await compressImage(file);
       final finalFile = compressedFile ?? file;
-      final finalExt = finalFile.path.split('.').last.split('?').first.toLowerCase();
+      final finalExt = finalFile.path
+          .split('.')
+          .last
+          .split('?')
+          .first
+          .toLowerCase();
 
       final fileToUpload = File(finalFile.path);
       if (!await fileToUpload.exists()) {
@@ -125,7 +130,12 @@ class UploadToFireStorage {
         if (!await originalFile.exists()) {
           throw Exception('The selected file could not be found.');
         }
-        final origExt = file.path.split('.').last.split('?').first.toLowerCase();
+        final origExt = file.path
+            .split('.')
+            .last
+            .split('?')
+            .first
+            .toLowerCase();
         return _performUpload(
           file,
           storagePath,
@@ -260,4 +270,3 @@ class UploadToFireStorage {
     return downloadUrl;
   }
 }
-

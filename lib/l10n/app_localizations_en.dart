@@ -5181,4 +5181,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resolutionTextRequired => 'Resolution text is required';
+
+  @override
+  String get urduName => 'Urdu Name';
+
+  @override
+  String get enterUrduName => 'Enter Urdu name';
+
+  @override
+  String get pleaseEnterUrduName => 'Please enter Urdu name';
+
+  @override
+  String get pleaseEnterUrduNameOnly => 'Please enter Urdu name only';
+
+  @override
+  String get searchForZones => 'Search for zones';
+
+  @override
+  String get failedToSearchForZones =>
+      'Failed to search for zones. Please try again.';
+
+  @override
+  String get zoneNameAlreadyExists => 'Zone name already exists';
+
+  @override
+  String get zoneType => 'Zone Type';
 }

@@ -30,7 +30,9 @@ class DMSansFont {
     double? decorationThickness,
   }) {
     final String language = LocalStore.getUserlanguage();
-    final String? fontFamily = language == 'ar' ? TextStyle().fontFamily : _defaultFontFamily;
+    final String? fontFamily = language == 'ar'
+        ? TextStyle().fontFamily
+        : _defaultFontFamily;
 
     return TextStyle(
       color: color,

@@ -74,7 +74,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             context: context,
           );
         } else {
-          debugPrint('ℹ️ User is admin, skipping location update on Home launch');
+          debugPrint(
+            'ℹ️ User is admin, skipping location update on Home launch',
+          );
         }
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
@@ -113,9 +115,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       if (!LocalStore.isCurrentUserAdmin()) {
         debugPrint('🔄 App resumed - updating location');
-        TechnicianLocationUpdateService.updateLocationNow(context: context).then((
-          _,
-        ) {
+        TechnicianLocationUpdateService.updateLocationNow(
+          context: context,
+        ).then((_) {
           if (mounted) {
             context.read<LoginBloc>().add(RefreshUserData());
           }
@@ -454,7 +456,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   ),
                   child: Text(
                     locale?.contactSupport ?? "Contact Support",
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -512,7 +517,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               const SizedBox(height: 24),
               Text(
                 locale?.applicationRejected ?? "Application Rejected",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -626,7 +634,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _showExitDialog(BuildContext context, AppLocalizations? locale) async {
+  Future<void> _showExitDialog(
+    BuildContext context,
+    AppLocalizations? locale,
+  ) async {
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

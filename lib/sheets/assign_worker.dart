@@ -109,7 +109,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           if (snapshot.docs.isNotEmpty) {
             final data = snapshot.docs.first.data() as Map<String, dynamic>;
             final locationsArray = data['locations'] as List<dynamic>? ?? [];
-            
+
             int index = 0;
             _availableZones = locationsArray.map((loc) {
               final map = loc as Map<String, dynamic>;
@@ -119,14 +119,14 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                 name: map['en_name']?.toString() ?? '',
                 name_ar: map['ar_name']?.toString() ?? '',
                 name_ur: map['ar_name']?.toString() ?? '',
-                polygon: (map['polygon'] as List<dynamic>?)
-                    ?.map((point) {
+                polygon:
+                    (map['polygon'] as List<dynamic>?)?.map((point) {
                       final p = point as Map<String, dynamic>;
                       final lat = (p['lat'] as num?)?.toDouble() ?? 0.0;
                       final lng = (p['lng'] as num?)?.toDouble() ?? 0.0;
                       return LatLng(lat, lng);
-                    })
-                    .toList() ?? [],
+                    }).toList() ??
+                    [],
                 priority: map['priority'] as int? ?? 0,
               );
             }).toList();
@@ -336,10 +336,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(color: Colors.white),
-          ),
+          content: Text(message, style: TextStyle(color: Colors.white)),
           backgroundColor: color,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -532,22 +529,16 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         content: Text(
           message,
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.grey[600],
-            height: 1.5,
-          ),
+          style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
         ),
+        actionsAlignment: MainAxisAlignment.start,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -596,10 +587,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           ),
           title: Text(
             AppLocalizations.of(context)!.filterByLocation,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.9,
@@ -639,6 +627,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                     },
                   ),
           ),
+          actionsAlignment: MainAxisAlignment.start,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -788,18 +777,12 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                   name != null
                       ? '${AppLocalizations.of(context)!.assignTo} $name'
                       : AppLocalizations.of(context)!.assignToUser,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   AppLocalizations.of(context)!.loadingAgents,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -955,19 +938,13 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                 children: [
                   Text(
                     user.name ?? '',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   if (roleNames.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       roleNames,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

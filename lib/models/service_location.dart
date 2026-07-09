@@ -23,13 +23,12 @@ class ServiceLocationModel {
       name: json['name'] as String? ?? '',
       name_ar: json['name_ar'] as String? ?? '',
       name_ur: json['name_ur'] as String? ?? json['name_ar'] as String? ?? '',
-      polygon: (json['polygon'] as List<dynamic>?)
-              ?.map((point) {
-                final lat = (point['lat'] as num?)?.toDouble() ?? 0.0;
-                final lng = (point['lng'] as num?)?.toDouble() ?? 0.0;
-                return LatLng(lat, lng);
-              })
-              .toList() ??
+      polygon:
+          (json['polygon'] as List<dynamic>?)?.map((point) {
+            final lat = (point['lat'] as num?)?.toDouble() ?? 0.0;
+            final lng = (point['lng'] as num?)?.toDouble() ?? 0.0;
+            return LatLng(lat, lng);
+          }).toList() ??
           [],
       priority: json['priority'] as int? ?? 0,
     );
@@ -42,10 +41,7 @@ class ServiceLocationModel {
       'name_ar': name_ar,
       'name_ur': name_ur,
       'polygon': polygon
-          .map((point) => {
-                'lat': point.latitude,
-                'lng': point.longitude,
-              })
+          .map((point) => {'lat': point.latitude, 'lng': point.longitude})
           .toList(),
       'priority': priority,
     };

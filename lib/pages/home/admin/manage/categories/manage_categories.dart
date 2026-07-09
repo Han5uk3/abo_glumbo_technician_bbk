@@ -1,8 +1,9 @@
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/categories/add_new_categories.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/category_tile.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 
 class ManageCategories extends StatefulWidget {
@@ -48,16 +49,7 @@ class _ManageCategoriesState extends State<ManageCategories> {
         stream: _categoriesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 24, child: Loader()),
-                  SizedBox(height: 10),
-                  Text(AppLocalizations.of(context)!.loadingCategories),
-                ],
-              ),
-            );
+            return const ManageShimmerLoading();
           }
           if (snapshot.hasError) {
             return Center(
@@ -82,7 +74,8 @@ class _ManageCategoriesState extends State<ManageCategories> {
           context,
           MaterialPageRoute(builder: (context) => const AddNewCategories()),
         ),
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

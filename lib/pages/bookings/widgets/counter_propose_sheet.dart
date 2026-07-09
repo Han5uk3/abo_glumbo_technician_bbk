@@ -36,16 +36,16 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    
+
     // Start with now + 30 mins
     DateTime baseTime = now.add(const Duration(minutes: 30));
 
     _selectedDate = baseTime;
-    
+
     // Round to next 30 min interval
     int minutes = baseTime.minute;
     int hour = baseTime.hour;
-    
+
     if (minutes > 0 && minutes <= 30) {
       minutes = 30;
     } else if (minutes > 30) {
@@ -54,7 +54,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
     } else {
       minutes = 0;
     }
-    
+
     // Ensure it's within 6 AM - 10 PM
     if (hour < 6) hour = 6;
     if (hour > 22 || (hour == 22 && minutes > 0)) {
@@ -62,7 +62,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       minutes = 0;
       _selectedDate = baseTime.add(const Duration(days: 1));
     }
-    
+
     _selectedTime = TimeOfDay(hour: hour, minute: minutes);
   }
 
@@ -71,8 +71,8 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: widget.currentBookingTime.isAfter(DateTime.now()) 
-          ? widget.currentBookingTime 
+      lastDate: widget.currentBookingTime.isAfter(DateTime.now())
+          ? widget.currentBookingTime
           : DateTime.now().add(const Duration(days: 30)),
       builder: (context, child) {
         return Theme(
@@ -107,7 +107,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
 
   Future<void> _pickTime() async {
     final slots = _generateTimeSlots();
-    
+
     final TimeOfDay? picked = await showModalBottomSheet<TimeOfDay>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -134,10 +134,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   AppLocalizations.of(context)!.selectTime,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               Expanded(
@@ -152,9 +149,10 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                   itemCount: slots.length,
                   itemBuilder: (context, index) {
                     final slot = slots[index];
-                    final isSelected = _selectedTime?.hour == slot.hour && 
-                                     _selectedTime?.minute == slot.minute;
-                    
+                    final isSelected =
+                        _selectedTime?.hour == slot.hour &&
+                        _selectedTime?.minute == slot.minute;
+
                     // Check if slot is valid (after now and before original booking time)
                     final bookingDate = widget.currentBookingTime;
                     final now = DateTime.now();
@@ -165,22 +163,27 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                       slot.hour,
                       slot.minute,
                     );
-                    
-                    final isValid = selectedSlotDateTime.isAfter(now) && 
-                                    selectedSlotDateTime.isBefore(bookingDate);
-                    
+
+                    final isValid =
+                        selectedSlotDateTime.isAfter(now) &&
+                        selectedSlotDateTime.isBefore(bookingDate);
+
                     return InkWell(
-                      onTap: isValid ? () => Navigator.pop(context, slot) : null,
+                      onTap: isValid
+                          ? () => Navigator.pop(context, slot)
+                          : null,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? AppColors.primary 
+                          color: isSelected
+                              ? AppColors.primary
                               : (isValid ? Colors.grey[50] : Colors.grey[100]),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected 
-                                ? AppColors.primary 
-                                : (isValid ? Colors.grey[200]! : Colors.grey[200]!.withOpacity(0.5)),
+                            color: isSelected
+                                ? AppColors.primary
+                                : (isValid
+                                      ? Colors.grey[200]!
+                                      : Colors.grey[200]!.withOpacity(0.5)),
                           ),
                         ),
                         alignment: Alignment.center,
@@ -188,9 +191,11 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                           slot.format(context),
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            color: isSelected 
-                                ? Colors.white 
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
                                 : (isValid ? Colors.black87 : Colors.grey[400]),
                           ),
                         ),
@@ -226,10 +231,13 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
     final originalDateTime = widget.currentBookingTime;
     final now = DateTime.now();
 
-    if (!selectedDateTime.isAfter(now) || !selectedDateTime.isBefore(originalDateTime)) {
+    if (!selectedDateTime.isAfter(now) ||
+        !selectedDateTime.isBefore(originalDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please select a valid time between now and original booking time'),
+          content: const Text(
+            'Please select a valid time between now and original booking time',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -261,7 +269,10 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.failedToSendCounter ?? 'Failed to send counter offer'),
+            content: Text(
+              AppLocalizations.of(context)?.failedToSendCounter ??
+                  'Failed to send counter offer',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -272,11 +283,11 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final dateStr = _selectedDate == null 
-        ? l10n.selectDate 
+    final dateStr = _selectedDate == null
+        ? l10n.selectDate
         : DateFormat('EEE, MMM d, yyyy').format(_selectedDate!);
-    final timeStr = _selectedTime == null 
-        ? l10n.selectTime 
+    final timeStr = _selectedTime == null
+        ? l10n.selectTime
         : _selectedTime!.format(context);
 
     return Container(
@@ -312,14 +323,12 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            (AppLocalizations.of(context)?.selectNewDateAppointment ?? 'Select a new date and time for the appointment'),
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            (AppLocalizations.of(context)?.selectNewDateAppointment ??
+                'Select a new date and time for the appointment'),
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
           const SizedBox(height: 32),
-          
+
           // Date Selector
           _buildPickerRow(
             icon: Icons.calendar_today_rounded,
@@ -327,9 +336,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
             value: dateStr,
             onTap: _pickDate,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Time Selector
           _buildPickerRow(
             icon: Icons.access_time_rounded,
@@ -337,9 +346,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
             value: timeStr,
             onTap: _pickTime,
           ),
-          
+
           const SizedBox(height: 40),
-          
+
           // Submit Button
           SizedBox(
             width: double.infinity,
@@ -409,10 +418,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
                 Text(
                   value,

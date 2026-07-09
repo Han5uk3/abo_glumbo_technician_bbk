@@ -166,8 +166,7 @@ class UnifiedWalletModel {
       paidBonus: paidBonus ?? this.paidBonus,
       availableBonus: availableBonus ?? this.availableBonus,
       inAppEarnings: inAppEarnings ?? this.inAppEarnings,
-      outsideAppEarnings:
-          outsideAppEarnings ?? this.outsideAppEarnings,
+      outsideAppEarnings: outsideAppEarnings ?? this.outsideAppEarnings,
       totalCompletionAmount:
           totalCompletionAmount ?? this.totalCompletionAmount,
       totalAvailableBalance:

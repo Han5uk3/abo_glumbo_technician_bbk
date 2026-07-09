@@ -78,10 +78,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
             ),
             Text(
               AppLocalizations.of(context)?.selectSource ?? 'Select Source',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             Row(
@@ -221,10 +218,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.white),
-        ),
+        content: Text(message, style: TextStyle(color: Colors.white)),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -282,10 +276,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -490,10 +481,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               Expanded(
                 child: Text(
                   AppLocalizations.of(context)!.confirmCompletion,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -814,7 +802,6 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
               const SizedBox(height: 24),
 
               // Payment Method Toggle
-             
               const SizedBox(height: 24),
 
               if (_serviceCompleted) ...[
@@ -879,9 +866,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                                       ),
                                       child: Text(
                                         file.path.split('/').last,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                        ),
+                                        style: TextStyle(fontSize: 10),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -963,10 +948,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                     padding: const EdgeInsets.only(top: 8, left: 4),
                     child: Text(
                       _fileError!,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
                 const SizedBox(height: 24),
@@ -975,10 +957,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 if (_serviceItems.isEmpty) ...[
                   Text(
                     '${AppLocalizations.of(context)!.serviceCost} *',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(

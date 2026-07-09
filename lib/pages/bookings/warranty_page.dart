@@ -48,12 +48,18 @@ class _WarrantyPageState extends State<WarrantyPage>
     if (cleanQuery.isEmpty) return;
 
     try {
-      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery).get();
+      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef
+          .doc(cleanQuery)
+          .get();
       if (!doc.exists) {
-        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toUpperCase()).get();
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toUpperCase())
+            .get();
       }
       if (!doc.exists) {
-        doc = await AppFirestore.bookingsCollectionRef.doc(cleanQuery.toLowerCase()).get();
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toLowerCase())
+            .get();
       }
 
       if (!doc.exists) {
@@ -106,7 +112,9 @@ class _WarrantyPageState extends State<WarrantyPage>
         final booking = BookingModel.fromDocumentSnapshot(doc);
         if (booking.warranty != null) {
           final warrantyCode = booking.warranty!.warrantyStatusCode;
-          final index = _warrantyStatuses.indexWhere((status) => status['code'] == warrantyCode);
+          final index = _warrantyStatuses.indexWhere(
+            (status) => status['code'] == warrantyCode,
+          );
           if (index != -1 && index != _tabController.index) {
             _tabController.animateTo(index);
           }
@@ -175,7 +183,13 @@ class _WarrantyPageState extends State<WarrantyPage>
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: SearchBar(
+                  side: MaterialStatePropertyAll(
+                    BorderSide(color: Colors.black),
+                  ),
                   controller: _searchController,
+                  hintStyle: MaterialStatePropertyAll(
+                    TextStyle(color: Colors.black),
+                  ),
                   hintText: AppLocalizations.of(context)!.searchByBookingId,
                   leading: const Icon(Icons.search),
                   trailing: _searchQuery.isNotEmpty
@@ -265,12 +279,16 @@ class _WarrantyPageState extends State<WarrantyPage>
     required VoidCallback onPressed,
   }) {
     if (code == 'R' || code == 'S') {
-      final stream = code == 'R' ? _pendingWarrantiesStream : _acceptedWarrantiesStream;
+      final stream = code == 'R'
+          ? _pendingWarrantiesStream
+          : _acceptedWarrantiesStream;
       return StreamBuilder<List<BookingModel>>(
         stream: stream,
         builder: (context, snapshot) {
           final hasRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
-          final inactiveColor = hasRequests ? Colors.orange : Colors.grey.shade600;
+          final inactiveColor = hasRequests
+              ? Colors.orange
+              : Colors.grey.shade600;
           return _buildChipWidget(
             context,
             code: code,
@@ -308,10 +326,7 @@ class _WarrantyPageState extends State<WarrantyPage>
     return ActionChip(
       onPressed: onPressed,
       backgroundColor: Colors.white,
-      side: BorderSide(
-        color: chipColor,
-        width: isSelected ? 1.5 : 1,
-      ),
+      side: BorderSide(color: chipColor, width: isSelected ? 1.5 : 1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       label: Text(
         getLocalizedName(name, context).toUpperCase(),
@@ -412,7 +427,8 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
       final newBookingId = warranty.newBookingId?.toLowerCase() ?? '';
 
       return bookingId.contains(widget.searchQuery) ||
-          (newBookingId.isNotEmpty && newBookingId.contains(widget.searchQuery));
+          (newBookingId.isNotEmpty &&
+              newBookingId.contains(widget.searchQuery));
     }).toList();
   }
 
@@ -484,11 +500,7 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.search_off,
-                size: 100,
-                color: Colors.grey,
-              ),
+              Icon(Icons.search_off, size: 100, color: Colors.grey),
               const SizedBox(height: 12),
               Text(
                 AppLocalizations.of(context)!.noresultsfound,
@@ -521,11 +533,7 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.build_circle_outlined,
-              size: 100,
-              color: Colors.grey,
-            ),
+            Icon(Icons.build_circle_outlined, size: 100, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
               AppLocalizations.of(context)!.noWarrantyRequests,

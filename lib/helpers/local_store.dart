@@ -117,7 +117,6 @@ class LocalStore {
     await MyApp.box.delete('biometric_auth_enabled_$uid');
   }
 
-
   // ============================================
   // Active Booking Tracking
   // ============================================
@@ -163,7 +162,6 @@ class LocalStore {
     }
     return getCachedAdminData() != null;
   }
-
 
   // ============================================
   // Welcome Modal Tracking

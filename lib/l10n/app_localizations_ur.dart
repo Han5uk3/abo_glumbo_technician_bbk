@@ -5203,4 +5203,29 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get resolutionTextRequired => 'حل کی تفصیل درکار ہے';
+
+  @override
+  String get urduName => 'اردو نام';
+
+  @override
+  String get enterUrduName => 'اردو نام درج کریں';
+
+  @override
+  String get pleaseEnterUrduName => 'براہ کرم اردو نام درج کریں';
+
+  @override
+  String get pleaseEnterUrduNameOnly => 'براہ کرم صرف اردو نام درج کریں';
+
+  @override
+  String get searchForZones => 'علاقوں کے لیے تلاش کریں';
+
+  @override
+  String get failedToSearchForZones =>
+      'علاقوں کی تلاش میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔';
+
+  @override
+  String get zoneNameAlreadyExists => '????? ?? ??? ???? ?? ????? ??';
+
+  @override
+  String get zoneType => '??? ?? ???';
 }

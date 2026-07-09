@@ -337,7 +337,9 @@ class AuthServices {
         debugPrint("✅ [TECH AUTH] Admin found with accessLevel: $accessLevel");
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
-        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        await LocalStore.storeAdminData(
+          AdminModel.fromJson(adminData ?? {}, id: uid),
+        );
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -411,7 +413,9 @@ class AuthServices {
         debugPrint("✅ [TECH AUTH] Valid technician found, logging in");
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
-        final userData = (await AppFirestore.usersCollectionRef.doc(uid).get()).data() as Map<String, dynamic>?;
+        final userData =
+            (await AppFirestore.usersCollectionRef.doc(uid).get()).data()
+                as Map<String, dynamic>?;
         if (userData != null) {
           await LocalStore.storeUserData(UserModel.fromJson(userData));
         }

@@ -338,13 +338,11 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: _startDate != null
-                                    ? colorScheme.primary
+                                    ? AppColors.primary
                                     : Colors.grey.shade400,
                               ),
                               borderRadius: BorderRadius.circular(12),
-                              color: _startDate != null
-                                  ? colorScheme.primary.withOpacity(0.1)
-                                  : null,
+                              color: Colors.white,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -353,7 +351,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                                   Icons.calendar_today_outlined,
                                   size: 20,
                                   color: _startDate != null
-                                      ? colorScheme.primary
+                                      ? AppColors.primary
                                       : Colors.grey.shade600,
                                 ),
                                 if (_startDate != null && _endDate != null) ...[
@@ -361,7 +359,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                                   Text(
                                     '${DateFormat('MMM dd').format(_startDate!)} - ${DateFormat('MMM dd').format(_endDate!)}',
                                     style: TextStyle(
-                                      color: colorScheme.primary,
+                                      color: AppColors.primary,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),
@@ -377,7 +375,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                                     child: Icon(
                                       Icons.close,
                                       size: 18,
-                                      color: colorScheme.primary,
+                                      color: AppColors.red,
                                     ),
                                   ),
                                 ] else ...[
@@ -388,7 +386,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                                         )?.filterByDate ??
                                         "Filter Date",
                                     style: TextStyle(
-                                      color: Colors.grey.shade600,
+                                      color: Colors.black,
                                       fontWeight: FontWeight.w500,
                                       fontSize: 13,
                                     ),

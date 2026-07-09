@@ -18,58 +18,92 @@ class ContactService {
       log('Cannot launch email: $url; Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.couldNotLaunchEmail ?? 'Could not launch email client')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.couldNotLaunchEmail ??
+                  'Could not launch email client',
+            ),
+          ),
         );
       }
     }
   }
 
-  static Future<void> launchWhatsApp(BuildContext context, String phoneNumber) async {
+  static Future<void> launchWhatsApp(
+    BuildContext context,
+    String phoneNumber,
+  ) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
     final whatsappUrl = 'https://wa.me/$cleanPhone';
     log('Attempting to launch WhatsApp: $whatsappUrl');
     try {
-      final success = await launchUrlString(whatsappUrl, mode: LaunchMode.externalApplication);
+      final success = await launchUrlString(
+        whatsappUrl,
+        mode: LaunchMode.externalApplication,
+      );
       if (!success) {
-        log('canLaunchUrlString returned false or failed; attempting fallback launch...');
+        log(
+          'canLaunchUrlString returned false or failed; attempting fallback launch...',
+        );
         await launchUrlString(whatsappUrl);
       }
     } catch (e) {
-      log('WhatsApp launch failed; attempting direct launch fallback... Error: $e');
+      log(
+        'WhatsApp launch failed; attempting direct launch fallback... Error: $e',
+      );
       try {
         await launchUrlString(whatsappUrl);
       } catch (err) {
         log('All WhatsApp launch attempts failed: $err');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)?.couldNotLaunchWhatsapp ?? 'Could not launch WhatsApp')),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.couldNotLaunchWhatsapp ??
+                    'Could not launch WhatsApp',
+              ),
+            ),
           );
         }
       }
     }
   }
 
-  static Future<void> launchPhone(BuildContext context, String phoneNumber) async {
+  static Future<void> launchPhone(
+    BuildContext context,
+    String phoneNumber,
+  ) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
     final url = "tel:$cleanPhone";
     log('Attempting to launch phone: $url');
     try {
       if (await canLaunchUrlString(url)) {
         log('Url can be launched: $url');
-        final success = await launchUrlString(url, mode: LaunchMode.externalNonBrowserApplication);
+        final success = await launchUrlString(
+          url,
+          mode: LaunchMode.externalNonBrowserApplication,
+        );
         log('Phone launch result: $success');
       } else {
         log('canLaunchUrlString returned false for: $url');
         // Try direct launch as fallback for some devices where canLaunch fails
         log('Attempting direct launch without canLaunch check...');
-        final success = await launchUrlString(url, mode: LaunchMode.externalNonBrowserApplication);
+        final success = await launchUrlString(
+          url,
+          mode: LaunchMode.externalNonBrowserApplication,
+        );
         log('Direct phone launch result: $success');
       }
     } catch (e) {
       log('Error launching phone: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.errorOccurred(e.toString()) ??
+                  'Error: ${e.toString()}',
+            ),
+          ),
         );
       }
     }
@@ -107,7 +141,9 @@ class ContactBottomSheet extends StatelessWidget {
           }
           final data = asyncSnapshot.data!;
 
-          log('Customer support data: ${data.map((e) => "${e.type}: ${e.detail}").toList()}');
+          log(
+            'Customer support data: ${data.map((e) => "${e.type}: ${e.detail}").toList()}',
+          );
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -122,10 +158,7 @@ class ContactBottomSheet extends StatelessWidget {
               SizedBox(height: 20),
               Text(
                 AppLocalizations.of(context)?.contactSupportOptions ?? "",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               Expanded(

@@ -7,10 +7,7 @@ class SendOTPPressed extends LoginEvent {
   final String phoneNumber;
   final BuildContext context;
 
-  SendOTPPressed({
-    required this.phoneNumber,
-    required this.context,
-  });
+  SendOTPPressed({required this.phoneNumber, required this.context});
 
   @override
   String toString() => 'SendOTPPressed { phoneNumber: $phoneNumber }';
@@ -48,8 +45,7 @@ class VerifyOTPForRegistration extends LoginEvent {
   });
 
   @override
-  String toString() =>
-      'VerifyOTPForRegistration { phoneNumber: $phoneNumber }';
+  String toString() => 'VerifyOTPForRegistration { phoneNumber: $phoneNumber }';
 }
 
 class RememberMeToggled extends LoginEvent {

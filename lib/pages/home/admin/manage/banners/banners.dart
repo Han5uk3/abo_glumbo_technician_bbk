@@ -1,11 +1,11 @@
 import "package:aboglumbo_bbk_panel/styles/color.dart";
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/banner.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/banners/add_banner.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/banner_tile.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,16 +59,7 @@ class ManageBanners extends StatelessWidget {
           stream: AppServices.getAllBannersStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(height: 24, child: Loader()),
-                    const SizedBox(height: 10),
-                    Text(AppLocalizations.of(context)!.loadingBanners),
-                  ],
-                ),
-              );
+              return const ManageShimmerLoading();
             }
             if (snapshot.hasError) {
               return Center(
@@ -127,7 +118,8 @@ class ManageBanners extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => const AddBanner()),
           ),
-          child: const Icon(Icons.add),
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );

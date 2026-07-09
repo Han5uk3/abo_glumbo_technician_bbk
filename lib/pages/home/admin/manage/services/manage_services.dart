@@ -1,12 +1,12 @@
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/services/edit_services_screen.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/service_tile.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/categories.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
-import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 
 class ManageServices extends StatefulWidget {
@@ -61,16 +61,7 @@ class _ManageServicesState extends State<ManageServices> {
             stream: _servicesStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: 24, child: Loader()),
-                      const SizedBox(height: 10),
-                      Text(AppLocalizations.of(context)!.loadingServices),
-                    ],
-                  ),
-                );
+                return const ManageShimmerLoading();
               }
 
               if (snapshot.hasError) {
@@ -157,6 +148,7 @@ class _ManageServicesState extends State<ManageServices> {
           context,
           MaterialPageRoute(builder: (context) => AddServicesDevPage()),
         ),
+
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

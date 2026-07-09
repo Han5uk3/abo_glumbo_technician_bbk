@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/crop_confirm_dialog.dart';
 
 class ImagePickerHelper {
   static final ImagePicker _picker = ImagePicker();
@@ -118,7 +119,16 @@ class ImagePickerHelper {
         lockAspectRatio: lockAspectRatio,
       );
 
-      return croppedImage ?? pickedImage; // Return original if crop failed
+      if (croppedImage != null) {
+        return croppedImage;
+      }
+
+      // If crop was cancelled, ask user if they want to keep the uncropped image
+      final bool? shouldKeepImage = await showCropConfirmDialog(context);
+      if (shouldKeepImage == true) {
+        return pickedImage;
+      }
+      return null;
     }
 
     return pickedImage;

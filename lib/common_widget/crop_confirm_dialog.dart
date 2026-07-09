@@ -24,7 +24,7 @@ Future<bool?> showCropConfirmDialog(BuildContext context) async {
           ),
           eButton(
             onPressed: () => Navigator.of(context).pop(true),
-              text: AppLocalizations.of(context)?.keep ?? 'Keep',
+            text: AppLocalizations.of(context)?.keep ?? 'Keep',
             context: context,
             textColor: Colors.white,
             backgroundColor: Colors.green,

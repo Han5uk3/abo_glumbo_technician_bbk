@@ -117,7 +117,9 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         'technicianPaymentProof': uploadedUrls,
         'bookingStatusCode': 'C',
         'paymentCompleted': true,
-        'paymentCompletedAt': FieldValue.serverTimestamp(),
+        'paymentVerifiedAt': FieldValue.serverTimestamp(),
+        if (widget.booking.paymentCompletedAt == null)
+          'paymentCompletedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
         // Apply warranty for 1 week from completion date if it's full work (mode 1)
         if (widget.booking.completionData?.mode == 1) ...{

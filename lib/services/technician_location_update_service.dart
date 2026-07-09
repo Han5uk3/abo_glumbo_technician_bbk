@@ -21,10 +21,11 @@ class TechnicianLocationUpdateService {
 
   /// Initialize background location updates
   /// Should be called once on app startup
-  static Future<void> initializeBackgroundLocationUpdates() async
-  {
+  static Future<void> initializeBackgroundLocationUpdates() async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint('ℹ️ User is admin, skipping background location service initialization');
+      debugPrint(
+        'ℹ️ User is admin, skipping background location service initialization',
+      );
       return;
     }
 
@@ -48,12 +49,10 @@ class TechnicianLocationUpdateService {
     } catch (e) {
       debugPrint('❌ Failed to initialize background location updates: $e');
     }
-
   }
 
   /// Callback for background fetch tasks
   static void _backgroundFetchHeadlessTask(String taskId) async {
-
     try {
       debugPrint('🔄 Running background location update task');
       await _updateTechnicianLocation();
@@ -65,8 +64,7 @@ class TechnicianLocationUpdateService {
   }
 
   /// Callback for background fetch timeout
-  static void _onBackgroundFetchTimeout(String taskId)
-  {
+  static void _onBackgroundFetchTimeout(String taskId) {
     debugPrint('⏱️ Background task timeout: $taskId');
     BackgroundFetch.finish(taskId);
   }
@@ -112,7 +110,9 @@ class TechnicianLocationUpdateService {
       // Try to get last known position first for faster update
       Position? position = await Geolocator.getLastKnownPosition();
       if (position != null) {
-        debugPrint('📍 Found last known position: ${position.latitude}, ${position.longitude}');
+        debugPrint(
+          '📍 Found last known position: ${position.latitude}, ${position.longitude}',
+        );
         await _updateFirestoreLocation(uid, position);
       }
 
@@ -133,7 +133,10 @@ class TechnicianLocationUpdateService {
     }
   }
 
-  static Future<void> _updateFirestoreLocation(String uid, Position position) async {
+  static Future<void> _updateFirestoreLocation(
+    String uid,
+    Position position,
+  ) async {
     Map<String, dynamic> updateData = {
       'liveLocation': {
         'latitude': position.latitude,
@@ -163,12 +166,16 @@ class TechnicianLocationUpdateService {
         updateData['location.city'] = place.locality;
         updateData['location.province'] = place.administrativeArea;
         updateData['location.street'] = place.subLocality ?? place.thoroughfare;
-        
+
         final parts = <String>[];
-        if (place.subLocality != null && place.subLocality!.isNotEmpty) parts.add(place.subLocality!);
-        if (place.locality != null && place.locality!.isNotEmpty) parts.add(place.locality!);
-        if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) parts.add(place.administrativeArea!);
-        
+        if (place.subLocality != null && place.subLocality!.isNotEmpty)
+          parts.add(place.subLocality!);
+        if (place.locality != null && place.locality!.isNotEmpty)
+          parts.add(place.locality!);
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty)
+          parts.add(place.administrativeArea!);
+
         if (parts.isNotEmpty) {
           updateData['location.fullAddress'] = parts.join(', ');
         }
@@ -207,7 +214,9 @@ class TechnicianLocationUpdateService {
     BuildContext context,
   ) async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint('ℹ️ User is admin, skipping manual location permission request');
+      debugPrint(
+        'ℹ️ User is admin, skipping manual location permission request',
+      );
       return;
     }
     final locale = AppLocalizations.of(context);
@@ -218,7 +227,8 @@ class TechnicianLocationUpdateService {
       if (context.mounted) {
         _showPermissionDialog(
           context,
-          title: locale?.locationServicesDisabled ?? 'Location Services Disabled',
+          title:
+              locale?.locationServicesDisabled ?? 'Location Services Disabled',
           message:
               locale?.pleaseEnableLocationServices ??
               'Please enable location services to continue using the app as a technician.',
@@ -243,7 +253,9 @@ class TechnicianLocationUpdateService {
       if (context.mounted) {
         _showPermissionDialog(
           context,
-          title: locale?.locationPermissionRequired ?? 'Location Permission Required',
+          title:
+              locale?.locationPermissionRequired ??
+              'Location Permission Required',
           message:
               locale?.locationPermissionPermanentlyDeniedMessage ??
               'Location permissions are permanently denied. Please enable them in app settings to receive job offers.',
@@ -275,14 +287,25 @@ class TechnicianLocationUpdateService {
           children: [
             const Icon(Icons.location_off_rounded, color: Colors.red),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ),
           ],
         ),
-        content: Text(message, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(locale?.later ?? 'Later', style: const TextStyle(color: Colors.grey)),
+            child: Text(
+              locale?.later ?? 'Later',
+              style: const TextStyle(color: Colors.grey),
+            ),
           ),
           const SizedBox(width: 8),
           eButton(
@@ -313,7 +336,9 @@ class TechnicianLocationUpdateService {
   /// Start background location updates
   static Future<void> startBackgroundLocationUpdates() async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint('ℹ️ User is admin, skipping start background location updates');
+      debugPrint(
+        'ℹ️ User is admin, skipping start background location updates',
+      );
       return;
     }
     try {

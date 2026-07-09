@@ -53,7 +53,7 @@ class UpdateWorkerNotificationLanguageEvent extends AccountEvent {
 class RequestPayoutEvent extends AccountEvent {
   final String user;
   final String amount;
-  final String type;  
+  final String type;
   RequestPayoutEvent(this.user, this.amount, this.type);
   @override
   List<Object?> get props => [user, amount, type];

@@ -53,7 +53,6 @@ class UserModel {
   bool? isDocsPendingReview; // Flag to indicate docs are ready for admin review
   bool? isRegistrationComplete; // Flag for initial registration completion
 
-
   UserModel({
     this.uid,
     this.name,
@@ -104,7 +103,6 @@ class UserModel {
     this.isDocsPendingReview,
     this.isRegistrationComplete,
   });
-
 
   UserModel copyWith({
     String? uid,
@@ -157,7 +155,6 @@ class UserModel {
     bool? isDocsPendingReview,
     bool? isRegistrationComplete,
   }) {
-
     return UserModel(
       uid: uid ?? this.uid,
       name: name ?? this.name,
@@ -202,13 +199,14 @@ class UserModel {
       isOnline: isOnline ?? this.isOnline,
       residenceIdUrl: residenceIdUrl ?? this.residenceIdUrl,
       sponsorWorkPermitUrl: sponsorWorkPermitUrl ?? this.sponsorWorkPermitUrl,
-      chamberOfCommerceApprovalUrl: chamberOfCommerceApprovalUrl ?? this.chamberOfCommerceApprovalUrl,
+      chamberOfCommerceApprovalUrl:
+          chamberOfCommerceApprovalUrl ?? this.chamberOfCommerceApprovalUrl,
       isBlocked: isBlocked ?? this.isBlocked,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       isDocsPendingReview: isDocsPendingReview ?? this.isDocsPendingReview,
-      isRegistrationComplete: isRegistrationComplete ?? this.isRegistrationComplete,
+      isRegistrationComplete:
+          isRegistrationComplete ?? this.isRegistrationComplete,
     );
-
   }
 
   factory UserModel.fromDocumentSnapshot(DocumentSnapshot doc) {
@@ -292,7 +290,6 @@ class UserModel {
       isDocsPendingReview: json['isDocsPendingReview'],
       isRegistrationComplete: json['isRegistrationComplete'],
     );
-
   }
 
   Map<String, dynamic> toJson() {
@@ -355,7 +352,6 @@ class UserModel {
       'isDocsPendingReview': isDocsPendingReview,
       'isRegistrationComplete': isRegistrationComplete,
     };
-
   }
 
   Map<String, dynamic> toFirestore() {
@@ -416,7 +412,6 @@ class UserModel {
       'isDocsPendingReview': isDocsPendingReview,
       'isRegistrationComplete': isRegistrationComplete,
     };
-
   }
 
   Map<String, dynamic> toEditJson({required UserModel previous}) {

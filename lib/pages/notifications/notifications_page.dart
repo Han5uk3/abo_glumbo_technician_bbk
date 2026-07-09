@@ -77,29 +77,29 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
       return isAr
           ? 'الآن'
           : isUr
-              ? 'ابھی'
-              : 'Just now';
+          ? 'ابھی'
+          : 'Just now';
     } else if (difference.inMinutes < 60) {
       final minutes = difference.inMinutes;
       return isAr
           ? 'منذ $minutes دقيقة'
           : isUr
-              ? '$minutes منٹ پہلے'
-              : '$minutes min ago';
+          ? '$minutes منٹ پہلے'
+          : '$minutes min ago';
     } else if (difference.inHours < 24) {
       final hours = difference.inHours;
       return isAr
           ? 'منذ $hours ساعة'
           : isUr
-              ? '$hours گھنٹے پہلے'
-              : '$hours hr ago';
+          ? '$hours گھنٹے پہلے'
+          : '$hours hr ago';
     } else if (difference.inDays < 7) {
       final days = difference.inDays;
       return isAr
           ? 'منذ $days يوم'
           : isUr
-              ? '$days دن پہلے'
-              : '$days day${days > 1 ? 's' : ''} ago';
+          ? '$days دن پہلے'
+          : '$days day${days > 1 ? 's' : ''} ago';
     } else {
       return DateFormat('MMM d, h:mm a').format(dateTime);
     }
@@ -172,16 +172,15 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                   tooltip: isAr
                       ? 'حذف الكل'
                       : isUr
-                          ? 'سب حذف کریں'
-                          : 'Delete All',
+                      ? 'سب حذف کریں'
+                      : 'Delete All',
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
                         actionsAlignment: MainAxisAlignment.start,
 
-                        shape:
-                        RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         // constraints: const BoxConstraints(maxWidth: 320),
@@ -197,8 +196,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                               isAr
                                   ? 'حذف الكل'
                                   : isUr
-                                      ? 'سب حذف کریں'
-                                      : 'Delete All',
+                                  ? 'سب حذف کریں'
+                                  : 'Delete All',
                               style: const TextStyle(fontSize: 18),
                             ),
                           ],
@@ -207,8 +206,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                           isAr
                               ? 'هل أنت متأكد أنك تريد حذف جميع الإشعارات؟'
                               : isUr
-                                  ? 'کیا آپ واقعی تمام اطلاعات حذف کرنا چاہتے ہیں؟'
-                                  : 'Are you sure you want to delete all notifications?',
+                              ? 'کیا آپ واقعی تمام اطلاعات حذف کرنا چاہتے ہیں؟'
+                              : 'Are you sure you want to delete all notifications?',
                           style: TextStyle(
                             color: Colors.grey[700],
                             fontSize: 15,
@@ -242,14 +241,12 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                         context: context,
                         barrierDismissible: false,
                         builder: (BuildContext context) {
-                          return const Center(
-                            child: Loader(size: 40),
-                          );
+                          return const Center(child: Loader(size: 40));
                         },
                       );
 
                       await AppServices.deleteAllFirestoreNotifications();
-                      
+
                       if (context.mounted) {
                         Navigator.pop(context); // Close the loading dialog
                         setState(() {
@@ -273,8 +270,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                                   isAr
                                       ? 'تم حذف جميع الإشعارات'
                                       : isUr
-                                          ? 'تمام اطلاعات حذف کر دی گئیں'
-                                          : 'All notifications deleted',
+                                      ? 'تمام اطلاعات حذف کر دی گئیں'
+                                      : 'All notifications deleted',
                                 ),
                               ],
                             ),
@@ -333,8 +330,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                         isAr
                             ? 'لا توجد إشعارات'
                             : isUr
-                                ? 'کوئی اطلاع نہیں'
-                                : 'No notifications',
+                            ? 'کوئی اطلاع نہیں'
+                            : 'No notifications',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.grey[600],
@@ -346,8 +343,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                         isAr
                             ? 'سيتم عرض إشعاراتك هنا'
                             : isUr
-                                ? 'آپ کی اطلاعات یہاں ظاہر ہوں گی'
-                                : 'Your notifications will appear here',
+                            ? 'آپ کی اطلاعات یہاں ظاہر ہوں گی'
+                            : 'Your notifications will appear here',
                         style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                       ),
                     ],
@@ -443,8 +440,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                             isAr
                                 ? 'تم حذف الإشعار'
                                 : isUr
-                                    ? 'اطلاع حذف کر دی گئی'
-                                    : 'Notification deleted',
+                                ? 'اطلاع حذف کر دی گئی'
+                                : 'Notification deleted',
                           ),
                           duration: const Duration(seconds: 2),
                         ),

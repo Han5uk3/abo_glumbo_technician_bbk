@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/service.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/services/edit_services_screen.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -225,10 +226,7 @@ class ServiceTileDevWidget extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Container(
-        color: Colors.grey[100],
-        child: Center(child: Loader(size: 20)),
-      ),
+      placeholder: (context, url) => const ImageShimmer(),
       errorWidget: (context, url, error) => Container(
         color: Colors.grey[200],
         child: const Icon(Icons.error, size: 40, color: Colors.red),
@@ -300,12 +298,12 @@ class ServiceTileDevWidget extends StatelessWidget {
                 'Are you sure you want to delete this service? This action cannot be undone.',
           ),
           actions: [
-            eButton(
-              textColor: Colors.black,
-              context: context,
-              backgroundColor: AppColors.bgWhite,
-              text: AppLocalizations.of(context)!.cancel,
-              onPressed: isDeleting ? null : () => Navigator.of(context).pop(),
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.pop(context),
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: TextStyle(color: Colors.black),
+              ),
             ),
             eButton(
               textColor: Colors.white,

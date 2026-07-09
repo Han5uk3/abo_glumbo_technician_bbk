@@ -15,7 +15,7 @@ class BatteryOptimizationService {
       );
       return isDisabled;
     } on PlatformException catch (e) {
-       debugPrint('Error checking battery optimization: $e');
+      debugPrint('Error checking battery optimization: $e');
       return false;
     }
   }
@@ -27,7 +27,7 @@ class BatteryOptimizationService {
     try {
       await _channel.invokeMethod('requestDisableBatteryOptimization');
     } on PlatformException catch (e) {
-       debugPrint('Error requesting battery optimization disable: $e');
+      debugPrint('Error requesting battery optimization disable: $e');
     }
   }
 
@@ -38,7 +38,7 @@ class BatteryOptimizationService {
     try {
       await _channel.invokeMethod('openBatteryOptimizationSettings');
     } on PlatformException catch (e) {
-       debugPrint('Error opening battery optimization settings: $e');
+      debugPrint('Error opening battery optimization settings: $e');
     }
   }
 }

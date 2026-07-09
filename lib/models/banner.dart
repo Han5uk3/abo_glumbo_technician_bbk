@@ -50,9 +50,7 @@ class BannerModel {
   }
 
   Map<String, dynamic> toEditJson({required BannerModel previous}) {
-    Map<String, dynamic> json = {
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
+    Map<String, dynamic> json = {'updatedAt': FieldValue.serverTimestamp()};
 
     if (section != previous.section) {
       json['section'] = section;
@@ -76,7 +74,8 @@ class BannerModel {
   }
 
   factory BannerModel.fromQueryDocumentSnapshot(
-      QueryDocumentSnapshot snapshot) {
+    QueryDocumentSnapshot snapshot,
+  ) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return BannerModel.fromJson(data)..id = snapshot.id;
   }

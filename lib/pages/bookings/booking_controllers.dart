@@ -603,10 +603,7 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey[600]!,
-                ),
+                style: TextStyle(fontSize: 15, color: Colors.grey[600]!),
               ),
               const SizedBox(height: 32),
 

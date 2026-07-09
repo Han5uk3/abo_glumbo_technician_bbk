@@ -157,7 +157,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           emit(LoginSuccess(user: user));
         } else {
           if (kDebugMode) {
-            print('📝 User not found in any collection — redirecting to signup');
+            print(
+              '📝 User not found in any collection — redirecting to signup',
+            );
           }
           // No account found → redirect to create account page
           emit(OTPVerifiedForRegistration(uid: userCredential.user!.uid));
@@ -256,8 +258,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     try {
       final uid = event.uid ?? LocalStore.getUID()!;
       UserModel? user = await _checkWorkerUser(uid);
-      
-      // If user not found in workers OR they have no name (possible placeholder doc), 
+
+      // If user not found in workers OR they have no name (possible placeholder doc),
       // check if they are an admin
       if (user == null || (user.name == null || user.name!.isEmpty)) {
         UserModel? admin = await _checkAdminUser(uid);
@@ -343,7 +345,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // Only accept users with role "technician"
         if (userRole != 'technician') {
           if (kDebugMode) {
-            print('❌ User found but role is "$userRole", not "technician". Skipping.');
+            print(
+              '❌ User found but role is "$userRole", not "technician". Skipping.',
+            );
           }
           return null;
         }
@@ -352,12 +356,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         await LocalStore.putlogoutStatus(false);
 
         if (kDebugMode) {
-          print('✅ Worker user found with role "technician": ${userData?['name']}');
+          print(
+            '✅ Worker user found with role "technician": ${userData?['name']}',
+          );
         }
 
         // Caching for local access
         await LocalStore.storeUserData(user);
-        
+
         return user;
       } else {
         if (kDebugMode) {
@@ -380,7 +386,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       if (adminDoc.exists) {
         final adminData = adminDoc.data() as Map<String, dynamic>?;
-        
+
         // Map AdminModel fields to UserModel structure for Home compatibility
         final user = UserModel(
           uid: uid,
@@ -397,20 +403,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
-        
+
         if (kDebugMode) {
           print('✅ Admin user found: ${user.name}');
         }
 
         // Store both in local storage
         await LocalStore.storeUserData(user);
-        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
-        
+        await LocalStore.storeAdminData(
+          AdminModel.fromJson(adminData ?? {}, id: uid),
+        );
+
         return user;
       }
       return null;
     } catch (e) {
-       if (kDebugMode) {
+      if (kDebugMode) {
         print('❌ Error fetching admin user: $e');
       }
       return null;
@@ -427,13 +435,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           .get();
 
       if (techByPhoneQuery.docs.isNotEmpty) {
-        final oldData = techByPhoneQuery.docs.first.data() as Map<String, dynamic>;
+        final oldData =
+            techByPhoneQuery.docs.first.data() as Map<String, dynamic>;
         final oldDocId = techByPhoneQuery.docs.first.id;
 
-        final userRole = oldData['role']?.toString().toLowerCase() ?? 'technician';
+        final userRole =
+            oldData['role']?.toString().toLowerCase() ?? 'technician';
         if (userRole != 'technician') {
           if (kDebugMode) {
-            print('❌ User found by phone but role is "$userRole", not "technician". Skipping.');
+            print(
+              '❌ User found by phone but role is "$userRole", not "technician". Skipping.',
+            );
           }
           return null;
         }
@@ -481,11 +493,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           .get();
 
       if (adminByPhoneQuery.docs.isNotEmpty) {
-        final adminData = adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
+        final adminData =
+            adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
         final oldDocId = adminByPhoneQuery.docs.first.id;
 
         if (kDebugMode) {
-          print('✅ Admin found by phone: $phone, accessLevel: ${adminData?['accessLevel']}');
+          print(
+            '✅ Admin found by phone: $phone, accessLevel: ${adminData?['accessLevel']}',
+          );
         }
 
         // Create admin model
@@ -493,9 +508,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         // If the admin doc UID differs from current UID, migrate admin doc
         if (oldDocId != uid) {
-          await AppFirestore.adminsCollectionRef.doc(uid).set(
-            adminModel.copyWith(uid: uid).toJson(),
-          );
+          await AppFirestore.adminsCollectionRef
+              .doc(uid)
+              .set(adminModel.copyWith(uid: uid).toJson());
           await AppFirestore.adminsCollectionRef.doc(oldDocId).delete();
           if (kDebugMode) {
             print('🔄 Admin doc migrated from $oldDocId to $uid');
@@ -521,7 +536,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         // Store both in local storage
         await LocalStore.storeUserData(user);
-        await LocalStore.storeAdminData(AdminModel.fromJson(adminData ?? {}, id: uid));
+        await LocalStore.storeAdminData(
+          AdminModel.fromJson(adminData ?? {}, id: uid),
+        );
 
         return user;
       } else {
@@ -535,26 +552,36 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             .get();
 
         if (pendingAdminQuery.docs.isNotEmpty) {
-          final pendingData = pendingAdminQuery.docs.first.data() as Map<String, dynamic>;
+          final pendingData =
+              pendingAdminQuery.docs.first.data() as Map<String, dynamic>;
           final pendingDocId = pendingAdminQuery.docs.first.id;
 
           if (kDebugMode) {
-            print('✅ Pending admin found by phone: $phone, promoting to active admin');
+            print(
+              '✅ Pending admin found by phone: $phone, promoting to active admin',
+            );
           }
 
           // Create admin model using the pending data and the pending doc ID
-          final pendingAdminModel = AdminModel.fromJson(pendingData, id: pendingDocId);
-
-          // Promote to active admin: set document in admins collection keyed by user auth uid
-          await AppFirestore.adminsCollectionRef.doc(uid).set(
-            pendingAdminModel.copyWith(uid: uid).toJson(),
+          final pendingAdminModel = AdminModel.fromJson(
+            pendingData,
+            id: pendingDocId,
           );
 
+          // Promote to active admin: set document in admins collection keyed by user auth uid
+          await AppFirestore.adminsCollectionRef
+              .doc(uid)
+              .set(pendingAdminModel.copyWith(uid: uid).toJson());
+
           // Delete from pending collection
-          await AppFirestore.pendingAdminsCollectionRef.doc(pendingDocId).delete();
+          await AppFirestore.pendingAdminsCollectionRef
+              .doc(pendingDocId)
+              .delete();
 
           if (kDebugMode) {
-            print('🔄 Pending admin $pendingDocId promoted to active admin under UID: $uid');
+            print(
+              '🔄 Pending admin $pendingDocId promoted to active admin under UID: $uid',
+            );
           }
 
           // Map to UserModel structure for Home compatibility
@@ -576,7 +603,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
           // Store both in local storage
           await LocalStore.storeUserData(user);
-          await LocalStore.storeAdminData(AdminModel.fromJson(pendingData, id: uid));
+          await LocalStore.storeAdminData(
+            AdminModel.fromJson(pendingData, id: uid),
+          );
 
           return user;
         }

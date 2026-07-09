@@ -14,11 +14,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:image_cropper/image_cropper.dart';
+import 'package:aboglumbo_bbk_panel/helpers/image_picker_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../common_widget/map_picker_page.dart';
 import '/models/categories.dart';
 import '/models/service.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 
 class AddServicesDevPage extends StatefulWidget {
   const AddServicesDevPage({super.key, this.service});
@@ -261,35 +262,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
   }
 
   Future pickImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final image = await ImagePickerConfigs.pickServiceImage(context);
     if (image != null) {
       setState(() => selectedImage = image);
-      await cropImage();
-    }
-  }
-
-  Future cropImage() async {
-    CroppedFile? res = await ImageCropper().cropImage(
-      sourcePath: selectedImage!.path,
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-          toolbarColor: AppColors.primary,
-          toolbarWidgetColor: Colors.white,
-        ),
-      ],
-    );
-
-    if (res != null) {
-      setState(() => selectedImage = XFile(res.path));
-    } else {
-      final bool? shouldKeepImage = await showCropConfirmDialog(context);
-
-      if (shouldKeepImage != true) {
-        setState(() => selectedImage = null);
-      }
-      // If shouldKeepImage is true, we keep the original selectedImage as is
     }
   }
 
@@ -476,624 +451,686 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     final safePadding = MediaQuery.of(context).padding;
     // final isArabic = AppLocalizations.of(context)?.localeName == 'ar';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.service == null
-              ? AppLocalizations.of(context)!.addService
-              : AppLocalizations.of(context)!.editService,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: isSaving ? null : saveContent,
-          ),
-        ],
-      ),
-      body: SavingStackWidget(
-        isSaving: isSaving,
-        isLoading: contentLoading,
-        progress: imageUploadProgress,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.only(
-              top: 16,
-              left: 16,
-              right: 16,
-              bottom: safePadding.bottom,
+    return PopScope(
+      canPop: !isSaving,
+      child: AbsorbPointer(
+        absorbing: isSaving,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.service == null
+                  ? AppLocalizations.of(context)!.addService
+                  : AppLocalizations.of(context)!.editService,
             ),
-            children: [
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(AppLocalizations.of(context)?.active ?? 'Active'),
-                value: isActive,
-                activeColor: AppColors.primary,
-                onChanged: (value) {
-                  setState(() {
-                    isActive = value;
-                  });
-                },
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: isSaving ? null : saveContent,
               ),
-              Divider(),
-              SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context)!.category,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: DropdownButtonFormField<CategoryModel>(
-                  dropdownColor: Colors.white,
-                  value: selectedCategory,
-                  items: categories.map((category) {
-                    return DropdownMenuItem<CategoryModel>(
-                      value: category,
-                      child: Text(
-                        category.nameLocalized(
-                              languageCode:
-                                  AppLocalizations.of(context)?.localeName ??
-                                  'en',
-                            ) ??
-                            category.name ??
-                            '',
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => selectedCategory = value);
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.black),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.red),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.red),
-                    ),
-                    hintText: AppLocalizations.of(context)?.choose ?? 'choose',
-                  ),
-                  validator: (value) {
-                    if (value == null) {
-                      return AppLocalizations.of(
-                        context,
-                      )?.pleaseSelectACategory;
-                    }
-                    return null;
-                  },
+            ],
+          ),
+          body: SavingStackWidget(
+            isSaving: isSaving,
+            isLoading: contentLoading,
+            progress: imageUploadProgress,
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: EdgeInsets.only(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  bottom: safePadding.bottom,
                 ),
-              ),
-              Text(
-                AppLocalizations.of(context)!.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: nameController,
-                  hintText: AppLocalizations.of(context)?.name ?? 'Name',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)?.pleaseEnterAName;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Text(
-                AppLocalizations.of(context)!.nameArabic,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: nameArController,
-                  hintText:
-                      AppLocalizations.of(context)?.nameArabic ??
-                      'Name (Arabic)',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterNameInArabic;
-                    } else if (!arabicFullRegex.hasMatch(value)) {
-                      return AppLocalizations.of(context)!.textMustBeInArabic;
-                    }
-
-                    return null;
-                  },
-                ),
-              ),
-              Text(
-                "Name (Urdu)",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: nameUrController,
-                  hintText: 'Name (Urdu)',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter name in Urdu';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Text(
-                AppLocalizations.of(context)!.description,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: descriptionController,
-                  hintText:
-                      AppLocalizations.of(context)?.description ??
-                      'Description',
-                  isDescription: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterADescription;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Text(
-                AppLocalizations.of(context)!.descriptionArabic,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: descriptionArController,
-                  isDescription: true,
-                  hintText:
-                      AppLocalizations.of(context)?.descriptionArabic ??
-                      'Description (Arabic)',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterDescriptionInArabic;
-                    } else if (!arabicFullRegex.hasMatch(value)) {
-                      return AppLocalizations.of(context)!.textMustBeInArabic;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Text(
-                "Description (Urdu)",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  controller: descriptionUrController,
-                  isDescription: true,
-                  hintText: 'Description (Urdu)',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter description in Urdu';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              Text(
-                AppLocalizations.of(context)!.workHoursPricing,
-                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-              Row(
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: TextFormField(
-                        controller: workStartTimeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.red),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.red),
-                          ),
-                          hintText:
-                              AppLocalizations.of(context)?.choose ?? 'choose',
-                          labelStyle: TextStyle(color: Colors.black),
-                          labelText: AppLocalizations.of(
-                            context,
-                          )?.workStartTime,
-                          suffixIcon: Icon(Icons.access_time),
-                        ),
-                        onTap: () async {
-                          TimeOfDay? picked = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay(
-                              hour: int.parse(
-                                workStartTimeController.text.split(':')[0],
-                              ),
-                              minute: int.parse(
-                                workStartTimeController.text.split(':')[1],
-                              ),
-                            ),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              workStartTimeController.text =
-                                  '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                            });
-                          }
-                        },
-                      ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      AppLocalizations.of(context)?.active ?? 'Active',
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: TextFormField(
-                        controller: workEndTimeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.black),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.red),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.red),
-                          ),
-                          hintText:
-                              AppLocalizations.of(context)?.choose ?? 'choose',
-                          labelStyle: TextStyle(color: Colors.black),
-                          labelText: AppLocalizations.of(context)?.workEndTime,
-                          suffixIcon: Icon(Icons.access_time),
-                        ),
-                        onTap: () async {
-                          TimeOfDay? picked = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay(
-                              hour: int.parse(
-                                workEndTimeController.text.split(':')[0],
-                              ),
-                              minute: int.parse(
-                                workEndTimeController.text.split(':')[1],
-                              ),
-                            ),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              workEndTimeController.text =
-                                  '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context)?.workingDays ?? 'Working Days',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [1, 2, 3, 4, 5, 6, 7].map((day) {
-                  final isSelected = workingDays.contains(day);
-                  return FilterChip(
-                    label: Text(
-                      _getDayName(day, context),
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-
-                    selected: isSelected,
-                    selectedColor: AppColors.primary,
-                    checkmarkColor: Colors.white,
-                    onSelected: (bool selected) {
+                    value: isActive,
+                    activeColor: AppColors.primary,
+                    onChanged: (value) {
                       setState(() {
-                        if (selected) {
-                          workingDays.add(day);
-                        } else {
-                          workingDays.remove(day);
-                        }
+                        isActive = value;
                       });
                     },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: NewTextField(
-                        keyboardType: TextInputType.number,
-                        labelText: AppLocalizations.of(context)!.onWorkPrice,
-                        hintText: AppLocalizations.of(context)!.onWorkPrice,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )?.pleaseEnterAnOnWorkPrice;
-                          }
-                          return null;
-                        },
-                        controller: onWorkHourPriceController,
-                      ),
-                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: NewTextField(
-                        keyboardType: TextInputType.number,
-                        controller: offWorkHourPriceController,
-                        hintText: AppLocalizations.of(context)!.offWorkPrice,
-                        labelText: AppLocalizations.of(context)!.offWorkPrice,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.pleaseEnterOffWorkPrice;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  keyboardType: TextInputType.number,
-                  controller: priceController,
-                  hintText: AppLocalizations.of(context)!.generalPrice,
-                  labelText: AppLocalizations.of(context)!.generalPrice,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterAGeneralPrice;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: NewTextField(
-                  keyboardType: TextInputType.number,
-                  controller: discountPercentageController,
-                  hintText:
-                      AppLocalizations.of(context)?.discountPercentage ??
-                      'Discount Percentage (%)',
-                  labelText:
-                      AppLocalizations.of(context)?.discountPercentage ??
-                      'Discount Percentage (%)',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )?.pleaseEnterADiscountPercentage;
-                    }
-                    final perc = double.tryParse(value);
-                    if (perc == null || perc < 0 || perc > 100) {
-                      return 'Enter a value between 0 and 100';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                  Divider(),
+                  SizedBox(height: 12),
                   Text(
-                    AppLocalizations.of(context)!.availableLocations,
+                    AppLocalizations.of(context)!.category,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (selectedCities.isNotEmpty)
-                        Text(
-                          "${selectedCities.length} hierarchy selected",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      if (mapSelectedLocations.isNotEmpty)
-                        Text(
-                          AppLocalizations.of(context)!.locationsSelectedCount(
-                            mapSelectedLocations.length,
-                          ),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-
-              // Hierarchical Location Selector Field
-              SizedBox(
-                height: 50,
-                child: eButton(
-                  onPressed: () async {
-                    final List<Map<String, dynamic>>? result =
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LocationMapPicker(
-                              initialLocations: mapSelectedLocations,
-                            ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: DropdownButtonFormField<CategoryModel>(
+                      dropdownColor: Colors.white,
+                      value: selectedCategory,
+                      items: categories.map((category) {
+                        return DropdownMenuItem<CategoryModel>(
+                          value: category,
+                          child: Text(
+                            category.nameLocalized(
+                                  languageCode:
+                                      AppLocalizations.of(
+                                        context,
+                                      )?.localeName ??
+                                      'en',
+                                ) ??
+                                category.name ??
+                                '',
                           ),
                         );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() => selectedCategory = value);
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                        hintText:
+                            AppLocalizations.of(context)?.choose ?? 'choose',
+                      ),
+                      validator: (value) {
+                        if (value == null) {
+                          return AppLocalizations.of(
+                            context,
+                          )?.pleaseSelectACategory;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: nameController,
+                      hintText: AppLocalizations.of(context)?.name ?? 'Name',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)?.pleaseEnterAName;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.nameArabic,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: nameArController,
+                      hintText:
+                          AppLocalizations.of(context)?.nameArabic ??
+                          'Name (Arabic)',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterNameInArabic;
+                        } else if (!arabicFullRegex.hasMatch(value)) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.textMustBeInArabic;
+                        }
 
-                    if (result != null) {
-                      setState(() {
-                        mapSelectedLocations = result;
-                      });
-                    }
-                  },
-                  context: context,
-                  backgroundColor: AppColors.primary,
-                  text: AppLocalizations.of(context)!.chooseLocations,
-                  textColor: Colors.white,
-                ),
-              ),
-              SizedBox(height: 16),
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    "Name (Urdu)",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: nameUrController,
+                      hintText: 'Name (Urdu)',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter name in Urdu';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: descriptionController,
+                      hintText:
+                          AppLocalizations.of(context)?.description ??
+                          'Description',
+                      isDescription: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterADescription;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.descriptionArabic,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: descriptionArController,
+                      isDescription: true,
+                      hintText:
+                          AppLocalizations.of(context)?.descriptionArabic ??
+                          'Description (Arabic)',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterDescriptionInArabic;
+                        } else if (!arabicFullRegex.hasMatch(value)) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.textMustBeInArabic;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Text(
+                    "Description (Urdu)",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      controller: descriptionUrController,
+                      isDescription: true,
+                      hintText: 'Description (Urdu)',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter description in Urdu';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
 
-              Text(
-                AppLocalizations.of(context)!.image,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Directionality.of(context) == TextDirection.rtl
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: GestureDetector(
-                    onTap: pickImage,
-                    child: DottedBorder(
-                      color: Colors.grey.withOpacity(0.5),
-                      strokeWidth: 1.5,
-                      dashPattern: const [6, 4],
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(12),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: 130,
-                          height: 130,
-                          color: Colors.grey.withOpacity(0.05),
-                          child: selectedImage != null
-                              ? Image.file(
-                                  File(selectedImage!.path),
-                                  fit: BoxFit.cover,
-                                  width: 130,
-                                  height: 130,
-                                )
-                              : widget.service?.image != null
-                              ? CachedNetworkImage(
-                                  imageUrl: widget.service?.image ?? "",
-                                  fit: BoxFit.cover,
-                                  width: 130,
-                                  height: 130,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(),
+                  Text(
+                    AppLocalizations.of(context)!.workHoursPricing,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: TextFormField(
+                            controller: workStartTimeController,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              disabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.red),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.red),
+                              ),
+                              hintText:
+                                  AppLocalizations.of(context)?.choose ??
+                                  'choose',
+                              labelStyle: TextStyle(color: Colors.black),
+                              labelText: AppLocalizations.of(
+                                context,
+                              )?.workStartTime,
+                              suffixIcon: Icon(Icons.access_time),
+                            ),
+                            onTap: () async {
+                              TimeOfDay? picked = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(
+                                  hour: int.parse(
+                                    workStartTimeController.text.split(':')[0],
                                   ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                )
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                      size: 32,
-                                      color: Colors.grey[400],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      AppLocalizations.of(context)?.pickImage ??
-                                          'Pick Image',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
+                                  minute: int.parse(
+                                    workStartTimeController.text.split(':')[1],
+                                  ),
                                 ),
+                              );
+                              if (picked != null) {
+                                setState(() {
+                                  workStartTimeController.text =
+                                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: TextFormField(
+                            controller: workEndTimeController,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              disabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.red),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.red),
+                              ),
+                              hintText:
+                                  AppLocalizations.of(context)?.choose ??
+                                  'choose',
+                              labelStyle: TextStyle(color: Colors.black),
+                              labelText: AppLocalizations.of(
+                                context,
+                              )?.workEndTime,
+                              suffixIcon: Icon(Icons.access_time),
+                            ),
+                            onTap: () async {
+                              TimeOfDay? picked = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(
+                                  hour: int.parse(
+                                    workEndTimeController.text.split(':')[0],
+                                  ),
+                                  minute: int.parse(
+                                    workEndTimeController.text.split(':')[1],
+                                  ),
+                                ),
+                              );
+                              if (picked != null) {
+                                setState(() {
+                                  workEndTimeController.text =
+                                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)?.workingDays ?? 'Working Days',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [1, 2, 3, 4, 5, 6, 7].map((day) {
+                      final isSelected = workingDays.contains(day);
+                      return FilterChip(
+                        label: Text(
+                          _getDayName(day, context),
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
+                        ),
+
+                        selected: isSelected,
+                        selectedColor: AppColors.primary,
+                        checkmarkColor: Colors.white,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            if (selected) {
+                              workingDays.add(day);
+                            } else {
+                              workingDays.remove(day);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: NewTextField(
+                            keyboardType: TextInputType.number,
+                            labelText: AppLocalizations.of(
+                              context,
+                            )!.onWorkPrice,
+                            hintText: AppLocalizations.of(context)!.onWorkPrice,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(
+                                  context,
+                                )?.pleaseEnterAnOnWorkPrice;
+                              }
+                              return null;
+                            },
+                            controller: onWorkHourPriceController,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: NewTextField(
+                            keyboardType: TextInputType.number,
+                            controller: offWorkHourPriceController,
+                            hintText: AppLocalizations.of(
+                              context,
+                            )!.offWorkPrice,
+                            labelText: AppLocalizations.of(
+                              context,
+                            )!.offWorkPrice,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(
+                                  context,
+                                )!.pleaseEnterOffWorkPrice;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      keyboardType: TextInputType.number,
+                      controller: priceController,
+                      hintText: AppLocalizations.of(context)!.generalPrice,
+                      labelText: AppLocalizations.of(context)!.generalPrice,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterAGeneralPrice;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NewTextField(
+                      keyboardType: TextInputType.number,
+                      controller: discountPercentageController,
+                      hintText:
+                          AppLocalizations.of(context)?.discountPercentage ??
+                          'Discount Percentage (%)',
+                      labelText:
+                          AppLocalizations.of(context)?.discountPercentage ??
+                          'Discount Percentage (%)',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )?.pleaseEnterADiscountPercentage;
+                        }
+                        final perc = double.tryParse(value);
+                        if (perc == null || perc < 0 || perc > 100) {
+                          return 'Enter a value between 0 and 100';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.availableLocations,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (selectedCities.isNotEmpty)
+                            Text(
+                              "${selectedCities.length} hierarchy selected",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          if (mapSelectedLocations.isNotEmpty)
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.locationsSelectedCount(
+                                mapSelectedLocations.length,
+                              ),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+
+                  // Hierarchical Location Selector Field
+                  SizedBox(
+                    height: 50,
+                    child: eButton(
+                      onPressed: () async {
+                        final List<Map<String, dynamic>>? result =
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LocationMapPicker(
+                                  initialLocations: mapSelectedLocations,
+                                ),
+                              ),
+                            );
+
+                        if (result != null) {
+                          setState(() {
+                            mapSelectedLocations = result;
+                          });
+                        }
+                      },
+                      context: context,
+                      backgroundColor: AppColors.primary,
+                      text: AppLocalizations.of(context)!.chooseLocations,
+                      textColor: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  Text(
+                    AppLocalizations.of(context)!.image,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Directionality.of(context) == TextDirection.rtl
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: GestureDetector(
+                        onTap: pickImage,
+                        child: DottedBorder(
+                          color: Colors.grey.withOpacity(0.5),
+                          strokeWidth: 1.5,
+                          dashPattern: const [6, 4],
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(12),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: 130,
+                              height: 130,
+                              color: Colors.grey.withOpacity(0.05),
+                              child: selectedImage != null
+                                  ? Image.file(
+                                      File(selectedImage!.path),
+                                      fit: BoxFit.cover,
+                                      width: 130,
+                                      height: 130,
+                                    )
+                                  : widget.service?.image != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: widget.service?.image ?? "",
+                                      fit: BoxFit.cover,
+                                      width: 130,
+                                      height: 130,
+                                      placeholder: (context, url) =>
+                                          const ImageShimmer(
+                                            width: 130,
+                                            height: 130,
+                                          ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    )
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                          size: 32,
+                                          color: Colors.grey[400],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          AppLocalizations.of(
+                                                context,
+                                              )?.pickImage ??
+                                              'Pick Image',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

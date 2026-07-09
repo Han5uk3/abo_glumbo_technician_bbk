@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:aboglumbo_bbk_panel/common_widget/crop_confirm_dialog.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/regex.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -10,7 +9,7 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_cropper/image_cropper.dart';
+import 'package:aboglumbo_bbk_panel/helpers/image_picker_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddBanner extends StatefulWidget {
@@ -28,38 +27,14 @@ class _AddBannerState extends State<AddBanner> {
   final TextEditingController urlController = TextEditingController();
   bool isActive = false;
   XFile? selectedImage;
-  XFile? tempSelectedImage;
-  bool showImageConfirmation = false;
   Future pickImage() async {
     try {
-      final image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
+      final image = await ImagePickerConfigs.pickBannerImage(context);
 
       if (image != null) {
-        // Check if file exists
-        final file = File(image.path);
-        if (!await file.exists()) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)?.selectedFileCouldNotBeFound ??
-                      'Selected file could not be found. Please try again.',
-                ),
-
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-          return;
-        }
-
-        setState(() => tempSelectedImage = image);
-        await cropImage();
+        setState(() {
+          selectedImage = image;
+        });
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
@@ -73,67 +48,6 @@ class _AddBannerState extends State<AddBanner> {
           ),
         );
       }
-    }
-  }
-
-  Future cropImage() async {
-    try {
-      if (tempSelectedImage == null) return;
-
-      CroppedFile? res = await ImageCropper().cropImage(
-        sourcePath: tempSelectedImage!.path,
-        aspectRatio: const CropAspectRatio(ratioX: 370, ratioY: 136),
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle:
-                AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-            toolbarColor: AppColors.primary,
-            toolbarWidgetColor: Colors.white,
-          ),
-          IOSUiSettings(
-            title: AppLocalizations.of(context)?.cropImage ?? 'Crop Image',
-            aspectRatioLockEnabled: true,
-          ),
-        ],
-      );
-
-      if (res != null) {
-        setState(() {
-          selectedImage = XFile(res.path);
-          tempSelectedImage = null;
-          showImageConfirmation = false;
-        });
-      } else {
-        final bool? shouldKeepImage = await showCropConfirmDialog(context);
-
-        if (shouldKeepImage == true) {
-          setState(() {
-            selectedImage = tempSelectedImage;
-            tempSelectedImage = null;
-          });
-        } else {
-          setState(() {
-            selectedImage = null;
-            tempSelectedImage = null;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Error cropping image: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)!.errorCroppingImage}: ${e.toString()}',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      setState(() {
-        selectedImage = null;
-        tempSelectedImage = null;
-      });
     }
   }
 

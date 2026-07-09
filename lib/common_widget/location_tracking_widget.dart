@@ -62,7 +62,9 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.locationTrackingStartedSuccessfully),
+            content: Text(
+              AppLocalizations.of(context)!.locationTrackingStartedSuccessfully,
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -96,7 +98,10 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.locationTrackingStopped ?? 'Location tracking stopped'),
+            content: Text(
+              AppLocalizations.of(context)?.locationTrackingStopped ??
+                  'Location tracking stopped',
+            ),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
           ),
@@ -182,7 +187,7 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
                 'For reliable background location tracking, please disable battery optimization for this app. This ensures location updates continue even when the app is in the background.',
           ),
           actions: [
-             eButton(
+            eButton(
               onPressed: () => Navigator.of(context).pop(),
               text: AppLocalizations.of(context)?.later ?? 'Later',
               context: context,
@@ -201,7 +206,6 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
               textColor: Colors.white,
               backgroundColor: Colors.green,
             ),
-           
           ],
         );
       },
@@ -259,7 +263,9 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isTracking ? AppLocalizations.of(context)!.trackingActive : AppLocalizations.of(context)!.trackingInactive,
+                        isTracking
+                            ? AppLocalizations.of(context)!.trackingActive
+                            : AppLocalizations.of(context)!.trackingInactive,
                         style: TextStyle(
                           color: isTracking
                               ? Colors.green.shade700
@@ -290,7 +296,9 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        AppLocalizations.of(context)!.batteryOptimizationEnabled,
+                        AppLocalizations.of(
+                          context,
+                        )!.batteryOptimizationEnabled,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.orange.shade700,
@@ -299,7 +307,7 @@ class _LocationTrackingWidgetState extends State<LocationTrackingWidget> {
                     ),
                     TextButton(
                       onPressed: _showBatteryOptimizationDialog,
-                      child:  Text(AppLocalizations.of(context)!.fix),
+                      child: Text(AppLocalizations.of(context)!.fix),
                     ),
                   ],
                 ),

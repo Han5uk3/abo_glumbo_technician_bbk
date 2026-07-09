@@ -65,14 +65,14 @@ class CustomerModel {
       location: json['location'] != null
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
           : (json['detailedLocation'] != null
-              ? LocationModel(
-                  lat: json['detailedLocation']['lat'] ?? 0.0,
-                  lon: json['detailedLocation']['lon'] ?? 0.0,
-                  fullAddress: json['detailedLocation']['neighborhoodEn'],
-                  city: json['detailedLocation']['cityEn'],
-                  province: json['detailedLocation']['regionEn'],
-                )
-              : null),
+                ? LocationModel(
+                    lat: json['detailedLocation']['lat'] ?? 0.0,
+                    lon: json['detailedLocation']['lon'] ?? 0.0,
+                    fullAddress: json['detailedLocation']['neighborhoodEn'],
+                    city: json['detailedLocation']['cityEn'],
+                    province: json['detailedLocation']['regionEn'],
+                  )
+                : null),
       addresses:
           (json['addresses'] as List<dynamic>?)
               ?.map((e) => AddressModel.fromJson(e as Map<String, dynamic>))
@@ -196,7 +196,7 @@ class CustomerModel {
     checkAndSet('name', name, previous.name);
     checkAndSet('role', role, previous.role);
     checkAndSet('email', email, previous.email);
-    
+
     // Format phone number with country code for Firebase
     final formattedPhone = phone != null
         ? CountryCodeDetector.convertToFirebaseFormat(
@@ -211,7 +211,7 @@ class CustomerModel {
           )
         : null;
     checkAndSet('phone', formattedPhone, formattedPreviousPhone);
-    
+
     checkAndSet('fcmToken', fcmToken, previous.fcmToken);
     checkAndSet('lanCode', lanCode, previous.lanCode);
     checkAndSet('country', country, previous.country);

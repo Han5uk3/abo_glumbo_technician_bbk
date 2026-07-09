@@ -45,6 +45,7 @@ class BookingModel {
   String? orderId;
   String? transactionId; // Added transactionId
   Timestamp? paymentCompletedAt;
+  Timestamp? paymentVerifiedAt;
   Timestamp? counterProposalAcceptedAt;
   Timestamp? counterProposalStartedAt;
 
@@ -82,7 +83,9 @@ class BookingModel {
       final selectedAddress = customer.addresses.firstWhere(
         (address) => address.isSelected == true,
       );
-      final text = "${selectedAddress.buildingNumber.isNotEmpty ? '${selectedAddress.buildingNumber}, ' : ''}${selectedAddress.streetName ?? ''}".trim();
+      final text =
+          "${selectedAddress.buildingNumber.isNotEmpty ? '${selectedAddress.buildingNumber}, ' : ''}${selectedAddress.streetName ?? ''}"
+              .trim();
       if (text.isNotEmpty && text != ',') {
         return text;
       }
@@ -93,7 +96,9 @@ class BookingModel {
     try {
       if (customer.addresses.isNotEmpty) {
         final firstAddress = customer.addresses.first;
-        final text = "${firstAddress.buildingNumber.isNotEmpty ? '${firstAddress.buildingNumber}, ' : ''}${firstAddress.streetName ?? ''}".trim();
+        final text =
+            "${firstAddress.buildingNumber.isNotEmpty ? '${firstAddress.buildingNumber}, ' : ''}${firstAddress.streetName ?? ''}"
+                .trim();
         if (text.isNotEmpty && text != ',') {
           return text;
         }
@@ -102,10 +107,11 @@ class BookingModel {
       // Ignored
     }
 
-    if (customer.location?.fullAddress != null && customer.location!.fullAddress!.isNotEmpty) {
+    if (customer.location?.fullAddress != null &&
+        customer.location!.fullAddress!.isNotEmpty) {
       return customer.location!.fullAddress!;
     }
-    
+
     return '';
   }
 
@@ -113,6 +119,7 @@ class BookingModel {
     required this.id,
     this.newBookingId,
     required this.paymentCompletedAt,
+    this.paymentVerifiedAt,
     required this.service,
     required this.bookingDateTime,
     required this.bookingStatusCode,
@@ -171,6 +178,7 @@ class BookingModel {
                 .toList()
           : [],
       paymentCompletedAt = data['paymentCompletedAt'] as Timestamp?,
+      paymentVerifiedAt = data['paymentVerifiedAt'] as Timestamp?,
       isStartTracking = data['isStarted'] ?? false,
       notes = data['notes'],
       id = data['id'] ?? '',
@@ -223,10 +231,12 @@ class BookingModel {
       paymentRequestedAt = data['paymentRequestedAt'] as Timestamp?, // ✅ Added
       assignedAt = data['assignedAt'] as Timestamp?, // ✅ Added
       reassignedAt = data['reassignedAt'] as Timestamp?, // ✅ Added
-      technicianSelectedAt = data['technicianSelectedAt'] as Timestamp?, // ✅ Added
+      technicianSelectedAt =
+          data['technicianSelectedAt'] as Timestamp?, // ✅ Added
       cancelledBy = data['cancelledBy'] as String?, // ✅ Added
       cancelledAt = data['cancelledAt'] as Timestamp?,
-      counterProposalAcceptedAt = data['counterProposalAcceptedAt'] as Timestamp?,
+      counterProposalAcceptedAt =
+          data['counterProposalAcceptedAt'] as Timestamp?,
       counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?,
       rebookTechnicianId = data['rebookTechnicianId'] as String?,
       invoiceId = data['invoiceId'] as String?,
@@ -251,6 +261,7 @@ class BookingModel {
       'bookingStatusCode': bookingStatusCode,
       'notes': notes,
       'paymentCompletedAt': paymentCompletedAt,
+      'paymentVerifiedAt': paymentVerifiedAt,
       'issueImage': issueImage,
       'customer': customer.toJson(),
       'orderId': orderId,
@@ -330,7 +341,12 @@ class BookingServiceLocation {
     return BookingServiceLocation(
       nameEn: json['nameEn'] as String? ?? json['en_name'] as String? ?? '',
       nameAr: json['nameAr'] as String? ?? json['ar_name'] as String? ?? '',
-      nameUr: json['nameUr'] as String? ?? json['ur_name'] as String? ?? json['nameAr'] as String? ?? json['nameEn'] as String? ?? '',
+      nameUr:
+          json['nameUr'] as String? ??
+          json['ur_name'] as String? ??
+          json['nameAr'] as String? ??
+          json['nameEn'] as String? ??
+          '',
       priority: (json['priority'] as num?)?.toInt() ?? 0,
     );
   }
@@ -342,8 +358,11 @@ class BookingServiceLocation {
     'priority': priority,
   };
 
-  String localizedName(String? locale) =>
-      locale == 'ar' ? nameAr : locale == 'ur' ? nameUr : nameEn;
+  String localizedName(String? locale) => locale == 'ar'
+      ? nameAr
+      : locale == 'ur'
+      ? nameUr
+      : nameEn;
 }
 
 class ReviewModel {

@@ -10,7 +10,8 @@ Future<List<String>> getPlaceSuggestions(String input) async {
   final data = jsonDecode(response.body);
   if (data['status'] == 'OK') {
     return List<String>.from(
-        data['predictions'].map((place) => place['description']));
+      data['predictions'].map((place) => place['description']),
+    );
   } else {
     return [];
   }

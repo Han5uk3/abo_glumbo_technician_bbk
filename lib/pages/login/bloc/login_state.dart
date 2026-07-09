@@ -20,11 +20,8 @@ final class LoginFailure extends LoginState {
 final class OTPSentSuccess extends LoginState {
   final String verificationId;
   final int? resendToken;
-  
-  OTPSentSuccess({
-    required this.verificationId,
-    this.resendToken,
-  });
+
+  OTPSentSuccess({required this.verificationId, this.resendToken});
 
   @override
   List<Object?> get props => [verificationId, resendToken];

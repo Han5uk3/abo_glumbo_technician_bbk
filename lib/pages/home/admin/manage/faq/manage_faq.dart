@@ -4,6 +4,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/faq.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/bloc/manage_app_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/faq/edit_faq.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 
@@ -113,7 +114,7 @@ class _ManageFaqState extends State<ManageFaq> {
           stream: _faqStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: Loader());
+              return const ManageShimmerLoading();
             }
 
             if (snapshot.hasError) {
@@ -266,8 +267,9 @@ class _ManageFaqState extends State<ManageFaq> {
             ),
           );
         },
+        backgroundColor: AppColors.primary,
         tooltip: AppLocalizations.of(context)!.addFaq,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

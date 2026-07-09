@@ -86,7 +86,8 @@ class ConflictCheckService {
 
         for (final doc in query.docs) {
           final data = doc.data() as Map<String, dynamic>;
-          final assignedTo = (data['agent'] as Map<String, dynamic>?)?['uid'] as String?;
+          final assignedTo =
+              (data['agent'] as Map<String, dynamic>?)?['uid'] as String?;
           if (assignedTo != null) {
             results[assignedTo] = [...(results[assignedTo] ?? []), doc];
           }

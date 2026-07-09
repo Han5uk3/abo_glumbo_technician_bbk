@@ -83,7 +83,9 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
     }
   }
 
-  List<ServiceLocationModel> _removeDuplicates(List<ServiceLocationModel> locations) {
+  List<ServiceLocationModel> _removeDuplicates(
+    List<ServiceLocationModel> locations,
+  ) {
     final seen = <String>{};
     return locations.where((location) {
       final name = location.name;
@@ -104,12 +106,15 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
         filteredLocations = uniqueLocations;
       } else {
         filteredLocations = uniqueLocations.where((location) {
-          final nameMatch =
-              location.name.toLowerCase().contains(query.toLowerCase());
-          final nameArMatch =
-              location.name_ar.toLowerCase().contains(query.toLowerCase());
-          final nameUrMatch =
-              location.name_ur.toLowerCase().contains(query.toLowerCase());
+          final nameMatch = location.name.toLowerCase().contains(
+            query.toLowerCase(),
+          );
+          final nameArMatch = location.name_ar.toLowerCase().contains(
+            query.toLowerCase(),
+          );
+          final nameUrMatch = location.name_ur.toLowerCase().contains(
+            query.toLowerCase(),
+          );
           return nameMatch || nameArMatch || nameUrMatch;
         }).toList();
       }
@@ -124,7 +129,9 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
 
   String _getLocationName(ServiceLocationModel location) {
     if (languageCode == 'ur') {
-      return location.name_ur.isNotEmpty ? location.name_ur : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+      return location.name_ur.isNotEmpty
+          ? location.name_ur
+          : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
     } else if (languageCode == 'ar') {
       return location.name_ar.isNotEmpty ? location.name_ar : location.name;
     }
@@ -299,10 +306,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                   ? Center(
                       child: Text(
                         widget.noLocationsMessage ?? 'No locations found',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     )
                   : ListView.builder(
@@ -374,10 +378,7 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
                     AppLocalizations.of(
                       context,
                     )!.doneSelectedCount(selectedLocations.length),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -471,7 +472,9 @@ class LocationSelectorHelper {
   }) {
     return locations.map((location) {
       if (languageCode == 'ur') {
-        return location.name_ur.isNotEmpty ? location.name_ur : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+        return location.name_ur.isNotEmpty
+            ? location.name_ur
+            : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
       } else if (languageCode == 'ar') {
         return location.name_ar.isNotEmpty ? location.name_ar : location.name;
       }

@@ -265,7 +265,8 @@ class _BookingListTabState extends State<_BookingListTab>
         id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
         newId = (item.booking?.newBookingId ?? '').toLowerCase();
       }
-      return id.contains(widget.searchQuery) || (newId.isNotEmpty && newId.contains(widget.searchQuery));
+      return id.contains(widget.searchQuery) ||
+          (newId.isNotEmpty && newId.contains(widget.searchQuery));
     }).toList();
   }
 

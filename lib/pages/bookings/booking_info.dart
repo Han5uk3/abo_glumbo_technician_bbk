@@ -840,7 +840,7 @@ class _BookingInfoState extends State<BookingInfo> {
   }
 
   String _formatDateTime(DateTime dateTime, String locale) {
-    return DateFormat('yyyy-MM-dd HH:mm', locale).format(dateTime);
+    return LocalizationHelper().formatDateTimeCompact(dateTime, context);
   }
 
   void _showFullScreenImageNew(String imageUrl, BuildContext context) {
@@ -901,18 +901,27 @@ class _BookingInfoState extends State<BookingInfo> {
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text(AppLocalizations.of(context)?.resolveIssue ?? 'Resolve Issue'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            AppLocalizations.of(context)?.resolveIssue ?? 'Resolve Issue',
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(AppLocalizations.of(context)?.whatWasDoneToResolve ?? 'What was done to resolve the issue?'),
+              Text(
+                AppLocalizations.of(context)?.whatWasDoneToResolve ??
+                    'What was done to resolve the issue?',
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: textController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   hintText: '...',
                 ),
               ),
@@ -921,34 +930,49 @@ class _BookingInfoState extends State<BookingInfo> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: TextStyle(color: Colors.grey)),
+              child: Text(
+                AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: () async {
                 if (textController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)?.resolutionTextRequired ?? 'Resolution text is required')),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)?.resolutionTextRequired ??
+                            'Resolution text is required',
+                      ),
+                    ),
                   );
                   return;
                 }
-                
+
                 try {
-                  await AppFirestore.bookingsCollectionRef.doc(currentBooking.id).update({
-                    'isEscalated': false,
-                    'resolutionText': textController.text.trim(),
-                    'resolvedAt': FieldValue.serverTimestamp(),
-                    'warranty.updatedAt': FieldValue.serverTimestamp(),
-                  });
+                  await AppFirestore.bookingsCollectionRef
+                      .doc(currentBooking.id)
+                      .update({
+                        'isEscalated': false,
+                        'resolutionText': textController.text.trim(),
+                        'resolvedAt': FieldValue.serverTimestamp(),
+                        'warranty.updatedAt': FieldValue.serverTimestamp(),
+                      });
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
                 } catch (e) {
                   log('Error resolving: $e');
                 }
               },
-              child: Text(AppLocalizations.of(context)?.submit ?? 'Submit', style: TextStyle(color: Colors.white)),
+              child: Text(
+                AppLocalizations.of(context)?.submit ?? 'Submit',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -1113,79 +1137,11 @@ class _BookingInfoState extends State<BookingInfo> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              if (widget.booking.bookingStatusCode.toLowerCase() == 'c' &&
+              if ((widget.booking.bookingStatusCode.toLowerCase() == 'c' ||
+                      widget.booking.bookingStatusCode.toLowerCase() == 'cp' ||
+                      widget.booking.bookingStatusCode.toLowerCase() == 'vp') &&
                   widget.booking.completionData != null) ...[
                 _buildCompletionDataCard(context, textTheme, colorScheme),
-                if (widget.isAdmin) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton.icon(
-                            onPressed: () =>
-                                InvoiceService.generateAndShowInvoice(
-                                  context,
-                                  widget.booking,
-                                ),
-                            icon: const Icon(
-                              Icons.download_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            label: const Text(
-                              "Download",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton.icon(
-                            onPressed: () =>
-                                InvoiceService.generateAndShareInvoice(
-                                  context,
-                                  widget.booking,
-                                ),
-                            icon: const Icon(
-                              Icons.share_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            label: const Text(
-                              "Share",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
               if (widget.booking.technicianPaymentProof != null &&
                   widget.booking.technicianPaymentProof!.isNotEmpty) ...[
@@ -1452,7 +1408,8 @@ class _BookingInfoState extends State<BookingInfo> {
                           ],
 
                           // Admin resolve escalated booking
-                          if (widget.isAdmin && currentBooking.isEscalated == true) ...[
+                          if (widget.isAdmin &&
+                              currentBooking.isEscalated == true) ...[
                             const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
@@ -1464,9 +1421,11 @@ class _BookingInfoState extends State<BookingInfo> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                                onPressed: () => _showResolveDialog(context, currentBooking),
+                                onPressed: () =>
+                                    _showResolveDialog(context, currentBooking),
                                 child: Text(
-                                  AppLocalizations.of(context)?.resolveIssue ?? 'Resolve Issue',
+                                  AppLocalizations.of(context)?.resolveIssue ??
+                                      'Resolve Issue',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -2613,8 +2572,10 @@ class _BookingInfoState extends State<BookingInfo> {
         });
       }
 
-      // Payment status (Legacy verification pending)
-      if (widget.booking.paymentCompletedAt != null) {
+      // Payment status (Verification pending for outside-app payments)
+      if (widget.booking.paymentCompletedAt != null &&
+          widget.booking.paymentVerifiedAt == null &&
+          widget.booking.bookingStatusCode == 'VP') {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentStatus,
           'time': _formatDateLocalized(
@@ -2632,7 +2593,8 @@ class _BookingInfoState extends State<BookingInfo> {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentCompleted,
           'time': _formatDateLocalized(
-            widget.booking.paymentCompletedAt?.toDate() ??
+            widget.booking.paymentVerifiedAt?.toDate() ??
+                widget.booking.paymentCompletedAt?.toDate() ??
                 widget.booking.completedAt?.toDate() ??
                 DateTime.now(),
             context,
@@ -2642,6 +2604,7 @@ class _BookingInfoState extends State<BookingInfo> {
           )!.paymentSuccessfullyCompleted,
           'status': 'completed',
           'date':
+              widget.booking.paymentVerifiedAt?.toDate() ??
               widget.booking.paymentCompletedAt?.toDate() ??
               widget.booking.completedAt?.toDate() ??
               DateTime.now(),
@@ -2987,7 +2950,7 @@ class _BookingInfoState extends State<BookingInfo> {
 
   // Helper method to format dates (you might already have this in your project)
   String _formatDateLocalized(DateTime date, BuildContext context) {
-    return LocalizationHelper().formatDateLocalized(date, context);
+    return LocalizationHelper().formatDateTimeCompact(date, context);
   }
 
   Widget _buildTimelineItem({
@@ -3191,6 +3154,54 @@ class _BookingInfoState extends State<BookingInfo> {
               textTheme: textTheme,
               colorScheme: colorScheme,
             ),
+
+            if (widget.isAdmin) ...{
+              GestureDetector(
+                onTap: () => InvoiceService.generateAndShowInvoice(
+                  context,
+                  widget.booking,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf_rounded,
+                        size: 20,
+                        color: Colors.red.shade400,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.booking.newBookingId ?? "",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => InvoiceService.generateAndShareInvoice(
+                          context,
+                          widget.booking,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Icon(Icons.share_rounded, size: 18),
+                        ),
+                      ),
+                      const Icon(Icons.open_in_new, size: 16),
+                    ],
+                  ),
+                ),
+              ),
+            },
 
             // Upload Files
             if (completionData.fileUrls.isNotEmpty) ...[
@@ -3570,7 +3581,7 @@ class _BookingInfoState extends State<BookingInfo> {
     ColorScheme colorScheme,
   ) {
     final review = widget.booking.review;
-    if (review == null) {
+    if (review == null || review.tipAmount == null || review.tipAmount! <= 0) {
       return const SizedBox.shrink();
     }
 

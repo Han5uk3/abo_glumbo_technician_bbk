@@ -152,7 +152,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       String? residenceIdUrl;
       bool residenceIdUpdated = false;
       if (event.selectedIqamaImage != null) {
-        residenceIdUrl = iqamaImageUrl; // Already uploaded above as iqamaImageUrl
+        residenceIdUrl =
+            iqamaImageUrl; // Already uploaded above as iqamaImageUrl
         residenceIdUpdated = true;
         event.user.residenceIdUrl = residenceIdUrl;
       }
@@ -160,12 +161,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       // Handle Sponsor Work Permit
       String? sponsorUrl;
       bool sponsorUpdated = false;
-      if (event.selectedSponsorWorkPermitFile != null && event.selectedSponsorWorkPermitFile!.path != null) {
+      if (event.selectedSponsorWorkPermitFile != null &&
+          event.selectedSponsorWorkPermitFile!.path != null) {
         try {
           final fileRef = AppFireStorage.agentDocStorageRef.child(
             'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${event.selectedSponsorWorkPermitFile!.name}',
           );
-          await fileRef.putFile(File(event.selectedSponsorWorkPermitFile!.path!));
+          await fileRef.putFile(
+            File(event.selectedSponsorWorkPermitFile!.path!),
+          );
           sponsorUrl = await fileRef.getDownloadURL();
           event.user.sponsorWorkPermitUrl = sponsorUrl;
           sponsorUpdated = true;
@@ -177,12 +181,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       // Handle Chamber of Commerce Approval
       String? chamberUrl;
       bool chamberUpdated = false;
-      if (event.selectedChamberOfCommerceFile != null && event.selectedChamberOfCommerceFile!.path != null) {
+      if (event.selectedChamberOfCommerceFile != null &&
+          event.selectedChamberOfCommerceFile!.path != null) {
         try {
           final fileRef = AppFireStorage.agentDocStorageRef.child(
             'agents/documents/${DateTime.now().millisecondsSinceEpoch}_${event.selectedChamberOfCommerceFile!.name}',
           );
-          await fileRef.putFile(File(event.selectedChamberOfCommerceFile!.path!));
+          await fileRef.putFile(
+            File(event.selectedChamberOfCommerceFile!.path!),
+          );
           chamberUrl = await fileRef.getDownloadURL();
           event.user.chamberOfCommerceApprovalUrl = chamberUrl;
           chamberUpdated = true;

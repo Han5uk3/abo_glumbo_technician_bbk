@@ -6,7 +6,10 @@ class WhatsAppUtils {
     final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
     final url = "https://wa.me/$cleanPhone";
     try {
-      final success = await launchUrlString(url, mode: LaunchMode.externalApplication);
+      final success = await launchUrlString(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
       if (!success) {
         await launchUrlString(url);
       }

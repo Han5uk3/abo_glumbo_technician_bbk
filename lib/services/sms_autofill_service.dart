@@ -58,11 +58,13 @@ class SmsAutofillService {
       );
 
       // Wait for result or timeout
-      final result = await completer.future
-          .timeout(timeout, onTimeout: () {
-            debugPrint('⚠️ [SMS AUTOFILL] SMS listening timeout');
-            return null;
-          });
+      final result = await completer.future.timeout(
+        timeout,
+        onTimeout: () {
+          debugPrint('⚠️ [SMS AUTOFILL] SMS listening timeout');
+          return null;
+        },
+      );
 
       return result;
     } catch (e) {
@@ -89,7 +91,9 @@ class SmsAutofillService {
         return match.group(0);
       }
 
-      debugPrint('⚠️ [SMS AUTOFILL] Could not extract OTP from message: $message');
+      debugPrint(
+        '⚠️ [SMS AUTOFILL] Could not extract OTP from message: $message',
+      );
       return null;
     } catch (e) {
       debugPrint('❌ [SMS AUTOFILL] Error extracting OTP: $e');

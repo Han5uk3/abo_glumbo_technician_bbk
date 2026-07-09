@@ -63,7 +63,8 @@ class AccountListTile extends StatelessWidget {
       title: Text(
         title,
         style: TextStyle(
-          fontSize: 13, // Matches font-size change requested in historical context
+          fontSize:
+              13, // Matches font-size change requested in historical context
           color: textcolor ?? Colors.black,
           fontWeight: FontWeight.w500,
         ),

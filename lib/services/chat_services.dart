@@ -13,7 +13,8 @@ class TechnicianChatService {
     _rtdb = FirebaseDatabase.instance.ref();
   }
 
-  String get currentUserId => _auth.currentUser?.uid ?? LocalStore.getUID() ?? '';
+  String get currentUserId =>
+      _auth.currentUser?.uid ?? LocalStore.getUID() ?? '';
 
   String generateChatId(String bookingId, String userId1, String userId2) {
     List<String> ids = [userId1, userId2]..sort();
@@ -389,7 +390,7 @@ class TechnicianChatService {
     try {
       await _rtdb.child(path).set(true);
       debugPrint('✅ Presence set success');
-      
+
       try {
         await _rtdb.child(path).onDisconnect().remove();
         debugPrint('✅ OnDisconnect register success');

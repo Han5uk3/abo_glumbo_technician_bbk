@@ -177,7 +177,10 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -486,7 +489,11 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.black38,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -608,7 +615,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                AppLocalizations.of(context)!.minimumPayoutAmount,
+                                AppLocalizations.of(
+                                  context,
+                                )!.minimumPayoutAmount,
                               ),
                               backgroundColor: Colors.orange,
                             ),
@@ -626,7 +635,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  AppLocalizations.of(context)!.noPayoutAccountsAdded,
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.noPayoutAccountsAdded,
                                 ),
                                 backgroundColor: Colors.red,
                               ),
@@ -729,7 +740,10 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                       const SizedBox(height: 16),
                       Text(
                         AppLocalizations.of(context)!.noPayoutRequests,
-                        style: TextStyle(color: Colors.black38, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: Colors.black38,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -872,14 +886,21 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   request.createdAt?.toDate() ?? DateTime.now(),
                   context,
                 ),
-                style: TextStyle(fontSize: 11, color: Colors.black38, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.black38,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               if (request.status == 'P')
                 InkWell(
                   onTap: () => _cancelPayoutRequest(request.id!, context),
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     child: Text(
                       AppLocalizations.of(context)!.cancel,
                       style: TextStyle(
@@ -902,12 +923,20 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 16, color: Colors.red),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Colors.red,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       '${AppLocalizations.of(context)!.reason}: ${request.rejectionReason}',
-                      style: TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -1050,7 +1079,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  AppLocalizations.of(context)!.totalPayoutAmount,
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.totalPayoutAmount,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -1130,7 +1161,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                   onPressed: isLoading
                                       ? null
                                       : () async {
-                                          setDialogState(() => isLoading = true);
+                                          setDialogState(
+                                            () => isLoading = true,
+                                          );
 
                                           String? errorMessage;
                                           bool success = false;
@@ -1147,7 +1180,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                             errorMessage = e.toString();
                                           } finally {
                                             if (dialogContext.mounted) {
-                                              setDialogState(() => isLoading = false);
+                                              setDialogState(
+                                                () => isLoading = false,
+                                              );
                                             }
                                           }
 
@@ -1157,16 +1192,22 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
 
                                           if (mounted) {
                                             if (success) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    AppLocalizations.of(context)!.payoutRequestSuccessful,
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.payoutRequestSuccessful,
                                                   ),
                                                   backgroundColor: Colors.green,
                                                 ),
                                               );
                                             } else if (errorMessage != null) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
                                                     '${AppLocalizations.of(context)!.error}: $errorMessage',
@@ -1180,7 +1221,9 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -1192,7 +1235,10 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                           height: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
                                           ),
                                         )
                                       : Text(

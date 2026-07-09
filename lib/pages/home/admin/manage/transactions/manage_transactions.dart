@@ -1,6 +1,7 @@
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/transaction_tile.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
@@ -651,7 +652,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                 stream: _transactionsStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: SizedBox(height: 24, child: Loader()));
+                    return const ManageShimmerLoading();
                   }
 
                   if (snapshot.hasError) {

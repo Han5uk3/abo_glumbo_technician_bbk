@@ -117,7 +117,9 @@ class NotificationServices {
 
           // Suppress notification if user is already in this chat
           if (incomingChatId != null && incomingChatId == currentActiveChatId) {
-            debugPrint('🤫 Suppressing foreground notification for active chat: $incomingChatId');
+            debugPrint(
+              '🤫 Suppressing foreground notification for active chat: $incomingChatId',
+            );
             return;
           }
 
@@ -357,12 +359,12 @@ class NotificationServices {
       RemoteMessage? initialMessage = await FirebaseMessaging.instance
           .getInitialMessage();
 
-        if (initialMessage != null) {
-          debugPrint('📬 Initial message found: ${initialMessage.messageId}');
-          if (initialMessage.notification != null) {
-            _handleGenericNotificationTap(initialMessage);
-          }
+      if (initialMessage != null) {
+        debugPrint('📬 Initial message found: ${initialMessage.messageId}');
+        if (initialMessage.notification != null) {
+          _handleGenericNotificationTap(initialMessage);
         }
+      }
 
       // Note: onMessageOpenedApp listener is already set up in setupFCMListeners()
       // No need to add it here again to avoid duplicate navigation
@@ -444,7 +446,7 @@ class NotificationServices {
         } else {
           debugPrint('⚠️ Chat ID is missing in notification payload');
         }
-      } 
+      }
       // Check if this is a job offer notification
       else if (type == 'job_offer' || data['category'] == 'job_offer') {
         debugPrint('📋 Job offer notification detected!');
@@ -469,14 +471,15 @@ class NotificationServices {
             MaterialPageRoute(
               builder: (context) => Home(
                 newIndex: 1, // Orders tab
-                selectedFilter: isAdmin ? 'P' : 'A', // Pending for admin, Accepted for technician
+                selectedFilter: isAdmin
+                    ? 'P'
+                    : 'A', // Pending for admin, Accepted for technician
               ),
             ),
             (route) => false,
           );
         }
-      }
-      else {
+      } else {
         debugPrint('ℹ️ Not a recognized notification type, ignoring');
       }
     } catch (e) {
@@ -577,7 +580,9 @@ class NotificationServices {
             MaterialPageRoute(
               builder: (context) => Home(
                 newIndex: 1, // Orders tab
-                selectedFilter: isAdmin ? 'P' : 'A', // Pending for admin, Accepted for technician
+                selectedFilter: isAdmin
+                    ? 'P'
+                    : 'A', // Pending for admin, Accepted for technician
               ),
             ),
             (route) => false,

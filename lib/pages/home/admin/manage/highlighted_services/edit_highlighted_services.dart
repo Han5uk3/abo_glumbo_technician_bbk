@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import '/models/highlighted_services.dart';
 import '/models/service.dart';
 
@@ -282,6 +283,10 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  const ImageShimmer(width: 50, height: 50),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
                             title: Text(
                               service.nameLocalized(
@@ -331,228 +336,250 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
   @override
   Widget build(BuildContext context) {
     final safePadding = MediaQuery.of(context).padding;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.service == null
-              ? AppLocalizations.of(context)!.addHighlightedService
-              : AppLocalizations.of(context)!.editHighlightedService,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: isSaving ? null : saveContent,
-          ),
-        ],
-      ),
-      body: SavingStackWidget(
-        isSaving: isSaving,
-        isLoading: false,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.only(
-              top: 16,
-              left: 16,
-              right: 16,
-              bottom: safePadding.bottom,
+    return PopScope(
+      canPop: !isSaving,
+      child: AbsorbPointer(
+        absorbing: isSaving,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.service == null
+                  ? AppLocalizations.of(context)!.addHighlightedService
+                  : AppLocalizations.of(context)!.editHighlightedService,
             ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: SwitchListTile(
-                  activeThumbColor: AppColors.primary,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(AppLocalizations.of(context)?.active ?? 'Active'),
-                  value: isActive,
-                  onChanged: (value) {
-                    setState(() {
-                      isActive = value;
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.title ?? 'Title',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.pleaseEnterATitle;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: TextFormField(
-                  controller: titleArController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.titleArabic ??
-                        'Title (Arabic)',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.pleaseEnterTheTitleInArabic;
-                    } else if (!arabicFullRegex.hasMatch(value)) {
-                      return AppLocalizations.of(
-                        context,
-                      )!.descriptionMustBeInArabic;
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppLocalizations.of(context)?.services ?? 'Services'),
-                    TextButton.icon(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(
-                          AppColors.primary,
-                        ),
-                      ),
-                      onPressed: selectServiceBottomSheet,
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      label: Text(
-                        AppLocalizations.of(context)?.addService ??
-                            'Add Service',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 127,
-                child: selectedServices.isEmpty
-                    ? Center(
-                        child: Text(
-                          AppLocalizations.of(context)?.noServicesSelected ??
-                              "No services selected",
-                        ),
-                      )
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: selectedServices.length,
-                        itemBuilder: (context, index) {
-                          final serviceId = selectedServices[index];
-                          final service = cachedServices[serviceId];
-
-                          if (service == null) {
-                            _loadSingleService(serviceId);
-                            return Container(
-                              height: 127,
-                              width: 127,
-                              alignment: Alignment.center,
-                              margin: const EdgeInsets.only(right: 13),
-                              color: Colors.grey[200],
-                              child: const CircularProgressIndicator(),
-                            );
-                          }
-
-                          return Container(
-                            height: 127,
-                            width: 127,
-                            margin: const EdgeInsets.only(right: 13),
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                SizedBox(
-                                  height: 127,
-                                  width: 127,
-                                  child: CachedNetworkImage(
-                                    imageUrl: service.image ?? '',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Container(
-                                  height: 88,
-                                  width: 127,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      stops: [0, 1],
-                                      begin: Alignment.center,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black,
-                                      ],
-                                    ),
-                                  ),
-                                  alignment:
-                                      Directionality.of(context) ==
-                                          TextDirection.rtl
-                                      ? Alignment.bottomRight
-                                      : Alignment.bottomLeft,
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    service.nameLocalized(
-                                          languageCode:
-                                              AppLocalizations.of(
-                                                context,
-                                              )?.localeName ??
-                                              'en',
-                                        ) ??
-                                        service.name ??
-                                        '',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16, top: 32),
-                child: TextFormField(
-                  controller: sortOrderController,
-                  decoration: InputDecoration(
-                    labelText:
-                        AppLocalizations.of(context)?.sortOrder ?? 'Sort Order',
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (value) {
-                    int? parsedValue = int.tryParse(value);
-                    if (parsedValue != null) {
-                      setState(() {
-                        sortOrder = parsedValue;
-                      });
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(
-                            context,
-                          )?.pleaseEnterSortOrder ??
-                          'Please enter sort order';
-                    }
-                    return null;
-                  },
-                ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: isSaving ? null : saveContent,
               ),
             ],
+          ),
+          body: SavingStackWidget(
+            isSaving: isSaving,
+            isLoading: false,
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: EdgeInsets.only(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  bottom: safePadding.bottom,
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: SwitchListTile(
+                      activeThumbColor: AppColors.primary,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        AppLocalizations.of(context)?.active ?? 'Active',
+                      ),
+                      value: isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          isActive = value;
+                        });
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: TextFormField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context)?.title ?? 'Title',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterATitle;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: TextFormField(
+                      controller: titleArController,
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context)?.titleArabic ??
+                            'Title (Arabic)',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterTheTitleInArabic;
+                        } else if (!arabicFullRegex.hasMatch(value)) {
+                          return AppLocalizations.of(
+                            context,
+                          )!.descriptionMustBeInArabic;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)?.services ?? 'Services',
+                        ),
+                        TextButton.icon(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              AppColors.primary,
+                            ),
+                          ),
+                          onPressed: selectServiceBottomSheet,
+                          icon: const Icon(Icons.add, color: Colors.white),
+                          label: Text(
+                            AppLocalizations.of(context)?.addService ??
+                                'Add Service',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 127,
+                    child: selectedServices.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppLocalizations.of(
+                                    context,
+                                  )?.noServicesSelected ??
+                                  "No services selected",
+                            ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: selectedServices.length,
+                            itemBuilder: (context, index) {
+                              final serviceId = selectedServices[index];
+                              final service = cachedServices[serviceId];
+
+                              if (service == null) {
+                                _loadSingleService(serviceId);
+                                return Container(
+                                  height: 127,
+                                  width: 127,
+                                  alignment: Alignment.center,
+                                  margin: const EdgeInsets.only(right: 13),
+                                  child: const ImageShimmer(
+                                    width: 127,
+                                    height: 127,
+                                  ),
+                                );
+                              }
+
+                              return Container(
+                                height: 127,
+                                width: 127,
+                                margin: const EdgeInsets.only(right: 13),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: [
+                                    SizedBox(
+                                      height: 127,
+                                      width: 127,
+                                      child: CachedNetworkImage(
+                                        imageUrl: service.image ?? '',
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            const ImageShimmer(),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 88,
+                                      width: 127,
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          stops: [0, 1],
+                                          begin: Alignment.center,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.black,
+                                          ],
+                                        ),
+                                      ),
+                                      alignment:
+                                          Directionality.of(context) ==
+                                              TextDirection.rtl
+                                          ? Alignment.bottomRight
+                                          : Alignment.bottomLeft,
+                                      padding: const EdgeInsets.all(8),
+                                      child: Text(
+                                        service.nameLocalized(
+                                              languageCode:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )?.localeName ??
+                                                  'en',
+                                            ) ??
+                                            service.name ??
+                                            '',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, top: 32),
+                    child: TextFormField(
+                      controller: sortOrderController,
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context)?.sortOrder ??
+                            'Sort Order',
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (value) {
+                        int? parsedValue = int.tryParse(value);
+                        if (parsedValue != null) {
+                          setState(() {
+                            sortOrder = parsedValue;
+                          });
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(
+                                context,
+                              )?.pleaseEnterSortOrder ??
+                              'Please enter sort order';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

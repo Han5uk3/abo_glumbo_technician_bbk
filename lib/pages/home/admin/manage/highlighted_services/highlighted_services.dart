@@ -1,8 +1,11 @@
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/highlighted_services/edit_highlighted_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/highlighted_service.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/styles/color.dart';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
+
 import 'package:flutter/material.dart';
 
 class HighlightedServices extends StatelessWidget {
@@ -36,18 +39,7 @@ class HighlightedServices extends StatelessWidget {
         stream: AppServices.getAllHighlightedServicesStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 24, child: Loader()),
-                  const SizedBox(height: 10),
-                  Text(
-                    AppLocalizations.of(context)!.loadingHighlightedServices,
-                  ),
-                ],
-              ),
-            );
+            return const ManageShimmerLoading();
           }
 
           if (snapshot.hasError) {
@@ -83,6 +75,99 @@ class HighlightedServices extends StatelessWidget {
                               AddHighlightedServices(service: service),
                         ),
                       ),
+                      deleteCallback: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (dialogContext) {
+                            return AlertDialog(
+                              backgroundColor: Colors.white,
+                              title: Text(
+                                AppLocalizations.of(dialogContext)?.delete ??
+                                    'Delete',
+                              ),
+                              content: Text(
+                                AppLocalizations.of(
+                                      dialogContext,
+                                    )?.deleteItemConfirmation ??
+                                    'Are you sure you want to delete this item?',
+                              ),
+                              actionsAlignment: MainAxisAlignment.start,
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(false),
+                                  child: Text(
+                                    AppLocalizations.of(
+                                          dialogContext,
+                                        )?.cancel ??
+                                        'Cancel',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(true),
+                                  child: Text(
+                                    AppLocalizations.of(
+                                          dialogContext,
+                                        )?.delete ??
+                                        'Delete',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmed == true && service.id != null) {
+                          if (context.mounted) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          try {
+                            await AppFirestore.highlightedServicesCollectionRef
+                                .doc(service.id)
+                                .delete();
+                            if (context.mounted) {
+                              Navigator.of(context).pop(); // pop loading
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                          context,
+                                        )?.deletedSuccessfully ??
+                                        'Deleted successfully',
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              Navigator.of(context).pop(); // pop loading
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
+                          }
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -98,7 +183,8 @@ class HighlightedServices extends StatelessWidget {
             MaterialPageRoute(builder: (context) => AddHighlightedServices()),
           );
         },
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

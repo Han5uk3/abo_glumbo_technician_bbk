@@ -5,6 +5,7 @@ import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/admins/add_admin.dart';
+import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -77,12 +78,13 @@ class _ManageAdminsState extends State<ManageAdmins>
             AppLocalizations.of(context)?.confirmRemoveAdmin(adminName) ??
                 'Are you sure you want to remove admin access for $adminName?',
           ),
+          actionsAlignment: MainAxisAlignment.start,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
                 AppLocalizations.of(context)?.cancelLower ?? 'Cancel',
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.black),
               ),
             ),
             eButton(
@@ -273,7 +275,7 @@ class _ManageAdminsState extends State<ManageAdmins>
               stream: _adminsStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ManageShimmerLoading();
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {

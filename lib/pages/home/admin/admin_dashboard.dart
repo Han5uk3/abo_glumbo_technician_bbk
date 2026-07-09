@@ -7,11 +7,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:intl/intl.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/customers/manage_customers.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/agents/manage_agents.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   final Function(int tabIndex, {String? bookingStatus})? onNavigate;
@@ -33,13 +33,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         stream: AppServices.getAdminDashboardStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: Loader(color: AppColors.primary));
+            return _buildShimmerLoader(l10n);
           }
           if (snapshot.hasError) {
-            return Center(child: Text(AppLocalizations.of(context)?.errorOccurred(snapshot.error.toString()) ?? 'Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(
+                      context,
+                    )?.errorOccurred(snapshot.error.toString()) ??
+                    'Error: ${snapshot.error}',
+              ),
+            );
           }
           if (!snapshot.hasData) {
-            return Center(child: Text(AppLocalizations.of(context)?.noDataAvailable ?? 'No data available'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)?.noDataAvailable ??
+                    'No data available',
+              ),
+            );
           }
 
           final data = snapshot.data!;
@@ -239,7 +251,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ManageCustomersPage()),
+              MaterialPageRoute(
+                builder: (context) => const ManageCustomersPage(),
+              ),
             );
           },
         ),
@@ -330,7 +344,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           String monthLabel;
                           try {
                             final date = DateFormat('MMM yyyy').parse(label);
-                            monthLabel = DateFormat.MMM(l10n.localeName).format(date);
+                            monthLabel = DateFormat.MMM(
+                              l10n.localeName,
+                            ).format(date);
                           } catch (e) {
                             monthLabel = label.split(' ')[0];
                           }
@@ -350,7 +366,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       },
                     ),
                   ),
-                    leftTitles: AxisTitles(
+                  leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       interval: maxRevenue > 0 ? maxRevenue / 4 : 250,
@@ -358,11 +374,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       getTitlesWidget: (double value, TitleMeta meta) {
                         String formattedValue;
                         if (value >= 1000) {
-                          formattedValue = '${(value / 1000).toStringAsFixed(1)}k';
+                          formattedValue =
+                              '${(value / 1000).toStringAsFixed(1)}k';
                         } else {
                           formattedValue = value.toInt().toString();
                         }
-                        
+
                         return SideTitleWidget(
                           meta: meta,
                           child: Text(
@@ -411,6 +428,56 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildShimmerLoader(AppLocalizations l10n) {
+    return CustomScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      slivers: [
+        _buildSliverHeader(l10n.dashboard),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Column(
+                  children: [
+                    GridView.count(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.2,
+                      children: List.generate(6, (index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ]),
+          ),
+        ),
+      ],
     );
   }
 }

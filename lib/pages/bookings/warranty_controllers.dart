@@ -243,18 +243,15 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                       ? null
                                       : () => _showCancelBottomSheet(context),
                                   label: AppLocalizations.of(context)!.cancel,
-                                  color:
-                                      shouldBlockCancel
-                                          ? Colors.grey
-                                          : Colors.red.shade50,
-                                  textColor:
-                                      shouldBlockCancel
-                                          ? Colors.grey.shade700
-                                          : Colors.red.shade700,
-                                  borderColor:
-                                      shouldBlockCancel
-                                          ? Colors.grey.shade200
-                                          : Colors.red.shade200,
+                                  color: shouldBlockCancel
+                                      ? Colors.grey
+                                      : Colors.red.shade50,
+                                  textColor: shouldBlockCancel
+                                      ? Colors.grey.shade700
+                                      : Colors.red.shade700,
+                                  borderColor: shouldBlockCancel
+                                      ? Colors.grey.shade200
+                                      : Colors.red.shade200,
                                   isLoading: isCancelLoading,
                                 ),
                               ),
@@ -270,20 +267,19 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                           isCompleteLoading)
                                       ? null
                                       : isThisBookingTracked
-                                      ? () =>
-                                          _showPauseTrackingBottomSheet(context)
-                                      : () =>
-                                          _showResumeTrackingBottomSheet(
-                                            context,
-                                          ),
-                                  label:
-                                      isThisBookingTracked
-                                          ? AppLocalizations.of(
-                                            context,
-                                          )!.pauseTracking
-                                          : AppLocalizations.of(
-                                            context,
-                                          )!.resumeTracking,
+                                      ? () => _showPauseTrackingBottomSheet(
+                                          context,
+                                        )
+                                      : () => _showResumeTrackingBottomSheet(
+                                          context,
+                                        ),
+                                  label: isThisBookingTracked
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.pauseTracking
+                                      : AppLocalizations.of(
+                                          context,
+                                        )!.resumeTracking,
                                   color: Colors.orange.shade50,
                                   textColor: Colors.orange.shade700,
                                   borderColor: Colors.orange.shade200,
@@ -308,29 +304,26 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                     ? null
                                     : isThisBookingActive
                                     ? () =>
-                                        _showStopTrackingBottomSheet(context)
-                                    : () =>
-                                        _showStartTrackingBottomSheet(context),
-                                label:
-                                    isThisBookingActive
-                                        ? AppLocalizations.of(
-                                          context,
-                                        )!.arrivedAtLocation
-                                        : AppLocalizations.of(
-                                          context,
-                                        )!.startTracking,
-                                color:
-                                    isThisBookingActive
-                                        ? Colors.green.shade50
-                                        : Colors.blue.shade50,
-                                textColor:
-                                    isThisBookingActive
-                                        ? Colors.green.shade700
-                                        : Colors.blue.shade700,
-                                borderColor:
-                                    isThisBookingActive
-                                        ? Colors.green.shade200
-                                        : Colors.blue.shade200,
+                                          _showStopTrackingBottomSheet(context)
+                                    : () => _showStartTrackingBottomSheet(
+                                        context,
+                                      ),
+                                label: isThisBookingActive
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.arrivedAtLocation
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.startTracking,
+                                color: isThisBookingActive
+                                    ? Colors.green.shade50
+                                    : Colors.blue.shade50,
+                                textColor: isThisBookingActive
+                                    ? Colors.green.shade700
+                                    : Colors.blue.shade700,
+                                borderColor: isThisBookingActive
+                                    ? Colors.green.shade200
+                                    : Colors.blue.shade200,
                                 isLoading:
                                     isStartWorkingLoading ||
                                     isStopWorkingLoading,
@@ -351,7 +344,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                             onPressed: (isCompleteLoading)
                                 ? null
                                 : () =>
-                                    _showCompleteWarrantyBottomSheet(context),
+                                      _showCompleteWarrantyBottomSheet(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -633,7 +626,12 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(AppLocalizations.of(context)?.errorOccurred(e.toString()) ?? 'Error: ${e.toString()}'),
+                                        content: Text(
+                                          AppLocalizations.of(
+                                                context,
+                                              )?.errorOccurred(e.toString()) ??
+                                              'Error: ${e.toString()}',
+                                        ),
                                       ),
                                     );
                                   }

@@ -63,7 +63,8 @@ class LocationSelectorWidget<T> extends StatelessWidget {
             onTap: enabled ? onLocationTap : null,
             borderRadius: BorderRadius.circular(4),
             child: InputDecorator(
-              decoration: decoration ?? 
+              decoration:
+                  decoration ??
                   InputDecoration(
                     labelText: labelText,
                     border: const OutlineInputBorder(),
@@ -73,8 +74,8 @@ class LocationSelectorWidget<T> extends StatelessWidget {
               child: Text(
                 _getDisplayText(),
                 style: TextStyle(
-                  color: selectedLocations.isEmpty 
-                      ? Colors.grey 
+                  color: selectedLocations.isEmpty
+                      ? Colors.grey
                       : (enabled ? null : Colors.grey),
                 ),
                 maxLines: maxLines,
@@ -99,7 +100,9 @@ class LocationSelectorWidget<T> extends StatelessWidget {
     }
 
     final count = selectedLocations.length;
-    final selectedText = count == 1 ? locationSelectedText : locationsSelectedText;
+    final selectedText = count == 1
+        ? locationSelectedText
+        : locationsSelectedText;
     return '$count $selectedText';
   }
 
@@ -112,10 +115,7 @@ class LocationSelectorWidget<T> extends StatelessWidget {
         return Chip(
           label: Text(
             locationName,
-            style: TextStyle(
-              fontSize: chipFontSize,
-              color: chipTextColor,
-            ),
+            style: TextStyle(fontSize: chipFontSize, color: chipTextColor),
           ),
           backgroundColor: chipColor,
           deleteIcon: Icon(
@@ -211,28 +211,30 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
             onTap: enabled ? onLocationTap : null,
             borderRadius: BorderRadius.circular(4),
             child: InputDecorator(
-              decoration: (decoration ?? 
-                  InputDecoration(
-                    labelText: labelText,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: suffixIcon,
-                    enabled: enabled,
-                  )).copyWith(
-                errorText: validationError,
-                errorBorder: validationError != null 
-                    ? const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                      )
-                    : null,
-              ),
+              decoration:
+                  (decoration ??
+                          InputDecoration(
+                            labelText: labelText,
+                            border: const OutlineInputBorder(),
+                            suffixIcon: suffixIcon,
+                            enabled: enabled,
+                          ))
+                      .copyWith(
+                        errorText: validationError,
+                        errorBorder: validationError != null
+                            ? const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.red),
+                              )
+                            : null,
+                      ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       _getDisplayText(),
                       style: TextStyle(
-                        color: selectedLocations.isEmpty 
-                            ? Colors.grey 
+                        color: selectedLocations.isEmpty
+                            ? Colors.grey
                             : (enabled ? null : Colors.grey),
                       ),
                       maxLines: maxLines,
@@ -242,19 +244,22 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
                   if (showSelectAll && onSelectAll != null)
                     TextButton(
                       onPressed: enabled ? onSelectAll : null,
-                      child: Text(AppLocalizations.of(context)?.selectAll ?? 'Select All', style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        AppLocalizations.of(context)?.selectAll ?? 'Select All',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                 ],
               ),
             ),
           ),
-          
+
           // Selected location chips
           if (selectedLocations.isNotEmpty) ...[
             const SizedBox(height: 8),
             _buildLocationChips(context, defaultChipColor),
           ],
-          
+
           // Counter or limit info
           if (maxChips != null && selectedLocations.isNotEmpty) ...[
             const SizedBox(height: 4),
@@ -262,8 +267,8 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
               '${selectedLocations.length}/$maxChips ${AppLocalizations.of(context)!.locationsSelected}',
               style: TextStyle(
                 fontSize: 11,
-                color: selectedLocations.length >= maxChips! 
-                    ? Colors.orange 
+                color: selectedLocations.length >= maxChips!
+                    ? Colors.orange
                     : Colors.grey[600],
               ),
             ),
@@ -279,19 +284,24 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
     if (!showCounter) {
       final names = selectedLocations.map(getLocationName);
       final displayText = names.join(', ');
-      return displayText.length > 50 ? '${displayText.substring(0, 47)}...' : displayText;
+      return displayText.length > 50
+          ? '${displayText.substring(0, 47)}...'
+          : displayText;
     }
 
     final count = selectedLocations.length;
-    final selectedText = count == 1 ? locationSelectedText : locationsSelectedText;
+    final selectedText = count == 1
+        ? locationSelectedText
+        : locationsSelectedText;
     return '$count $selectedText';
   }
 
   Widget _buildLocationChips(BuildContext context, Color chipColor) {
-    final displayChips = maxChips != null && selectedLocations.length > maxChips!
+    final displayChips =
+        maxChips != null && selectedLocations.length > maxChips!
         ? selectedLocations.take(maxChips!).toList()
         : selectedLocations;
-    
+
     final hiddenCount = selectedLocations.length - displayChips.length;
 
     return Wrap(
@@ -305,10 +315,7 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
             child: Chip(
               label: Text(
                 locationName,
-                style: TextStyle(
-                  fontSize: chipFontSize,
-                  color: chipTextColor,
-                ),
+                style: TextStyle(fontSize: chipFontSize, color: chipTextColor),
               ),
               backgroundColor: chipColor,
               deleteIcon: Icon(
@@ -324,10 +331,7 @@ class LocationSelectorWidgetEnhanced<T> extends StatelessWidget {
           Chip(
             label: Text(
               '+$hiddenCount ${AppLocalizations.of(context)!.more}',
-              style: TextStyle(
-                fontSize: chipFontSize,
-                color: chipTextColor,
-              ),
+              style: TextStyle(fontSize: chipFontSize, color: chipTextColor),
             ),
             backgroundColor: Colors.grey[600],
           ),

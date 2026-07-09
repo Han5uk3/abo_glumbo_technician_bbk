@@ -31,7 +31,8 @@ class TechnicianChatScreen extends StatefulWidget {
   State<TechnicianChatScreen> createState() => _TechnicianChatScreenState();
 }
 
-class _TechnicianChatScreenState extends State<TechnicianChatScreen> with WidgetsBindingObserver {
+class _TechnicianChatScreenState extends State<TechnicianChatScreen>
+    with WidgetsBindingObserver {
   final TechnicianChatService _chatService = TechnicianChatService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -180,7 +181,10 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.failedToSendMessage(e.toString()) ?? 'Failed to send message: $e'),
+            content: Text(
+              AppLocalizations.of(context)?.failedToSendMessage(e.toString()) ??
+                  'Failed to send message: $e',
+            ),
             backgroundColor: Colors.red,
             action: SnackBarAction(
               label: 'Retry',
@@ -241,7 +245,12 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.failedToRetryMessage(e.toString()) ?? 'Failed to retry message: $e'),
+            content: Text(
+              AppLocalizations.of(
+                    context,
+                  )?.failedToRetryMessage(e.toString()) ??
+                  'Failed to retry message: $e',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -303,10 +312,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                   ),
                   Text(
                     localization.customer,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.black54),
                   ),
                 ],
               ),
@@ -731,10 +737,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
                 style: TextStyle(fontSize: 15),
                 decoration: InputDecoration(
                   hintText: localization.typeMessageToCustomer,
-                  hintStyle: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey[500],
-                  ),
+                  hintStyle: TextStyle(fontSize: 15, color: Colors.grey[500]),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -792,7 +795,8 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen> with Widget
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       _chatService.clearActiveChat(widget.chatId);
     } else if (state == AppLifecycleState.resumed) {
       _chatService.setActiveChat(widget.chatId);

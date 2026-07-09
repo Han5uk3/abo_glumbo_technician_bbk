@@ -10,9 +10,13 @@ class TimeService {
       final myTime = DateTime.now();
       final ntpTime = await NTP.now();
       _offset = ntpTime.difference(myTime);
-      debugPrint('TimeService initialized. Clock skew offset: ${_offset.inMilliseconds}ms');
+      debugPrint(
+        'TimeService initialized. Clock skew offset: ${_offset.inMilliseconds}ms',
+      );
     } catch (e) {
-      debugPrint('TimeService failed to initialize, falling back to local clock: $e');
+      debugPrint(
+        'TimeService failed to initialize, falling back to local clock: $e',
+      );
       _offset = Duration.zero;
     }
   }

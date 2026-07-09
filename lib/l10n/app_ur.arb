@@ -1840,5 +1840,14 @@
   "resolveIssue": "مسئلہ حل کریں",
   "whatWasDoneToResolve": "مسئلے کو حل کرنے کے لیے کیا کیا گیا؟",
   "resolutionTextRequired": "حل کی تفصیل درکار ہے",
-  "submit": "جمع کرائیں"
+  "urduName": "اردو نام",
+  "enterUrduName": "اردو نام درج کریں",
+  "pleaseEnterUrduName": "براہ کرم اردو نام درج کریں",
+  "pleaseEnterUrduNameOnly": "براہ کرم صرف اردو نام درج کریں",
+  "searchForZones": "علاقوں کے لیے تلاش کریں",
+  "failedToSearchForZones": "علاقوں کی تلاش میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
+,
+  "zoneNameAlreadyExists": "????? ?? ??? ???? ?? ????? ??"
+,
+  "zoneType": "??? ?? ???"
 }

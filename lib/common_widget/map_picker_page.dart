@@ -7,6 +7,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/address.dart';
+import '../models/nominatim_places_model.dart';
+import '../services/nominatim_services.dart';
 import '../styles/color.dart';
 
 class LocationMapPicker extends StatefulWidget {
@@ -38,10 +40,17 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   LatLng? _selectedLocation;
   final _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final _selectedLocationsSearchController = TextEditingController();
+  String _selectedLocationsSearchQuery = '';
   List<String> _predictions = [];
   bool _isLoading = false;
   bool _mapReady = false;
   bool _hasLocationPermission = false;
+  bool _locationInitialized = false;
+  bool _isSearchingZone = false;
+  bool _isZoneSearchLoading = false;
+  final _zoneSearchController = TextEditingController();
+  List<PlaceResult> _zoneSearchResults = [];
   Timer? _debounceTimer;
 
   final _buildingNameController = TextEditingController();
@@ -59,11 +68,16 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
   final TextEditingController _nameEnController = TextEditingController();
   final TextEditingController _nameArController = TextEditingController();
+  final TextEditingController _nameUrController = TextEditingController();
   final TextEditingController _priorityController = TextEditingController(
     text: '0',
   );
   final int _priority = 0;
   final GlobalKey<FormState> _dialogFormKey = GlobalKey<FormState>();
+
+  String? _selectedZoneNameEn;
+  String? _selectedZoneNameAr;
+  String? _selectedZoneNameUr;
 
   static const List<Color> _regionColors = [
     Colors.blue,
@@ -89,6 +103,17 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
        \s\n\r\d
        \.\,\!\?\،\؛\؟\:\-\(\)\[\]\"\'\\u061F]+$''', multiLine: true);
 
+  final urduFullRegex = RegExp(r'''^[\u0600-\u06FF
+       \u0750-\u077F
+       \u08A0-\u08FF
+       \uFB50-\uFDFF
+       \uFE70-\uFEFF
+       \u0660-\u0669
+       \u06F0-\u06F9
+       \u200C-\u200F
+       \s\n\r\d
+       \.\,\!\?\،\؛\؟\:\-\(\)\[\]\"\'\\u061F]+$''', multiLine: true);
+
   List<Map<String, dynamic>> _selectedLocations = [];
   Set<Marker> _markers = {};
 
@@ -98,7 +123,15 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   void initState() {
     super.initState();
     _checkLocationPermission();
-    _initializeLocation();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_locationInitialized) {
+      _locationInitialized = true;
+      _initializeLocation();
+    }
   }
 
   Future<void> _checkLocationPermission() async {
@@ -244,6 +277,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
   void _addLocation(
     String nameEn,
     String nameAr,
+    String nameUr,
     int priority, {
     int? editIndex,
   }) {
@@ -271,6 +305,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         'location': _selectedLocation,
         'en_name': nameEn,
         'ar_name': nameAr,
+        'ur_name': nameUr,
         'polygon': _currentPolygonPoints.isNotEmpty
             ? _currentPolygonPoints
                   .map((p) => {'lat': p.latitude, 'lng': p.longitude})
@@ -475,16 +510,91 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     }
   }
 
+  void _onZoneSelected(PlaceResult item) async {
+    final lat = item.latitude;
+    final lng = item.longitude;
+    final south = item.south;
+    final north = item.north;
+    final west = item.west;
+    final east = item.east;
+
+    final polygonPoints = [
+      LatLng(south, west),
+      LatLng(north, west),
+      LatLng(north, east),
+      LatLng(south, east),
+    ];
+
+    setState(() {
+      _selectedLocation = LatLng(lat, lng);
+      _selectedZoneNameEn = item.getNameEn();
+      _selectedZoneNameAr = item.getNameAr();
+      _selectedZoneNameUr = item.getNameUr();
+      _currentPolygonPoints.clear();
+      _currentPolygonPoints.addAll(polygonPoints);
+      _isDrawingPolygon = true;
+      _isSearchingZone = false;
+      _zoneSearchController.clear();
+      _zoneSearchResults.clear();
+      _updateMapElements();
+    });
+
+    await _moveCameraToRegion(polygonPoints);
+  }
+
+  Future<void> _searchZones() async {
+    final city = _zoneSearchController.text.trim();
+    if (city.isEmpty) return;
+
+    setState(() {
+      _isZoneSearchLoading = true;
+      _zoneSearchResults = [];
+    });
+
+    try {
+      final jsonList = await NominatimService.search(
+        query: city,
+        locale: Localizations.localeOf(context),
+        countryCode: 'sa',
+      );
+
+      _zoneSearchResults = jsonList
+          .map((j) => PlaceResult.fromJson(j))
+          .where(
+            (place) =>
+                place.addressType != 'state' && place.addressType != 'road',
+          )
+          .toList();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToSearchForZones),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isZoneSearchLoading = false;
+        });
+      }
+    }
+  }
+
   void _showLocationDetailsDialog({int? editIndex}) {
     if (editIndex != null) {
       final loc = _selectedLocations[editIndex];
       _nameEnController.text = loc['en_name'] ?? '';
       _nameArController.text = loc['ar_name'] ?? '';
+      _nameUrController.text = loc['ur_name'] ?? '';
       _priorityController.text = (loc['priority'] ?? _priority).toString();
       _selectedLocation = loc['location'];
     } else {
-      _nameEnController.text = _locationTitle;
-      _nameArController.text = '';
+      _nameEnController.text = _selectedZoneNameEn ?? _locationTitle;
+      _nameArController.text = _selectedZoneNameAr ?? '';
+      _nameUrController.text = _selectedZoneNameUr ?? '';
       _priorityController.text = _priority.toString();
     }
 
@@ -493,6 +603,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
+        actionsAlignment: MainAxisAlignment.start,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
         title: Text(
@@ -502,7 +613,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: AppColors.primary,
+            color: Colors.black,
           ),
         ),
         content: Form(
@@ -512,6 +623,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
+                  cursorColor: Colors.black,
                   controller: _nameEnController,
                   style: TextStyle(fontSize: 14),
                   decoration: InputDecoration(
@@ -521,13 +633,15 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
                   ),
                   validator: (value) {
@@ -536,11 +650,34 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         context,
                       )!.pleaseEnterEnglishName;
                     }
+
+                    final normalizedValue = value.trim().toLowerCase();
+                    final exists = _selectedLocations.asMap().entries.any((
+                      entry,
+                    ) {
+                      if (editIndex != null && entry.key == editIndex) {
+                        return false;
+                      }
+                      final name = entry.value['en_name']
+                          ?.toString()
+                          .trim()
+                          .toLowerCase();
+                      return name == normalizedValue;
+                    });
+
+                    if (exists) {
+                      return AppLocalizations.of(
+                            context,
+                          )?.zoneNameAlreadyExists ??
+                          'Name already exists';
+                    }
+
                     return null;
                   },
                 ),
                 SizedBox(height: 16),
                 TextFormField(
+                  cursorColor: Colors.black,
                   controller: _nameArController,
                   style: TextStyle(fontSize: 14),
                   textAlign: TextAlign.right,
@@ -551,13 +688,15 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
                   ),
                   validator: (value) {
@@ -566,11 +705,91 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                         context,
                       )!.pleaseEnterArabicName;
                     }
-                    // if (!arabicFullRegex.hasMatch(value)) {
-                    //   return AppLocalizations.of(
-                    //     context,
-                    //   )!.pleaseEnterArabicNameOnly;
-                    // }
+                    if (!arabicFullRegex.hasMatch(value)) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterArabicNameOnly;
+                    }
+
+                    final normalizedValue = value.trim().toLowerCase();
+                    final exists = _selectedLocations.asMap().entries.any((
+                      entry,
+                    ) {
+                      if (editIndex != null && entry.key == editIndex) {
+                        return false;
+                      }
+                      final name = entry.value['ar_name']
+                          ?.toString()
+                          .trim()
+                          .toLowerCase();
+                      return name == normalizedValue;
+                    });
+
+                    if (exists) {
+                      return AppLocalizations.of(
+                            context,
+                          )?.zoneNameAlreadyExists ??
+                          'Name already exists';
+                    }
+
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  cursorColor: Colors.black,
+                  controller: _nameUrController,
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.urduName,
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    hintText: AppLocalizations.of(context)!.enterUrduName,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return AppLocalizations.of(context)!.pleaseEnterUrduName;
+                    }
+                    if (!urduFullRegex.hasMatch(value)) {
+                      return AppLocalizations.of(
+                        context,
+                      )!.pleaseEnterUrduNameOnly;
+                    }
+
+                    final normalizedValue = value.trim().toLowerCase();
+                    final exists = _selectedLocations.asMap().entries.any((
+                      entry,
+                    ) {
+                      if (editIndex != null && entry.key == editIndex) {
+                        return false;
+                      }
+                      final name = entry.value['ur_name']
+                          ?.toString()
+                          .trim()
+                          .toLowerCase();
+                      return name == normalizedValue;
+                    });
+
+                    if (exists) {
+                      return AppLocalizations.of(
+                            context,
+                          )?.zoneNameAlreadyExists ??
+                          'Name already exists';
+                    }
+
                     return null;
                   },
                 ),
@@ -585,13 +804,15 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
                   ),
                   keyboardType: TextInputType.number,
@@ -650,11 +871,18 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
 
                 final nameEn = _nameEnController.text.trim();
                 final nameAr = _nameArController.text.trim();
+                final nameUr = _nameUrController.text.trim();
                 final priority =
                     int.tryParse(_priorityController.text.trim()) ?? _priority;
 
                 Navigator.pop(context);
-                _addLocation(nameEn, nameAr, priority, editIndex: editIndex);
+                _addLocation(
+                  nameEn,
+                  nameAr,
+                  nameUr,
+                  priority,
+                  editIndex: editIndex,
+                );
               }
             },
             style: ElevatedButton.styleFrom(
@@ -745,102 +973,226 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       child: ListView.builder(
         shrinkWrap: true,
         itemCount: _predictions.length,
-        itemBuilder: (context, i) => ListTile(
-          dense: true,
-          title: Text(_predictions[i], style: TextStyle(fontSize: 14)),
-          leading: Icon(Icons.location_on, size: 20, color: Colors.blue),
-          onTap: () => _moveCameraToPlace(_predictions[i]),
+        itemBuilder: (context, i) => Material(
+          color: Colors.transparent,
+          child: ListTile(
+            dense: true,
+            title: Text(_predictions[i], style: TextStyle(fontSize: 14)),
+            leading: Icon(Icons.location_on, size: 20, color: Colors.blue),
+            onTap: () => _moveCameraToPlace(_predictions[i]),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildRadiusControl() {
-    if (!_isDrawingPolygon) {
+    if (_isDrawingPolygon) {
       return SizedBox(
         width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () {
-            setState(() {
-              _isDrawingPolygon = true;
-              _currentPolygonPoints.clear();
-              _updateMapElements();
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)!.tapOnMapToDrawPolygonPoints,
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_currentPolygonPoints.length < 4) {
+                    _showSnackBar(
+                      AppLocalizations.of(
+                        context,
+                      )!.regionMustHaveAtLeast4Points,
+                      Colors.orange,
+                    );
+                    return;
+                  }
+                  setState(() {
+                    _isDrawingPolygon = false;
+                  });
+                  _showLocationDetailsDialog();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _currentPolygonPoints.length >= 4
+                      ? Colors.orange
+                      : Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                backgroundColor: Colors.blue,
-                duration: Duration(seconds: 2),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.completeRegionWithPts(_currentPolygonPoints.length),
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
-            );
-          },
-          icon: Icon(Icons.add_location_alt, color: Colors.white),
-          label: Text(
-            AppLocalizations.of(context)!.addRegion,
-            style: TextStyle(color: Colors.white),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.symmetric(vertical: 12),
-          ),
+            SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isDrawingPolygon = false;
+                  _currentPolygonPoints.clear();
+                  _updateMapElements();
+                });
+              },
+              icon: Icon(Icons.clear, color: Colors.red),
+              tooltip: AppLocalizations.of(context)!.clearDrawing,
+            ),
+          ],
         ),
       );
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                if (_currentPolygonPoints.length < 4) {
-                  _showSnackBar(
-                    AppLocalizations.of(context)!.regionMustHaveAtLeast4Points,
-                    Colors.orange,
-                  );
-                  return;
-                }
-                setState(() {
-                  _isDrawingPolygon = false;
-                });
-                _showLocationDetailsDialog();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _currentPolygonPoints.length >= 4
-                    ? Colors.orange
-                    : Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: _isSearchingZone
+          ? Column(
+              key: ValueKey('searching_zone'),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        cursorColor: Colors.black,
+                        controller: _zoneSearchController,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchForZones,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: _searchZones,
+                          ),
+                        ),
+                        onSubmitted: (_) => _searchZones(),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _isSearchingZone = false;
+                          _zoneSearchController.clear();
+                          _zoneSearchResults.clear();
+                        });
+                      },
+                    ),
+                  ],
                 ),
-              ),
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                )!.completeRegionWithPts(_currentPolygonPoints.length),
-                style: TextStyle(color: Colors.white),
-              ),
+                if (_isZoneSearchLoading)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (!_isZoneSearchLoading && _zoneSearchResults.isNotEmpty)
+                  ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _zoneSearchResults.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 2),
+                    itemBuilder: (context, index) {
+                      final item = _zoneSearchResults[index];
+                      return Card(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.location_city,
+                            color: Colors.blue,
+                          ),
+                          title: Text(
+                            item.getLocalizedName(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "${AppLocalizations.of(context)?.zoneType ?? 'Zone Type'} : ${item.addressType}",
+                          ),
+
+                          onTap: () => _onZoneSelected(item),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            )
+          : Row(
+              key: ValueKey('default_buttons'),
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isDrawingPolygon = true;
+                        _currentPolygonPoints.clear();
+                        _updateMapElements();
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.tapOnMapToDrawPolygonPoints,
+                          ),
+                          backgroundColor: Colors.blue,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.add_location_alt, color: Colors.white),
+                    label: Text(
+                      AppLocalizations.of(context)!.addRegion,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => setState(() => _isSearchingZone = true),
+                    icon: Icon(Icons.search, color: Colors.white),
+                    label: Text(
+                      AppLocalizations.of(context)!.searchForZones,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          SizedBox(width: 8),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isDrawingPolygon = false;
-                _currentPolygonPoints.clear();
-                _updateMapElements();
-              });
-            },
-            icon: Icon(Icons.clear, color: Colors.red),
-            tooltip: AppLocalizations.of(context)!.clearDrawing,
-          ),
-        ],
-      ),
     );
   }
 
@@ -891,86 +1243,170 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
             ],
           ),
           SizedBox(height: 8),
-          Container(
-            constraints: BoxConstraints(maxHeight: 150),
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: _selectedLocations.length,
-              separatorBuilder: (_, __) => Divider(height: 1),
-              itemBuilder: (context, i) {
-                var loc = _selectedLocations[i];
-                return ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    radius: 12,
-                    backgroundColor: i == 0 ? Colors.blue : Colors.green,
+          TextField(
+            cursorColor: Colors.black,
+            controller: _selectedLocationsSearchController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.searchForAPlace,
+              prefixIcon: Icon(Icons.search, size: 20),
+              suffixIcon: _selectedLocationsSearchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear, size: 20),
+                      onPressed: () {
+                        _selectedLocationsSearchController.clear();
+                        setState(() {
+                          _selectedLocationsSearchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              isDense: true,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.black),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.black),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.black),
+              ),
+            ),
+            onChanged: (val) {
+              setState(() {
+                _selectedLocationsSearchQuery = val;
+              });
+            },
+          ),
+          SizedBox(height: 8),
+          Builder(
+            builder: (context) {
+              final filteredLocations = _selectedLocationsSearchQuery.isEmpty
+                  ? _selectedLocations
+                  : _selectedLocations.where((loc) {
+                      final enName =
+                          (loc['en_name'] as String?)?.toLowerCase() ?? '';
+                      final arName =
+                          (loc['ar_name'] as String?)?.toLowerCase() ?? '';
+                      final query = _selectedLocationsSearchQuery.toLowerCase();
+                      return enName.contains(query) || arName.contains(query);
+                    }).toList();
+
+              if (filteredLocations.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
                     child: Text(
-                      '${i + 1}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      AppLocalizations.of(context)!.noLocationsFound,
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
                   ),
-                  title: Text(
-                    '${loc['en_name']} / ${loc['ar_name']}',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${AppLocalizations.of(context)!.priority}: ${loc['priority']} | ${AppLocalizations.of(context)!.pointsCount((loc['polygon'] as List).length)}',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
-                  onTap: () {
-                    if (loc['polygon'] != null &&
-                        (loc['polygon'] as List).isNotEmpty) {
-                      List<LatLng> points = (loc['polygon'] as List)
-                          .where((p) => p['lat'] != null && p['lng'] != null)
-                          .map(
-                            (p) => LatLng(
-                              (p['lat'] as num).toDouble(),
-                              (p['lng'] as num).toDouble(),
-                            ),
-                          )
-                          .toList();
-                      if (points.isNotEmpty) {
-                        _moveCameraToRegion(points);
-                        return;
-                      }
-                    }
-                    if (loc['location'] != null) {
-                      _moveCameraToLocation(loc['location']);
-                    }
-                  },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.edit,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: () =>
-                            _showLocationDetailsDialog(editIndex: i),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(Icons.close, size: 16, color: Colors.red),
-                        onPressed: () => _removeLocation(i),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                    ],
-                  ),
                 );
-              },
-            ),
+              }
+
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: filteredLocations.length,
+                separatorBuilder: (_, __) => Divider(height: 1),
+                itemBuilder: (context, i) {
+                  var loc = filteredLocations[i];
+                  // find original index for delete/edit actions
+                  var originalIndex = _selectedLocations.indexOf(loc);
+                  return Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        radius: 12,
+                        backgroundColor: i == 0 ? Colors.blue : Colors.green,
+                        child: Text(
+                          '${i + 1}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? (loc['ar_name'] ?? loc['en_name'])
+                            : Localizations.localeOf(context).languageCode ==
+                                  'ur'
+                            ? (loc['ur_name'] ?? loc['en_name'])
+                            : (loc['en_name'] ?? loc['ar_name']),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        '${AppLocalizations.of(context)!.priority}: ${loc['priority']} | ${AppLocalizations.of(context)!.pointsCount((loc['polygon'] as List).length)}',
+                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                      ),
+                      onTap: () {
+                        if (loc['polygon'] != null &&
+                            (loc['polygon'] as List).isNotEmpty) {
+                          List<LatLng> points = (loc['polygon'] as List)
+                              .where(
+                                (p) => p['lat'] != null && p['lng'] != null,
+                              )
+                              .map(
+                                (p) => LatLng(
+                                  (p['lat'] as num).toDouble(),
+                                  (p['lng'] as num).toDouble(),
+                                ),
+                              )
+                              .toList();
+                          if (points.isNotEmpty) {
+                            _moveCameraToRegion(points);
+                            return;
+                          }
+                        }
+                        if (loc['location'] != null) {
+                          _moveCameraToLocation(loc['location']);
+                        }
+                      },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            onPressed: () => _showLocationDetailsDialog(
+                              editIndex: originalIndex,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.red,
+                            ),
+                            onPressed: () => _removeLocation(originalIndex),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
           const SizedBox(height: 16),
         ],
@@ -1007,245 +1443,257 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Map section (60%)
-          Expanded(
-            flex: 3,
-
-            child: Stack(
-              children: [
-                if (!_mapReady) Center(child: CircularProgressIndicator()),
-                GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _initialPosition,
-                    zoom: 14,
-                  ),
-                  onTap: _onMapTap,
-                  markers: _markers,
-                  polygons: _polygons,
-                  myLocationEnabled: _hasLocationPermission,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  compassEnabled: true,
+          // Full-screen Map
+          Stack(
+            children: [
+              if (!_mapReady) Center(child: CircularProgressIndicator()),
+              GoogleMap(
+                onMapCreated: _onMapCreated,
+                initialCameraPosition: CameraPosition(
+                  target: _initialPosition,
+                  zoom: 14,
                 ),
-
-                // Search Bar
-                Positioned(
-                  top: 15,
-                  left: 15,
-                  right: 15,
-                  child: Column(
-                    children: [
-                      Material(
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(8),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _searchPlaces,
-                          focusNode: _searchFocusNode,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.searchForAPlace,
-                            prefixIcon: Icon(Icons.search, color: Colors.grey),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(Icons.clear, size: 20),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() => _predictions.clear());
-                                      _searchFocusNode.unfocus();
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      _buildSearchResults(),
-                    ],
-                  ),
-                ),
-
-                // My Location Button
-                Positioned(
-                  bottom: 10,
-                  left: 20,
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(20),
-                    child: InkWell(
-                      onTap: _getCurrentLocation,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.my_location,
-                              size: 16,
-                              color: Colors.blue,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              AppLocalizations.of(context)!.myLocation,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Loading indicator
-                if (_isLoading)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.black26,
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Bottom panel (40%)
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
+                onTap: _onMapTap,
+                markers: _markers,
+                polygons: _polygons,
+                myLocationEnabled: _hasLocationPermission,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                compassEnabled: true,
               ),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16),
+
+              // Search Bar
+              Positioned(
+                top: 15,
+                left: 15,
+                right: 15,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Current Location Card
-                    LocationCard(
-                      title: _locationTitle.isNotEmpty
-                          ? _locationTitle
-                          : AppLocalizations.of(context)!.noLocationSelected,
-                      subtitle: _locationSubtitle.isNotEmpty
-                          ? _locationSubtitle
-                          : AppLocalizations.of(context)!.tapOnMapToSelect,
-                      dense: true,
-                    ),
-                    SizedBox(height: 12),
-
-                    // Radius Control
-                    _buildRadiusControl(),
-                    SizedBox(height: 12),
-
-                    // Selected Locations List
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.selectedLocations,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                    Material(
+                      elevation: 8,
+                      borderRadius: BorderRadius.circular(8),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _searchPlaces,
+                        focusNode: _searchFocusNode,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchForAPlace,
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear, size: 20),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _predictions.clear());
+                                    _searchFocusNode.unfocus();
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
-                        if (_selectedLocations.isNotEmpty)
-                          Container(
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    _buildSearchResults(),
+                    SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(20),
+                        child: InkWell(
+                          onTap: _getCurrentLocation,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
-                              '${_selectedLocations.length}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.my_location,
+                                  size: 16,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  AppLocalizations.of(context)!.myLocation,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    _buildLocationsList(),
-                    SizedBox(height: 16),
-
-                    // Confirm Button
-                    if (_selectedLocations.isNotEmpty)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_isLoading) return;
-                            if (widget.onLocationSelected != null) {
-                              widget.onLocationSelected!({
-                                'locations': _selectedLocations,
-                                'priority': _priority,
-                                'count': _selectedLocations.length,
-                              });
-                            }
-                            _showSnackBar(
-                              AppLocalizations.of(
-                                context,
-                              )!.locationsSelectedCount(
-                                _selectedLocations.length,
-                              ),
-                              Colors.green,
-                            );
-                            Navigator.pop(context, _selectedLocations);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            minimumSize: Size(double.infinity, 45),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)!.confirmLocations,
-                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
-
-                    SizedBox(height: 20),
+                    ),
                   ],
                 ),
               ),
-            ),
+
+              // Loading indicator
+              if (_isLoading)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black26,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
+          ),
+
+          // Bottom Sheet
+          DraggableScrollableSheet(
+            initialChildSize: 0.4,
+            minChildSize: 0.1,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Drag Handle
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 5,
+                          margin: EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2.5),
+                          ),
+                        ),
+                      ),
+
+                      // Current Location Card
+                      LocationCard(
+                        title: _locationTitle.isNotEmpty
+                            ? _locationTitle
+                            : AppLocalizations.of(context)!.noLocationSelected,
+                        subtitle: _locationSubtitle.isNotEmpty
+                            ? _locationSubtitle
+                            : AppLocalizations.of(context)!.tapOnMapToSelect,
+                        dense: true,
+                      ),
+                      SizedBox(height: 12),
+
+                      // Radius Control
+                      _buildRadiusControl(),
+                      SizedBox(height: 12),
+
+                      // Selected Locations List
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.selectedLocations,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (_selectedLocations.isNotEmpty)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${_selectedLocations.length}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      _buildLocationsList(),
+                      SizedBox(height: 16),
+
+                      // Confirm Button
+                      if (_selectedLocations.isNotEmpty)
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_isLoading) return;
+                              if (widget.onLocationSelected != null) {
+                                widget.onLocationSelected!({
+                                  'locations': _selectedLocations,
+                                  'priority': _priority,
+                                  'count': _selectedLocations.length,
+                                });
+                              }
+                              _showSnackBar(
+                                AppLocalizations.of(
+                                  context,
+                                )!.locationsSelectedCount(
+                                  _selectedLocations.length,
+                                ),
+                                Colors.green,
+                              );
+                              Navigator.pop(context, _selectedLocations);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              minimumSize: Size(double.infinity, 45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.confirmLocations,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+
+                      SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

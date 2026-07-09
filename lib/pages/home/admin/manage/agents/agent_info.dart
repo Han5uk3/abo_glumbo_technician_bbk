@@ -176,7 +176,7 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.money_outlined,
           Colors.blue,
-          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${agent.paidAmounts ?? "0.00"} ${AppLocalizations.of(context)!.sar}',
+          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${((widget.initialInAppEarnings ?? 0.0) + (widget.initialOutsideAppEarnings ?? 0.0)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
         ),
         const SizedBox(height: 8),
         Divider(
@@ -293,12 +293,12 @@ class _AgentInfoState extends State<AgentInfo> {
     final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: l10n.profession ?? 'Profession',
+      title: l10n.profession,
       icon: Icons.settings_outlined,
       iconColor: Colors.blue.shade700,
       children: [
         Text(
-          l10n.jobRoles ?? 'Job Roles',
+          l10n.jobRoles,
           style: TextStyle(
             fontSize: 13,
             color: Colors.grey,
@@ -387,42 +387,44 @@ class _AgentInfoState extends State<AgentInfo> {
     final hasFullAccess =
         LocalStore.getCachedAdminData()?.hasFullAccess ?? true;
     final l10n = AppLocalizations.of(context)!;
+    final inApp = widget.initialInAppEarnings ?? 0.0;
+    final outsideApp = widget.initialOutsideAppEarnings ?? 0.0;
+    final totalEarnings = inApp + outsideApp;
+
     return _buildCard(
       context,
-      title: l10n.earningsBreakdown ?? 'Earnings Breakdown',
+      title: l10n.earningsBreakdown,
       icon: Icons.attach_money,
       iconColor: Colors.blue.shade700,
       children: [
-        if (hasFilter) ...[
-          if (widget.startDate != null && widget.endDate != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                "${AppLocalizations.of(context)?.filteredBy ?? 'Filtered:'} ${DateFormat('dd/MM/yyyy').format(widget.startDate!)} - ${DateFormat('dd/MM/yyyy').format(widget.endDate!)}",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
+        if (hasFilter && widget.startDate != null && widget.endDate != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              "${AppLocalizations.of(context)?.filteredBy ?? 'Filtered:'} ${DateFormat('dd/MM/yyyy').format(widget.startDate!)} - ${DateFormat('dd/MM/yyyy').format(widget.endDate!)}",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          _buildDetailRow(
-            l10n.inAppEarnings ?? 'In-App Earnings',
-            'SAR ${(widget.initialInAppEarnings ?? 0.0).toStringAsFixed(2)}',
           ),
-          _buildDetailRow(
-            l10n.outsideAppEarnings ?? 'Outside-App Earnings',
-            'SAR ${(widget.initialOutsideAppEarnings ?? 0.0).toStringAsFixed(2)}',
-          ),
-          const Divider(height: 24),
-        ],
         _buildDetailRow(
-          l10n.totalEarnings ?? 'Service Earnings (Total)',
-          'SAR ${agent.paidAmounts ?? "0.00"}',
+          l10n.inAppEarnings,
+          '${inApp.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
         ),
         _buildDetailRow(
-          l10n.bonuses ?? 'Bonuses',
-          'SAR ${agent.bonusAmount ?? agent.totalMonthlyBonus ?? "0.00"}',
+          l10n.outsideAppEarnings,
+          '${outsideApp.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+        ),
+        const Divider(height: 24),
+        _buildDetailRow(
+          l10n.totalEarnings,
+          '${totalEarnings.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+        ),
+        _buildDetailRow(
+          l10n.bonuses,
+          '${agent.bonusAmount ?? agent.totalMonthlyBonus ?? "0.00"} ${AppLocalizations.of(context)!.sar}',
         ),
         if (hasFullAccess) ...[
           const SizedBox(height: 16),
@@ -459,7 +461,7 @@ class _AgentInfoState extends State<AgentInfo> {
     final l10n = AppLocalizations.of(context)!;
     return _buildCard(
       context,
-      title: l10n.bonusTier ?? 'Bonus Tier',
+      title: l10n.bonusTier,
       icon: Icons.card_giftcard,
       iconColor: Colors.blue.shade700,
       children: [
@@ -1186,11 +1188,11 @@ class _AgentInfoState extends State<AgentInfo> {
   }
 
   String _getLocalizedTier(String? tier, AppLocalizations l10n) {
-    if (tier == null) return l10n.bronze ?? 'Bronze';
+    if (tier == null) return l10n.bronze;
     final lowerTier = tier.toLowerCase();
-    if (lowerTier == 'bronze') return l10n.bronze ?? 'Bronze';
-    if (lowerTier == 'silver') return l10n.silver ?? 'Silver';
-    if (lowerTier == 'gold') return l10n.gold ?? 'Gold';
+    if (lowerTier == 'bronze') return l10n.bronze;
+    if (lowerTier == 'silver') return l10n.silver;
+    if (lowerTier == 'gold') return l10n.gold;
     return tier;
   }
 

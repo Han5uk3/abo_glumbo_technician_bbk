@@ -52,7 +52,9 @@ class TechnicianWelcomeModal extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.welcomeToAboGlumboTechnician(technicianName),
+                    AppLocalizations.of(
+                      context,
+                    )!.welcomeToAboGlumboTechnician(technicianName),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

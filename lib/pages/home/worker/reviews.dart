@@ -139,7 +139,9 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
                       const SizedBox(height: 20),
                       _buildEmptyState(),
                     ] else ...[
-                      ...reviewedBookings.map((booking) => _buildReviewCard(booking)),
+                      ...reviewedBookings.map(
+                        (booking) => _buildReviewCard(booking),
+                      ),
                     ],
                   ],
                 ),
@@ -358,138 +360,144 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
   }
 
   Widget _buildReviewCard(BookingModel booking) {
-  final review = booking.review!;
-  final customer = booking.customer;
-  final rating = review.rating;
-  final l10n = AppLocalizations.of(context)!;
+    final review = booking.review!;
+    final customer = booking.customer;
+    final rating = review.rating;
+    final l10n = AppLocalizations.of(context)!;
 
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey[200]!),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              backgroundImage: customer.profileUrl != null
-                  ? NetworkImage(customer.profileUrl!)
-                  : null,
-              child: customer.profileUrl == null
-                  ? Text(
-                      customer.name?.isNotEmpty == true
-                          ? customer.name![0].toUpperCase()
-                          : 'C',
-                      style: TextStyle(color: AppColors.primary, fontSize: 14),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    customer.name ?? "Customer",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      _buildStarRating(rating?.toDouble() ?? 0.0, size: 14),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatReviewTime(review.createdAt?.toDate()),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundImage: customer.profileUrl != null
+                    ? NetworkImage(customer.profileUrl!)
+                    : null,
+                child: customer.profileUrl == null
+                    ? Text(
+                        customer.name?.isNotEmpty == true
+                            ? customer.name![0].toUpperCase()
+                            : 'C',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer.name ?? "Customer",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        _buildStarRating(rating?.toDouble() ?? 0.0, size: 14),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatReviewTime(review.createdAt?.toDate()),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (review.review.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              review.review,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[800],
+                height: 1.4,
               ),
             ),
           ],
-        ),
-        if (review.review.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 0.5, color: Color(0xFFE2E8F0)),
+          const SizedBox(height: 8),
           Text(
-            review.review,
+            '${l10n.service}: ${booking.service.nameLocalized(languageCode: l10n.localeName) ?? booking.service.name ?? ""}',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: Colors.grey[800],
-              height: 1.4,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
-        const SizedBox(height: 12),
-        const Divider(height: 1, thickness: 0.5, color: Color(0xFFE2E8F0)),
-        const SizedBox(height: 8),
-        Text(
-          '${l10n.service}: ${booking.service.nameLocalized(languageCode: l10n.localeName) ?? booking.service.name ?? ""}',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[800],
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-String _formatReviewTime(DateTime? date) {
-  if (date == null) return 'Recent';
-  final now = DateTime.now();
-  final difference = now.difference(date);
-
-  if (difference.inDays >= 7) {
-    final weeks = (difference.inDays / 7).floor();
-    return '$weeks ${weeks == 1 ? "week" : "weeks"} ago';
-  } else if (difference.inDays >= 1) {
-    return '${difference.inDays} ${difference.inDays == 1 ? "day" : "days"} ago';
-  } else if (difference.inHours >= 1) {
-    return '${difference.inHours} ${difference.inHours == 1 ? "hour" : "hours"} ago';
-  } else {
-    return 'Just now';
+      ),
+    );
   }
-}
 
-Widget _buildStarRating(double rating, {double size = 20, Color? color}) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: List.generate(5, (index) {
-      if (index < rating.floor()) {
-        return Icon(
-          Icons.star_rounded,
-          size: size,
-          color: color ?? Colors.amber[600],
-        );
-      } else if (index < rating && rating % 1 != 0) {
-        return Icon(
-          Icons.star_half_rounded,
-          size: size,
-          color: color ?? Colors.amber[600],
-        );
-      } else {
-        return Icon(
-          Icons.star_border_rounded,
-          size: size,
-          color: color ?? Colors.grey[300],
-        );
-      }
-    }),
-  );
-}
+  String _formatReviewTime(DateTime? date) {
+    if (date == null) return 'Recent';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays >= 7) {
+      final weeks = (difference.inDays / 7).floor();
+      return '$weeks ${weeks == 1 ? "week" : "weeks"} ago';
+    } else if (difference.inDays >= 1) {
+      return '${difference.inDays} ${difference.inDays == 1 ? "day" : "days"} ago';
+    } else if (difference.inHours >= 1) {
+      return '${difference.inHours} ${difference.inHours == 1 ? "hour" : "hours"} ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  Widget _buildStarRating(double rating, {double size = 20, Color? color}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        if (index < rating.floor()) {
+          return Icon(
+            Icons.star_rounded,
+            size: size,
+            color: color ?? Colors.amber[600],
+          );
+        } else if (index < rating && rating % 1 != 0) {
+          return Icon(
+            Icons.star_half_rounded,
+            size: size,
+            color: color ?? Colors.amber[600],
+          );
+        } else {
+          return Icon(
+            Icons.star_border_rounded,
+            size: size,
+            color: color ?? Colors.grey[300],
+          );
+        }
+      }),
+    );
+  }
 }

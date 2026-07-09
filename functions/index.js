@@ -2086,6 +2086,10 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           en: `${customerName} requested warranty repair for ${serviceName}`,
           ar: `${customerName} طلب إصلاح الضمان لـ ${serviceNameAr}`,
         },
+        technician: {
+          en: `Warranty repair requested for ${serviceName}. Customer: ${customerName}`,
+          ar: `تم طلب إصلاح الضمان لـ ${serviceNameAr}. العميل: ${customerName}`,
+        },
       },
       warranty_accepted: {
         customer: {
@@ -2195,6 +2199,49 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
       });
     }
 
+    // Notify technician
+    if (workerId && statusMessages[status]?.technician) {
+      try {
+        const techDoc = await admin
+          .firestore()
+          .collection("users")
+          .doc(workerId)
+          .get();
+        if (techDoc.exists) {
+          const techData = techDoc.data();
+          if (techData.fcmToken && techData.fcmToken.trim() !== "") {
+            await sendAndStoreNotification({
+              targetRole: "technician",
+              targetId: workerId,
+              titleEn: "Warranty Update",
+              titleAr: "تحديث الضمان",
+              bodyEn:
+                statusMessages[status].technician["en"] ||
+                `Warranty status updated for booking ${bookingId}`,
+              bodyAr:
+                statusMessages[status].technician["ar"] ||
+                `تم تحديث حالة الضمان للحجز ${bookingId}`,
+              data: {
+                targetRole: "technician",
+                category: "warranty",
+                bookingId: bookingId,
+                customerId: customerId || "",
+                status: status,
+                warrantyStatusCode: afterStatusCode,
+                serviceName: serviceName,
+                isWarranty: "true",
+                ...notificationData,
+              },
+              fcmToken: techData.fcmToken,
+              lanCode: techData.lanCode || "en",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching technician data:", error);
+      }
+    }
+
     // Notify admins
     if (adminTokens.length > 0) {
       for (const { uid, token, lanCode } of adminTokens) {
@@ -2264,6 +2311,8 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     );
 
     const serviceName = afterData.service?.name || "Service";
+    const serviceNameAr = afterData.service?.name_ar || serviceName;
+    const serviceNameUr = afterData.service?.name_ur || serviceNameAr || serviceName;
     const customerName = afterData.customer?.name || "Customer";
     const warranty = afterData.warranty;
 
@@ -2273,8 +2322,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
       warranty?.rejectedTechnicians &&
       warranty.rejectedTechnicians.length > 0
     ) {
-      escalationReason =
-        "the original technician cancelled/rejected the request";
+      escalationReason = "the original technician cancelled/rejected the request";
     }
 
     // Fetch all admin users
@@ -2307,13 +2355,19 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     // Notification messages
     const titleEn = "⚠️ Warranty Request Escalated";
     const titleAr = "⚠️ تم تصعيد طلب الضمان";
+    const titleUr = "⚠️ وارنٹی کی درخواست کو بڑھا دیا گیا";
 
-    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} requires your attention.\n\nReason: This request has been ${escalationReason}.\n\nActions Available:\n✅ Approve Rejection: Confirm the technician's decision and close the request.\n🔁 Assign Alternate Technician: Use the "Assign" option to re-assign the job to another technician.`;
+    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} with booking id ${bookingId} requires your attention. Reason: ${escalationReason}.`;
 
-    const bodyAr = `طلب ضمان لـ "${serviceName}" من ${customerName} يتطلب انتباهك.\n\nالسبب: تم ${escalationReason === "staying unchanged (unattended) for a long time"
+    const arReason = escalationReason === "staying unchanged (unattended) for a long time"
       ? "ترك هذا الطلب دون تغيير (غير مُعالج) لفترة طويلة"
-      : "إلغاء/رفض الطلب من قبل الفني الأصلي"
-      }.\n\nالإجراءات المتاحة:\n✅ الموافقة على الرفض: تأكيد قرار الفني وإغلاق الطلب.\n🔁 تعيين فني بديل: استخدم خيار "تعيين" لإعادة تعيين العمل لفني آخر.`;
+      : "إلغاء/رفض الطلب من قبل الفني الأصلي";
+    const bodyAr = `طلب ضمان لـ "${serviceNameAr}" من ${customerName} برقم الحجز ${bookingId} يتطلب انتباهك. السبب: ${arReason}.`;
+
+    const urReason = escalationReason === "staying unchanged (unattended) for a long time"
+      ? "اس درخواست کو طویل عرصے سے بغیر تبدیلی (غیر حل شدہ) چھوڑ دیا گیا ہے"
+      : "اصل ٹیکنیشن نے درخواست کو منسوخ/مسترد کر دیا ہے";
+    const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
 
     // Send notification to each admin
     for (const { uid, token, lanCode } of adminTokens) {
@@ -2322,8 +2376,10 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
         targetId: uid,
         titleEn: titleEn,
         titleAr: titleAr,
+        titleUr: titleUr,
         bodyEn: bodyEn,
         bodyAr: bodyAr,
+        bodyUr: bodyUr,
         data: {
           targetRole: "admin",
           category: "warranty_escalation",
@@ -2343,6 +2399,74 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     console.log(
       `✅ Escalation notifications sent to ${adminTokens.length} admin(s) for booking ${bookingId}`
     );
+
+    return null;
+  }
+);
+
+// ============================================
+// Notify Customer on Warranty Resolution
+// ============================================
+exports.notifyCustomerOnWarrantyResolution = onDocumentWritten(
+  "bookings/{bookingId}",
+  async (event) => {
+    const beforeData = event.data?.before?.data();
+    const afterData = event.data?.after?.data();
+    const bookingId = event.params.bookingId;
+
+    if (!afterData || !beforeData) {
+      return null;
+    }
+
+    // Check if isEscalated changed from true to false
+    const wasEscalated = beforeData.isEscalated === true;
+    const isEscalatedNow = afterData.isEscalated === true;
+
+    if (!wasEscalated || isEscalatedNow) {
+      return null; // No resolution occurred
+    }
+
+    console.log(`Warranty request resolved for booking ${bookingId}. Notifying customer...`);
+
+    const customer = afterData.customer;
+    if (!customer || !customer.uid) {
+      console.log("Customer data missing, cannot send notification.");
+      return null;
+    }
+
+    const serviceName = afterData.service?.name || "Service";
+    const serviceNameAr = afterData.service?.name_ar || serviceName;
+    const serviceNameUr = afterData.service?.name_ur || serviceNameAr || serviceName;
+    const resolutionText = afterData.resolutionText || "Issue resolved";
+
+    const titleEn = "✅ Warranty Issue Resolved";
+    const titleAr = "✅ تم حل مشكلة الضمان";
+    const titleUr = "✅ وارنٹی کا مسئلہ حل ہو گیا";
+
+    const bodyEn = `Your escalated warranty issue for "${serviceName}" has been resolved by our admin. Resolution: ${resolutionText}`;
+    const bodyAr = `تم حل مشكلة الضمان المصعدة لـ "${serviceNameAr}" من قبل الإدارة. الحل: ${resolutionText}`;
+    const bodyUr = `آپ کے "${serviceNameUr}" کے لیے وارنٹی کے مسئلے کو ہمارے ایڈمن نے حل کر دیا ہے۔ حل: ${resolutionText}`;
+
+    await sendAndStoreNotification({
+      targetRole: "customer",
+      targetId: customer.uid,
+      titleEn: titleEn,
+      titleAr: titleAr,
+      titleUr: titleUr,
+      bodyEn: bodyEn,
+      bodyAr: bodyAr,
+      bodyUr: bodyUr,
+      data: {
+        targetRole: "customer",
+        category: "warranty_resolution",
+        bookingId: bookingId,
+        isWarranty: "true",
+      },
+      fcmToken: customer.fcmToken || "",
+      lanCode: customer.lanCode || "en",
+    });
+
+    console.log(`✅ Resolution notification sent to customer for booking ${bookingId}`);
 
     return null;
   }
@@ -3388,18 +3512,10 @@ exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
       return;
     }
 
-    // Skip if there was already a technician assigned before (should be null/undefined)
-    if (beforeTechnicianId != null) {
+    // Skip if the status is not S
+    if (afterStatusCode !== "S") {
       console.log(
-        `[${bookingId}] Skipping warranty notification - technician reassignment (was ${beforeTechnicianId}, now ${afterTechnicianId})`
-      );
-      return;
-    }
-
-    // Skip if status didn't change from R to S
-    if (beforeStatusCode !== "R" || afterStatusCode !== "S") {
-      console.log(
-        `[${bookingId}] Skipping warranty notification - status not R→S (was ${beforeStatusCode}, now ${afterStatusCode})`
+        `[${bookingId}] Skipping warranty notification - status is not S (current: ${afterStatusCode})`
       );
       return;
     }

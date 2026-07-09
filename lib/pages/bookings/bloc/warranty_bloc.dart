@@ -55,7 +55,8 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       emit(WarrantyRejectLoading());
 
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
-        'warranty.assignedTechnician': null,
+        'warranty.assignedTechnician': FieldValue.delete(),
+        'warranty.assignedTechnicianId': FieldValue.delete(),
         'warranty.warrantyStatusCode': 'X',
         'warranty.availability': false,
         'warranty.rejectedAt': Timestamp.now(),
@@ -107,8 +108,8 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       if (isWarrantyExpired) {
         // Warranty has expired — close the claim
         await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
-          'warranty.assignedTechnician': null,
-          'warranty.assignedTechnicianId': '',
+          'warranty.assignedTechnician': FieldValue.delete(),
+          'warranty.assignedTechnicianId': FieldValue.delete(),
           'warranty.warrantyStatusCode': 'E',
           'warranty.availability': false,
           'warranty.rejectedTechnicians': rejectedTechsList,
@@ -122,8 +123,8 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
 
       // Warranty is still valid — set back to Requested for admin
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
-        'warranty.assignedTechnician': null,
-        'warranty.assignedTechnicianId': '',
+        'warranty.assignedTechnician': FieldValue.delete(),
+        'warranty.assignedTechnicianId': FieldValue.delete(),
         'warranty.warrantyStatusCode': 'R',
         'warranty.availability': true,
         'warranty.rejectedTechnicians': rejectedTechsList,
@@ -218,6 +219,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         'warranty.warrantyStatusCode': 'S',
         'warranty.availability': false,
         'warranty.acceptedAt': Timestamp.now(),
+        'warranty.rejectedAt': FieldValue.delete(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
         // Clear any old chatroom to ensure fresh start with new technician

@@ -5169,4 +5169,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get discountAppliesToInspectionFeeOnly =>
       'Discount applies to the inspection fee only.';
+
+  @override
+  String get escalated => 'Escalated';
+
+  @override
+  String get resolveIssue => 'Resolve Issue';
+
+  @override
+  String get whatWasDoneToResolve => 'What was done to resolve the issue?';
+
+  @override
+  String get resolutionTextRequired => 'Resolution text is required';
 }

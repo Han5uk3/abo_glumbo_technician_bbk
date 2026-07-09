@@ -894,6 +894,68 @@ class _BookingInfoState extends State<BookingInfo> {
     return names[0][0].toUpperCase();
   }
 
+  void _showResolveDialog(BuildContext context, BookingModel currentBooking) {
+    final TextEditingController textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Text(AppLocalizations.of(context)?.resolveIssue ?? 'Resolve Issue'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(AppLocalizations.of(context)?.whatWasDoneToResolve ?? 'What was done to resolve the issue?'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: textController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  hintText: '...',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () async {
+                if (textController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)?.resolutionTextRequired ?? 'Resolution text is required')),
+                  );
+                  return;
+                }
+                
+                try {
+                  await AppFirestore.bookingsCollectionRef.doc(currentBooking.id).update({
+                    'isEscalated': false,
+                    'resolutionText': textController.text.trim(),
+                    'resolvedAt': FieldValue.serverTimestamp(),
+                    'warranty.updatedAt': FieldValue.serverTimestamp(),
+                  });
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                } catch (e) {
+                  log('Error resolving: $e');
+                }
+              },
+              child: Text(AppLocalizations.of(context)?.submit ?? 'Submit', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -1019,7 +1081,10 @@ class _BookingInfoState extends State<BookingInfo> {
     );
 
     // Tab 3: TECHNICIAN (Only for admin)
-    if (widget.isAdmin && widget.booking.agent != null) {
+    final activeAgentForTab = widget.isWarranty
+        ? widget.booking.warranty?.assignedTechnician
+        : widget.booking.agent;
+    if (widget.isAdmin && activeAgentForTab != null) {
       tabs.add(Tab(text: AppLocalizations.of(context)!.technician));
       tabViews.add(
         SingleChildScrollView(
@@ -1383,6 +1448,32 @@ class _BookingInfoState extends State<BookingInfo> {
                                 }
                                 return const SizedBox.shrink();
                               },
+                            ),
+                          ],
+
+                          // Admin resolve escalated booking
+                          if (widget.isAdmin && currentBooking.isEscalated == true) ...[
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () => _showResolveDialog(context, currentBooking),
+                                child: Text(
+                                  AppLocalizations.of(context)?.resolveIssue ?? 'Resolve Issue',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ],

@@ -5191,4 +5191,16 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get discountAppliesToInspectionFeeOnly =>
       'رعایت صرف معائنہ کی فیس پر لاگو ہوتی ہے۔';
+
+  @override
+  String get escalated => 'مسئلہ بڑھا دیا گیا';
+
+  @override
+  String get resolveIssue => 'مسئلہ حل کریں';
+
+  @override
+  String get whatWasDoneToResolve => 'مسئلے کو حل کرنے کے لیے کیا کیا گیا؟';
+
+  @override
+  String get resolutionTextRequired => 'حل کی تفصیل درکار ہے';
 }

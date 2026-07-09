@@ -1835,5 +1835,10 @@
   "noAdditionalDescription": "کوئی اضافی تفصیل نہیں",
   "distance": "فاصلہ",
   "discountAmount": "رعایتی رقم",
-  "discountAppliesToInspectionFeeOnly": "رعایت صرف معائنہ کی فیس پر لاگو ہوتی ہے۔"
+  "discountAppliesToInspectionFeeOnly": "رعایت صرف معائنہ کی فیس پر لاگو ہوتی ہے۔",
+  "escalated": "مسئلہ بڑھا دیا گیا",
+  "resolveIssue": "مسئلہ حل کریں",
+  "whatWasDoneToResolve": "مسئلے کو حل کرنے کے لیے کیا کیا گیا؟",
+  "resolutionTextRequired": "حل کی تفصیل درکار ہے",
+  "submit": "جمع کرائیں"
 }

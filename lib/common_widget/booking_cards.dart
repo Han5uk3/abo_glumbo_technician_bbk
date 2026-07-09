@@ -173,6 +173,27 @@ class BookingListTileWidget extends StatelessWidget {
                                   color: Colors.grey[500],
                                 ),
                               ),
+                              if (booking.isEscalated == true) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)?.escalated.toUpperCase() ?? 'ESCALATED',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
                               if (isWarranty) ...[
                                 const SizedBox(width: 8),
                                 Container(

@@ -9658,6 +9658,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discount applies to the inspection fee only.'**
   String get discountAppliesToInspectionFeeOnly;
+
+  /// No description provided for @escalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated'**
+  String get escalated;
+
+  /// No description provided for @resolveIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Issue'**
+  String get resolveIssue;
+
+  /// No description provided for @whatWasDoneToResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'What was done to resolve the issue?'**
+  String get whatWasDoneToResolve;
+
+  /// No description provided for @resolutionTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution text is required'**
+  String get resolutionTextRequired;
 }
 
 class _AppLocalizationsDelegate

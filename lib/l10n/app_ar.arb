@@ -1835,5 +1835,10 @@
   "noAdditionalDescription": "لا يوجد وصف إضافي",
   "distance": "المسافة",
   "discountAmount": "مبلغ الخصم",
-  "discountAppliesToInspectionFeeOnly": "الخصم يطبق على رسوم الفحص فقط."
+  "discountAppliesToInspectionFeeOnly": "الخصم يطبق على رسوم الفحص فقط.",
+  "escalated": "تم التصعيد",
+  "resolveIssue": "حل المشكلة",
+  "whatWasDoneToResolve": "ما الذي تم فعله لحل المشكلة؟",
+  "resolutionTextRequired": "نص الحل مطلوب",
+  "submit": "إرسال"
 }

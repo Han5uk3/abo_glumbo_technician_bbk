@@ -1845,9 +1845,7 @@
   "pleaseEnterUrduName": "يرجى إدخال الاسم بالأردية",
   "pleaseEnterUrduNameOnly": "يرجى إدخال الاسم بالأردية فقط",
   "searchForZones": "البحث عن المناطق",
-  "failedToSearchForZones": "فشل البحث عن المناطق. يرجى المحاولة مرة أخرى."
-,
-  "zoneNameAlreadyExists": "??? ??????? ????? ??????"
-,
-  "zoneType": "??? ???????"
+  "failedToSearchForZones": "فشل البحث عن المناطق. يرجى المحاولة مرة أخرى.",
+  "zoneNameAlreadyExists": "اسم المنطقة موجود بالفعل",
+  "zoneType": "نوع المنطقة"
 }

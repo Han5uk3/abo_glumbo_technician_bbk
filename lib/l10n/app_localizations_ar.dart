@@ -5132,8 +5132,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'فشل البحث عن المناطق. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get zoneNameAlreadyExists => '??? ??????? ????? ??????';
+  String get zoneNameAlreadyExists => 'اسم المنطقة موجود بالفعل';
 
   @override
-  String get zoneType => '??? ???????';
+  String get zoneType => 'نوع المنطقة';
 }

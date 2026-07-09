@@ -1847,7 +1847,7 @@
   "searchForZones": "علاقوں کے لیے تلاش کریں",
   "failedToSearchForZones": "علاقوں کی تلاش میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
 ,
-  "zoneNameAlreadyExists": "????? ?? ??? ???? ?? ????? ??"
+  "zoneNameAlreadyExists": "زون کا نام پہلے سے موجود ہے"
 ,
-  "zoneType": "??? ?? ???"
+  "zoneType": "زون کی قسم"
 }

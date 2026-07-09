@@ -5224,8 +5224,8 @@ class AppLocalizationsUr extends AppLocalizations {
       'علاقوں کی تلاش میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔';
 
   @override
-  String get zoneNameAlreadyExists => '????? ?? ??? ???? ?? ????? ??';
+  String get zoneNameAlreadyExists => 'زون کا نام پہلے سے موجود ہے';
 
   @override
-  String get zoneType => '??? ?? ???';
+  String get zoneType => 'زون کی قسم';
 }

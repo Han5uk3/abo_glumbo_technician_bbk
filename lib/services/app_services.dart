@@ -3004,6 +3004,7 @@ class AppServices {
     if (bookingId == null) throw Exception('No booking or request ID provided');
 
     final bookingRef = AppFirestore.bookingsCollectionRef.doc(bookingId);
+    bool wasAutoAssigned = false;
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final bookingSnapshot = await transaction.get(bookingRef);
@@ -3033,6 +3034,7 @@ class AppServices {
       final bool isAutoAssignment = bookingData['autoAssignmentStatus'] != null;
 
       if (isAutoAssignment) {
+        wasAutoAssigned = true;
         // Auto-assignment booking: Assign technician immediately
         transaction.update(bookingRef, {
           'bookingStatusCode': 'A',
@@ -3050,6 +3052,21 @@ class AppServices {
           'status': 'accepted',
           'acceptedAt': FieldValue.serverTimestamp(),
         });
+
+        // Also update the auto-assignment request status
+        final autoReqRef = AppFirestore.autoAssignmentRequestsCollectionRef.doc(
+          bookingId,
+        );
+        transaction.update(autoReqRef, {
+          'status': 'A',
+          'agent': {
+            'uid': technician.uid,
+            'name': technician.name,
+            'phone': technician.phone,
+            'profileUrl': technician.profileUrl,
+          },
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
       } else {
         // Not an auto-assignment booking: Just record acceptance
         transaction.update(offerRef, {
@@ -3058,6 +3075,34 @@ class AppServices {
         });
       }
     });
+
+    if (wasAutoAssigned) {
+      // Clean up lingering job offers for this booking
+      try {
+        final snapshot = await AppFirestore.jobOffersCollectionRef
+            .where('bookingId', isEqualTo: bookingId)
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          final batch = FirebaseFirestore.instance.batch();
+          int deletedCount = 0;
+          for (var doc in snapshot.docs) {
+            if (doc.id != offerId) {
+              batch.delete(doc.reference);
+              deletedCount++;
+            }
+          }
+          if (deletedCount > 0) {
+            await batch.commit();
+            debugPrint(
+              'Cleaned up $deletedCount lingering job offers for booking $bookingId',
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('Error cleaning up lingering job offers: $e');
+      }
+    }
 
     try {
       final bookingDoc = await AppFirestore.bookingsCollectionRef

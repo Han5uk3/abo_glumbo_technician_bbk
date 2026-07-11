@@ -343,6 +343,9 @@ class _AccountPageState extends State<AccountPage> {
         child: FittedBox(
           fit: BoxFit.fill,
           child: Switch(
+            activeThumbColor: Colors.white,
+            activeTrackColor: AppColors.primary,
+            inactiveTrackColor: Colors.grey.shade300,
             value: _isBiometricEnabled,
             onChanged: _handleBiometricToggle,
           ),

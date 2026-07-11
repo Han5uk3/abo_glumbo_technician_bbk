@@ -162,11 +162,6 @@ class _LanguageOptionTile extends StatelessWidget {
                               : AppColors.black1,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        languageName,
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
                     ],
                   ),
                 ),

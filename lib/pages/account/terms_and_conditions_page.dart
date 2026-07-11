@@ -130,9 +130,12 @@ class TermsAndConditionsPage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 3),
-        RichText(
-          text: TextSpan(
-            style: TextStyle(color: Colors.black, fontSize: 14),
+        Text.rich(
+          TextSpan(
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+            ),
             children: [
               TextSpan(text: part1),
               TextSpan(

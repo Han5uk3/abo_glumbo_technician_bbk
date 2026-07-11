@@ -4169,8 +4169,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Payment and Final Cost: The total cost of the service is agreed upon directly with the Technician after inspection, and must be approved via the Application before work commences. You are responsible for paying the agreed-upon amount in full.';
 
   @override
-  String get terms4p1 =>
-      'Warranty (Guarantee): Completed work is subject to the Platform\'s';
+  String get terms4p1 => 'Completed work is subject to the Platform\'s';
 
   @override
   String get warrantyPolicy => 'Warranty Policy';

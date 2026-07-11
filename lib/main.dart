@@ -280,6 +280,9 @@ class MyApp extends StatelessWidget {
                     ),
                     titleSpacing: 0,
                     titleTextStyle: TextStyle(
+                      fontFamily: state.locale.languageCode == 'ar'
+                          ? GoogleFonts.notoKufiArabic().fontFamily
+                          : 'DMSans',
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.normal,

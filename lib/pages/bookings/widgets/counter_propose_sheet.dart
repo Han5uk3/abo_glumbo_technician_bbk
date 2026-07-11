@@ -71,9 +71,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: widget.currentBookingTime.isAfter(DateTime.now())
-          ? widget.currentBookingTime
-          : DateTime.now().add(const Duration(days: 30)),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -153,8 +151,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                         _selectedTime?.hour == slot.hour &&
                         _selectedTime?.minute == slot.minute;
 
-                    // Check if slot is valid (after now and before original booking time)
-                    final bookingDate = widget.currentBookingTime;
+                    // Check if slot is valid (after now)
                     final now = DateTime.now();
                     final selectedSlotDateTime = DateTime(
                       _selectedDate!.year,
@@ -164,9 +161,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                       slot.minute,
                     );
 
-                    final isValid =
-                        selectedSlotDateTime.isAfter(now) &&
-                        selectedSlotDateTime.isBefore(bookingDate);
+                    final isValid = selectedSlotDateTime.isAfter(now);
 
                     return InkWell(
                       onTap: isValid
@@ -228,16 +223,12 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       _selectedTime!.minute,
     );
 
-    final originalDateTime = widget.currentBookingTime;
     final now = DateTime.now();
 
-    if (!selectedDateTime.isAfter(now) ||
-        !selectedDateTime.isBefore(originalDateTime)) {
+    if (!selectedDateTime.isAfter(now)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            'Please select a valid time between now and original booking time',
-          ),
+          content: Text('Please select a valid future time'),
           backgroundColor: Colors.red,
         ),
       );

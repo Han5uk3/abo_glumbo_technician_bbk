@@ -224,9 +224,9 @@ class _WarrantyPageState extends State<WarrantyPage>
                   final status = _warrantyStatuses[index];
                   final isSelected = _tabController.index == index;
                   return Padding(
-                    padding: EdgeInsets.only(
-                      left: index == 0 ? 12 : 0,
-                      right: index < _warrantyStatuses.length - 1 ? 8 : 12,
+                    padding: EdgeInsetsDirectional.only(
+                      start: index == 0 ? 12 : 0,
+                      end: index < _warrantyStatuses.length - 1 ? 8 : 12,
                     ),
                     child: _buildStatusChip(
                       context,

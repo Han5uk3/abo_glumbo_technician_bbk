@@ -414,9 +414,9 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                         final status = bookingStatus[index];
                         final isSelected = _tabController.index == index;
                         return Padding(
-                          padding: EdgeInsets.only(
-                            left: index == 0 ? 12 : 0,
-                            right: index < bookingStatus.length - 1 ? 8 : 12,
+                          padding: EdgeInsetsDirectional.only(
+                            start: index == 0 ? 12 : 0,
+                            end: index < bookingStatus.length - 1 ? 8 : 12,
                           ),
                           child: _buildStatusChip(
                             context,

@@ -1373,7 +1373,7 @@
   "terms1": "Responsibility for the Request: You are committed to providing an accurate and sufficient description of the issue (text, photo, video) and the service location to enable the Technician to respond.",
   "terms2": "Inspection Fees: You are responsible for paying the determined inspection/call-out fees (if applicable) immediately upon the Technician accepting the request and proceeding to the location. These fees are generally non-refundable.",
   "terms3": "Payment and Final Cost: The total cost of the service is agreed upon directly with the Technician after inspection, and must be approved via the Application before work commences. You are responsible for paying the agreed-upon amount in full.",
-  "terms4p1": "Warranty (Guarantee): Completed work is subject to the Platform's",
+  "terms4p1": "Completed work is subject to the Platform's",
   "warrantyPolicy": "Warranty Policy",
   "terms4p2": "the full details of which can be reviewed via the dedicated link.",
   "terms5": "You have the right to rate the Technician's performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.",
@@ -1860,9 +1860,7 @@
   "pleaseEnterUrduName": "Please enter Urdu name",
   "pleaseEnterUrduNameOnly": "Please enter Urdu name only",
   "searchForZones": "Search for zones",
-  "failedToSearchForZones": "Failed to search for zones. Please try again."
-,
-  "zoneNameAlreadyExists": "Zone name already exists"
-,
+  "failedToSearchForZones": "Failed to search for zones. Please try again.",
+  "zoneNameAlreadyExists": "Zone name already exists",
   "zoneType": "Zone Type"
 }

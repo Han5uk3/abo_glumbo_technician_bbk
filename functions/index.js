@@ -4971,7 +4971,9 @@ exports.processAutoAssignments = onSchedule(
           continue;
         }
 
-        if (request.bookingDateTime) {
+        if (request.type === "instant") {
+          // Always process instant bookings (broadcasting again to new techs)
+        } else if (request.bookingDateTime) {
           const bookingDate = request.bookingDateTime.toDate();
           if (bookingDate > threeHoursFromNow) {
             continue; // Not within 3 hours yet
@@ -5094,6 +5096,8 @@ exports.processAutoAssignments = onSchedule(
 
         if (eligibleTechs.length > 0 || shouldSendCustomerNotification) {
           const batch = db.batch();
+          const expiresAtDate = new Date(Date.now() + 120 * 1000);
+          const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
 
           for (const tech of eligibleTechs) {
             const offerId = db.collection("job_offers").doc().id;
@@ -5105,7 +5109,7 @@ exports.processAutoAssignments = onSchedule(
               technicianId: tech.uid,
               status: "pending",
               createdAt: FieldValue.serverTimestamp(),
-              expiresAt: request.bookingDateTime,
+              expiresAt: expiresAtTimestamp,
               customerName: request.customer?.name || "Customer",
               serviceLocation: {
                 fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
@@ -5270,6 +5274,8 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       }
 
       const batch = db.batch();
+      const expiresAtDate = new Date(Date.now() + 120 * 1000);
+      const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
 
       for (const tech of eligibleTechs) {
         const offerId = db.collection("job_offers").doc().id;
@@ -5281,7 +5287,7 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
           technicianId: tech.uid,
           status: "pending",
           createdAt: FieldValue.serverTimestamp(),
-          expiresAt: request.bookingDateTime,
+          expiresAt: expiresAtTimestamp,
           customerName: request.customer?.name || "Customer",
           serviceLocation: {
             fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",

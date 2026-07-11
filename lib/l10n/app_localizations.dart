@@ -7886,7 +7886,7 @@ abstract class AppLocalizations {
   /// No description provided for @terms4p1.
   ///
   /// In en, this message translates to:
-  /// **'Warranty (Guarantee): Completed work is subject to the Platform\'s'**
+  /// **'Completed work is subject to the Platform\'s'**
   String get terms4p1;
 
   /// No description provided for @warrantyPolicy.

@@ -264,6 +264,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 activeColor: Colors.green,
                 activeThumbColor: Colors.white,
                 activeTrackColor: Colors.green,
+                inactiveTrackColor: Colors.grey.shade300,
               ),
             ),
           ],

@@ -111,9 +111,9 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
                   final status = _bookingStatuses[index];
                   final isSelected = _tabController.index == index;
                   return Padding(
-                    padding: EdgeInsets.only(
-                      left: index == 0 ? 12 : 0,
-                      right: index < _bookingStatuses.length - 1 ? 8 : 12,
+                    padding: EdgeInsetsDirectional.only(
+                      start: index == 0 ? 12 : 0,
+                      end: index < _bookingStatuses.length - 1 ? 8 : 12,
                     ),
                     child: _buildStatusChip(
                       context,

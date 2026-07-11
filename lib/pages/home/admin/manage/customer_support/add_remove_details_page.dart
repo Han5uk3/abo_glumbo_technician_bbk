@@ -105,16 +105,15 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
-              appBar: AppBar(
-                title: Text(getAppBarTitles()[widget.index]),
-                actions: [
-                  if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
-                    IconButton(
+              appBar: AppBar(title: Text(getAppBarTitles()[widget.index])),
+              floatingActionButton:
+                  (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
+                  ? FloatingActionButton(
                       onPressed: () {},
-                      icon: Icon(Icons.add, color: Colors.white),
-                    ),
-                ],
-              ),
+                      backgroundColor: AppColors.primary,
+                      child: const Icon(Icons.add, color: Colors.white),
+                    )
+                  : null,
               body: const ManageShimmerLoading(),
             );
           }
@@ -128,24 +127,36 @@ class _AddRemoveDetailsPageState extends State<AddRemoveDetailsPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context)!.noDataAvailable),
+            return Scaffold(
+              appBar: AppBar(title: Text(getAppBarTitles()[widget.index])),
+              floatingActionButton:
+                  (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
+                  ? FloatingActionButton(
+                      onPressed: () {
+                        detailDialog(false, allContacts: []);
+                      },
+                      backgroundColor: AppColors.primary,
+                      child: const Icon(Icons.add, color: Colors.white),
+                    )
+                  : null,
+              body: Center(
+                child: Text(AppLocalizations.of(context)!.noDataAvailable),
+              ),
             );
           }
 
           return Scaffold(
-            appBar: AppBar(
-              title: Text(getAppBarTitles()[widget.index]),
-              actions: [
-                if (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
-                  IconButton(
+            appBar: AppBar(title: Text(getAppBarTitles()[widget.index])),
+            floatingActionButton:
+                (LocalStore.getCachedAdminData()?.hasFullAccess ?? true)
+                ? FloatingActionButton(
                     onPressed: () {
                       detailDialog(false, allContacts: snapshot.data!);
                     },
-                    icon: Icon(Icons.add, color: Colors.white),
-                  ),
-              ],
-            ),
+                    backgroundColor: AppColors.primary,
+                    child: const Icon(Icons.add, color: Colors.white),
+                  )
+                : null,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

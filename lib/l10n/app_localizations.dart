@@ -6706,6 +6706,18 @@ abstract class AppLocalizations {
   /// **'Allowed file types: jpg, jpeg, png, pdf, doc,'**
   String get allowedFileTypes;
 
+  /// No description provided for @uploadFileOrImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload File or Image'**
+  String get uploadFileOrImage;
+
+  /// No description provided for @pendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'PENDING REVIEW'**
+  String get pendingReview;
+
   /// No description provided for @uploadFiles.
   ///
   /// In en, this message translates to:

@@ -925,7 +925,9 @@ class _ManageAgentsState extends State<ManageAgents>
                                     return "REJECTED";
                                   }
                                   if (agent.isDocsPendingReview == true) {
-                                    return "PENDING REVIEW";
+                                    return AppLocalizations.of(
+                                      context,
+                                    )!.pendingReview;
                                   }
                                   return AppLocalizations.of(context)!.pending;
                                 })().toUpperCase(),

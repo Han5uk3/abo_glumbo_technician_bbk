@@ -3490,6 +3490,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allowed file types: jpg, jpeg, png, pdf, doc,';
 
   @override
+  String get uploadFileOrImage => 'Upload File or Image';
+
+  @override
+  String get pendingReview => 'PENDING REVIEW';
+
+  @override
   String get uploadFiles => 'Upload Files';
 
   @override

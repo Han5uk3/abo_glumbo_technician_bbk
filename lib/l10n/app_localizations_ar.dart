@@ -1046,7 +1046,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get jobRoles => 'وظائف العمل';
 
   @override
-  String get document => 'وثيقة';
+  String get document => 'مستند';
 
   @override
   String get jobRolesAreRequired => 'وظائف العمل مطلوبة';
@@ -1471,7 +1471,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completeWork => 'إنهاء العمل';
 
   @override
-  String get gallery => 'معرض الصور';
+  String get gallery => 'الاستوديو';
 
   @override
   String get qty => 'الكمية';
@@ -1917,7 +1917,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noAgentsFound => 'لم يتم العثور على فنيين';
 
   @override
-  String get agentApproved => 'الفني موافق';
+  String get agentApproved => 'تمت الموافقة على الفني';
 
   @override
   String get agentDisapproved => 'الفني غير موافق';
@@ -3434,6 +3434,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get allowedFileTypes =>
       'الملفات المسموح بها: jpg, jpeg, png, pdf, doc,';
+
+  @override
+  String get uploadFileOrImage => 'تحميل ملف أو صورة';
+
+  @override
+  String get pendingReview => 'قيد المراجعة';
 
   @override
   String get uploadFiles => 'تحميل الملفات';

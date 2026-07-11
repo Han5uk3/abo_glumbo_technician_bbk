@@ -251,10 +251,33 @@ class _SignupState extends State<Signup> {
   }
 
   Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return null;
+
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 80,
       );
 
@@ -293,11 +316,56 @@ class _SignupState extends State<Signup> {
   }
 
   Future<PlatformFile?> _pickFile() async {
+    final source = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
+              onTap: () => Navigator.of(context).pop('camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
+              onTap: () => Navigator.of(context).pop('gallery'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder),
+              title: Text(AppLocalizations.of(context)?.document ?? 'Document'),
+              onTap: () => Navigator.of(context).pop('file'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return null;
+
     try {
+      if (source == 'camera' || source == 'gallery') {
+        final ImagePicker picker = ImagePicker();
+        final XFile? image = await picker.pickImage(
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+          imageQuality: 80,
+        );
+        if (image != null) {
+          return PlatformFile(
+            name: image.name,
+            size: await image.length(),
+            path: image.path,
+          );
+        }
+        return null;
+      }
+
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
       );
+
       if (result != null && result.files.isNotEmpty) {
         return result.files.first;
       }
@@ -424,7 +492,7 @@ class _SignupState extends State<Signup> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Upload File or Image',
+                        AppLocalizations.of(context)!.uploadFileOrImage,
                         style: TextStyle(color: Colors.grey[500], fontSize: 13),
                       ),
                     ],

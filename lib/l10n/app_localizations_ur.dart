@@ -3502,6 +3502,12 @@ class AppLocalizationsUr extends AppLocalizations {
       'معاون فائل کی اقسام: jpg, jpeg, png, pdf, doc';
 
   @override
+  String get uploadFileOrImage => 'Upload File or Image';
+
+  @override
+  String get pendingReview => 'PENDING REVIEW';
+
+  @override
   String get uploadFiles => 'فائلیں اپ لوڈ کریں';
 
   @override

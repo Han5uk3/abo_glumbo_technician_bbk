@@ -1280,21 +1280,6 @@ class AppServices {
           'mode': mode,
           'inspectionFee': inspectionFee,
         },
-
-        if (mode == 1) ...{
-          'warranty': {
-            'id': bookingId,
-            'claimrequested': false,
-            'warrantyStatusCode': 'A',
-            'assignedTechnicianId': technicianId,
-            'createdAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-            'expiredOn': Timestamp.fromDate(
-              DateTime.now().add(const Duration(days: 7)),
-            ),
-            'rejectedTechnicians': [],
-          },
-        },
       });
       return true;
     } catch (e) {

@@ -1419,6 +1419,7 @@
   "rejectionReason": "Rejection Reason",
   "enterTransactionId": "Enter Transaction ID",
   "uploadPaymentProof": "Upload Payment Proof",
+  "paymentProof": "Payment Proof",
   "proofUploaded": "Proof uploaded successfully",
   "enterReason": "Enter reason",
   "cancelPayoutConfirmation": "Are you sure you want to cancel this payout request?",
@@ -1841,6 +1842,15 @@
   "distance": "Distance",
   "discountAmount": "Discount Amount",
   "discountAppliesToInspectionFeeOnly": "Discount applies to the inspection fee only.",
+  "discountApplied": "{percentageamount}% discount",
+  "@discountApplied": {
+    "placeholders": {
+      "percentageamount": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "escalated": "Escalated",
   "resolveIssue": "Resolve Issue",
   "whatWasDoneToResolve": "What was done to resolve the issue?",

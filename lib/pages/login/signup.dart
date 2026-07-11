@@ -252,20 +252,47 @@ class _SignupState extends State<Signup> {
 
   Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
     final source = await showModalBottomSheet<ImageSource>(
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.of(context).size.height * 0.3,
+        maxHeight: MediaQuery.of(context).size.height * 0.5,
+      ),
+      backgroundColor: Colors.white,
+      showDragHandle: true,
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                child: ListTile(
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.camera_alt),
+                  title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                child: ListTile(
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.photo_library),
+                  title: Text(
+                    AppLocalizations.of(context)?.gallery ?? 'Gallery',
+                  ),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                ),
+              ),
             ),
           ],
         ),

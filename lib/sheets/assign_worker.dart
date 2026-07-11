@@ -433,6 +433,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           filteredUsers = users.where((u) => u.uid != assignedUid).toList();
         }
 
+        // Hide technicians who are not available to work
+        filteredUsers = filteredUsers.where((u) => u.isOnline != false).toList();
+
         if (_selectedZoneIds.isEmpty) return filteredUsers;
 
         final selectedPolygons = _availableZones

@@ -1414,6 +1414,7 @@
   "rejectionReason": "مسترد کرنے کی وجہ",
   "enterTransactionId": "ٹرانزیکشن آئی ڈی درج کریں",
   "uploadPaymentProof": "ادائیگی کا ثبوت اپ لوڈ کریں",
+  "paymentProof": "ادائیگی کا ثبوت",
   "proofUploaded": "ثبوت کامیابی سے اپ لوڈ ہو گیا",
   "enterReason": "وجہ درج کریں",
   "cancelPayoutConfirmation": "کیا آپ واقعی اس ادائیگی کی درخواست کو منسوخ کرنا چاہتے ہیں؟",
@@ -1836,6 +1837,15 @@
   "distance": "فاصلہ",
   "discountAmount": "رعایتی رقم",
   "discountAppliesToInspectionFeeOnly": "رعایت صرف معائنہ کی فیس پر لاگو ہوتی ہے۔",
+  "discountApplied": "{percentageamount}% رعایت",
+  "@discountApplied": {
+    "placeholders": {
+      "percentageamount": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "escalated": "مسئلہ بڑھا دیا گیا",
   "resolveIssue": "مسئلہ حل کریں",
   "whatWasDoneToResolve": "مسئلے کو حل کرنے کے لیے کیا کیا گیا؟",

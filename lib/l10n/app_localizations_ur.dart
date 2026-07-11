@@ -4326,6 +4326,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get uploadPaymentProof => 'ادائیگی کا ثبوت اپ لوڈ کریں';
 
   @override
+  String get paymentProof => 'ادائیگی کا ثبوت';
+
+  @override
   String get proofUploaded => 'ثبوت کامیابی سے اپ لوڈ ہو گیا';
 
   @override
@@ -5197,6 +5200,17 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get discountAppliesToInspectionFeeOnly =>
       'رعایت صرف معائنہ کی فیس پر لاگو ہوتی ہے۔';
+
+  @override
+  String discountApplied(num percentageamount) {
+    final intl.NumberFormat percentageamountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String percentageamountString = percentageamountNumberFormat.format(
+      percentageamount,
+    );
+
+    return '$percentageamountString% رعایت';
+  }
 
   @override
   String get escalated => 'مسئلہ بڑھا دیا گیا';

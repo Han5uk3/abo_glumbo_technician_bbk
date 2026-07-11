@@ -4315,6 +4315,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadPaymentProof => 'Upload Payment Proof';
 
   @override
+  String get paymentProof => 'Payment Proof';
+
+  @override
   String get proofUploaded => 'Proof uploaded successfully';
 
   @override
@@ -5175,6 +5178,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get discountAppliesToInspectionFeeOnly =>
       'Discount applies to the inspection fee only.';
+
+  @override
+  String discountApplied(num percentageamount) {
+    final intl.NumberFormat percentageamountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String percentageamountString = percentageamountNumberFormat.format(
+      percentageamount,
+    );
+
+    return '$percentageamountString% discount';
+  }
 
   @override
   String get escalated => 'Escalated';

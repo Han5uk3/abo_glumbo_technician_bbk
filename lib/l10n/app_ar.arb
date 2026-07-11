@@ -1419,6 +1419,7 @@
   "rejectionReason": "سبب الرفض",
   "enterTransactionId": "أدخل رقم العملية",
   "uploadPaymentProof": "ارفع إثبات الدفع",
+  "paymentProof": "إثبات الدفع",
   "proofUploaded": "تم رفع الإثبات بنجاح",
   "enterReason": "أدخل السبب",
   "cancelPayoutConfirmation": "هل أنت متأكد أنك تريد إلغاء طلب السحب؟",
@@ -1841,6 +1842,15 @@
   "distance": "المسافة",
   "discountAmount": "مبلغ الخصم",
   "discountAppliesToInspectionFeeOnly": "الخصم يطبق على رسوم الفحص فقط.",
+  "discountApplied": "خصم {percentageamount}%",
+  "@discountApplied": {
+    "placeholders": {
+      "percentageamount": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "escalated": "تم التصعيد",
   "resolveIssue": "حل المشكلة",
   "whatWasDoneToResolve": "ما الذي تم فعله لحل المشكلة؟",

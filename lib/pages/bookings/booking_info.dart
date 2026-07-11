@@ -1508,7 +1508,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  "Payment Proof",
+                  AppLocalizations.of(context)!.paymentProof,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -3157,10 +3157,36 @@ class _BookingInfoState extends State<BookingInfo> {
 
             if (widget.isAdmin) ...{
               GestureDetector(
-                onTap: () => InvoiceService.generateAndShowInvoice(
-                  context,
-                  widget.booking,
-                ),
+                onTap: () async {
+                  bool loaderPopped = false;
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => PopScope(
+                      canPop: false,
+                      child: Center(child: Loader(color: AppColors.primary)),
+                    ),
+                  );
+                  try {
+                    await InvoiceService.generateAndShowInvoice(
+                      context,
+                      widget.booking,
+                      onReady: () {
+                        if (!loaderPopped && context.mounted) {
+                          Navigator.pop(context);
+                          loaderPopped = true;
+                        }
+                      },
+                    );
+                  } catch (e) {
+                    debugPrint('Error showing invoice: $e');
+                  } finally {
+                    if (!loaderPopped && context.mounted) {
+                      Navigator.pop(context);
+                      loaderPopped = true;
+                    }
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -3187,10 +3213,36 @@ class _BookingInfoState extends State<BookingInfo> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => InvoiceService.generateAndShareInvoice(
-                          context,
-                          widget.booking,
-                        ),
+                        onTap: () async {
+                          bool loaderPopped = false;
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const PopScope(
+                              canPop: false,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                          );
+                          try {
+                            await InvoiceService.generateAndShareInvoice(
+                              context,
+                              widget.booking,
+                              onReady: () {
+                                if (!loaderPopped && context.mounted) {
+                                  Navigator.pop(context);
+                                  loaderPopped = true;
+                                }
+                              },
+                            );
+                          } catch (e) {
+                            debugPrint('Error sharing invoice: $e');
+                          } finally {
+                            if (!loaderPopped && context.mounted) {
+                              Navigator.pop(context);
+                              loaderPopped = true;
+                            }
+                          }
+                        },
                         child: const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
                           child: Icon(Icons.share_rounded, size: 18),
@@ -3322,29 +3374,57 @@ class _BookingInfoState extends State<BookingInfo> {
                 textTheme: textTheme,
                 colorScheme: colorScheme,
               ),
-              if (widget.booking.service.discountPercentage != null &&
-                  widget.booking.service.discountPercentage! > 0) ...[
-                const SizedBox(height: 12),
-
-                _buildInfoRow(
-                  context,
-                  label: AppLocalizations.of(context)!.discountAmount,
-                  value:
-                      '${(completionData.serviceCost * (widget.booking.service.discountPercentage! / 100)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                  textTheme: textTheme,
-                  colorScheme: colorScheme,
-                ),
-              ],
             ],
 
             const SizedBox(height: 12),
-            _buildInfoRow(
-              context,
-              label: AppLocalizations.of(context)!.inspectionFee,
-              value:
-                  '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-              textTheme: textTheme,
-              colorScheme: colorScheme,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      AppLocalizations.of(context)!.inspectionFee,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (widget.booking.service.discountPercentage != null &&
+                            widget.booking.service.discountPercentage! > 0)
+                          Text(
+                            '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        if (widget.booking.service.discountPercentage != null &&
+                            widget.booking.service.discountPercentage! > 0)
+                          const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}${widget.booking.service.discountPercentage != null && widget.booking.service.discountPercentage! > 0 ? ' (${AppLocalizations.of(context)!.discountApplied(widget.booking.service.discountPercentage!)})' : ''}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Payment Mode (before total)
@@ -3424,18 +3504,16 @@ class _BookingInfoState extends State<BookingInfo> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.05),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: colorScheme.primary.withOpacity(0.2),
-                  ),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       _getFileIcon(entry.value),
                       size: 20,
-                      color: colorScheme.primary,
+                      color: AppColors.black1,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -3444,18 +3522,14 @@ class _BookingInfoState extends State<BookingInfo> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: colorScheme.primary,
+                          color: AppColors.black1,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(
-                      Icons.open_in_new,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
+                    Icon(Icons.open_in_new, size: 16, color: AppColors.black1),
                   ],
                 ),
               ),

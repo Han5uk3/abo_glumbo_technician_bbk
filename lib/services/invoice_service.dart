@@ -452,9 +452,11 @@ class InvoiceService {
 
   static Future<void> generateAndShowInvoice(
     BuildContext context,
-    BookingModel booking,
-  ) async {
+    BookingModel booking, {
+    VoidCallback? onReady,
+  }) async {
     final bytes = await _getOrGenerateInvoiceBytes(context, booking);
+    if (onReady != null) onReady();
     if (bytes == null) return;
 
     // Show preview/print dialog
@@ -467,9 +469,11 @@ class InvoiceService {
 
   static Future<void> generateAndShareInvoice(
     BuildContext context,
-    BookingModel booking,
-  ) async {
+    BookingModel booking, {
+    VoidCallback? onReady,
+  }) async {
     final bytes = await _getOrGenerateInvoiceBytes(context, booking);
+    if (onReady != null) onReady();
     if (bytes == null) return;
 
     await Printing.sharePdf(

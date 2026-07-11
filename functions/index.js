@@ -943,8 +943,10 @@ exports.onBookingUpdateToTip = onDocumentWritten(
           targetId: agent.uid,
           titleEn: "New Tip Received",
           titleAr: "تم استلام إكرامية جديدة",
+          titleUr: "نئی ٹپ موصول ہوئی",
           bodyEn: `Customer gave you a tip of ${tipAmount} SAR.`,
           bodyAr: `العميل قدّم لك إكرامية بقيمة ${tipAmount} ر.س.`,
+          bodyUr: `صارف نے آپ کو ${tipAmount} SAR کی ٹپ دی ہے۔`,
           data: {
             category: "tip",
             amount: tipAmount.toString(),
@@ -1208,11 +1210,13 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
     const notificationTitle = {
       en: "Tip Payout Processed",
       ar: "تم معالجة سحب الإكرامية",
+      ur: "ٹپ کی ادائیگی کی کارروائی مکمل ہو گئی",
     };
 
     const notificationBody = {
       en: `Your tip payout of ₹${totalTip} has been processed successfully. The amount will be transferred to your account shortly.`,
       ar: `تم معالجة سحب الإكرامية بمبلغ ₹${totalTip} بنجاح. سيتم تحويل المبلغ إلى حسابك قريبًا.`,
+      ur: `آپ کی ₹${totalTip} کی ٹپ کی ادائیگی کامیابی کے ساتھ ہو گئی ہے۔ یہ رقم جلد ہی آپ کے اکاؤنٹ میں منتقل کر دی جائے گی۔`,
     };
 
     const title = notificationTitle[lanCode] || notificationTitle["en"];
@@ -1223,8 +1227,10 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
       targetId: agentId,
       titleEn: notificationTitle["en"],
       titleAr: notificationTitle["ar"],
+      titleUr: notificationTitle["ur"],
       bodyEn: notificationBody["en"],
       bodyAr: notificationBody["ar"],
+      bodyUr: notificationBody["ur"],
       data: {
         targetRole: "technician",
         category: "tip_payout",
@@ -1254,11 +1260,13 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
     const recipientId = data.recipientId;
     const targetRole = data.targetRole || "technician"; // Default to technician for backward compatibility
 
-    // Support both old format (single language) and new format (bilingual)
+    // Support both old format (single language) and new format (bilingual/trilingual)
     const titleEn = data.titleEn || data.title || null;
     const bodyEn = data.bodyEn || data.body || null;
     const titleAr = data.titleAr || null;
     const bodyAr = data.bodyAr || null;
+    const titleUr = data.titleUr || null;
+    const bodyUr = data.bodyUr || null;
 
     if (!recipientId) {
       console.log("Missing recipientId in notification_queue");
@@ -1271,13 +1279,13 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
     }
 
     // Validate at least one language has content
-    if ((!titleEn && !titleAr) || (!bodyEn && !bodyAr)) {
+    if ((!titleEn && !titleAr && !titleUr) || (!bodyEn && !bodyAr && !bodyUr)) {
       console.log(
         "Missing required fields - at least one language must have title and body"
       );
       await snap.ref.update({
         processed: true,
-        error: "Missing content in both languages",
+        error: "Missing content in all languages",
         processedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
       return;
@@ -1327,6 +1335,12 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
         console.log(
           `Sending Arabic notification to ${targetRole} ${recipientId}`
         );
+      } else if (lanCode === "ur" && titleUr && bodyUr) {
+        notificationTitle = titleUr;
+        notificationBody = bodyUr;
+        console.log(
+          `Sending Urdu notification to ${targetRole} ${recipientId}`
+        );
       } else if (titleEn && bodyEn) {
         notificationTitle = titleEn;
         notificationBody = bodyEn;
@@ -1338,6 +1352,12 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
         notificationBody = bodyAr;
         console.log(
           `Sending Arabic notification to ${targetRole} ${recipientId}`
+        );
+      } else if (titleUr && bodyUr) {
+        notificationTitle = titleUr;
+        notificationBody = bodyUr;
+        console.log(
+          `Sending Urdu notification to ${targetRole} ${recipientId}`
         );
       } else {
         throw new Error("No valid notification content available");
@@ -1398,6 +1418,8 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
         bodyEn: bodyEn,
         titleAr: titleAr,
         bodyAr: bodyAr,
+        titleUr: titleUr,
+        bodyUr: bodyUr,
         // Store the sent notification text for history
         sentTitle: notificationTitle,
         sentBody: notificationBody,
@@ -2024,6 +2046,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
     const customerName = afterData.customer?.name || "Customer";
     const serviceName = afterData.service?.name || "Service";
     const serviceNameAr = afterData.service?.name_ar || serviceName;
+    const serviceNameUr = afterData.service?.name_ur || serviceName;
     const workerId = afterWarranty.assignedTechnicianId || afterData.agent?.uid;
 
     // Fetch customer data for notification
@@ -2071,100 +2094,131 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
         customer: {
           en: "Your booking is now covered by warranty. You can request free repair within 7 days if needed.",
           ar: "حجزك الآن مشمول بالضمان. يمكنك طلب الإصلاح المجاني خلال 7 أيام إذا لزم الأمر.",
+          ur: "آپ کی بکنگ اب وارنٹی میں شامل ہے۔ ضرورت پڑنے پر آپ 7 دن کے اندر مفت مرمت کی درخواست کر سکتے ہیں۔",
         },
         admin: {
           en: `Warranty activated for ${serviceName} - Customer: ${customerName}`,
           ar: `تم تفعيل الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `وارنٹی فعال کر دی گئی برائے ${serviceNameUr} - صارف: ${customerName}`,
         },
       },
       repair_requested: {
         customer: {
           en: "Your warranty repair request has been submitted. We will assign a technician soon.",
           ar: "تم تقديم طلب إصلاح الضمان الخاص بك. سنقوم بتعيين فني قريبًا.",
+          ur: "آپ کی وارنٹی مرمت کی درخواست جمع کر دی گئی ہے۔ ہم جلد ہی ایک ٹیکنیشن تفویض کریں گے۔",
         },
         admin: {
           en: `${customerName} requested warranty repair for ${serviceName}`,
           ar: `${customerName} طلب إصلاح الضمان لـ ${serviceNameAr}`,
+          ur: `${customerName} نے ${serviceNameUr} کے لیے وارنٹی مرمت کی درخواست کی ہے`,
         },
         technician: {
           en: `Warranty repair requested for ${serviceName}. Customer: ${customerName}`,
           ar: `تم طلب إصلاح الضمان لـ ${serviceNameAr}. العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی مرمت کی درخواست کی گئی ہے۔ صارف: ${customerName}`,
         },
       },
       warranty_accepted: {
         customer: {
           en: "Your warranty repair request has been accepted. A technician will contact you soon.",
           ar: "تم قبول طلب إصلاح الضمان الخاص بك. سيتصل بك فني قريبًا.",
+          ur: "آپ کی وارنٹی مرمت کی درخواست منظور کر لی گئی ہے۔ ایک ٹیکنیشن جلد ہی آپ سے رابطہ کرے گا۔",
         },
         admin: {
           en: `Warranty repair accepted for ${serviceName} - Customer: ${customerName}`,
           ar: `تم قبول إصلاح الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی مرمت منظور کر لی گئی ہے - صارف: ${customerName}`,
         },
       },
       warranty_tracking_started: {
         customer: {
           en: "The technician is on the way for your warranty repair. You can now track their location.",
           ar: "الفني في الطريق لإصلاح الضمان الخاص بك. يمكنك الآن تتبع موقعه.",
+          ur: "ٹیکنیشن آپ کی وارنٹی مرمت کے لیے راستے میں ہے۔ اب آپ ان کا مقام ٹریک کر سکتے ہیں۔",
         },
         admin: {
           en: `Technician started tracking for warranty repair - ${serviceName}`,
           ar: `بدأ الفني التتبع لإصلاح الضمان - ${serviceNameAr}`,
+          ur: `ٹیکنیشن نے وارنٹی مرمت کے لیے ٹریکنگ شروع کر دی ہے - ${serviceNameUr}`,
         },
       },
       warranty_tracking_stopped: {
         customer: {
           en: "The technician has arrived at your location for warranty repair.",
           ar: "وصل الفني إلى موقعك لإصلاح الضمان.",
+          ur: "ٹیکنیشن وارنٹی مرمت کے لیے آپ کے مقام پر پہنچ گیا ہے۔",
         },
         admin: {
           en: `Technician arrived for warranty repair - ${serviceName}`,
           ar: `وصل الفني لإصلاح الضمان - ${serviceNameAr}`,
+          ur: `ٹیکنیشن وارنٹی مرمت کے لیے پہنچ گیا ہے - ${serviceNameUr}`,
         },
       },
       warranty_completed: {
         customer: {
           en: "Your warranty repair has been completed successfully. Thank you for using our service!",
           ar: "تم إكمال إصلاح الضمان الخاص بك بنجاح. شكرًا لاستخدام خدمتنا!",
+          ur: "آپ کی وارنٹی مرمت کامیابی کے ساتھ مکمل ہو گئی ہے۔ ہماری سروس استعمال کرنے کا شکریہ!",
         },
         admin: {
           en: `Warranty repair completed for ${serviceName} - Customer: ${customerName}`,
           ar: `تم إكمال إصلاح الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی مرمت مکمل ہو گئی ہے - صارف: ${customerName}`,
         },
       },
       warranty_rejected: {
         customer: {
           en: "Your warranty repair request has been rejected by the administrator.",
           ar: "تم رفض طلب إصلاح الضمان الخاص بك من قبل المسؤول.",
+          ur: "آپ کی وارنٹی مرمت کی درخواست ایڈمنسٹریٹر کی طرف سے مسترد کر دی گئی ہے۔",
         },
         admin: {
           en: `Warranty repair rejected for ${serviceName} - Customer: ${customerName}`,
           ar: `تم رفض إصلاح الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی مرمت مسترد کر دی گئی ہے - صارف: ${customerName}`,
         },
       },
       warranty_expired: {
         customer: {
           en: "Your warranty period has expired (7 days). You can no longer request repair under warranty.",
           ar: "انتهت فترة الضمان الخاصة بك (7 أيام). لم يعد بإمكانك طلب الإصلاح بموجب الضمان.",
+          ur: "آپ کی وارنٹی کی مدت ختم ہو چکی ہے (7 دن)۔ اب آپ وارنٹی کے تحت مرمت کی درخواست نہیں کر سکتے۔",
         },
         admin: {
           en: `Warranty expired for ${serviceName} - Customer: ${customerName}`,
           ar: `انتهى الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی ختم ہو گئی ہے - صارف: ${customerName}`,
         },
       },
       technician_rejected: {
         customer: {
-          en: `Technician ${notificationData.rejectedTechnicianName || "has"
-            } declined your warranty repair request. We are assigning another technician.`,
-          ar: `رفض الفني ${notificationData.rejectedTechnicianName || ""
-            } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
+          en: `Technician ${
+            notificationData.rejectedTechnicianName || "has"
+          } declined your warranty repair request. We are assigning another technician.`,
+          ar: `رفض الفني ${
+            notificationData.rejectedTechnicianName || ""
+          } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
+          ur: `ٹیکنیشن ${
+            notificationData.rejectedTechnicianName || "نے"
+          } نے آپ کی وارنٹی مرمت کی درخواست مسترد کر دی ہے۔ ہم ایک اور ٹیکنیشن تفویض کر رہے ہیں۔`,
         },
         admin: {
-          en: `Technician ${notificationData.rejectedTechnicianName || "Unknown"
-            } rejected warranty repair for ${serviceName}. Reason: ${notificationData.rejectionReason || "Not specified"
-            }`,
-          ar: `رفض الفني ${notificationData.rejectedTechnicianName || "غير معروف"
-            } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${notificationData.rejectionReason || "غير محدد"
-            }`,
+          en: `Technician ${
+            notificationData.rejectedTechnicianName || "Unknown"
+          } rejected warranty repair for ${serviceName}. Reason: ${
+            notificationData.rejectionReason || "Not specified"
+          }`,
+          ar: `رفض الفني ${
+            notificationData.rejectedTechnicianName || "غير معروف"
+          } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${
+            notificationData.rejectionReason || "غير محدد"
+          }`,
+          ur: `ٹیکنیشن ${
+            notificationData.rejectedTechnicianName || "نامعلوم"
+          } نے ${serviceNameUr} کے لیے وارنٹی مرمت مسترد کر دی ہے۔ وجہ: ${
+            notificationData.rejectionReason || "غیر متعین"
+          }`,
         },
       },
     };
@@ -2178,12 +2232,16 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
         targetId: customerId,
         titleEn: "Warranty Update",
         titleAr: "تحديث الضمان",
+        titleUr: "وارنٹی اپ ڈیٹ",
         bodyEn:
           statusMessages[status]?.customer?.["en"] ||
           `Your warranty status has been updated`,
         bodyAr:
           statusMessages[status]?.customer?.["ar"] ||
           `تم تحديث حالة الضمان الخاصة بك`,
+        bodyUr:
+          statusMessages[status]?.customer?.["ur"] ||
+          `آپ کی وارنٹی کی صورتحال اپ ڈیٹ کر دی گئی ہے`,
         data: {
           targetRole: "customer",
           category: "warranty",
@@ -2215,12 +2273,16 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
               targetId: workerId,
               titleEn: "Warranty Update",
               titleAr: "تحديث الضمان",
+              titleUr: "وارنٹی اپ ڈیٹ",
               bodyEn:
                 statusMessages[status].technician["en"] ||
                 `Warranty status updated for booking ${bookingId}`,
               bodyAr:
                 statusMessages[status].technician["ar"] ||
                 `تم تحديث حالة الضمان للحجز ${bookingId}`,
+              bodyUr:
+                statusMessages[status].technician["ur"] ||
+                `بکنگ ${bookingId} کے لیے وارنٹی کی صورتحال اپ ڈیٹ کر دی گئی ہے`,
               data: {
                 targetRole: "technician",
                 category: "warranty",
@@ -2250,12 +2312,16 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           targetId: uid,
           titleEn: "Warranty Update",
           titleAr: "تحديث الضمان",
+          titleUr: "وارنٹی اپ ڈیٹ",
           bodyEn:
             statusMessages[status]?.admin?.["en"] ||
             `Warranty status updated for booking ${bookingId}`,
           bodyAr:
             statusMessages[status]?.admin?.["ar"] ||
             `تم تحديث حالة الضمان للحجز ${bookingId}`,
+          bodyUr:
+            statusMessages[status]?.admin?.["ur"] ||
+            `بکنگ ${bookingId} کے لیے وارنٹی کی صورتحال اپ ڈیٹ کر دی گئی ہے`,
           data: {
             targetRole: "admin",
             category: "warranty",
@@ -3351,6 +3417,52 @@ exports.applyMonthlyBonus = onSchedule(
     } catch (error) {
       logger.error("Error calculating bonuses:", error);
       throw error;
+    }
+  }
+);
+
+// ============================================
+// Attach Warranty on Payment Completion
+// Triggers when a booking status changes to C and payment is completed
+// ============================================
+exports.attachWarrantyOnPaymentCompletion = onDocumentUpdated(
+  "bookings/{bookingId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+    const bookingId = event.params.bookingId;
+
+    if (!afterData) return;
+
+    // Check if status just changed to C and payment is completed
+    const wasPaymentCompletedAndC = beforeData.bookingStatusCode === "C" && beforeData.paymentCompleted === true;
+    const isPaymentCompletedAndC = afterData.bookingStatusCode === "C" && afterData.paymentCompleted === true;
+
+    if (!wasPaymentCompletedAndC && isPaymentCompletedAndC) {
+      const mode = afterData.completionData?.mode;
+
+      if (mode === 1 && !afterData.warranty) {
+        const expiredOn = new Date();
+        expiredOn.setDate(expiredOn.getDate() + 7);
+
+        try {
+          await admin.firestore().collection("bookings").doc(bookingId).update({
+            warranty: {
+              id: bookingId,
+              claimrequested: false,
+              warrantyStatusCode: "A",
+              assignedTechnicianId: afterData.agent?.uid || "",
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              expiredOn: admin.firestore.Timestamp.fromDate(expiredOn),
+              rejectedTechnicians: [],
+            }
+          });
+          console.log(`[${bookingId}] Warranty attached after payment completion.`);
+        } catch (error) {
+          console.error(`[${bookingId}] Error attaching warranty:`, error);
+        }
+      }
     }
   }
 );

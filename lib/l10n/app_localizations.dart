@@ -8159,6 +8159,12 @@ abstract class AppLocalizations {
   /// **'Upload Payment Proof'**
   String get uploadPaymentProof;
 
+  /// No description provided for @paymentProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Proof'**
+  String get paymentProof;
+
   /// No description provided for @proofUploaded.
   ///
   /// In en, this message translates to:
@@ -9670,6 +9676,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discount applies to the inspection fee only.'**
   String get discountAppliesToInspectionFeeOnly;
+
+  /// No description provided for @discountApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'{percentageamount}% discount'**
+  String discountApplied(num percentageamount);
 
   /// No description provided for @escalated.
   ///

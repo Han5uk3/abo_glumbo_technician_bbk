@@ -254,7 +254,7 @@ class BookingListTileWidget extends StatelessWidget {
                                     booking.service.getDiscountedPrice(
                                       booking.effectiveInspectionFee,
                                     ))
-                                .toStringAsFixed(1),
+                                .toStringAsFixed(2),
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,

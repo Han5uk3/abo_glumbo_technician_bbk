@@ -971,7 +971,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            amount.toStringAsFixed(0),
+            amount.toStringAsFixed(2),
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,

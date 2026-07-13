@@ -207,7 +207,7 @@ class _RewardsPageState extends State<RewardsPage> {
                     Expanded(
                       child: _buildCompactVerticalStat(
                         Icons.card_giftcard_rounded,
-                        bonusAmount.toStringAsFixed(1),
+                        bonusAmount.toStringAsFixed(2),
                         l10n.bonus,
                         const Color(0xFF00C853),
                         const Color(0xFFE8F5E9),

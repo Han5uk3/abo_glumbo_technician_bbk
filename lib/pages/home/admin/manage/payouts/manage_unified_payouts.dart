@@ -692,7 +692,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
           ),
           const SizedBox(height: 2),
           Text(
-            amount.toStringAsFixed(0),
+            amount.toStringAsFixed(2),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

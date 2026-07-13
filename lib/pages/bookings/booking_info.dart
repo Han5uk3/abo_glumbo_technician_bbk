@@ -27,7 +27,6 @@ import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:collection/collection.dart';
 import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
@@ -3125,325 +3124,337 @@ class _BookingInfoState extends State<BookingInfo> {
               ],
             ),
             const SizedBox(height: 12),
-            if (widget.booking.paymentCompleted &&
-                ((widget.booking.transactionId != null &&
-                        widget.booking.transactionId!.isNotEmpty) ||
-                    (widget.booking.orderId != null &&
-                        widget.booking.orderId!.isNotEmpty))) ...[
+            if (widget.isAdmin) ...[
+              if (widget.booking.paymentCompleted &&
+                  ((widget.booking.transactionId != null &&
+                          widget.booking.transactionId!.isNotEmpty) ||
+                      (widget.booking.orderId != null &&
+                          widget.booking.orderId!.isNotEmpty))) ...[
+                _buildInfoRow(
+                  context,
+                  label: AppLocalizations.of(context)!.transactionId,
+                  value:
+                      (widget.booking.transactionId?.isNotEmpty == true
+                          ? widget.booking.transactionId
+                          : widget.booking.orderId) ??
+                      "",
+                  textTheme: textTheme,
+                  colorScheme: colorScheme,
+                  needCopyButton: true,
+                ),
+                const SizedBox(height: 16),
+              ],
+
               _buildInfoRow(
                 context,
-                label: AppLocalizations.of(context)!.transactionId,
-                value:
-                    (widget.booking.transactionId?.isNotEmpty == true
-                        ? widget.booking.transactionId
-                        : widget.booking.orderId) ??
-                    "",
+                label: AppLocalizations.of(context)!.invoiceType,
+                value: completionData.mode == 0
+                    ? AppLocalizations.of(context)!.inspection
+                    : AppLocalizations.of(context)!.fullService,
                 textTheme: textTheme,
                 colorScheme: colorScheme,
-                needCopyButton: true,
               ),
-              const SizedBox(height: 16),
-            ],
 
-            _buildInfoRow(
-              context,
-              label: AppLocalizations.of(context)!.invoiceType,
-              value: completionData.mode == 0
-                  ? AppLocalizations.of(context)!.inspection
-                  : AppLocalizations.of(context)!.fullService,
-              textTheme: textTheme,
-              colorScheme: colorScheme,
-            ),
-
-            if (widget.isAdmin) ...{
-              GestureDetector(
-                onTap: () async {
-                  bool loaderPopped = false;
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => PopScope(
-                      canPop: false,
-                      child: Center(child: Loader(color: AppColors.primary)),
-                    ),
-                  );
-                  try {
-                    await InvoiceService.generateAndShowInvoice(
-                      context,
-                      widget.booking,
-                      onReady: () {
-                        if (!loaderPopped && context.mounted) {
-                          Navigator.pop(context);
-                          loaderPopped = true;
-                        }
-                      },
+              if (widget.isAdmin) ...{
+                GestureDetector(
+                  onTap: () async {
+                    bool loaderPopped = false;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => PopScope(
+                        canPop: false,
+                        child: Center(child: Loader(color: AppColors.primary)),
+                      ),
                     );
-                  } catch (e) {
-                    debugPrint('Error showing invoice: $e');
-                  } finally {
-                    if (!loaderPopped && context.mounted) {
-                      Navigator.pop(context);
-                      loaderPopped = true;
-                    }
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.picture_as_pdf_rounded,
-                        size: 20,
-                        color: Colors.red.shade400,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.booking.newBookingId ?? "",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          bool loaderPopped = false;
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => const PopScope(
-                              canPop: false,
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                          );
-                          try {
-                            await InvoiceService.generateAndShareInvoice(
-                              context,
-                              widget.booking,
-                              onReady: () {
-                                if (!loaderPopped && context.mounted) {
-                                  Navigator.pop(context);
-                                  loaderPopped = true;
-                                }
-                              },
-                            );
-                          } catch (e) {
-                            debugPrint('Error sharing invoice: $e');
-                          } finally {
-                            if (!loaderPopped && context.mounted) {
-                              Navigator.pop(context);
-                              loaderPopped = true;
-                            }
+                    try {
+                      await InvoiceService.generateAndShowInvoice(
+                        context,
+                        widget.booking,
+                        onReady: () {
+                          if (!loaderPopped && context.mounted) {
+                            Navigator.pop(context);
+                            loaderPopped = true;
                           }
                         },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Icon(Icons.share_rounded, size: 18),
-                        ),
-                      ),
-                      const Icon(Icons.open_in_new, size: 16),
-                    ],
-                  ),
-                ),
-              ),
-            },
-
-            // Upload Files
-            if (completionData.fileUrls.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context)!.uploadFilesTitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ..._buildFileLinks(context, completionData.fileUrls, colorScheme),
-            ],
-
-            // Service Items
-            if (completionData.serviceItems.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context)!.serviceItems,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: colorScheme.outline.withOpacity(0.1),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: completionData.serviceItems
-                        .asMap()
-                        .entries
-                        .map(
-                          (entry) => Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    flex: 12,
-                                    child: Text(
-                                      entry.value.name,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      'x${entry.value.quantity.toInt()}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: colorScheme.onSurface
-                                            .withOpacity(0.7),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      '${entry.value.price.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.green,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (entry.key !=
-                                  completionData.serviceItems.length - 1)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  child: Divider(
-                                    color: colorScheme.outline.withOpacity(0.2),
-                                    height: 1,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ),
-            ],
-
-            // Service Cost
-            if (completionData.serviceCost > 0) ...[
-              const SizedBox(height: 12),
-              _buildInfoRow(
-                context,
-                label: AppLocalizations.of(context)!.serviceCost,
-                value:
-                    '${completionData.serviceCost.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                textTheme: textTheme,
-                colorScheme: colorScheme,
-              ),
-            ],
-
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    child: Text(
-                      AppLocalizations.of(context)!.inspectionFee,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
-                      ),
+                      );
+                    } catch (e) {
+                      debugPrint('Error showing invoice: $e');
+                    } finally {
+                      if (!loaderPopped && context.mounted) {
+                        Navigator.pop(context);
+                        loaderPopped = true;
+                      }
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
                     child: Row(
                       children: [
-                        if (widget.booking.service.discountPercentage != null &&
-                            widget.booking.service.discountPercentage! > 0)
-                          Text(
-                            '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        if (widget.booking.service.discountPercentage != null &&
-                            widget.booking.service.discountPercentage! > 0)
-                          const SizedBox(width: 8),
+                        Icon(
+                          Icons.picture_as_pdf_rounded,
+                          size: 20,
+                          color: Colors.red.shade400,
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            '${widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}${widget.booking.service.discountPercentage != null && widget.booking.service.discountPercentage! > 0 ? ' (${AppLocalizations.of(context)!.discountApplied(widget.booking.service.discountPercentage!)})' : ''}',
+                            widget.booking.newBookingId ?? "",
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        GestureDetector(
+                          onTap: () async {
+                            bool loaderPopped = false;
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const PopScope(
+                                canPop: false,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            );
+                            try {
+                              await InvoiceService.generateAndShareInvoice(
+                                context,
+                                widget.booking,
+                                onReady: () {
+                                  if (!loaderPopped && context.mounted) {
+                                    Navigator.pop(context);
+                                    loaderPopped = true;
+                                  }
+                                },
+                              );
+                            } catch (e) {
+                              debugPrint('Error sharing invoice: $e');
+                            } finally {
+                              if (!loaderPopped && context.mounted) {
+                                Navigator.pop(context);
+                                loaderPopped = true;
+                              }
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(Icons.share_rounded, size: 18),
+                          ),
+                        ),
+                        const Icon(Icons.open_in_new, size: 16),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
+              },
 
-            // Payment Mode (before total)
-            if ((widget.booking.bookingStatusCode.toLowerCase() == 'c' ||
-                    widget.booking.bookingStatusCode.toLowerCase() == 'vp' ||
-                    widget.booking.bookingStatusCode.toLowerCase() == 'p') &&
-                widget.booking.paymentModeCode.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                context,
-                label: AppLocalizations.of(context)!.paymentMode,
-                value:
-                    (widget.booking.paymentModeCode.toLowerCase() == 'c' ||
-                        widget.booking.paymentModeCode.toLowerCase() == 'a')
-                    ? AppLocalizations.of(context)!.insideApp
-                    : AppLocalizations.of(context)!.outsideApp,
-                textTheme: textTheme,
-                colorScheme: colorScheme,
+              // Upload Files
+              if (completionData.fileUrls.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.uploadFilesTitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._buildFileLinks(
+                  context,
+                  completionData.fileUrls,
+                  colorScheme,
+                ),
+              ],
+
+              // Service Items
+              if (completionData.serviceItems.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.serviceItems,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.outline.withOpacity(0.1),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: completionData.serviceItems
+                          .asMap()
+                          .entries
+                          .map(
+                            (entry) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      flex: 12,
+                                      child: Text(
+                                        entry.value.name,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'x${entry.value.quantity.toInt()}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: colorScheme.onSurface
+                                              .withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      flex: 5,
+                                      child: Text(
+                                        '${entry.value.price.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (entry.key !=
+                                    completionData.serviceItems.length - 1)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Divider(
+                                      color: colorScheme.outline.withOpacity(
+                                        0.2,
+                                      ),
+                                      height: 1,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
+
+              // Service Cost
+              if (completionData.serviceCost > 0) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  context,
+                  label: AppLocalizations.of(context)!.serviceCost,
+                  value:
+                      '${completionData.serviceCost.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                  textTheme: textTheme,
+                  colorScheme: colorScheme,
+                ),
+              ],
+
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        AppLocalizations.of(context)!.inspectionFee,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          if (widget.booking.service.discountPercentage !=
+                                  null &&
+                              widget.booking.service.discountPercentage! > 0)
+                            Text(
+                              '${widget.booking.effectiveInspectionFee.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          if (widget.booking.service.discountPercentage !=
+                                  null &&
+                              widget.booking.service.discountPercentage! > 0)
+                            const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}${widget.booking.service.discountPercentage != null && widget.booking.service.discountPercentage! > 0 ? ' (${AppLocalizations.of(context)!.discountApplied(widget.booking.service.discountPercentage!)})' : ''}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
+              // Payment Mode (before total)
+              if ((widget.booking.bookingStatusCode.toLowerCase() == 'c' ||
+                      widget.booking.bookingStatusCode.toLowerCase() == 'vp' ||
+                      widget.booking.bookingStatusCode.toLowerCase() == 'p') &&
+                  widget.booking.paymentModeCode.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildInfoRow(
+                  context,
+                  label: AppLocalizations.of(context)!.paymentMode,
+                  value:
+                      (widget.booking.paymentModeCode.toLowerCase() == 'c' ||
+                          widget.booking.paymentModeCode.toLowerCase() == 'a')
+                      ? AppLocalizations.of(context)!.insideApp
+                      : AppLocalizations.of(context)!.outsideApp,
+                  textTheme: textTheme,
+                  colorScheme: colorScheme,
+                ),
+              ],
             ],
 
             // Total Cost

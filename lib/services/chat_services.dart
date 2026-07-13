@@ -299,15 +299,14 @@ class TechnicianChatService {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
     try {
-      await messageRef.set({
+      final messageData = {
         'senderId': currentUserId,
         'senderType': senderType,
         'text': message,
         'timestamp': timestamp,
         'status': 'sent',
-        'mediaUrl': null,
-        'mediaType': null,
-      });
+      };
+      await messageRef.set(messageData);
 
       await _rtdb.child('chats/$chatId').update({
         'lastMessage': message,

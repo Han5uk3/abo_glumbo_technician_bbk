@@ -34,25 +34,27 @@ async function sendAndStoreNotification({
     collectionName = "customers";
   }
 
-  // Check for duplicate notification - only if requestId is not provided or different
-  const requestId = data?.requestId || data?.offerId;
-  let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
-    .where("titleEn", "==", titleEn)
-    .where("bodyEn", "==", bodyEn);
+  // Check for duplicate notification - only if it's not a chat message
+  if (data?.type !== "chat") {
+    const requestId = data?.requestId || data?.offerId;
+    let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
+      .where("titleEn", "==", titleEn)
+      .where("bodyEn", "==", bodyEn);
 
-  if (requestId) {
-    query = query.where("data.requestId", "==", requestId);
-  }
-
-  try {
-    const existing = await query.get();
-    if (!existing.empty) {
-      console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
-      return null;
+    if (requestId) {
+      query = query.where("data.requestId", "==", requestId);
     }
-  } catch (error) {
-    console.error(`Error checking for duplicate notification:`, error);
-    // Continue anyway
+
+    try {
+      const existing = await query.get();
+      if (!existing.empty) {
+        console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error checking for duplicate notification:`, error);
+      // Continue anyway
+    }
   }
 
   // 2. Store in Firestore (subcollection 'notifications')
@@ -2193,32 +2195,23 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
       },
       technician_rejected: {
         customer: {
-          en: `Technician ${
-            notificationData.rejectedTechnicianName || "has"
-          } declined your warranty repair request. We are assigning another technician.`,
-          ar: `رفض الفني ${
-            notificationData.rejectedTechnicianName || ""
-          } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
-          ur: `ٹیکنیشن ${
-            notificationData.rejectedTechnicianName || "نے"
-          } نے آپ کی وارنٹی مرمت کی درخواست مسترد کر دی ہے۔ ہم ایک اور ٹیکنیشن تفویض کر رہے ہیں۔`,
+          en: `Technician ${notificationData.rejectedTechnicianName || "has"
+            } declined your warranty repair request. We are assigning another technician.`,
+          ar: `رفض الفني ${notificationData.rejectedTechnicianName || ""
+            } طلب إصلاح الضمان الخاص بك. نحن نقوم بتعيين فني آخر.`,
+          ur: `ٹیکنیشن ${notificationData.rejectedTechnicianName || "نے"
+            } نے آپ کی وارنٹی مرمت کی درخواست مسترد کر دی ہے۔ ہم ایک اور ٹیکنیشن تفویض کر رہے ہیں۔`,
         },
         admin: {
-          en: `Technician ${
-            notificationData.rejectedTechnicianName || "Unknown"
-          } rejected warranty repair for ${serviceName}. Reason: ${
-            notificationData.rejectionReason || "Not specified"
-          }`,
-          ar: `رفض الفني ${
-            notificationData.rejectedTechnicianName || "غير معروف"
-          } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${
-            notificationData.rejectionReason || "غير محدد"
-          }`,
-          ur: `ٹیکنیشن ${
-            notificationData.rejectedTechnicianName || "نامعلوم"
-          } نے ${serviceNameUr} کے لیے وارنٹی مرمت مسترد کر دی ہے۔ وجہ: ${
-            notificationData.rejectionReason || "غیر متعین"
-          }`,
+          en: `Technician ${notificationData.rejectedTechnicianName || "Unknown"
+            } rejected warranty repair for ${serviceName}. Reason: ${notificationData.rejectionReason || "Not specified"
+            }`,
+          ar: `رفض الفني ${notificationData.rejectedTechnicianName || "غير معروف"
+            } إصلاح الضمان لـ ${serviceNameAr}. السبب: ${notificationData.rejectionReason || "غير محدد"
+            }`,
+          ur: `ٹیکنیشن ${notificationData.rejectedTechnicianName || "نامعلوم"
+            } نے ${serviceNameUr} کے لیے وارنٹی مرمت مسترد کر دی ہے۔ وجہ: ${notificationData.rejectionReason || "غیر متعین"
+            }`,
         },
       },
     };

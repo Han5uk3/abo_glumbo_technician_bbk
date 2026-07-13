@@ -212,29 +212,30 @@ class InvoiceService {
                     ),
                     if (booking.transactionId != null)
                       pw.Text(reshape(loc.transactionIdLabel(booking.transactionId!))),
-                    pw.Text(
-                      reshape(loc.warrantyLabel(() {
-                        final daysDiff =
-                            booking.warranty?.expiredOn != null &&
-                                (booking.warranty?.createdAt != null ||
-                                    booking.completedAt != null)
-                            ? booking.warranty!.expiredOn!
-                                  .toDate()
-                                  .difference(
-                                    (booking.warranty!.createdAt ??
-                                            booking.completedAt)!
-                                        .toDate(),
-                                  )
-                                  .inDays
-                            : 7;
+                    if (data.mode == 1)
+                      pw.Text(
+                        reshape(loc.warrantyLabel(() {
+                          final daysDiff =
+                              booking.warranty?.expiredOn != null &&
+                                  (booking.warranty?.createdAt != null ||
+                                      booking.completedAt != null)
+                              ? booking.warranty!.expiredOn!
+                                    .toDate()
+                                    .difference(
+                                      (booking.warranty!.createdAt ??
+                                              booking.completedAt)!
+                                          .toDate(),
+                                    )
+                                    .inDays
+                              : 7;
 
-                        return (loc.localeName == 'ar')
-                            ? "$daysDiff أيام"
-                            : (loc.localeName == 'ur')
-                            ? "$daysDiff دن"
-                            : "$daysDiff Days";
-                      }())),
-                    ),
+                          return (loc.localeName == 'ar')
+                              ? "$daysDiff أيام"
+                              : (loc.localeName == 'ur')
+                              ? "$daysDiff دن"
+                              : "$daysDiff Days";
+                        }())),
+                      ),
                   ],
                 ),
               ),
@@ -386,6 +387,9 @@ class InvoiceService {
     BuildContext context,
     BookingModel booking,
   ) async {
+    if (booking.bookingStatusCode.toUpperCase() != 'C') {
+      return null;
+    }
     // If we already have the URL cached, download the bytes.
     if (booking.invoicePdfUrl != null && booking.invoicePdfUrl!.isNotEmpty) {
       try {
@@ -408,6 +412,9 @@ class InvoiceService {
     BuildContext context,
     BookingModel booking,
   ) async {
+    if (booking.bookingStatusCode.toUpperCase() != 'C') {
+      return false;
+    }
     try {
       final invoiceId =
           '${booking.newBookingId ?? booking.id}_${booking.customer.uid}';

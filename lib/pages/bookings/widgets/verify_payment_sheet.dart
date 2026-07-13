@@ -157,6 +157,12 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
           .doc(orderId)
           .set(transaction.toMap());
 
+      // Update local booking object before generating invoice
+      widget.booking.bookingStatusCode = 'C';
+      widget.booking.transactionId = transaction.orderId;
+      widget.booking.paymentCompletedAt = Timestamp.now();
+      widget.booking.paymentCompleted = true;
+
       // Eagerly generate and upload the invoice in the background
       await InvoiceService.generateAndUploadInvoice(context, widget.booking);
 

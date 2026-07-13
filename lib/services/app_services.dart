@@ -2364,33 +2364,41 @@ class AppServices {
     String uid,
   ) {
     return AppFirestore.bookingsCollectionRef
-        .where("bookingStatusCode", isEqualTo: "C")
-        .where('warranty', isNull: false)
-        .where("warranty.assignedTechnicianId", isEqualTo: uid)
+        .where('bookingStatusCode', isEqualTo: 'C')
+        .where('paymentCompleted', isEqualTo: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
               .map((doc) {
-                final warrantyData = doc['warranty'];
+                final data = doc.data() as Map<String, dynamic>;
+                final warrantyData = data['warranty'];
                 if (warrantyData != null) {
                   return WarrantyModel.fromJson(
                     Map<String, dynamic>.from(warrantyData),
                   );
                 }
-                return WarrantyModel();
+                return null;
               })
               .where((warranty) {
-                // Only include requested ('R') and confirmed/accepted ('S') claims
+                if (warranty == null) return false;
+
+                // Include 'R' (Requested - if somehow pre-assigned) and 'S' (Scheduled/Assigned by Admin)
                 if (warranty.warrantyStatusCode != 'R' &&
                     warranty.warrantyStatusCode != 'S') {
                   return false;
                 }
+
+                // Check if technician is assigned to this warranty
+                bool isAssigned = warranty.assignedTechnician?.uid == uid ||
+                    warranty.assignedTechnicianId == uid;
+                if (!isAssigned) return false;
 
                 // If rejectedTechnicians is null or empty, include the request
                 if (warranty.rejectedTechnicians == null ||
                     warranty.rejectedTechnicians!.isEmpty) {
                   return true;
                 }
+                
                 // Otherwise exclude if your UID is in the list
                 final alreadyRejected = warranty.rejectedTechnicians!.any(
                   (rejectedTech) =>
@@ -2398,6 +2406,7 @@ class AppServices {
                 );
                 return !alreadyRejected;
               })
+              .map((warranty) => warranty!)
               .toList(),
         );
   }

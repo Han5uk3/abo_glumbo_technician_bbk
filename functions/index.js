@@ -1538,8 +1538,8 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         titleEn: "Booking Rejected",
         titleAr: "تم رفض الحجز",
         titleUr: "ٹیکنیشن نے منسوخ کر دیا",
-        bodyEn: `A Technician rejected your booking for ${serviceNameEn}.`,
-        bodyAr: `لقد قام الفني برفض حجزك ل ${serviceNameAr}.`,
+        bodyEn: `Technician ${lastCancelledWorker.agentName} rejected your booking for ${serviceNameEn}.`,
+        bodyAr: `لقد قام الفني ${lastCancelledWorker.agentName} برفض حجزك ل ${serviceNameAr}.`,
         bodyUr: `بدقسمتی سے، ٹیکنیشن ${lastCancelledWorker.agentName} نے ${serviceNameUr} کے لیے آپ کی بکنگ منسوخ کر دی ہے۔`,
         data: {
           bookingId: afterData.id,

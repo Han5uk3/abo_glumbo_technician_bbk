@@ -1471,18 +1471,26 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
     const beforeData = beforeSnap.data();
     const afterData = afterSnap.data();
 
-    // Check if cancelledWorkerUids array changed (new cancellation)
-    const beforeCancelledCount = beforeData.cancelledWorkerUids?.length || 0;
-    const afterCancelledCount = afterData.cancelledWorkerUids?.length || 0;
+    const beforeCancelledWorkers = beforeData.cancelledWorkers || [];
+    const afterCancelledWorkers = afterData.cancelledWorkers || [];
 
-    // Only proceed if a worker was just added to cancelledWorkerUids
-    if (afterCancelledCount <= beforeCancelledCount) {
+    // Find new worker(s) who cancelled
+    const newCancellations = afterCancelledWorkers.filter(
+      (worker) =>
+        !beforeCancelledWorkers.some(
+          (w) =>
+            w.uid === worker.uid &&
+            w.cancelledAt?.toMillis?.() === worker.cancelledAt?.toMillis?.()
+        )
+    );
+
+    if (newCancellations.length === 0) {
       return;
     }
 
     try {
       // Get the customer data to retrieve FCM token
-      const customerId = afterData.customer.uid || afterData.customer.uid;
+      const customerId = afterData.customer?.uid;
 
       if (!customerId) {
         console.log("Customer ID not found in booking data");
@@ -1507,9 +1515,9 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         return;
       }
 
-      // Get the worker details who just cancelled from CancelledWorkers array
-      const cancelledWorkers = afterData.cancelledWorkers || [];
-      const lastCancelledWorker = cancelledWorkers[cancelledWorkers.length - 1];
+      // Get the worker details who just cancelled
+      const lastCancelledWorker = newCancellations[newCancellations.length - 1];
+      const afterCancelledCount = afterCancelledWorkers.length;
 
       if (!lastCancelledWorker) {
         console.log("No cancelled Technician found");
@@ -1569,19 +1577,27 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
     const beforeData = beforeSnap.data();
     const afterData = afterSnap.data();
 
-    // Check if cancelledWorkerUids array changed (new cancellation)
-    const beforeCancelledCount = beforeData.cancelledWorkerUids?.length || 0;
-    const afterCancelledCount = afterData.cancelledWorkerUids?.length || 0;
+    const beforeCancelledWorkers = beforeData.cancelledWorkers || [];
+    const afterCancelledWorkers = afterData.cancelledWorkers || [];
 
-    // Only proceed if a worker was just added to cancelledWorkerUids
-    if (afterCancelledCount <= beforeCancelledCount) {
+    // Find new worker(s) who cancelled
+    const newCancellations = afterCancelledWorkers.filter(
+      (worker) =>
+        !beforeCancelledWorkers.some(
+          (w) =>
+            w.uid === worker.uid &&
+            w.cancelledAt?.toMillis?.() === worker.cancelledAt?.toMillis?.()
+        )
+    );
+
+    if (newCancellations.length === 0) {
       return;
     }
 
     try {
-      // Get the worker details who just cancelled from CancelledWorkers array
-      const cancelledWorkers = afterData.cancelledWorkers || [];
-      const lastCancelledWorker = cancelledWorkers[cancelledWorkers.length - 1];
+      // Get the worker details who just cancelled
+      const lastCancelledWorker = newCancellations[newCancellations.length - 1];
+      const afterCancelledCount = afterCancelledWorkers.length;
 
       if (!lastCancelledWorker) {
         console.log("No cancelled Technician found");
@@ -1594,7 +1610,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
       const serviceNameAr = serviceData.name_ar || serviceData.name;
 
       // Get customer name
-      const customerName = afterData.customer.name;
+      const customerName = afterData.customer?.name || "Customer";
 
       // Fetch all admin users with FCM tokens
       const adminUsersDocs = await getAllAdminUsers();
@@ -1617,9 +1633,9 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
             titleEn: "Technician Cancelled Booking",
             titleAr: "الفني ألغى الحجز",
             titleUr: "ٹیکنیشن نے بکنگ منسوخ کر دی",
-            bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.id} for customer ${customerName}.`,
-            bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.id} للعميل ${customerName}.`,
-            bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.id} منسوخ کر دی ہے۔`,
+            bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.neBookingId || afterData.id} for customer ${customerName}.`,
+            bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.neBookingId || afterData.id} للعميل ${customerName}.`,
+            bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.neBookingId || afterData.id} منسوخ کر دی ہے۔`,
             data: {
               bookingId: afterData.id,
               bookingStatusCode: afterData.bookingStatusCode,
@@ -2416,17 +2432,17 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     const titleAr = "⚠️ تم تصعيد طلب الضمان";
     const titleUr = "⚠️ وارنٹی کی درخواست کو بڑھا دیا گیا";
 
-    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} with booking id ${bookingId} requires your attention. Reason: ${escalationReason}.`;
+    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} with booking id ${afterData.neBookingId || bookingId} requires your attention. Reason: ${escalationReason}.`;
 
     const arReason = escalationReason === "staying unchanged (unattended) for a long time"
       ? "ترك هذا الطلب دون تغيير (غير مُعالج) لفترة طويلة"
       : "إلغاء/رفض الطلب من قبل الفني الأصلي";
-    const bodyAr = `طلب ضمان لـ "${serviceNameAr}" من ${customerName} برقم الحجز ${bookingId} يتطلب انتباهك. السبب: ${arReason}.`;
+    const bodyAr = `طلب ضمان لـ "${serviceNameAr}" من ${customerName} برقم الحجز ${afterData.neBookingId || bookingId} يتطلب انتباهك. السبب: ${arReason}.`;
 
     const urReason = escalationReason === "staying unchanged (unattended) for a long time"
       ? "اس درخواست کو طویل عرصے سے بغیر تبدیلی (غیر حل شدہ) چھوڑ دیا گیا ہے"
       : "اصل ٹیکنیشن نے درخواست کو منسوخ/مسترد کر دیا ہے";
-    const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
+    const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${afterData.neBookingId || bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
 
     // Send notification to each admin
     for (const { uid, token, lanCode } of adminTokens) {

@@ -47,10 +47,60 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
 
   Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
     final l10n = AppLocalizations.of(context)!;
+    final source = await showModalBottomSheet<ImageSource>(
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.of(context).size.height * 0.3,
+        maxHeight: MediaQuery.of(context).size.height * 0.5,
+      ),
+      backgroundColor: Colors.white,
+      showDragHandle: true,
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                child: ListTile(
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.camera_alt),
+                  title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                child: ListTile(
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.photo_library),
+                  title: Text(
+                    AppLocalizations.of(context)?.gallery ?? 'Gallery',
+                  ),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return null;
+
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 80,
       );
 

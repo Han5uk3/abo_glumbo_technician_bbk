@@ -5248,4 +5248,8 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get zoneType => 'زون کی قسم';
+
+  @override
+  String get waitingTechnicianToVerifyDocuments =>
+      'دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے';
 }

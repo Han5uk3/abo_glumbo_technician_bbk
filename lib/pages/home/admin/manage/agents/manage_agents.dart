@@ -922,7 +922,7 @@ class _ManageAgentsState extends State<ManageAgents>
                                   if (agent.rejectionReason != null &&
                                       agent.rejectionReason!.isNotEmpty &&
                                       agent.isDocsPendingReview != true) {
-                                    return "REJECTED";
+                                    return AppLocalizations.of(context)!.rejected;
                                   }
                                   if (agent.isDocsPendingReview == true) {
                                     return AppLocalizations.of(

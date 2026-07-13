@@ -231,25 +231,64 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
               ),
               const SizedBox(height: 12),
               if (issueImage != null && issueImage.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
-                    imageUrl: issueImage,
+                GestureDetector(
+                  onTap: () => _showFullScreenImageNew(issueImage, context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Center(child: Loader()),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.image, size: 20, color: Colors.grey[600]),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppLocalizations.of(context)!.image,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
+                      ],
+                    ),
                   ),
                 ),
-              if (issueVideo != null && issueVideo.isNotEmpty) ...[
+              if (issueImage != null && issueImage.isNotEmpty &&
+                  issueVideo != null && issueVideo.isNotEmpty)
                 const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: CachedVideoPlayer(videoUrl: issueVideo),
+              if (issueVideo != null && issueVideo.isNotEmpty)
+                GestureDetector(
+                  onTap: () => _showFullScreenVideo(issueVideo, context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.videocam, size: 20, color: Colors.grey[600]),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppLocalizations.of(context)!.video,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
+                      ],
+                    ),
                   ),
                 ),
-              ],
             ],
           ],
         ),
@@ -369,6 +408,83 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
           localization.kmAway((dist / 1000).toStringAsFixed(1)),
         );
       },
+    );
+  }
+
+  void _showFullScreenImageNew(String imageUrl, BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.image,
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: const EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+                placeholder: (context, url) =>
+                    const Center(child: SizedBox(width: 24, child: Loader())),
+                errorWidget: (context, url, error) => const Center(
+                  child: Icon(
+                    Icons.broken_image,
+                    size: 100,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullScreenVideo(String videoUrl, BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            elevation: 0,
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.video,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+          body: Center(
+            child: CachedVideoPlayer(
+              videoUrl: videoUrl,
+              height: double.infinity,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1862,5 +1862,7 @@
   "searchForZones": "Search for zones",
   "failedToSearchForZones": "Failed to search for zones. Please try again.",
   "zoneNameAlreadyExists": "Zone name already exists",
-  "zoneType": "Zone Type"
+  "zoneType": "Zone Type",
+  "rejected": "REJECTED",
+  "waitingTechnicianToVerifyDocuments": "Waiting technician to verify documents"
 }

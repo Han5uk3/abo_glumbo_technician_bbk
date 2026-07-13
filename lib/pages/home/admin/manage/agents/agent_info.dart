@@ -743,9 +743,8 @@ class _AgentInfoState extends State<AgentInfo> {
                   Expanded(
                     child: Text(
                       agent.rejectionReason != null
-                          ? AppLocalizations.of(
-                                  context,
-                                )?.waitingForTechnicianVerification ??
+                          ? AppLocalizations.of(context)
+                                        ?.waitingTechnicianToVerifyDocuments ??
                                 "Waiting for technician to re-upload documents"
                           : AppLocalizations.of(
                                   context,

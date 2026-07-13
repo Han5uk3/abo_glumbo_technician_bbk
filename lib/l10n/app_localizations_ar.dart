@@ -1920,7 +1920,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get agentApproved => 'تمت الموافقة على الفني';
 
   @override
-  String get agentDisapproved => 'الفني غير موافق';
+  String get agentDisapproved => 'تم رفض الفني';
 
   @override
   String get deleteBanner => 'حذف البانر';
@@ -5156,4 +5156,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get zoneType => 'نوع المنطقة';
+
+  @override
+  String get waitingTechnicianToVerifyDocuments => 'التحقق من المرفقات';
 }

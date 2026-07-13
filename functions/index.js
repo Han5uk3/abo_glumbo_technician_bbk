@@ -5516,7 +5516,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
                 technicianId: userId,
                 technicianName: techName,
                 isAdmin: "true",
-                requestId: userId,
+                requestId: `${userId}_${Date.now()}`,
               },
               fcmToken: token,
               lanCode: lanCode,

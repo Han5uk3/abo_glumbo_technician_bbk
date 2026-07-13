@@ -908,7 +908,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pending => 'Pending';
 
   @override
-  String get rejected => 'Rejected';
+  String get rejected => 'REJECTED';
 
   @override
   String get accepted => 'Confirmed';
@@ -5225,4 +5225,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zoneType => 'Zone Type';
+
+  @override
+  String get waitingTechnicianToVerifyDocuments =>
+      'Waiting technician to verify documents';
 }

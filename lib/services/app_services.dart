@@ -55,10 +55,10 @@ class AppServices {
           ? AppFirestore.adminsCollectionRef
           : AppFirestore.usersCollectionRef;
 
-      await collection.doc(userId).set({
+      await collection.doc(userId).update({
         'fcmToken': token,
         'fcmTokenUpdatedAt': Timestamp.now(),
-      }, SetOptions(merge: true));
+      });
       debugPrint(
         '✅ FCM token updated in ${isUserAdmin ? 'admins' : 'users'} collection',
       );

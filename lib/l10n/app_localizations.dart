@@ -1843,7 +1843,7 @@ abstract class AppLocalizations {
   /// No description provided for @rejected.
   ///
   /// In en, this message translates to:
-  /// **'Rejected'**
+  /// **'REJECTED'**
   String get rejected;
 
   /// No description provided for @accepted.
@@ -9754,6 +9754,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Zone Type'**
   String get zoneType;
+
+  /// No description provided for @waitingTechnicianToVerifyDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting technician to verify documents'**
+  String get waitingTechnicianToVerifyDocuments;
 }
 
 class _AppLocalizationsDelegate

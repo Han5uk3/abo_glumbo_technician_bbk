@@ -113,7 +113,7 @@ class InvoiceService {
               ),
             ],
           ),
-          pw.SizedBox(height: 40),
+          pw.SizedBox(height: 15),
 
           // Customer & Booking Info
           pw.Row(

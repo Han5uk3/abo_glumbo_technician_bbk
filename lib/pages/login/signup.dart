@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/location.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
+import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/firestorage.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
@@ -815,6 +816,20 @@ class _SignupState extends State<Signup> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+            await LocalStore.clearAllAuthData();
+            if (context.mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+                (route) => false,
+              );
+            }
+          },
+        ),
         title: Text(
           localization.createAccount,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),

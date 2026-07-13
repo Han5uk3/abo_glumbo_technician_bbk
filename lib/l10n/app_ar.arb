@@ -621,7 +621,7 @@
   "assignedRoles": "الوظائف المخصصة",
   "noAgentsFound": "لم يتم العثور على فنيين",
   "agentApproved": "تمت الموافقة على الفني",
-  "agentDisapproved": "الفني غير موافق",
+  "agentDisapproved": "تم رفض الفني",
   "deleteBanner": "حذف البانر",
   "invalidImageUrl": "رابط صورة غير صحيح",
   "imageLoadError": "خطأ في تحميل الصورة",
@@ -1862,5 +1862,7 @@
   "searchForZones": "البحث عن المناطق",
   "failedToSearchForZones": "فشل البحث عن المناطق. يرجى المحاولة مرة أخرى.",
   "zoneNameAlreadyExists": "اسم المنطقة موجود بالفعل",
-  "zoneType": "نوع المنطقة"
+  "zoneType": "نوع المنطقة",
+  "rejected": "مرفوض",
+  "waitingTechnicianToVerifyDocuments": "التحقق من المرفقات"
 }

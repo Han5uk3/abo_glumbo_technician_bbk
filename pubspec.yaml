@@ -75,6 +75,7 @@ dependencies:
   printing: ^5.14.3
   pinput: ^6.0.2
   ntp: ^2.0.0
+  arabic_reshaper: ^0.0.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0

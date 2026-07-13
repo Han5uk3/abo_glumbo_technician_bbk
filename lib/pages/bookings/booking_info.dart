@@ -3155,7 +3155,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 colorScheme: colorScheme,
               ),
 
-              if (widget.isAdmin) ...{
+              if (widget.isAdmin && (widget.booking.bookingStatusCode == 'C' || widget.isWarranty)) ...{
                 GestureDetector(
                   onTap: () async {
                     bool loaderPopped = false;

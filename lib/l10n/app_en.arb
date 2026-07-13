@@ -1864,5 +1864,8 @@
   "zoneNameAlreadyExists": "Zone name already exists",
   "zoneType": "Zone Type",
   "rejected": "REJECTED",
-  "waitingTechnicianToVerifyDocuments": "Waiting technician to verify documents"
+  "waitingTechnicianToVerifyDocuments": "Waiting technician to verify documents",
+  "workerCancelledThisBooking": "Worker cancelled this booking",
+  "workerCancelledNearby": "Worker cancelled nearby",
+  "busyAtThisTime": "Busy at this time"
 }

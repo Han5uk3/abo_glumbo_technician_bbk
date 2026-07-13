@@ -1859,5 +1859,8 @@
   "zoneNameAlreadyExists": "زون کا نام پہلے سے موجود ہے",
   "zoneType": "زون کی قسم",
   "rejected": "مسترد شدہ",
-  "waitingTechnicianToVerifyDocuments": "دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے"
+  "waitingTechnicianToVerifyDocuments": "دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے",
+  "workerCancelledThisBooking": "ٹیکنیشن نے یہ بکنگ منسوخ کر دی",
+  "workerCancelledNearby": "ٹیکنیشن نے قریبی بکنگ منسوخ کر دی",
+  "busyAtThisTime": "اس وقت مصروف ہے"
 }

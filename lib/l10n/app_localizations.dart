@@ -9760,6 +9760,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting technician to verify documents'**
   String get waitingTechnicianToVerifyDocuments;
+
+  /// No description provided for @workerCancelledThisBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker cancelled this booking'**
+  String get workerCancelledThisBooking;
+
+  /// No description provided for @workerCancelledNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker cancelled nearby'**
+  String get workerCancelledNearby;
+
+  /// No description provided for @busyAtThisTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy at this time'**
+  String get busyAtThisTime;
 }
 
 class _AppLocalizationsDelegate

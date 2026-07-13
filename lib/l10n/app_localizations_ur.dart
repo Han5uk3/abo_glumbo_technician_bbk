@@ -5252,4 +5252,13 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get waitingTechnicianToVerifyDocuments =>
       'دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے';
+
+  @override
+  String get workerCancelledThisBooking => 'ٹیکنیشن نے یہ بکنگ منسوخ کر دی';
+
+  @override
+  String get workerCancelledNearby => 'ٹیکنیشن نے قریبی بکنگ منسوخ کر دی';
+
+  @override
+  String get busyAtThisTime => 'اس وقت مصروف ہے';
 }

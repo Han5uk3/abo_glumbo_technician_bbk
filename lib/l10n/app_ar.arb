@@ -1864,5 +1864,8 @@
   "zoneNameAlreadyExists": "اسم المنطقة موجود بالفعل",
   "zoneType": "نوع المنطقة",
   "rejected": "مرفوض",
-  "waitingTechnicianToVerifyDocuments": "التحقق من المرفقات"
+  "waitingTechnicianToVerifyDocuments": "التحقق من المرفقات",
+  "workerCancelledThisBooking": "ألغى الفني هذا الحجز",
+  "workerCancelledNearby": "ألغى الفني في مكان قريب",
+  "busyAtThisTime": "مشغول في هذا الوقت"
 }

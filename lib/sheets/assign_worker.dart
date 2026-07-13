@@ -1040,12 +1040,12 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   String _getConflictLabel(ConflictData data) {
-    // Add logic to use existing localization keys with fallbacks for missing ones
+    final loc = AppLocalizations.of(context);
     if (data.type == ConflictType.workerCancelledThisBooking)
-      return "Worker cancelled this booking";
+      return loc?.workerCancelledThisBooking ?? "Worker cancelled this booking";
     if (data.type == ConflictType.workerCancelled)
-      return "Worker cancelled nearby";
-    return "Busy at this time";
+      return loc?.workerCancelledNearby ?? "Worker cancelled nearby";
+    return loc?.busyAtThisTime ?? "Busy at this time";
   }
 
   Widget _buildShimmerList() {

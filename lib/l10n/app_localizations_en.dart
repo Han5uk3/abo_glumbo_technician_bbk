@@ -5229,4 +5229,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get waitingTechnicianToVerifyDocuments =>
       'Waiting technician to verify documents';
+
+  @override
+  String get workerCancelledThisBooking => 'Worker cancelled this booking';
+
+  @override
+  String get workerCancelledNearby => 'Worker cancelled nearby';
+
+  @override
+  String get busyAtThisTime => 'Busy at this time';
 }

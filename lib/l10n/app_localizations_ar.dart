@@ -5159,4 +5159,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get waitingTechnicianToVerifyDocuments => 'التحقق من المرفقات';
+
+  @override
+  String get workerCancelledThisBooking => 'ألغى الفني هذا الحجز';
+
+  @override
+  String get workerCancelledNearby => 'ألغى الفني في مكان قريب';
+
+  @override
+  String get busyAtThisTime => 'مشغول في هذا الوقت';
 }

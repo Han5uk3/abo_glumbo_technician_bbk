@@ -16,10 +16,9 @@ import 'package:arabic_reshaper/arabic_reshaper.dart';
 
 class InvoiceService {
   static Future<pw.Document?> _buildInvoiceDocument(
-    BuildContext context,
+    AppLocalizations loc,
     BookingModel booking,
   ) async {
-    final loc = AppLocalizations.of(context)!;
     final pdf = pw.Document();
 
     // Load logo if exists
@@ -390,10 +389,15 @@ class InvoiceService {
     if (booking.bookingStatusCode.toUpperCase() != 'C') {
       return null;
     }
+    
+    final loc = AppLocalizations.of(context)!;
+    final localeName = loc.localeName;
+    final invoiceUrl = booking.getInvoiceUrlForLocale(localeName);
+
     // If we already have the URL cached, download the bytes.
-    if (booking.invoicePdfUrl != null && booking.invoicePdfUrl!.isNotEmpty) {
+    if (invoiceUrl != null && invoiceUrl.isNotEmpty) {
       try {
-        final response = await http.get(Uri.parse(booking.invoicePdfUrl!));
+        final response = await http.get(Uri.parse(invoiceUrl));
         if (response.statusCode == 200) {
           return response.bodyBytes;
         }
@@ -403,7 +407,7 @@ class InvoiceService {
     }
 
     // Fallback: generate it locally
-    final pdf = await _buildInvoiceDocument(context, booking);
+    final pdf = await _buildInvoiceDocument(loc, booking);
     if (pdf == null) return null;
     return await pdf.save();
   }
@@ -416,49 +420,62 @@ class InvoiceService {
       return false;
     }
     try {
-      final invoiceId =
-          '${booking.newBookingId ?? booking.id}_${booking.customer.uid}';
+      final baseInvoiceId = '${booking.newBookingId ?? booking.id}_${booking.customer.uid}';
 
-      final pdf = await _buildInvoiceDocument(context, booking);
-      if (pdf == null) return false;
+      Map<String, String> uploadedUrls = {};
+      final languages = ['en', 'ar', 'ur'];
 
-      final bytes = await pdf.save();
+      for (var langCode in languages) {
+        final loc = lookupAppLocalizations(Locale(langCode));
+        final pdf = await _buildInvoiceDocument(loc, booking);
+        if (pdf == null) continue;
 
-      // Upload to Firebase Storage
-      final storageRef = FirebaseStorage.instance.ref(
-        'invoices/$invoiceId.pdf',
-      );
-      await storageRef.putData(
-        bytes,
-        SettableMetadata(contentType: 'application/pdf'),
-      );
-      final downloadUrl = await storageRef.getDownloadURL();
+        final bytes = await pdf.save();
+
+        final fileName = '${booking.newBookingId ?? booking.id}_$langCode.pdf';
+        final storageRef = FirebaseStorage.instance.ref(
+          'invoices/${booking.newBookingId ?? booking.id}/$fileName',
+        );
+
+        await storageRef.putData(
+          bytes,
+          SettableMetadata(contentType: 'application/pdf'),
+        );
+        final downloadUrl = await storageRef.getDownloadURL();
+        uploadedUrls[langCode] = downloadUrl;
+      }
+
+      if (uploadedUrls.isEmpty) return false;
 
       // Save to invoices collection
       final invoiceModel = InvoiceModel(
-        id: invoiceId,
-        invoiceUrl: downloadUrl,
+        id: baseInvoiceId,
+        invoiceUrlEn: uploadedUrls['en'],
+        invoiceUrlAr: uploadedUrls['ar'],
+        invoiceUrlUr: uploadedUrls['ur'],
         createdAt: Timestamp.now(),
         bookingId: booking.id,
         newBookingId: booking.newBookingId,
-        userId: booking.customer.uid ?? '',
+        userId: booking.customer.uid,
         technicianId: booking.agent?.uid,
       );
 
       await FirebaseFirestore.instance
           .collection('invoices')
-          .doc(invoiceId)
+          .doc(baseInvoiceId)
           .set(invoiceModel.toMap());
 
       // Update booking
       await AppFirestore.bookingsCollectionRef.doc(booking.id).update({
-        'invoiceId': invoiceId,
-        'invoicePdfUrl': downloadUrl,
+        'invoiceId': baseInvoiceId,
+        if (uploadedUrls.containsKey('en')) 'invoicePdfUrlEn': uploadedUrls['en'],
+        if (uploadedUrls.containsKey('ar')) 'invoicePdfUrlAr': uploadedUrls['ar'],
+        if (uploadedUrls.containsKey('ur')) 'invoicePdfUrlUr': uploadedUrls['ur'],
       });
 
       return true;
     } catch (e) {
-      debugPrint('Error generating and uploading invoice: $e');
+      debugPrint('Error generating and uploading invoices: $e');
       return false;
     }
   }

@@ -1216,7 +1216,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get counterPropose => 'اقتراح بديل';
 
   @override
-  String get proposeNewTime => 'اقتراح وقت جديد';
+  String get proposeNewTime => 'قدم عرض مضاد';
 
   @override
   String get counterOfferPending => 'اقتراح بديل قيد الانتظار';

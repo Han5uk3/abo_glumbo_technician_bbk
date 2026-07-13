@@ -11,6 +11,7 @@ import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
@@ -27,6 +28,7 @@ import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:collection/collection.dart';
 import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
@@ -1388,6 +1390,7 @@ class _BookingInfoState extends State<BookingInfo> {
                               builder: (context) {
                                 final warrantyStatus =
                                     currentBooking.warranty?.warrantyStatusCode;
+
                                 if (warrantyStatus == 'S' &&
                                     currentBooking
                                             .warranty
@@ -2424,7 +2427,9 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty expired
-      if (widget.booking.warranty?.expiredOn != null) {
+      if (widget.booking.warranty?.expiredOn != null &&
+          (widget.booking.warranty?.warrantyStatusCode == 'E' ||
+           widget.booking.warranty?.warrantyStatusCode == 'e')) {
         final eventDate = widget.booking.warranty!.expiredOn!.toDate();
 
         if (currentTechCancelledAt == null ||
@@ -3155,7 +3160,9 @@ class _BookingInfoState extends State<BookingInfo> {
                 colorScheme: colorScheme,
               ),
 
-              if (widget.isAdmin && (widget.booking.bookingStatusCode == 'C' || widget.isWarranty)) ...{
+              if (widget.isAdmin &&
+                  (widget.booking.bookingStatusCode == 'C' ||
+                      widget.isWarranty)) ...{
                 GestureDetector(
                   onTap: () async {
                     bool loaderPopped = false;
@@ -3962,6 +3969,8 @@ class _BookingInfoState extends State<BookingInfo> {
       },
     );
   }
+
+
 
   Future<void> _assignAgentToDriver(
     BuildContext context,

@@ -65,7 +65,10 @@ class BookingModel {
   BookingServiceLocation? serviceLocation;
 
   final String? invoiceId;
-  final String? invoicePdfUrl;
+  final String? invoicePdfUrl; // Fallback for old bookings
+  final String? invoicePdfUrlEn;
+  final String? invoicePdfUrlAr;
+  final String? invoicePdfUrlUr;
 
   /// Returns the correct inspection fee based on the on-hour/off-hour status
   double get effectiveInspectionFee {
@@ -113,6 +116,19 @@ class BookingModel {
     }
 
     return '';
+  }
+
+  /// Returns the correct invoice PDF URL based on the given locale.
+  /// Falls back to the old `invoicePdfUrl` if the specific language one is missing.
+  String? getInvoiceUrlForLocale(String localeName) {
+    if (localeName == 'ar' && invoicePdfUrlAr != null && invoicePdfUrlAr!.isNotEmpty) {
+      return invoicePdfUrlAr;
+    } else if (localeName == 'ur' && invoicePdfUrlUr != null && invoicePdfUrlUr!.isNotEmpty) {
+      return invoicePdfUrlUr;
+    } else if (localeName == 'en' && invoicePdfUrlEn != null && invoicePdfUrlEn!.isNotEmpty) {
+      return invoicePdfUrlEn;
+    }
+    return invoicePdfUrl;
   }
 
   BookingModel({
@@ -166,6 +182,9 @@ class BookingModel {
     this.rebookTechnicianId, // ✅ Added
     this.invoiceId,
     this.invoicePdfUrl,
+    this.invoicePdfUrlEn,
+    this.invoicePdfUrlAr,
+    this.invoicePdfUrlUr,
   });
 
   BookingModel.fromMap(Map<String, dynamic> data)
@@ -240,7 +259,10 @@ class BookingModel {
       counterProposalStartedAt = data['counterProposalStartedAt'] as Timestamp?,
       rebookTechnicianId = data['rebookTechnicianId'] as String?,
       invoiceId = data['invoiceId'] as String?,
-      invoicePdfUrl = data['invoicePdfUrl'] as String?;
+      invoicePdfUrl = data['invoicePdfUrl'] as String?,
+      invoicePdfUrlEn = data['invoicePdfUrlEn'] as String?,
+      invoicePdfUrlAr = data['invoicePdfUrlAr'] as String?,
+      invoicePdfUrlUr = data['invoicePdfUrlUr'] as String?;
 
   factory BookingModel.fromQueryDocumentSnapshot(
     QueryDocumentSnapshot snapshot,
@@ -297,6 +319,9 @@ class BookingModel {
       'rebookTechnicianId': rebookTechnicianId, // ✅ Added
       'invoiceId': invoiceId,
       'invoicePdfUrl': invoicePdfUrl,
+      if (invoicePdfUrlEn != null) 'invoicePdfUrlEn': invoicePdfUrlEn,
+      if (invoicePdfUrlAr != null) 'invoicePdfUrlAr': invoicePdfUrlAr,
+      if (invoicePdfUrlUr != null) 'invoicePdfUrlUr': invoicePdfUrlUr,
     };
 
     map['id'] = id;

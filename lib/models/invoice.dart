@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InvoiceModel {
   final String id;
-  final String invoiceUrl;
+  final String? invoiceUrl;
+  final String? invoiceUrlEn;
+  final String? invoiceUrlAr;
+  final String? invoiceUrlUr;
   final Timestamp createdAt;
   final String bookingId;
   final String? newBookingId;
@@ -11,7 +14,10 @@ class InvoiceModel {
 
   InvoiceModel({
     required this.id,
-    required this.invoiceUrl,
+    this.invoiceUrl,
+    this.invoiceUrlEn,
+    this.invoiceUrlAr,
+    this.invoiceUrlUr,
     required this.createdAt,
     required this.bookingId,
     this.newBookingId,
@@ -22,7 +28,10 @@ class InvoiceModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'invoiceUrl': invoiceUrl,
+      if (invoiceUrl != null) 'invoiceUrl': invoiceUrl,
+      if (invoiceUrlEn != null) 'invoiceUrlEn': invoiceUrlEn,
+      if (invoiceUrlAr != null) 'invoiceUrlAr': invoiceUrlAr,
+      if (invoiceUrlUr != null) 'invoiceUrlUr': invoiceUrlUr,
       'createdAt': createdAt,
       'bookingId': bookingId,
       if (newBookingId != null) 'newBookingId': newBookingId,
@@ -35,6 +44,9 @@ class InvoiceModel {
     return InvoiceModel(
       id: map['id'],
       invoiceUrl: map['invoiceUrl'],
+      invoiceUrlEn: map['invoiceUrlEn'],
+      invoiceUrlAr: map['invoiceUrlAr'],
+      invoiceUrlUr: map['invoiceUrlUr'],
       createdAt: map['createdAt'],
       bookingId: map['bookingId'],
       newBookingId: map['newBookingId'],

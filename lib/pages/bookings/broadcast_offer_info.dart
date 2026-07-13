@@ -201,94 +201,99 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
 
             // Customer Notes / Issue Description
             if (notes.isNotEmpty) ...[
-              Text(
-                localization.notes,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              _buildInfoCard(
+                context,
+                localization.bookingNote,
+                Icons.note_alt_outlined,
+                [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Text(
+                      notes,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: Text(
-                  notes,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[800]),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
             ],
 
             // Issue Media
             if ((issueImage != null && issueImage.isNotEmpty) ||
                 (issueVideo != null && issueVideo.isNotEmpty)) ...[
-              Text(
+              _buildInfoCard(
+                context,
                 localization.issueMedia,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Icons.image_outlined,
+                [
+                  if (issueImage != null && issueImage.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => _showFullScreenImageNew(issueImage, context),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.image, size: 20, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context)!.image,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (issueImage != null && issueImage.isNotEmpty &&
+                      issueVideo != null && issueVideo.isNotEmpty)
+                    const SizedBox(height: 12),
+                  if (issueVideo != null && issueVideo.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => _showFullScreenVideo(issueVideo, context),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.videocam, size: 20, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context)!.video,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 12),
-              if (issueImage != null && issueImage.isNotEmpty)
-                GestureDetector(
-                  onTap: () => _showFullScreenImageNew(issueImage, context),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.image, size: 20, color: Colors.grey[600]),
-                        const SizedBox(width: 12),
-                        Text(
-                          AppLocalizations.of(context)!.image,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
-                      ],
-                    ),
-                  ),
-                ),
-              if (issueImage != null && issueImage.isNotEmpty &&
-                  issueVideo != null && issueVideo.isNotEmpty)
-                const SizedBox(height: 12),
-              if (issueVideo != null && issueVideo.isNotEmpty)
-                GestureDetector(
-                  onTap: () => _showFullScreenVideo(issueVideo, context),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.videocam, size: 20, color: Colors.grey[600]),
-                        const SizedBox(width: 12),
-                        Text(
-                          AppLocalizations.of(context)!.video,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.open_in_new, size: 16, color: Colors.grey[600]),
-                      ],
-                    ),
-                  ),
-                ),
+              const SizedBox(height: 20),
             ],
           ],
         ),

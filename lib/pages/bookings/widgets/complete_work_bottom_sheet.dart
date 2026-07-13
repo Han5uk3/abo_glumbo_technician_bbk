@@ -448,7 +448,7 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
       context: context,
       builder: (BuildContext context) {
         final serviceCost = _totalCost;
-        final inspectionFee = widget.booking.effectiveInspectionFee;
+        final inspectionFee = widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee);
         final total = serviceCost + inspectionFee;
 
         return AlertDialog(
@@ -536,24 +536,14 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                 if (_serviceCompleted) ...[
                   const SizedBox(height: 16),
                   _buildCostRow(
-                    label: AppLocalizations.of(context)!.serviceCost,
-                    amount: serviceCost,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildCostRow(
-                    label: AppLocalizations.of(context)!.inspectionFee,
-                    amount: inspectionFee,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildCostRow(
-                    label: AppLocalizations.of(context)!.totalCost,
+                    label: AppLocalizations.of(context)!.amountToBePaid,
                     amount: total,
                     isTotal: true,
                   ),
                 ] else ...[
                   const SizedBox(height: 16),
                   _buildCostRow(
-                    label: AppLocalizations.of(context)!.inspectionFee,
+                    label: AppLocalizations.of(context)!.amountToBePaid,
                     amount: inspectionFee,
                     isTotal: true,
                   ),

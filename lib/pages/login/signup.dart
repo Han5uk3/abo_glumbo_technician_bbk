@@ -251,92 +251,105 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
-    final source = await showModalBottomSheet<ImageSource>(
-      constraints: BoxConstraints(
-        minHeight: MediaQuery.of(context).size.height * 0.3,
-        maxHeight: MediaQuery.of(context).size.height * 0.5,
-      ),
-      backgroundColor: Colors.white,
-      showDragHandle: true,
+  Future<String?> _showSourceSelector() async {
+    return showModalBottomSheet<String>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 12),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-                child: ListTile(
-                  tileColor: Colors.white,
-                  leading: const Icon(Icons.camera_alt),
-                  title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
-                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                AppLocalizations.of(context)!.selectSource,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-                child: ListTile(
-                  tileColor: Colors.white,
-                  leading: const Icon(Icons.photo_library),
-                  title: Text(
-                    AppLocalizations.of(context)?.gallery ?? 'Gallery',
-                  ),
-                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-                ),
-              ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
+              onTap: () => Navigator.pop(context, 'gallery'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder),
+              title: Text(AppLocalizations.of(context)?.files ?? 'Files'),
+              onTap: () => Navigator.pop(context, 'file'),
             ),
           ],
         ),
       ),
     );
+  }
 
+  Future<XFile?> _pickImage({bool crop = true, bool square = true}) async {
+    final source = await _showSourceSelector();
     if (source == null) return null;
 
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        imageQuality: 80,
-      );
+      XFile? image;
+      bool isImage = true;
 
-      if (image != null && crop) {
-        final croppedFile = await ImageCropper().cropImage(
-          sourcePath: image.path,
-          aspectRatio: square
-              ? const CropAspectRatio(ratioX: 1, ratioY: 1)
-              : null,
-          compressQuality: 80,
-          maxWidth: 1024,
-          maxHeight: 1024,
-          uiSettings: [
-            AndroidUiSettings(
-              toolbarTitle: 'Crop Image',
-              toolbarColor: AppColors.primary,
-              toolbarWidgetColor: Colors.white,
-              initAspectRatio: square
-                  ? CropAspectRatioPreset.square
-                  : CropAspectRatioPreset.original,
-              lockAspectRatio: square,
-            ),
-            IOSUiSettings(title: 'Crop Image', aspectRatioLockEnabled: square),
-          ],
+      if (source == 'camera' || source == 'gallery') {
+        final ImagePicker picker = ImagePicker();
+        image = await picker.pickImage(
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+          imageQuality: 80,
         );
-
-        if (croppedFile != null) {
-          return XFile(croppedFile.path);
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        );
+        if (result != null && result.files.isNotEmpty) {
+          final file = result.files.first;
+          if (file.path != null) {
+            image = XFile(file.path!);
+            final ext = file.extension?.toLowerCase();
+            isImage = ['jpg', 'jpeg', 'png'].contains(ext);
+          }
         }
       }
-      return image;
+
+      if (image != null) {
+        if (isImage && crop) {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: image.path,
+            aspectRatio: square
+                ? const CropAspectRatio(ratioX: 1, ratioY: 1)
+                : null,
+            compressQuality: 80,
+            maxWidth: 1024,
+            maxHeight: 1024,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Document',
+                toolbarColor: AppColors.primary,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: square
+                    ? CropAspectRatioPreset.square
+                    : CropAspectRatioPreset.original,
+                lockAspectRatio: square,
+              ),
+              IOSUiSettings(
+                title: 'Crop Document',
+                aspectRatioLockEnabled: square,
+              ),
+            ],
+          );
+
+          if (croppedFile != null) {
+            return XFile(croppedFile.path);
+          }
+        }
+        return image;
+      }
+      return null;
     } catch (e) {
       debugPrint('Error picking image: $e');
       return null;
@@ -344,32 +357,7 @@ class _SignupState extends State<Signup> {
   }
 
   Future<PlatformFile?> _pickFile() async {
-    final source = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
-              onTap: () => Navigator.of(context).pop('camera'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
-              onTap: () => Navigator.of(context).pop('gallery'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder),
-              title: Text(AppLocalizations.of(context)?.document ?? 'Document'),
-              onTap: () => Navigator.of(context).pop('file'),
-            ),
-          ],
-        ),
-      ),
-    );
-
+    final source = await _showSourceSelector();
     if (source == null) return null;
 
     try {
@@ -405,17 +393,67 @@ class _SignupState extends State<Signup> {
   }
 
   Future<void> _pickCertifications() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-        allowMultiple: true,
-      );
+    final source = await _showSourceSelector();
+    if (source == null) return;
 
-      if (result != null) {
-        setState(() {
-          certifications.addAll(result.files);
-        });
+    try {
+      if (source == 'camera' || source == 'gallery') {
+        final ImagePicker picker = ImagePicker();
+        final XFile? image = await picker.pickImage(
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+          imageQuality: 80,
+        );
+
+        if (image != null) {
+          final file = File(image.path);
+          final size = await file.length();
+
+          if (size > 5 * 1024 * 1024) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${image.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
+                  ),
+                ),
+              );
+            }
+            return;
+          }
+
+          setState(() {
+            certifications.add(
+              PlatformFile(name: image.name, path: image.path, size: size),
+            );
+          });
+        }
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+          allowMultiple: true,
+        );
+
+        if (result != null) {
+          for (var file in result.files) {
+            if (file.size > 5 * 1024 * 1024) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${file.name} ${AppLocalizations.of(context)?.fileTooLarge ?? 'is too large (max 5MB)'}',
+                    ),
+                  ),
+                );
+              }
+              return;
+            }
+          }
+
+          setState(() {
+            certifications.addAll(result.files);
+          });
+        }
       }
     } catch (e) {
       debugPrint('Error picking certifications: $e');

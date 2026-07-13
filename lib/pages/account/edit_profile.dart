@@ -74,8 +74,8 @@ class _EditProfileState extends State<EditProfile> {
   // Helper getter to check if all data is loaded
   bool get isDataLoading => isCategoriesLoading;
 
-  Future<int?> _showSourceSelector() async {
-    return showModalBottomSheet<int>(
+  Future<String?> _showSourceSelector() async {
+    return showModalBottomSheet<String>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -85,19 +85,27 @@ class _EditProfileState extends State<EditProfile> {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
                 AppLocalizations.of(context)!.selectSource,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.camera_alt),
               title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
-              onTap: () => Navigator.pop(context, 0),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
+              onTap: () => Navigator.pop(context, 'gallery'),
             ),
             ListTile(
               leading: const Icon(Icons.folder),
               title: Text(AppLocalizations.of(context)?.files ?? 'Files'),
-              onTap: () => Navigator.pop(context, 1),
+              onTap: () => Navigator.pop(context, 'file'),
             ),
           ],
         ),
@@ -111,9 +119,11 @@ class _EditProfileState extends State<EditProfile> {
 
     try {
       PlatformFile? file;
-      if (source == 0) {
+      if (source == 'camera' || source == 'gallery') {
         final ImagePicker picker = ImagePicker();
-        final XFile? image = await picker.pickImage(source: ImageSource.camera);
+        final XFile? image = await picker.pickImage(
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+        );
         if (image != null) {
           file = PlatformFile(
             name: image.name,
@@ -143,9 +153,11 @@ class _EditProfileState extends State<EditProfile> {
 
     try {
       PlatformFile? file;
-      if (source == 0) {
+      if (source == 'camera' || source == 'gallery') {
         final ImagePicker picker = ImagePicker();
-        final XFile? image = await picker.pickImage(source: ImageSource.camera);
+        final XFile? image = await picker.pickImage(
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+        );
         if (image != null) {
           file = PlatformFile(
             name: image.name,
@@ -197,11 +209,11 @@ class _EditProfileState extends State<EditProfile> {
       XFile? image;
       bool isImage = true;
 
-      if (source == 0) {
+      if (source == 'camera' || source == 'gallery') {
         // Camera
         final ImagePicker picker = ImagePicker();
         image = await picker.pickImage(
-          source: ImageSource.camera,
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
           imageQuality: 80,
         );
       } else {
@@ -267,11 +279,11 @@ class _EditProfileState extends State<EditProfile> {
     if (source == null) return;
 
     try {
-      if (source == 0) {
-        // Camera
+      if (source == 'camera' || source == 'gallery') {
+        // Camera or Gallery
         final ImagePicker picker = ImagePicker();
         final XFile? image = await picker.pickImage(
-          source: ImageSource.camera,
+          source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
           imageQuality: 80,
         );
 
@@ -454,7 +466,7 @@ class _EditProfileState extends State<EditProfile> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
-                AppLocalizations.of(context)?.idDocument ?? 'ID Document',
+                AppLocalizations.of(context)?.certificate ?? 'Certificate',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.normal,
@@ -1551,7 +1563,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 ),
                                           label: Text(
                                             _isFetchingLocation
-                                                ? 'Fetching...'
+                                                ? locale.fetching
                                                 : (locale.useCurrentLocation),
                                             style: TextStyle(
                                               color: Colors.white,
@@ -1852,8 +1864,8 @@ class _EditProfileState extends State<EditProfile> {
                                                         .workerData
                                                         ?.sponsorWorkPermitUrl ==
                                                     null
-                                            ? "Upload Sponsor Permit"
-                                            : "Change Sponsor Permit",
+                                            ? "${locale.upload} ${locale.sponsorWorkPermit}"
+                                            : "${locale.change} ${locale.sponsorWorkPermit}",
                                       ),
                                       if (selectedSponsorWorkPermitFile != null)
                                         _buildFileItem(
@@ -1908,8 +1920,8 @@ class _EditProfileState extends State<EditProfile> {
                                                         .workerData
                                                         ?.chamberOfCommerceApprovalUrl ==
                                                     null
-                                            ? "Upload Chamber Approval"
-                                            : "Change Chamber Approval",
+                                            ? "${locale.upload} ${locale.chamberOfCommerceApproval}"
+                                            : "${locale.change} ${locale.chamberOfCommerceApproval}",
                                       ),
                                       if (selectedChamberOfCommerceFile != null)
                                         _buildFileItem(
@@ -1993,10 +2005,10 @@ class _EditProfileState extends State<EditProfile> {
                                               String certUrl = entry.value;
                                               return _buildFileItem(
                                                 label:
-                                                    'Certificate ${index + 1}',
+                                                    '${locale.certificate} ${index + 1}',
                                                 onTap: () => _viewCertificate(
                                                   certUrl,
-                                                  'Certificate ${index + 1}',
+                                                  '${locale.certificate} ${index + 1}',
                                                 ),
                                                 onRemove: () async {
                                                   final confirm =

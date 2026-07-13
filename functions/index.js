@@ -5767,3 +5767,102 @@ exports.updateTechnicianRatingOnReview = onDocumentWritten(
     });
   }
 );
+
+exports.notifyOnWarrantyStatusChange = onDocumentWritten(
+  "bookings/{bookingId}",
+  async (event) => {
+    const bookingId = event.params.bookingId;
+    const beforeData = event.data?.before?.data() || {};
+    const afterData = event.data?.after?.data() || {};
+
+    if (!afterData || Object.keys(afterData).length === 0) {
+      return;
+    }
+
+    const beforeWarrantyStatus = beforeData.warranty?.warrantyStatusCode;
+    const afterWarrantyStatus = afterData.warranty?.warrantyStatusCode;
+
+    // Check if warranty was cancelled by technician (S -> R)
+    if (beforeWarrantyStatus === "S" && afterWarrantyStatus === "R") {
+      // Find the technician who cancelled it
+      const beforeTech = beforeData.warranty?.assignedTechnician;
+      const techNameEn = beforeTech?.name || beforeTech?.name_en || "the technician";
+      const techNameAr = beforeTech?.name_ar || techNameEn;
+      const techNameUr = beforeTech?.name_ur || techNameAr || techNameEn;
+
+      // 1. Notify Customer
+      const customer = afterData.customer;
+      const customerId = customer?.uid;
+      
+      if (customerId) {
+        try {
+          const customerDoc = await admin.firestore().collection("customers").doc(customerId).get();
+          if (customerDoc.exists) {
+            const customerData = customerDoc.data();
+            const fcmToken = customerData?.fcmToken;
+            const lanCode = customerData?.lanCode || "en";
+
+            if (fcmToken && fcmToken.trim() !== "") {
+              await sendAndStoreNotification({
+                targetRole: "customer",
+                targetId: customerId,
+                titleEn: "Warranty Request Update",
+                titleAr: "تحديث طلب الضمان",
+                titleUr: "وارنٹی کی درخواست کی تازہ کاری",
+                bodyEn: `Your warranty repair request was cancelled by ${techNameEn}. We will assign a new technician shortly.`,
+                bodyAr: `تم إلغاء طلب إصلاح الضمان الخاص بك بواسطة ${techNameAr}. سنقوم بتعيين فني جديد قريباً.`,
+                bodyUr: `آپ کی وارنٹی کی مرمت کی درخواست ${techNameUr} کی طرف سے منسوخ کر دی گئی ہے۔ ہم جلد ہی نیا ٹیکنیشن تفویض کریں گے۔`,
+                data: {
+                  customerId: customerId,
+                  targetRole: "customer",
+                  bookingId: bookingId,
+                  status: "warranty_cancelled",
+                },
+                fcmToken: fcmToken,
+                lanCode: lanCode,
+              });
+            }
+          }
+        } catch (e) {
+          console.error(`Error notifying customer for warranty cancel:`, e);
+        }
+      }
+
+      // 2. Notify Admins
+      try {
+        const adminUsersDocs = await getAllAdminUsers();
+        const adminTokens = adminUsersDocs
+          .map((doc) => {
+            const data = doc.data();
+            return data.fcmToken && data.fcmToken.trim() !== ""
+              ? { uid: doc.id, token: data.fcmToken, lanCode: data.lanCode || "en" }
+              : null;
+          })
+          .filter((t) => t !== null);
+
+        for (const { uid, token, lanCode } of adminTokens) {
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: uid,
+            titleEn: "Warranty Cancelled by Technician",
+            titleAr: "إلغاء الضمان من قبل الفني",
+            titleUr: "ٹیکنیشن کی طرف سے وارنٹی منسوخ",
+            bodyEn: `Technician ${techNameEn} has cancelled the warranty repair request for booking ${bookingId}. Please assign a new technician.`,
+            bodyAr: `قام الفني ${techNameAr} بإلغاء طلب إصلاح الضمان للحجز ${bookingId}. يرجى تعيين فني جديد.`,
+            bodyUr: `ٹیکنیشن ${techNameUr} نے بکنگ ${bookingId} کے لیے وارنٹی کی مرمت کی درخواست منسوخ کر دی ہے۔ براہ کرم نیا ٹیکنیشن تفویض کریں۔`,
+            data: {
+              targetRole: "admin",
+              bookingId: bookingId,
+              status: "warranty_cancelled",
+              isAdmin: "true",
+            },
+            fcmToken: token,
+            lanCode: lanCode,
+          });
+        }
+      } catch (e) {
+        console.error(`Error notifying admins for warranty cancel:`, e);
+      }
+    }
+  }
+);

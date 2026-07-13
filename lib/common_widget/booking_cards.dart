@@ -1262,7 +1262,10 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
                             horizontal: 6,
                             vertical: 3,
                           ),
-                          margin: const EdgeInsets.only(right: 8),
+                          margin: const EdgeInsetsDirectional.only(
+                            start: 8,
+                            end: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.orange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),

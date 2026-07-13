@@ -323,7 +323,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           // Date Selector
           _buildPickerRow(
             icon: Icons.calendar_today_rounded,
-            label: 'Date',
+            label: AppLocalizations.of(context)!.date,
             value: dateStr,
             onTap: _pickDate,
           ),
@@ -333,7 +333,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
           // Time Selector
           _buildPickerRow(
             icon: Icons.access_time_rounded,
-            label: 'Time',
+            label: AppLocalizations.of(context)!.time,
             value: timeStr,
             onTap: _pickTime,
           ),

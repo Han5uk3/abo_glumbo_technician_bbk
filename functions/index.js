@@ -461,11 +461,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
 
     let customerData;
     try {
-      const customerDoc = await admin
-        .firestore()
-        .collection("customers")
-        .doc(customerId)
-        .get();
+      const customerDoc = await admin.firestore().collection("customers").doc(customerId).get();
       if (!customerDoc.exists) {
         console.log("Customer document not found.");
         return;
@@ -781,11 +777,7 @@ exports.customerTrackingNotification = onDocumentWritten(
 
     let customerData;
     try {
-      const customerDoc = await admin
-        .firestore()
-        .collection("customers")
-        .doc(customerId)
-        .get();
+      const customerDoc = await admin.firestore().collection("customers").doc(customerId).get();
 
       if (!customerDoc.exists) {
         console.log("Customer document not found.");
@@ -1497,7 +1489,7 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         return;
       }
 
-      const customerDoc = await db
+      const customerDoc = await admin.firestore()
         .collection("customers")
         .doc(customerId)
         .get();
@@ -1538,9 +1530,9 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         titleEn: "Booking Rejected",
         titleAr: "تم رفض الحجز",
         titleUr: "ٹیکنیشن نے منسوخ کر دیا",
-        bodyEn: `Technician ${lastCancelledWorker.agentName} rejected your booking for ${serviceNameEn}.`,
-        bodyAr: `لقد قام الفني ${lastCancelledWorker.agentName} برفض حجزك ل ${serviceNameAr}.`,
-        bodyUr: `بدقسمتی سے، ٹیکنیشن ${lastCancelledWorker.agentName} نے ${serviceNameUr} کے لیے آپ کی بکنگ منسوخ کر دی ہے۔`,
+        bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.newBookingId || afterData.id}.`,
+        bodyAr: `لقد قام الفني ${lastCancelledWorker.agentName} بإلغاء الحجز ذو الرقم ${afterData.newBookingId || afterData.id}.`,
+        bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} منسوخ کر دی ہے۔`,
         data: {
           bookingId: afterData.id,
           bookingStatusCode: afterData.bookingStatusCode,
@@ -1555,6 +1547,35 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
       console.log(
         `✅ Customer notification sent for booking ${afterData.id} - Worker ${lastCancelledWorker.agentName} rejected`
       );
+
+      // Notify the cancelling technician
+      try {
+        const workerDoc = await admin.firestore().collection("users").doc(lastCancelledWorker.uid).get();
+        if (workerDoc.exists) {
+          const workerData = workerDoc.data();
+          if (workerData.fcmToken) {
+            await sendAndStoreNotification({
+              targetRole: "worker",
+              targetId: lastCancelledWorker.uid,
+              titleEn: "Booking Cancelled",
+              titleAr: "تم إلغاء الحجز",
+              titleUr: "بکنگ منسوخ کر دی گئی",
+              bodyEn: `You have successfully cancelled Booking ID: ${afterData.newBookingId || afterData.id}.`,
+              bodyAr: `لقد قمت بإلغاء الحجز ذو الرقم ${afterData.newBookingId || afterData.id} بنجاح.`,
+              bodyUr: `آپ نے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} کامیابی سے منسوخ کر دی ہے۔`,
+              data: {
+                bookingId: afterData.id,
+                bookingStatusCode: afterData.bookingStatusCode,
+              },
+              fcmToken: workerData.fcmToken,
+              lanCode: workerData.lanCode || "en",
+            });
+            console.log(`✅ Worker cancellation confirmation sent for booking ${afterData.id} to ${lastCancelledWorker.agentName}`);
+          }
+        }
+      } catch (workerErr) {
+        console.error(`❌ Error sending worker cancellation confirmation: ${workerErr}`);
+      }
     } catch (error) {
       console.error(
         `❌ Error sending customer cancellation notification: ${error}`
@@ -1562,6 +1583,7 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
     }
   }
 );
+
 
 exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
   "bookings/{bookingId}",
@@ -1633,9 +1655,9 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
             titleEn: "Technician Cancelled Booking",
             titleAr: "الفني ألغى الحجز",
             titleUr: "ٹیکنیشن نے بکنگ منسوخ کر دی",
-            bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.neBookingId || afterData.id} for customer ${customerName}.`,
-            bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.neBookingId || afterData.id} للعميل ${customerName}.`,
-            bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.neBookingId || afterData.id} منسوخ کر دی ہے۔`,
+            bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.newBookingId || afterData.id} for customer ${customerName}.`,
+            bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.newBookingId || afterData.id} للعميل ${customerName}.`,
+            bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} منسوخ کر دی ہے۔`,
             data: {
               bookingId: afterData.id,
               bookingStatusCode: afterData.bookingStatusCode,
@@ -1693,7 +1715,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
       // Update the booking itself to set autoAssignmentStatus = 'ready_to_assign' and status = 'SR' (Searching/Re-Routing)
       await db.collection("bookings").doc(bookingId).update({
         autoAssignmentStatus: "ready_to_assign",
-        bookingStatusCode: "SR",
+        bookingStatusCode: "P",
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
       console.log(`[AutoReassign] Updated booking ${bookingId} with autoAssignmentStatus ready_to_assign`);
@@ -2432,17 +2454,17 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     const titleAr = "⚠️ تم تصعيد طلب الضمان";
     const titleUr = "⚠️ وارنٹی کی درخواست کو بڑھا دیا گیا";
 
-    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} with booking id ${afterData.neBookingId || bookingId} requires your attention. Reason: ${escalationReason}.`;
+    const bodyEn = `A warranty request for "${serviceName}" from ${customerName} with booking id ${afterData.newBookingId || bookingId} requires your attention. Reason: ${escalationReason}.`;
 
     const arReason = escalationReason === "staying unchanged (unattended) for a long time"
       ? "ترك هذا الطلب دون تغيير (غير مُعالج) لفترة طويلة"
       : "إلغاء/رفض الطلب من قبل الفني الأصلي";
-    const bodyAr = `طلب ضمان لـ "${serviceNameAr}" من ${customerName} برقم الحجز ${afterData.neBookingId || bookingId} يتطلب انتباهك. السبب: ${arReason}.`;
+    const bodyAr = `طلب ضمان لـ "${serviceNameAr}" من ${customerName} برقم الحجز ${afterData.newBookingId || bookingId} يتطلب انتباهك. السبب: ${arReason}.`;
 
     const urReason = escalationReason === "staying unchanged (unattended) for a long time"
       ? "اس درخواست کو طویل عرصے سے بغیر تبدیلی (غیر حل شدہ) چھوڑ دیا گیا ہے"
       : "اصل ٹیکنیشن نے درخواست کو منسوخ/مسترد کر دیا ہے";
-    const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${afterData.neBookingId || bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
+    const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${afterData.newBookingId || bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
 
     // Send notification to each admin
     for (const { uid, token, lanCode } of adminTokens) {
@@ -5866,3 +5888,49 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
     }
   }
 );
+
+ / /   C l e a n u p   i s s u e M e d i a   f o l d e r   o n c e   a   m o n t h 
+ e x p o r t s . c l e a n u p I s s u e M e d i a   =   o n S c h e d u l e ( \  
+ 0  
+ 0  
+ 1  
+ *  
+ * \ ,   a s y n c   ( e v e n t )   = >   { 
+     c o n s o l e . l o g ( \ S t a r t i n g  
+ m o n t h l y  
+ c l e a n u p  
+ o f  
+ i s s u e M e d i a  
+ f o l d e r . . . \ ) ; 
+     t r y   { 
+         c o n s t   b u c k e t   =   a d m i n . s t o r a g e ( ) . b u c k e t ( ) ; 
+         c o n s t   [ f i l e s ]   =   a w a i t   b u c k e t . g e t F i l e s ( {   p r e f i x :   ' i s s u e M e d i a / '   } ) ; 
+         
+         c o n s t   o n e M o n t h A g o   =   n e w   D a t e ( ) ; 
+         o n e M o n t h A g o . s e t M o n t h ( o n e M o n t h A g o . g e t M o n t h ( )   -   1 ) ; 
+         
+         c o n s t   d e l e t e P r o m i s e s   =   [ ] ; 
+         l e t   c o u n t   =   0 ; 
+         
+         f o r   ( c o n s t   f i l e   o f   f i l e s )   { 
+             c o n s t   [ m e t a d a t a ]   =   a w a i t   f i l e . g e t M e t a d a t a ( ) ; 
+             c o n s t   t i m e C r e a t e d   =   n e w   D a t e ( m e t a d a t a . t i m e C r e a t e d ) ; 
+             
+             i f   ( t i m e C r e a t e d   <   o n e M o n t h A g o )   { 
+                 d e l e t e P r o m i s e s . p u s h ( f i l e . d e l e t e ( ) . c a t c h ( e   = >   c o n s o l e . e r r o r ( \ F a i l e d   t o   d e l e t e   \ : \ ,   e ) ) ) ; 
+                 c o u n t + + ; 
+             } 
+         } 
+         
+         a w a i t   P r o m i s e . a l l ( d e l e t e P r o m i s e s ) ; 
+         c o n s o l e . l o g ( \ S u c c e s s f u l l y   c l e a n e d   u p   \   f i l e s   f r o m   i s s u e M e d i a   f o l d e r . \ ) ; 
+     }   c a t c h   ( e r r o r )   { 
+         c o n s o l e . e r r o r ( \ E r r o r  
+ c l e a n i n g  
+ u p  
+ i s s u e M e d i a  
+ f o l d e r : \ ,   e r r o r ) ; 
+     } 
+ } ) ; 
+  
+ 

@@ -234,7 +234,7 @@ class _ManageAgentsState extends State<ManageAgents>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          content: Container(
+          content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
               shrinkWrap: true,
@@ -772,10 +772,12 @@ class _ManageAgentsState extends State<ManageAgents>
 
                               final date = t.createdAt.toDate();
                               if (_startDate != null &&
-                                  date.isBefore(_startDate!))
+                                  date.isBefore(_startDate!)) {
                                 continue;
-                              if (_endDate != null && date.isAfter(_endDate!))
+                              }
+                              if (_endDate != null && date.isAfter(_endDate!)) {
                                 continue;
+                              }
 
                               if (isOutside) {
                                 outside += t.amount;
@@ -922,7 +924,9 @@ class _ManageAgentsState extends State<ManageAgents>
                                   if (agent.rejectionReason != null &&
                                       agent.rejectionReason!.isNotEmpty &&
                                       agent.isDocsPendingReview != true) {
-                                    return AppLocalizations.of(context)!.rejected;
+                                    return AppLocalizations.of(
+                                      context,
+                                    )!.rejected;
                                   }
                                   if (agent.isDocsPendingReview == true) {
                                     return AppLocalizations.of(

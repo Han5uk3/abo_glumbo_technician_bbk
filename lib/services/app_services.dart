@@ -1237,7 +1237,7 @@ class AppServices {
         ]),
         'cancelledWorkerUids': FieldValue.arrayUnion([agentUid]),
         'agent': FieldValue.delete(),
-        'bookingStatusCode': 'SR',
+        'bookingStatusCode': 'P',
         'acceptedAt': FieldValue.delete(),
         'cancelledBy': 'worker',
         'updatedAt': cancelledAt,
@@ -2389,7 +2389,8 @@ class AppServices {
                 }
 
                 // Check if technician is assigned to this warranty
-                bool isAssigned = warranty.assignedTechnician?.uid == uid ||
+                bool isAssigned =
+                    warranty.assignedTechnician?.uid == uid ||
                     warranty.assignedTechnicianId == uid;
                 if (!isAssigned) return false;
 
@@ -2398,7 +2399,7 @@ class AppServices {
                     warranty.rejectedTechnicians!.isEmpty) {
                   return true;
                 }
-                
+
                 // Otherwise exclude if your UID is in the list
                 final alreadyRejected = warranty.rejectedTechnicians!.any(
                   (rejectedTech) =>
@@ -3174,7 +3175,7 @@ class AppServices {
       }
     } catch (e) {
       debugPrint('Error declining job offer: $e');
-      throw e;
+      rethrow;
     }
   }
 

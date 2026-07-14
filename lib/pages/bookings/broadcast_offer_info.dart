@@ -112,10 +112,25 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
               booking?.customer.location?.fullAddress ??
               localization.notAvailable;
 
-    final notes =
-        data['notes'] ?? booking?.notes ?? localization.noAdditionalDescription;
-    final issueImage = data['issueImage'] ?? booking?.issueImage;
-    final issueVideo = data['issueVideo'] ?? booking?.issueVideo;
+    final String? offerNotes = data['notes'];
+    final String? bookingNotes = booking?.notes;
+    final notes = (offerNotes != null && offerNotes.isNotEmpty)
+        ? offerNotes
+        : (bookingNotes != null && bookingNotes.isNotEmpty
+            ? bookingNotes
+            : localization.noAdditionalDescription);
+
+    final String? offerIssueImage = data['issueImage'];
+    final String? bookingIssueImage = booking?.issueImage;
+    final issueImage = (offerIssueImage != null && offerIssueImage.isNotEmpty)
+        ? offerIssueImage
+        : (bookingIssueImage != null && bookingIssueImage.isNotEmpty ? bookingIssueImage : null);
+
+    final String? offerIssueVideo = data['issueVideo'];
+    final String? bookingIssueVideo = booking?.issueVideo;
+    final issueVideo = (offerIssueVideo != null && offerIssueVideo.isNotEmpty)
+        ? offerIssueVideo
+        : (bookingIssueVideo != null && bookingIssueVideo.isNotEmpty ? bookingIssueVideo : null);
     final bookingDateTime =
         data['bookingDateTime'] as Timestamp? ?? booking?.bookingDateTime;
 

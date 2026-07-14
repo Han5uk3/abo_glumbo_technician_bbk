@@ -250,6 +250,28 @@ class _BookingListTabState extends State<_BookingListTab>
       }
     }
     final List<dynamic> uniqueData = uniqueMap.values.toList();
+    
+    uniqueData.sort((a, b) {
+      DateTime? getTime(dynamic item) {
+        if (item is BookingModel) {
+          return item.createdAt?.toDate();
+        } else if (item is JobOfferContainer) {
+          final timestamp = item.offerData['createdAt'] ?? item.booking?.createdAt;
+          if (timestamp != null) {
+            return (timestamp as dynamic).toDate();
+          }
+        }
+        return null;
+      }
+
+      final aTime = getTime(a);
+      final bTime = getTime(b);
+
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return bTime.compareTo(aTime);
+    });
 
     if (widget.searchQuery.isEmpty) {
       return uniqueData;

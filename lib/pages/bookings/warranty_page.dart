@@ -418,11 +418,21 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
   }
 
   List<BookingModel> _filterWarranties(List<BookingModel> warranties) {
+    final sortedWarranties = List<BookingModel>.from(warranties);
+    sortedWarranties.sort((a, b) {
+      final aTime = a.warranty?.requestedOn?.toDate() ?? a.createdAt?.toDate();
+      final bTime = b.warranty?.requestedOn?.toDate() ?? b.createdAt?.toDate();
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return bTime.compareTo(aTime);
+    });
+
     if (widget.searchQuery.isEmpty) {
-      return warranties;
+      return sortedWarranties;
     }
 
-    return warranties.where((warranty) {
+    return sortedWarranties.where((warranty) {
       final bookingId = warranty.id.toLowerCase();
       final newBookingId = warranty.newBookingId?.toLowerCase() ?? '';
 

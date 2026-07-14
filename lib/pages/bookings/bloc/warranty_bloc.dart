@@ -174,6 +174,12 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         uid: event.uid,
       );
 
+      await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
+        'warranty.warrantyStatusCode': 'S',
+        'warranty.updatedAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
+
       // Configure background fetch with error handling
       try {
         await BackgroundFetch.configure(
@@ -214,7 +220,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
         'warranty.assignedTechnician': event.technician.toJson(),
         'warranty.assignedTechnicianId': event.technician.uid,
-        'warranty.warrantyStatusCode': 'S',
+        'warranty.warrantyStatusCode': 'R',
         'warranty.availability': false,
         'warranty.acceptedAt': Timestamp.now(),
         'warranty.rejectedAt': FieldValue.delete(),

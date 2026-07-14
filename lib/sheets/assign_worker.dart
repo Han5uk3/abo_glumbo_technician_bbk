@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:aboglumbo_bbk_panel/common_widget/searchable_dropdown.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -14,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/models/service_location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AssignUserBottomSheet extends StatefulWidget {
   final BookingModel booking;
@@ -175,11 +173,13 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   Future<void> _preloadConflictData(List<UserModel> users) async {
-    if (!mounted || _conflictService.isCacheValid || _hasPreloadedConflicts)
+    if (!mounted || _conflictService.isCacheValid || _hasPreloadedConflicts) {
       return;
+    }
     if (_lastPreloadedUsers != null &&
-        _usersAreEqual(_lastPreloadedUsers!, users))
+        _usersAreEqual(_lastPreloadedUsers!, users)) {
       return;
+    }
 
     _hasPreloadedConflicts = true;
     _lastPreloadedUsers = users;
@@ -434,7 +434,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         }
 
         // Hide technicians who are not available to work
-        filteredUsers = filteredUsers.where((u) => u.isOnline != false).toList();
+        filteredUsers = filteredUsers
+            .where((u) => u.isOnline != false)
+            .toList();
 
         if (_selectedZoneIds.isEmpty) return filteredUsers;
 
@@ -674,38 +676,6 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     }
   }
 
-  Widget _buildSearchableDropdown<T extends Object>({
-    required String label,
-    required T? value,
-    required List<T> items,
-    required String Function(T) itemLabel,
-    required ValueChanged<T?> onChanged,
-    required String hint,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 6),
-        SearchableDropdown<T>(
-          label: "",
-          value: value,
-          items: items,
-          itemLabel: itemLabel,
-          onChanged: onChanged,
-          hintText: hint,
-        ),
-      ],
-    );
-  }
-
   void _clearFilter() {
     setState(() {
       _selectedZoneIds.clear();
@@ -890,8 +860,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     return StreamBuilder<List<UserModel>>(
       stream: _getFilteredUsersStream(),
       builder: (context, snapshot) {
-        if (snapshot.hasError)
+        if (snapshot.hasError) {
           return _buildErrorState(snapshot.error.toString());
+        }
         if (!snapshot.hasData) return _buildShimmerList();
 
         final users = snapshot.data!;
@@ -1041,10 +1012,12 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   String _getConflictLabel(ConflictData data) {
     final loc = AppLocalizations.of(context);
-    if (data.type == ConflictType.workerCancelledThisBooking)
+    if (data.type == ConflictType.workerCancelledThisBooking) {
       return loc?.workerCancelledThisBooking ?? "Worker cancelled this booking";
-    if (data.type == ConflictType.workerCancelled)
+    }
+    if (data.type == ConflictType.workerCancelled) {
       return loc?.workerCancelledNearby ?? "Worker cancelled nearby";
+    }
     return loc?.busyAtThisTime ?? "Busy at this time";
   }
 

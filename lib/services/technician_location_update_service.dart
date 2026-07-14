@@ -168,13 +168,16 @@ class TechnicianLocationUpdateService {
         updateData['location.street'] = place.subLocality ?? place.thoroughfare;
 
         final parts = <String>[];
-        if (place.subLocality != null && place.subLocality!.isNotEmpty)
+        if (place.subLocality != null && place.subLocality!.isNotEmpty) {
           parts.add(place.subLocality!);
-        if (place.locality != null && place.locality!.isNotEmpty)
+        }
+        if (place.locality != null && place.locality!.isNotEmpty) {
           parts.add(place.locality!);
+        }
         if (place.administrativeArea != null &&
-            place.administrativeArea!.isNotEmpty)
+            place.administrativeArea!.isNotEmpty) {
           parts.add(place.administrativeArea!);
+        }
 
         if (parts.isNotEmpty) {
           updateData['location.fullAddress'] = parts.join(', ');

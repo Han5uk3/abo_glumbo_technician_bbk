@@ -206,7 +206,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                 // Check warranty status
                 final warrantyStatus =
                     widget.booking.warranty?.warrantyStatusCode ?? '';
-                final isWarrantyStarted = warrantyStatus == 'S';
+                final isWarrantyStarted = warrantyStatus == 'S' || warrantyStatus == 'R';
 
                 return Container(
                   padding: const EdgeInsets.all(16),

@@ -27,25 +27,27 @@ class _AddAdminPageState extends State<AddAdminPage> {
   bool _isLoading = false;
 
   String get _submitButtonText {
-    if (widget.adminToEdit == null)
+    if (widget.adminToEdit == null) {
       return AppLocalizations.of(context)?.addAdmin ?? 'Add Admin';
+    }
     return AppLocalizations.of(context)?.saveChanges ?? 'Save Changes';
   }
 
   String get _pageTitle {
-    if (widget.adminToEdit == null)
+    if (widget.adminToEdit == null) {
       return AppLocalizations.of(context)?.addNewAdmin ?? 'Add New Admin';
+    }
     return AppLocalizations.of(context)?.editAdmin ?? 'Edit Admin';
   }
 
-  String get _pageSubtitle {
-    if (widget.adminToEdit == null) {
-      return AppLocalizations.of(context)?.enterAdminDetails ??
-          'Enter admin details to invite them to the platform.';
-    }
-    return AppLocalizations.of(context)?.editAdminDetails ??
-        'Edit admin details and access level.';
-  }
+  // String get _pageSubtitle {
+  //   if (widget.adminToEdit == null) {
+  //     return AppLocalizations.of(context)?.enterAdminDetails ??
+  //         'Enter admin details to invite them to the platform.';
+  //   }
+  //   return AppLocalizations.of(context)?.editAdminDetails ??
+  //       'Edit admin details and access level.';
+  // }
 
   String get _successMessage {
     if (widget.adminToEdit == null) {

@@ -11,7 +11,6 @@ import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/customer.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
-import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/warranty_controllers.dart';
 import 'package:aboglumbo_bbk_panel/pages/chat_screen.dart';
@@ -28,7 +27,6 @@ import 'package:aboglumbo_bbk_panel/utils/whatsapp_utils.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/sheets/assign_worker.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:collection/collection.dart';
 import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
@@ -62,6 +60,7 @@ class _BookingInfoState extends State<BookingInfo> {
   int _offerSecondsRemaining = 0;
   DateTime? _offerExpiresAt;
   bool _isRebookOffer = false;
+  bool _isAwaitingCustomerAction = false;
   Future<void> handleChatButton() async {
     if (isInitiatingChat) return;
 
@@ -345,6 +344,14 @@ class _BookingInfoState extends State<BookingInfo> {
         final data = doc.data() as Map<String, dynamic>?;
         final expiresAt = data?['expiresAt'] as Timestamp?;
         final status = data?['status'] as String?;
+
+        if (mounted) {
+          setState(() {
+            _isAwaitingCustomerAction =
+                status == 'accepted_by_technician' ||
+                status == 'counter_offered';
+          });
+        }
 
         if (status == 'accepted_by_technician' ||
             status == 'accepted' ||
@@ -1260,7 +1267,11 @@ class _BookingInfoState extends State<BookingInfo> {
                           // Booking controls (Normal)
                           if (!widget.isWarranty &&
                               (statusCode.toLowerCase() == 'a') &&
-                              !widget.isAdmin)
+                              !widget.isAdmin &&
+                              !(_isAwaitingCustomerAction ||
+                                  currentBooking.activeCounterOffer?.status
+                                          .toLowerCase() ==
+                                      'pending'))
                             BookingControlsWidget(
                               booking: currentBooking,
                               isTracking: isTracking,
@@ -1391,7 +1402,26 @@ class _BookingInfoState extends State<BookingInfo> {
                                 final warrantyStatus =
                                     currentBooking.warranty?.warrantyStatusCode;
 
-                                if (warrantyStatus == 'S' &&
+                                final isUnassignedR =
+                                    warrantyStatus == 'R' &&
+                                    (currentBooking
+                                                .warranty
+                                                ?.assignedTechnician ==
+                                            null ||
+                                        currentBooking
+                                                .warranty
+                                                ?.assignedTechnicianId ==
+                                            null);
+
+                                if (isUnassignedR && widget.isAdmin) {
+                                  return _buildPendingBookingControls(
+                                    context,
+                                    currentBooking,
+                                  );
+                                }
+
+                                if ((warrantyStatus == 'S' ||
+                                        warrantyStatus == 'R') &&
                                     currentBooking
                                             .warranty
                                             ?.assignedTechnician
@@ -1884,11 +1914,7 @@ class _BookingInfoState extends State<BookingInfo> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.video_collection,
-                    size: 20,
-                    color: Colors.grey[600],
-                  ),
+                  Icon(Icons.videocam, size: 20, color: Colors.grey[600]),
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.of(context)!.video,
@@ -2429,7 +2455,7 @@ class _BookingInfoState extends State<BookingInfo> {
       // Warranty expired
       if (widget.booking.warranty?.expiredOn != null &&
           (widget.booking.warranty?.warrantyStatusCode == 'E' ||
-           widget.booking.warranty?.warrantyStatusCode == 'e')) {
+              widget.booking.warranty?.warrantyStatusCode == 'e')) {
         final eventDate = widget.booking.warranty!.expiredOn!.toDate();
 
         if (currentTechCancelledAt == null ||
@@ -3969,8 +3995,6 @@ class _BookingInfoState extends State<BookingInfo> {
       },
     );
   }
-
-
 
   Future<void> _assignAgentToDriver(
     BuildContext context,

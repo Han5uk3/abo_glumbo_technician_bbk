@@ -5983,7 +5983,7 @@ exports.chatCleanupOnCompletion = onDocumentUpdated(
 );
 
 // 2. Scheduled deletion for full service chats after 14 days
-exports.scheduledChatCleanup = onSchedule("every week", async (event) => {
+exports.scheduledChatCleanup = onSchedule("0 0 * * 0", async (event) => {
   console.log("Starting weekly cleanup of chatrooms for full service bookings...");
   try {
     const cutoffDate = new Date();

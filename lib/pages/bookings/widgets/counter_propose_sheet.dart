@@ -364,7 +364,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                       ),
                     )
                   : Text(
-                      l10n.submitCounterOffer,
+                      l10n.proposeNewTime,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

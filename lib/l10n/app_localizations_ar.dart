@@ -1216,7 +1216,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get counterPropose => 'اقتراح بديل';
 
   @override
-  String get proposeNewTime => 'قدم عرض مضاد';
+  String get proposeNewTime => 'اقترح موعدًا جديدًا';
 
   @override
   String get counterOfferPending => 'اقتراح بديل قيد الانتظار';
@@ -4641,7 +4641,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectTime => 'اختر الوقت';
 
   @override
-  String get submitCounterOffer => 'قدم عرض مضاد';
+  String get submitCounterOffer => 'قدم عرض جديد';
 
   @override
   String get pleaseSelectALaterTime => 'يرجى اختيار وقت لاحق';

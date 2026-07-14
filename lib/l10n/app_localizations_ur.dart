@@ -4723,7 +4723,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get selectTime => 'وقت منتخب کریں';
 
   @override
-  String get submitCounterOffer => 'جوابی پیشکش جمع کرائیں';
+  String get submitCounterOffer => 'نئی پیشکش جمع کرائیں';
 
   @override
   String get pleaseSelectALaterTime =>

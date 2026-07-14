@@ -1226,7 +1226,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get counterPropose => 'Counter Propose';
 
   @override
-  String get proposeNewTime => 'Propose New Time';
+  String get proposeNewTime => 'Suggest New Time';
 
   @override
   String get counterOfferPending => 'Counter Offer Pending';
@@ -4706,7 +4706,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectTime => 'Select Time';
 
   @override
-  String get submitCounterOffer => 'Submit Counter Offer';
+  String get submitCounterOffer => 'Submit a New Offer';
 
   @override
   String get pleaseSelectALaterTime =>

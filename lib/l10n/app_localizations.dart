@@ -2449,7 +2449,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposeNewTime.
   ///
   /// In en, this message translates to:
-  /// **'Propose New Time'**
+  /// **'Suggest New Time'**
   String get proposeNewTime;
 
   /// No description provided for @counterOfferPending.
@@ -8852,7 +8852,7 @@ abstract class AppLocalizations {
   /// No description provided for @submitCounterOffer.
   ///
   /// In en, this message translates to:
-  /// **'Submit Counter Offer'**
+  /// **'Submit a New Offer'**
   String get submitCounterOffer;
 
   /// No description provided for @pleaseSelectALaterTime.

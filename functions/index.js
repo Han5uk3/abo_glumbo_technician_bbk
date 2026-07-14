@@ -32,6 +32,8 @@ async function sendAndStoreNotification({
   let collectionName = "users";
   if (targetRole === "customer") {
     collectionName = "customers";
+  } else if (targetRole === "admin") {
+    collectionName = "admins";
   }
 
   // Check for duplicate notification - only if it's not a chat message
@@ -1287,7 +1289,12 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
 
     try {
       // Determine collection based on role
-      const collectionName = targetRole === "customer" ? "customers" : "users";
+      let collectionName = "users";
+      if (targetRole === "customer") {
+        collectionName = "customers";
+      } else if (targetRole === "admin") {
+        collectionName = "admins";
+      }
 
       // Get recipient's FCM token and language preference
       const recipientDoc = await admin
@@ -3046,8 +3053,9 @@ exports.notifyOnNewChatMessage = onValueCreated(
           }
         } else {
           // technician or admin
+          const coll = receiverType === "admin" ? "admins" : "users";
           const receiverDoc = await db
-            .collection("users")
+            .collection(coll)
             .doc(receiverId)
             .get();
           if (receiverDoc.exists) {
@@ -3121,7 +3129,8 @@ exports.notifyOnNewChatMessage = onValueCreated(
             senderPhoto = senderDoc.data().photo || "";
           }
         } else {
-          const senderDoc = await db.collection("users").doc(senderId).get();
+          const coll = senderType === "admin" ? "admins" : "users";
+          const senderDoc = await db.collection(coll).doc(senderId).get();
           if (senderDoc.exists) {
             senderPhoto = senderDoc.data().photo || "";
           }
@@ -3140,14 +3149,15 @@ exports.notifyOnNewChatMessage = onValueCreated(
             receiverPhoto = receiverData.photo || "";
           }
         } else {
+          const coll = receiverType === "admin" ? "admins" : "users";
           const receiverDoc = await db
-            .collection("users")
+            .collection(coll)
             .doc(receiverId)
             .get();
           if (receiverDoc.exists) {
             const receiverData = receiverDoc.data();
             receiverName =
-              receiverData.name || receiverData.fullName || "Technician";
+              receiverData.name || receiverData.fullName || (receiverType === "admin" ? "Admin" : "Technician");
             receiverPhoto = receiverData.photo || "";
           }
         }
@@ -5887,50 +5897,34 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
       }
     }
   }
-);
+)
 
- / /   C l e a n u p   i s s u e M e d i a   f o l d e r   o n c e   a   m o n t h 
- e x p o r t s . c l e a n u p I s s u e M e d i a   =   o n S c h e d u l e ( \  
- 0  
- 0  
- 1  
- *  
- * \ ,   a s y n c   ( e v e n t )   = >   { 
-     c o n s o l e . l o g ( \ S t a r t i n g  
- m o n t h l y  
- c l e a n u p  
- o f  
- i s s u e M e d i a  
- f o l d e r . . . \ ) ; 
-     t r y   { 
-         c o n s t   b u c k e t   =   a d m i n . s t o r a g e ( ) . b u c k e t ( ) ; 
-         c o n s t   [ f i l e s ]   =   a w a i t   b u c k e t . g e t F i l e s ( {   p r e f i x :   ' i s s u e M e d i a / '   } ) ; 
-         
-         c o n s t   o n e M o n t h A g o   =   n e w   D a t e ( ) ; 
-         o n e M o n t h A g o . s e t M o n t h ( o n e M o n t h A g o . g e t M o n t h ( )   -   1 ) ; 
-         
-         c o n s t   d e l e t e P r o m i s e s   =   [ ] ; 
-         l e t   c o u n t   =   0 ; 
-         
-         f o r   ( c o n s t   f i l e   o f   f i l e s )   { 
-             c o n s t   [ m e t a d a t a ]   =   a w a i t   f i l e . g e t M e t a d a t a ( ) ; 
-             c o n s t   t i m e C r e a t e d   =   n e w   D a t e ( m e t a d a t a . t i m e C r e a t e d ) ; 
-             
-             i f   ( t i m e C r e a t e d   <   o n e M o n t h A g o )   { 
-                 d e l e t e P r o m i s e s . p u s h ( f i l e . d e l e t e ( ) . c a t c h ( e   = >   c o n s o l e . e r r o r ( \ F a i l e d   t o   d e l e t e   \ : \ ,   e ) ) ) ; 
-                 c o u n t + + ; 
-             } 
-         } 
-         
-         a w a i t   P r o m i s e . a l l ( d e l e t e P r o m i s e s ) ; 
-         c o n s o l e . l o g ( \ S u c c e s s f u l l y   c l e a n e d   u p   \   f i l e s   f r o m   i s s u e M e d i a   f o l d e r . \ ) ; 
-     }   c a t c h   ( e r r o r )   { 
-         c o n s o l e . e r r o r ( \ E r r o r  
- c l e a n i n g  
- u p  
- i s s u e M e d i a  
- f o l d e r : \ ,   e r r o r ) ; 
-     } 
- } ) ; 
-  
- 
+// Cleanup issueMedia folder once a month
+exports.cleanupIssueMedia = onSchedule("0 0 1 * *", async (event) => {
+    console.log("Starting monthly cleanup of issueMedia folder...");
+    try {
+        const bucket = admin.storage().bucket();
+        const [files] = await bucket.getFiles({ prefix: 'issueMedia/' });
+        
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        const deletePromises = [];
+        let count = 0;
+        
+        for (const file of files) {
+            const [metadata] = await file.getMetadata();
+            const timeCreated = new Date(metadata.timeCreated);
+            
+            if (timeCreated < oneMonthAgo) {
+                deletePromises.push(file.delete().catch(e => console.error(`Failed to delete ${file.name}:`, e)));
+                count++;
+            }
+        }
+        
+        await Promise.all(deletePromises);
+        console.log(`Successfully cleaned up ${count} files from issueMedia folder.`);
+    } catch (error) {
+        console.error("Error cleaning up issueMedia folder:", error);
+    }
+});

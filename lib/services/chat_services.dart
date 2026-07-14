@@ -591,11 +591,13 @@ class TechnicianChatService {
         );
 
         await _rtdb.child('messages/$chatId').remove();
-        await _rtdb.child('chats/$chatId').remove();
 
+        // Delete userChats entries BEFORE deleting the main chat so participant rules still pass
         for (String userId in participants.keys) {
           await _rtdb.child('userChats/$userId/$chatId').remove();
         }
+
+        await _rtdb.child('chats/$chatId').remove();
 
         if (chatData['bookingId'] != null) {
           await _firestore

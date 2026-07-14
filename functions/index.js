@@ -5825,7 +5825,7 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
       // 1. Notify Customer
       const customer = afterData.customer;
       const customerId = customer?.uid;
-      
+
       if (customerId) {
         try {
           const customerDoc = await admin.firestore().collection("customers").doc(customerId).get();
@@ -5901,30 +5901,133 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
 
 // Cleanup issueMedia folder once a month
 exports.cleanupIssueMedia = onSchedule("0 0 1 * *", async (event) => {
-    console.log("Starting monthly cleanup of issueMedia folder...");
-    try {
-        const bucket = admin.storage().bucket();
-        const [files] = await bucket.getFiles({ prefix: 'issueMedia/' });
-        
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        
-        const deletePromises = [];
-        let count = 0;
-        
-        for (const file of files) {
-            const [metadata] = await file.getMetadata();
-            const timeCreated = new Date(metadata.timeCreated);
-            
-            if (timeCreated < oneMonthAgo) {
-                deletePromises.push(file.delete().catch(e => console.error(`Failed to delete ${file.name}:`, e)));
-                count++;
-            }
-        }
-        
-        await Promise.all(deletePromises);
-        console.log(`Successfully cleaned up ${count} files from issueMedia folder.`);
-    } catch (error) {
-        console.error("Error cleaning up issueMedia folder:", error);
+  console.log("Starting monthly cleanup of issueMedia folder...");
+  try {
+    const bucket = admin.storage().bucket();
+    const [files] = await bucket.getFiles({ prefix: 'issueMedia/' });
+
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const deletePromises = [];
+    let count = 0;
+
+    for (const file of files) {
+      const [metadata] = await file.getMetadata();
+      const timeCreated = new Date(metadata.timeCreated);
+
+      if (timeCreated < oneMonthAgo) {
+        deletePromises.push(file.delete().catch(e => console.error(`Failed to delete ${file.name}:`, e)));
+        count++;
+      }
     }
+
+    await Promise.all(deletePromises);
+    console.log(`Successfully cleaned up ${count} files from issueMedia folder.`);
+  } catch (error) {
+    console.error("Error cleaning up issueMedia folder:", error);
+  }
+});
+// Helper to delete chat from Realtime Database
+async function deleteChatFromRTDB(chatId) {
+  if (!chatId) return;
+  try {
+    const rtdb = admin.database();
+    const chatSnap = await rtdb.ref(`chats/${chatId}`).get();
+    if (chatSnap.exists()) {
+      const chatData = chatSnap.val();
+      const participants = chatData.participants || {};
+      
+      await rtdb.ref(`messages/${chatId}`).remove();
+      
+      // Delete userChats entries BEFORE deleting the main chat so participant rules still pass
+      for (const userId of Object.keys(participants)) {
+        await rtdb.ref(`userChats/${userId}/${chatId}`).remove();
+      }
+      
+      await rtdb.ref(`chats/${chatId}`).remove();
+      console.log(`[${chatId}] Chat successfully deleted from RTDB.`);
+    } else {
+      console.log(`[${chatId}] Chat not found in RTDB, skipped deletion.`);
+    }
+  } catch (error) {
+    console.error(`[${chatId}] Error deleting chat from RTDB:`, error);
+  }
+}
+
+// 1. Delete inspection-only chatrooms on booking completion
+exports.chatCleanupOnCompletion = onDocumentUpdated(
+  "bookings/{bookingId}",
+  async (event) => {
+    const beforeData = event.data?.before?.data() || {};
+    const afterData = event.data?.after?.data() || {};
+    const bookingId = event.params.bookingId;
+
+    // Proceed only if status JUST changed to 'C'
+    if (beforeData.bookingStatusCode !== "C" && afterData.bookingStatusCode === "C") {
+      const mode = afterData.completionData?.mode;
+      const chatId = afterData.chatroomId;
+
+      if (mode === 0 && chatId) {
+        console.log(`[${bookingId}] Booking completed as 'inspection only'. Cleaning up chatroom ${chatId}...`);
+        
+        await deleteChatFromRTDB(chatId);
+        
+        // Remove chatroomId from booking
+        await admin.firestore().collection("bookings").doc(bookingId).update({
+          chatroomId: FieldValue.delete()
+        });
+      }
+    }
+  }
+);
+
+// 2. Scheduled deletion for full service chats after 14 days
+exports.scheduledChatCleanup = onSchedule("every week", async (event) => {
+  console.log("Starting weekly cleanup of chatrooms for full service bookings...");
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 14); // 14 days ago
+    const cutoffTimestamp = admin.firestore.Timestamp.fromDate(cutoffDate);
+    
+    // Find completed bookings with a chatroomId and a completedAt older than 14 days
+    const snapshot = await admin.firestore().collection("bookings")
+      .where("bookingStatusCode", "==", "C")
+      .where("completedAt", "<=", cutoffTimestamp)
+      .get();
+      
+    let count = 0;
+    const batch = admin.firestore().batch();
+    let batchCount = 0;
+    
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const chatId = data.chatroomId;
+      
+      // Mode !== 0 (full service) and has chat
+      if (chatId && data.completionData?.mode !== 0) {
+        await deleteChatFromRTDB(chatId);
+        
+        // Remove from firestore document
+        batch.update(doc.ref, { chatroomId: FieldValue.delete() });
+        count++;
+        batchCount++;
+        
+        if (batchCount >= 500) {
+          await batch.commit();
+          batchCount = 0;
+          const newBatch = admin.firestore().batch();
+          Object.assign(batch, newBatch);
+        }
+      }
+    }
+    
+    if (batchCount > 0) {
+      await batch.commit();
+    }
+    
+    console.log(`Successfully cleaned up ${count} chatrooms for old full service bookings.`);
+  } catch (error) {
+    console.error("Error in scheduledChatCleanup:", error);
+  }
 });

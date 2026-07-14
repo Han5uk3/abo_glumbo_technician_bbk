@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -1260,75 +1261,114 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              backgroundColor: Colors.white,
               title: Text(AppLocalizations.of(context)!.rejectPayout),
               content: TextField(
+                cursorColor: Colors.black,
                 controller: reasonController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.rejectionReason,
                   hintText: AppLocalizations.of(context)!.enterReason,
-                  border: const OutlineInputBorder(),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
                 ),
               ),
+              actionsAlignment: MainAxisAlignment.start,
               actions: [
-                TextButton(
-                  onPressed: isLoading
-                      ? null
-                      : () => Navigator.pop(dialogContext),
-                  child: Text(AppLocalizations.of(context)!.cancel),
-                ),
-                ElevatedButton(
-                  onPressed: isLoading || reasonController.text.isEmpty
-                      ? null
-                      : () async {
-                          setDialogState(() => isLoading = true);
-                          try {
-                            await UnifiedPayoutServices.rejectPayout(
-                              requestId: request.id!,
-                              reason: reasonController.text,
-                            );
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: eButton(
+                        context: dialogContext,
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black,
+                        onPressed: isLoading
+                            ? null
+                            : () => Navigator.pop(dialogContext),
+                        text: AppLocalizations.of(context)!.cancel,
+                      ),
+                    ),
+                    Expanded(
+                      child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: reasonController,
+                        builder: (contextLocal, value, child) {
+                          return ElevatedButton(
+                            onPressed: isLoading || value.text.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => isLoading = true);
+                                    try {
+                                      await UnifiedPayoutServices.rejectPayout(
+                                        requestId: request.id!,
+                                        reason: value.text,
+                                      );
 
-                            if (dialogContext.mounted) {
-                              Navigator.pop(dialogContext);
-                            }
+                                      if (dialogContext.mounted) {
+                                        Navigator.pop(dialogContext);
+                                      }
 
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.payoutRejected,
-                                  ),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (dialogContext.mounted) {
-                              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${AppLocalizations.of(context)!.error}: $e',
-                                  ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          } finally {
-                            if (dialogContext.mounted) {
-                              setDialogState(() => isLoading = false);
-                            }
-                          }
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.payoutRejected,
+                                            ),
+                                            backgroundColor: Colors.orange,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (dialogContext.mounted) {
+                                        ScaffoldMessenger.of(
+                                          dialogContext,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${AppLocalizations.of(context)!.error}: $e',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    } finally {
+                                      if (dialogContext.mounted) {
+                                        setDialogState(() => isLoading = false);
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.circular(12),
+                              ),
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(AppLocalizations.of(context)!.reject),
+                          );
                         },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(AppLocalizations.of(context)!.reject),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );

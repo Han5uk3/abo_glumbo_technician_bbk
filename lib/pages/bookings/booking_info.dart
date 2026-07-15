@@ -1407,7 +1407,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                     (currentBooking
                                                 .warranty
                                                 ?.assignedTechnician ==
-                                            null ||
+                                            null &&
                                         currentBooking
                                                 .warranty
                                                 ?.assignedTechnicianId ==
@@ -1422,11 +1422,8 @@ class _BookingInfoState extends State<BookingInfo> {
 
                                 if ((warrantyStatus == 'S' ||
                                         warrantyStatus == 'R') &&
-                                    currentBooking
-                                            .warranty
-                                            ?.assignedTechnician
-                                            ?.uid ==
-                                        LocalStore.getUID()) {
+                                    (currentBooking.warranty?.assignedTechnician?.uid == LocalStore.getUID() ||
+                                        currentBooking.warranty?.assignedTechnicianId == LocalStore.getUID())) {
                                   return WarrantyControlsWidget(
                                     booking: currentBooking,
                                     isTracking: isTracking,

@@ -50,7 +50,7 @@ class BookingListTileWidget extends StatelessWidget {
         : null;
 
     final bool isCurrentlyAssignedToMe = isWarranty
-        ? booking.warranty?.assignedTechnician?.uid == LocalStore.getUID()
+        ? (booking.warranty?.assignedTechnician?.uid == LocalStore.getUID() || booking.warranty?.assignedTechnicianId == LocalStore.getUID())
         : booking.agent?.uid == LocalStore.getUID();
 
     final bool currentTechCancelled = isWarranty

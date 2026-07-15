@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 const db = admin.firestore();
 
 function extractCustomerCoordinates(request) {
@@ -14,7 +14,6 @@ function extractCustomerCoordinates(request) {
     return isNaN(num) ? NaN : num;
   };
 
-  // 1. First attempt: Find the address by selectedAddressId
   if (selectedAddressId && addresses.length > 0) {
     const selectedAddr = addresses.find(addr => addr.id === selectedAddressId);
     if (selectedAddr) {
@@ -23,16 +22,14 @@ function extractCustomerCoordinates(request) {
     }
   }
 
-  // 2. Second attempt: Find the address where isSelected is true
   if ((lat === null || isNaN(lat) || lon === null || isNaN(lon)) && addresses.length > 0) {
-    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === 'true');
+    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === "true");
     if (selectedAddr) {
       lat = parseVal(selectedAddr.lat !== undefined && selectedAddr.lat !== null ? selectedAddr.lat : selectedAddr.latitude);
       lon = parseVal(selectedAddr.lon !== undefined && selectedAddr.lon !== null ? selectedAddr.lon : selectedAddr.longitude);
     }
   }
 
-  // 3. Third attempt: Default to first address in the customer's list
   if ((lat === null || isNaN(lat) || lon === null || isNaN(lon)) && addresses.length > 0) {
     const firstAddr = addresses[0];
     lat = parseVal(firstAddr.lat !== undefined && firstAddr.lat !== null ? firstAddr.lat : firstAddr.latitude);
@@ -44,7 +41,6 @@ function extractCustomerCoordinates(request) {
   }
   return { lat, lon };
 }
-
 module.exports.extractCustomerCoordinates = extractCustomerCoordinates;
 
 function extractTechnicianCoordinates(tech) {
@@ -65,7 +61,6 @@ function extractTechnicianCoordinates(tech) {
   }
   return { lat, lon };
 }
-
 module.exports.extractTechnicianCoordinates = extractTechnicianCoordinates;
 
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
@@ -78,11 +73,10 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-
 module.exports.calculateDistanceKm = calculateDistanceKm;
 
 function sendAndStoreNotification({
-  targetRole, // 'customer', 'technician', 'admin'
+  targetRole, // "customer", "technician", "admin"
   targetId,
   titleEn,
   titleAr,
@@ -93,13 +87,118 @@ function sendAndStoreNotification({
   data,
   fcmToken,
   lanCode,
+}) {
+  let collectionName = "users";
+  if (targetRole === "customer") {
+    collectionName = "customers";
+  } else if (targetRole === "admin") {
+    collectionName = "admins";
+  }
+
+  if (data?.type !== "chat") {
+    const requestId = data?.requestId || data?.offerId;
+    let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
+      .where("titleEn", "==", titleEn)
+      .where("bodyEn", "==", bodyEn);
+
+    if (requestId) {
+      query = query.where("data.requestId", "==", requestId);
+    }
+
+    try {
+      return query.get().then(existing => {
+        if (!existing.empty) {
+          console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
+          return null;
+        }
+        return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
+      }).catch(error => {
+        console.error(`Error checking for duplicate notification:`, error);
+        return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
+      });
+    } catch (error) {
+      console.error(`Error checking for duplicate notification:`, error);
+    }
+  }
+
+  return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
 }
 
+async function proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode) {
+  try {
+    await admin
+      .firestore()
+      .collection(collectionName)
+      .doc(targetId)
+      .collection("notifications")
+      .add({
+        titleEn,
+        titleAr,
+        titleUr: titleUr || "",
+        bodyEn,
+        bodyAr,
+        bodyUr: bodyUr || "",
+        data: data || {},
+        read: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    console.log(`Notification stored for ${targetRole} ${targetId}`);
+  } catch (e) {
+    console.error(
+      `Error storing notification for ${targetRole} ${targetId}:`,
+      e
+    );
+  }
+
+  if (fcmToken && fcmToken.trim() !== "") {
+    const title = lanCode === "ar"
+      ? (titleAr || titleEn)
+      : lanCode === "ur"
+        ? (titleUr || titleAr || titleEn)
+        : titleEn;
+    const body = lanCode === "ar"
+      ? (bodyAr || bodyEn)
+      : lanCode === "ur"
+        ? (bodyUr || bodyAr || bodyEn)
+        : bodyEn;
+
+    const message = {
+      notification: { title, body },
+      android: {
+        priority: "high",
+        notification: {
+          channelId: "abo_glumbo_channel",
+          priority: "high",
+          defaultSound: true,
+          defaultVibrateTimings: true,
+          defaultLightSettings: true,
+          visibility: "public",
+          notificationPriority: "PRIORITY_HIGH",
+        },
+      },
+      data: {
+        ...data,
+        lanCode: lanCode || "en",
+        title: title,
+        body: body,
+      },
+      token: fcmToken,
+    };
+
+    try {
+      const response = await admin.messaging().send(message);
+      console.log(`FCM sent to ${targetRole} ${targetId}, msgId: ${response}`);
+      return response;
+    } catch (e) {
+      console.error(`Error sending FCM to ${targetRole} ${targetId}:`, e);
+    }
+  }
+  return null;
+}
 module.exports.sendAndStoreNotification = sendAndStoreNotification;
 
-function getAllAdminUsers() {
+async function getAllAdminUsers() {
   try {
-    // The source of truth for admins is now the dedicated 'admins' collection.
     const adminsSnapshot = await admin
       .firestore()
       .collection("admins")
@@ -111,8 +210,6 @@ function getAllAdminUsers() {
       const data = doc.data();
       const level = data.accessLevel;
 
-      // Per USER request: Only access level 1 or 2 needs to get notifications.
-      // However, accessLevel 0 is Super Admin and should also receive them.
       if (level === 0 || level === 1 || level === 2) {
         adminUsersMap.set(doc.id, doc);
       }
@@ -124,7 +221,6 @@ function getAllAdminUsers() {
     return [];
   }
 }
-
 module.exports.getAllAdminUsers = getAllAdminUsers;
 
 function extractCustomerAddress(request) {
@@ -137,7 +233,7 @@ function extractCustomerAddress(request) {
   }
 
   if (addresses.length > 0) {
-    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === 'true');
+    const selectedAddr = addresses.find(addr => addr.isSelected === true || addr.isSelected === "true");
     if (selectedAddr) return selectedAddr;
   }
 
@@ -147,6 +243,4 @@ function extractCustomerAddress(request) {
 
   return null;
 }
-
 module.exports.extractCustomerAddress = extractCustomerAddress;
-

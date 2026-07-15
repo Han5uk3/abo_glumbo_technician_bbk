@@ -355,7 +355,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.hourglass_empty, size: 80, color: AppColors.secondary),
+              Icon(Icons.hourglass_empty, size: 80, color: AppColors.primary),
               const SizedBox(height: 24),
               Text(
                 locale?.pleaseWaitAccountVerification ??
@@ -384,7 +384,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,

@@ -3436,7 +3436,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'الملفات المسموح بها: jpg, jpeg, png, pdf, doc,';
 
   @override
-  String get uploadFileOrImage => 'تحميل ملف أو صورة';
+  String get uploadFileOrImage => 'رفع ملف أو صورة';
 
   @override
   String get pendingReview => 'قيد المراجعة';
@@ -3871,7 +3871,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get availabilityStatus => 'حالة التوافر';
 
   @override
-  String get youAreNowOnline => 'أنت الآن متاح';
+  String get youAreNowOnline => 'أنت متصل بالإنترنت الآن';
 
   @override
   String get leaveOffForInspectionOnly =>

@@ -3502,10 +3502,10 @@ class AppLocalizationsUr extends AppLocalizations {
       'معاون فائل کی اقسام: jpg, jpeg, png, pdf, doc';
 
   @override
-  String get uploadFileOrImage => 'Upload File or Image';
+  String get uploadFileOrImage => 'فائل یا تصویر اپ لوڈ کریں';
 
   @override
-  String get pendingReview => 'PENDING REVIEW';
+  String get pendingReview => 'جائزے کے لیے زیرِ التواء';
 
   @override
   String get uploadFiles => 'فائلیں اپ لوڈ کریں';
@@ -3945,7 +3945,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get leaveOffForInspectionOnly =>
-      ' (Leave OFF for inspection only, or turn ON for repair details)';
+      '(صرف معائنہ کے لیے اسے بند رکھیں، یا مرمت کی تفصیلات شامل کرنے کے لیے اسے آن کریں)';
 
   @override
   String get youAreNowOffline => 'اب آپ آف لائن ہیں';
@@ -3961,7 +3961,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get files => 'فائلیں';
 
   @override
-  String get enableFullServiceAndRepair => 'Enable Full Service & Repair';
+  String get enableFullServiceAndRepair => 'مکمل سروس اور مرمت فعال کریں';
 
   @override
   String get phoneNumberAlreadyUpdated => 'فون نمبر پہلے ہی اپ ڈیٹ ہو چکا ہے';

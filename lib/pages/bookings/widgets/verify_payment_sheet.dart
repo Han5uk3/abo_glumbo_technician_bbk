@@ -163,8 +163,6 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
       widget.booking.paymentCompletedAt = Timestamp.now();
       widget.booking.paymentCompleted = true;
 
-      // Eagerly generate and upload the invoice in the background
-      await InvoiceService.generateAndUploadInvoice(context, widget.booking);
 
       // Update wallet with outside-app earnings for lifetime tracking
       // Only for full service (mode 1) — inspection fees are excluded

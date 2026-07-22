@@ -410,73 +410,7 @@ class InvoiceService {
     return await pdf.save();
   }
 
-  static Future<bool> generateAndUploadInvoice(
-    BuildContext context,
-    BookingModel booking,
-  ) async {
-    if (booking.bookingStatusCode.toUpperCase() != 'C') {
-      return false;
-    }
-    try {
-      final baseInvoiceId = '${booking.newBookingId ?? booking.id}_${booking.customer.uid}';
 
-      Map<String, String> uploadedUrls = {};
-      final languages = ['en', 'ar', 'ur'];
-
-      for (var langCode in languages) {
-        final loc = lookupAppLocalizations(Locale(langCode));
-        final pdf = await _buildInvoiceDocument(loc, booking);
-        if (pdf == null) continue;
-
-        final bytes = await pdf.save();
-
-        final fileName = '${booking.newBookingId ?? booking.id}_$langCode.pdf';
-        final storageRef = FirebaseStorage.instance.ref(
-          'invoices/${booking.newBookingId ?? booking.id}/$fileName',
-        );
-
-        await storageRef.putData(
-          bytes,
-          SettableMetadata(contentType: 'application/pdf'),
-        );
-        final downloadUrl = await storageRef.getDownloadURL();
-        uploadedUrls[langCode] = downloadUrl;
-      }
-
-      if (uploadedUrls.isEmpty) return false;
-
-      // Save to invoices collection
-      final invoiceModel = InvoiceModel(
-        id: baseInvoiceId,
-        invoiceUrlEn: uploadedUrls['en'],
-        invoiceUrlAr: uploadedUrls['ar'],
-        invoiceUrlUr: uploadedUrls['ur'],
-        createdAt: Timestamp.now(),
-        bookingId: booking.id,
-        newBookingId: booking.newBookingId,
-        userId: booking.customer.uid,
-        technicianId: booking.agent?.uid,
-      );
-
-      await FirebaseFirestore.instance
-          .collection('invoices')
-          .doc(baseInvoiceId)
-          .set(invoiceModel.toMap());
-
-      // Update booking
-      await AppFirestore.bookingsCollectionRef.doc(booking.id).update({
-        'invoiceId': baseInvoiceId,
-        if (uploadedUrls.containsKey('en')) 'invoicePdfUrlEn': uploadedUrls['en'],
-        if (uploadedUrls.containsKey('ar')) 'invoicePdfUrlAr': uploadedUrls['ar'],
-        if (uploadedUrls.containsKey('ur')) 'invoicePdfUrlUr': uploadedUrls['ur'],
-      });
-
-      return true;
-    } catch (e) {
-      debugPrint('Error generating and uploading invoices: $e');
-      return false;
-    }
-  }
 
   static Future<void> generateAndShowInvoice(
     BuildContext context,

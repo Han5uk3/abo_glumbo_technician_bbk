@@ -5208,7 +5208,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get escalated => 'Escalated';
+  String get escalated => 'Pending Admin Review';
 
   @override
   String get resolveIssue => 'Resolve Issue';

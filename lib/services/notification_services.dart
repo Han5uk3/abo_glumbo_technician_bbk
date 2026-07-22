@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io' show Platform;
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'app_services.dart';
 import '../main.dart';
 
@@ -161,8 +162,15 @@ class NotificationServices {
             );
           } else if (notification == null) {
             if (data['type'] == 'custom' || data.containsKey('titleEn')) {
-              String title = data['titleEn'] ?? data['title'] ?? 'Notification';
-              String body = data['bodyEn'] ?? data['body'] ?? '';
+              String lang = 'en';
+              try {
+                lang = LocalStore.getUserlanguage();
+              } catch (e) {
+                lang = 'en';
+              }
+              String capLang = lang.substring(0, 1).toUpperCase() + lang.substring(1);
+              String title = data['title$capLang'] ?? data['titleEn'] ?? data['title'] ?? 'Notification';
+              String body = data['body$capLang'] ?? data['bodyEn'] ?? data['body'] ?? '';
               if (title.isNotEmpty) {
                 showNotification(
                   id: message.hashCode,

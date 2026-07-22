@@ -283,7 +283,7 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
       try {
         const requestRef = db.collection("booking_request").doc(bookingId);
         const autoReqRef = db.collection("auto-assignment_requests").doc(bookingId);
-        
+
         await Promise.allSettled([
           requestRef.update({
             rejectedTechnicians: FieldValue.arrayUnion(techId),
@@ -297,6 +297,52 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
         console.log(`[Offer ${offerId}] Technician ${techId} declined and added to rejectedTechnicians list`);
       } catch (e) {
         console.error(`Error logging declination of offer ${offerId}:`, e);
+      }
+    }
+
+    // Check if status changed to counter_offered
+    if (beforeData.status !== "counter_offered" && afterData.status === "counter_offered") {
+      try {
+        const customerId = afterData.customerId;
+        if (customerId) {
+          const custSnap = await db.collection("customers").doc(customerId).get();
+          if (custSnap.exists) {
+            const custData = custSnap.data();
+            if (custData.fcmToken && custData.fcmToken.trim() !== "") {
+              let timeString = "a new time";
+              if (afterData.proposedTime) {
+                const date = afterData.proposedTime.toDate();
+                timeString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+              }
+
+              const serviceName = afterData.serviceName || "your booking";
+              const serviceNameAr = afterData.serviceNameAr || serviceName;
+              const serviceNameUr = afterData.serviceNameUr || serviceNameAr;
+
+              await sendAndStoreNotification({
+                targetRole: "customer",
+                targetId: customerId,
+                titleEn: "Technician Proposed a New Time",
+                titleAr: "اقترح الفني وقتاً جديداً",
+                titleUr: "ٹیکنیشن نے نیا وقت تجویز کیا ہے",
+                bodyEn: `The technician has proposed a new time: ${timeString} for ${serviceName}.`,
+                bodyAr: `اقترح الفني وقتاً جديداً: ${timeString} لخدمة ${serviceNameAr}.`,
+                bodyUr: `ٹیکنیشن نے ${serviceNameUr} کے لیے نیا وقت تجویز کیا ہے: ${timeString}۔`,
+                data: {
+                  bookingId: bookingId,
+                  offerId: offerId,
+                  category: "counter_offer",
+                  type: "counter_offer"
+                },
+                fcmToken: custData.fcmToken,
+                lanCode: custData.lanCode || "en"
+              });
+              console.log(`[Offer ${offerId}] Sent counter-proposal notification to customer ${customerId}`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Error sending counter offer notification for offer ${offerId}:`, e);
       }
     }
 
@@ -408,7 +454,7 @@ exports.processAutoAssignments = onSchedule(
           if (offer.technicianId) {
             const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
             const isExpired = expiresAt < nowTime;
-            
+
             if (offer.status === "pending" && !isExpired) {
               techsWithOffers.add(offer.technicianId);
             } else if (offer.status !== "pending") {
@@ -587,14 +633,14 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       existingOffersSnapshot.forEach(offerDoc => {
         const offer = offerDoc.data();
         if (offer.technicianId) {
-            const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
-            const isExpired = expiresAt < nowTime;
-            
-            if (offer.status === "pending" && !isExpired) {
-              techsWithOffers.add(offer.technicianId);
-            } else if (offer.status !== "pending") {
-              techsWithOffers.add(offer.technicianId);
-            }
+          const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
+          const isExpired = expiresAt < nowTime;
+
+          if (offer.status === "pending" && !isExpired) {
+            techsWithOffers.add(offer.technicianId);
+          } else if (offer.status !== "pending") {
+            techsWithOffers.add(offer.technicianId);
+          }
         }
       });
 
@@ -893,6 +939,9 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
               titleAr: "إعادة إرسال مستندات الفني",
               titleUr: "ٹیکنیشن کی دستاویزات دوبارہ جمع کر دی گئیں",
               bodyEn: `Technician "${techName}" has resubmitted their documents for review.`,
+              titleAr: "إعادة إرسال مستندات الفني",
+              titleUr: "ٹیکنیشن کی دستاویزات دوبارہ جمع کر دی گئیں",
+              bodyEn: `Technician "${techName}" has resubmitted their documents for review.`,
               bodyAr: `أعاد الفني "${techName}" إرسال مستنداته للمراجعة.`,
               bodyUr: `ٹیکنیشن "${techName}" نے جائزے کے لیے اپنی دستاویزات دوبارہ جمع کر دی ہیں۔`,
               data: {
@@ -967,35 +1016,70 @@ exports.onJobOfferCreatedForRebook = onDocumentCreated(
         if (!techDoc.exists) return null;
 
         const techData = techDoc.data();
-        if (!techData.fcmToken || techData.fcmToken.trim() === "") return null;
-
-        const lanCode = techData.lanCode || "en";
         const serviceName = offerData.serviceName || "Service";
         const serviceNameAr = offerData.serviceNameAr || serviceName;
         const serviceNameUr = offerData.serviceNameUr || serviceNameAr;
         const customerName = offerData.customerName || "Customer";
 
-        await sendAndStoreNotification({
-          targetRole: "technician",
-          targetId: technicianId,
-          titleEn: "New Rebooking Request",
-          titleAr: "طلب إعادة حجز جديد",
-          titleUr: "نئی دوبارہ بکنگ کی درخواست",
-          bodyEn: `Customer ${customerName} has requested to rebook you for ${serviceName}.`,
-          bodyAr: `لقد طلب العميل ${customerName} إعادة حجزك لخدمة ${serviceNameAr}.`,
-          bodyUr: `صارف ${customerName} نے آپ کو ${serviceNameUr} کے لیے دوبارہ بک کرنے کی درخواست کی ہے۔`,
-          data: {
-            bookingId: offerData.requestId || offerData.bookingId || "",
-            requestId: offerData.requestId || offerData.bookingId || "",
-            offerId: event.params.offerId,
+        if (techData.fcmToken && techData.fcmToken.trim() !== "") {
+          const lanCode = techData.lanCode || "en";
+          await sendAndStoreNotification({
             targetRole: "technician",
-            category: "rebook_request",
-            type: "rebook_request"
-          },
-          fcmToken: techData.fcmToken,
-          lanCode: lanCode
-        });
-        console.log(`[${event.params.offerId}] Rebooking push notification sent to technician ${technicianId}.`);
+            targetId: technicianId,
+            titleEn: `New Booking Assigned: ${serviceName}`,
+            titleAr: `تم تعيين حجز جديد: ${serviceNameAr}`,
+            titleUr: `نیا بکنگ تفویض کیا گیا: ${serviceNameUr}`,
+            bodyEn: "You have been assigned to a booking.",
+            bodyAr: "لقد تم تعيينك في حجز جديد.",
+            bodyUr: "آپ کو ایک بکنگ تفویض کی گئی ہے۔",
+            data: {
+              bookingId: offerData.requestId || offerData.bookingId || "",
+              requestId: offerData.requestId || offerData.bookingId || "",
+              offerId: event.params.offerId,
+              targetRole: "technician",
+              category: "booking",
+              serviceName: serviceName,
+              serviceNameAr: serviceNameAr,
+              serviceNameUr: serviceNameUr,
+              isAdmin: "false"
+            },
+            fcmToken: techData.fcmToken,
+            lanCode: lanCode
+          });
+          console.log(`[${event.params.offerId}] Rebooking push notification sent to technician ${technicianId}.`);
+        }
+
+        // Also notify admins when customer completes a rebooking request
+        const adminUsersDocs = await getAllAdminUsers();
+        for (const doc of adminUsersDocs) {
+          const user = doc.data();
+          if (user.fcmToken && user.fcmToken.trim() !== "") {
+            await sendAndStoreNotification({
+              targetRole: "admin",
+              targetId: doc.id,
+              titleEn: `New Booking Request: ${serviceName}`,
+              titleAr: `طلب حجز جديد: ${serviceNameAr}`,
+              titleUr: `بکنگ کی نئی درخواست: ${serviceNameUr}`,
+              bodyEn: `A new booking for ${serviceName} is pending approval.`,
+              bodyAr: `هناك حجز جديد لـ ${serviceNameAr} بانتظار الموافقة.`,
+              bodyUr: `${serviceNameUr} کے لیے ایک نئی بکنگ منظوری کا انتظار کر رہی ہے۔`,
+              data: {
+                bookingId: offerData.requestId || offerData.bookingId || "",
+                requestId: offerData.requestId || offerData.bookingId || "",
+                offerId: event.params.offerId,
+                targetRole: "admin",
+                category: "booking",
+                serviceName: serviceName,
+                serviceNameAr: serviceNameAr,
+                serviceNameUr: serviceNameUr,
+                isAdmin: "true"
+              },
+              fcmToken: user.fcmToken,
+              lanCode: user.lanCode || "en"
+            });
+          }
+        }
+        console.log(`[${event.params.offerId}] Rebooking push notification sent to admins.`);
       } catch (error) {
         console.error(`[${event.params.offerId}] Error sending rebooking push notification:`, error);
       }

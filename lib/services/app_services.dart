@@ -2589,17 +2589,36 @@ class AppServices {
       completedBookings,
       (p, a, c, w, cust, tech, jr, bookings) {
         Map<String, double> revenue = {};
-        final now = DateTime.now();
+        Map<String, double> rev7 = {};
+        Map<String, double> rev30 = {};
+        Map<String, double> rev12 = {};
+        double totalRev = 0.0;
+        List<Map<String, dynamic>> rawData = [];
 
-        // Get last 6 months list
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        // Prepare keys
         final last6Months = List.generate(6, (i) {
-          final date = DateTime(now.year, now.month - i, 1);
-          return DateFormat('MMM yyyy').format(date);
+          return DateFormat('MMM yyyy').format(DateTime(now.year, now.month - i, 1));
         }).reversed.toList();
 
-        for (var month in last6Months) {
-          revenue[month] = 0.0;
-        }
+        final last12Months = List.generate(12, (i) {
+          return DateFormat('MMM yyyy').format(DateTime(now.year, now.month - i, 1));
+        }).reversed.toList();
+
+        final last30Days = List.generate(30, (i) {
+          return DateFormat('dd MMM').format(today.subtract(Duration(days: i)));
+        }).reversed.toList();
+
+        final last7Days = List.generate(7, (i) {
+          return DateFormat('dd MMM').format(today.subtract(Duration(days: i)));
+        }).reversed.toList();
+
+        for (var m in last6Months) revenue[m] = 0.0;
+        for (var m in last12Months) rev12[m] = 0.0;
+        for (var d in last30Days) rev30[d] = 0.0;
+        for (var d in last7Days) rev7[d] = 0.0;
 
         for (var booking in bookings) {
           final date =
@@ -2608,12 +2627,27 @@ class AppServices {
               booking.completedAt?.toDate();
           if (date != null) {
             final monthStr = DateFormat('MMM yyyy').format(date);
-            if (revenue.containsKey(monthStr)) {
-              // Only consider Online payments (Telr: 'C' or 'A')
-              final mode = booking.paymentModeCode.toUpperCase();
-              if (mode == 'C' || mode == 'A') {
-                final amount = (booking.service.price ?? 0.0);
+            final dayStr = DateFormat('dd MMM').format(date);
+            
+            // Only consider Online payments (Telr: 'C' or 'A')
+            final mode = booking.paymentModeCode.toUpperCase();
+            if (mode == 'C' || mode == 'A') {
+              final amount = booking.completionData?.totalCost ?? booking.service.price ?? 0.0;
+              
+              totalRev += amount;
+              rawData.add({'date': date, 'amount': amount});
+
+              if (revenue.containsKey(monthStr)) {
                 revenue[monthStr] = (revenue[monthStr] ?? 0.0) + amount;
+              }
+              if (rev12.containsKey(monthStr)) {
+                rev12[monthStr] = (rev12[monthStr] ?? 0.0) + amount;
+              }
+              if (rev30.containsKey(dayStr)) {
+                rev30[dayStr] = (rev30[dayStr] ?? 0.0) + amount;
+              }
+              if (rev7.containsKey(dayStr)) {
+                rev7[dayStr] = (rev7[dayStr] ?? 0.0) + amount;
               }
             }
           }
@@ -2627,6 +2661,11 @@ class AppServices {
           customerCount: cust,
           technicianCount: tech,
           monthlyRevenue: revenue,
+          revenue7Days: rev7,
+          revenue30Days: rev30,
+          revenue12Months: rev12,
+          totalRevenue: totalRev,
+          rawRevenueData: rawData,
         );
       },
     );

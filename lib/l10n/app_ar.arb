@@ -1308,6 +1308,15 @@
       }
     }
   },
+  "notificationSenttoCustomers": "{count, plural, one {تم إرسال الإشعار إلى عميل واحد.} other {تم إرسال الإشعار إلى {count} عملاء.}}",
+  "@notificationSenttoCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
   "locationTracking": "تتبع الموقع",
   "trackingInactive": "الإيقاف غير النشط",
   "trackingActive": "الإيقاف النشط",
@@ -1615,6 +1624,8 @@
   "pleaseSelectRole": "يرجى تحديد دور وظيفي واحد على الأقل",
   "pleaseUploadDocuments": "يرجى تحميل جميع المستندات الإلزامية",
   "revokeAccess": "إلغاء الصلاحية",
+  "leaveOffForInspectionOnly": " (اتركه مطفأً للفحص فقط، أو فعّله للانتقال لتفاصيل التصليح)",
+  "enableFullServiceAndRepair": "تشغيل خدمة كاملة وتصليح",
   "coreAdminCannotRemove": "لا يمكن إزالة المشرف الأساسي.",
   "onlyCoreAdminCanAdd": "المشرف الأساسي فقط يمكنه إضافة مشرفين جدد.",
   "adminAddedSuccessfully": "تمت إضافة المشرف بنجاح إلى الدعوات المعلقة.",

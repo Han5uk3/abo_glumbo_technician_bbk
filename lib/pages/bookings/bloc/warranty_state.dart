@@ -110,7 +110,14 @@ class WarrantyPauseWorkingFailure extends WarrantyState {
 // Assign Warranty Technician States
 class WarrantyAssignLoading extends WarrantyState {}
 
-class WarrantyAssignSuccess extends WarrantyState {}
+class WarrantyAssignSuccess extends WarrantyState {
+  final UserModel technician;
+
+  const WarrantyAssignSuccess({required this.technician});
+
+  @override
+  List<Object> get props => [technician];
+}
 
 class WarrantyAssignFailure extends WarrantyState {
   final String error;

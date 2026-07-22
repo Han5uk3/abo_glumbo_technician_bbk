@@ -1303,6 +1303,15 @@
       }
     }
   },
+  "notificationSenttoCustomers": "{count, plural, one {1 کسٹمر کو اطلاع بھیج دی گئی۔} other {{count} کسٹمرز کو اطلاع بھیج دی گئی۔}}",
+  "@notificationSenttoCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
   "locationTracking": "لوکیشن ٹریکنگ",
   "trackingInactive": "ٹریکنگ غیر فعال",
   "trackingActive": "ٹریکنگ فعال",

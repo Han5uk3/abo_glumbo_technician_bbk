@@ -222,7 +222,7 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.star,
           Colors.orange,
-          '${agent.rating ?? 0.0} (${agent.reviewCount ?? 0} ${AppLocalizations.of(context)?.reviews ?? "Reviews"})',
+          '${((agent.rating ?? 0.0) / ((agent.reviewCount ?? 1) * 5)).toStringAsFixed(1)} (${agent.reviewCount ?? 0} ${AppLocalizations.of(context)?.reviews ?? "Reviews"})',
         ),
         _buildStatSeparator(),
         _buildStatItem(
@@ -743,8 +743,9 @@ class _AgentInfoState extends State<AgentInfo> {
                   Expanded(
                     child: Text(
                       agent.rejectionReason != null
-                          ? AppLocalizations.of(context)
-                                        ?.waitingTechnicianToVerifyDocuments ??
+                          ? AppLocalizations.of(
+                                  context,
+                                )?.waitingTechnicianToVerifyDocuments ??
                                 "Waiting for technician to re-upload documents"
                           : AppLocalizations.of(
                                   context,

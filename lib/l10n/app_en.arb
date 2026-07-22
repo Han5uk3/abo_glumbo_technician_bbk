@@ -1277,10 +1277,12 @@
   "noJobCategoriesAvailable": "No job categories available",
   "availabilityStatus": "Availability Status",
   "youAreNowOnline": "You are now online",
+  "leaveOffForInspectionOnly": " (Leave OFF for inspection only, or turn ON for repair details)",
   "youAreNowOffline": "You are now offline",
   "youAreCurrentlyUnavailable": "You are currently unavailable for requests",
   "youAreAvailableForRequests": "You are available for requests",
   "files": "Files",
+  "enableFullServiceAndRepair": "Enable Full Service & Repair",
   "phoneNumberAlreadyUpdated": "Phone number already updated",
   "phoneNumberFormatHint": "Phone number must start with 05",
   "manageTransactions": "Manage Transactions",
@@ -1301,6 +1303,15 @@
   "fillInBothEnglishAndArabicMessageContent": "Please fill in both English and Arabic message content",
   "notificationSenttoTechnicians": "{count, plural, one {Notification sent to 1 technician.} other {Notification sent to {count} technicians.}}",
   "@notificationSenttoTechnicians": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "notificationSenttoCustomers": "{count, plural, one {Notification sent to 1 customer.} other {Notification sent to {count} customers.}}",
+  "@notificationSenttoCustomers": {
     "placeholders": {
       "count": {
         "type": "int",

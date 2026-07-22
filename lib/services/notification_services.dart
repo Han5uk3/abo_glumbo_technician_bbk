@@ -13,6 +13,34 @@ import '../main.dart';
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('📨 Background message received: ${message.messageId}');
+  final data = message.data;
+  if (message.notification == null && (data['type'] == 'custom' || data.containsKey('titleEn'))) {
+    try {
+      String title = data['titleEn'] ?? data['title'] ?? 'Notification';
+      String body = data['bodyEn'] ?? data['body'] ?? '';
+      
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
+      const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsDarwin);
+      await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+      
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'abo_glumbo_channel', 'Abo Glumbo Notifications',
+        channelDescription: 'Notifications related to Abo Glumbo tasks and updates',
+        importance: Importance.max, priority: Priority.high,
+      );
+      const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails();
+      const NotificationDetails platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
+      
+      await flutterLocalNotificationsPlugin.show(
+        message.hashCode, title, body, platformDetails,
+        payload: json.encode(data),
+      );
+    } catch (e) {
+      debugPrint('❌ Error showing background data notification: $e');
+    }
+  }
   // Note: Notification is already stored by backend in sendAndStoreNotification
   // No need to store it again here to avoid duplicates
 }
@@ -131,6 +159,19 @@ class NotificationServices {
               body: notification.body ?? '',
               payload: json.encode(message.data),
             );
+          } else if (notification == null) {
+            if (data['type'] == 'custom' || data.containsKey('titleEn')) {
+              String title = data['titleEn'] ?? data['title'] ?? 'Notification';
+              String body = data['bodyEn'] ?? data['body'] ?? '';
+              if (title.isNotEmpty) {
+                showNotification(
+                  id: message.hashCode,
+                  title: title,
+                  body: body,
+                  payload: json.encode(message.data),
+                );
+              }
+            }
           }
         });
 

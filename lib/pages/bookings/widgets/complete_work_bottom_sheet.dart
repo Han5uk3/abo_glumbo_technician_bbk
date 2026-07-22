@@ -448,7 +448,9 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
       context: context,
       builder: (BuildContext context) {
         final serviceCost = _totalCost;
-        final inspectionFee = widget.booking.service.getDiscountedPrice(widget.booking.effectiveInspectionFee);
+        final inspectionFee = widget.booking.service.getDiscountedPrice(
+          widget.booking.effectiveInspectionFee,
+        );
         final total = serviceCost + inspectionFee;
 
         return AlertDialog(
@@ -742,9 +744,9 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _serviceCompleted
-                                ? AppLocalizations.of(context)!.serviceCompleted
-                                : AppLocalizations.of(context)!.inspectionOnly,
+                            AppLocalizations.of(
+                              context,
+                            )!.enableFullServiceAndRepair,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -753,13 +755,9 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _serviceCompleted
-                                ? AppLocalizations.of(
-                                    context,
-                                  )!.serviceCompletedDescription
-                                : AppLocalizations.of(
-                                    context,
-                                  )!.inspectionOnlyDescription,
+                            AppLocalizations.of(
+                              context,
+                            )!.leaveOffForInspectionOnly,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -789,9 +787,6 @@ class _CompleteWorkBottomSheetState extends State<CompleteWorkBottomSheet> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Payment Method Toggle
               const SizedBox(height: 24),
 
               if (_serviceCompleted) ...[

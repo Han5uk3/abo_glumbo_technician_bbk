@@ -23,6 +23,9 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  String _selectedDateFilter = '6 Months';
+  DateTimeRange? _customDateRange;
+  
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -278,9 +281,60 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildRevenueChart(AdminDashboardData data, AppLocalizations l10n) {
+    Map<String, double> revenueMap = {};
+    
+    if (_selectedDateFilter == '7 Days') {
+      revenueMap = Map.from(data.revenue7Days);
+    } else if (_selectedDateFilter == '30 Days') {
+      revenueMap = Map.from(data.revenue30Days);
+    } else if (_selectedDateFilter == '12 Months') {
+      revenueMap = Map.from(data.revenue12Months);
+    } else if (_selectedDateFilter == 'Custom Range...' && _customDateRange != null) {
+      final startDate = _customDateRange!.start;
+      final endDate = _customDateRange!.end;
+      
+      final duration = endDate.difference(startDate).inDays;
+      final isDaily = duration <= 31;
+      
+      // Generate empty spots for the range
+      if (isDaily) {
+        for (int i = 0; i <= duration; i++) {
+          final d = startDate.add(Duration(days: i));
+          revenueMap[DateFormat('dd MMM').format(d)] = 0.0;
+        }
+      } else {
+        // Generate months
+        var curr = DateTime(startDate.year, startDate.month, 1);
+        final endMonth = DateTime(endDate.year, endDate.month, 1);
+        while (curr.isBefore(endMonth) || curr.isAtSameMomentAs(endMonth)) {
+          revenueMap[DateFormat('MMM yyyy').format(curr)] = 0.0;
+          curr = DateTime(curr.year, curr.month + 1, 1);
+        }
+      }
+      
+      final filtered = data.rawRevenueData.where((e) {
+        final date = e['date'] as DateTime;
+        return date.isAfter(startDate.subtract(const Duration(days: 1))) && 
+               date.isBefore(endDate.add(const Duration(days: 1)));
+      });
+
+      for (var item in filtered) {
+        final d = item['date'] as DateTime;
+        final a = item['amount'] as double;
+        final key = isDaily ? DateFormat('dd MMM').format(d) : DateFormat('MMM yyyy').format(d);
+        if (revenueMap.containsKey(key)) {
+          revenueMap[key] = (revenueMap[key] ?? 0.0) + a;
+        }
+      }
+    } else {
+      revenueMap = Map.from(data.monthlyRevenue); // 6 Months
+    }
+
     final spots = <FlSpot>[];
-    final labels = data.monthlyRevenue.keys.toList();
-    final values = data.monthlyRevenue.values.toList();
+    final labels = revenueMap.keys.toList();
+    final values = revenueMap.values.toList();
+    
+    double currentTotalRevenue = values.fold(0.0, (sum, val) => sum + val);
 
     for (int i = 0; i < values.length; i++) {
       spots.add(FlSpot(i.toDouble(), values[i]));
@@ -309,14 +363,72 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.monthlyRevenue,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Revenue',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: _selectedDateFilter,
+                underline: const SizedBox(),
+                items: ['7 Days', '30 Days', '6 Months', '12 Months', 'Custom Range...']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14))))
+                    .toList(),
+                onChanged: (val) async {
+                  if (val != null) {
+                    if (val == 'Custom Range...') {
+                      final previousFilter = _selectedDateFilter;
+                      setState(() {
+                        _selectedDateFilter = val;
+                      });
+                      
+                      final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        initialDateRange: _customDateRange,
+                      );
+                      
+                      if (picked != null) {
+                        setState(() {
+                          _customDateRange = picked;
+                        });
+                      } else {
+                        setState(() {
+                          _selectedDateFilter = previousFilter;
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        _selectedDateFilter = val;
+                      });
+                    }
+                  }
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          Text(
+            '${currentTotalRevenue.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 24),
           Expanded(
             child: LineChart(
               LineChartData(
+                lineTouchData: LineTouchData(
+                  touchSpotThreshold: 50,
+                  handleBuiltInTouches: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (touchedSpot) => Colors.blueGrey.withOpacity(0.8),
+                  ),
+                ),
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
@@ -336,7 +448,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: 1,
+                      interval: (labels.length > 12) ? (labels.length / 5).ceilToDouble() : 1,
                       getTitlesWidget: (double value, TitleMeta meta) {
                         int index = value.toInt();
                         if (index >= 0 && index < labels.length) {
@@ -398,7 +510,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 borderData: FlBorderData(show: false),
                 minX: 0,
                 maxX: (labels.length - 1).toDouble(),
-                minY: 0,
+                minY: -(maxRevenue * 0.1),
                 maxY: maxRevenue * 1.2,
                 lineBarsData: [
                   LineChartBarData(

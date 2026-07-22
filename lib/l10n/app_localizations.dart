@@ -7499,6 +7499,12 @@ abstract class AppLocalizations {
   /// **'You are now online'**
   String get youAreNowOnline;
 
+  /// No description provided for @leaveOffForInspectionOnly.
+  ///
+  /// In en, this message translates to:
+  /// **' (Leave OFF for inspection only, or turn ON for repair details)'**
+  String get leaveOffForInspectionOnly;
+
   /// No description provided for @youAreNowOffline.
   ///
   /// In en, this message translates to:
@@ -7522,6 +7528,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Files'**
   String get files;
+
+  /// No description provided for @enableFullServiceAndRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Full Service & Repair'**
+  String get enableFullServiceAndRepair;
 
   /// No description provided for @phoneNumberAlreadyUpdated.
   ///
@@ -7636,6 +7648,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one {Notification sent to 1 technician.} other {Notification sent to {count} technicians.}}'**
   String notificationSenttoTechnicians(int count);
+
+  /// No description provided for @notificationSenttoCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {Notification sent to 1 customer.} other {Notification sent to {count} customers.}}'**
+  String notificationSenttoCustomers(int count);
 
   /// No description provided for @locationTracking.
   ///

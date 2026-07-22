@@ -3932,6 +3932,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youAreNowOnline => 'You are now online';
 
   @override
+  String get leaveOffForInspectionOnly =>
+      ' (Leave OFF for inspection only, or turn ON for repair details)';
+
+  @override
   String get youAreNowOffline => 'You are now offline';
 
   @override
@@ -3943,6 +3947,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get files => 'Files';
+
+  @override
+  String get enableFullServiceAndRepair => 'Enable Full Service & Repair';
 
   @override
   String get phoneNumberAlreadyUpdated => 'Phone number already updated';
@@ -4008,6 +4015,17 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: 'Notification sent to $count technicians.',
       one: 'Notification sent to 1 technician.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notificationSenttoCustomers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notification sent to $count customers.',
+      one: 'Notification sent to 1 customer.',
     );
     return '$_temp0';
   }

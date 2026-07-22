@@ -174,12 +174,35 @@ class _WarrantyPageState extends State<WarrantyPage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      body: SafeArea(
+    return BlocListener<WarrantyBloc, WarrantyState>(
+      listener: (context, state) {
+        if (state is WarrantyAssignSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${AppLocalizations.of(context)?.agentAssignedSuccessfully ?? 'Technician assigned successfully'} - ${state.technician.name ?? ''}',
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else if (state is WarrantyAssignFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${AppLocalizations.of(context)?.failedToAssignAgent ?? 'Failed to assign technician'}: ${state.error}',
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: _buildAppBar(context),
+        body: SafeArea(
         child: Column(
           children: [
-            if (!widget.isTechnicianView)
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: SearchBar(
@@ -256,8 +279,9 @@ class _WarrantyPageState extends State<WarrantyPage>
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
@@ -420,8 +444,27 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
   List<BookingModel> _filterWarranties(List<BookingModel> warranties) {
     final sortedWarranties = List<BookingModel>.from(warranties);
     sortedWarranties.sort((a, b) {
-      final aTime = a.warranty?.requestedOn?.toDate() ?? a.createdAt?.toDate();
-      final bTime = b.warranty?.requestedOn?.toDate() ?? b.createdAt?.toDate();
+      DateTime? getWarrantyDisplayDate(BookingModel booking) {
+        final warranty = booking.warranty;
+        if (warranty == null) return booking.createdAt?.toDate();
+        switch (widget.warrantyStatusCode) {
+          case 'R':
+            return warranty.requestedOn?.toDate() ?? warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+          case 'S':
+            return warranty.acceptedAt?.toDate() ?? warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+          case 'C':
+            return warranty.completedAt?.toDate() ?? warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+          case 'X':
+            return warranty.rejectedAt?.toDate() ?? warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+          case 'E':
+            return warranty.expiredOn?.toDate() ?? warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+          default:
+            return warranty.createdAt?.toDate() ?? booking.createdAt?.toDate();
+        }
+      }
+
+      final aTime = getWarrantyDisplayDate(a);
+      final bTime = getWarrantyDisplayDate(b);
       if (aTime == null && bTime == null) return 0;
       if (aTime == null) return 1;
       if (bTime == null) return -1;

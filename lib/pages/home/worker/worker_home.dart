@@ -1,9 +1,12 @@
 import 'package:aboglumbo_bbk_panel/common_widget/booking_cards.dart';
+import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -31,6 +34,86 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
   late AnimationController _shimmerController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  Future<void> _searchAndNavigateToTab(String query) async {
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return;
+
+    try {
+      DocumentSnapshot doc = await AppFirestore.bookingsCollectionRef
+          .doc(cleanQuery)
+          .get();
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toUpperCase())
+            .get();
+      }
+      if (!doc.exists) {
+        doc = await AppFirestore.bookingsCollectionRef
+            .doc(cleanQuery.toLowerCase())
+            .get();
+      }
+
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('id', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery)
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toUpperCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+      if (!doc.exists) {
+        final querySnap = await AppFirestore.bookingsCollectionRef
+            .where('newBookingId', isEqualTo: cleanQuery.toLowerCase())
+            .limit(1)
+            .get();
+        if (querySnap.docs.isNotEmpty) {
+          doc = querySnap.docs.first;
+        }
+      }
+
+      if (doc.exists) {
+        final booking = BookingModel.fromDocumentSnapshot(doc);
+        final bookingCode = booking.bookingStatusCode;
+        final index = _bookingStatuses.indexWhere(
+          (status) => status['code'] == bookingCode,
+        );
+        if (index != -1 && index != _tabController.index) {
+          _tabController.animateTo(index);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error searching booking: $e");
+    }
+  }
 
   @override
   void initState() {
@@ -62,6 +145,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
       });
+      _searchAndNavigateToTab(_searchController.text);
     });
   }
 
@@ -95,7 +179,33 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
-            // Search bar removed for technician view as per request
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: SearchBar(
+                side: MaterialStatePropertyAll(
+                  BorderSide(color: Colors.black),
+                ),
+                controller: _searchController,
+                hintStyle: MaterialStatePropertyAll(
+                  TextStyle(color: Colors.black),
+                ),
+                hintText: AppLocalizations.of(context)!.searchByBookingId,
+                leading: const Icon(Icons.search),
+                trailing: _searchQuery.isNotEmpty
+                    ? [
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                          },
+                        ),
+                      ]
+                    : null,
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+              ),
+            ),
             Container(
               height: 64,
               alignment: AlignmentDirectional.centerStart,
@@ -254,7 +364,35 @@ class _BookingListTabState extends State<_BookingListTab>
     uniqueData.sort((a, b) {
       DateTime? getTime(dynamic item) {
         if (item is BookingModel) {
-          return item.createdAt?.toDate();
+          switch (widget.bookingStatusCode) {
+            case 'P':
+              return item.createdAt?.toDate();
+            case 'A':
+              return item.assignedAt?.toDate() ?? item.acceptedAt?.toDate() ?? item.createdAt?.toDate();
+            case 'CP':
+              return item.paymentRequestedAt?.toDate() ?? item.createdAt?.toDate();
+            case 'C':
+              final bool isInAppPayment = item.orderId != null && item.orderId!.isNotEmpty;
+              if (isInAppPayment) {
+                return item.paymentCompletedAt?.toDate() ?? item.completedAt?.toDate() ?? item.createdAt?.toDate();
+              } else {
+                return item.paymentVerifiedAt?.toDate() ?? item.completedAt?.toDate() ?? item.createdAt?.toDate();
+              }
+            case 'X':
+              final currentWorkerId = LocalStore.getUID() ?? '';
+              DateTime? workerCancelledAt;
+              for (var worker in item.cancelledWorkers) {
+                if (worker.uid == currentWorkerId) {
+                  workerCancelledAt = worker.cancelledAt.toDate();
+                  break;
+                }
+              }
+              return workerCancelledAt ?? item.cancelledAt?.toDate() ?? item.createdAt?.toDate();
+            case 'R':
+              return item.rejectedAt?.toDate() ?? item.cancelledAt?.toDate() ?? item.createdAt?.toDate();
+            default:
+              return item.createdAt?.toDate();
+          }
         } else if (item is JobOfferContainer) {
           final timestamp = item.offerData['createdAt'] ?? item.booking?.createdAt;
           if (timestamp != null) {

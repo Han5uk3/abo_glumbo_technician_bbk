@@ -242,6 +242,11 @@ class _AddAdminPageState extends State<AddAdminPage> {
                     : null,
               ),
               const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context)!.phoneNumber,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
               TextFormWidget(
                 controller: _emailController,
                 label:
@@ -257,25 +262,9 @@ class _AddAdminPageState extends State<AddAdminPage> {
                     : null,
               ),
               const SizedBox(height: 16),
-              TextFormWidget(
-                controller: _phoneController,
-                label:
-                    AppLocalizations.of(context)?.phoneNumber ?? 'Phone Number',
-                hintText:
-                    AppLocalizations.of(context)?.egPhoneNumber ??
-                    'e.g. +9665XXXXXXXXX',
-                isPhoneNumber: true,
-                validator: (v) => v == null || v.isEmpty
-                    ? (AppLocalizations.of(context)?.pleaseEnterPhoneNumber ??
-                          'Please enter phone number')
-                    : null,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                AppLocalizations.of(context)?.phoneNoteWithCountryCode ??
-                    '(enter phone number along with country code example : +966)',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
+
+              _buildPhoneInputField(_phoneController),
+
               const SizedBox(height: 24),
               Text(
                 AppLocalizations.of(context)?.accessLevelTitle ??
@@ -319,6 +308,75 @@ class _AddAdminPageState extends State<AddAdminPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneInputField(TextEditingController controller) {
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black.withOpacity(0.1), width: 1),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🇸🇦', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    "+966",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  height: 24,
+                  width: 1,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+                const SizedBox(width: 12),
+              ],
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: controller,
+                textInputAction: TextInputAction.done,
+                keyboardType: TextInputType.number,
+                textAlignVertical: TextAlignVertical.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                  hintText: '5XXXXXXXX',
+                  hintStyle: TextStyle(
+                    color: Colors.black.withOpacity(0.3),
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

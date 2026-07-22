@@ -4010,7 +4010,7 @@ class _BookingInfoState extends State<BookingInfo> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.bookingAssignedTo),
+            content: Text('${l10n.bookingAssignedTo} ${user.name ?? ''}'),
             backgroundColor: Colors.green,
           ),
         );

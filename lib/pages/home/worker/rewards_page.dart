@@ -37,7 +37,9 @@ class _RewardsPageState extends State<RewardsPage> {
         final data = userDoc.data() as Map<String, dynamic>?;
         setState(() {
           totalJobsCount = _toInt(data?['currentMonthJobs']);
-          currentRating = _toDouble(data?['rating']);
+          currentRating = _toDouble(
+            (data?['rating'] / (data?['reviewCount'] * 5)),
+          );
           currentTier = data?['tier'] ?? 'Bronze';
           bonusAmount = _toDouble(data?['bonusAmount']);
           isLoading = false;

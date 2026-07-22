@@ -88,7 +88,7 @@ class _ManageAdminsState extends State<ManageAdmins>
               ),
             ),
             eButton(
-              text: 'Revoke',
+              text: AppLocalizations.of(context)!.revoke,
               onPressed: () => Navigator.of(context).pop(true),
               context: context,
               textColor: Colors.white,
@@ -570,7 +570,9 @@ class _ManageAdminsState extends State<ManageAdmins>
                       }
                     },
                     icon: Icon(
-                      Icons.delete_outline_rounded,
+                      isPending
+                          ? Icons.delete_outline_rounded
+                          : Icons.remove_circle_outline,
                       color: Colors.red.shade400,
                       size: 20,
                     ),

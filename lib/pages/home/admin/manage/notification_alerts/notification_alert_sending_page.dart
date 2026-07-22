@@ -186,9 +186,13 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
 
       if (mounted) {
         _showSnackBar(
-          AppLocalizations.of(
-            context,
-          )!.notificationSenttoTechnicians(selectedRecipientIds.length),
+          _recipientType == 'customer'
+              ? AppLocalizations.of(
+                  context,
+                )!.notificationSenttoCustomers(selectedRecipientIds.length)
+              : AppLocalizations.of(
+                  context,
+                )!.notificationSenttoTechnicians(selectedRecipientIds.length),
           true,
         );
 

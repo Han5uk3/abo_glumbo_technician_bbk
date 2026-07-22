@@ -3944,6 +3944,10 @@ class AppLocalizationsUr extends AppLocalizations {
   String get youAreNowOnline => 'اب آپ آن لائن ہیں';
 
   @override
+  String get leaveOffForInspectionOnly =>
+      ' (Leave OFF for inspection only, or turn ON for repair details)';
+
+  @override
   String get youAreNowOffline => 'اب آپ آف لائن ہیں';
 
   @override
@@ -3955,6 +3959,9 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get files => 'فائلیں';
+
+  @override
+  String get enableFullServiceAndRepair => 'Enable Full Service & Repair';
 
   @override
   String get phoneNumberAlreadyUpdated => 'فون نمبر پہلے ہی اپ ڈیٹ ہو چکا ہے';
@@ -4020,6 +4027,17 @@ class AppLocalizationsUr extends AppLocalizations {
       locale: localeName,
       other: '$count ٹیکنیشنز کو اطلاع بھیج دی گئی۔',
       one: '1 ٹیکنیشن کو اطلاع بھیج دی گئی۔',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notificationSenttoCustomers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count کسٹمرز کو اطلاع بھیج دی گئی۔',
+      one: '1 کسٹمر کو اطلاع بھیج دی گئی۔',
     );
     return '$_temp0';
   }

@@ -230,7 +230,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         'chatroomId': FieldValue.delete(),
       });
 
-      emit(WarrantyAssignSuccess());
+      emit(WarrantyAssignSuccess(technician: event.technician));
     } catch (e) {
       emit(WarrantyAssignFailure(error: e.toString()));
     }

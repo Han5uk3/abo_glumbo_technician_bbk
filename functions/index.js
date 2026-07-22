@@ -663,9 +663,17 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 
     // Get payment amount from completionData
     const inspectionOnly = afterData.completionData?.mode === 0 || false;
+
+    // Calculate effective inspection fee with discount
+    const discountPercentage = afterData.service?.discountPercentage || 0;
+    const baseInspectionFee = afterData.completionData?.inspectionFee || 0;
+    const effectiveInspectionFee = discountPercentage > 0
+      ? baseInspectionFee - (baseInspectionFee * discountPercentage / 100)
+      : baseInspectionFee;
+
     const totalAmount = inspectionOnly
-      ? afterData.completionData?.inspectionFee || 0
-      : afterData.completionData?.totalCost || 0;
+      ? effectiveInspectionFee
+      : (afterData.completionData?.totalCost || 0) + effectiveInspectionFee;
 
     if (fcmToken && fcmToken.trim() !== "") {
       await sendAndStoreNotification({
@@ -701,6 +709,52 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 
     // Determine admin notification texts based on payment method
     const isOutsideApp = afterData.paymentModeCode === 'O';
+
+    // Update Unified Wallet for In-App Payments
+    if (!isOutsideApp && afterData.completionData?.mode === 1) {
+      try {
+        const costToCredit = afterData.completionData.totalCost || 0;
+        if (costToCredit > 0) {
+          const walletRef = admin.firestore().collection("unified_wallets").doc(agent.uid);
+
+          await admin.firestore().runTransaction(async (transaction) => {
+            const walletDoc = await transaction.get(walletRef);
+            if (walletDoc.exists) {
+              transaction.update(walletRef, {
+                inAppEarnings: admin.firestore.FieldValue.increment(costToCredit),
+                totalCompletionAmount: admin.firestore.FieldValue.increment(costToCredit),
+                totalAvailableBalance: admin.firestore.FieldValue.increment(costToCredit),
+                lifetimeTotal: admin.firestore.FieldValue.increment(costToCredit),
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+              });
+            } else {
+              transaction.set(walletRef, {
+                workerId: agent.uid,
+                totalTips: 0.0,
+                cardTips: 0.0,
+                cashTips: 0.0,
+                paidTips: 0.0,
+                totalBonus: 0.0,
+                paidBonus: 0.0,
+                availableBonus: 0.0,
+                inAppEarnings: costToCredit,
+                outsideAppEarnings: 0.0,
+                totalCompletionAmount: costToCredit,
+                totalAvailableBalance: costToCredit,
+                lifetimeTotal: costToCredit,
+                payoutRequested: false,
+                requestedAmount: 0.0,
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+              });
+            }
+          });
+          console.log(`[${bookingId}] Unified wallet updated with in-app earnings for agent ${agent.uid}, amount: ${costToCredit}`);
+        }
+      } catch (error) {
+        console.error(`[${bookingId}] Error updating unified wallet for in-app earnings:`, error);
+      }
+    }
+
     const adminTitleEn = isOutsideApp ? "Payment received outside app" : "Payment received within app";
     const adminTitleAr = isOutsideApp ? "تم استلام الدفع خارج التطبيق" : "تم استلام الدفع داخل التطبيق";
     const adminTitleUr = isOutsideApp ? "ایپ کے باہر ادائیگی موصول ہوئی" : "ایپ کے اندر ادائیگی موصول ہوئی";
@@ -4898,14 +4952,14 @@ async function deleteChatFromRTDB(chatId) {
     if (chatSnap.exists()) {
       const chatData = chatSnap.val();
       const participants = chatData.participants || {};
-      
+
       await rtdb.ref(`messages/${chatId}`).remove();
-      
+
       // Delete userChats entries BEFORE deleting the main chat so participant rules still pass
       for (const userId of Object.keys(participants)) {
         await rtdb.ref(`userChats/${userId}/${chatId}`).remove();
       }
-      
+
       await rtdb.ref(`chats/${chatId}`).remove();
       console.log(`[${chatId}] Chat successfully deleted from RTDB.`);
     } else {
@@ -4931,9 +4985,9 @@ exports.chatCleanupOnCompletion = onDocumentUpdated(
 
       if (mode === 0 && chatId) {
         console.log(`[${bookingId}] Booking completed as 'inspection only'. Cleaning up chatroom ${chatId}...`);
-        
+
         await deleteChatFromRTDB(chatId);
-        
+
         // Remove chatroomId from booking
         await admin.firestore().collection("bookings").doc(bookingId).update({
           chatroomId: FieldValue.delete()
@@ -4950,30 +5004,30 @@ exports.scheduledChatCleanup = onSchedule("0 0 * * 0", async (event) => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 14); // 14 days ago
     const cutoffTimestamp = admin.firestore.Timestamp.fromDate(cutoffDate);
-    
+
     // Find completed bookings with a chatroomId and a completedAt older than 14 days
     const snapshot = await admin.firestore().collection("bookings")
       .where("bookingStatusCode", "==", "C")
       .where("completedAt", "<=", cutoffTimestamp)
       .get();
-      
+
     let count = 0;
     const batch = admin.firestore().batch();
     let batchCount = 0;
-    
+
     for (const doc of snapshot.docs) {
       const data = doc.data();
       const chatId = data.chatroomId;
-      
+
       // Mode !== 0 (full service) and has chat
       if (chatId && data.completionData?.mode !== 0) {
         await deleteChatFromRTDB(chatId);
-        
+
         // Remove from firestore document
         batch.update(doc.ref, { chatroomId: FieldValue.delete() });
         count++;
         batchCount++;
-        
+
         if (batchCount >= 500) {
           await batch.commit();
           batchCount = 0;
@@ -4982,11 +5036,11 @@ exports.scheduledChatCleanup = onSchedule("0 0 * * 0", async (event) => {
         }
       }
     }
-    
+
     if (batchCount > 0) {
       await batch.commit();
     }
-    
+
     console.log(`Successfully cleaned up ${count} chatrooms for old full service bookings.`);
   } catch (error) {
     console.error("Error in scheduledChatCleanup:", error);

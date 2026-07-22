@@ -235,8 +235,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(context)?.agentAssignedSuccessfully ??
-                    'Technician assigned successfully',
+                '${AppLocalizations.of(context)?.agentAssignedSuccessfully ?? 'Technician assigned successfully'} - ${state.assignedAgent?.name ?? ''}',
               ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
@@ -484,7 +483,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
   }
 
   // Filter data based on search query, date range, and remove duplicates
-  List<dynamic> _filterData(List<dynamic> data) {
+  List<dynamic> _filterData(List<dynamic> data, {required String selectedBookingStatus}) {
     // 1. Remove duplicates by Booking ID to avoid UI ghosting
     final Map<String, dynamic> uniqueMap = {};
     for (var item in data) {
@@ -497,8 +496,8 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     }
     var filtered = uniqueMap.values.toList();
 
-    // 2. Date filter
-    if (_startDate != null && _endDate != null) {
+    // 2. Date filter (only if not searching for a specific ID)
+    if (_startDate != null && _endDate != null && _searchQuery.isEmpty) {
       filtered = filtered.where((item) {
         DateTime? createdAt;
         if (item is BookingModel) {
@@ -515,7 +514,50 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       }).toList();
     }
 
-    // 3. Search filter
+    // 3. Sort by displayed date (newest first)
+    filtered.sort((a, b) {
+      DateTime? getTime(dynamic item) {
+        if (item is BookingModel) {
+          switch (selectedBookingStatus) {
+            case 'P':
+              return item.createdAt?.toDate();
+            case 'A':
+              return item.assignedAt?.toDate() ?? item.acceptedAt?.toDate() ?? item.createdAt?.toDate();
+            case 'CP':
+              return item.paymentRequestedAt?.toDate() ?? item.createdAt?.toDate();
+            case 'C':
+              final bool isInAppPayment = item.orderId != null && item.orderId!.isNotEmpty;
+              if (isInAppPayment) {
+                return item.paymentCompletedAt?.toDate() ?? item.completedAt?.toDate() ?? item.createdAt?.toDate();
+              } else {
+                return item.paymentVerifiedAt?.toDate() ?? item.completedAt?.toDate() ?? item.createdAt?.toDate();
+              }
+            case 'X':
+              return item.cancelledAt?.toDate() ?? item.createdAt?.toDate();
+            case 'R':
+              return item.rejectedAt?.toDate() ?? item.cancelledAt?.toDate() ?? item.createdAt?.toDate();
+            default:
+              return item.createdAt?.toDate();
+          }
+        } else if (item is JobOfferContainer) {
+          final timestamp = item.offerData['createdAt'] ?? item.booking?.createdAt;
+          if (timestamp != null) {
+            return (timestamp as dynamic).toDate();
+          }
+        }
+        return null;
+      }
+
+      final aTime = getTime(a);
+      final bTime = getTime(b);
+
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return bTime.compareTo(aTime);
+    });
+
+    // 4. Search filter
     if (_searchQuery.isEmpty) {
       return filtered;
     }
@@ -590,7 +632,10 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         }
 
         final allData = snapshot.data ?? [];
-        final filteredData = _filterData(allData);
+        final filteredData = _filterData(
+          allData,
+          selectedBookingStatus: selectedBookingStatus,
+        );
 
         if (filteredData.isEmpty) {
           return _buildEmptyState(

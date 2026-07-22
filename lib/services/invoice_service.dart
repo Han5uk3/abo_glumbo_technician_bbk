@@ -1,4 +1,3 @@
-import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,9 +7,6 @@ import 'package:printing/printing.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:intl/intl.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/models/invoice.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:arabic_reshaper/arabic_reshaper.dart';
 
 class InvoiceService {
@@ -215,8 +211,9 @@ class InvoiceService {
                     pw.Text(reshape(loc.completedAtLabel(completedAtStr))),
                     pw.Text(
                       reshape(loc.paymentModeLabel(
-                        (booking.paymentModeCode.toUpperCase() == 'C' ||
-                                booking.paymentModeCode.toUpperCase() == 'A')
+                        (booking.orderId != null && booking.orderId!.isNotEmpty) ||
+                                (booking.paymentModeCode.toUpperCase() == 'C' ||
+                                    booking.paymentModeCode.toUpperCase() == 'A')
                             ? loc.insideApp
                             : loc.outsideApp,
                       )),

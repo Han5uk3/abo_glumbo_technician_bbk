@@ -3874,6 +3874,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youAreNowOnline => 'أنت الآن متاح';
 
   @override
+  String get leaveOffForInspectionOnly =>
+      ' (اتركه مطفأً للفحص فقط، أو فعّله للانتقال لتفاصيل التصليح)';
+
+  @override
   String get youAreNowOffline => 'أنت الآن غير متاح';
 
   @override
@@ -3884,6 +3888,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get files => 'الملفات';
+
+  @override
+  String get enableFullServiceAndRepair => 'تشغيل خدمة كاملة وتصليح';
 
   @override
   String get phoneNumberAlreadyUpdated => 'رقم الهاتف تم تحديثه مسبقاً';
@@ -3947,6 +3954,17 @@ class AppLocalizationsAr extends AppLocalizations {
       locale: localeName,
       other: 'تم إرسال الإشعار إلى $count فنّيين.',
       one: 'تم إرسال الإشعار إلى فنّي واحد.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notificationSenttoCustomers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم إرسال الإشعار إلى $count عملاء.',
+      one: 'تم إرسال الإشعار إلى عميل واحد.',
     );
     return '$_temp0';
   }

@@ -124,7 +124,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
         final accounts = snapshot.data ?? [];
 
         if (accounts.isEmpty) {
-          return _EmptyStateWidget(onAddAccount: _showAddEditDialog);
+          return _EmptyStateWidget();
         }
 
         return ListView.separated(
@@ -349,9 +349,7 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
 
 // Extracted to StatelessWidget for better performance
 class _EmptyStateWidget extends StatelessWidget {
-  final VoidCallback onAddAccount;
-
-  const _EmptyStateWidget({required this.onAddAccount});
+  const _EmptyStateWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -401,27 +399,6 @@ class _EmptyStateWidget extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              onPressed: onAddAccount,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                localizations.addFirstAccount,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 18,
-                ),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
             ),
           ],
         ),

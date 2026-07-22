@@ -5057,3 +5057,4 @@ exports.syncAgentToAutoAssignment = bookingTriggers.syncAgentToAutoAssignment;
 exports.onBookingCreatedCleanupOffers = bookingTriggers.onBookingCreatedCleanupOffers;
 exports.onBookingRequestDeletedCleanupOffers = bookingTriggers.onBookingRequestDeletedCleanupOffers;
 exports.onJobOfferCreatedForRebook = bookingTriggers.onJobOfferCreatedForRebook;
+exports.notifyOnTechnicianRegistrationStatusChange = bookingTriggers.notifyOnTechnicianRegistrationStatusChange;

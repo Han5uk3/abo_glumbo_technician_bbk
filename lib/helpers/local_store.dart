@@ -148,6 +148,11 @@ class LocalStore {
     return MyApp.box.get('role_preference');
   }
 
+  /// Get user's role preference synchronously
+  static String? getRolePreferenceSync() {
+    return MyApp.box.get('role_preference');
+  }
+
   /// Clear role preference
   static Future<void> clearRolePreference() async {
     await MyApp.box.delete('role_preference');

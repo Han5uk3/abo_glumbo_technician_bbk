@@ -20,6 +20,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
     on<AcceptWarranty>(_onAcceptWarranty);
     on<AssignWarrantyTechnician>(_onAssignWarrantyTechnician);
     on<RejectWarranty>(_onRejectWarranty);
+    on<AdminRejectWarranty>(_onAdminRejectWarranty);
     on<CancelWarranty>(_onCancelWarranty);
     on<CompleteWarranty>(_onCompleteWarranty);
     on<StartWorkingOnWarranty>(_onStartWorkingOnWarranty);
@@ -49,6 +50,29 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
 
   Future<void> _onRejectWarranty(
     RejectWarranty event,
+    Emitter<WarrantyState> emit,
+  ) async {
+    try {
+      emit(WarrantyRejectLoading());
+
+      await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
+        'warranty.assignedTechnician': FieldValue.delete(),
+        'warranty.assignedTechnicianId': FieldValue.delete(),
+        'warranty.rejectedAt': Timestamp.now(),
+        'warranty.updatedAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+        // Clear chatroom when rejecting warranty
+        'chatroomId': FieldValue.delete(),
+      });
+
+      emit(WarrantyRejectSuccess());
+    } catch (e) {
+      emit(WarrantyRejectFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onAdminRejectWarranty(
+    AdminRejectWarranty event,
     Emitter<WarrantyState> emit,
   ) async {
     try {

@@ -176,6 +176,29 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
           log("pause tracking error: ${state.error}");
+        } else if (state is WarrantyAcceptSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.technicianAcceptedTheRequest, // Using existing translation if possible, or fallback
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state is WarrantyRejectSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.orderRejectedSuccessfully, // Fallback string if needed
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state is WarrantyAcceptFailure || state is WarrantyRejectFailure) {
+          final error = state is WarrantyAcceptFailure ? state.error : (state as WarrantyRejectFailure).error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error), backgroundColor: Colors.red),
+          );
         }
       },
       builder: (context, state) {
@@ -184,6 +207,8 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
         final isStartWorkingLoading = state is WarrantyStartWorkingLoading;
         final isStopWorkingLoading = state is WarrantyStopWorkingLoading;
         final isPauseWorkingLoading = state is WarrantyPauseWorkingLoading;
+        final isAcceptLoading = state is WarrantyAcceptLoading;
+        final isRejectLoading = state is WarrantyRejectLoading;
 
         return ValueListenableBuilder<bool>(
           valueListenable: WarrantyControlsWidget._trackerService.isTracking,
@@ -206,7 +231,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                 // Check warranty status
                 final warrantyStatus =
                     widget.booking.warranty?.warrantyStatusCode ?? '';
-                final isWarrantyStarted = warrantyStatus == 'S' || warrantyStatus == 'R';
+                final isWarrantyStarted = warrantyStatus == 'S';
 
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -225,6 +250,63 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                   ),
                   child: Column(
                     children: [
+                      // Accept / Reject UI for Requested state
+                      if (warrantyStatus == 'R') ...[
+                        Row(
+                          children: [
+                            if (widget.isAdmin)
+                              Expanded(
+                                child: _buildButton(
+                                  onPressed: isRejectLoading
+                                      ? null
+                                      : () => context.read<WarrantyBloc>().add(
+                                            AdminRejectWarranty(
+                                                bookingId: widget.booking.id),
+                                          ),
+                                  label: AppLocalizations.of(context)!.reject, // or Admin Reject
+                                  color: Colors.red.shade50,
+                                  textColor: Colors.red.shade700,
+                                  borderColor: Colors.red.shade200,
+                                  isLoading: isRejectLoading,
+                                ),
+                              )
+                            else ...[
+                              Expanded(
+                                child: _buildButton(
+                                  onPressed: isRejectLoading
+                                      ? null
+                                      : () => context.read<WarrantyBloc>().add(
+                                            RejectWarranty(
+                                                bookingId: widget.booking.id),
+                                          ),
+                                  label: AppLocalizations.of(context)!.reject,
+                                  color: Colors.red.shade50,
+                                  textColor: Colors.red.shade700,
+                                  borderColor: Colors.red.shade200,
+                                  isLoading: isRejectLoading,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildButton(
+                                  onPressed: isAcceptLoading
+                                      ? null
+                                      : () => context.read<WarrantyBloc>().add(
+                                            AcceptWarranty(
+                                                bookingId: widget.booking.id),
+                                          ),
+                                  label: AppLocalizations.of(context)!.accept,
+                                  color: Colors.green.shade50,
+                                  textColor: Colors.green.shade700,
+                                  borderColor: Colors.green.shade200,
+                                  isLoading: isAcceptLoading,
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       // Only show tracking and cancel buttons if warranty is started
                       if (isWarrantyStarted &&
                           widget.booking.trackingStoppedAt == null) ...[

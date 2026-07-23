@@ -9704,7 +9704,7 @@ abstract class AppLocalizations {
   /// No description provided for @escalated.
   ///
   /// In en, this message translates to:
-  /// **'Escalated'**
+  /// **'Pending Admin Review'**
   String get escalated;
 
   /// No description provided for @resolveIssue.

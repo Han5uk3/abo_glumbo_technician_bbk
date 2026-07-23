@@ -360,59 +360,7 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
       }
     }
 
-    // ==============================
-    // 2. Worker Cancellation Notification
-    // ==============================
-    try {
-      const beforeCancelledWorkers = beforeData.cancelledWorkers || [];
-      const afterCancelledWorkers = afterData.cancelledWorkers || [];
 
-      // Find new worker(s) who cancelled
-      const newCancellations = afterCancelledWorkers.filter(
-        (worker) =>
-          !beforeCancelledWorkers.some(
-            (w) =>
-              w.uid === worker.uid &&
-              w.cancelledAt?.toMillis?.() === worker.cancelledAt?.toMillis?.()
-          )
-      );
-
-      if (newCancellations.length > 0) {
-        const latestCancelled = newCancellations[newCancellations.length - 1];
-        const workerName = latestCancelled?.agentName || "Unknown Worker";
-        const workerId = latestCancelled?.uid || "";
-
-        if (adminTokens.length > 0) {
-          for (const { uid, token, lanCode } of adminTokens) {
-            await sendAndStoreNotification({
-              targetRole: "admin",
-              targetId: uid,
-              titleEn: "Booking Cancelled by Technician",
-              titleAr: "إلغاء الحجز من قبل الفني",
-              titleUr: "ٹیکنیشن کی طرف سے بکنگ منسوخ کر دی گئی",
-              bodyEn: `The booking has been cancelled by Technician ${workerName}.`,
-              bodyAr: `تم إلغاء الحجز من قبل الفني ${workerName}.`,
-              bodyUr: `ٹیکنیشن ${workerName} کی طرف سے بکنگ منسوخ کر دی گئی ہے۔`,
-              data: {
-                targetRole: "admin",
-                category: "booking",
-                bookingId,
-                workerId,
-                workerName,
-                isAdmin: "true",
-              },
-              fcmToken: token,
-              lanCode: lanCode,
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error(
-        `[${bookingId}] Error notifying admins of cancellation:`,
-        error
-      );
-    }
 
     return null;
   }
@@ -1588,12 +1536,12 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
       await sendAndStoreNotification({
         targetRole: "customer",
         targetId: customerId,
-        titleEn: "Booking Rejected",
-        titleAr: "تم رفض الحجز",
-        titleUr: "ٹیکنیشن نے منسوخ کر دیا",
-        bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ID: ${afterData.newBookingId || afterData.id}.`,
-        bodyAr: `لقد قام الفني ${lastCancelledWorker.agentName} بإلغاء الحجز ذو الرقم ${afterData.newBookingId || afterData.id}.`,
-        bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} منسوخ کر دی ہے۔`,
+        titleEn: "Booking Cancelled",
+        titleAr: "تم إلغاء الحجز",
+        titleUr: "بکنگ منسوخ کر دی گئی",
+        bodyEn: `Technician ${lastCancelledWorker.agentName} cancelled Booking ${afterData.newBookingId || afterData.id}. A new technician will be assigned to your booking shortly.`,
+        bodyAr: `لقد قام الفني ${lastCancelledWorker.agentName} بإلغاء الحجز ذو الرقم ${afterData.newBookingId || afterData.id}. سيتم تعيين فني جديد لحجزك قريباً.`,
+        bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} منسوخ کر دی ہے۔ آپ کی بکنگ کے لیے جلد ہی ایک نیا ٹیکنیشن مقرر کیا جائے گا۔`,
         data: {
           bookingId: afterData.id,
           bookingStatusCode: afterData.bookingStatusCode,
@@ -1720,7 +1668,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
             bodyAr: `ألغى الفني ${lastCancelledWorker.agentName} الحجز ذو الرقم ${afterData.newBookingId || afterData.id} للعميل ${customerName}.`,
             bodyUr: `ٹیکنیشن ${lastCancelledWorker.agentName} نے کسٹمر ${customerName} کے لیے بکنگ آئی ڈی ${afterData.newBookingId || afterData.id} منسوخ کر دی ہے۔`,
             data: {
-              bookingId: afterData.id,
+              bookingId: afterData.newBookingId || afterData.id,
               bookingStatusCode: afterData.bookingStatusCode,
               cancelledWorkerName: lastCancelledWorker.agentName,
               cancelledWorkerUid: lastCancelledWorker.uid,
@@ -4748,22 +4696,26 @@ function extractTechnicianCoordinates(tech) {
 
 exports.assignNewBookingId_bookings = onDocumentCreated("bookings/{docId}", async (event) => {
   if (!event.data) return null;
-  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+  const bookingTriggers = require('./src/triggers/bookingTriggers');
+  return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
 exports.assignNewBookingId_jobRequests = onDocumentCreated("job_requests/{docId}", async (event) => {
   if (!event.data) return null;
-  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+  const bookingTriggers = require('./src/triggers/bookingTriggers');
+  return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
 exports.assignNewBookingId_bookingRequest = onDocumentCreated("booking_request/{docId}", async (event) => {
   if (!event.data) return null;
-  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+  const bookingTriggers = require('./src/triggers/bookingTriggers');
+  return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
 exports.assignNewBookingId_autoAssignment = onDocumentCreated("auto-assignment_requests/{docId}", async (event) => {
   if (!event.data) return null;
-  return assignNewBookingIdHelper(event.data.ref, event.data.data());
+  const bookingTriggers = require('./src/triggers/bookingTriggers');
+  return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
 exports.updateTechnicianRatingOnReview = onDocumentWritten(
@@ -5058,3 +5010,4 @@ exports.onBookingCreatedCleanupOffers = bookingTriggers.onBookingCreatedCleanupO
 exports.onBookingRequestDeletedCleanupOffers = bookingTriggers.onBookingRequestDeletedCleanupOffers;
 exports.onJobOfferCreatedForRebook = bookingTriggers.onJobOfferCreatedForRebook;
 exports.notifyOnTechnicianRegistrationStatusChange = bookingTriggers.notifyOnTechnicianRegistrationStatusChange;
+exports.notifyOnNewTechnicianRegistration = bookingTriggers.notifyOnNewTechnicianRegistration;

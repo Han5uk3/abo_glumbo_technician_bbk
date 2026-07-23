@@ -317,14 +317,30 @@ class AppServices {
 
   static Stream<List<NotificationModel>> getNotificationsStream() {
     String userId = LocalStore.getUID() ?? '';
-    if (userId.isEmpty) return Stream.value([]);
+    if (userId.isEmpty) {
+      if (kDebugMode) print('getNotificationsStream: userId is empty');
+      return Stream.value([]);
+    }
+    
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode 
+        ? AppFirestore.adminsCollectionRef 
+        : AppFirestore.usersCollectionRef;
 
-    return AppFirestore.usersCollectionRef
+    if (kDebugMode) {
+      print('getNotificationsStream: isAdminMode=$isAdminMode, userId=$userId');
+      print('getNotificationsStream: querying ${isAdminMode ? 'admins' : 'users'}/$userId/notifications');
+    }
+
+    return collectionRef
         .doc(userId)
         .collection('notifications')
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
+          if (kDebugMode) {
+            print('getNotificationsStream: got ${snapshot.docs.length} notifications');
+          }
           return snapshot.docs
               .map((doc) => NotificationModel.fromFirestore(doc))
               .toList();
@@ -337,7 +353,12 @@ class AppServices {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) return;
 
-    await AppFirestore.usersCollectionRef
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode 
+        ? AppFirestore.adminsCollectionRef 
+        : AppFirestore.usersCollectionRef;
+
+    await collectionRef
         .doc(userId)
         .collection('notifications')
         .doc(notificationId)
@@ -348,7 +369,12 @@ class AppServices {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) return;
 
-    await AppFirestore.usersCollectionRef
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode 
+        ? AppFirestore.adminsCollectionRef 
+        : AppFirestore.usersCollectionRef;
+
+    await collectionRef
         .doc(userId)
         .collection('notifications')
         .doc(notificationId)
@@ -359,7 +385,12 @@ class AppServices {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) return;
 
-    final collection = AppFirestore.usersCollectionRef
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode 
+        ? AppFirestore.adminsCollectionRef 
+        : AppFirestore.usersCollectionRef;
+
+    final collection = collectionRef
         .doc(userId)
         .collection('notifications');
 
@@ -377,7 +408,12 @@ class AppServices {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) return Stream.value(0);
 
-    return AppFirestore.usersCollectionRef
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode 
+        ? AppFirestore.adminsCollectionRef 
+        : AppFirestore.usersCollectionRef;
+
+    return collectionRef
         .doc(userId)
         .collection('notifications')
         .where('read', isEqualTo: false)
@@ -391,7 +427,12 @@ class AppServices {
 
     try {
       final batch = FirebaseFirestore.instance.batch();
-      final snapshot = await AppFirestore.usersCollectionRef
+      final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+      final collectionRef = isAdminMode 
+          ? AppFirestore.adminsCollectionRef 
+          : AppFirestore.usersCollectionRef;
+
+      final snapshot = await collectionRef
           .doc(userId)
           .collection('notifications')
           .where('read', isEqualTo: false)
@@ -426,8 +467,13 @@ class AppServices {
       bool isCurrentUserAdmin = currentUser?.isAdmin ?? false;
       String currentUserRole = isCurrentUserAdmin ? 'admin' : 'worker';
 
-      // Query from subcollection: users/{userId}/notifications
-      Query query = AppFirestore.usersCollectionRef
+      final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+      final collectionRef = isAdminMode 
+          ? AppFirestore.adminsCollectionRef 
+          : AppFirestore.usersCollectionRef;
+
+      // Query from subcollection: {collection}/{userId}/notifications
+      Query query = collectionRef
           .doc(userId)
           .collection('notifications')
           .orderBy('createdAt', descending: true);
@@ -3033,19 +3079,17 @@ class AppServices {
         final customerId = offerData['customerId'];
         final isRebook = offerData['isRebook'] == true;
         if (customerId != null) {
-          await _recordCustomerNotification(
-            customerId: customerId,
-            titleEn: 'Technician Accepted!',
-            titleAr: 'تم قبول الفني!',
-            bodyEn: isRebook
-                ? '${technician.name} accepted your rebooking request.'
-                : '${technician.name} has accepted your request. Please confirm to proceed.',
-            bodyAr: isRebook
-                ? 'قبل ${technician.name} طلب إعادة الجدولة الخاص بك.'
-                : 'وافق ${technician.name} على طلبك. يرجى التأكيد للمتابعة.',
-            type: 'offer_accepted',
-            data: {'requestId': requestId},
-          );
+          if (isRebook) {
+            await _recordCustomerNotification(
+              customerId: customerId,
+              titleEn: 'Technician Accepted!',
+              titleAr: 'تم قبول الفني!',
+              bodyEn: '${technician.name} accepted your rebooking request.',
+              bodyAr: 'قبل ${technician.name} طلب إعادة الجدولة الخاص بك.',
+              type: 'offer_accepted',
+              data: {'requestId': requestId},
+            );
+          }
         }
       }
       return;

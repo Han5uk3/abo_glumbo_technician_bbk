@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/models/service_location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AssignUserBottomSheet extends StatefulWidget {
   final BookingModel booking;
@@ -40,6 +41,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   Set<String> _selectedZoneIds = {};
   bool _isLoadingZones = true;
   bool _isDataFullyLoaded = false;
+  bool _isNearbyFilterActive = false;
 
   final ValueNotifier<bool> _isLoadingCategory = ValueNotifier(true);
   final ValueNotifier<bool> _isAssigning = ValueNotifier(false);
@@ -423,8 +425,36 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     return false;
   }
 
+  double? _getBookingLat() {
+    try {
+      final selectedAddress = widget.booking.customer.addresses.firstWhere(
+        (a) => a.isSelected == true,
+      );
+      return selectedAddress.lat;
+    } catch (e) {
+      if (widget.booking.customer.addresses.isNotEmpty) {
+        return widget.booking.customer.addresses.first.lat;
+      }
+    }
+    return null;
+  }
+
+  double? _getBookingLon() {
+    try {
+      final selectedAddress = widget.booking.customer.addresses.firstWhere(
+        (a) => a.isSelected == true,
+      );
+      return selectedAddress.lon;
+    } catch (e) {
+      if (widget.booking.customer.addresses.isNotEmpty) {
+        return widget.booking.customer.addresses.first.lon;
+      }
+    }
+    return null;
+  }
+
   Stream<List<UserModel>> _getFilteredUsersStream() {
-    final locationKey = (_selectedZoneIds.toList()..sort()).join('_');
+    final locationKey = '${(_selectedZoneIds.toList()..sort()).join('_')}_$_isNearbyFilterActive';
     if (_cachedUsersStream == null || _lastLocationKey != locationKey) {
       _cachedUsersStream = _createUsersStream().map((users) {
         final assignedUid = widget.booking.agent?.uid;
@@ -438,7 +468,10 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             .where((u) => u.isOnline != false)
             .toList();
 
-        if (_selectedZoneIds.isEmpty) return filteredUsers;
+        final bookingLat = _getBookingLat();
+        final bookingLon = _getBookingLon();
+
+        if (_selectedZoneIds.isEmpty && !_isNearbyFilterActive) return filteredUsers;
 
         final selectedPolygons = _availableZones
             .where((z) => _selectedZoneIds.contains(z.id))
@@ -463,6 +496,15 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           if (userLat == null || userLng == null) {
             return false;
           }
+
+          if (_isNearbyFilterActive && bookingLat != null && bookingLon != null) {
+            final distance = Geolocator.distanceBetween(bookingLat, bookingLon, userLat, userLng) / 1000;
+            if (distance > 20.0) {
+              return false;
+            }
+          }
+
+          if (_selectedZoneIds.isEmpty) return true;
 
           for (final poly in selectedPolygons) {
             if (_isPointInPolygon(userLat, userLng, poly)) {
@@ -580,6 +622,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
   Future<void> _showLocationFilterDialog() async {
     Set<String> tempSelected = Set.from(_selectedZoneIds);
+    bool tempNearby = _isNearbyFilterActive;
 
     final result = await showDialog<bool>(
       context: context,
@@ -591,20 +634,39 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             borderRadius: BorderRadius.circular(24),
           ),
           title: Text(
-            AppLocalizations.of(context)!.filterByLocation,
+            "Filter",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.9,
-            child: _isLoadingZones
-                ? const Center(child: CircularProgressIndicator())
-                : _availableZones.isEmpty
-                ? Text(
-                    AppLocalizations.of(context)!.noDataAvailable,
-                    style: TextStyle(),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SwitchListTile(
+                  title: Text(
+                    "Nearby (20km)",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  value: tempNearby,
+                  activeColor: AppColors.primary,
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (bool val) {
+                    setDialogState(() {
+                      tempNearby = val;
+                    });
+                  },
+                ),
+                const Divider(),
+                Flexible(
+                  child: _isLoadingZones
+                      ? const Center(child: CircularProgressIndicator())
+                      : _availableZones.isEmpty
+                          ? Text(
+                              AppLocalizations.of(context)!.noDataAvailable,
+                              style: TextStyle(),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
                     itemCount: _availableZones.length,
                     itemBuilder: (context, index) {
                       final zone = _availableZones[index];
@@ -631,6 +693,9 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                       );
                     },
                   ),
+                ),
+              ],
+            ),
           ),
           actionsAlignment: MainAxisAlignment.start,
           actions: [
@@ -670,6 +735,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     if (result == true && mounted) {
       setState(() {
         _selectedZoneIds = tempSelected;
+        _isNearbyFilterActive = tempNearby;
         _conflictService.invalidateCache();
         _cachedUsersStream = null;
       });
@@ -681,6 +747,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       _selectedZoneIds.clear();
       _conflictService.invalidateCache();
       _cachedUsersStream = null;
+      _isNearbyFilterActive = false;
       _hasPreloadedConflicts = false;
       _lastPreloadedUsers = null;
       _isDataFullyLoaded = false;
@@ -688,15 +755,21 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   String _getSelectedLocationText() {
-    if (_selectedZoneIds.isEmpty) return "";
-    final lang = LocalStore.getUserlanguage();
-    final selectedNames = _availableZones
-        .where((z) => _selectedZoneIds.contains(z.id))
-        .map(
-          (z) => lang == 'ar' ? z.name_ar : (lang == 'ur' ? z.name_ur : z.name),
-        )
-        .join(', ');
-    return selectedNames;
+    List<String> activeFilters = [];
+    if (_isNearbyFilterActive) {
+      activeFilters.add("Nearby (20km)");
+    }
+    if (_selectedZoneIds.isNotEmpty) {
+      final lang = LocalStore.getUserlanguage();
+      final selectedNames = _availableZones
+          .where((z) => _selectedZoneIds.contains(z.id))
+          .map(
+            (z) => lang == 'ar' ? z.name_ar : (lang == 'ur' ? z.name_ur : z.name),
+          )
+          .join(', ');
+      if (selectedNames.isNotEmpty) activeFilters.add(selectedNames);
+    }
+    return activeFilters.join(' + ');
   }
 
   @override
@@ -752,11 +825,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                       : AppLocalizations.of(context)!.assignToUser,
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  AppLocalizations.of(context)!.loadingAgents,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
+              
               ],
             ),
           ),
@@ -778,7 +847,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
   }
 
   Widget _buildLocationSection() {
-    final hasFilter = _selectedZoneIds.isNotEmpty;
+    final hasFilter = _selectedZoneIds.isNotEmpty || _isNearbyFilterActive;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
@@ -811,7 +880,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                     child: Text(
                       hasFilter
                           ? _getSelectedLocationText()
-                          : AppLocalizations.of(context)!.filterByLocation,
+                          : "Filter",
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: hasFilter
@@ -870,11 +939,21 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
 
         _preloadConflictData(users);
 
+        if (!_isDataFullyLoaded) return _buildShimmerList();
+
+        final availableUsers = users.where((user) {
+          final conflictData = _conflictService.getConflictData(user.uid ?? '');
+          return conflictData == null || !conflictData.hasConflict;
+        }).toList();
+
+        if (availableUsers.isEmpty) return _buildEmptyState();
+
         return ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          itemCount: users.length,
+          itemCount: availableUsers.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) => _buildWorkerTile(users[index]),
+          itemBuilder: (context, index) =>
+              _buildWorkerTile(availableUsers[index]),
         );
       },
     );
@@ -884,6 +963,28 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     final conflictData = _conflictService.getConflictData(user.uid ?? '');
     final lang = LocalStore.getUserlanguage();
     final roleNames = _getJobRoleNames(user.jobRoles, lang);
+
+    double? dist;
+    if (_isNearbyFilterActive) {
+      final bookingLat = _getBookingLat();
+      final bookingLon = _getBookingLon();
+      double? userLat;
+      double? userLng;
+      if (user.lastKnownLocation != null) {
+        userLat = user.lastKnownLocation!.latitude;
+        userLng = user.lastKnownLocation!.longitude;
+      } else if (user.liveLocation != null) {
+        userLat = user.liveLocation!.latitude;
+        userLng = user.liveLocation!.longitude;
+      } else if (user.location != null) {
+        userLat = user.location!.lat;
+        userLng = user.location!.lon;
+      }
+
+      if (bookingLat != null && bookingLon != null && userLat != null && userLng != null) {
+        dist = Geolocator.distanceBetween(bookingLat, bookingLon, userLat, userLng) / 1000;
+      }
+    }
 
     return InkWell(
       onTap: () => _handleAssignAgent(user),
@@ -921,6 +1022,19 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (dist != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 12, color: AppColors.primary),
+                        const SizedBox(width: 4),
+                        Text(
+                          AppLocalizations.of(context)?.kmAway(dist.toStringAsFixed(1)) ?? '${dist.toStringAsFixed(1)} km',
+                          style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                   ],
                   if (conflictData != null && conflictData.hasConflict) ...[

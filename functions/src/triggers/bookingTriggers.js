@@ -46,38 +46,51 @@ exports.onBookingRequestCreated = onDocumentCreated(
           continue;
         }
 
-        // 1. Proximity check (60km)
-        const techCoords = extractTechnicianCoordinates(tech);
-        if (!techCoords) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} has no valid coordinates`);
+        // 0. Job Role Check
+        const categoryId = request.service?.category;
+        const techJobRoles = tech.jobRoles || [];
+        if (categoryId && !techJobRoles.includes(categoryId)) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} does not have required job role (category ${categoryId})`);
           continue;
         }
+
+        const techCoords = extractTechnicianCoordinates(tech);
+        if (!techCoords) continue;
         const techLat = techCoords.lat;
         const techLon = techCoords.lon;
 
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > 60.0) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} too far (${distance.toFixed(1)} km)`);
-          continue;
-        }
+        if (distance > 60.0) continue;
 
-        // 2. Active started booking check
+        // Active booking & Time Conflict check
         const activeBookings = await db.collection("bookings")
           .where("agent.uid", "==", techUid)
           .where("bookingStatusCode", "==", "A")
           .get();
 
         let hasStartedJob = false;
+        let hasTimeConflict = false;
+        const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+
         for (const bookingDoc of activeBookings.docs) {
           const bData = bookingDoc.data();
           if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
             hasStartedJob = true;
-            break;
+          }
+          if (reqBookingTime && bData.bookingDateTime) {
+            if (bData.bookingDateTime.toMillis() === reqBookingTime) {
+              hasTimeConflict = true;
+            }
           }
         }
 
         if (hasStartedJob) {
           console.log(`[Booking Request ${requestId}] Technician ${techUid} has an active started job`);
+          continue;
+        }
+
+        if (hasTimeConflict) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} has a conflicting booking for the same date and time`);
           continue;
         }
 
@@ -253,9 +266,9 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
                       titleEn: "Technician Accepted!",
                       titleAr: "قبل الفني العرض!",
                       titleUr: "ٹیکنیشن نے قبول کر لیا!",
-                      bodyEn: `${techData.name || "A technician"} has accepted your request. Review and select them!`,
-                      bodyAr: `لقد قبل الفني ${techData.name || "فني"} طلبك. اضغط للمراجعة والاختيار!`,
-                      bodyUr: `ٹیکنیشن ${techData.name || "فنی"} نے آپ کی درخواست قبول کر لی ہے۔ جائزہ لیں اور منتخب کریں!`,
+                      bodyEn: `${techData.name || "A technician"} has accepted your booking request. Review and complete your booking.`,
+                      bodyAr: `لقد قبل الفني ${techData.name || "فني"} طلب الحجز الخاص بك. راجع وأكمل حجزك.`,
+                      bodyUr: `ٹیکنیشن ${techData.name || "فنی"} نے آپ کی بکنگ کی درخواست قبول کر لی ہے۔ جائزہ لیں اور اپنی بکنگ مکمل کریں۔`,
                       data: {
                         bookingId: bookingId,
                         category: "manual_accepted",
@@ -489,6 +502,13 @@ exports.processAutoAssignments = onSchedule(
             continue;
           }
 
+          // Job Role Check
+          const categoryId = request.service?.category;
+          const techJobRoles = tech.jobRoles || [];
+          if (categoryId && !techJobRoles.includes(categoryId)) {
+            continue;
+          }
+
           const techCoords = extractTechnicianCoordinates(tech);
           if (!techCoords) continue;
           const techLat = techCoords.lat;
@@ -497,13 +517,16 @@ exports.processAutoAssignments = onSchedule(
           const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
           if (distance > 60.0) continue;
 
-          // Started work check
+          // Started work check & Time Conflict check
           const activeBookings = await db.collection("bookings")
             .where("agent.uid", "==", techUid)
             .where("bookingStatusCode", "==", "A")
             .get();
 
           let hasStartedJob = false;
+          let hasTimeConflict = false;
+          const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+
           for (const bookingDoc of activeBookings.docs) {
             const bData = bookingDoc.data();
             if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
@@ -670,6 +693,13 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
           continue;
         }
 
+        // Job Role Check
+        const categoryId = request.service?.category;
+        const techJobRoles = tech.jobRoles || [];
+        if (categoryId && !techJobRoles.includes(categoryId)) {
+          continue;
+        }
+
         const techCoords = extractTechnicianCoordinates(tech);
         if (!techCoords) continue;
         const techLat = techCoords.lat;
@@ -678,22 +708,29 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
         if (distance > 60.0) continue;
 
-        // Active booking check
+        // Active booking & Time Conflict check
         const activeBookings = await db.collection("bookings")
           .where("agent.uid", "==", techUid)
           .where("bookingStatusCode", "==", "A")
           .get();
 
         let hasStartedJob = false;
+        let hasTimeConflict = false;
+        const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+
         for (const bookingDoc of activeBookings.docs) {
           const bData = bookingDoc.data();
           if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
             hasStartedJob = true;
-            break;
+          }
+          if (reqBookingTime && bData.bookingDateTime) {
+            if (bData.bookingDateTime.toMillis() === reqBookingTime) {
+              hasTimeConflict = true;
+            }
           }
         }
 
-        if (hasStartedJob) continue;
+        if (hasStartedJob || hasTimeConflict) continue;
 
         eligibleTechs.push({ uid: techUid, data: tech });
       }
@@ -939,9 +976,6 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
               titleAr: "إعادة إرسال مستندات الفني",
               titleUr: "ٹیکنیشن کی دستاویزات دوبارہ جمع کر دی گئیں",
               bodyEn: `Technician "${techName}" has resubmitted their documents for review.`,
-              titleAr: "إعادة إرسال مستندات الفني",
-              titleUr: "ٹیکنیشن کی دستاویزات دوبارہ جمع کر دی گئیں",
-              bodyEn: `Technician "${techName}" has resubmitted their documents for review.`,
               bodyAr: `أعاد الفني "${techName}" إرسال مستنداته للمراجعة.`,
               bodyUr: `ٹیکنیشن "${techName}" نے جائزے کے لیے اپنی دستاویزات دوبارہ جمع کر دی ہیں۔`,
               data: {
@@ -1158,5 +1192,251 @@ async function assignNewBookingIdHelper(docRef, data) {
     return null;
   }
 }
+exports.assignNewBookingIdHelper = assignNewBookingIdHelper;
 
 
+// 9. Trigger when a new technician registers
+exports.notifyOnNewTechnicianRegistration = onDocumentCreated(
+  "users/{userId}",
+  async (event) => {
+    const data = event.data?.data();
+    if (!data) return null;
+
+    if (data.role !== "technician") return null;
+
+    if (data.isDocsPendingReview === true) {
+      const techName = data.name || "Technician";
+      try {
+        const adminUsersDocs = await getAllAdminUsers();
+
+        const adminTokens = adminUsersDocs
+          .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
+          .map((doc) => {
+            const adminData = doc.data();
+            return adminData.fcmToken && adminData.fcmToken.trim() !== ""
+              ? {
+                uid: doc.id,
+                token: adminData.fcmToken,
+                lanCode: adminData.lanCode || "en",
+              }
+              : null;
+          })
+          .filter(Boolean);
+
+        if (adminTokens.length > 0) {
+          for (const { uid, token, lanCode } of adminTokens) {
+            await sendAndStoreNotification({
+              targetRole: "admin",
+              targetId: uid,
+              titleEn: "New Technician Registration",
+              titleAr: "تسجيل فني جديد",
+              titleUr: "نئے ٹیکنیشن کی رجسٹریشن",
+              bodyEn: `Technician "${techName}" has registered and is pending review.`,
+              bodyAr: `قام الفني "${techName}" بالتسجيل وبانتظار المراجعة.`,
+              bodyUr: `ٹیکنیشن "${techName}" نے رجسٹریشن کرائی ہے اور جائزے کا منتظر ہے۔`,
+              data: {
+                targetRole: "admin",
+                category: "new_technician_registration",
+                technicianId: event.params.userId,
+                technicianName: techName,
+                isAdmin: "true",
+              },
+              fcmToken: token,
+              lanCode: lanCode,
+            });
+          }
+          console.log(`[${event.params.userId}] Admin notifications sent for new technician registration.`);
+        }
+      } catch (error) {
+        console.error(`[${event.params.userId}] Error sending admin notifications for new technician registration:`, error);
+      }
+    }
+    return null;
+  }
+);
+
+
+exports.onBookingWarrantyUpdated = onDocumentUpdated(
+  "bookings/{bookingId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const bookingId = event.params.bookingId;
+
+    if (!before || !after) return null;
+
+    const beforeStatus = before.warranty?.warrantyStatusCode;
+    const afterStatus = after.warranty?.warrantyStatusCode;
+    
+    // Check if status changed
+    if (beforeStatus !== afterStatus) {
+      const customerId = after.customer?.uid;
+      const techId = before.warranty?.assignedTechnicianId || after.warranty?.assignedTechnicianId;
+      
+      // Helper to fetch user data for FCM
+      const fetchUserData = async (uid, role) => {
+        const col = role === "customer" ? "customers" : "users";
+        const doc = await db.collection(col).doc(uid).get();
+        return doc.exists ? doc.data() : null;
+      };
+
+      // 1. Technician Acceptance (R -> S)
+      if (beforeStatus === 'R' && afterStatus === 'S') {
+        const techName = after.warranty?.assignedTechnician?.name || "The technician";
+        
+        // Notify Customer
+        if (customerId) {
+          const custData = await fetchUserData(customerId, "customer");
+          await sendAndStoreNotification({
+            targetRole: "customer",
+            targetId: customerId,
+            titleEn: "Warranty Request Accepted",
+            titleAr: "تم قبول طلب الضمان",
+            titleUr: "وارنٹی کی درخواست منظور کر لی گئی",
+            bodyEn: `${techName} has accepted your warranty repair request.`,
+            bodyAr: `لقد وافق ${techName} على طلب إصلاح الضمان الخاص بك.`,
+            bodyUr: `${techName} نے آپ کی وارنٹی مرمت کی درخواست قبول کر لی ہے۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: custData?.fcmToken,
+            lanCode: custData?.lanCode,
+          });
+        }
+        
+        // Notify Admins
+        const admins = await getAllAdminUsers();
+        for (const adoc of admins) {
+          const adminData = adoc.data();
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: adoc.id,
+            titleEn: "Warranty Request Accepted",
+            titleAr: "تم قبول طلب الضمان",
+            titleUr: "وارنٹی کی درخواست منظور کر لی گئی",
+            bodyEn: `${techName} has accepted warranty repair request ${bookingId}.`,
+            bodyAr: `وافق ${techName} على طلب إصلاح الضمان ${bookingId}.`,
+            bodyUr: `${techName} نے وارنٹی مرمت کی درخواست ${bookingId} قبول کر لی ہے۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: adminData.fcmToken,
+            lanCode: adminData.lanCode,
+          });
+        }
+      }
+
+      // 2. Admin Rejection (changed to X)
+      if (afterStatus === 'X' && beforeStatus === 'R') {
+        if (customerId) {
+          const custData = await fetchUserData(customerId, "customer");
+          await sendAndStoreNotification({
+            targetRole: "customer",
+            targetId: customerId,
+            titleEn: "Warranty Request Rejected",
+            titleAr: "تم رفض طلب الضمان",
+            titleUr: "وارنٹی کی درخواست مسترد کر دی گئی",
+            bodyEn: `Your warranty repair request has been rejected by the administration.`,
+            bodyAr: `تم رفض طلب إصلاح الضمان الخاص بك من قبل الإدارة.`,
+            bodyUr: `آپ کی وارنٹی مرمت کی درخواست انتظامیہ نے مسترد کر دی ہے۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: custData?.fcmToken,
+            lanCode: custData?.lanCode,
+          });
+        }
+      }
+    }
+    
+    // 3. Technician Rejection (status stays R, but assignedTechnicianId is removed)
+    // AND 4. Technician Reassign (assignedTechnicianId changes while in R)
+    if (beforeStatus === 'R' && afterStatus === 'R') {
+      const beforeTechId = before.warranty?.assignedTechnicianId;
+      const afterTechId = after.warranty?.assignedTechnicianId;
+      
+      const fetchUserData = async (uid, role) => {
+        const col = role === "customer" ? "customers" : "users";
+        const doc = await db.collection(col).doc(uid).get();
+        return doc.exists ? doc.data() : null;
+      };
+
+      // Technician Rejection (removed)
+      if (beforeTechId && !afterTechId) {
+        const customerId = after.customer?.uid;
+        // Notify Customer
+        if (customerId) {
+          const custData = await fetchUserData(customerId, "customer");
+          await sendAndStoreNotification({
+            targetRole: "customer",
+            targetId: customerId,
+            titleEn: "Technician Unavailable",
+            titleAr: "الفني غير متاح",
+            titleUr: "ٹیکنیشن دستیاب نہیں",
+            bodyEn: `The assigned technician is unavailable for your warranty repair. We will assign a new technician shortly.`,
+            bodyAr: `الفني المعين غير متاح لإصلاح الضمان الخاص بك. سنقوم بتعيين فني جديد قريباً.`,
+            bodyUr: `تفویض کردہ ٹیکنیشن آپ کی وارنٹی کی مرمت کے لیے دستیاب نہیں ہے۔ ہم جلد ہی ایک نیا ٹیکنیشن تفویض کریں گے۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: custData?.fcmToken,
+            lanCode: custData?.lanCode,
+          });
+        }
+        
+        // Notify Admins
+        const admins = await getAllAdminUsers();
+        for (const adoc of admins) {
+          const adminData = adoc.data();
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: adoc.id,
+            titleEn: "Warranty Technician Rejected",
+            titleAr: "رفض فني الضمان",
+            titleUr: "وارنٹی ٹیکنیشن مسترد کر دیا گیا",
+            bodyEn: `Technician rejected warranty repair ${bookingId}. Please reassign a new technician.`,
+            bodyAr: `رفض الفني إصلاح الضمان ${bookingId}. يرجى إعادة تعيين فني جديد.`,
+            bodyUr: `ٹیکنیشن نے وارنٹی مرمت ${bookingId} کو مسترد کر دیا۔ براہ کرم نیا ٹیکنیشن تفویض کریں۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: adminData.fcmToken,
+            lanCode: adminData.lanCode,
+          });
+        }
+      }
+      
+      // Technician Reassign (changed from one tech to another, or from null to tech)
+      if (afterTechId && beforeTechId !== afterTechId) {
+        const customerId = after.customer?.uid;
+        const techName = after.warranty?.assignedTechnician?.name || "A new technician";
+        
+        // Notify Customer
+        if (customerId) {
+          const custData = await fetchUserData(customerId, "customer");
+          await sendAndStoreNotification({
+            targetRole: "customer",
+            targetId: customerId,
+            titleEn: "Technician Assigned",
+            titleAr: "تم تعيين فني",
+            titleUr: "ٹیکنیشن تفویض کر دیا گیا",
+            bodyEn: `${techName} has been assigned to your warranty repair request.`,
+            bodyAr: `تم تعيين ${techName} لطلب إصلاح الضمان الخاص بك.`,
+            bodyUr: `${techName} کو آپ کی وارنٹی مرمت کی درخواست کے لیے تفویض کیا گیا ہے۔`,
+            data: { type: "booking", requestId: bookingId },
+            fcmToken: custData?.fcmToken,
+            lanCode: custData?.lanCode,
+          });
+        }
+        
+        // Notify New Technician
+        const techData = await fetchUserData(afterTechId, "technician");
+        await sendAndStoreNotification({
+          targetRole: "technician",
+          targetId: afterTechId,
+          titleEn: "Warranty Repair Assigned",
+          titleAr: "تم تعيين إصلاح الضمان",
+          titleUr: "وارنٹی مرمت تفویض کر دی گئی",
+          bodyEn: `You have been assigned a new warranty repair request.`,
+          bodyAr: `تم تعيينك لطلب إصلاح ضمان جديد.`,
+          bodyUr: `آپ کو ایک نئی وارنٹی مرمت کی درخواست تفویض کی گئی ہے۔`,
+          data: { type: "booking", requestId: bookingId },
+          fcmToken: techData?.fcmToken,
+          lanCode: techData?.lanCode,
+        });
+      }
+    }
+
+    return null;
+  }
+);

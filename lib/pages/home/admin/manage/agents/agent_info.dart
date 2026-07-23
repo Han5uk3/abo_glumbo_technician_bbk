@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -13,6 +14,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AgentInfo extends StatefulWidget {
   final UserModel agent;
@@ -94,10 +96,12 @@ class _AgentInfoState extends State<AgentInfo> {
                   _buildProfessionSection(context),
                   const SizedBox(height: 16),
                   _buildDocumentsSection(context),
-                  const SizedBox(height: 16),
-                  _buildEarningsSection(context),
-                  const SizedBox(height: 16),
-                  _buildBonusTierSection(context),
+                  if (agent.isVerified == true) ...[
+                    const SizedBox(height: 16),
+                    _buildEarningsSection(context),
+                    const SizedBox(height: 16),
+                    _buildBonusTierSection(context),
+                  ],
                   const SizedBox(height: 16),
                   _buildSystemInfoSection(context),
                   const SizedBox(height: 32),
@@ -309,9 +313,13 @@ class _AgentInfoState extends State<AgentInfo> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: (agent.jobRoles ?? []).map((role) {
-            return _buildPill(_getLocalizedJobCategory(role, currentLocale));
-          }).toList(),
+          children: isLoadingCategories
+              ? (agent.jobRoles ?? []).map((_) => _buildShimmerPill()).toList()
+              : (agent.jobRoles ?? []).map((role) {
+                  return _buildPill(
+                    _getLocalizedJobCategory(role, currentLocale),
+                  );
+                }).toList(),
         ),
         if (agent.certifications != null &&
             agent.certifications!.isNotEmpty) ...[
@@ -552,6 +560,21 @@ class _AgentInfoState extends State<AgentInfo> {
           const Divider(height: 32),
           ...children,
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerPill() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: 100,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
@@ -892,21 +915,43 @@ class _AgentInfoState extends State<AgentInfo> {
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
+                backgroundColor: Colors.white,
                 title: Text(l10n.rejectionReason),
                 content: TextField(
                   controller: controller,
                   decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
                     hintText: l10n.enterReasonForReject,
                     errorText: errorText,
                   ),
                   maxLines: 3,
                 ),
+                actionsAlignment: MainAxisAlignment.start,
                 actions: [
-                  TextButton(
+                  eButton(
+                    backgroundColor: Colors.white,
+                    context: context,
+                    textColor: Colors.black,
+
                     onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
+                    text: l10n.cancel
                   ),
-                  TextButton(
+                  eButton(
                     onPressed: () {
                       final text = controller.text.trim();
                       if (text.isEmpty) {
@@ -917,7 +962,10 @@ class _AgentInfoState extends State<AgentInfo> {
                         Navigator.pop(context, text);
                       }
                     },
-                    child: Text(l10n.reject),
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    context: context,
+                    text: l10n.reject,
                   ),
                 ],
               );

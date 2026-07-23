@@ -91,7 +91,7 @@ class ConflictDialogs {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 350),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(

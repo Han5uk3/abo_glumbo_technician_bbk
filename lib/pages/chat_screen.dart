@@ -266,7 +266,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -750,7 +750,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
           const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: _isLoading ? Colors.grey[400] : AppColors.blue1,
+              color: _isLoading ? Colors.grey[400] : AppColors.primary,
               shape: BoxShape.circle,
             ),
             child: IconButton(

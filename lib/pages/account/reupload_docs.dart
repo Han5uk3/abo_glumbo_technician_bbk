@@ -593,6 +593,7 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
                     text: AppLocalizations.of(context)!.submit,
                     onPressed: _submitReupload,
                     context: context,
+                    textColor: Colors.white,
                     backgroundColor: AppColors.primary,
                   ),
                 ],

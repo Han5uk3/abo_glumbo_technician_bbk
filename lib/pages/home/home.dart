@@ -589,15 +589,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 child: OutlinedButton(
                   onPressed: () => _handleLogout(context),
                   style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Colors.red),
                     ),
                   ),
                   child: Text(
                     locale?.logout ?? "Logout",
                     style: const TextStyle(
                       fontSize: 16,
+                      color: Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -25,6 +25,15 @@ class RejectWarranty extends WarrantyEvent {
   List<Object> get props => [bookingId];
 }
 
+class AdminRejectWarranty extends WarrantyEvent {
+  final String bookingId;
+
+  const AdminRejectWarranty({required this.bookingId});
+
+  @override
+  List<Object> get props => [bookingId];
+}
+
 class CancelWarranty extends WarrantyEvent {
   final String bookingId;
   final String technicianUid;

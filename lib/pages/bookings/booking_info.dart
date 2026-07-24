@@ -1391,7 +1391,7 @@ class _BookingInfoState extends State<BookingInfo> {
                           // Verification Controls
                           if (!widget.isWarranty &&
                               !widget.isAdmin &&
-                              (statusCode == 'VP' || statusCode == 'CP'))
+                              statusCode == 'VP')
                             VerifyPaymentControls(booking: currentBooking),
 
                           // Warranty controls (Warranty)
@@ -4233,9 +4233,7 @@ class VerifyPaymentControls extends StatelessWidget {
               Icon(Icons.payment_rounded, color: AppColors.white),
               const SizedBox(width: 12),
               Text(
-                booking.bookingStatusCode == 'CP'
-                    ? AppLocalizations.of(context)!.paymentPending
-                    : AppLocalizations.of(context)!.verificationPending,
+                AppLocalizations.of(context)!.verificationPending,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -4246,11 +4244,9 @@ class VerifyPaymentControls extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            booking.bookingStatusCode == 'CP'
-                ? AppLocalizations.of(context)!.waitingForPayment
-                : AppLocalizations.of(
-                    context,
-                  )!.waitingForTechnicianVerification,
+            AppLocalizations.of(
+              context,
+            )!.waitingForTechnicianVerification,
             style: TextStyle(fontSize: 13, color: AppColors.white),
           ),
           const SizedBox(height: 20),

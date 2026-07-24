@@ -488,8 +488,12 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
 
     // Determine which message to use
     let messageKey = bookingStatus;
-    if (bookingStatus === "C" && isPaymentCompleted && afterData.completionData?.mode !== 0) {
-      messageKey = "C_PAYMENT_COMPLETED";
+    if (bookingStatus === "C") {
+      if (!isPaymentCompleted) {
+        messageKey = "CP";
+      } else if (afterData.completionData?.mode !== 0) {
+        messageKey = "C_PAYMENT_COMPLETED";
+      }
     } else if (technicianChanged && !statusChanged && bookingStatus === "A") {
       messageKey = "REASSIGNED";
     }
@@ -522,6 +526,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
         serviceNameAr: serviceNameAr,
         serviceNameUr: serviceNameUr,
         paymentCompleted: isPaymentCompleted.toString(),
+        requestId: `${event.params.bookingId}_${messageKey}`,
       },
       fcmToken: fcmToken,
       lanCode: lanCode,
@@ -802,7 +807,7 @@ exports.customerTrackingNotification = onDocumentWritten(
       return;
     }
 
-    const isAccepted = afterData.bookingStatusCode === "A";
+    const isAccepted = afterData.bookingStatusCode === "A" || afterData.warranty?.warrantyStatusCode === "S";
     if (!isAccepted) {
       console.log("Booking not accepted, skipping tracking notification...");
       return;
@@ -840,6 +845,9 @@ exports.customerTrackingNotification = onDocumentWritten(
       bodyUr = "ٹیکنیشن آپ کے سروس کے مقام پر پہنچ گیا ہے۔";
     }
 
+    const isWarranty = afterData.warranty?.warrantyStatusCode === "S";
+    const reqId = event.params.bookingId + (isWarranty ? "_warranty" : "");
+
     await sendAndStoreNotification({
       targetRole: "customer",
       targetId: customerId,
@@ -849,7 +857,10 @@ exports.customerTrackingNotification = onDocumentWritten(
       bodyEn,
       bodyAr,
       bodyUr,
-      data: {},
+      data: {
+        requestId: reqId,
+        type: "tracking"
+      },
       fcmToken: fcmToken,
       lanCode: lanCode,
     });
@@ -2290,6 +2301,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           warrantyStatusCode: afterStatusCode,
           serviceName: serviceName,
           isWarranty: "true",
+          requestId: `${bookingId}_warranty_${status}`,
           ...notificationData,
         },
         fcmToken: customerData.fcmToken,
@@ -2332,6 +2344,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
                 warrantyStatusCode: afterStatusCode,
                 serviceName: serviceName,
                 isWarranty: "true",
+                requestId: `${bookingId}_warranty_${status}`,
                 ...notificationData,
               },
               fcmToken: techData.fcmToken,
@@ -2374,6 +2387,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
             serviceName: serviceName,
             isWarranty: "true",
             isAdmin: "true",
+            requestId: `${bookingId}_warranty_${status}`,
             ...notificationData,
           },
           fcmToken: token,
@@ -4998,6 +5012,86 @@ exports.scheduledChatCleanup = onSchedule("0 0 * * 0", async (event) => {
     console.error("Error in scheduledChatCleanup:", error);
   }
 });
+
+exports.notifyTechnicianOnPaymentVerificationPending = onDocumentWritten(
+  "bookings/{bookingId}",
+  async (event) => {
+    const bookingId = event.params.bookingId;
+    const beforeData = event.data?.before?.data();
+    const afterData = event.data?.after?.data();
+
+    if (!afterData) {
+      console.log(`[${bookingId}] Document deleted, skipping...`);
+      return;
+    }
+
+    const wasVP = beforeData?.bookingStatusCode === "VP";
+    const isVP = afterData.bookingStatusCode === "VP";
+
+    if (!isVP || wasVP) {
+      return;
+    }
+
+    console.log(`[${bookingId}] Booking status is VP, proceeding with verification notification`);
+
+    const agent = afterData.agent;
+    if (!agent || !agent.uid) {
+      console.log(`[${bookingId}] No agent assigned, skipping notification`);
+      return;
+    }
+    
+    // Fetch technician data
+    let fcmToken;
+    let lanCode = "en";
+    try {
+      const technicianDoc = await admin
+        .firestore()
+        .collection("users")
+        .doc(agent.uid)
+        .get();
+
+      if (technicianDoc.exists) {
+        const technicianData = technicianDoc.data();
+        fcmToken = technicianData?.fcmToken;
+        lanCode = technicianData?.lanCode || "en";
+      }
+    } catch (error) {
+      console.error(`[${bookingId}] Error fetching technician data:`, error);
+    }
+
+    if (!fcmToken || fcmToken.trim() === "") {
+      console.log(`[${bookingId}] Technician has no valid FCM token, skipping`);
+      return;
+    }
+
+    const customerName = afterData.customer?.name || "Customer";
+    const serviceName = afterData.service?.name || "Service";
+    const serviceNameAr = afterData.service?.name_ar || serviceName;
+    const serviceNameUr = afterData.service?.name_ur || serviceNameAr || serviceName;
+
+    await sendAndStoreNotification({
+      targetRole: "technician",
+      targetId: agent.uid,
+      titleEn: "Payment Verification Required",
+      titleAr: "مطلوب التحقق من الدفع",
+      titleUr: "ادائیگی کی تصدیق درکار ہے",
+      bodyEn: `${customerName} has completed the payment outside the app. Please verify the payment to complete the booking.`,
+      bodyAr: `أكمل ${customerName} الدفع خارج التطبيق. يرجى التحقق من الدفع لإكمال الحجز.`,
+      bodyUr: `${customerName} نے ایپ کے باہر ادائیگی مکمل کر لی ہے۔ براہ کرم بکنگ مکمل کرنے کے لیے ادائیگی کی تصدیق کریں۔`,
+      data: {
+        targetRole: "technician",
+        category: "booking",
+        bookingId: bookingId,
+        serviceName: serviceName,
+        serviceNameAr: serviceNameAr,
+        serviceNameUr: serviceNameUr,
+        requestId: `${bookingId}_VP`,
+      },
+      fcmToken: fcmToken,
+      lanCode: lanCode,
+    });
+  }
+);
 
 // Booking Triggers
 const bookingTriggers = require('./src/triggers/bookingTriggers');

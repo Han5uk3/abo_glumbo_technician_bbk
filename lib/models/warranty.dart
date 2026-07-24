@@ -17,6 +17,9 @@ class WarrantyModel {
   Timestamp? expiredOn;
   Timestamp? preferredDateTime;
   bool? availability;
+  Timestamp? trackingStartedAt;
+  Timestamp? trackingStoppedAt;
+  Timestamp? arrivedAt;
 
   WarrantyModel({
     this.id,
@@ -34,6 +37,9 @@ class WarrantyModel {
     this.expiredOn,
     this.preferredDateTime,
     this.availability,
+    this.trackingStartedAt,
+    this.trackingStoppedAt,
+    this.arrivedAt,
   });
 
   factory WarrantyModel.fromJson(Map<String, dynamic> json) {
@@ -72,6 +78,9 @@ class WarrantyModel {
       expiredOn: parseTimestamp(json['expiredOn']),
       preferredDateTime: parseTimestamp(json['preferredDateTime']),
       availability: json['availability'] as bool?,
+      trackingStartedAt: parseTimestamp(json['trackingStartedAt']),
+      trackingStoppedAt: parseTimestamp(json['trackingStoppedAt']),
+      arrivedAt: parseTimestamp(json['arrivedAt']),
       rejectedTechnicians: (json['rejectedTechnicians'] is List)
           ? (json['rejectedTechnicians'] as List)
                 .map(
@@ -100,6 +109,9 @@ class WarrantyModel {
       'expiredOn': expiredOn,
       'preferredDateTime': preferredDateTime,
       'availability': availability,
+      'trackingStartedAt': trackingStartedAt,
+      'trackingStoppedAt': trackingStoppedAt,
+      'arrivedAt': arrivedAt,
       'rejectedTechnicians': rejectedTechnicians
           ?.map((e) => e.toJson())
           .toList(),

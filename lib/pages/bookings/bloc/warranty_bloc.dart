@@ -192,7 +192,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
   ) async {
     emit(WarrantyStartWorkingLoading());
     try {
-      await tracker.startWorking(
+      await tracker.startWorkingWarranty(
         context: event.context,
         bookingId: event.bookingId,
         uid: event.uid,
@@ -266,7 +266,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
   ) async {
     emit(WarrantyStopWorkingLoading());
     try {
-      await tracker.stopTracking();
+      await tracker.stopTrackingWarranty();
       emit(WarrantyStopWorkingSuccess());
     } catch (e) {
       emit(WarrantyStopWorkingFailure(error: e.toString()));

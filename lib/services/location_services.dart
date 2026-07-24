@@ -653,8 +653,8 @@ class BookingTrackerService {
           'isStarted': false,
           'isStartTracking': false,
           'isTrackingPaused': false,
-          'trackingStoppedAt': FieldValue.serverTimestamp(),
-          'arrivedAt': FieldValue.serverTimestamp(),
+          'warranty.trackingStoppedAt': FieldValue.serverTimestamp(),
+          'warranty.arrivedAt': FieldValue.serverTimestamp(),
           'warranty.isTracking': false,
         });
       } catch (e) {
@@ -718,8 +718,8 @@ class BookingTrackerService {
       'isStarted': true,
       'isStartTracking': true,
       'isTrackingPaused': false,
-      'trackingStartedAt': FieldValue.serverTimestamp(),
-      'trackingStoppedAt': null,
+      'warranty.trackingStartedAt': FieldValue.serverTimestamp(),
+      'warranty.trackingStoppedAt': null,
       'warranty.isTracking': true,
     });
 

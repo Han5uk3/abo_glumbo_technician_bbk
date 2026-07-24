@@ -309,7 +309,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                       ],
                       // Only show tracking and cancel buttons if warranty is started
                       if (isWarrantyStarted &&
-                          widget.booking.trackingStoppedAt == null) ...[
+                          widget.booking.warranty?.trackingStoppedAt == null) ...[
                         Row(
                           children: [
                             if (!isThisBookingActive)
@@ -418,7 +418,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
 
                       // Complete work button (free for warranty)
                       if (isWarrantyStarted &&
-                          widget.booking.trackingStoppedAt != null)
+                          widget.booking.warranty?.trackingStoppedAt != null)
                         SizedBox(
                           width: double.infinity,
                           height: 48,

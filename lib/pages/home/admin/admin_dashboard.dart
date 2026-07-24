@@ -510,12 +510,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 borderData: FlBorderData(show: false),
                 minX: 0,
                 maxX: (labels.length - 1).toDouble(),
-                minY: -(maxRevenue * 0.1),
+                minY: 0,
                 maxY: maxRevenue * 1.2,
                 lineBarsData: [
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
+                    preventCurveOverShooting: true,
                     gradient: LinearGradient(
                       colors: [AppColors.primary, AppColors.secondary],
                     ),

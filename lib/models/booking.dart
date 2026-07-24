@@ -201,6 +201,7 @@ class BookingModel {
       isStartTracking = data['isStarted'] ?? false,
       notes = data['notes'],
       id = data['id'] ?? '',
+      isEscalated = data['isEscalated'] ?? false,
       newBookingId = data['newBookingId'],
       chatroomId = data['chatroomId'],
       issueImage = data['issueImage'],

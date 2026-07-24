@@ -242,13 +242,8 @@ class UnifiedPayoutServices {
           .doc(requestId)
           .set(request.toJson());
 
-      // Update wallet status
-      await AppFirestore.unifiedWalletCollectionRef.doc(workerId).update({
-        'payoutRequested': true,
-        'requestedAmount': totalAmount,
-        'lastPayoutRequestedAt': Timestamp.now(),
-        'lastUpdated': Timestamp.now(),
-      });
+      // Sync wallet to accurately calculate pending amounts
+      await syncExistingDataToUnifiedWallet(workerId);
 
       if (kDebugMode) {
         print('✅ Payout request created: $requestId');
@@ -326,47 +321,8 @@ class UnifiedPayoutServices {
         proofUrl = await _uploadPaymentProof(request.workerId!, paymentProof);
       }
 
-      // Update wallet - deduct amounts and mark as paid
-      final walletRef = AppFirestore.unifiedWalletCollectionRef.doc(
-        request.workerId,
-      );
-      final walletDoc = await walletRef.get();
-
-      if (!walletDoc.exists) {
-        throw Exception('Wallet not found');
-      }
-
-      final wallet = UnifiedWalletModel.fromSnapshot(walletDoc);
-
-      // Calculate new values (Inside App tips, bonus, and in-app earnings)
-      final newCardTips =
-          (wallet.cardTips ?? 0.0) - (request.tipsAmount ?? 0.0);
-      final newAvailableBonus =
-          (wallet.availableBonus ?? 0.0) - (request.bonusAmount ?? 0.0);
-      final newInAppEarnings =
-          (wallet.inAppEarnings ?? 0.0) - (request.earningsAmount ?? 0.0);
-
-      final newPaidTips =
-          (wallet.paidTips ?? 0.0) + (request.tipsAmount ?? 0.0);
-      final newPaidBonus =
-          (wallet.paidBonus ?? 0.0) + (request.bonusAmount ?? 0.0);
-
-      final newTotalAvailable =
-          newCardTips + newAvailableBonus + newInAppEarnings;
-
-      // Update wallet
-      await walletRef.update({
-        'cardTips': newCardTips,
-        'availableBonus': newAvailableBonus,
-        'inAppEarnings': newInAppEarnings,
-        'paidTips': newPaidTips,
-        'paidBonus': newPaidBonus,
-        'totalAvailableBalance': newTotalAvailable,
-        'payoutRequested': false,
-        'requestedAmount': 0.0,
-        'lastPayoutCompletedAt': Timestamp.now(),
-        'lastUpdated': Timestamp.now(),
-      });
+      // We no longer manually update the wallet here. 
+      // Instead, we mark the request as Approved ('A') and then call sync.
 
       // Update request status
       await AppFirestore.unifiedPayoutRequestsCollectionRef
@@ -398,6 +354,11 @@ class UnifiedPayoutServices {
       await AppFirestore.payoutHistoryCollectionRef
           .doc(historyId)
           .set(history.toJson());
+
+      // Sync wallet to recalculate based on newly approved status
+      if (request.workerId != null) {
+        await syncExistingDataToUnifiedWallet(request.workerId!);
+      }
 
       if (kDebugMode) {
         print('✅ Payout approved: $requestId');
@@ -440,13 +401,7 @@ class UnifiedPayoutServices {
 
       // Update wallet status
       if (request.workerId != null) {
-        await AppFirestore.unifiedWalletCollectionRef
-            .doc(request.workerId)
-            .update({
-              'payoutRequested': false,
-              'requestedAmount': 0.0,
-              'lastUpdated': Timestamp.now(),
-            });
+        await syncExistingDataToUnifiedWallet(request.workerId!);
       }
 
       if (kDebugMode) {
@@ -512,13 +467,7 @@ class UnifiedPayoutServices {
 
       // Update wallet status
       if (request.workerId != null) {
-        await AppFirestore.unifiedWalletCollectionRef
-            .doc(request.workerId)
-            .update({
-              'payoutRequested': false,
-              'requestedAmount': 0.0,
-              'lastUpdated': Timestamp.now(),
-            });
+        await syncExistingDataToUnifiedWallet(request.workerId!);
       }
 
       if (kDebugMode) {
@@ -647,17 +596,19 @@ class UnifiedPayoutServices {
       double totalPaidBonus = 0.0;
       double totalPaidEarnings = 0.0;
       bool hasPendingPayout = false;
+      double pendingAmount = 0.0;
 
       for (var doc in payoutsQuery.docs) {
         final reqData = doc.data() as Map<String, dynamic>;
-        // Fallback safely in case of bad data
-        totalPaidTips += (reqData['tipsAmount'] as num?)?.toDouble() ?? 0.0;
-        totalPaidBonus += (reqData['bonusAmount'] as num?)?.toDouble() ?? 0.0;
-        totalPaidEarnings +=
-            (reqData['earningsAmount'] as num?)?.toDouble() ?? 0.0;
-
-        if (reqData['status'] == 'P') {
+        
+        if (reqData['status'] == 'A') {
+          // Only deduct approved payouts from available balance
+          totalPaidTips += (reqData['tipsAmount'] as num?)?.toDouble() ?? 0.0;
+          totalPaidBonus += (reqData['bonusAmount'] as num?)?.toDouble() ?? 0.0;
+          totalPaidEarnings += (reqData['earningsAmount'] as num?)?.toDouble() ?? 0.0;
+        } else if (reqData['status'] == 'P') {
           hasPendingPayout = true;
+          pendingAmount += (reqData['totalAmount'] as num?)?.toDouble() ?? 0.0;
         }
       }
 
@@ -693,6 +644,7 @@ class UnifiedPayoutServices {
         outsideAppEarnings: lifetimeOutsideAppEarnings, // Lifetime info
         totalCompletionAmount: totalEarnings, // Lifetime sum
         payoutRequested: isPayoutRequested,
+        requestedAmount: isPayoutRequested ? pendingAmount : 0.0,
         lastUpdated: Timestamp.now(),
       );
 

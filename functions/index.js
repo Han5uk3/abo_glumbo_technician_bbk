@@ -36,8 +36,8 @@ async function sendAndStoreNotification({
     collectionName = "admins";
   }
 
-  // Check for duplicate notification - only if it's not a chat message
-  if (data?.type !== "chat") {
+  // Check for duplicate notification - only if it's not a chat message and not a custom notification
+  if (data?.type !== "chat" && data?.type !== "custom") {
     const requestId = data?.requestId || data?.offerId;
     let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
       .where("titleEn", "==", titleEn)
@@ -74,52 +74,77 @@ async function sendAndStoreNotification({
         bodyAr,
         bodyUr: bodyUr || "",
         data: data || {},
-        read: false,
+        isRead: false,
         createdAt: FieldValue.serverTimestamp(),
       });
-    console.log(`Notification stored for ${targetRole} ${targetId}`);
-  } catch (e) {
-    console.error(
-      `Error storing notification for ${targetRole} ${targetId}:`,
-      e
-    );
+  } catch (error) {
+    console.error(`Error saving notification to Firestore for ${targetRole} ${targetId}:`, error);
+    // Continue to send FCM even if Firestore save fails
   }
 
-  // 3. Send FCM
+  // 3. Send FCM Push Notification
   if (fcmToken && fcmToken.trim() !== "") {
-    const title = lanCode === "ar"
-      ? (titleAr || titleEn)
+    const title = (lanCode === "ar"
+      ? (titleAr || titleEn || titleUr)
       : lanCode === "ur"
         ? (titleUr || titleAr || titleEn)
-        : titleEn;
-    const body = lanCode === "ar"
-      ? (bodyAr || bodyEn)
+        : (titleEn || titleAr || titleUr)) || "Notification";
+    
+    const body = (lanCode === "ar"
+      ? (bodyAr || bodyEn || bodyUr)
       : lanCode === "ur"
         ? (bodyUr || bodyAr || bodyEn)
-        : bodyEn;
+        : (bodyEn || bodyAr || bodyUr)) || "New Update";
+
+    // Ensure all data payload values are strings (FCM requirement)
+    const safeData = { ...data };
+    for (const key in safeData) {
+      if (safeData[key] === null || safeData[key] === undefined) {
+        delete safeData[key];
+      } else if (typeof safeData[key] !== 'string') {
+        safeData[key] = String(safeData[key]);
+      }
+    }
+
+    const isCustom = safeData.type === "custom";
 
     const message = {
-      notification: { title, body },
       android: {
         priority: "high",
-        notification: {
-          channelId: "abo_glumbo_channel",
-          priority: "high",
-          defaultSound: true,
-          defaultVibrateTimings: true,
-          defaultLightSettings: true,
-          visibility: "public",
-          notificationPriority: "PRIORITY_HIGH",
+      },
+      apns: {
+        headers: {
+          "apns-priority": "10",
+        },
+        payload: {
+          aps: {
+            sound: "default",
+            badge: 1,
+            "content-available": 1,
+          },
         },
       },
       data: {
-        ...data,
+        ...safeData,
         lanCode: lanCode || "en",
         title: title,
         body: body,
       },
       token: fcmToken,
     };
+
+    if (!isCustom) {
+      message.notification = { title, body };
+      message.android.notification = {
+        channelId: "abo_glumbo_channel",
+        priority: "high",
+        defaultSound: true,
+        defaultVibrateTimings: true,
+        defaultLightSettings: true,
+        visibility: "public",
+        notificationPriority: "PRIORITY_HIGH",
+      };
+    }
 
     try {
       const response = await admin.messaging().send(message);
@@ -661,7 +686,8 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
     }
 
     // Determine admin notification texts based on payment method
-    const isOutsideApp = afterData.paymentModeCode === 'O';
+    const inAppCodes = ['c', 'a', 'C', 'A', 'Inside App', 'inside app', 'in app'];
+    const isOutsideApp = !inAppCodes.includes(afterData.paymentModeCode);
 
     // Update Unified Wallet for In-App Payments
     if (!isOutsideApp && afterData.completionData?.mode === 1) {
@@ -1267,7 +1293,17 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
     const data = snap.data();
     const docId = event.params.docId;
     const recipientId = data.recipientId;
-    const targetRole = data.targetRole || "technician"; // Default to technician for backward compatibility
+    
+    let targetRole = data.targetRole;
+    if (!targetRole) {
+      if (data.recipientCollection === 'customers') {
+        targetRole = 'customer';
+      } else if (data.recipientCollection === 'admins') {
+        targetRole = 'admin';
+      } else {
+        targetRole = 'technician'; // Default
+      }
+    }
 
     // Support both old format (single language) and new format (bilingual/trilingual)
     const titleEn = data.titleEn || data.title || null;
@@ -3263,6 +3299,7 @@ exports.resetMonthlyTiers = onSchedule(
           previousMonthTier: userData.tier || "Bronze",
           previousMonthJobs: userData.currentMonthJobs || 0,
           previousMonthRating: userData.rating || 0.0,
+          previousMonthReviewCount: userData.reviewCount || 0,
           currentMonthJobs: 0,
           lastResetDate: admin.firestore.FieldValue.serverTimestamp(),
         });
@@ -3337,20 +3374,25 @@ exports.applyMonthlyBonus = onSchedule(
 
         // Use PREVIOUS month's data (stored before reset)
         const jobs = userData.previousMonthJobs || 0;
-        const rating = userData.previousMonthRating || 0.0;
+        
+        // previousMonthRating stores the sum of all rating values
+        const totalRating = userData.previousMonthRating || 0.0;
+        const reviewCount = userData.previousMonthReviewCount || userData.reviewCount || 0;
+        const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0.0;
+        
         const previousTier = userData.previousMonthTier || "Bronze";
 
         // Calculate tier and bonus percentage based on previous month performance
         let tier = "Bronze";
         let bonusPercentage = 0;
 
-        if (rating >= 4.8 && jobs >= 60) {
+        if (averageRating >= 4.8 && jobs >= 60) {
           tier = "Platinum";
           bonusPercentage = 0.15;
-        } else if (rating >= 4.5 && jobs >= 40) {
+        } else if (averageRating >= 4.5 && jobs >= 40) {
           tier = "Gold";
           bonusPercentage = 0.1;
-        } else if (rating >= 4.0 && jobs >= 20) {
+        } else if (averageRating >= 4.0 && jobs >= 20) {
           tier = "Silver";
           bonusPercentage = 0.05;
         }
@@ -3421,6 +3463,45 @@ exports.applyMonthlyBonus = onSchedule(
             lastBonusMonth: currentMonthKey,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
+
+        // Update unified wallet with bonus amount
+        try {
+          const walletRef = db.collection("unified_wallets").doc(userId);
+          await db.runTransaction(async (transaction) => {
+            const walletDoc = await transaction.get(walletRef);
+            if (walletDoc.exists) {
+              transaction.update(walletRef, {
+                totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
+                lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+              });
+            } else {
+              transaction.set(walletRef, {
+                workerId: userId,
+                totalTips: 0.0,
+                cardTips: 0.0,
+                cashTips: 0.0,
+                paidTips: 0.0,
+                totalBonus: bonusAmount,
+                paidBonus: 0.0,
+                availableBonus: bonusAmount,
+                inAppEarnings: 0.0,
+                outsideAppEarnings: 0.0,
+                totalCompletionAmount: 0.0,
+                totalAvailableBalance: bonusAmount,
+                lifetimeTotal: bonusAmount,
+                payoutRequested: false,
+                requestedAmount: 0.0,
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+              });
+            }
+          });
+          logger.info(`Updated unified wallet for user ${userId} with bonus ₹${bonusAmount.toFixed(2)}`);
+        } catch (walletError) {
+          logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
+        }
 
         // Send notification to worker
         const workerFcmToken = userData.fcmToken;
@@ -3559,18 +3640,21 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
 
       const userData = userDoc.data() || {};
       const currentJobs = userData.currentMonthJobs || 0;
-      const currentRating = userData.rating || 0;
+      const totalRating = userData.rating || 0;
+      const reviewCount = userData.reviewCount || 0;
       const currentTier = userData.tier || "Bronze";
 
       const newJobCount = currentJobs + 1;
+      
+      const averageRating = reviewCount > 0 ? parseFloat((totalRating / reviewCount).toFixed(2)) : 0.0;
 
       // Calculate new tier based on total jobs and overall rating
       let newTier = "Bronze";
-      if (currentRating >= 4.8 && newJobCount >= 60) {
+      if (averageRating >= 4.8 && newJobCount >= 60) {
         newTier = "Platinum";
-      } else if (currentRating >= 4.5 && newJobCount >= 40) {
+      } else if (averageRating >= 4.5 && newJobCount >= 40) {
         newTier = "Gold";
-      } else if (currentRating >= 4.0 && newJobCount >= 20) {
+      } else if (averageRating >= 4.0 && newJobCount >= 20) {
         newTier = "Silver";
       }
 
@@ -3608,7 +3692,7 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
                 oldTier: currentTier,
                 newTier: newTier,
                 jobs: newJobCount.toString(),
-                rating: newAverageRating.toFixed(2),
+                rating: averageRating.toFixed(2),
               },
               fcmToken: fcmToken,
               lanCode: lanCode,
@@ -3622,7 +3706,7 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
       }
 
       logger.info(
-        `✅ Updated stats for user ${workerId} (${serviceName}): ${newJobCount} jobs, ${newAverageRating.toFixed(
+        `✅ Updated stats for user ${workerId} (${serviceName}): ${newJobCount} jobs, ${averageRating.toFixed(
           2
         )} rating, tier: ${newTier}`
       );
@@ -3896,6 +3980,103 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
 );
 
 // ============================================
+// Notify Admins on New Unified Payout Request
+// ============================================
+
+exports.notifyAdminsOnUnifiedPayoutRequest = onDocumentCreated(
+  "unified_payout_requests/{requestId}",
+  async (event) => {
+    const requestId = event.params.requestId;
+    const requestData = event.data?.data();
+
+    if (!requestData) {
+      console.log(`[${requestId}] No unified payout request data found`);
+      return;
+    }
+
+    const workerId = requestData.workerId;
+    const workerName = requestData.workerName || "Technician";
+    const totalAmount = requestData.totalAmount || "0";
+    const status = requestData.status;
+
+    // Only notify on pending requests
+    if (status !== "P") {
+      console.log(`[${requestId}] Payout status is not pending, skipping...`);
+      return;
+    }
+
+    console.log(
+      `[${requestId}] New unified payout request detected for worker ${workerId}, amount: ${totalAmount}`
+    );
+
+    const titleEn = "New Payout Request";
+    const titleAr = "طلب صرف جديد";
+    const titleUr = "نئی پے آؤٹ کی درخواست";
+    const bodyEn = `${workerName} has requested a unified payout of ${totalAmount}. Please review the request.`;
+    const bodyAr = `طلب ${workerName} صرف مجمع بقيمة ${totalAmount}. يرجى مراجعة الطلب.`;
+    const bodyUr = `${workerName} نے ${totalAmount} کی یونیفائیڈ پے آؤٹ کی درخواست کی ہے۔ براہ کرم درخواست کا جائزہ لیں۔`;
+
+    // Fetch all admin users
+    try {
+      const adminUsersDocs = await getAllAdminUsers();
+
+      if (!adminUsersDocs || adminUsersDocs.length === 0) {
+        console.log(`[${requestId}] No admin users found`);
+        return;
+      }
+
+      // Send notification to each admin
+      for (const adminDoc of adminUsersDocs) {
+        const adminData = adminDoc.data();
+        const adminFcmToken = adminData?.fcmToken;
+        const adminLanCode = adminData?.lanCode || "en";
+
+        if (!adminFcmToken || adminFcmToken.trim() === "") {
+          console.log(
+            `[${requestId}] Admin ${adminDoc.id} has no valid FCM token`
+          );
+          continue;
+        }
+
+        await sendAndStoreNotification({
+          targetRole: "admin",
+          targetId: adminDoc.id,
+          titleEn,
+          titleAr,
+          titleUr,
+          bodyEn,
+          bodyAr,
+          bodyUr,
+          data: {
+            targetRole: "admin",
+            category: "unified_payout",
+            requestId,
+            workerId,
+            technicianName: workerName,
+            amount: totalAmount.toString(),
+            type: "unified",
+            isAdmin: "true",
+          },
+          fcmToken: adminFcmToken,
+          lanCode: adminLanCode,
+        });
+      }
+
+      console.log(
+        `[${requestId}] ✅ Unified payout request notifications sent to admins`
+      );
+    } catch (error) {
+      console.error(
+        `[${requestId}] Error sending unified payout request notifications:`,
+        error
+      );
+    }
+
+    return null;
+  }
+);
+
+// ============================================
 // Notify Admins on Tip Payout Request
 // ============================================
 
@@ -4078,6 +4259,122 @@ exports.notifyTechnicianOnTipPayoutCompletion = onDocumentWritten(
     return null;
   }
 );
+// ============================================
+// Notify Technician on Unified Payout Approval/Rejection
+// ============================================
+exports.notifyTechnicianOnUnifiedPayoutStatusChange = onDocumentWritten(
+  "unified_payout_requests/{requestId}",
+  async (event) => {
+    const requestId = event.params.requestId;
+    const beforeData = event.data?.before?.data();
+    const afterData = event.data?.after?.data();
+
+    if (!afterData) {
+      console.log(`[${requestId}] Document deleted, skipping...`);
+      return;
+    }
+
+    const beforeStatus = beforeData?.status;
+    const afterStatus = afterData.status;
+
+    // Check if status changed to approved (A) or rejected (R)
+    if (beforeStatus === afterStatus) {
+      return;
+    }
+
+    if (afterStatus !== "A" && afterStatus !== "R") {
+      return;
+    }
+
+    const workerId = afterData.workerId;
+    const totalAmount = afterData.totalAmount || "0";
+    const rejectionReason = afterData.rejectionReason || "";
+    const transactionId = afterData.transactionId || "";
+
+    console.log(
+      `[${requestId}] Unified payout status changed to ${afterStatus} for worker ${workerId}`
+    );
+
+    // Fetch technician data
+    let technicianData;
+    try {
+      const technicianDoc = await admin
+        .firestore()
+        .collection("users")
+        .doc(workerId)
+        .get();
+
+      if (!technicianDoc.exists) {
+        console.log(`[${requestId}] Technician document not found`);
+        return;
+      }
+
+      technicianData = technicianDoc.data();
+    } catch (error) {
+      console.error(`[${requestId}] Error fetching technician data:`, error);
+      return;
+    }
+
+    const technicianFcmToken = technicianData?.fcmToken;
+    const technicianLanCode = technicianData?.lanCode || "en";
+
+    if (!technicianFcmToken || technicianFcmToken.trim() === "") {
+      console.log(`[${requestId}] Technician has no valid FCM token`);
+      return;
+    }
+
+    let titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr;
+
+    if (afterStatus === "A") {
+      // Approved
+      titleEn = "Payout Request Approved";
+      titleAr = "تمت الموافقة على طلب الصرف";
+      titleUr = "پے آؤٹ کی درخواست منظور ہو گئی";
+      bodyEn = `Your payout request of ${totalAmount} has been approved.`;
+      bodyAr = `تمت الموافقة على طلب الصرف الخاص بك بقيمة ${totalAmount}.`;
+      bodyUr = `آپ کی ${totalAmount} کی پے آؤٹ کی درخواست منظور کر لی گئی ہے۔`;
+    } else if (afterStatus === "R") {
+      // Rejected
+      titleEn = "Payout Request Rejected";
+      titleAr = "تم رفض طلب الصرف";
+      titleUr = "پے آؤٹ کی درخواست مسترد کر دی گئی";
+      bodyEn = `Your payout request of ${totalAmount} has been rejected.`;
+      bodyAr = `تم رفض طلب الصرف الخاص بك بقيمة ${totalAmount}.`;
+      bodyUr = `آپ کی ${totalAmount} کی پے آؤٹ کی درخواست مسترد کر دی گئی ہے۔`;
+    }
+
+    // Send notification to technician
+    try {
+      await sendAndStoreNotification({
+        targetRole: "technician",
+        targetId: workerId,
+        titleEn,
+        titleAr,
+        titleUr,
+        bodyEn,
+        bodyAr,
+        bodyUr,
+        data: {
+          targetRole: "technician",
+          category: "unified_payout",
+          requestId,
+          amount: totalAmount.toString(),
+          status: afterStatus,
+          transactionId: transactionId || "",
+          rejectionReason: rejectionReason || "",
+          isAdmin: "false",
+        },
+        fcmToken: technicianFcmToken,
+        lanCode: technicianLanCode,
+      });
+
+      console.log(`[${requestId}] Status notification sent to technician ${workerId}`);
+    } catch (error) {
+      console.error(`[${requestId}] Error sending notification:`, error);
+    }
+  }
+);
+
 // ============================================
 // Notify Technician on Payout Approval/Rejection
 // ============================================
@@ -4754,8 +5051,7 @@ exports.updateTechnicianRatingOnReview = onDocumentWritten(
 
       const userData = userDoc.data();
       let currentRatingCount = userData.reviewCount || 0;
-      let currentAverageRating = userData.rating || 0.0;
-      let totalRating = currentAverageRating * currentRatingCount;
+      let totalRating = userData.rating || 0.0;
 
       if (typeof oldRating !== "number" && typeof newRating === "number") {
         // New review
@@ -4770,13 +5066,11 @@ exports.updateTechnicianRatingOnReview = onDocumentWritten(
         totalRating -= oldRating;
       }
 
-      const newAverageRating = currentRatingCount > 0 ? parseFloat((totalRating / currentRatingCount).toFixed(2)) : 0.0;
-
       transaction.update(userRef, {
-        rating: newAverageRating,
+        rating: totalRating,
         reviewCount: currentRatingCount,
       });
-      console.log(`Updated technician ${workerId} rating to ${newAverageRating} (${currentRatingCount} reviews)`);
+      console.log(`Updated technician ${workerId} rating sum to ${totalRating} (${currentRatingCount} reviews)`);
     });
   }
 );

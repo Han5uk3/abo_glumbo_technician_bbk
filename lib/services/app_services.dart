@@ -2675,26 +2675,26 @@ class AppServices {
             final monthStr = DateFormat('MMM yyyy').format(date);
             final dayStr = DateFormat('dd MMM').format(date);
             
-            // Only consider Online payments (Telr: 'C' or 'A')
-            final mode = booking.paymentModeCode.toUpperCase();
-            if (mode == 'C' || mode == 'A') {
-              final amount = booking.completionData?.totalCost ?? booking.service.price ?? 0.0;
-              
-              totalRev += amount;
-              rawData.add({'date': date, 'amount': amount});
+            final amount =
+                (booking.completionData?.totalCost ?? 0.0) +
+                booking.service.getDiscountedPrice(
+                  booking.effectiveInspectionFee,
+                );
 
-              if (revenue.containsKey(monthStr)) {
-                revenue[monthStr] = (revenue[monthStr] ?? 0.0) + amount;
-              }
-              if (rev12.containsKey(monthStr)) {
-                rev12[monthStr] = (rev12[monthStr] ?? 0.0) + amount;
-              }
-              if (rev30.containsKey(dayStr)) {
-                rev30[dayStr] = (rev30[dayStr] ?? 0.0) + amount;
-              }
-              if (rev7.containsKey(dayStr)) {
-                rev7[dayStr] = (rev7[dayStr] ?? 0.0) + amount;
-              }
+            totalRev += amount;
+            rawData.add({'date': date, 'amount': amount});
+
+            if (revenue.containsKey(monthStr)) {
+              revenue[monthStr] = (revenue[monthStr] ?? 0.0) + amount;
+            }
+            if (rev12.containsKey(monthStr)) {
+              rev12[monthStr] = (rev12[monthStr] ?? 0.0) + amount;
+            }
+            if (rev30.containsKey(dayStr)) {
+              rev30[dayStr] = (rev30[dayStr] ?? 0.0) + amount;
+            }
+            if (rev7.containsKey(dayStr)) {
+              rev7[dayStr] = (rev7[dayStr] ?? 0.0) + amount;
             }
           }
         }

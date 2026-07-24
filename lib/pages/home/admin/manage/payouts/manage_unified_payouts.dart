@@ -1363,7 +1363,10 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : Text(AppLocalizations.of(context)!.reject),
+                                : Text(
+                                    AppLocalizations.of(context)!.reject,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                           );
                         },
                       ),

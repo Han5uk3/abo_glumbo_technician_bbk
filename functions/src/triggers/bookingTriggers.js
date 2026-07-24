@@ -1343,98 +1343,95 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
       }
     }
     
-    // 3. Technician Rejection (status stays R, but assignedTechnicianId is removed)
-    // AND 4. Technician Reassign (assignedTechnicianId changes while in R)
-    if (beforeStatus === 'R' && afterStatus === 'R') {
-      const beforeTechId = before.warranty?.assignedTechnicianId;
-      const afterTechId = after.warranty?.assignedTechnicianId;
-      
-      const fetchUserData = async (uid, role) => {
-        const col = role === "customer" ? "customers" : "users";
-        const doc = await db.collection(col).doc(uid).get();
-        return doc.exists ? doc.data() : null;
-      };
+    // Technician Rejection/Cancellation or Reassignment
+    const beforeTechId = before.warranty?.assignedTechnicianId;
+    const afterTechId = after.warranty?.assignedTechnicianId;
+    
+    const fetchUserData = async (uid, role) => {
+      const col = role === "customer" ? "customers" : "users";
+      const doc = await db.collection(col).doc(uid).get();
+      return doc.exists ? doc.data() : null;
+    };
 
-      // Technician Rejection (removed)
-      if (beforeTechId && !afterTechId) {
-        const customerId = after.customer?.uid;
-        // Notify Customer
-        if (customerId) {
-          const custData = await fetchUserData(customerId, "customer");
-          await sendAndStoreNotification({
-            targetRole: "customer",
-            targetId: customerId,
-            titleEn: "Technician Unavailable",
-            titleAr: "الفني غير متاح",
-            titleUr: "ٹیکنیشن دستیاب نہیں",
-            bodyEn: `The assigned technician is unavailable for your warranty repair. We will assign a new technician shortly.`,
-            bodyAr: `الفني المعين غير متاح لإصلاح الضمان الخاص بك. سنقوم بتعيين فني جديد قريباً.`,
-            bodyUr: `تفویض کردہ ٹیکنیشن آپ کی وارنٹی کی مرمت کے لیے دستیاب نہیں ہے۔ ہم جلد ہی ایک نیا ٹیکنیشن تفویض کریں گے۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: custData?.fcmToken,
-            lanCode: custData?.lanCode,
-          });
-        }
-        
-        // Notify Admins
-        const admins = await getAllAdminUsers();
-        for (const adoc of admins) {
-          const adminData = adoc.data();
-          await sendAndStoreNotification({
-            targetRole: "admin",
-            targetId: adoc.id,
-            titleEn: "Warranty Technician Rejected",
-            titleAr: "رفض فني الضمان",
-            titleUr: "وارنٹی ٹیکنیشن مسترد کر دیا گیا",
-            bodyEn: `Technician rejected warranty repair ${bookingId}. Please reassign a new technician.`,
-            bodyAr: `رفض الفني إصلاح الضمان ${bookingId}. يرجى إعادة تعيين فني جديد.`,
-            bodyUr: `ٹیکنیشن نے وارنٹی مرمت ${bookingId} کو مسترد کر دیا۔ براہ کرم نیا ٹیکنیشن تفویض کریں۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: adminData.fcmToken,
-            lanCode: adminData.lanCode,
-          });
-        }
-      }
-      
-      // Technician Reassign (changed from one tech to another, or from null to tech)
-      if (afterTechId && beforeTechId !== afterTechId) {
-        const customerId = after.customer?.uid;
-        const techName = after.warranty?.assignedTechnician?.name || "A new technician";
-        
-        // Notify Customer
-        if (customerId) {
-          const custData = await fetchUserData(customerId, "customer");
-          await sendAndStoreNotification({
-            targetRole: "customer",
-            targetId: customerId,
-            titleEn: "Technician Assigned",
-            titleAr: "تم تعيين فني",
-            titleUr: "ٹیکنیشن تفویض کر دیا گیا",
-            bodyEn: `${techName} has been assigned to your warranty repair request.`,
-            bodyAr: `تم تعيين ${techName} لطلب إصلاح الضمان الخاص بك.`,
-            bodyUr: `${techName} کو آپ کی وارنٹی مرمت کی درخواست کے لیے تفویض کیا گیا ہے۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: custData?.fcmToken,
-            lanCode: custData?.lanCode,
-          });
-        }
-        
-        // Notify New Technician
-        const techData = await fetchUserData(afterTechId, "technician");
+    // 3. Technician Rejection / Cancellation (removed assigned technician)
+    if (beforeTechId && !afterTechId) {
+      const customerId = after.customer?.uid;
+      // Notify Customer
+      if (customerId) {
+        const custData = await fetchUserData(customerId, "customer");
         await sendAndStoreNotification({
-          targetRole: "technician",
-          targetId: afterTechId,
-          titleEn: "Warranty Repair Assigned",
-          titleAr: "تم تعيين إصلاح الضمان",
-          titleUr: "وارنٹی مرمت تفویض کر دی گئی",
-          bodyEn: `You have been assigned a new warranty repair request.`,
-          bodyAr: `تم تعيينك لطلب إصلاح ضمان جديد.`,
-          bodyUr: `آپ کو ایک نئی وارنٹی مرمت کی درخواست تفویض کی گئی ہے۔`,
+          targetRole: "customer",
+          targetId: customerId,
+          titleEn: "Technician Unavailable",
+          titleAr: "الفني غير متاح",
+          titleUr: "ٹیکنیشن دستیاب نہیں",
+          bodyEn: `The technician cancelled your warranty repair request. A new technician will be assigned shortly. You may submit a complaint if delayed.`,
+          bodyAr: `قام الفني بإلغاء طلب إصلاح الضمان الخاص بك. سيتم تعيين فني جديد قريباً. يمكنك تقديم شكوى في حال التأخير.`,
+          bodyUr: `ٹیکنیشن نے آپ کی وارنٹی مرمت کی درخواست منسوخ کر دی ہے۔ جلد ہی نیا ٹیکنیشن تفویض کیا جائے گا۔ تاخیر کی صورت میں آپ شکایت درج کر سکتے ہیں۔`,
           data: { type: "booking", requestId: bookingId },
-          fcmToken: techData?.fcmToken,
-          lanCode: techData?.lanCode,
+          fcmToken: custData?.fcmToken,
+          lanCode: custData?.lanCode,
         });
       }
+      
+      // Notify Admins
+      const admins = await getAllAdminUsers();
+      for (const adoc of admins) {
+        const adminData = adoc.data();
+        await sendAndStoreNotification({
+          targetRole: "admin",
+          targetId: adoc.id,
+          titleEn: "Warranty Technician Rejected / Cancelled",
+          titleAr: "الفني رفض / ألغى الضمان",
+          titleUr: "وارنٹی ٹیکنیشن نے مسترد / منسوخ کر دیا",
+          bodyEn: `The technician cancelled the warranty repair request ${bookingId}. Check and review the booking.`,
+          bodyAr: `قام الفني بإلغاء طلب إصلاح الضمان ${bookingId}. يرجى التحقق ومراجعة الحجز.`,
+          bodyUr: `ٹیکنیشن نے وارنٹی مرمت کی درخواست ${bookingId} منسوخ کر دی۔ براہ کرم بکنگ چیک کریں اور جائزہ لیں۔`,
+          data: { type: "booking", requestId: bookingId },
+          fcmToken: adminData.fcmToken,
+          lanCode: adminData.lanCode,
+        });
+      }
+    }
+    
+    // 4. Technician Assign/Reassign (changed from one tech to another, or from null to tech)
+    if (afterTechId && beforeTechId !== afterTechId) {
+      const customerId = after.customer?.uid;
+      const techName = after.warranty?.assignedTechnician?.name || "A new technician";
+      
+      // Notify Customer
+      if (customerId) {
+        const custData = await fetchUserData(customerId, "customer");
+        await sendAndStoreNotification({
+          targetRole: "customer",
+          targetId: customerId,
+          titleEn: "Technician Assigned",
+          titleAr: "تم تعيين فني",
+          titleUr: "ٹیکنیشن تفویض کر دیا گیا",
+          bodyEn: `${techName} has been assigned to your warranty repair request.`,
+          bodyAr: `تم تعيين ${techName} لطلب إصلاح الضمان الخاص بك.`,
+          bodyUr: `${techName} کو آپ کی وارنٹی مرمت کی درخواست کے لیے تفویض کیا گیا ہے۔`,
+          data: { type: "booking", requestId: bookingId },
+          fcmToken: custData?.fcmToken,
+          lanCode: custData?.lanCode,
+        });
+      }
+      
+      // Notify New Technician
+      const techData = await fetchUserData(afterTechId, "technician");
+      await sendAndStoreNotification({
+        targetRole: "technician",
+        targetId: afterTechId,
+        titleEn: "Warranty Repair Assigned",
+        titleAr: "تم تعيين إصلاح الضمان",
+        titleUr: "وارنٹی مرمت تفویض کر دی گئی",
+        bodyEn: `You have been assigned a new warranty repair request.`,
+        bodyAr: `تم تعيينك لطلب إصلاح ضمان جديد.`,
+        bodyUr: `آپ کو ایک نئی وارنٹی مرمت کی درخواست تفویض کی گئی ہے۔`,
+        data: { type: "booking", requestId: bookingId },
+        fcmToken: techData?.fcmToken,
+        lanCode: techData?.lanCode,
+      });
     }
 
     return null;

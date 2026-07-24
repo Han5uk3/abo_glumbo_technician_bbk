@@ -1107,7 +1107,8 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue[50],
+                              color: Colors.white,
+                              border: Border.all(color: AppColors.primary),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -1123,7 +1124,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                                     AppLocalizations.of(context)!.payoutNote,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: AppColors.primary.withOpacity(0.7),
+                                      color: AppColors.primary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

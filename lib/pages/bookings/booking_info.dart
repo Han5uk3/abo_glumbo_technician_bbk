@@ -1436,34 +1436,6 @@ class _BookingInfoState extends State<BookingInfo> {
                             ),
                           ],
 
-                          // Admin resolve escalated booking
-                          if (widget.isAdmin &&
-                              currentBooking.isEscalated == true) ...[
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () =>
-                                    _showResolveDialog(context, currentBooking),
-                                child: Text(
-                                  AppLocalizations.of(context)?.resolveIssue ??
-                                      'Resolve Issue',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       );
                     },

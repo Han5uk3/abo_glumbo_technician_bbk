@@ -208,6 +208,13 @@ class InvoiceService {
                             '',
                       )),
                     ),
+                    if (booking.agent?.name != null)
+                      buildDirectionalText("${loc.technicianName}: ${booking.agent!.name!}"),
+                    if (booking.agent?.phone != null)
+                      pw.Directionality(
+                        textDirection: pw.TextDirection.ltr,
+                        child: pw.Text(reshape("${loc.phoneNumber}: ${booking.agent!.phone!}")),
+                      ),
                     pw.Text(reshape(loc.completedAtLabel(completedAtStr))),
                     pw.Text(
                       reshape(loc.paymentModeLabel(
@@ -223,25 +230,11 @@ class InvoiceService {
                     if (data.mode == 1)
                       pw.Text(
                         reshape(loc.warrantyLabel(() {
-                          final daysDiff =
-                              booking.warranty?.expiredOn != null &&
-                                  (booking.warranty?.createdAt != null ||
-                                      booking.completedAt != null)
-                              ? booking.warranty!.expiredOn!
-                                    .toDate()
-                                    .difference(
-                                      (booking.warranty!.createdAt ??
-                                              booking.completedAt)!
-                                          .toDate(),
-                                    )
-                                    .inDays
-                              : 7;
-
                           return (loc.localeName == 'ar')
-                              ? "$daysDiff أيام"
+                              ? "7 أيام (من تاريخ اكتمال الخدمة)"
                               : (loc.localeName == 'ur')
-                              ? "$daysDiff دن"
-                              : "$daysDiff Days";
+                              ? "7 دن (سروس مکمل ہونے کی تاریخ سے)"
+                              : "7 Days (from service completion)";
                         }())),
                       ),
                   ],

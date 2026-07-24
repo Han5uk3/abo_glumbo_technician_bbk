@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -370,7 +371,13 @@ class BookingListTileWidget extends StatelessWidget {
                 ),
 
                 // Action Buttons or Status Badge
-                if (actionOverride != null)
+                if (isAdmin && isWarranty && booking.isEscalated == true)
+                  _buildActionButton(
+                    label: 'Mark as Resolved',
+                    color: Colors.green,
+                    onPressed: () => _showResolveDialog(context, booking),
+                  )
+                else if (actionOverride != null)
                   actionOverride!
                 else if (isAdmin &&
                     onAssign != null &&
@@ -498,6 +505,90 @@ class BookingListTileWidget extends StatelessWidget {
                 ),
               ),
             ),
+    );
+  }
+
+  void _showResolveDialog(BuildContext context, BookingModel currentBooking) {
+    final TextEditingController textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text('Mark as Resolved'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppLocalizations.of(context)?.whatWasDoneToResolve ??
+                    'What was done to resolve the issue?',
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: textController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  hintText: '...',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                if (textController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)?.resolutionTextRequired ??
+                            'Resolution text is required',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await AppFirestore.bookingsCollectionRef
+                      .doc(currentBooking.id)
+                      .update({
+                        'isEscalated': false,
+                        'resolutionText': textController.text.trim(),
+                        'resolvedAt': FieldValue.serverTimestamp(),
+                        'warranty.updatedAt': FieldValue.serverTimestamp(),
+                      });
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                } catch (e) {
+                  log('Error resolving: $e');
+                }
+              },
+              child: Text(
+                AppLocalizations.of(context)?.submit ?? 'Submit',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

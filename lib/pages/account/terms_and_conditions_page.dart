@@ -72,20 +72,34 @@ class TermsAndConditionsPage extends StatelessWidget {
 
             _FadeSlide(
               delay: 400,
-              child: _buildWarrantyTermsText(
-                locale.terms4p1,
-                locale.terms4p2,
-                locale.terms4title,
-                4,
-                context,
-              ),
+              child: _buildText(locale.terms4, locale.terms4title, 4),
             ),
 
             const SizedBox(height: 8),
 
             _FadeSlide(
               delay: 500,
-              child: _buildText(locale.terms5, locale.terms5title, 5),
+              child: Builder(
+                builder: (context) {
+                  final text = locale.terms5;
+                  final policyText = locale.warrantyPolicy;
+                  final index = text.indexOf(policyText);
+                  
+                  if (index != -1) {
+                    final part1 = text.substring(0, index);
+                    final part2 = text.substring(index + policyText.length);
+                    return _buildWarrantyTermsText(
+                      part1,
+                      part2,
+                      locale.terms5title,
+                      5,
+                      context,
+                    );
+                  }
+                  
+                  return _buildText(text, locale.terms5title, 5);
+                },
+              ),
             ),
           ],
         ),
@@ -216,7 +230,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                     );
                   },
 
-                text: ' ${AppLocalizations.of(context)!.warrantyPolicy} ',
+                text: AppLocalizations.of(context)!.warrantyPolicy,
                 style: TextStyle(
                   color: Colors.blue,
                   fontSize: 14,

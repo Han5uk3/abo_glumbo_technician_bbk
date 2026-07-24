@@ -4149,19 +4149,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get policy3title => 'Data Sharing';
 
   @override
-  String get terms1title => 'Responsibility for the Request';
+  String get terms1title => 'Licenses and Qualifications';
 
   @override
-  String get terms2title => 'Inspection Fees';
+  String get terms2title => 'Service Quality and Responsibility';
 
   @override
-  String get terms3title => 'Payment and Final Cost';
+  String get terms3title => 'Fair Pricing';
 
   @override
-  String get terms4title => 'Warranty (Guarantee)';
+  String get terms4title => 'Platform Commission';
 
   @override
-  String get terms5title => 'Rating';
+  String get terms5title => 'Warranty';
+
+  @override
+  String get terms6title => 'Legal Liability Limits';
 
   @override
   String get searchByCustomerName => 'Search by customer name';
@@ -4176,7 +4179,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get terms1 =>
-      'Responsibility for the Request: You are committed to providing an accurate and sufficient description of the issue (text, photo, video) and the service location to enable the Technician to respond.';
+      'You guarantee that you possess all necessary professional licenses and qualifications to provide the services advertised.';
 
   @override
   String get terms2 =>
@@ -4184,33 +4187,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get terms3 =>
-      'Payment and Final Cost: The total cost of the service is agreed upon directly with the Technician after inspection, and must be approved via the Application before work commences. You are responsible for paying the agreed-upon amount in full.';
+      'You are committed to providing fair, reasonable, and upfront pricing to the User after inspection.';
 
   @override
-  String get terms4p1 => 'Completed work is subject to the Platform\'s';
+  String get terms4 =>
+      'You are committed to paying the pre-agreed commission to the Application, which will be deducted from the value of the completed service.';
 
   @override
   String get warrantyPolicy => 'Warranty Policy';
 
   @override
-  String get terms4p2 =>
-      'the full details of which can be reviewed via the dedicated link.';
+  String get terms6 =>
+      'The Application is not responsible for any material damages or injuries resulting from your performance of the service.';
 
   @override
   String get terms5 =>
-      'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.';
+      'You are obligated to provide a warranty on the work performed in accordance with the \"Warranty Policy,\" and you bear the cost of repairs falling within the warranty period.';
 
   @override
   String get policy1 =>
-      'Name, phone number, email address, the precise service location address, order history, and Technician ratings.';
+      'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.';
 
   @override
   String get policy2 =>
-      'Used to match you with Technicians, facilitate the booking and payment process, and send order notifications.';
+      'Used to verify your identity and qualifications, process your payments, and display your professional profile to Users (ratings and experience).';
 
   @override
   String get policy3 =>
-      'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable serviceÂ delivery.';
+      'Your name, professional photo, and ratings are shared with Users. Your bank account information is NOT shared.';
 
   @override
   String get waitingForAdminAction => 'Waiting for admin action';

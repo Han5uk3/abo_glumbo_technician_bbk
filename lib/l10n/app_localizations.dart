@@ -7838,32 +7838,38 @@ abstract class AppLocalizations {
   /// No description provided for @terms1title.
   ///
   /// In en, this message translates to:
-  /// **'Responsibility for the Request'**
+  /// **'Licenses and Qualifications'**
   String get terms1title;
 
   /// No description provided for @terms2title.
   ///
   /// In en, this message translates to:
-  /// **'Inspection Fees'**
+  /// **'Service Quality and Responsibility'**
   String get terms2title;
 
   /// No description provided for @terms3title.
   ///
   /// In en, this message translates to:
-  /// **'Payment and Final Cost'**
+  /// **'Fair Pricing'**
   String get terms3title;
 
   /// No description provided for @terms4title.
   ///
   /// In en, this message translates to:
-  /// **'Warranty (Guarantee)'**
+  /// **'Platform Commission'**
   String get terms4title;
 
   /// No description provided for @terms5title.
   ///
   /// In en, this message translates to:
-  /// **'Rating'**
+  /// **'Warranty'**
   String get terms5title;
+
+  /// No description provided for @terms6title.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Liability Limits'**
+  String get terms6title;
 
   /// No description provided for @searchByCustomerName.
   ///
@@ -7886,7 +7892,7 @@ abstract class AppLocalizations {
   /// No description provided for @terms1.
   ///
   /// In en, this message translates to:
-  /// **'Responsibility for the Request: You are committed to providing an accurate and sufficient description of the issue (text, photo, video) and the service location to enable the Technician to respond.'**
+  /// **'You guarantee that you possess all necessary professional licenses and qualifications to provide the services advertised.'**
   String get terms1;
 
   /// No description provided for @terms2.
@@ -7898,14 +7904,14 @@ abstract class AppLocalizations {
   /// No description provided for @terms3.
   ///
   /// In en, this message translates to:
-  /// **'Payment and Final Cost: The total cost of the service is agreed upon directly with the Technician after inspection, and must be approved via the Application before work commences. You are responsible for paying the agreed-upon amount in full.'**
+  /// **'You are committed to providing fair, reasonable, and upfront pricing to the User after inspection.'**
   String get terms3;
 
-  /// No description provided for @terms4p1.
+  /// No description provided for @terms4.
   ///
   /// In en, this message translates to:
-  /// **'Completed work is subject to the Platform\'s'**
-  String get terms4p1;
+  /// **'You are committed to paying the pre-agreed commission to the Application, which will be deducted from the value of the completed service.'**
+  String get terms4;
 
   /// No description provided for @warrantyPolicy.
   ///
@@ -7913,34 +7919,34 @@ abstract class AppLocalizations {
   /// **'Warranty Policy'**
   String get warrantyPolicy;
 
-  /// No description provided for @terms4p2.
+  /// No description provided for @terms6.
   ///
   /// In en, this message translates to:
-  /// **'the full details of which can be reviewed via the dedicated link.'**
-  String get terms4p2;
+  /// **'The Application is not responsible for any material damages or injuries resulting from your performance of the service.'**
+  String get terms6;
 
   /// No description provided for @terms5.
   ///
   /// In en, this message translates to:
-  /// **'You have the right to rate the Technician\'s performance after service completion, and you must ensure that ratings are honestÂ andÂ objective.'**
+  /// **'You are obligated to provide a warranty on the work performed in accordance with the \"Warranty Policy,\" and you bear the cost of repairs falling within the warranty period.'**
   String get terms5;
 
   /// No description provided for @policy1.
   ///
   /// In en, this message translates to:
-  /// **'Name, phone number, email address, the precise service location address, order history, and Technician ratings.'**
+  /// **'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.'**
   String get policy1;
 
   /// No description provided for @policy2.
   ///
   /// In en, this message translates to:
-  /// **'Used to match you with Technicians, facilitate the booking and payment process, and send order notifications.'**
+  /// **'Used to verify your identity and qualifications, process your payments, and display your professional profile to Users (ratings and experience).'**
   String get policy2;
 
   /// No description provided for @policy3.
   ///
   /// In en, this message translates to:
-  /// **'Your Name, phone number, and location address are shared ONLY with the Technician who accepted your request to enable serviceÂ delivery.'**
+  /// **'Your name, professional photo, and ratings are shared with Users. Your bank account information is NOT shared.'**
   String get policy3;
 
   /// No description provided for @waitingForAdminAction.

@@ -4183,7 +4183,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get terms2 =>
-      'Inspection Fees: You are responsible for paying the determined inspection/call-out fees (if applicable) immediately upon the Technician accepting the request and proceeding to the location. These fees are generally non-refundable.';
+      'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.';
 
   @override
   String get terms3 =>
@@ -4206,7 +4206,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get policy1 =>
-      'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.';
+      'Professional license information, qualifications and experience, personal/professional photos, bank account details for payment reception, and rating history.';
 
   @override
   String get policy2 =>

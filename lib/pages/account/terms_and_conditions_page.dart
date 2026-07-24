@@ -38,47 +38,40 @@ class TermsAndConditionsPage extends StatelessWidget {
           children: [
             const SizedBox(height: 16),
 
+         
+
+   
+
             _FadeSlide(
               delay: 0,
-              child: _buildText(
-                locale.termsIntroduction,
-                locale.introduction,
-                0,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            _FadeSlide(
-              delay: 100,
               child: _buildText(locale.terms1, locale.terms1title, 1),
             ),
 
             const SizedBox(height: 8),
 
             _FadeSlide(
-              delay: 200,
+              delay: 100,
               child: _buildText(locale.terms2, locale.terms2title, 2),
             ),
 
             const SizedBox(height: 8),
 
             _FadeSlide(
-              delay: 300,
+              delay: 200,
               child: _buildText(locale.terms3, locale.terms3title, 3),
             ),
 
             const SizedBox(height: 8),
 
             _FadeSlide(
-              delay: 400,
+              delay: 300,
               child: _buildText(locale.terms4, locale.terms4title, 4),
             ),
 
             const SizedBox(height: 8),
 
             _FadeSlide(
-              delay: 500,
+              delay: 400,
               child: Builder(
                 builder: (context) {
                   final text = locale.terms5;
@@ -100,6 +93,10 @@ class TermsAndConditionsPage extends StatelessWidget {
                   return _buildText(text, locale.terms5title, 5);
                 },
               ),
+            ),
+            _FadeSlide(
+              delay: 500,
+              child: _buildText(locale.terms6, locale.terms6title, 6),
             ),
           ],
         ),
@@ -160,13 +157,14 @@ class TermsAndConditionsPage extends StatelessWidget {
                         builder: (context) => Scaffold(
                           appBar: AppBar(
                             centerTitle: true,
-                            backgroundColor: Colors.white,
+                            backgroundColor: AppColors.primary,
+                            surfaceTintColor: AppColors.primary,
                             elevation: 0,
                             leading: IconButton(
                               icon: const Icon(
                                 Icons.arrow_back_ios,
-                                color: Colors.black,
-                                size: 20,
+                                color: Colors.white,
+                                size: 18,
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
@@ -175,7 +173,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black,
+                                color: Colors.white,
                               ),
                             ),
                           ),

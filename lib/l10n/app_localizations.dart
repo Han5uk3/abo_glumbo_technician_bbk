@@ -7898,7 +7898,7 @@ abstract class AppLocalizations {
   /// No description provided for @terms2.
   ///
   /// In en, this message translates to:
-  /// **'Inspection Fees: You are responsible for paying the determined inspection/call-out fees (if applicable) immediately upon the Technician accepting the request and proceeding to the location. These fees are generally non-refundable.'**
+  /// **'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.'**
   String get terms2;
 
   /// No description provided for @terms3.
@@ -7934,7 +7934,7 @@ abstract class AppLocalizations {
   /// No description provided for @policy1.
   ///
   /// In en, this message translates to:
-  /// **'You are solely responsible for the quality of the service provided, the tools used, and ensuring the safety of the premises during and after the work.'**
+  /// **'Professional license information, qualifications and experience, personal/professional photos, bank account details for payment reception, and rating history.'**
   String get policy1;
 
   /// No description provided for @policy2.

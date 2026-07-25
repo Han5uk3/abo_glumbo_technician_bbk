@@ -8339,12 +8339,6 @@ abstract class AppLocalizations {
   /// **'Revoking admin access'**
   String get revokingAdminAccess;
 
-  /// No description provided for @revoke.
-  ///
-  /// In en, this message translates to:
-  /// **'Revoke'**
-  String get revoke;
-
   /// No description provided for @switchToAdmin.
   ///
   /// In en, this message translates to:

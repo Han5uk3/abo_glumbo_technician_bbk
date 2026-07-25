@@ -1462,7 +1462,7 @@
   "adminAccessGrantedTo": "ایڈمن رسائی دے دی گئی کو",
   "revokeAdminAccess": "ایڈمن رسائی منسوخ کریں",
   "revokingAdminAccess": "ایڈمن رسائی منسوخ کی جا رہی ہے",
-  "revoke": "منسوخ کریں",
+
   "switchToAdmin": "ایڈمن پر سوئچ کریں",
   "manageAdmins": "ایڈمنز کا انتظام کریں",
   "searchAdmins": "ایڈمنز تلاش کریں...",

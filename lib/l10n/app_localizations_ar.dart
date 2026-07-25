@@ -4360,9 +4360,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get revokingAdminAccess => 'جارٍ إلغاء صلاحيات المشرف';
 
   @override
-  String get revoke => 'إلغاء';
-
-  @override
   String get switchToAdmin => 'التبديل إلى وضع المشرف';
 
   @override

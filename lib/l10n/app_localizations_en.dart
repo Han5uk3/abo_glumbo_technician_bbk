@@ -4422,9 +4422,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get revokingAdminAccess => 'Revoking admin access';
 
   @override
-  String get revoke => 'Revoke';
-
-  @override
   String get switchToAdmin => 'Switch to Admin';
 
   @override

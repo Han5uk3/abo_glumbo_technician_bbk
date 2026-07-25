@@ -83,12 +83,12 @@ class _ManageAdminsState extends State<ManageAdmins>
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
-                AppLocalizations.of(context)?.cancelLower ?? 'Cancel',
+                AppLocalizations.of(context)?.no ?? 'Cancel',
                 style: const TextStyle(color: Colors.black),
               ),
             ),
             eButton(
-              text: AppLocalizations.of(context)!.revoke,
+              text: AppLocalizations.of(context)!.yes,
               onPressed: () => Navigator.of(context).pop(true),
               context: context,
               textColor: Colors.white,

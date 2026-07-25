@@ -1462,7 +1462,7 @@
   "adminAccessGrantedTo": "تم منح صلاحيات المشرف لـ",
   "revokeAdminAccess": "إلغاء صلاحيات المشرف",
   "revokingAdminAccess": "جارٍ إلغاء صلاحيات المشرف",
-  "revoke": "إلغاء",
+
   "switchToAdmin": "التبديل إلى وضع المشرف",
   "manageAdmins": "إدارة المشرفين",
   "searchAdmins": "البحث عن المشرفين...",

@@ -1464,7 +1464,7 @@
   "adminAccessGrantedTo": "Admin access granted to",
   "revokeAdminAccess": "Revoke Admin Access",
   "revokingAdminAccess": "Revoking admin access",
-  "revoke": "Revoke",
+
   "switchToAdmin": "Switch to Admin",
   "manageAdmins": "Manage Admins",
   "searchAdmins": "Search admins...",

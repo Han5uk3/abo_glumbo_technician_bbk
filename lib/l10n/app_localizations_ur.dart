@@ -4435,9 +4435,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get revokingAdminAccess => 'ایڈمن رسائی منسوخ کی جا رہی ہے';
 
   @override
-  String get revoke => 'منسوخ کریں';
-
-  @override
   String get switchToAdmin => 'ایڈمن پر سوئچ کریں';
 
   @override

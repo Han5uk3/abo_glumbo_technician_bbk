@@ -486,11 +486,22 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
   List<dynamic> _filterData(List<dynamic> data, {required String selectedBookingStatus}) {
     // 1. Remove duplicates by Booking ID to avoid UI ghosting
     final Map<String, dynamic> uniqueMap = {};
+    // First add JobOfferContainers
     for (var item in data) {
       if (item is JobOfferContainer) {
         final id = item.booking?.id ?? item.requestId ?? item.offerId;
         uniqueMap[id] = item;
-      } else if (item is BookingModel) {
+      }
+    }
+    // Then add RawBookingRequests to overwrite JobOffers if they exist
+    for (var item in data) {
+      if (item is RawBookingRequest) {
+        uniqueMap[item.id] = item;
+      }
+    }
+    // Then add BookingModels to overwrite JobOfferContainers if they exist
+    for (var item in data) {
+      if (item is BookingModel) {
         uniqueMap[item.id] = item;
       }
     }
@@ -505,6 +516,8 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         } else if (item is JobOfferContainer) {
           final data = item.offerData;
           createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        } else if (item is RawBookingRequest) {
+          createdAt = (item.data['createdAt'] as Timestamp?)?.toDate();
         }
 
         if (createdAt == null) return false;
@@ -544,6 +557,11 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
           if (timestamp != null) {
             return (timestamp as dynamic).toDate();
           }
+        } else if (item is RawBookingRequest) {
+          final timestamp = item.data['createdAt'];
+          if (timestamp != null) {
+            return (timestamp as dynamic).toDate();
+          }
         }
         return null;
       }
@@ -571,6 +589,8 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
       } else if (item is JobOfferContainer) {
         id = (item.booking?.id ?? item.requestId ?? '').toLowerCase();
         newId = (item.booking?.newBookingId ?? '').toLowerCase();
+      } else if (item is RawBookingRequest) {
+        id = item.id.toLowerCase();
       }
       return id.contains(_searchQuery) ||
           (newId.isNotEmpty && newId.contains(_searchQuery));
@@ -588,19 +608,13 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         bookingStatusCode: 'P',
         isAdmin: true,
       );
-      stream = Rx.combineLatest2(offers, bookings, (
+      final rawRequests = AppServices.getBookingRequestsStream();
+      stream = Rx.combineLatest3(offers, bookings, rawRequests, (
         List<JobOfferContainer> o,
         List<BookingModel> b,
+        List<RawBookingRequest> r,
       ) {
-        final offerBookingIds = o
-            .map(
-              (offer) => offer.booking?.id ?? offer.requestId ?? offer.offerId,
-            )
-            .toSet();
-        final filteredBookings = b
-            .where((booking) => !offerBookingIds.contains(booking.id))
-            .toList();
-        return [...o, ...filteredBookings];
+        return [...o, ...b, ...r];
       }).cast<List<dynamic>>();
     } else {
       stream = AppServices.getBookingsStream(
@@ -653,16 +667,17 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
             final item = filteredData[index];
             if (item is JobOfferContainer) {
               if (item.booking != null) {
-                final bool isAutoAssign = item.booking!.autoAssignmentStatus != null;
+                final bool isAutoAssign =
+                    item.booking!.autoAssignmentStatus != null;
                 return BookingListTileWidget(
                   key: ValueKey(item.booking!.id),
                   booking: item.booking!,
                   isAdmin: true,
-                  onAssign: isAutoAssign 
+                  onAssign: isAutoAssign
                       ? () => showAssignToUserBottomSheet(item.booking!)
-                      : null, // Ensure service for now remains view only for non-auto-assign
-                  actionOverride: isAutoAssign 
-                      ? null 
+                      : null,
+                  actionOverride: isAutoAssign
+                      ? null
                       : Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -690,14 +705,45 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                 isAdmin: true,
                 onAssign: null,
               );
+            } else if (item is RawBookingRequest) {
+              return BookingRequestTileWidget(
+                key: ValueKey(item.id),
+                request: item,
+              );
             } else if (item is BookingModel) {
+              final isSearching = item.bookingStatusCode == 'SR';
               return BookingListTileWidget(
                 key: ValueKey(item.id),
                 booking: item,
                 isAdmin: true,
-                onAssign: () {
-                  showAssignToUserBottomSheet(item);
-                },
+                onAssign: isSearching
+                    ? null
+                    : () {
+                        showAssignToUserBottomSheet(item);
+                      },
+                actionOverride: isSearching
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.viewOnly.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      )
+                    : null,
               );
             }
             return const SizedBox.shrink();

@@ -35,6 +35,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+class RawBookingRequest {
+  final String id;
+  final Map<String, dynamic> data;
+
+  RawBookingRequest({required this.id, required this.data});
+}
+
 class AppServices {
   static Future<void> updateFCMToken(String token, {bool? isAdmin}) async {
     try {
@@ -1245,6 +1252,21 @@ class AppServices {
           .map((doc) => UserModel.fromDocumentSnapshot(doc))
           .toList();
     });
+  }
+
+  static Stream<List<RawBookingRequest>> getBookingRequestsStream() {
+    return AppFirestore.bookingRequestsCollectionRef
+        .where('status', whereIn: ['pending', 'searching'])
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return RawBookingRequest(
+              id: doc.id,
+              data: doc.data() as Map<String, dynamic>,
+            );
+          }).toList();
+        })
+        .onErrorReturn([]);
   }
 
   static Future<bool> isEmailRegistered(String email) async {
@@ -2523,29 +2545,19 @@ class AppServices {
         .map((s) => s.docs.map((doc) => doc.id).toList())
         .onErrorReturn([]);
 
-    final jobOffers = getJobOffersStream(isAdmin: true)
-        .map(
-          (offers) => offers
-              .map((o) => o.booking?.id ?? o.requestId ?? o.offerId)
-              .toList(),
-        )
-        .onErrorReturn([]);
-
-    final rawJobRequests = AppFirestore.jobRequestsCollectionRef
-        .where('status', isEqualTo: 'pending')
+    final rawBookingRequests = AppFirestore.bookingRequestsCollectionRef
+        .where('status', whereIn: ['pending', 'searching'])
         .snapshots()
         .map((s) => s.docs.map((doc) => doc.id).toList())
         .onErrorReturn([]);
 
-    final pending = Rx.combineLatest3(
+    final pending = Rx.combineLatest2(
       pendingBookings,
-      jobOffers,
-      rawJobRequests,
-      (List<String> b, List<String> o, List<String> jr) {
+      rawBookingRequests,
+      (List<String> b, List<String> br) {
         final Set<String> uniqueIds = {};
         uniqueIds.addAll(b);
-        uniqueIds.addAll(o);
-        uniqueIds.addAll(jr);
+        uniqueIds.addAll(br);
         return uniqueIds.length;
       },
     ).onErrorReturn(0);

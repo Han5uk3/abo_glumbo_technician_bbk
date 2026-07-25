@@ -732,9 +732,7 @@ class BookingListTileWidget extends StatelessWidget {
     bool isCurrentlyAssignedToMe,
     AppLocalizations localization,
   ) {
-    log(
-      "booking.paymentCompletedAt!.toDate(): ${booking.paymentCompletedAt?.toDate()}",
-    );
+  
     String text = '';
     String? prefix;
 
@@ -912,6 +910,179 @@ class BookingListTileWidget extends StatelessWidget {
     );
   }
 }
+
+class BookingRequestTileWidget extends StatelessWidget {
+  final RawBookingRequest request;
+
+  const BookingRequestTileWidget({Key? key, required this.request})
+    : super(key: key);
+
+  Widget _buildDetailRow(IconData icon, String text, {Color? color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: color ?? Colors.grey[600]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(fontSize: 14, color: color ?? Colors.grey[800]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).languageCode;
+    final data = request.data;
+
+    final customerName = data['customer']?['name'] ?? 'Customer';
+    final serviceName = locale == 'en'
+        ? (data['service']?['name'] ?? 'Service')
+        : (data['service']?['name_ar'] ??
+              data['service']?['name'] ??
+              'Service');
+    final address =
+        data['address']?['fullName'] ??
+        data['address']?['streetName'] ??
+        'Service Location';
+    final isRebook = data['isRebook'] == true;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    if (isRebook) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        margin: const EdgeInsetsDirectional.only(
+                          start: 8,
+                          end: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: Colors.orange.withOpacity(0.5),
+                          ),
+                        ),
+                        child: Text(
+                          localization.rebookTechnician.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
+                    Expanded(
+                      child: Text(
+                        serviceName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.search_outlined,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      localization.pending,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildDetailRow(Icons.person_outline, customerName),
+          const SizedBox(height: 8),
+          _buildDetailRow(Icons.location_on_outlined, address),
+          if (data['bookingDateTime'] != null) ...[
+            const SizedBox(height: 8),
+            _buildDetailRow(
+              Icons.calendar_today_outlined,
+              DateFormat(
+                'EEE, d MMM • hh:mm a',
+              ).format((data['bookingDateTime'] as Timestamp).toDate()),
+            ),
+          ],
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(),
+          ),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+              ),
+              child: Text(
+                localization.viewOnly.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class JobOfferTileWidget extends StatefulWidget {
   final JobOfferContainer offer;

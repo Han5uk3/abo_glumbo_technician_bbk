@@ -1195,65 +1195,7 @@ async function assignNewBookingIdHelper(docRef, data) {
 exports.assignNewBookingIdHelper = assignNewBookingIdHelper;
 
 
-// 9. Trigger when a new technician registers
-exports.notifyOnNewTechnicianRegistration = onDocumentCreated(
-  "users/{userId}",
-  async (event) => {
-    const data = event.data?.data();
-    if (!data) return null;
 
-    if (data.role !== "technician") return null;
-
-    if (data.isDocsPendingReview === true) {
-      const techName = data.name || "Technician";
-      try {
-        const adminUsersDocs = await getAllAdminUsers();
-
-        const adminTokens = adminUsersDocs
-          .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
-          .map((doc) => {
-            const adminData = doc.data();
-            return adminData.fcmToken && adminData.fcmToken.trim() !== ""
-              ? {
-                uid: doc.id,
-                token: adminData.fcmToken,
-                lanCode: adminData.lanCode || "en",
-              }
-              : null;
-          })
-          .filter(Boolean);
-
-        if (adminTokens.length > 0) {
-          for (const { uid, token, lanCode } of adminTokens) {
-            await sendAndStoreNotification({
-              targetRole: "admin",
-              targetId: uid,
-              titleEn: "New Technician Registration",
-              titleAr: "تسجيل فني جديد",
-              titleUr: "نئے ٹیکنیشن کی رجسٹریشن",
-              bodyEn: `Technician "${techName}" has registered and is pending review.`,
-              bodyAr: `قام الفني "${techName}" بالتسجيل وبانتظار المراجعة.`,
-              bodyUr: `ٹیکنیشن "${techName}" نے رجسٹریشن کرائی ہے اور جائزے کا منتظر ہے۔`,
-              data: {
-                targetRole: "admin",
-                category: "new_technician_registration",
-                technicianId: event.params.userId,
-                technicianName: techName,
-                isAdmin: "true",
-              },
-              fcmToken: token,
-              lanCode: lanCode,
-            });
-          }
-          console.log(`[${event.params.userId}] Admin notifications sent for new technician registration.`);
-        }
-      } catch (error) {
-        console.error(`[${event.params.userId}] Error sending admin notifications for new technician registration:`, error);
-      }
-    }
-    return null;
-  }
-);
 
 
 exports.onBookingWarrantyUpdated = onDocumentUpdated(
@@ -1437,3 +1379,40 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
     return null;
   }
 );
+
+// Scheduled job to clean up stale booking requests that have been searching for more than 5 minutes
+exports.cleanupStaleBookingRequests = onSchedule("every 2 minutes", async (event) => {
+  try {
+    const fiveMinutesAgo = admin.firestore.Timestamp.fromDate(new Date(Date.now() - 5 * 60 * 1000));
+    
+    // Fetch all active requests. We filter by date in memory to avoid needing a composite index.
+    // The volume of concurrently active requests is very low, so this is safe and cheap.
+    const snapshotSearching = await db.collection("booking_request").where("status", "==", "searching").get();
+    const snapshotPending = await db.collection("booking_request").where("status", "==", "pending").get();
+    
+    const batch = db.batch();
+    let count = 0;
+    
+    const processDocs = (snapshot) => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const createdAt = data.createdAt;
+        // If createdAt is missing (e.g. malformed data), we ignore it or we could close it. Let's only close if we know it's old.
+        if (createdAt && createdAt.toMillis() < fiveMinutesAgo.toMillis()) {
+          batch.update(doc.ref, { status: "closed" });
+          count++;
+        }
+      });
+    };
+    
+    processDocs(snapshotSearching);
+    processDocs(snapshotPending);
+    
+    if (count > 0) {
+      await batch.commit();
+      console.log(`[Cron] Cleaned up ${count} stale booking requests.`);
+    }
+  } catch (error) {
+    console.error("[Cron] Error in cleanupStaleBookingRequests:", error);
+  }
+});

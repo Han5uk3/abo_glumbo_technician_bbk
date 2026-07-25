@@ -3126,17 +3126,11 @@ exports.notifyOnNewChatMessage = onValueCreated(
         return null;
       }
 
-      // If the receiver is actively viewing this chat, skip push notifications.
-      const presenceSnapshot = await rtdb
-        .ref(`chats/${chatId}/presence/${receiverId}`)
-        .once("value");
-
-      if (presenceSnapshot.exists() && presenceSnapshot.val() === true) {
-        console.log(
-          `[${chatId}] Receiver ${receiverId} is actively viewing chat; skipping push notification.`
-        );
-        return null;
-      }
+      // The presence check has been removed. 
+      // Rely purely on the frontend (NotificationServices.currentActiveChatId) 
+      // to suppress notifications when the user is actively viewing the chat.
+      // This prevents issues where app suspension causes presence to remain true 
+      // in the background, which silently drops push notifications.
 
       // Prepare notification message
       let bodyEn = messageText;
@@ -5398,4 +5392,4 @@ exports.onBookingCreatedCleanupOffers = bookingTriggers.onBookingCreatedCleanupO
 exports.onBookingRequestDeletedCleanupOffers = bookingTriggers.onBookingRequestDeletedCleanupOffers;
 exports.onJobOfferCreatedForRebook = bookingTriggers.onJobOfferCreatedForRebook;
 exports.notifyOnTechnicianRegistrationStatusChange = bookingTriggers.notifyOnTechnicianRegistrationStatusChange;
-exports.notifyOnNewTechnicianRegistration = bookingTriggers.notifyOnNewTechnicianRegistration;
+

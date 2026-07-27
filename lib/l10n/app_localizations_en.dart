@@ -908,9 +908,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pending => 'Pending';
 
   @override
-  String get rejected => 'REJECTED';
-
-  @override
   String get accepted => 'Confirmed';
 
   @override
@@ -5246,6 +5243,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get zoneType => 'Zone Type';
 
   @override
+  String get rejected => 'REJECTED';
+
+  @override
   String get waitingTechnicianToVerifyDocuments =>
       'Waiting technician to verify documents';
 
@@ -5257,4 +5257,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get busyAtThisTime => 'Busy at this time';
+
+  @override
+  String get revenueFilter7Days => '7 Days';
+
+  @override
+  String get revenueFilter30Days => '30 Days';
+
+  @override
+  String get revenueFilter6Months => '6 Months';
+
+  @override
+  String get revenueFilter12Months => '12 Months';
+
+  @override
+  String get revenueFilterCustomRange => 'Custom Range...';
+
+  @override
+  String get nearby20km => 'Nearby (20km)';
 }

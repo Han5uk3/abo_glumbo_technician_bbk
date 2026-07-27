@@ -37,6 +37,7 @@ class BookingInfo extends StatefulWidget {
   final bool isWarranty;
   final String? offerId;
   final bool isFromOffersTab;
+  final bool isRawRequest;
 
   const BookingInfo({
     super.key,
@@ -45,6 +46,7 @@ class BookingInfo extends StatefulWidget {
     this.isWarranty = false,
     this.offerId,
     this.isFromOffersTab = false,
+    this.isRawRequest = false,
   });
 
   @override
@@ -235,9 +237,15 @@ class _BookingInfoState extends State<BookingInfo> {
   @override
   void initState() {
     super.initState();
-    _bookingStream = AppFirestore.bookingsCollectionRef
-        .doc(widget.booking.id)
-        .snapshots();
+    if (widget.isRawRequest) {
+      _bookingStream = AppFirestore.bookingRequestsCollectionRef
+          .doc(widget.booking.id)
+          .snapshots();
+    } else {
+      _bookingStream = AppFirestore.bookingsCollectionRef
+          .doc(widget.booking.id)
+          .snapshots();
+    }
     _checkJobOffer();
   }
 
@@ -3849,6 +3857,9 @@ class _BookingInfoState extends State<BookingInfo> {
     BuildContext context,
     BookingModel booking,
   ) {
+    if (widget.isRawRequest) {
+      return const SizedBox.shrink();
+    }
     if (booking.activeCounterOffer?.status.toLowerCase() == 'pending') {
       return const SizedBox.shrink();
     }

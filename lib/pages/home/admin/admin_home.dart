@@ -436,7 +436,6 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                       children: List.generate(bookingStatus.length, (index) {
                         return _buildBookingsList(
                           context,
-
                           selectedBookingStatus: bookingStatus[index]['code']!,
                         );
                       }),

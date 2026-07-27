@@ -917,9 +917,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get pending => 'زیر التوا';
 
   @override
-  String get rejected => 'مسترد شدہ';
-
-  @override
   String get accepted => 'تصدیق شدہ';
 
   @override
@@ -5269,6 +5266,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get zoneType => 'زون کی قسم';
 
   @override
+  String get rejected => 'مسترد شدہ';
+
+  @override
   String get waitingTechnicianToVerifyDocuments =>
       'دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے';
 
@@ -5280,4 +5280,22 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get busyAtThisTime => 'اس وقت مصروف ہے';
+
+  @override
+  String get revenueFilter7Days => '7 دن';
+
+  @override
+  String get revenueFilter30Days => '30 دن';
+
+  @override
+  String get revenueFilter6Months => '6 مہینے';
+
+  @override
+  String get revenueFilter12Months => '12 مہینے';
+
+  @override
+  String get revenueFilterCustomRange => 'اپنی مرضی کے مطابق...';
+
+  @override
+  String get nearby20km => 'قریب (20 کلومیٹر)';
 }

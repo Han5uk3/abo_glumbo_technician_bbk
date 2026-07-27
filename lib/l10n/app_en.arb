@@ -289,7 +289,6 @@
   "loginError": "Login Error",
   "passwordMustBeAtleast6Characters": "Password Must Be At Least 6 Characters Long",
   "pending": "Pending",
-  "rejected": "Rejected",
   "accepted": "Confirmed",
   "cancelled": "Canceled",
   "bookings": "Bookings",
@@ -1101,9 +1100,6 @@
   "addMoreFiles": "Add more files",
   "allowedFileTypes": "Allowed file types: jpg, jpeg, png, pdf, doc,",
   "uploadFileOrImage": "Upload File or Image",
-  "camera": "Camera",
-  "gallery": "Gallery",
-  "document": "Document",
   "pendingReview": "PENDING REVIEW",
   "uploadFiles": "Upload Files",
   "filesAttached": "Files attached",
@@ -1879,5 +1875,11 @@
   "waitingTechnicianToVerifyDocuments": "Waiting technician to verify documents",
   "workerCancelledThisBooking": "Worker cancelled this booking",
   "workerCancelledNearby": "Worker cancelled nearby",
-  "busyAtThisTime": "Busy at this time"
+  "busyAtThisTime": "Busy at this time",
+  "revenueFilter7Days": "7 Days",
+  "revenueFilter30Days": "30 Days",
+  "revenueFilter6Months": "6 Months",
+  "revenueFilter12Months": "12 Months",
+  "revenueFilterCustomRange": "Custom Range...",
+  "nearby20km": "Nearby (20km)"
 }

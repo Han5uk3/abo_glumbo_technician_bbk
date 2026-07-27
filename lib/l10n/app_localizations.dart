@@ -1840,12 +1840,6 @@ abstract class AppLocalizations {
   /// **'Pending'**
   String get pending;
 
-  /// No description provided for @rejected.
-  ///
-  /// In en, this message translates to:
-  /// **'REJECTED'**
-  String get rejected;
-
   /// No description provided for @accepted.
   ///
   /// In en, this message translates to:
@@ -9773,6 +9767,12 @@ abstract class AppLocalizations {
   /// **'Zone Type'**
   String get zoneType;
 
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'REJECTED'**
+  String get rejected;
+
   /// No description provided for @waitingTechnicianToVerifyDocuments.
   ///
   /// In en, this message translates to:
@@ -9796,6 +9796,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Busy at this time'**
   String get busyAtThisTime;
+
+  /// No description provided for @revenueFilter7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7 Days'**
+  String get revenueFilter7Days;
+
+  /// No description provided for @revenueFilter30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'30 Days'**
+  String get revenueFilter30Days;
+
+  /// No description provided for @revenueFilter6Months.
+  ///
+  /// In en, this message translates to:
+  /// **'6 Months'**
+  String get revenueFilter6Months;
+
+  /// No description provided for @revenueFilter12Months.
+  ///
+  /// In en, this message translates to:
+  /// **'12 Months'**
+  String get revenueFilter12Months;
+
+  /// No description provided for @revenueFilterCustomRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Range...'**
+  String get revenueFilterCustomRange;
+
+  /// No description provided for @nearby20km.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby (20km)'**
+  String get nearby20km;
 }
 
 class _AppLocalizationsDelegate

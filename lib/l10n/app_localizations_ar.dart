@@ -901,9 +901,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pending => 'قيد الانتظار';
 
   @override
-  String get rejected => 'مرفوض';
-
-  @override
   String get accepted => 'مؤكد';
 
   @override
@@ -1471,7 +1468,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completeWork => 'إنهاء العمل';
 
   @override
-  String get gallery => 'الاستوديو';
+  String get gallery => 'معرض الصور';
 
   @override
   String get qty => 'الكمية';
@@ -3436,7 +3433,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'الملفات المسموح بها: jpg, jpeg, png, pdf, doc,';
 
   @override
-  String get uploadFileOrImage => 'رفع ملف أو صورة';
+  String get uploadFileOrImage => 'تحميل ملف أو صورة';
 
   @override
   String get pendingReview => 'قيد المراجعة';
@@ -3871,7 +3868,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get availabilityStatus => 'حالة التوافر';
 
   @override
-  String get youAreNowOnline => 'أنت متصل بالإنترنت الآن';
+  String get youAreNowOnline => 'أنت الآن متاح';
 
   @override
   String get leaveOffForInspectionOnly =>
@@ -5177,6 +5174,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get zoneType => 'نوع المنطقة';
 
   @override
+  String get rejected => 'مرفوض';
+
+  @override
   String get waitingTechnicianToVerifyDocuments => 'التحقق من المرفقات';
 
   @override
@@ -5187,4 +5187,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get busyAtThisTime => 'مشغول في هذا الوقت';
+
+  @override
+  String get revenueFilter7Days => '7 أيام';
+
+  @override
+  String get revenueFilter30Days => '30 يومًا';
+
+  @override
+  String get revenueFilter6Months => '6 أشهر';
+
+  @override
+  String get revenueFilter12Months => '12 شهرًا';
+
+  @override
+  String get revenueFilterCustomRange => 'نطاق مخصص...';
+
+  @override
+  String get nearby20km => 'بالقرب (20 كم)';
 }

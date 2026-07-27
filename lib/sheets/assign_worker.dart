@@ -634,7 +634,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
             borderRadius: BorderRadius.circular(24),
           ),
           title: Text(
-            "Filter",
+            AppLocalizations.of(context)!.filter,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: SizedBox(
@@ -644,7 +644,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
               children: [
                 SwitchListTile(
                   title: Text(
-                    "Nearby (20km)",
+                    AppLocalizations.of(context)!.nearby20km,
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   value: tempNearby,
@@ -754,10 +754,10 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
     });
   }
 
-  String _getSelectedLocationText() {
+  String _getSelectedLocationText(BuildContext context) {
     List<String> activeFilters = [];
     if (_isNearbyFilterActive) {
-      activeFilters.add("Nearby (20km)");
+      activeFilters.add(AppLocalizations.of(context)!.nearby20km);
     }
     if (_selectedZoneIds.isNotEmpty) {
       final lang = LocalStore.getUserlanguage();
@@ -879,8 +879,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                   Expanded(
                     child: Text(
                       hasFilter
-                          ? _getSelectedLocationText()
-                          : "Filter",
+                          ? _getSelectedLocationText(context)
+                          : AppLocalizations.of(context)!.filter,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: hasFilter

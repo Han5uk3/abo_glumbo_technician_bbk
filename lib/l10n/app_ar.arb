@@ -336,7 +336,7 @@
   "hasBeenApprovedAsAnAgent": "تمت الموافقة كفني",
   "hasBeenDisapprovedAsAnAgent": "تم الغاء الموافقة كفني",
   "jobRoles": "وظائف العمل",
-  "document": "وثيقة",
+
   "jobRolesAreRequired": "وظائف العمل مطلوبة",
   "failedToDeleteAccount": "فشل حذف الحساب",
   "pleaseConfirmYourPassword": "الرجاء التاكيد من كلمة المرور الخاصة بك",
@@ -1101,10 +1101,9 @@
   "addMoreFiles": "اضافة الملفات",
   "allowedFileTypes": "الملفات المسموح بها: jpg, jpeg, png, pdf, doc,",
   "uploadFileOrImage": "تحميل ملف أو صورة",
-  "camera": "الكاميرا",
-  "gallery": "الاستوديو",
+
+
   "document": "مستند",
-  "pendingReview": "قيد المراجعة",
   "uploadFiles": "تحميل الملفات",
   "filesAttached": "الوثائق المرفقة",
   "costBreakdown": "تفصيل التكلفة",
@@ -1625,10 +1624,8 @@
   "pleaseSelectRole": "يرجى تحديد دور وظيفي واحد على الأقل",
   "pleaseUploadDocuments": "يرجى تحميل جميع المستندات الإلزامية",
   "revokeAccess": "إلغاء الصلاحية",
-  "youAreNowOnline": "أنت متصل بالإنترنت الآن",
-  "leaveOffForInspectionOnly": "(اتركه مُعطلاً للفحص فقط، أو فعّله لإضافة تفاصيل الإصلاح)",
+
   "pendingReview": "قيد المراجعة",
-  "uploadFileOrImage": "رفع ملف أو صورة",
   "leaveOffForInspectionOnly": " (اتركه مطفأً للفحص فقط، أو فعّله للانتقال لتفاصيل التصليح)",
   "enableFullServiceAndRepair": "تشغيل خدمة كاملة وتصليح",
   "coreAdminCannotRemove": "لا يمكن إزالة المشرف الأساسي.",
@@ -1879,9 +1876,14 @@
   "failedToSearchForZones": "فشل البحث عن المناطق. يرجى المحاولة مرة أخرى.",
   "zoneNameAlreadyExists": "اسم المنطقة موجود بالفعل",
   "zoneType": "نوع المنطقة",
-  "rejected": "مرفوض",
   "waitingTechnicianToVerifyDocuments": "التحقق من المرفقات",
   "workerCancelledThisBooking": "ألغى الفني هذا الحجز",
   "workerCancelledNearby": "ألغى الفني في مكان قريب",
-  "busyAtThisTime": "مشغول في هذا الوقت"
+  "busyAtThisTime": "مشغول في هذا الوقت",
+  "revenueFilter7Days": "7 أيام",
+  "revenueFilter30Days": "30 يومًا",
+  "revenueFilter6Months": "6 أشهر",
+  "revenueFilter12Months": "12 شهرًا",
+  "revenueFilterCustomRange": "نطاق مخصص...",
+  "nearby20km": "بالقرب (20 كم)"
 }

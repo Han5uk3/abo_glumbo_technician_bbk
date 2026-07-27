@@ -374,7 +374,28 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 value: _selectedDateFilter,
                 underline: const SizedBox(),
                 items: ['7 Days', '30 Days', '6 Months', '12 Months', 'Custom Range...']
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14))))
+                    .map((e) {
+                      String localizedText = e;
+                      if (e == '7 Days') {
+                        localizedText = l10n.revenueFilter7Days;
+                      } else if (e == '30 Days') {
+                        localizedText = l10n.revenueFilter30Days;
+                      } else if (e == '6 Months') {
+                        localizedText = l10n.revenueFilter6Months;
+                      } else if (e == '12 Months') {
+                        localizedText = l10n.revenueFilter12Months;
+                      } else if (e == 'Custom Range...') {
+                        localizedText = l10n.revenueFilterCustomRange;
+                      }
+
+                      return DropdownMenuItem(
+                        value: e,
+                        child: Text(
+                          localizedText,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      );
+                    })
                     .toList(),
                 onChanged: (val) async {
                   if (val != null) {

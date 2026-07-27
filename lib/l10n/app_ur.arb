@@ -1877,5 +1877,12 @@
   "waitingTechnicianToVerifyDocuments": "دستاویزات کی تصدیق کے لیے ٹیکنیشن کا انتظار ہے",
   "workerCancelledThisBooking": "ٹیکنیشن نے یہ بکنگ منسوخ کر دی",
   "workerCancelledNearby": "ٹیکنیشن نے قریبی بکنگ منسوخ کر دی",
-  "busyAtThisTime": "اس وقت مصروف ہے"
+  "busyAtThisTime": "اس وقت مصروف ہے",
+  "revenueFilter7Days": "7 دن",
+  "revenueFilter30Days": "30 دن",
+  "revenueFilter6Months": "6 مہینے",
+  "revenueFilter12Months": "12 مہینے",
+  "revenueFilterCustomRange": "اپنی مرضی کے مطابق...",
+  "filter": "فلٹر",
+  "nearby20km": "قریب (20 کلومیٹر)"
 }

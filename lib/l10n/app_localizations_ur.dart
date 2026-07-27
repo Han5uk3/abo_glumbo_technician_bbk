@@ -4928,6 +4928,16 @@ class AppLocalizationsUr extends AppLocalizations {
   String get thankYouInvoice => 'ابو جلمبو منتخب کرنے کے لیے آپ کا شکریہ!';
 
   @override
+  String technicianLabel(String technician) {
+    return 'ٹیکنیشن: $technician';
+  }
+
+  @override
+  String techPhoneLabel(String phone) {
+    return 'ٹیکنیشن کا فون: $phone';
+  }
+
+  @override
   String invoiceNumber(String number) {
     return 'انوائس نمبر: $number';
   }

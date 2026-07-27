@@ -4907,6 +4907,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thankYouInvoice => 'Thank you for choosing Abo Glumbo!';
 
   @override
+  String technicianLabel(String technician) {
+    return 'Technician: $technician';
+  }
+
+  @override
+  String techPhoneLabel(String phone) {
+    return 'Tech Phone: $phone';
+  }
+
+  @override
   String invoiceNumber(String number) {
     return 'Invoice #: $number';
   }

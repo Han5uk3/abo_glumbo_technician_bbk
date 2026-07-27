@@ -60,7 +60,7 @@ exports.onBookingRequestCreated = onDocumentCreated(
         const techLon = techCoords.lon;
 
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > 60.0) continue;
+        if (distance > 20.0) continue;
 
         // Active booking & Time Conflict check
         const activeBookings = await db.collection("bookings")
@@ -515,7 +515,7 @@ exports.processAutoAssignments = onSchedule(
           const techLon = techCoords.lon;
 
           const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-          if (distance > 60.0) continue;
+          if (distance > 20.0) continue;
 
           // Started work check & Time Conflict check
           const activeBookings = await db.collection("bookings")
@@ -706,7 +706,7 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
         const techLon = techCoords.lon;
 
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > 60.0) continue;
+        if (distance > 20.0) continue;
 
         // Active booking & Time Conflict check
         const activeBookings = await db.collection("bookings")

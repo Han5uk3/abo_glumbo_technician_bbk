@@ -1885,5 +1885,21 @@
   "revenueFilter6Months": "6 أشهر",
   "revenueFilter12Months": "12 شهرًا",
   "revenueFilterCustomRange": "نطاق مخصص...",
-  "nearby20km": "بالقرب (20 كم)"
+  "nearby20km": "بالقرب (20 كم)",
+  "technicianLabel": "الفني: {technician}",
+  "@technicianLabel": {
+    "placeholders": {
+      "technician": {
+        "type": "String"
+      }
+    }
+  },
+  "techPhoneLabel": "هاتف الفني: {phone}",
+  "@techPhoneLabel": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1644,6 +1644,22 @@
   "inspectionFeeLabel": "Inspection Fee:",
   "totalLabel": "Total:",
   "thankYouInvoice": "Thank you for choosing Abo Glumbo!",
+  "technicianLabel": "Technician: {technician}",
+  "@technicianLabel": {
+    "placeholders": {
+      "technician": {
+        "type": "String"
+      }
+    }
+  },
+  "techPhoneLabel": "Tech Phone: {phone}",
+  "@techPhoneLabel": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "invoiceNumber": "Invoice #: {number}",
   "@invoiceNumber": {
     "placeholders": {

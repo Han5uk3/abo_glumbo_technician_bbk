@@ -9209,6 +9209,18 @@ abstract class AppLocalizations {
   /// **'Thank you for choosing Abo Glumbo!'**
   String get thankYouInvoice;
 
+  /// No description provided for @technicianLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician: {technician}'**
+  String technicianLabel(String technician);
+
+  /// No description provided for @techPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tech Phone: {phone}'**
+  String techPhoneLabel(String phone);
+
   /// No description provided for @invoiceNumber.
   ///
   /// In en, this message translates to:

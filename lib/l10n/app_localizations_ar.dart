@@ -4843,6 +4843,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get thankYouInvoice => 'شكراً لاختيارك أبو جلمبو!';
 
   @override
+  String technicianLabel(String technician) {
+    return 'الفني: $technician';
+  }
+
+  @override
+  String techPhoneLabel(String phone) {
+    return 'هاتف الفني: $phone';
+  }
+
+  @override
   String invoiceNumber(String number) {
     return 'رقم الفاتورة: $number';
   }

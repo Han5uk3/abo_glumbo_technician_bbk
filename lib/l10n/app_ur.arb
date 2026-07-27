@@ -1654,6 +1654,22 @@
       }
     }
   },
+  "technicianLabel": "ٹیکنیشن: {technician}",
+  "@technicianLabel": {
+    "placeholders": {
+      "technician": {
+        "type": "String"
+      }
+    }
+  },
+  "techPhoneLabel": "ٹیکنیشن کا فون: {phone}",
+  "@techPhoneLabel": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "dateString": "تاریخ: {date}",
   "@dateString": {
     "placeholders": {

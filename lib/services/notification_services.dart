@@ -93,6 +93,24 @@ class NotificationServices {
         },
       );
 
+      // Android 8+ drops any notification posted to a channel that does not
+      // exist yet. The backend targets 'abo_glumbo_channel' by name, so create
+      // it up front instead of relying on the first foreground notification to
+      // bring it into existence.
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.createNotificationChannel(
+            const AndroidNotificationChannel(
+              'abo_glumbo_channel',
+              'Abo Glumbo Notifications',
+              description:
+                  'Notifications related to Abo Glumbo tasks and updates',
+              importance: Importance.max,
+            ),
+          );
+
       debugPrint('✅ Local notifications initialized');
     } catch (e) {
       debugPrint('❌ Error initializing local notifications: $e');

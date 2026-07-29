@@ -804,12 +804,16 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      _chatService.clearActiveChat(widget.chatId);
-    } else if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed) {
       _chatService.setActiveChat(widget.chatId);
+      NotificationServices.setActiveChatId(widget.chatId);
       _chatService.markAsRead(widget.chatId);
+    } else {
+      // paused / inactive / hidden / detached - the chat is no longer on
+      // screen, so drop both the backend presence flag and the on-device
+      // suppression. Anything that arrives from here on must alert the user.
+      _chatService.clearActiveChat(widget.chatId);
+      NotificationServices.setActiveChatId(null);
     }
   }
 

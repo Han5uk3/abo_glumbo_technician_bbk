@@ -30,6 +30,21 @@ class AppLocalizationsUr extends AppLocalizations {
   String get awaitingCustomerAction => 'گاہک کے اگلے اقدامات کا انتظار ہے';
 
   @override
+  String get awaitingTechnicianAction => 'ٹیکنیشن کے اگلے اقدامات کا انتظار ہے';
+
+  @override
+  String get bookingRequestDetails => 'بکنگ کی درخواست کی تفصیلات';
+
+  @override
+  String get requestInfo => 'درخواست کی معلومات';
+
+  @override
+  String get counterProposalStatus => 'جوابی تجویز کی صورتحال';
+
+  @override
+  String get proposedBy => 'تجویز کنندہ';
+
+  @override
   String kmAway(Object distance) {
     return '$distance کلومیٹر دور';
   }

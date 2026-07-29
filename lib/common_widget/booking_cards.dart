@@ -8,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/models/address.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/broadcast_offer_info.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/booking_info.dart';
+import 'package:aboglumbo_bbk_panel/pages/bookings/booking_request_details_page.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/counter_propose_sheet.dart';
 import 'package:geolocator/geolocator.dart';
@@ -970,25 +971,38 @@ class BookingRequestTileWidget extends StatelessWidget {
 
     final isRebook = data['isRebook'] == true;
 
+    // No technician has proposed a new time yet (or their last proposal was
+    // rejected, so the ball is back in their court) vs. a proposal is out
+    // and it's the customer who needs to respond. Read straight off the raw
+    // map — this card (and the details page it opens) intentionally never
+    // forces this document through `BookingModel.fromMap`, since that model
+    // assumes a non-nullable `bookingStatusCode` that raw `booking_request`
+    // docs never have (they only ever carry a `status` string).
+    final counterOfferStatus =
+        (data['activeCounterOffer']
+                as Map<String, dynamic>?)?['status']
+            ?.toString()
+            .toLowerCase();
+    final isAwaitingCustomer = counterOfferStatus == 'pending';
+    final requestStatusLabel = isAwaitingCustomer
+        ? localization.awaitingCustomerAction
+        : localization.awaitingTechnicianAction;
+    final requestStatusColor = isAwaitingCustomer
+        ? Colors.blue
+        : AppColors.primary;
+    final requestStatusIcon = isAwaitingCustomer
+        ? Icons.hourglass_top_outlined
+        : Icons.engineering_outlined;
+
     return GestureDetector(
       onTap: () {
-        try {
-          final dataWithId = Map<String, dynamic>.from(data);
-          dataWithId['id'] = request.id;
-          final bookingModel = BookingModel.fromMap(dataWithId);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BookingInfo(
-                booking: bookingModel,
-                isAdmin: true,
-                isRawRequest: true,
-              ),
-            ),
-          );
-        } catch (e) {
-          debugPrint("Error parsing raw booking request: $e");
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                BookingRequestDetailsPage(request: request),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -1060,23 +1074,23 @@ class BookingRequestTileWidget extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: requestStatusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.search_outlined,
+                      Icon(
+                        requestStatusIcon,
                         size: 14,
-                        color: AppColors.primary,
+                        color: requestStatusColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        localization.pending,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        requestStatusLabel,
+                        style: TextStyle(
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: requestStatusColor,
                         ),
                       ),
                     ],

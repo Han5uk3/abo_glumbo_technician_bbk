@@ -142,6 +142,36 @@ abstract class AppLocalizations {
   /// **'Awaiting Customer Action'**
   String get awaitingCustomerAction;
 
+  /// No description provided for @awaitingTechnicianAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting Technician Action'**
+  String get awaitingTechnicianAction;
+
+  /// No description provided for @bookingRequestDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Request Details'**
+  String get bookingRequestDetails;
+
+  /// No description provided for @requestInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Info'**
+  String get requestInfo;
+
+  /// No description provided for @counterProposalStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter Proposal Status'**
+  String get counterProposalStatus;
+
+  /// No description provided for @proposedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed By'**
+  String get proposedBy;
+
   /// No description provided for @kmAway.
   ///
   /// In en, this message translates to:

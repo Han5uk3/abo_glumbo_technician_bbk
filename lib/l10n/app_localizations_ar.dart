@@ -30,6 +30,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get awaitingCustomerAction => 'في انتظار إجراء العميل';
 
   @override
+  String get awaitingTechnicianAction => 'في انتظار إجراء الفني';
+
+  @override
+  String get bookingRequestDetails => 'تفاصيل طلب الحجز';
+
+  @override
+  String get requestInfo => 'معلومات الطلب';
+
+  @override
+  String get counterProposalStatus => 'حالة العرض المقابل';
+
+  @override
+  String get proposedBy => 'مقدَّم من';
+
+  @override
   String kmAway(Object distance) {
     return 'على بعد $distance كم';
   }

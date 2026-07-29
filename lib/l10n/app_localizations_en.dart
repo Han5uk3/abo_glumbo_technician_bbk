@@ -30,6 +30,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get awaitingCustomerAction => 'Awaiting Customer Action';
 
   @override
+  String get awaitingTechnicianAction => 'Awaiting Technician Action';
+
+  @override
+  String get bookingRequestDetails => 'Booking Request Details';
+
+  @override
+  String get requestInfo => 'Request Info';
+
+  @override
+  String get counterProposalStatus => 'Counter Proposal Status';
+
+  @override
+  String get proposedBy => 'Proposed By';
+
+  @override
   String kmAway(Object distance) {
     return '$distance km away';
   }

@@ -54,48 +54,145 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
   }
 
   /// Rejecting hands the claim back to the admin and detaches this technician,
-  /// so it is not something to fire on a stray tap — confirm first.
+  /// so it is not something to fire on a stray tap — confirm first. Uses the
+  /// same drag-handle/icon/title/description/No-Yes bottom sheet as every
+  /// other confirmation in this widget (start/stop/pause/resume tracking,
+  /// complete warranty) rather than a one-off AlertDialog, to stay visually
+  /// consistent within this screen.
   Future<void> _confirmRejectWarranty(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final bloc = context.read<WarrantyBloc>();
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await _showConfirmationBottomSheet(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          l10n.confirmRejectWarranty,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        content: Text(
-          l10n.confirmRejectWarrantyMessage,
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(l10n.reject),
-          ),
-        ],
-      ),
+      icon: Icons.cancel_outlined,
+      iconColor: Colors.red,
+      title: l10n.confirmRejectWarranty,
+      description: l10n.confirmRejectWarrantyMessage,
+      confirmColor: Colors.red,
     );
 
     if (confirmed != true) return;
 
     bloc.add(RejectWarranty(bookingId: widget.booking.id));
+  }
+
+  /// Accepting locks the technician into the claim, so it deserves the same
+  /// confirm-first treatment as reject rather than firing on a stray tap.
+  Future<void> _confirmAcceptWarranty(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final bloc = context.read<WarrantyBloc>();
+
+    final confirmed = await _showConfirmationBottomSheet(
+      context: context,
+      icon: Icons.check_circle_outline,
+      iconColor: Colors.green,
+      title: l10n.acceptWarrantyClaim,
+      description: l10n.acceptWarrantyClaimMessage,
+      confirmColor: Colors.green,
+    );
+
+    if (confirmed != true) return;
+
+    bloc.add(AcceptWarranty(bookingId: widget.booking.id));
+  }
+
+  Future<bool?> _showConfirmationBottomSheet({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required Color confirmColor,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    return showModalBottomSheet<bool>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext bottomSheetContext) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Icon(icon, size: 60, color: iconColor),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          Navigator.of(bottomSheetContext).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.no,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          Navigator.of(bottomSheetContext).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: confirmColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.yes,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -333,10 +430,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                 child: _buildButton(
                                   onPressed: isAcceptLoading
                                       ? null
-                                      : () => context.read<WarrantyBloc>().add(
-                                            AcceptWarranty(
-                                                bookingId: widget.booking.id),
-                                          ),
+                                      : () => _confirmAcceptWarranty(context),
                                   label: AppLocalizations.of(context)!.accept,
                                   color: Colors.green.shade50,
                                   textColor: Colors.green.shade700,

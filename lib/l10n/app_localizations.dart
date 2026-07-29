@@ -4000,6 +4000,18 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to reject this order?'**
   String get confirmRejectMessage;
 
+  /// No description provided for @confirmRejectWarranty.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Warranty Request'**
+  String get confirmRejectWarranty;
+
+  /// No description provided for @confirmRejectWarrantyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reject this warranty request? It will be returned to the admin for reassignment.'**
+  String get confirmRejectWarrantyMessage;
+
   /// No description provided for @bookingCancelledSuccessfully.
   ///
   /// In en, this message translates to:
@@ -9731,6 +9743,54 @@ abstract class AppLocalizations {
   /// **'Resolution text is required'**
   String get resolutionTextRequired;
 
+  /// No description provided for @markAsResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Resolved'**
+  String get markAsResolved;
+
+  /// No description provided for @pleaseSelectValidFutureTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a valid future time'**
+  String get pleaseSelectValidFutureTime;
+
+  /// No description provided for @complaintSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint Submitted'**
+  String get complaintSubmitted;
+
+  /// No description provided for @customerSubmittedAComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer raised a complaint about this warranty request'**
+  String get customerSubmittedAComplaint;
+
+  /// No description provided for @complaintResolvedByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint Resolved by Admin'**
+  String get complaintResolvedByAdmin;
+
+  /// No description provided for @adminResolvedTheComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin resolved the customer\'s complaint'**
+  String get adminResolvedTheComplaint;
+
+  /// No description provided for @warrantyTechnicianAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Assigned'**
+  String get warrantyTechnicianAssigned;
+
+  /// No description provided for @technicianAssignedToWarranty.
+  ///
+  /// In en, this message translates to:
+  /// **'{technician} was assigned to this warranty request'**
+  String technicianAssignedToWarranty(String technician);
+
   /// No description provided for @urduName.
   ///
   /// In en, this message translates to:
@@ -9844,6 +9904,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nearby (20km)'**
   String get nearby20km;
+
+  /// No description provided for @totalRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Revenue'**
+  String get totalRevenue;
 }
 
 class _AppLocalizationsDelegate

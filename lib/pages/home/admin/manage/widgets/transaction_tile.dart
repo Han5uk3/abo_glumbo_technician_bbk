@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
@@ -256,7 +257,9 @@ class _TransactionTileState extends State<TransactionTile> {
         locale == 'ar' ? 'dd-MM-yyyy hh:mm a' : 'dd-MM-yyyy hh:mm a',
         locale,
       );
-      return formatter.format(date);
+      // The elapsed-time branches above compare two instants, so they are
+      // zone-independent; only the absolute rendering needs the KSA wall clock.
+      return formatter.format(KsaTime.fromInstant(date));
     } else if (difference.inDays > 0) {
       return AppLocalizations.of(context)!.daysAgo(difference.inDays);
     } else if (difference.inHours > 0) {

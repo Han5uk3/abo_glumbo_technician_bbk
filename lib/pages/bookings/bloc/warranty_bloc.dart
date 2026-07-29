@@ -246,7 +246,14 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
         'warranty.assignedTechnicianId': event.technician.uid,
         'warranty.warrantyStatusCode': 'R',
         'warranty.availability': false,
-        'warranty.acceptedAt': Timestamp.now(),
+        // Assignment is not acceptance — the claim goes back to 'R' and waits for
+        // the new technician to accept, which is what stamps `acceptedAt`. Writing
+        // `acceptedAt` here used to backdate an acceptance that had not happened,
+        // so the timeline showed "Warranty Repair Accepted" the moment the admin
+        // assigned. Any acceptance carried over from the previous technician is
+        // cleared for the same reason.
+        'warranty.assignedAt': Timestamp.now(),
+        'warranty.acceptedAt': FieldValue.delete(),
         'warranty.rejectedAt': FieldValue.delete(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),

@@ -431,10 +431,15 @@ class _WarrantyListTabState extends State<_WarrantyListTab> {
                   ),
                 );
               },
+          // This sheet is the admin assignment flow, so rejecting here must use
+          // the admin event. `RejectWarranty` is the technician's "not me" action
+          // — it only detaches the assignee and deliberately leaves the status
+          // alone, so dispatching it here left the claim sitting in the Requested
+          // tab and let the admin press Reject over and over with no effect.
           onRejectOrder: booking.warranty?.warrantyStatusCode == 'X'
               ? null
               : (BookingModel booking) {
-                  warrantyBloc.add(RejectWarranty(bookingId: booking.id));
+                  warrantyBloc.add(AdminRejectWarranty(bookingId: booking.id));
                 },
         );
       },

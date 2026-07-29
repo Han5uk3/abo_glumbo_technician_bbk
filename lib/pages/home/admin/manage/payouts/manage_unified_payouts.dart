@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
@@ -523,7 +524,9 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                         const SizedBox(height: 4),
                         Text(
                           DateFormat('MMM dd, yyyy • HH:mm').format(
-                            request.createdAt?.toDate() ?? DateTime.now(),
+                            KsaTime.fromInstant(
+                              request.createdAt?.toDate() ?? DateTime.now(),
+                            ),
                           ),
                           style: TextStyle(
                             fontSize: 11,
@@ -833,7 +836,9 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
                         const SizedBox(width: 8),
                         Text(
                           DateFormat('MMM dd, yyyy • HH:mm').format(
-                            request.createdAt?.toDate() ?? DateTime.now(),
+                            KsaTime.fromInstant(
+                              request.createdAt?.toDate() ?? DateTime.now(),
+                            ),
                           ),
                           style: TextStyle(
                             fontSize: 13,

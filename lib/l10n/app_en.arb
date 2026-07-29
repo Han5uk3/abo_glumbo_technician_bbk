@@ -649,6 +649,8 @@
   "updatedOn": "Updated On",
   "approvedOn": "Confirmed On",
   "confirmRejectMessage": "Are you sure you want to reject this order?",
+  "confirmRejectWarranty": "Reject Warranty Request",
+  "confirmRejectWarrantyMessage": "Are you sure you want to reject this warranty request? It will be returned to the admin for reassignment.",
   "bookingCancelledSuccessfully": "Booking Cancelled Successfully",
   "workMarkedAsComplete": "Work Marked As Complete",
   "areYouSureYouWantToStartTrackingThisBooking": "Are you sure you want to start tracking this booking?",
@@ -1879,6 +1881,15 @@
   "resolveIssue": "Resolve Issue",
   "whatWasDoneToResolve": "What was done to resolve the issue?",
   "resolutionTextRequired": "Resolution text is required",
+  "markAsResolved": "Mark as Resolved",
+  "pleaseSelectValidFutureTime": "Please select a valid future time",
+  "complaintSubmitted": "Complaint Submitted",
+  "customerSubmittedAComplaint": "Customer raised a complaint about this warranty request",
+  "complaintResolvedByAdmin": "Complaint Resolved by Admin",
+  "adminResolvedTheComplaint": "Admin resolved the customer's complaint",
+  "warrantyTechnicianAssigned": "Technician Assigned",
+  "technicianAssignedToWarranty": "{technician} was assigned to this warranty request",
+  "@technicianAssignedToWarranty": {"placeholders":{"technician":{"type":"String"}}},
   "urduName": "Urdu Name",
   "enterUrduName": "Enter Urdu name",
   "pleaseEnterUrduName": "Please enter Urdu name",
@@ -1897,5 +1908,6 @@
   "revenueFilter6Months": "6 Months",
   "revenueFilter12Months": "12 Months",
   "revenueFilterCustomRange": "Custom Range...",
-  "nearby20km": "Nearby (20km)"
+  "nearby20km": "Nearby (20km)",
+  "totalRevenue": "Total Revenue"
 }

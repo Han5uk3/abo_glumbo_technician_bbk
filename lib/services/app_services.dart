@@ -591,7 +591,7 @@ class AppServices {
             });
       } else if (bookingStatusCode == 'P') {
         return AppFirestore.bookingsCollectionRef
-            .where('bookingStatusCode', whereIn: ['P', 'SR'])
+            .where('bookingStatusCode', isEqualTo: 'P')
             .orderBy('createdAt', descending: true)
             .limit(50)
             .snapshots()
@@ -678,7 +678,7 @@ class AppServices {
       } else if (bookingStatusCode == 'P') {
         return AppFirestore.bookingsCollectionRef
             .where('agent.uid', isEqualTo: workerId)
-            .where('bookingStatusCode', whereIn: ['P', 'SR'])
+            .where('bookingStatusCode', isEqualTo: 'P')
             .orderBy('createdAt', descending: true)
             .limit(50)
             .snapshots()
@@ -2184,12 +2184,24 @@ class AppServices {
         .map((snapshot) => snapshot.docs.length)
         .onErrorReturn(0);
 
+    // Must mirror the "Payment Pending" tab query in [getBookingsStream] exactly,
+    // otherwise the dashboard counter and the list the technician lands on after
+    // tapping it disagree. That tab covers both halves of the payment handover:
+    // CP (technician finished, awaiting the customer's payment) and VP (customer
+    // paid, awaiting the technician's verification).
     final paymentPending = AppFirestore.bookingsCollectionRef
         .where('agent.uid', isEqualTo: uid)
-        .where('bookingStatusCode', isEqualTo: 'C')
+        .where('bookingStatusCode', whereIn: ['CP', 'VP'])
         .where('paymentCompleted', isEqualTo: false)
         .snapshots()
         .map((snapshot) => snapshot.docs.length)
+        // A failure here (a missing Firestore index, most likely) would otherwise
+        // be indistinguishable from "nothing pending" — the counter would just
+        // read 0, which is exactly the symptom this query was fixed for. Log it
+        // so the cause is visible while debugging.
+        .doOnError(
+          (e, _) => debugPrint('❌ paymentPending counter query failed: $e'),
+        )
         .onErrorReturn(0);
 
     final Stream<double> rating = AppFirestore.bookingsCollectionRef
@@ -2540,7 +2552,7 @@ class AppServices {
 
   static Stream<AdminDashboardData> getAdminDashboardStream() {
     final pendingBookings = AppFirestore.bookingsCollectionRef
-        .where('bookingStatusCode', whereIn: ['P', 'SR'])
+        .where('bookingStatusCode', isEqualTo: 'P')
         .snapshots()
         .map((s) => s.docs.map((doc) => doc.id).toList())
         .onErrorReturn([]);
@@ -2653,8 +2665,10 @@ class AppServices {
         double totalRev = 0.0;
         List<Map<String, dynamic>> rawData = [];
 
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
+        // Revenue is bucketed by Saudi day and month, so the same booking
+        // lands in the same bucket for every admin regardless of where they are.
+        final now = KsaTime.now;
+        final today = KsaTime.today;
 
         // Prepare keys
         final last6Months = List.generate(6, (i) {
@@ -2679,10 +2693,12 @@ class AppServices {
         for (var d in last7Days) rev7[d] = 0.0;
 
         for (var booking in bookings) {
-          final date =
+          final instant =
               booking.paymentVerifiedAt?.toDate() ??
               booking.paymentCompletedAt?.toDate() ??
               booking.completedAt?.toDate();
+          // Label against the KSA wall clock to match the bucket keys above.
+          final date = instant == null ? null : KsaTime.fromInstant(instant);
           if (date != null) {
             final monthStr = DateFormat('MMM yyyy').format(date);
             final dayStr = DateFormat('dd MMM').format(date);
@@ -3024,7 +3040,6 @@ class AppServices {
             final booking = await getBookingById(bookingId);
             if (booking != null) {
               if (booking.bookingStatusCode == 'P' ||
-                  booking.bookingStatusCode == 'SR' ||
                   (booking.bookingStatusCode == 'R' &&
                       booking.rejectedBy != 'Admin') ||
                   booking.bookingStatusCode == 'A') {

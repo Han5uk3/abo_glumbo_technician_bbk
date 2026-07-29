@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -62,7 +63,8 @@ class StatServices {
           ? ratings.reduce((a, b) => a + b) / ratings.length
           : 0;
 
-      final now = DateTime.now();
+      // Saudi month boundaries — the stats window is a business month.
+      final now = KsaTime.now;
       final firstDayOfMonth = DateTime(now.year, now.month, 1);
       final firstDayOfNextMonth = (now.month < 12)
           ? DateTime(now.year, now.month + 1, 1)

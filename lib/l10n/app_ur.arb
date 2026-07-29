@@ -655,6 +655,8 @@
   "updatedOn": "اپ ڈیٹ کیا گیا بروز",
   "approvedOn": "منظور کیا گیا بروز",
   "confirmRejectMessage": "کیا آپ واقعی اس آرڈر کو مسترد کرنا چاہتے ہیں؟",
+  "confirmRejectWarranty": "وارنٹی کی درخواست مسترد کریں",
+  "confirmRejectWarrantyMessage": "کیا آپ واقعی اس وارنٹی درخواست کو مسترد کرنا چاہتے ہیں؟ اسے دوبارہ تفویض کے لیے ایڈمن کو واپس بھیج دیا جائے گا۔",
   "bookingCancelledSuccessfully": "بکنگ کامیابی سے منسوخ ہو گئی",
   "workMarkedAsComplete": "کام کو مکمل قرار دے دیا گیا",
   "areYouSureYouWantToStartTrackingThisBooking": "کیا آپ واقعی اس بکنگ کے لیے ٹریکنگ شروع کرنا چاہتے ہیں؟",
@@ -1881,6 +1883,14 @@
   "resolveIssue": "مسئلہ حل کریں",
   "whatWasDoneToResolve": "مسئلے کو حل کرنے کے لیے کیا کیا گیا؟",
   "resolutionTextRequired": "حل کی تفصیل درکار ہے",
+  "markAsResolved": "حل شدہ کے طور پر نشان زد کریں",
+  "pleaseSelectValidFutureTime": "براہ کرم مستقبل کا درست وقت منتخب کریں",
+  "complaintSubmitted": "شکایت جمع کرائی گئی",
+  "customerSubmittedAComplaint": "گاہک نے اس وارنٹی درخواست کے بارے میں شکایت درج کرائی",
+  "complaintResolvedByAdmin": "ایڈمن نے شکایت حل کر دی",
+  "adminResolvedTheComplaint": "ایڈمن نے گاہک کی شکایت حل کر دی",
+  "warrantyTechnicianAssigned": "ٹیکنیشن تفویض کیا گیا",
+  "technicianAssignedToWarranty": "{technician} کو اس وارنٹی درخواست کے لیے تفویض کیا گیا",
   "urduName": "اردو نام",
   "enterUrduName": "اردو نام درج کریں",
   "pleaseEnterUrduName": "براہ کرم اردو نام درج کریں",
@@ -1900,5 +1910,6 @@
   "revenueFilter12Months": "12 مہینے",
   "revenueFilterCustomRange": "اپنی مرضی کے مطابق...",
   "filter": "فلٹر",
-  "nearby20km": "قریب (20 کلومیٹر)"
+  "nearby20km": "قریب (20 کلومیٹر)",
+  "totalRevenue": "کل آمدنی"
 }

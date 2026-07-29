@@ -3,13 +3,11 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
-import 'package:aboglumbo_bbk_panel/services/invoice_service.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
-import 'package:aboglumbo_bbk_panel/services/unified_payout_services.dart';
 import 'package:flutter/material.dart';
 
 Future<bool?> showVerifyPaymentSheet(
@@ -164,17 +162,12 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
       widget.booking.paymentCompleted = true;
 
 
-      // Update wallet with outside-app earnings for lifetime tracking
-      // Only for full service (mode 1) — inspection fees are excluded
-      if (widget.booking.agent?.uid != null &&
-          widget.booking.completionData != null &&
-          widget.booking.completionData!.mode == 1) {
-        await UnifiedPayoutServices.updateWalletAmounts(
-          workerId: widget.booking.agent!.uid!,
-          outsideAppEarningsIncrement:
-              widget.booking.completionData?.totalCost ?? 0.0,
-        );
-      }
+      // The unified wallet is credited server-side by the
+      // `creditTechnicianWalletOnPaymentCompletion` Cloud Function, which reads
+      // the booking as it actually stands in Firestore. It used to be done here
+      // from `widget.booking`, which is whatever was loaded when this screen was
+      // built — if `completionData` wasn't on that copy the credit was skipped
+      // without a trace, and the earnings never appeared in the wallet.
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(

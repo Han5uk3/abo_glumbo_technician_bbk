@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -173,7 +174,7 @@ class _ManageAgentsState extends State<ManageAgents>
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: KsaTime.now.add(const Duration(days: 365)),
       initialDateRange: _startDate != null && _endDate != null
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
@@ -214,7 +215,7 @@ class _ManageAgentsState extends State<ManageAgents>
   }
 
   Future<void> _selectMonth() async {
-    final now = DateTime.now();
+    final now = KsaTime.now;
     final months = List.generate(12, (index) {
       return DateTime(now.year, now.month - index, 1);
     });
@@ -341,7 +342,7 @@ class _ManageAgentsState extends State<ManageAgents>
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () {
-                  final now = DateTime.now();
+                  final now = KsaTime.now;
                   setState(() {
                     _startDate = DateTime(now.year, now.month, 1);
                     _endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);

@@ -710,39 +710,13 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
                 request: item,
               );
             } else if (item is BookingModel) {
-              final isSearching = item.bookingStatusCode == 'SR';
               return BookingListTileWidget(
                 key: ValueKey(item.id),
                 booking: item,
                 isAdmin: true,
-                onAssign: isSearching
-                    ? null
-                    : () {
-                        showAssignToUserBottomSheet(item);
-                      },
-                actionOverride: isSearching
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.grey.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.viewOnly.toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      )
-                    : null,
+                onAssign: () {
+                  showAssignToUserBottomSheet(item);
+                },
               );
             }
             return const SizedBox.shrink();

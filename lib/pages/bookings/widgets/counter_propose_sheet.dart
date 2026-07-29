@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
@@ -35,7 +36,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    // Seeded from, bounded by and validated against the Saudi clock, because the
+    // value this sheet submits is stored as a KSA wall-clock time.
+    final now = KsaTime.now;
 
     // Start with now + 30 mins
     DateTime baseTime = now.add(const Duration(minutes: 30));
@@ -69,9 +72,9 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      initialDate: _selectedDate ?? KsaTime.today,
+      firstDate: KsaTime.today,
+      lastDate: KsaTime.today.add(const Duration(days: 30)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -151,8 +154,8 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
                         _selectedTime?.hour == slot.hour &&
                         _selectedTime?.minute == slot.minute;
 
-                    // Check if slot is valid (after now)
-                    final now = DateTime.now();
+                    // Check if slot is valid (after now, in KSA terms)
+                    final now = KsaTime.now;
                     final selectedSlotDateTime = DateTime(
                       _selectedDate!.year,
                       _selectedDate!.month,
@@ -215,6 +218,8 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
   Future<void> _submit() async {
     if (_selectedDate == null || _selectedTime == null) return;
 
+    // The pickers produce a KSA wall clock — the technician is proposing "the
+    // 14th at 10:00" in Saudi terms, the same terms the customer sees it in.
     final selectedDateTime = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
@@ -223,12 +228,16 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       _selectedTime!.minute,
     );
 
-    final now = DateTime.now();
+    // Compared against the KSA clock, since both sides are wall-clock values.
+    final now = KsaTime.now;
 
     if (!selectedDateTime.isAfter(now)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please select a valid future time'),
+          content: Text(
+            AppLocalizations.of(context)?.pleaseSelectValidFutureTime ??
+                'Please select a valid future time',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -243,7 +252,7 @@ class _CounterProposeSheetState extends State<CounterProposeSheet> {
       proposedBy: 'technician',
       proposedByUid: LocalStore.getUID() ?? '',
       proposedByName: LocalStore.getCachedUserData()?.name ?? 'Technician',
-      proposedTime: Timestamp.fromDate(selectedDateTime),
+      proposedTime: Timestamp.fromDate(KsaTime.toInstant(selectedDateTime)),
       customerId: widget.booking?.customer.uid ?? widget.customerId ?? '',
     );
 

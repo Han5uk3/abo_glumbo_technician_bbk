@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/address.dart';
@@ -93,7 +94,7 @@ class InvoiceService {
 
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final completedAtStr = booking.completedAt != null
-        ? dateFormat.format(booking.completedAt!.toDate())
+        ? dateFormat.format(KsaTime.fromInstant(booking.completedAt!.toDate()))
         : ((loc.localeName == 'ar')
               ? 'غير متوفر'
               : (loc.localeName == 'ur')
@@ -217,7 +218,7 @@ class InvoiceService {
                           booking.id.substring(0, 8).toUpperCase(),
                     ),
                   ),
-                  text(loc.dateString(dateFormat.format(DateTime.now()))),
+                  text(loc.dateString(dateFormat.format(KsaTime.now))),
                   text(
                     loc.statusPaid,
                     style: pw.TextStyle(

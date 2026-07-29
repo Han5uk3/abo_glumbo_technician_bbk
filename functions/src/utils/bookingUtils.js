@@ -75,6 +75,14 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
 }
 module.exports.calculateDistanceKm = calculateDistanceKm;
 
+/**
+ * How far back an identical notification suppresses a new one.
+ *
+ * Long enough to absorb a retry or a trigger that fires twice for one event,
+ * short enough that two genuinely separate events an hour apart both land.
+ */
+const NOTIFICATION_DEDUP_WINDOW_MS = 15 * 60 * 1000;
+
 function sendAndStoreNotification({
   targetRole, // "customer", "technician", "admin"
   targetId,
@@ -107,7 +115,22 @@ function sendAndStoreNotification({
 
     try {
       return query.get().then(existing => {
-        if (!existing.empty) {
+        // The dedup window exists to swallow retry storms and double-firing
+        // triggers, not to silence a message forever. Without a bound, any two
+        // genuinely separate events that render the same text for the same
+        // recipient — "You have been assigned to a booking." carries no
+        // requestId, so every assignment produces identical text — collapsed
+        // into one, and the recipient never heard about the second booking.
+        const cutoffMillis = Date.now() - NOTIFICATION_DEDUP_WINDOW_MS;
+        const hasRecentDuplicate = existing.docs.some(doc => {
+          const createdAt = doc.get("createdAt");
+          // A document whose serverTimestamp has not resolved yet was written
+          // moments ago, so it counts as recent.
+          if (!createdAt) return true;
+          return createdAt.toMillis() >= cutoffMillis;
+        });
+
+        if (hasRecentDuplicate) {
           console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
           return null;
         }

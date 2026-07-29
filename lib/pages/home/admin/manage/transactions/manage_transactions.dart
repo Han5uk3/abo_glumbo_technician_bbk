@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/transaction_tile.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
@@ -68,7 +69,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: KsaTime.now.add(const Duration(days: 365)),
       initialDateRange: _startDate != null && _endDate != null
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
@@ -108,7 +109,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
   }
 
   Future<void> _selectMonth() async {
-    final now = DateTime.now();
+    final now = KsaTime.now;
     final months = List.generate(12, (index) {
       return DateTime(now.year, now.month - index, 1);
     });
@@ -235,7 +236,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () {
-                  final now = DateTime.now();
+                  final now = KsaTime.now;
                   setState(() {
                     _startDate = DateTime(now.year, now.month, 1);
                     _endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);

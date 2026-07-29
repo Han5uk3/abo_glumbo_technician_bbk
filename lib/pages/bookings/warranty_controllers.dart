@@ -53,6 +53,51 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
     super.dispose();
   }
 
+  /// Rejecting hands the claim back to the admin and detaches this technician,
+  /// so it is not something to fire on a stray tap — confirm first.
+  Future<void> _confirmRejectWarranty(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final bloc = context.read<WarrantyBloc>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          l10n.confirmRejectWarranty,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: Text(
+          l10n.confirmRejectWarrantyMessage,
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(l10n.reject),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    bloc.add(RejectWarranty(bookingId: widget.booking.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<WarrantyBloc, WarrantyState>(
@@ -275,10 +320,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                                 child: _buildButton(
                                   onPressed: isRejectLoading
                                       ? null
-                                      : () => context.read<WarrantyBloc>().add(
-                                            RejectWarranty(
-                                                bookingId: widget.booking.id),
-                                          ),
+                                      : () => _confirmRejectWarranty(context),
                                   label: AppLocalizations.of(context)!.reject,
                                   color: Colors.red.shade50,
                                   textColor: Colors.red.shade700,
@@ -591,7 +633,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.blue),
+                            borderSide: BorderSide(color: Colors.grey),
                           ),
                           focusedErrorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -605,12 +647,14 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(color: Colors.grey),
                           ),
+                          labelStyle: TextStyle(color: Colors.black),
+                          hintStyle: TextStyle(color: Colors.grey.shade700),
                           labelText: AppLocalizations.of(
                             context,
-                          )!.reasonforrejection,
+                          )!.enterReasonForCancel,
                           hintText: AppLocalizations.of(
                             context,
-                          )!.enterReasonForReject,
+                          )!.enterReasonForCancel,
                           border: const OutlineInputBorder(),
                           errorMaxLines: 2,
                         ),

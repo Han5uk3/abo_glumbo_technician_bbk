@@ -2005,6 +2005,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmRejectMessage => 'هل أنت متأكد أنك تريد رفض هذا الطلب؟';
 
   @override
+  String get confirmRejectWarranty => 'رفض طلب الضمان';
+
+  @override
+  String get confirmRejectWarrantyMessage =>
+      'هل أنت متأكد أنك تريد رفض طلب الضمان هذا؟ ستتم إعادته إلى المسؤول لإعادة تعيينه.';
+
+  @override
   String get bookingCancelledSuccessfully => 'تم إلغاء الحجز بنجاح';
 
   @override
@@ -5159,6 +5166,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resolutionTextRequired => 'نص الحل مطلوب';
 
   @override
+  String get markAsResolved => 'وضع علامة كمحلولة';
+
+  @override
+  String get pleaseSelectValidFutureTime => 'يرجى اختيار وقت صالح في المستقبل';
+
+  @override
+  String get complaintSubmitted => 'تم تقديم شكوى';
+
+  @override
+  String get customerSubmittedAComplaint =>
+      'قدّم العميل شكوى بشأن طلب الضمان هذا';
+
+  @override
+  String get complaintResolvedByAdmin => 'تم حل الشكوى من قبل الإدارة';
+
+  @override
+  String get adminResolvedTheComplaint => 'قامت الإدارة بحل شكوى العميل';
+
+  @override
+  String get warrantyTechnicianAssigned => 'تم تعيين فني';
+
+  @override
+  String technicianAssignedToWarranty(String technician) {
+    return 'تم تعيين $technician لطلب الضمان هذا';
+  }
+
+  @override
   String get urduName => 'الاسم بالأردية';
 
   @override
@@ -5215,4 +5249,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get nearby20km => 'بالقرب (20 كم)';
+
+  @override
+  String get totalRevenue => 'إجمالي الإيرادات';
 }

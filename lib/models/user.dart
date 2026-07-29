@@ -20,7 +20,11 @@ class UserModel {
   String? docUrl;
   String? profileUrl;
   String? fcmToken;
+  /// Running **sum** of every review score this technician has received.
+  /// Not a displayable rating on its own — use [averageRating].
   double? rating;
+
+  /// Number of jobs that have been rated. Denominator for [averageRating].
   int? reviewCount;
   String? availableBalance;
   String? paidAmounts;
@@ -52,6 +56,19 @@ class UserModel {
   String? rejectionReason;
   bool? isDocsPendingReview; // Flag to indicate docs are ready for admin review
   bool? isRegistrationComplete; // Flag for initial registration completion
+
+  /// The technician's displayable star rating, 0.0 when they have no reviews yet.
+  ///
+  /// `rating` holds the running SUM of review scores and `reviewCount` the number
+  /// of rated jobs; both are maintained transactionally by the
+  /// `updateTechnicianRatingOnReview` Cloud Function. Always display through this
+  /// getter rather than reading `rating` directly, otherwise the raw sum leaks
+  /// into the UI as an absurd star value.
+  double get averageRating {
+    final count = reviewCount ?? 0;
+    if (count <= 0) return 0.0;
+    return (rating ?? 0.0) / count;
+  }
 
   UserModel({
     this.uid,

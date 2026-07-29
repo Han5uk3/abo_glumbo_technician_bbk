@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -186,7 +187,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  DateFormat('MMM dd', locale).format(DateTime.now()),
+                  DateFormat('MMM dd', locale).format(KsaTime.now),
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
                     fontSize: 11,
@@ -991,7 +992,7 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
     final locale = Localizations.localeOf(context).languageCode;
     // Format: dd - MM - yyyy, hh:mm a (e.g., "25 - 12 - 2025, 10:34 pm")
     final formatter = DateFormat('dd-MM-yyy, hh:mm a', locale);
-    return formatter.format(date);
+    return formatter.format(KsaTime.fromInstant(date));
   }
 
   void _showPayoutRequestDialog(UnifiedWalletModel wallet) {

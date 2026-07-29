@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/models/admin_dashboard_data.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/notifications/notifications_page.dart';
@@ -367,7 +368,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total Revenue',
+                l10n.totalRevenue,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               DropdownButton<String>(
@@ -408,7 +409,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       final picked = await showDateRangePicker(
                         context: context,
                         firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
+                        lastDate: KsaTime.today,
                         initialDateRange: _customDateRange,
                       );
                       
@@ -432,7 +433,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ],
           ),
           Text(
-            '${currentTotalRevenue.toStringAsFixed(2)}',
+            l10n.sarAmount(currentTotalRevenue.toStringAsFixed(2)),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

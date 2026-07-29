@@ -1196,27 +1196,46 @@ class _BookingInfoState extends State<BookingInfo> {
     tabViews.add(
       SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            if (widget.isAdmin &&
-                widget.booking.warranty != null &&
-                widget.booking.warranty!.rejectedTechnicians != null &&
-                widget.booking.warranty!.rejectedTechnicians!.isNotEmpty) ...[
-              _buildWarrantyRejectedTechniciansCard(
-                context,
-                textTheme,
-                colorScheme,
-              ),
-              const SizedBox(height: 16),
-            ],
-            _buildBookingTimelineCard(
-              context,
-              textTheme,
-              colorScheme,
-              widget.isWarranty,
-            ),
-            const SizedBox(height: 100),
-          ],
+        // Wrapped in the live booking stream so events that land after this
+        // screen opened (e.g. a complaint submitted/resolved while the
+        // technician is already viewing the claim) show up without needing
+        // to leave and reopen the page — `widget.booking` is just the
+        // snapshot passed in at navigation time and never updates on its own.
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: _bookingStream,
+          builder: (context, snapshot) {
+            final docData = snapshot.data?.data() as Map<String, dynamic>?;
+            final currentBooking = docData != null
+                ? BookingModel.fromMap(docData)
+                : widget.booking;
+
+            return Column(
+              children: [
+                if (widget.isAdmin &&
+                    currentBooking.warranty != null &&
+                    currentBooking.warranty!.rejectedTechnicians != null &&
+                    currentBooking
+                        .warranty!
+                        .rejectedTechnicians!
+                        .isNotEmpty) ...[
+                  _buildWarrantyRejectedTechniciansCard(
+                    context,
+                    textTheme,
+                    colorScheme,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                _buildBookingTimelineCard(
+                  context,
+                  textTheme,
+                  colorScheme,
+                  widget.isWarranty,
+                  currentBooking,
+                ),
+                const SizedBox(height: 100),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -1287,8 +1306,7 @@ class _BookingInfoState extends State<BookingInfo> {
                             ),
 
                           if (!widget.isWarranty &&
-                              (statusCode.toUpperCase() == 'P' ||
-                                  statusCode.toUpperCase() == 'SR'))
+                              statusCode.toUpperCase() == 'P')
                             if (widget.isAdmin)
                               _buildPendingBookingControls(
                                 context,
@@ -2188,6 +2206,7 @@ class _BookingInfoState extends State<BookingInfo> {
     TextTheme textTheme,
     ColorScheme colorScheme,
     bool isWarranty,
+    BookingModel booking,
   ) {
     List<Map<String, dynamic>> timelineItems = [];
 
@@ -2197,11 +2216,8 @@ class _BookingInfoState extends State<BookingInfo> {
     if (!widget.isAdmin && isWarranty) {
       final currentTechId = FirebaseAuth.instance.currentUser?.uid;
       if (currentTechId != null &&
-          widget.booking.warranty?.rejectedTechnicians != null) {
-        final cancelledByCurrentTech = widget
-            .booking
-            .warranty!
-            .rejectedTechnicians!
+          booking.warranty?.rejectedTechnicians != null) {
+        final cancelledByCurrentTech = booking.warranty!.rejectedTechnicians!
             .firstWhereOrNull((tech) => tech.uid == currentTechId);
 
         if (cancelledByCurrentTech != null) {
@@ -2216,8 +2232,8 @@ class _BookingInfoState extends State<BookingInfo> {
       // ==========================================
 
       // Created (original booking)
-      if (widget.booking.createdAt != null) {
-        final eventDate = widget.booking.createdAt!.toDate();
+      if (booking.createdAt != null) {
+        final eventDate = booking.createdAt!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
@@ -2235,8 +2251,8 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Original service completed
-      if (widget.booking.completedAt != null) {
-        final eventDate = widget.booking.completedAt!.toDate();
+      if (booking.completedAt != null) {
+        final eventDate = booking.completedAt!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
@@ -2254,8 +2270,8 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty requested - always show this regardless of technician cancellation
-      if (widget.booking.warranty?.requestedOn != null) {
-        final eventDate = widget.booking.warranty!.requestedOn!.toDate();
+      if (booking.warranty?.requestedOn != null) {
+        final eventDate = booking.warranty!.requestedOn!.toDate();
         timelineItems.add({
           'title': AppLocalizations.of(context)!.warrantyRepairRequested,
           'time': _formatDateLocalized(eventDate, context),
@@ -2267,9 +2283,71 @@ class _BookingInfoState extends State<BookingInfo> {
         });
       }
 
+      // Customer raised a complaint about the claim. `escalatedAt` survives the
+      // admin's resolution (which only flips `isEscalated` back to false), so the
+      // complaint stays on the timeline as a historical event either way.
+      if (booking.escalatedAt != null) {
+        final eventDate = booking.escalatedAt!.toDate();
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.complaintSubmitted,
+          'time': _formatDateLocalized(eventDate, context),
+          'description': AppLocalizations.of(
+            context,
+          )!.customerSubmittedAComplaint,
+          'status': 'cancelled',
+          'date': eventDate,
+        });
+      }
+
+      // Admin closed the complaint out. The description is the admin's own
+      // resolution note when there is one.
+      if (booking.resolvedAt != null) {
+        final eventDate = booking.resolvedAt!.toDate();
+        final resolution = booking.resolutionText?.trim() ?? '';
+        timelineItems.add({
+          'title': AppLocalizations.of(context)!.complaintResolvedByAdmin,
+          'time': _formatDateLocalized(eventDate, context),
+          'description': resolution.isNotEmpty
+              ? resolution
+              : AppLocalizations.of(context)!.adminResolvedTheComplaint,
+          'status': 'completed',
+          'date': eventDate,
+        });
+      }
+
+      // Admin (re)assigned a technician to the claim. This is what carries the
+      // timeline forward after a complaint is resolved — the items below
+      // (accepted → tracking → completed) then follow for the new technician.
+      if (booking.warranty?.assignedAt != null) {
+        final eventDate = booking.warranty!.assignedAt!.toDate();
+
+        if (currentTechCancelledAt == null ||
+            eventDate.isBefore(currentTechCancelledAt) ||
+            eventDate.isAtSameMomentAs(currentTechCancelledAt)) {
+          final technicianName =
+              booking.warranty?.assignedTechnician?.name ??
+              AppLocalizations.of(context)!.unknownTechnician;
+          final hasEarlierTechnician =
+              (booking.warranty?.rejectedTechnicians?.isNotEmpty ?? false) ||
+              booking.resolvedAt != null;
+
+          timelineItems.add({
+            'title': hasEarlierTechnician
+                ? AppLocalizations.of(context)!.newTechnicianAssigned
+                : AppLocalizations.of(context)!.warrantyTechnicianAssigned,
+            'time': _formatDateLocalized(eventDate, context),
+            'description': AppLocalizations.of(
+              context,
+            )!.technicianAssignedToWarranty(technicianName),
+            'status': 'completed',
+            'date': eventDate,
+          });
+        }
+      }
+
       // Warranty accepted
-      if (widget.booking.warranty?.acceptedAt != null) {
-        final eventDate = widget.booking.warranty!.acceptedAt!;
+      if (booking.warranty?.acceptedAt != null) {
+        final eventDate = booking.warranty!.acceptedAt!;
         final eventDateTime = eventDate.toDate();
 
         if (currentTechCancelledAt == null ||
@@ -2288,8 +2366,8 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty tracking started
-      if (widget.booking.trackingStartedAt != null) {
-        final eventDate = widget.booking.trackingStartedAt!.toDate();
+      if (booking.trackingStartedAt != null) {
+        final eventDate = booking.trackingStartedAt!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
@@ -2307,8 +2385,8 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty tracking stopped
-      if (widget.booking.trackingStoppedAt != null) {
-        final eventDate = widget.booking.trackingStoppedAt!.toDate();
+      if (booking.trackingStoppedAt != null) {
+        final eventDate = booking.trackingStoppedAt!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
@@ -2324,8 +2402,8 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty completed
-      if (widget.booking.warranty?.completedAt != null) {
-        final eventDate = widget.booking.warranty!.completedAt!;
+      if (booking.warranty?.completedAt != null) {
+        final eventDate = booking.warranty!.completedAt!;
         final eventDateTime = eventDate.toDate();
 
         if (currentTechCancelledAt == null ||
@@ -2345,13 +2423,12 @@ class _BookingInfoState extends State<BookingInfo> {
 
       // Warranty rejected technicians - For technician view
       if (!widget.isAdmin &&
-          widget.booking.warranty?.rejectedTechnicians != null &&
-          widget.booking.warranty!.rejectedTechnicians!.isNotEmpty) {
+          booking.warranty?.rejectedTechnicians != null &&
+          booking.warranty!.rejectedTechnicians!.isNotEmpty) {
         final currentTechId = LocalStore.getUID();
 
         if (currentTechId != null) {
-          final currentTechCancellation = widget
-              .booking
+          final currentTechCancellation = booking
               .warranty!
               .rejectedTechnicians!
               .firstWhereOrNull((tech) => tech.uid == currentTechId);
@@ -2375,9 +2452,9 @@ class _BookingInfoState extends State<BookingInfo> {
 
       // Warranty rejected technicians - For admin view
       if (widget.isAdmin &&
-          widget.booking.warranty?.rejectedTechnicians != null &&
-          widget.booking.warranty!.rejectedTechnicians!.isNotEmpty) {
-        for (var tech in widget.booking.warranty!.rejectedTechnicians!) {
+          booking.warranty?.rejectedTechnicians != null &&
+          booking.warranty!.rejectedTechnicians!.isNotEmpty) {
+        for (var tech in booking.warranty!.rejectedTechnicians!) {
           final eventDate = tech.rejectedAt!;
           final eventDateTime = eventDate.toDate();
 
@@ -2400,14 +2477,14 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty rejected by admin
-      if (widget.booking.warranty?.rejectedAt != null) {
-        final eventDate = widget.booking.warranty!.rejectedAt!.toDate();
+      if (booking.warranty?.rejectedAt != null) {
+        final eventDate = booking.warranty!.rejectedAt!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
             eventDate.isAtSameMomentAs(currentTechCancelledAt)) {
           final warrantyStatus =
-              widget.booking.warranty?.warrantyStatusCode.toLowerCase() ?? '';
+              booking.warranty?.warrantyStatusCode.toLowerCase() ?? '';
           final isAdminRejection =
               warrantyStatus == 's' || warrantyStatus == 'x';
 
@@ -2430,10 +2507,10 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // Warranty expired
-      if (widget.booking.warranty?.expiredOn != null &&
-          (widget.booking.warranty?.warrantyStatusCode == 'E' ||
-              widget.booking.warranty?.warrantyStatusCode == 'e')) {
-        final eventDate = widget.booking.warranty!.expiredOn!.toDate();
+      if (booking.warranty?.expiredOn != null &&
+          (booking.warranty?.warrantyStatusCode == 'E' ||
+              booking.warranty?.warrantyStatusCode == 'e')) {
+        final eventDate = booking.warranty!.expiredOn!.toDate();
 
         if (currentTechCancelledAt == null ||
             eventDate.isBefore(currentTechCancelledAt) ||
@@ -2455,39 +2532,36 @@ class _BookingInfoState extends State<BookingInfo> {
       // ==========================================
 
       // Created
-      if (widget.booking.createdAt != null) {
+      if (booking.createdAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.createdAt,
-          'time': _formatDateLocalized(
-            widget.booking.createdAt!.toDate(),
-            context,
-          ),
+          'time': _formatDateLocalized(booking.createdAt!.toDate(), context),
           'description': AppLocalizations.of(
             context,
           )!.customerSubmittedBookingRequest,
           'status': 'completed',
-          'date': widget.booking.createdAt!.toDate(),
+          'date': booking.createdAt!.toDate(),
         });
       }
 
       // Technician Selected
-      if (widget.booking.technicianSelectedAt != null) {
+      if (booking.technicianSelectedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.technicianSelected(1),
           'time': _formatDateLocalized(
-            widget.booking.technicianSelectedAt!.toDate(),
+            booking.technicianSelectedAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
-          'date': widget.booking.technicianSelectedAt!.toDate(),
+          'date': booking.technicianSelectedAt!.toDate(),
         });
       }
 
       // Confirmed / Assigned
-      final dateToUse = widget.booking.assignedAt ?? widget.booking.acceptedAt;
+      final dateToUse = booking.assignedAt ?? booking.acceptedAt;
       if (dateToUse != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.acceptedAt,
@@ -2501,108 +2575,102 @@ class _BookingInfoState extends State<BookingInfo> {
       }
 
       // New Technician Assigned (Reassigned)
-      if (widget.booking.reassignedAt != null) {
+      if (booking.reassignedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.newTechnicianAssigned,
           'time': _formatDateLocalized(
-            widget.booking.reassignedAt!.toDate(),
+            booking.reassignedAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.serviceProviderConfirmedAppointment,
           'status': 'completed',
-          'date': widget.booking.reassignedAt!.toDate(),
+          'date': booking.reassignedAt!.toDate(),
         });
       }
 
       // Tracking started
-      if (widget.booking.trackingStartedAt != null) {
+      if (booking.trackingStartedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.technicianStartedTracking,
           'time': _formatDateLocalized(
-            widget.booking.trackingStartedAt!.toDate(),
+            booking.trackingStartedAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(context)!.serviceTrackingInitiated,
           'status': 'completed',
-          'date': widget.booking.trackingStartedAt!.toDate(),
+          'date': booking.trackingStartedAt!.toDate(),
         });
       }
 
       // Arrived at location
-      if (widget.booking.arrivedAt != null) {
+      if (booking.arrivedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.technicianArrived,
-          'time': _formatDateLocalized(
-            widget.booking.arrivedAt!.toDate(),
-            context,
-          ),
+          'time': _formatDateLocalized(booking.arrivedAt!.toDate(), context),
           'description': AppLocalizations.of(
             context,
           )!.technicianArrivedAtLocation,
           'status': 'completed',
-          'date': widget.booking.arrivedAt!.toDate(),
+          'date': booking.arrivedAt!.toDate(),
         });
       }
 
       // Completed
-      if (widget.booking.completedAt != null) {
-        bool isInspection = widget.booking.completionData?.mode == 0;
+      if (booking.completedAt != null) {
+        bool isInspection = booking.completionData?.mode == 0;
         timelineItems.add({
           'title': isInspection
               ? AppLocalizations.of(context)!.inspectionCompleted
               : AppLocalizations.of(context)!.fullServiceCompleted,
-          'time': _formatDateLocalized(
-            widget.booking.completedAt!.toDate(),
-            context,
-          ),
+          'time': _formatDateLocalized(booking.completedAt!.toDate(), context),
           'description': AppLocalizations.of(
             context,
           )!.serviceHasBeenSuccessfullyCompleted,
           'status': 'completed',
-          'date': widget.booking.completedAt!.toDate(),
+          'date': booking.completedAt!.toDate(),
         });
       }
 
       // Payment Requested
-      if (widget.booking.paymentRequestedAt != null) {
+      if (booking.paymentRequestedAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentRequested,
           'time': _formatDateLocalized(
-            widget.booking.paymentRequestedAt!.toDate(),
+            booking.paymentRequestedAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(context)!.waitingForPayment,
           'status': 'completed',
-          'date': widget.booking.paymentRequestedAt!.toDate(),
+          'date': booking.paymentRequestedAt!.toDate(),
         });
       }
 
       // Payment status (Verification pending for outside-app payments)
-      if (widget.booking.paymentCompletedAt != null &&
-          widget.booking.paymentVerifiedAt == null &&
-          widget.booking.bookingStatusCode == 'VP') {
+      if (booking.paymentCompletedAt != null &&
+          booking.paymentVerifiedAt == null &&
+          booking.bookingStatusCode == 'VP') {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentStatus,
           'time': _formatDateLocalized(
-            widget.booking.paymentCompletedAt!.toDate(),
+            booking.paymentCompletedAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(context)!.waitingForPayment,
           'status': 'completed',
-          'date': widget.booking.paymentCompletedAt!.toDate(),
+          'date': booking.paymentCompletedAt!.toDate(),
         });
       }
 
       // Payment Completed
-      if (widget.booking.paymentCompleted == true) {
+      if (booking.paymentCompleted == true) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.paymentCompleted,
           'time': _formatDateLocalized(
-            widget.booking.paymentVerifiedAt?.toDate() ??
-                widget.booking.paymentCompletedAt?.toDate() ??
-                widget.booking.completedAt?.toDate() ??
+            booking.paymentVerifiedAt?.toDate() ??
+                booking.paymentCompletedAt?.toDate() ??
+                booking.completedAt?.toDate() ??
                 DateTime.now(),
             context,
           ),
@@ -2611,88 +2679,86 @@ class _BookingInfoState extends State<BookingInfo> {
           )!.paymentSuccessfullyCompleted,
           'status': 'completed',
           'date':
-              widget.booking.paymentVerifiedAt?.toDate() ??
-              widget.booking.paymentCompletedAt?.toDate() ??
-              widget.booking.completedAt?.toDate() ??
+              booking.paymentVerifiedAt?.toDate() ??
+              booking.paymentCompletedAt?.toDate() ??
+              booking.completedAt?.toDate() ??
               DateTime.now(),
         });
       }
 
       // Reviewed
-      if (widget.booking.review != null &&
-          widget.booking.review!.createdAt != null) {
+      if (booking.review != null && booking.review!.createdAt != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.review,
           'time': _formatDateLocalized(
-            widget.booking.review!.createdAt!.toDate(),
+            booking.review!.createdAt!.toDate(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.reviewSubmittedSuccessfully,
           'status': 'completed',
-          'date': widget.booking.review!.createdAt!.toDate(),
+          'date': booking.review!.createdAt!.toDate(),
         });
       }
 
       // Rejected by Admin
-      if (widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
-          (widget.booking.rejectedBy == 'Admin' ||
-              widget.booking.rejectedBy == null)) {
+      if (booking.bookingStatusCode.toLowerCase() == 'r' &&
+          (booking.rejectedBy == 'Admin' || booking.rejectedBy == null)) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.cancelledByAdmin,
           'time': _formatDateLocalized(
-            widget.booking.rejectedAt?.toDate() ??
-                widget.booking.updatedAt?.toDate() ??
+            booking.rejectedAt?.toDate() ??
+                booking.updatedAt?.toDate() ??
                 DateTime.now(),
             context,
           ),
           'description': AppLocalizations.of(context)!.bookingCancelledByAdmin,
           'status': 'rejected',
           'date':
-              widget.booking.rejectedAt?.toDate() ??
-              widget.booking.updatedAt?.toDate() ??
+              booking.rejectedAt?.toDate() ??
+              booking.updatedAt?.toDate() ??
               DateTime.now(),
         });
-      } else if (widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
-          widget.booking.rejectedBy != 'Admin' &&
-          widget.booking.rejectedBy != null) {
+      } else if (booking.bookingStatusCode.toLowerCase() == 'r' &&
+          booking.rejectedBy != 'Admin' &&
+          booking.rejectedBy != null) {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.technicianCancelled,
           'time': _formatDateLocalized(
-            widget.booking.rejectedAt?.toDate() ??
-                widget.booking.updatedAt?.toDate() ??
+            booking.rejectedAt?.toDate() ??
+                booking.updatedAt?.toDate() ??
                 DateTime.now(),
             context,
           ),
           'description': AppLocalizations.of(context)!.cancelledByTechnician,
           'status': 'cancelled',
           'date':
-              widget.booking.rejectedAt?.toDate() ??
-              widget.booking.updatedAt?.toDate() ??
+              booking.rejectedAt?.toDate() ??
+              booking.updatedAt?.toDate() ??
               DateTime.now(),
         });
       }
 
       // Cancelled by customer
-      if (widget.booking.bookingStatusCode.toLowerCase() == 'xc') {
+      if (booking.bookingStatusCode.toLowerCase() == 'xc') {
         timelineItems.add({
           'title': AppLocalizations.of(context)!.cancelledByCustomer,
           'time': _formatDateLocalized(
-            widget.booking.cancelledAt?.toDate() ?? DateTime.now(),
+            booking.cancelledAt?.toDate() ?? DateTime.now(),
             context,
           ),
           'description': AppLocalizations.of(
             context,
           )!.bookingWasCancelledByCustomer,
           'status': 'rejected',
-          'date': widget.booking.cancelledAt?.toDate() ?? DateTime.now(),
+          'date': booking.cancelledAt?.toDate() ?? DateTime.now(),
         });
       }
 
       // Worker cancellations (admin only)
-      if (widget.isAdmin && widget.booking.cancelledWorkers.isNotEmpty) {
-        for (var worker in widget.booking.cancelledWorkers) {
+      if (widget.isAdmin && booking.cancelledWorkers.isNotEmpty) {
+        for (var worker in booking.cancelledWorkers) {
           final workerName = worker.agentName.isNotEmpty
               ? worker.agentName
               : AppLocalizations.of(context)!.unknownTechnician;
@@ -2710,8 +2776,8 @@ class _BookingInfoState extends State<BookingInfo> {
     }
 
     // Counter Proposal Started
-    if (widget.booking.counterProposalStartedAt != null) {
-      final eventDate = widget.booking.counterProposalStartedAt!.toDate();
+    if (booking.counterProposalStartedAt != null) {
+      final eventDate = booking.counterProposalStartedAt!.toDate();
       timelineItems.add({
         'title': AppLocalizations.of(context)!.counterProposalStarted,
         'time': _formatDateLocalized(eventDate, context),
@@ -2722,8 +2788,8 @@ class _BookingInfoState extends State<BookingInfo> {
     }
 
     // Counter Proposal Accepted
-    if (widget.booking.counterProposalAcceptedAt != null) {
-      final eventDate = widget.booking.counterProposalAcceptedAt!.toDate();
+    if (booking.counterProposalAcceptedAt != null) {
+      final eventDate = booking.counterProposalAcceptedAt!.toDate();
       timelineItems.add({
         'title': AppLocalizations.of(context)!.counterProposalAccepted,
         'time': _formatDateLocalized(eventDate, context),
@@ -2759,17 +2825,17 @@ class _BookingInfoState extends State<BookingInfo> {
 
       if (!hasRejectionOrCancellation) {
         bool isInProgress =
-            widget.booking.trackingStartedAt != null &&
-            widget.booking.trackingStoppedAt == null;
+            booking.trackingStartedAt != null &&
+            booking.trackingStoppedAt == null;
 
         if (isWarranty) {
           // Warranty current status
           // Only show pending status if warranty is not completed, rejected, or expired
-          final warrantyStatusCode = widget.booking.warranty!.warrantyStatusCode
+          final warrantyStatusCode = booking.warranty!.warrantyStatusCode
               .toLowerCase();
           final isWarrantyActive =
-              widget.booking.warranty?.completedAt == null &&
-              widget.booking.warranty?.rejectedAt == null &&
+              booking.warranty?.completedAt == null &&
+              booking.warranty?.rejectedAt == null &&
               warrantyStatusCode != 'e' && // Not expired
               warrantyStatusCode != 'x' && // Not rejected
               warrantyStatusCode != 'c'; // Not completed
@@ -2785,7 +2851,7 @@ class _BookingInfoState extends State<BookingInfo> {
                 'status': 'current',
                 'date': DateTime.now(),
               });
-            } else if (widget.booking.warranty?.acceptedAt != null) {
+            } else if (booking.warranty?.acceptedAt != null) {
               timelineItems.add({
                 'title': AppLocalizations.of(
                   context,
@@ -2797,11 +2863,25 @@ class _BookingInfoState extends State<BookingInfo> {
                 'status': 'current',
                 'date': DateTime.now(),
               });
+            } else if (booking.warranty?.assignedTechnicianId != null ||
+                booking.warranty?.assignedTechnician != null) {
+              // A technician is on the claim but has not accepted it yet. This is
+              // the state a claim sits in right after an admin assignment — it is
+              // waiting on the technician, not on the admin.
+              timelineItems.add({
+                'title': AppLocalizations.of(context)!.waitingForAcceptance,
+                'time': AppLocalizations.of(context)!.pending,
+                'description': AppLocalizations.of(
+                  context,
+                )!.waitingForServiceProviderResponse,
+                'status': 'current',
+                'date': DateTime.now(),
+              });
             } else {
               // Check if there are any rejected technicians
               final hasRejectedTechnicians =
-                  widget.booking.warranty?.rejectedTechnicians != null &&
-                  widget.booking.warranty!.rejectedTechnicians!.isNotEmpty;
+                  booking.warranty?.rejectedTechnicians != null &&
+                  booking.warranty!.rejectedTechnicians!.isNotEmpty;
 
               if (hasRejectedTechnicians) {
                 // After technician rejection, waiting for admin to reassign
@@ -2817,7 +2897,7 @@ class _BookingInfoState extends State<BookingInfo> {
               } else {
                 // Initial state, waiting for technician to accept
                 final isSearching =
-                    widget.booking.autoAssignmentStatus == 'ready_to_assign';
+                    booking.autoAssignmentStatus == 'ready_to_assign';
                 timelineItems.add({
                   'title': isSearching
                       ? AppLocalizations.of(context)!.assigningTechnician
@@ -2837,13 +2917,12 @@ class _BookingInfoState extends State<BookingInfo> {
         } else {
           // Normal booking current status
           bool isAdminRejection =
-              widget.booking.bookingStatusCode.toLowerCase() == 'r' &&
-              (widget.booking.rejectedBy == 'Admin' ||
-                  widget.booking.rejectedBy == null);
+              booking.bookingStatusCode.toLowerCase() == 'r' &&
+              (booking.rejectedBy == 'Admin' || booking.rejectedBy == null);
 
-          if (widget.booking.completedAt == null &&
-              widget.booking.rejectedAt == null &&
-              widget.booking.bookingStatusCode.toLowerCase() != 'xc' &&
+          if (booking.completedAt == null &&
+              booking.rejectedAt == null &&
+              booking.bookingStatusCode.toLowerCase() != 'xc' &&
               !isAdminRejection) {
             if (isInProgress) {
               timelineItems.add({
@@ -2855,8 +2934,8 @@ class _BookingInfoState extends State<BookingInfo> {
                 'status': 'current',
                 'date': DateTime.now(),
               });
-            } else if (widget.booking.assignedAt != null ||
-                widget.booking.acceptedAt != null) {
+            } else if (booking.assignedAt != null ||
+                booking.acceptedAt != null) {
               timelineItems.add({
                 'title': AppLocalizations.of(
                   context,
@@ -2870,7 +2949,7 @@ class _BookingInfoState extends State<BookingInfo> {
               });
             } else {
               final isSearching =
-                  widget.booking.autoAssignmentStatus == 'ready_to_assign';
+                  booking.autoAssignmentStatus == 'ready_to_assign';
               timelineItems.add({
                 'title': isSearching
                     ? AppLocalizations.of(context)!.assigningTechnician
@@ -4054,8 +4133,17 @@ class _BookingInfoState extends State<BookingInfo> {
     try {
       final Map<String, dynamic> updateData = {};
       if (widget.isWarranty) {
+        // Keep in step with WarrantyBloc's AdminRejectWarranty: a rejected claim
+        // is closed, so it must also drop out of availability and release the
+        // assignee and their chatroom.
         updateData['warranty.warrantyStatusCode'] = 'X';
+        updateData['warranty.availability'] = false;
+        updateData['warranty.assignedTechnician'] = FieldValue.delete();
+        updateData['warranty.assignedTechnicianId'] = FieldValue.delete();
         updateData['warranty.rejectedAt'] = FieldValue.serverTimestamp();
+        updateData['warranty.updatedAt'] = FieldValue.serverTimestamp();
+        updateData['updatedAt'] = FieldValue.serverTimestamp();
+        updateData['chatroomId'] = FieldValue.delete();
       } else {
         updateData['bookingStatusCode'] = 'R';
         updateData['rejectedBy'] = 'Admin';
@@ -4113,9 +4201,7 @@ class _BookingInfoState extends State<BookingInfo> {
   Widget _buildBookingTimestamp(BuildContext context, BookingModel booking) {
     final locale = AppLocalizations.of(context)?.localeName ?? 'en';
 
-    if ((booking.bookingStatusCode == "P" ||
-            booking.bookingStatusCode == "SR") &&
-        booking.createdAt != null) {
+    if (booking.bookingStatusCode == "P" && booking.createdAt != null) {
       return _timestampText(
         "${AppLocalizations.of(context)!.bookedOn} : ${formatBookingDateTime(booking.createdAt!.toDate(), locale)}",
       );

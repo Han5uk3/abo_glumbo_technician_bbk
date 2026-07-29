@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,10 @@ class _HorizontalDateRangePickerState extends State<HorizontalDateRangePicker> {
   @override
   void initState() {
     super.initState();
-    _currentMonth = DateTime.now();
+    // The calendar grid is a Saudi calendar: which day counts as "today", and
+    // therefore which days are greyed out as future, must not depend on where
+    // the admin happens to be.
+    _currentMonth = KsaTime.now;
     // Start with current month (index ~1200)
     _pageController = PageController(initialPage: 1200);
   }
@@ -43,7 +47,7 @@ class _HorizontalDateRangePickerState extends State<HorizontalDateRangePicker> {
   }
 
   DateTime _getMonthForPage(int page) {
-    final now = DateTime.now();
+    final now = KsaTime.now;
     final offset = page - 1200;
     return DateTime(now.year, now.month + offset, 1);
   }
@@ -414,8 +418,8 @@ class _HorizontalDateRangePickerState extends State<HorizontalDateRangePicker> {
     final daysInMonth = lastDay.day;
     final startWeekday = firstDay.weekday % 7;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final now = KsaTime.now;
+    final today = KsaTime.today;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),

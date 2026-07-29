@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:aboglumbo_bbk_panel/firebase_options.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -210,7 +212,7 @@ class MyApp extends StatelessWidget {
     final double bottomPadding = MediaQueryData.fromView(
       View.of(context),
     ).padding.bottom;
-    final bool isThickNavBar = bottomPadding > 12.0;
+    final bool isThickNavBar = bottomPadding >= 24.0;
     return BlocProvider(
       create: (context) => AccountBloc(),
       child: BlocBuilder<AccountBloc, AccountState>(

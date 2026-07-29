@@ -2042,6 +2042,13 @@ class AppLocalizationsUr extends AppLocalizations {
       'کیا آپ واقعی اس آرڈر کو مسترد کرنا چاہتے ہیں؟';
 
   @override
+  String get confirmRejectWarranty => 'وارنٹی کی درخواست مسترد کریں';
+
+  @override
+  String get confirmRejectWarrantyMessage =>
+      'کیا آپ واقعی اس وارنٹی درخواست کو مسترد کرنا چاہتے ہیں؟ اسے دوبارہ تفویض کے لیے ایڈمن کو واپس بھیج دیا جائے گا۔';
+
+  @override
   String get bookingCancelledSuccessfully => 'بکنگ کامیابی سے منسوخ ہو گئی';
 
   @override
@@ -5251,6 +5258,34 @@ class AppLocalizationsUr extends AppLocalizations {
   String get resolutionTextRequired => 'حل کی تفصیل درکار ہے';
 
   @override
+  String get markAsResolved => 'حل شدہ کے طور پر نشان زد کریں';
+
+  @override
+  String get pleaseSelectValidFutureTime =>
+      'براہ کرم مستقبل کا درست وقت منتخب کریں';
+
+  @override
+  String get complaintSubmitted => 'شکایت جمع کرائی گئی';
+
+  @override
+  String get customerSubmittedAComplaint =>
+      'گاہک نے اس وارنٹی درخواست کے بارے میں شکایت درج کرائی';
+
+  @override
+  String get complaintResolvedByAdmin => 'ایڈمن نے شکایت حل کر دی';
+
+  @override
+  String get adminResolvedTheComplaint => 'ایڈمن نے گاہک کی شکایت حل کر دی';
+
+  @override
+  String get warrantyTechnicianAssigned => 'ٹیکنیشن تفویض کیا گیا';
+
+  @override
+  String technicianAssignedToWarranty(String technician) {
+    return '$technician کو اس وارنٹی درخواست کے لیے تفویض کیا گیا';
+  }
+
+  @override
   String get urduName => 'اردو نام';
 
   @override
@@ -5308,4 +5343,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get nearby20km => 'قریب (20 کلومیٹر)';
+
+  @override
+  String get totalRevenue => 'کل آمدنی';
 }

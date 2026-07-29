@@ -12,6 +12,10 @@ class WarrantyModel {
   Timestamp? updatedAt;
   Timestamp? requestedOn;
   Timestamp? completedAt;
+
+  /// When an admin (re)assigned a technician to this claim. Distinct from
+  /// [acceptedAt], which is only set once that technician actually accepts.
+  Timestamp? assignedAt;
   Timestamp? acceptedAt;
   Timestamp? rejectedAt;
   Timestamp? expiredOn;
@@ -32,6 +36,7 @@ class WarrantyModel {
     this.updatedAt,
     this.requestedOn,
     this.completedAt,
+    this.assignedAt,
     this.acceptedAt,
     this.rejectedAt,
     this.expiredOn,
@@ -71,6 +76,7 @@ class WarrantyModel {
       updatedAt: parseTimestamp(json['updatedAt']),
       requestedOn: parseTimestamp(json['requestedOn']),
       completedAt: parseTimestamp(json['completedAt']),
+      assignedAt: parseTimestamp(json['assignedAt']),
       acceptedAt:
           parseTimestamp(json['acceptedAt']) ??
           parseTimestamp(json['acceptedOn']),
@@ -104,6 +110,7 @@ class WarrantyModel {
       'updatedAt': updatedAt,
       'requestedOn': requestedOn,
       'completedAt': completedAt,
+      'assignedAt': assignedAt,
       'acceptedAt': acceptedAt,
       'rejectedAt': rejectedAt,
       'expiredOn': expiredOn,

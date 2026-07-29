@@ -5,6 +5,80 @@ const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 const { extractCustomerCoordinates, extractTechnicianCoordinates, calculateDistanceKm, sendAndStoreNotification, extractCustomerAddress, getAllAdminUsers } = require('../utils/bookingUtils');
 
+const MAX_ASSIGNMENT_DISTANCE_KM = 20.0;
+const OFFER_TTL_SECONDS = 120;
+
+/**
+ * Loads every currently-assigned booking in a SINGLE query and indexes it by agent uid.
+ *
+ * This replaces the previous pattern of issuing one `bookings` query per candidate
+ * technician, which made each assignment pass cost O(technicians) reads. The set of
+ * bookings with status 'A' is small and bounded, so one scan is far cheaper than N
+ * targeted queries and produces exactly the same eligibility answers.
+ *
+ * Returns:
+ *   startedJobAgentUids  Set<uid>              - agents with a job already in progress
+ *   bookedInstantsByAgent Map<uid, Set<millis>> - exact booking instants already taken
+ */
+async function loadActiveAgentSchedules() {
+  const startedJobAgentUids = new Set();
+  const bookedInstantsByAgent = new Map();
+
+  const activeBookings = await db.collection("bookings")
+    .where("bookingStatusCode", "==", "A")
+    .get();
+
+  for (const doc of activeBookings.docs) {
+    const data = doc.data();
+    const uid = data.agent && data.agent.uid;
+    if (!uid) continue;
+
+    if (data.trackingStartedAt && !data.completedAt && !data.cancelledAt) {
+      startedJobAgentUids.add(uid);
+    }
+
+    if (data.bookingDateTime && typeof data.bookingDateTime.toMillis === "function") {
+      if (!bookedInstantsByAgent.has(uid)) {
+        bookedInstantsByAgent.set(uid, new Set());
+      }
+      bookedInstantsByAgent.get(uid).add(data.bookingDateTime.toMillis());
+    }
+  }
+
+  return { startedJobAgentUids, bookedInstantsByAgent };
+}
+
+/**
+ * Collects the technician ids that already hold an offer for this booking/request,
+ * so a re-broadcast never sends a second notification to the same person.
+ * A technician is considered "already offered" when they hold a live pending offer,
+ * or when they have already responded (accepted/declined/countered) in any way.
+ */
+async function loadTechniciansWithExistingOffers(bookingId) {
+  const techsWithOffers = new Set();
+  const nowTime = Date.now();
+
+  const existingOffers = await db.collection("job_offers")
+    .where("bookingId", "==", bookingId)
+    .get();
+
+  existingOffers.forEach((offerDoc) => {
+    const offer = offerDoc.data();
+    if (!offer.technicianId) return;
+
+    const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
+    const isExpired = expiresAt < nowTime;
+
+    if (offer.status === "pending" && !isExpired) {
+      techsWithOffers.add(offer.technicianId);
+    } else if (offer.status !== "pending") {
+      techsWithOffers.add(offer.technicianId);
+    }
+  });
+
+  return techsWithOffers;
+}
+
 exports.onBookingRequestCreated = onDocumentCreated(
   "booking_request/{requestId}",
   async (event) => {
@@ -37,12 +111,23 @@ exports.onBookingRequestCreated = onDocumentCreated(
       const eligibleTechs = [];
       const rejectedTechs = request.rejectedTechnicians || [];
 
+      // One batched read each, instead of one query per candidate technician.
+      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
+      const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
+      const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+
       for (const doc of techsSnapshot.docs) {
         const tech = doc.data();
         const techUid = doc.id;
 
         if (rejectedTechs.includes(techUid)) {
           console.log(`[Booking Request ${requestId}] Technician ${techUid} was previously rejected.`);
+          continue;
+        }
+
+        // Never send a second offer to someone who already holds/answered one for this request.
+        if (techsWithOffers.has(techUid)) {
+          console.log(`[Booking Request ${requestId}] Technician ${techUid} already has an offer for this request.`);
           continue;
         }
 
@@ -60,36 +145,15 @@ exports.onBookingRequestCreated = onDocumentCreated(
         const techLon = techCoords.lon;
 
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > 20.0) continue;
+        if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
 
-        // Active booking & Time Conflict check
-        const activeBookings = await db.collection("bookings")
-          .where("agent.uid", "==", techUid)
-          .where("bookingStatusCode", "==", "A")
-          .get();
-
-        let hasStartedJob = false;
-        let hasTimeConflict = false;
-        const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
-
-        for (const bookingDoc of activeBookings.docs) {
-          const bData = bookingDoc.data();
-          if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
-            hasStartedJob = true;
-          }
-          if (reqBookingTime && bData.bookingDateTime) {
-            if (bData.bookingDateTime.toMillis() === reqBookingTime) {
-              hasTimeConflict = true;
-            }
-          }
-        }
-
-        if (hasStartedJob) {
+        if (startedJobAgentUids.has(techUid)) {
           console.log(`[Booking Request ${requestId}] Technician ${techUid} has an active started job`);
           continue;
         }
 
-        if (hasTimeConflict) {
+        const bookedInstants = bookedInstantsByAgent.get(techUid);
+        if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) {
           console.log(`[Booking Request ${requestId}] Technician ${techUid} has a conflicting booking for the same date and time`);
           continue;
         }
@@ -104,7 +168,7 @@ exports.onBookingRequestCreated = onDocumentCreated(
       }
 
       const batch = db.batch();
-      const expiresAtDate = new Date(Date.now() + 120 * 1000);
+      const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
       const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
 
       // Create a job offer for each eligible technician
@@ -207,27 +271,44 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
             if (techSnap.exists) {
               const techData = techSnap.data();
 
-              // Fetch all bookings for this technician to count ratings and completed jobs safely without indexes
-              const bookingsSnapshot = await db.collection("bookings")
-                .where("agent.uid", "==", techId)
-                .get();
+              // Rating comes from the running aggregates maintained transactionally by
+              // `updateTechnicianRatingOnReview`: `rating` is the SUM of all review
+              // scores and `reviewCount` is the number of rated jobs. Deriving the
+              // average here (instead of re-scanning every booking the technician has
+              // ever had) keeps this trigger O(1) and guarantees the number shown to the
+              // customer matches the one shown everywhere else in both apps.
+              const ratingSum = techData.rating || 0.0;
+              const reviewCount = techData.reviewCount || 0;
+              const averageRating = reviewCount > 0
+                ? parseFloat((ratingSum / reviewCount).toFixed(2))
+                : 0.0;
 
+              // Completed jobs via a server-side COUNT aggregation, which transfers a
+              // single number instead of every booking document. This needs a composite
+              // index on (agent.uid, bookingStatusCode, paymentCompleted); if that index
+              // is not present yet the call fails with FAILED_PRECONDITION, so we fall
+              // back to the original client-side scan and the feature keeps working.
               let completedJobsCount = 0;
-              let totalRating = 0;
-              let ratingCount = 0;
-
-              bookingsSnapshot.forEach((doc) => {
-                const b = doc.data();
-                if (b.bookingStatusCode === "C" && b.paymentCompleted === true) {
-                  completedJobsCount++;
-                }
-                if (b.review && b.review.rating != null) {
-                  totalRating += b.review.rating;
-                  ratingCount++;
-                }
-              });
-
-              const averageRating = ratingCount > 0 ? parseFloat((totalRating / ratingCount).toFixed(2)) : (techData.rating || 0.0);
+              try {
+                const completedAgg = await db.collection("bookings")
+                  .where("agent.uid", "==", techId)
+                  .where("bookingStatusCode", "==", "C")
+                  .where("paymentCompleted", "==", true)
+                  .count()
+                  .get();
+                completedJobsCount = completedAgg.data().count || 0;
+              } catch (aggErr) {
+                console.warn(`[Offer ${offerId}] Completed-jobs aggregation unavailable for ${techId}, falling back to scan:`, aggErr.message);
+                const bookingsSnapshot = await db.collection("bookings")
+                  .where("agent.uid", "==", techId)
+                  .get();
+                bookingsSnapshot.forEach((bookingDoc) => {
+                  const b = bookingDoc.data();
+                  if (b.bookingStatusCode === "C" && b.paymentCompleted === true) {
+                    completedJobsCount++;
+                  }
+                });
+              }
 
               const techCoords = extractTechnicianCoordinates(techData);
               const custCoords = extractCustomerCoordinates(requestData);
@@ -379,6 +460,11 @@ exports.processAutoAssignments = onSchedule(
 
       console.log(`Found ${snapshot.size} pending auto-assignment requests to check`);
 
+      // Loaded once per cron run rather than once per candidate technician per request.
+      // Offers do not themselves assign anyone (assignment happens later, when a
+      // technician accepts), so a per-run snapshot yields the same eligibility answers.
+      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
+
       for (const doc of snapshot.docs) {
         const request = doc.data();
         const requestId = doc.id;
@@ -390,8 +476,8 @@ exports.processAutoAssignments = onSchedule(
           continue;
         }
         const bookingData = bookingSnap.data();
-        if (bookingData.bookingStatusCode !== "P" && bookingData.bookingStatusCode !== "SR") {
-          console.log(`[Auto-Assignment ${requestId}] Booking status is '${bookingData.bookingStatusCode}' (not 'P' or 'SR'). Syncing status and skipping.`);
+        if (bookingData.bookingStatusCode !== "P") {
+          console.log(`[Auto-Assignment ${requestId}] Booking status is '${bookingData.bookingStatusCode}' (not 'P'). Syncing status and skipping.`);
           await db.collection("auto-assignment_requests").doc(requestId).update({
             status: bookingData.bookingStatusCode,
             updatedAt: FieldValue.serverTimestamp()
@@ -456,25 +542,7 @@ exports.processAutoAssignments = onSchedule(
         }
 
         // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
-        const existingOffersSnapshot = await db.collection("job_offers")
-          .where("bookingId", "==", requestId)
-          .get();
-
-        const techsWithOffers = new Set();
-        const nowTime = Date.now();
-        existingOffersSnapshot.forEach(offerDoc => {
-          const offer = offerDoc.data();
-          if (offer.technicianId) {
-            const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
-            const isExpired = expiresAt < nowTime;
-
-            if (offer.status === "pending" && !isExpired) {
-              techsWithOffers.add(offer.technicianId);
-            } else if (offer.status !== "pending") {
-              techsWithOffers.add(offer.technicianId);
-            }
-          }
-        });
+        const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
 
         // --- Skip Cancelled Technicians ---
         const cancelledWorkerUids = request.cancelledWorkerUids || bookingData.cancelledWorkerUids || [];
@@ -487,6 +555,13 @@ exports.processAutoAssignments = onSchedule(
           .get();
 
         const eligibleTechs = [];
+
+        // Exact instant this request is for, used for the same-minute conflict
+        // check below. Null when the request carries no booking time, in which
+        // case there is nothing to collide with.
+        const reqBookingTime = request.bookingDateTime
+          ? request.bookingDateTime.toMillis()
+          : null;
 
         for (const techDoc of techsSnapshot.docs) {
           const tech = techDoc.data();
@@ -515,34 +590,26 @@ exports.processAutoAssignments = onSchedule(
           const techLon = techCoords.lon;
 
           const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-          if (distance > 20.0) continue;
+          if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
 
-          // Started work check & Time Conflict check
-          const activeBookings = await db.collection("bookings")
-            .where("agent.uid", "==", techUid)
-            .where("bookingStatusCode", "==", "A")
-            .get();
+          // Started work check
+          if (startedJobAgentUids.has(techUid)) continue;
 
-          let hasStartedJob = false;
-          let hasTimeConflict = false;
-          const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
-
-          for (const bookingDoc of activeBookings.docs) {
-            const bData = bookingDoc.data();
-            if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
-              hasStartedJob = true;
-              break;
-            }
+          // Same-instant conflict check. The instant and manual paths have always
+          // enforced this; the cron computed the inputs and then never tested
+          // them, so a technician could be offered two "late" auto-assign
+          // bookings for the exact same minute.
+          const bookedInstants = bookedInstantsByAgent.get(techUid);
+          if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) {
+            continue;
           }
-
-          if (hasStartedJob) continue;
 
           eligibleTechs.push({ uid: techUid, data: tech });
         }
 
         if (eligibleTechs.length > 0 || shouldSendCustomerNotification) {
           const batch = db.batch();
-          const expiresAtDate = new Date(Date.now() + 120 * 1000);
+          const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
           const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
 
           for (const tech of eligibleTechs) {
@@ -645,27 +712,12 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
     const customerAddress = extractCustomerAddress(request);
 
     try {
-      const now = new Date();
       // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
-      const existingOffersSnapshot = await db.collection("job_offers")
-        .where("bookingId", "==", requestId)
-        .get();
+      const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
 
-      const techsWithOffers = new Set();
-      const nowTime = Date.now();
-      existingOffersSnapshot.forEach(offerDoc => {
-        const offer = offerDoc.data();
-        if (offer.technicianId) {
-          const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
-          const isExpired = expiresAt < nowTime;
-
-          if (offer.status === "pending" && !isExpired) {
-            techsWithOffers.add(offer.technicianId);
-          } else if (offer.status !== "pending") {
-            techsWithOffers.add(offer.technicianId);
-          }
-        }
-      });
+      // One batched read instead of one query per candidate technician.
+      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
+      const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
 
       // --- Skip Cancelled Technicians ---
       const cancelledWorkerUids = request.cancelledWorkerUids || [];
@@ -706,31 +758,13 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
         const techLon = techCoords.lon;
 
         const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > 20.0) continue;
+        if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
 
-        // Active booking & Time Conflict check
-        const activeBookings = await db.collection("bookings")
-          .where("agent.uid", "==", techUid)
-          .where("bookingStatusCode", "==", "A")
-          .get();
+        // Active booking & Time Conflict check (from the batched schedule index)
+        if (startedJobAgentUids.has(techUid)) continue;
 
-        let hasStartedJob = false;
-        let hasTimeConflict = false;
-        const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
-
-        for (const bookingDoc of activeBookings.docs) {
-          const bData = bookingDoc.data();
-          if (bData.trackingStartedAt && !bData.completedAt && !bData.cancelledAt) {
-            hasStartedJob = true;
-          }
-          if (reqBookingTime && bData.bookingDateTime) {
-            if (bData.bookingDateTime.toMillis() === reqBookingTime) {
-              hasTimeConflict = true;
-            }
-          }
-        }
-
-        if (hasStartedJob || hasTimeConflict) continue;
+        const bookedInstants = bookedInstantsByAgent.get(techUid);
+        if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) continue;
 
         eligibleTechs.push({ uid: techUid, data: tech });
       }
@@ -742,7 +776,7 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       }
 
       const batch = db.batch();
-      const expiresAtDate = new Date(Date.now() + 120 * 1000);
+      const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
       const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
 
       for (const tech of eligibleTechs) {
@@ -1060,12 +1094,12 @@ exports.onJobOfferCreatedForRebook = onDocumentCreated(
           await sendAndStoreNotification({
             targetRole: "technician",
             targetId: technicianId,
-            titleEn: `New Booking Assigned: ${serviceName}`,
-            titleAr: `تم تعيين حجز جديد: ${serviceNameAr}`,
-            titleUr: `نیا بکنگ تفویض کیا گیا: ${serviceNameUr}`,
-            bodyEn: "You have been assigned to a booking.",
-            bodyAr: "لقد تم تعيينك في حجز جديد.",
-            bodyUr: "آپ کو ایک بکنگ تفویض کی گئی ہے۔",
+            titleEn: `Booking Request: ${serviceName}`,
+            titleAr: `طلب حجز: ${serviceNameAr}`,
+            titleUr: `بکنگ کی درخواست: ${serviceNameUr}`,
+            bodyEn: `${customerName} has requested you for a booking.`,
+            bodyAr: `لقد طلبك ${customerName} لحجز جديد.`,
+            bodyUr: `${customerName} نے آپ کو ایک بکنگ کے لیے درخواست دی ہے۔`,
             data: {
               bookingId: offerData.requestId || offerData.bookingId || "",
               requestId: offerData.requestId || offerData.bookingId || "",
@@ -1151,11 +1185,20 @@ async function assignNewBookingIdHelper(docRef, data) {
     }
   }
 
-  // Generate new ID
-  // To ensure the correct local time date or UTC date? The prompt says "first booking of 22nd june 2026 should be AG-260622-0001"
-  // Let's use UTC or the server's local time. Server time is usually UTC.
-  // Using a consistent timezone for date string generation. UTC is safest.
-  const dateObj = new Date();
+  // Generate new ID.
+  //
+  // The date is the **Saudi** date, matching the requirement that the first
+  // booking of 22 June 2026 is AG-260622-0001 — "the 22nd" means the 22nd in
+  // Riyadh, which is the only calendar the business runs on. Deriving it in UTC
+  // rolled the date three hours late, so every booking placed between midnight
+  // and 03:00 KSA was stamped with the previous day and counted against the
+  // previous day's sequence.
+  //
+  // Shifting the epoch by the offset and then reading UTC fields gives the KSA
+  // calendar date without depending on the server's own timezone. KSA is UTC+3
+  // year round and has never observed DST, so a fixed offset is exact.
+  const KSA_OFFSET_MS = 3 * 60 * 60 * 1000;
+  const dateObj = new Date(Date.now() + KSA_OFFSET_MS);
   const yy = String(dateObj.getUTCFullYear()).slice(-2);
   const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(dateObj.getUTCDate()).padStart(2, '0');
@@ -1198,6 +1241,21 @@ exports.assignNewBookingIdHelper = assignNewBookingIdHelper;
 
 
 
+/**
+ * Notifies when a technician drops off a warranty claim.
+ *
+ * This trigger previously also announced acceptance (R→S), admin rejection
+ * (→X) and (re)assignment. Those three are already delivered by
+ * `notifyOnWarrantyRequestStatusChange` and `notifyTechnicianOnWarrantyAssignment`
+ * in index.js, and this function was never added to the exports list — so
+ * wiring it up as it stood would have sent every one of them twice.
+ *
+ * What none of the index.js functions cover is a technician *leaving* a claim:
+ * `notifyOnWarrantyRequestStatusChange` branches on A→R, R/A→S, →C, →X and →E,
+ * and a technician rejection moves the claim S→R, which matches none of them.
+ * That is the one case kept here, so the customer learns their repair lost its
+ * technician and admins learn they need to reassign.
+ */
 exports.onBookingWarrantyUpdated = onDocumentUpdated(
   "bookings/{bookingId}",
   async (event) => {
@@ -1207,95 +1265,16 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
 
     if (!before || !after) return null;
 
-    const beforeStatus = before.warranty?.warrantyStatusCode;
-    const afterStatus = after.warranty?.warrantyStatusCode;
-    
-    // Check if status changed
-    if (beforeStatus !== afterStatus) {
-      const customerId = after.customer?.uid;
-      const techId = before.warranty?.assignedTechnicianId || after.warranty?.assignedTechnicianId;
-      
-      // Helper to fetch user data for FCM
-      const fetchUserData = async (uid, role) => {
-        const col = role === "customer" ? "customers" : "users";
-        const doc = await db.collection(col).doc(uid).get();
-        return doc.exists ? doc.data() : null;
-      };
-
-      // 1. Technician Acceptance (R -> S)
-      if (beforeStatus === 'R' && afterStatus === 'S') {
-        const techName = after.warranty?.assignedTechnician?.name || "The technician";
-        
-        // Notify Customer
-        if (customerId) {
-          const custData = await fetchUserData(customerId, "customer");
-          await sendAndStoreNotification({
-            targetRole: "customer",
-            targetId: customerId,
-            titleEn: "Warranty Request Accepted",
-            titleAr: "تم قبول طلب الضمان",
-            titleUr: "وارنٹی کی درخواست منظور کر لی گئی",
-            bodyEn: `${techName} has accepted your warranty repair request.`,
-            bodyAr: `لقد وافق ${techName} على طلب إصلاح الضمان الخاص بك.`,
-            bodyUr: `${techName} نے آپ کی وارنٹی مرمت کی درخواست قبول کر لی ہے۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: custData?.fcmToken,
-            lanCode: custData?.lanCode,
-          });
-        }
-        
-        // Notify Admins
-        const admins = await getAllAdminUsers();
-        for (const adoc of admins) {
-          const adminData = adoc.data();
-          await sendAndStoreNotification({
-            targetRole: "admin",
-            targetId: adoc.id,
-            titleEn: "Warranty Request Accepted",
-            titleAr: "تم قبول طلب الضمان",
-            titleUr: "وارنٹی کی درخواست منظور کر لی گئی",
-            bodyEn: `${techName} has accepted warranty repair request ${bookingId}.`,
-            bodyAr: `وافق ${techName} على طلب إصلاح الضمان ${bookingId}.`,
-            bodyUr: `${techName} نے وارنٹی مرمت کی درخواست ${bookingId} قبول کر لی ہے۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: adminData.fcmToken,
-            lanCode: adminData.lanCode,
-          });
-        }
-      }
-
-      // 2. Admin Rejection (changed to X)
-      if (afterStatus === 'X' && beforeStatus === 'R') {
-        if (customerId) {
-          const custData = await fetchUserData(customerId, "customer");
-          await sendAndStoreNotification({
-            targetRole: "customer",
-            targetId: customerId,
-            titleEn: "Warranty Request Rejected",
-            titleAr: "تم رفض طلب الضمان",
-            titleUr: "وارنٹی کی درخواست مسترد کر دی گئی",
-            bodyEn: `Your warranty repair request has been rejected by the administration.`,
-            bodyAr: `تم رفض طلب إصلاح الضمان الخاص بك من قبل الإدارة.`,
-            bodyUr: `آپ کی وارنٹی مرمت کی درخواست انتظامیہ نے مسترد کر دی ہے۔`,
-            data: { type: "booking", requestId: bookingId },
-            fcmToken: custData?.fcmToken,
-            lanCode: custData?.lanCode,
-          });
-        }
-      }
-    }
-    
-    // Technician Rejection/Cancellation or Reassignment
     const beforeTechId = before.warranty?.assignedTechnicianId;
     const afterTechId = after.warranty?.assignedTechnicianId;
-    
+
     const fetchUserData = async (uid, role) => {
       const col = role === "customer" ? "customers" : "users";
       const doc = await db.collection(col).doc(uid).get();
       return doc.exists ? doc.data() : null;
     };
 
-    // 3. Technician Rejection / Cancellation (removed assigned technician)
+    // Technician Rejection / Cancellation (removed assigned technician)
     if (beforeTechId && !afterTechId) {
       const customerId = after.customer?.uid;
       // Notify Customer
@@ -1334,46 +1313,6 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
           lanCode: adminData.lanCode,
         });
       }
-    }
-    
-    // 4. Technician Assign/Reassign (changed from one tech to another, or from null to tech)
-    if (afterTechId && beforeTechId !== afterTechId) {
-      const customerId = after.customer?.uid;
-      const techName = after.warranty?.assignedTechnician?.name || "A new technician";
-      
-      // Notify Customer
-      if (customerId) {
-        const custData = await fetchUserData(customerId, "customer");
-        await sendAndStoreNotification({
-          targetRole: "customer",
-          targetId: customerId,
-          titleEn: "Technician Assigned",
-          titleAr: "تم تعيين فني",
-          titleUr: "ٹیکنیشن تفویض کر دیا گیا",
-          bodyEn: `${techName} has been assigned to your warranty repair request.`,
-          bodyAr: `تم تعيين ${techName} لطلب إصلاح الضمان الخاص بك.`,
-          bodyUr: `${techName} کو آپ کی وارنٹی مرمت کی درخواست کے لیے تفویض کیا گیا ہے۔`,
-          data: { type: "booking", requestId: bookingId },
-          fcmToken: custData?.fcmToken,
-          lanCode: custData?.lanCode,
-        });
-      }
-      
-      // Notify New Technician
-      const techData = await fetchUserData(afterTechId, "technician");
-      await sendAndStoreNotification({
-        targetRole: "technician",
-        targetId: afterTechId,
-        titleEn: "Warranty Repair Assigned",
-        titleAr: "تم تعيين إصلاح الضمان",
-        titleUr: "وارنٹی مرمت تفویض کر دی گئی",
-        bodyEn: `You have been assigned a new warranty repair request.`,
-        bodyAr: `تم تعيينك لطلب إصلاح ضمان جديد.`,
-        bodyUr: `آپ کو ایک نئی وارنٹی مرمت کی درخواست تفویض کی گئی ہے۔`,
-        data: { type: "booking", requestId: bookingId },
-        fcmToken: techData?.fcmToken,
-        lanCode: techData?.lanCode,
-      });
     }
 
     return null;

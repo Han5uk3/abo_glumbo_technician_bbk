@@ -11,8 +11,15 @@ class BookingModel {
   late ServiceModel service;
   late Timestamp bookingDateTime;
   late String bookingStatusCode;
+  /// Warranty complaint escalation. The customer raises a complaint against an
+  /// unresolved warranty claim (`isEscalated: true` + [escalatedAt]); an admin
+  /// closes it out with [resolutionText] + [resolvedAt], which clears the flag.
   bool? isEscalated;
   Timestamp? escalatedAt;
+
+  /// What the admin wrote when resolving the customer's complaint.
+  String? resolutionText;
+  Timestamp? resolvedAt;
   late String notes;
   late String? issueImage;
   late String? issueVideo;
@@ -180,6 +187,10 @@ class BookingModel {
     this.counterProposalAcceptedAt,
     this.counterProposalStartedAt,
     this.rebookTechnicianId, // ✅ Added
+    this.isEscalated,
+    this.escalatedAt,
+    this.resolutionText,
+    this.resolvedAt,
     this.invoiceId,
     this.invoicePdfUrl,
     this.invoicePdfUrlEn,
@@ -202,6 +213,9 @@ class BookingModel {
       notes = data['notes'],
       id = data['id'] ?? '',
       isEscalated = data['isEscalated'] ?? false,
+      escalatedAt = data['escalatedAt'] as Timestamp?,
+      resolutionText = data['resolutionText'] as String?,
+      resolvedAt = data['resolvedAt'] as Timestamp?,
       newBookingId = data['newBookingId'],
       chatroomId = data['chatroomId'],
       issueImage = data['issueImage'],
@@ -318,6 +332,10 @@ class BookingModel {
       'autoAssignmentStatus': autoAssignmentStatus, // ✅ Added
       'assignmentScheduledTime': assignmentScheduledTime,
       'rebookTechnicianId': rebookTechnicianId, // ✅ Added
+      'isEscalated': isEscalated ?? false,
+      'escalatedAt': escalatedAt,
+      'resolutionText': resolutionText,
+      'resolvedAt': resolvedAt,
       'invoiceId': invoiceId,
       'invoicePdfUrl': invoicePdfUrl,
       if (invoicePdfUrlEn != null) 'invoicePdfUrlEn': invoicePdfUrlEn,

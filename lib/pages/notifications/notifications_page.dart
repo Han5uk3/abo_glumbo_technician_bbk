@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -101,7 +102,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
           ? '$days دن پہلے'
           : '$days day${days > 1 ? 's' : ''} ago';
     } else {
-      return DateFormat('MMM d, h:mm a').format(dateTime);
+      return DateFormat('MMM d, h:mm a').format(KsaTime.fromInstant(dateTime));
     }
   }
 

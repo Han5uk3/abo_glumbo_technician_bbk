@@ -2031,6 +2031,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to reject this order?';
 
   @override
+  String get confirmRejectWarranty => 'Reject Warranty Request';
+
+  @override
+  String get confirmRejectWarrantyMessage =>
+      'Are you sure you want to reject this warranty request? It will be returned to the admin for reassignment.';
+
+  @override
   String get bookingCancelledSuccessfully => 'Booking Cancelled Successfully';
 
   @override
@@ -5228,6 +5235,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resolutionTextRequired => 'Resolution text is required';
 
   @override
+  String get markAsResolved => 'Mark as Resolved';
+
+  @override
+  String get pleaseSelectValidFutureTime => 'Please select a valid future time';
+
+  @override
+  String get complaintSubmitted => 'Complaint Submitted';
+
+  @override
+  String get customerSubmittedAComplaint =>
+      'Customer raised a complaint about this warranty request';
+
+  @override
+  String get complaintResolvedByAdmin => 'Complaint Resolved by Admin';
+
+  @override
+  String get adminResolvedTheComplaint =>
+      'Admin resolved the customer\'s complaint';
+
+  @override
+  String get warrantyTechnicianAssigned => 'Technician Assigned';
+
+  @override
+  String technicianAssignedToWarranty(String technician) {
+    return '$technician was assigned to this warranty request';
+  }
+
+  @override
   String get urduName => 'Urdu Name';
 
   @override
@@ -5285,4 +5320,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nearby20km => 'Nearby (20km)';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
 }

@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -34,7 +35,14 @@ class LocalizationHelper {
     }
   }
 
-  String formatDateLocalized(DateTime date, BuildContext context) {
+  /// Renders in **Saudi time**, like every other formatter in the app.
+  ///
+  /// [date] is an absolute instant (typically `Timestamp.toDate()`, which comes
+  /// back in the device's zone); it is converted to the Saudi wall clock here so
+  /// a booking reads the same on a phone in Riyadh and a phone anywhere else.
+  /// See [KsaTime].
+  String formatDateLocalized(DateTime instant, BuildContext context) {
+    final date = KsaTime.fromInstant(instant);
     final locale = Localizations.localeOf(context).languageCode;
     String formatted;
     if (locale == 'ar') {
@@ -65,8 +73,10 @@ class LocalizationHelper {
     return formatted;
   }
 
-  /// Formats date time as dd/MM/yy, hh:mm AM/PM (localized AM/PM)
-  String formatDateTimeCompact(DateTime date, BuildContext context) {
+  /// Formats date time as dd/MM/yy, hh:mm AM/PM (localized AM/PM), in KSA time.
+  /// [instant] is an absolute instant; see [formatDateLocalized].
+  String formatDateTimeCompact(DateTime instant, BuildContext context) {
+    final date = KsaTime.fromInstant(instant);
     final locale = Localizations.localeOf(context).languageCode;
     String formatted = intl.DateFormat(
       'dd/MM/yy, hh:mm a',

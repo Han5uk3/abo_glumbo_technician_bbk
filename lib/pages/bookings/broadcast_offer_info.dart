@@ -200,14 +200,14 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
                     DateFormat(
                       'EEEE, d MMMM yyyy',
                       locale,
-                    ).format(bookingDateTime.toDate()),
+                    ).format(KsaTime.fromInstant(bookingDateTime.toDate())),
                   ),
                   _buildDetailRow(
                     localization.time,
                     DateFormat(
                       'hh:mm a',
                       locale,
-                    ).format(bookingDateTime.toDate()),
+                    ).format(KsaTime.fromInstant(bookingDateTime.toDate())),
                   ),
                 ],
               ),

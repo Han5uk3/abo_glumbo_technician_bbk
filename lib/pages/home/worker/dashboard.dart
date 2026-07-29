@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'dart:async';
 
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -501,7 +502,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            DateFormat('MMM dd, yyyy').format(DateTime.now()),
+                            DateFormat('MMM dd, yyyy').format(KsaTime.now),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,

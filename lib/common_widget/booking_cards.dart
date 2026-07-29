@@ -518,7 +518,9 @@ class BookingListTileWidget extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          title: const Text('Mark as Resolved'),
+          title: Text(
+            AppLocalizations.of(context)?.markAsResolved ?? 'Mark as Resolved',
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -669,10 +671,6 @@ class BookingListTileWidget extends StatelessWidget {
         case 'R':
           label = localization.rejected;
           color = Colors.red;
-          break;
-        case 'SR':
-          label = localization.assigningTechnician; // Searching
-          color = AppColors.primary;
           break;
         case 'A':
           label = localization.accepted;
@@ -1096,7 +1094,11 @@ class BookingRequestTileWidget extends StatelessWidget {
                 Icons.calendar_today_outlined,
                 DateFormat(
                   'EEE, d MMM • hh:mm a',
-                ).format((data['bookingDateTime'] as Timestamp).toDate()),
+                ).format(
+                  KsaTime.fromInstant(
+                    (data['bookingDateTime'] as Timestamp).toDate(),
+                  ),
+                ),
               ),
             ],
             const Padding(

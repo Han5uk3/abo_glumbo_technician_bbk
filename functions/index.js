@@ -401,7 +401,7 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
       return;
     }
 
-    if (afterData.bookingStatusCode === "P" || afterData.bookingStatusCode === "SR") {
+    if (afterData.bookingStatusCode === "P") {
       console.log("Booking status is pending/searching, skipping notification...");
       return;
     }
@@ -558,6 +558,149 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
     });
   }
 );
+/**
+ * `paymentModeCode` values that mean the customer paid inside the app (Telr /
+ * Apple Pay). Anything else — notably "O" — is an outside-app (cash) payment.
+ */
+const IN_APP_PAYMENT_CODES = ['c', 'a', 'C', 'A', 'Inside App', 'inside app', 'in app'];
+
+/**
+ * Credits a completed booking to the technician's unified wallet.
+ *
+ * This is the **single writer** of booking earnings. It replaces three separate
+ * client-side credits that each only covered part of the matrix:
+ *
+ *  - the customer app credited in-app earnings on the payment screen,
+ *  - the technician app credited outside-app earnings from the verify-payment
+ *    sheet, using the `BookingModel` it had loaded — which is stale whenever the
+ *    booking was completed after that screen's list was built, in which case
+ *    `completionData` was null locally and the credit was silently skipped,
+ *  - and `notifyTechnicianOnPaymentCompletion` credited in-app earnings again,
+ *    double-counting against the first one, but only if it got that far (it
+ *    returns early for warranty claims and when the agent lookup fails).
+ *
+ * Doing it here instead makes the credit independent of which of the three
+ * booking creation paths produced the booking (broadcast, auto-assign, rebook)
+ * and of which client happened to observe the payment. It is keyed on the
+ * booking's *state* rather than on a field transition, so a booking that reaches
+ * a payable state by any route is picked up, and it is made exactly-once by the
+ * `walletCreditedAt` marker written on the booking inside the same transaction.
+ */
+exports.creditTechnicianWalletOnPaymentCompletion = onDocumentWritten(
+  "bookings/{bookingId}",
+  async (event) => {
+    const bookingId = event.params.bookingId;
+    const beforeData = event.data?.before?.data();
+    const afterData = event.data?.after?.data();
+
+    if (!afterData) return; // deleted
+    if (afterData.walletCreditedAt) return; // already credited — cheap pre-check
+
+    // Fire on the booking *entering* the payable state — payment settled and the
+    // job closed out — rather than on it merely being in that state.
+    //
+    // Two reasons this is a transition and not a state check. Bookings settled
+    // before this function existed were credited by the old client-side paths and
+    // carry no `walletCreditedAt` marker, so a state check would back-credit every
+    // one of them the next time anything touched the document (a warranty claim,
+    // a review, an invoice url). And this trigger fires on every write to the
+    // booking, including the marker write below.
+    //
+    // Comparing the whole payable condition rather than a single field keeps it
+    // robust: if a path ever set `paymentCompleted` while still at VP and moved to
+    // C afterwards, the second write is the entering transition and still counts.
+    const wasPayable =
+      beforeData?.paymentCompleted === true &&
+      beforeData?.bookingStatusCode === "C";
+    const isPayable =
+      afterData.paymentCompleted === true && afterData.bookingStatusCode === "C";
+
+    if (!isPayable || wasPayable) return;
+
+    const agentUid = afterData.agent?.uid;
+    if (!agentUid) {
+      console.log(`[${bookingId}] No agent on booking, nothing to credit`);
+      return;
+    }
+
+    // Only full-service jobs earn. Inspection-only jobs (mode 0) are excluded,
+    // as are warranty repairs, whose costs are forced to zero on completion.
+    if (afterData.completionData?.mode !== 1) return;
+
+    const amount = Number(afterData.completionData?.totalCost) || 0;
+    if (amount <= 0) return;
+
+    const isInApp = IN_APP_PAYMENT_CODES.includes(afterData.paymentModeCode);
+    const bookingRef = event.data.after.ref;
+    const walletRef = db.collection("unified_wallets").doc(agentUid);
+
+    try {
+      await db.runTransaction(async (tx) => {
+        // All reads first — Firestore transactions forbid a read after a write.
+        // `getAll` is the documented way to read several documents in one
+        // transaction round trip.
+        const [bookingSnap, walletSnap] = await tx.getAll(bookingRef, walletRef);
+
+        // Re-check the marker inside the transaction: this trigger fires on every
+        // write to the booking, so two invocations can race here.
+        if (!bookingSnap.exists || bookingSnap.data().walletCreditedAt) return;
+
+        const increment = admin.firestore.FieldValue.increment(amount);
+        const now = admin.firestore.FieldValue.serverTimestamp();
+
+        if (walletSnap.exists) {
+          const walletUpdate = {
+            totalCompletionAmount: increment,
+            lifetimeTotal: increment,
+            lastUpdated: now,
+          };
+          if (isInApp) {
+            // In-app earnings are payoutable, so they also raise the balance the
+            // technician can request against. Cash stays lifetime-only.
+            walletUpdate.inAppEarnings = increment;
+            walletUpdate.totalAvailableBalance = increment;
+          } else {
+            walletUpdate.outsideAppEarnings = increment;
+          }
+          tx.update(walletRef, walletUpdate);
+        } else {
+          tx.set(walletRef, {
+            workerId: agentUid,
+            totalTips: 0.0,
+            cardTips: 0.0,
+            cashTips: 0.0,
+            paidTips: 0.0,
+            totalBonus: 0.0,
+            paidBonus: 0.0,
+            availableBonus: 0.0,
+            inAppEarnings: isInApp ? amount : 0.0,
+            outsideAppEarnings: isInApp ? 0.0 : amount,
+            totalCompletionAmount: amount,
+            totalAvailableBalance: isInApp ? amount : 0.0,
+            lifetimeTotal: amount,
+            payoutRequested: false,
+            requestedAmount: 0.0,
+            lastUpdated: now,
+          });
+        }
+
+        tx.update(bookingRef, {
+          walletCreditedAt: now,
+          walletCreditedAmount: amount,
+          walletCreditedTo: agentUid,
+          walletCreditedAs: isInApp ? "inApp" : "outsideApp",
+        });
+      });
+
+      console.log(
+        `[${bookingId}] Credited ${amount} to ${agentUid} as ${isInApp ? "in-app" : "outside-app"} earnings`
+      );
+    } catch (error) {
+      console.error(`[${bookingId}] Error crediting unified wallet:`, error);
+    }
+  }
+);
+
 exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
   "bookings/{bookingId}",
   async (event) => {
@@ -685,54 +828,13 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       console.log(`[${bookingId}] Technician has no valid FCM token or fetch failed, skipping technician notification`);
     }
 
-    // Determine admin notification texts based on payment method
-    const inAppCodes = ['c', 'a', 'C', 'A', 'Inside App', 'inside app', 'in app'];
-    const isOutsideApp = !inAppCodes.includes(afterData.paymentModeCode);
-
-    // Update Unified Wallet for In-App Payments
-    if (!isOutsideApp && afterData.completionData?.mode === 1) {
-      try {
-        const costToCredit = afterData.completionData.totalCost || 0;
-        if (costToCredit > 0) {
-          const walletRef = admin.firestore().collection("unified_wallets").doc(agent.uid);
-
-          await admin.firestore().runTransaction(async (transaction) => {
-            const walletDoc = await transaction.get(walletRef);
-            if (walletDoc.exists) {
-              transaction.update(walletRef, {
-                inAppEarnings: admin.firestore.FieldValue.increment(costToCredit),
-                totalCompletionAmount: admin.firestore.FieldValue.increment(costToCredit),
-                totalAvailableBalance: admin.firestore.FieldValue.increment(costToCredit),
-                lifetimeTotal: admin.firestore.FieldValue.increment(costToCredit),
-                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-              });
-            } else {
-              transaction.set(walletRef, {
-                workerId: agent.uid,
-                totalTips: 0.0,
-                cardTips: 0.0,
-                cashTips: 0.0,
-                paidTips: 0.0,
-                totalBonus: 0.0,
-                paidBonus: 0.0,
-                availableBonus: 0.0,
-                inAppEarnings: costToCredit,
-                outsideAppEarnings: 0.0,
-                totalCompletionAmount: costToCredit,
-                totalAvailableBalance: costToCredit,
-                lifetimeTotal: costToCredit,
-                payoutRequested: false,
-                requestedAmount: 0.0,
-                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-              });
-            }
-          });
-          console.log(`[${bookingId}] Unified wallet updated with in-app earnings for agent ${agent.uid}, amount: ${costToCredit}`);
-        }
-      } catch (error) {
-        console.error(`[${bookingId}] Error updating unified wallet for in-app earnings:`, error);
-      }
-    }
+    // Determine admin notification texts based on payment method.
+    // NOTE: crediting the technician's unified wallet used to live here. It now
+    // lives in `creditTechnicianWalletOnPaymentCompletion` above — this function
+    // returns early in several places (no FCM token path aside, a warranty claim
+    // in any state other than 'A' bails out well before this point), and money
+    // must not depend on whether a notification was deliverable.
+    const isOutsideApp = !IN_APP_PAYMENT_CODES.includes(afterData.paymentModeCode);
 
     const adminTitleEn = isOutsideApp ? "Payment received outside app" : "Payment received within app";
     const adminTitleAr = isOutsideApp ? "تم استلام الدفع خارج التطبيق" : "تم استلام الدفع داخل التطبيق";
@@ -1768,7 +1870,8 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
       await autoReqRef.set(autoReqData);
       console.log(`[AutoReassign] Created/updated auto-assignment request for cancelled booking ${bookingId}`);
 
-      // Update the booking itself to set autoAssignmentStatus = 'ready_to_assign' and status = 'SR' (Searching/Re-Routing)
+      // Re-enter the auto-assignment cron: back to pending with the booking
+      // flagged ready to assign.
       await db.collection("bookings").doc(bookingId).update({
         autoAssignmentStatus: "ready_to_assign",
         bookingStatusCode: "P",
@@ -5169,7 +5272,11 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
 )
 
 // Cleanup issueMedia folder once a month
-exports.cleanupIssueMedia = onSchedule("0 0 1 * *", async (event) => {
+// Monthly at 00:00 Riyadh — every scheduled job in this codebase runs on the
+// Saudi calendar so "the 1st" means the same day everywhere.
+exports.cleanupIssueMedia = onSchedule(
+  { schedule: "0 0 1 * *", timeZone: "Asia/Riyadh" },
+  async (event) => {
   console.log("Starting monthly cleanup of issueMedia folder...");
   try {
     const bucket = admin.storage().bucket();
@@ -5252,7 +5359,9 @@ exports.chatCleanupOnCompletion = onDocumentUpdated(
 );
 
 // 2. Scheduled deletion for full service chats after 14 days
-exports.scheduledChatCleanup = onSchedule("0 0 * * 0", async (event) => {
+exports.scheduledChatCleanup = onSchedule(
+  { schedule: "0 0 * * 0", timeZone: "Asia/Riyadh" },
+  async (event) => {
   console.log("Starting weekly cleanup of chatrooms for full service bookings...");
   try {
     const cutoffDate = new Date();
@@ -5392,4 +5501,11 @@ exports.onBookingCreatedCleanupOffers = bookingTriggers.onBookingCreatedCleanupO
 exports.onBookingRequestDeletedCleanupOffers = bookingTriggers.onBookingRequestDeletedCleanupOffers;
 exports.onJobOfferCreatedForRebook = bookingTriggers.onJobOfferCreatedForRebook;
 exports.notifyOnTechnicianRegistrationStatusChange = bookingTriggers.notifyOnTechnicianRegistrationStatusChange;
+// Both of these were defined but never exported, so neither was deployed:
+// warranty claims that lost their technician notified nobody, and abandoned
+// `booking_request` docs were only ever closed by the customer's 5-minute
+// client-side timer — which dies with the app, leaving them 'searching' forever
+// and inflating the admin dashboard's pending count.
+exports.onBookingWarrantyUpdated = bookingTriggers.onBookingWarrantyUpdated;
+exports.cleanupStaleBookingRequests = bookingTriggers.cleanupStaleBookingRequests;
 

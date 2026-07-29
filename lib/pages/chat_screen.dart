@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
@@ -541,9 +542,12 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
   }
 
   Widget _buildDateSeparator(int timestamp, AppLocalizations localization) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Day boundaries follow the Saudi calendar, so a message sent at 01:00 KSA
+    // is filed under the KSA day for everyone reading the thread.
+    final date = KsaTime.fromInstant(
+      DateTime.fromMillisecondsSinceEpoch(timestamp),
+    );
+    final today = KsaTime.today;
     final yesterday = today.subtract(const Duration(days: 1));
     final messageDate = DateTime(date.year, date.month, date.day);
 
@@ -553,6 +557,7 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
     } else if (messageDate == yesterday) {
       dateText = localization.yesterday;
     } else {
+      // `date` is already the KSA wall clock — converting again would shift it.
       dateText = DateFormat('MMM dd, yyyy').format(date);
     }
 
@@ -783,8 +788,12 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
 
   String _formatTime(int timestamp) {
     if (timestamp == 0) return '';
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final now = DateTime.now();
+    // Compare and render on the Saudi calendar, so "today" means today in KSA
+    // and the clock matches every other time in the app.
+    final dateTime = KsaTime.fromInstant(
+      DateTime.fromMillisecondsSinceEpoch(timestamp),
+    );
+    final now = KsaTime.now;
     if (dateTime.day == now.day &&
         dateTime.month == now.month &&
         dateTime.year == now.year) {

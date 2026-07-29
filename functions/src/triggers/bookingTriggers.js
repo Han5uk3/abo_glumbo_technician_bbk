@@ -1002,7 +1002,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
           .filter(Boolean);
 
         if (adminTokens.length > 0) {
-          for (const { uid, token, lanCode } of adminTokens) {
+          await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
             await sendAndStoreNotification({
               targetRole: "admin",
               targetId: uid,
@@ -1023,7 +1023,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
               fcmToken: token,
               lanCode: lanCode,
             });
-          }
+          }));
           console.log(`[${userId}] Admin notifications sent for document resubmission.`);
         }
       } catch (error) {
@@ -1276,6 +1276,24 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
 
     // Technician Rejection / Cancellation (removed assigned technician)
     if (beforeTechId && !afterTechId) {
+      // notifyOnWarrantyStatusChange (index.js) watches this same document and
+      // already covers the S -> R transition, with copy that names the
+      // technician. A technician cancelling clears assignedTechnicianId and
+      // moves the status code in one write, so without this guard a single
+      // cancellation notified the customer and every admin twice - the two
+      // messages differ in wording and payload, so no dedup could catch them.
+      // This branch stays for the case the other trigger does not see: an
+      // assignment cleared without the status going S -> R.
+      const handledByStatusCodeTrigger =
+        before.warranty?.warrantyStatusCode === "S" &&
+        after.warranty?.warrantyStatusCode === "R";
+      if (handledByStatusCodeTrigger) {
+        console.log(
+          `Warranty cancellation for ${bookingId} handled by notifyOnWarrantyStatusChange, skipping duplicate.`
+        );
+        return null;
+      }
+
       const customerId = after.customer?.uid;
       // Notify Customer
       if (customerId) {
@@ -1297,7 +1315,7 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
       
       // Notify Admins
       const admins = await getAllAdminUsers();
-      for (const adoc of admins) {
+      await Promise.allSettled(admins.map(async (adoc) => {
         const adminData = adoc.data();
         await sendAndStoreNotification({
           targetRole: "admin",
@@ -1312,7 +1330,7 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
           fcmToken: adminData.fcmToken,
           lanCode: adminData.lanCode,
         });
-      }
+      }));
     }
 
     return null;

@@ -12,6 +12,16 @@ admin.initializeApp();
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
+// Single implementation, shared with src/triggers/bookingTriggers.js. This file
+// used to carry its own copy; the two drifted into writing different field
+// names and building different FCM payloads, so there is only one now.
+// Required after initializeApp() because bookingUtils calls admin.firestore()
+// at module load.
+const {
+  sendAndStoreNotification,
+  money,
+} = require("./src/utils/bookingUtils");
+
 // How long a chat presence heartbeat stays trustworthy.
 // Clients refresh the heartbeat every 15s (see `_presenceHeartbeat` in each
 // app's chat_services.dart). Anything older than this is treated as "the user
@@ -52,158 +62,6 @@ async function isReceiverViewingChat(rtdb, chatId, receiverId) {
   }
 }
 
-// Helper function to send FCM and store notification in Firestore
-async function sendAndStoreNotification({
-  targetRole, // 'customer', 'technician', 'admin'
-  targetId,
-  titleEn,
-  titleAr,
-  titleUr,
-  bodyEn,
-  bodyAr,
-  bodyUr,
-  data,
-  fcmToken,
-  lanCode,
-  sendPush = true, // false -> store the entry but skip the push
-}) {
-  // 1. Determine collection based on role
-  // Customer -> customers collection
-  // Technician/Admin -> users collection
-  let collectionName = "users";
-  if (targetRole === "customer") {
-    collectionName = "customers";
-  } else if (targetRole === "admin") {
-    collectionName = "admins";
-  }
-
-  // Check for duplicate notification - only if it's not a chat message and not a custom notification
-  if (data?.type !== "chat" && data?.type !== "custom") {
-    const requestId = data?.requestId || data?.offerId;
-    let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
-      .where("titleEn", "==", titleEn)
-      .where("bodyEn", "==", bodyEn);
-
-    if (requestId) {
-      query = query.where("data.requestId", "==", requestId);
-    }
-
-    try {
-      const existing = await query.get();
-      if (!existing.empty) {
-        console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error checking for duplicate notification:`, error);
-      // Continue anyway
-    }
-  }
-
-  // 2. Store in Firestore (subcollection 'notifications')
-  try {
-    await admin
-      .firestore()
-      .collection(collectionName)
-      .doc(targetId)
-      .collection("notifications")
-      .add({
-        titleEn,
-        titleAr,
-        titleUr: titleUr || "",
-        bodyEn,
-        bodyAr,
-        bodyUr: bodyUr || "",
-        data: data || {},
-        isRead: false,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-  } catch (error) {
-    console.error(`Error saving notification to Firestore for ${targetRole} ${targetId}:`, error);
-    // Continue to send FCM even if Firestore save fails
-  }
-
-  // 3. Send FCM Push Notification
-  if (!sendPush) {
-    console.log(
-      `Push suppressed for ${targetRole} ${targetId} (receiver is viewing this chat)`
-    );
-    return null;
-  }
-
-  if (fcmToken && fcmToken.trim() !== "") {
-    const title = (lanCode === "ar"
-      ? (titleAr || titleEn || titleUr)
-      : lanCode === "ur"
-        ? (titleUr || titleAr || titleEn)
-        : (titleEn || titleAr || titleUr)) || "Notification";
-    
-    const body = (lanCode === "ar"
-      ? (bodyAr || bodyEn || bodyUr)
-      : lanCode === "ur"
-        ? (bodyUr || bodyAr || bodyEn)
-        : (bodyEn || bodyAr || bodyUr)) || "New Update";
-
-    // Ensure all data payload values are strings (FCM requirement)
-    const safeData = { ...data };
-    for (const key in safeData) {
-      if (safeData[key] === null || safeData[key] === undefined) {
-        delete safeData[key];
-      } else if (typeof safeData[key] !== 'string') {
-        safeData[key] = String(safeData[key]);
-      }
-    }
-
-    const isCustom = safeData.type === "custom";
-
-    const message = {
-      android: {
-        priority: "high",
-      },
-      apns: {
-        headers: {
-          "apns-priority": "10",
-        },
-        payload: {
-          aps: {
-            sound: "default",
-            badge: 1,
-            "content-available": 1,
-          },
-        },
-      },
-      data: {
-        ...safeData,
-        lanCode: lanCode || "en",
-        title: title,
-        body: body,
-      },
-      token: fcmToken,
-    };
-
-    if (!isCustom) {
-      message.notification = { title, body };
-      message.android.notification = {
-        channelId: "abo_glumbo_channel",
-        priority: "high",
-        defaultSound: true,
-        defaultVibrateTimings: true,
-        defaultLightSettings: true,
-        visibility: "public",
-        notificationPriority: "PRIORITY_HIGH",
-      };
-    }
-
-    try {
-      const response = await admin.messaging().send(message);
-      console.log(`FCM sent to ${targetRole} ${targetId}, msgId: ${response}`);
-      return response;
-    } catch (e) {
-      console.error(`Error sending FCM to ${targetRole} ${targetId}:`, e);
-    }
-  }
-  return null;
-}
 
 // Helper function to get all admin users (main admins + granted admins)
 // Excludes customer service admins (adminAccessLevel == 2)
@@ -407,7 +265,7 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
 
       // Notify admins about assignment
       if (adminTokens.length > 0) {
-        for (const { uid, token, lanCode } of adminTokens) {
+        await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
           await sendAndStoreNotification({
             targetRole: "admin",
             targetId: uid,
@@ -429,7 +287,7 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
             fcmToken: token,
             lanCode: lanCode,
           });
-        }
+        }));
       }
     }
 
@@ -906,7 +764,7 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
         .filter(Boolean);
 
       if (adminTokens.length > 0) {
-        for (const { uid, token, lanCode } of adminTokens) {
+        await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
           await sendAndStoreNotification({
             targetRole: "admin",
             targetId: uid,
@@ -930,7 +788,7 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
             fcmToken: token,
             lanCode: lanCode,
           });
-        }
+        }));
         console.log(
           `[${bookingId}] Payment completion notification sent to ${adminTokens.length} admin(s)`
         );
@@ -1129,9 +987,9 @@ exports.onBookingUpdateToTip = onDocumentWritten(
           titleEn: "New Tip Received",
           titleAr: "تم استلام إكرامية جديدة",
           titleUr: "نئی ٹپ موصول ہوئی",
-          bodyEn: `Customer gave you a tip of ${tipAmount} SAR.`,
-          bodyAr: `العميل قدّم لك إكرامية بقيمة ${tipAmount} ر.س.`,
-          bodyUr: `صارف نے آپ کو ${tipAmount} SAR کی ٹپ دی ہے۔`,
+          bodyEn: `Customer gave you a tip of ${money(tipAmount, "en")}.`,
+          bodyAr: `العميل قدّم لك إكرامية بقيمة ${money(tipAmount, "ar")}.`,
+          bodyUr: `صارف نے آپ کو ${money(tipAmount, "ur")} کی ٹپ دی ہے۔`,
           data: {
             category: "tip",
             amount: tipAmount.toString(),
@@ -1356,6 +1214,21 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
       return;
     }
 
+    // notifyTechnicianOnTipPayoutCompletion watches this same document and
+    // fires on a strict subset of this condition (the same payoutRequested
+    // transition, plus cardtip being cleared). Both notify the technician with
+    // different wording, so a card tip payout used to send two notifications.
+    // Defer to the more specific one; this branch still covers a payout
+    // processed without a card tip balance being cleared.
+    const beforeCardTip = beforeData?.cardtip || 0;
+    const afterCardTip = afterData.cardtip || 0;
+    if (beforeCardTip > 0 && afterCardTip === 0) {
+      console.log(
+        "Card tip payout handled by notifyTechnicianOnTipPayoutCompletion, skipping duplicate."
+      );
+      return;
+    }
+
     const agentId = afterData.agentId;
     const totalTip = afterData.totalTip || 0;
 
@@ -1399,9 +1272,9 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
     };
 
     const notificationBody = {
-      en: `Your tip payout of ₹${totalTip} has been processed successfully. The amount will be transferred to your account shortly.`,
-      ar: `تم معالجة سحب الإكرامية بمبلغ ₹${totalTip} بنجاح. سيتم تحويل المبلغ إلى حسابك قريبًا.`,
-      ur: `آپ کی ₹${totalTip} کی ٹپ کی ادائیگی کامیابی کے ساتھ ہو گئی ہے۔ یہ رقم جلد ہی آپ کے اکاؤنٹ میں منتقل کر دی جائے گی۔`,
+      en: `Your tip payout of ${money(totalTip, "en")} has been processed successfully. The amount will be transferred to your account shortly.`,
+      ar: `تم معالجة سحب الإكرامية بمبلغ ${money(totalTip, "ar")} بنجاح. سيتم تحويل المبلغ إلى حسابك قريبًا.`,
+      ur: `آپ کی ${money(totalTip, "ur")} کی ٹپ کی ادائیگی کامیابی کے ساتھ ہو گئی ہے۔ یہ رقم جلد ہی آپ کے اکاؤنٹ میں منتقل کر دی جائے گی۔`,
     };
 
     const title = notificationTitle[lanCode] || notificationTitle["en"];
@@ -1625,6 +1498,10 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
         sentBody: notificationBody,
         sentLanguage: lanCode,
         sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Both apps list notifications with .orderBy('createdAt'), which drops
+        // any document missing the field - without this, broadcasts pushed fine
+        // but never appeared in the in-app list.
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
         read: false,
         type: "custom",
         fcmMessageId: response,
@@ -1850,7 +1727,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
         console.log("No admin users found with FCM tokens");
       } else {
         // Send notification to each admin
-        for (const adminDoc of adminsWithTokens) {
+        await Promise.allSettled(adminsWithTokens.map(async (adminDoc) => {
           const adminData = adminDoc.data();
           const adminFcmToken = adminData.fcmToken;
           const adminLanCode = adminData.lanCode || "en";
@@ -1878,7 +1755,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
             fcmToken: adminFcmToken,
             lanCode: adminLanCode,
           });
-        }
+        }));
         console.log(
           `✅ Admin notifications sent for booking ${afterData.id} - Worker ${lastCancelledWorker.agentName} rejected`
         );
@@ -2082,7 +1959,7 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
       }
 
       // Send notification to each admin
-      for (const adminDoc of adminsWithTokens) {
+      await Promise.allSettled(adminsWithTokens.map(async (adminDoc) => {
         const adminData = adminDoc.data();
         const adminFcmToken = adminData.fcmToken;
         const adminLanCode = adminData.lanCode || "en";
@@ -2112,7 +1989,7 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
           fcmToken: adminFcmToken,
           lanCode: adminLanCode,
         });
-      }
+      }));
       console.log(
         `✅ Admin notifications sent for booking ${afterData.id} - Customer cancelled`
       );
@@ -2546,7 +2423,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
 
     // Notify admins
     if (adminTokens.length > 0) {
-      for (const { uid, token, lanCode } of adminTokens) {
+      await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
         await sendAndStoreNotification({
           targetRole: "admin",
           targetId: uid,
@@ -2580,7 +2457,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           fcmToken: token,
           lanCode: lanCode,
         });
-      }
+      }));
     }
 
     // Note: Warranty technician assignment notifications are handled by
@@ -2677,7 +2554,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     const bodyUr = `"${serviceNameUr}" کے لیے ${customerName} کی طرف سے وارنٹی کی درخواست بکنگ آئی ڈی ${afterData.newBookingId || bookingId} کے ساتھ آپ کی توجہ کی طلبگار ہے۔ وجہ: ${urReason}۔`;
 
     // Send notification to each admin
-    for (const { uid, token, lanCode } of adminTokens) {
+    await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
       await sendAndStoreNotification({
         targetRole: "admin",
         targetId: uid,
@@ -2701,7 +2578,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
         fcmToken: token,
         lanCode: lanCode,
       });
-    }
+    }));
 
     console.log(
       `✅ Escalation notifications sent to ${adminTokens.length} admin(s) for booking ${bookingId}`
@@ -2956,6 +2833,7 @@ exports.notifyOnCounterOfferStatusChange = onDocumentUpdated(
 
       const serviceName = bookingData.service?.name || 'Service';
       const serviceNameAr = bookingData.service?.name_ar || serviceName;
+      const serviceNameUr = bookingData.service?.name_ur || serviceNameAr || serviceName;
       const proposedTime = afterData.proposedTime.toDate();
       const timeString = proposedTime.toLocaleString('en-US', {
         year: 'numeric',
@@ -2966,14 +2844,17 @@ exports.notifyOnCounterOfferStatusChange = onDocumentUpdated(
       });
       const statusTextEn = newStatus === 'accepted' ? 'accepted' : 'rejected';
       const statusTextAr = newStatus === 'accepted' ? 'قبول' : 'رفض';
+      const statusTextUr = newStatus === 'accepted' ? 'قبول' : 'مسترد';
 
       await sendAndStoreNotification({
         targetRole,
         targetId,
         titleEn: 'Counter Offer Response',
         titleAr: 'الرد على الاقتراح البديل',
+        titleUr: 'جوابی پیشکش کا جواب',
         bodyEn: `${proposedByName} has ${statusTextEn} your proposed time: ${timeString} for ${serviceName}`,
         bodyAr: `${proposedByName} قام بـ ${statusTextAr} الوقت المقترح: ${timeString} لـ ${serviceNameAr}`,
+        bodyUr: `${proposedByName} نے ${serviceNameUr} کے لیے آپ کا تجویز کردہ وقت ${timeString} ${statusTextUr} کر دیا ہے`,
         data: {
           targetRole: targetRole,
           category: 'counter_offer_response',
@@ -3192,85 +3073,80 @@ exports.notifyOnNewChatMessage = onValueCreated(
 
       console.log(`[${chatId}] Receiver: ${receiverType} (${receiverId})`);
 
-      // Get sender's name from their user/customer document
-      let senderName = "Someone";
-      try {
-        if (senderType === "customer") {
-          const senderDoc = await db
-            .collection("customers")
-            .doc(senderId)
-            .get();
-          if (senderDoc.exists) {
-            const senderData = senderDoc.data();
-            senderName = senderData.name || senderData.fullName || "Customer";
-          }
-        } else {
-          // technician or admin
-          const senderDoc = await db.collection("users").doc(senderId).get();
-          if (senderDoc.exists) {
-            const senderData = senderDoc.data();
-            senderName = senderData.name || senderData.fullName || "Technician";
-          }
-        }
-      } catch (error) {
-        console.error(`[${chatId}] Error fetching sender name:`, error);
-      }
+      // Chat is by far the highest-volume trigger here, so both profiles and
+      // the booking are read exactly once and concurrently. This used to be
+      // four sequential document reads - sender and receiver were each fetched
+      // twice, once for the name and again further down for the photo.
+      const profileCollection = (role) =>
+        role === "customer" ? "customers" : role === "admin" ? "admins" : "users";
 
-      // Fetch booking details to get service name and warranty status
-      let serviceName = "Service";
-      let isWarranty = "false";
+      const loadProfile = async (uid, role, whenMissing, whenNameless) => {
+        try {
+          const doc = await db.collection(profileCollection(role)).doc(uid).get();
+          if (!doc.exists) {
+            return { name: whenMissing, photo: "", fcmToken: null, lanCode: "en" };
+          }
+          const d = doc.data();
+          return {
+            name: d.name || d.fullName || whenNameless,
+            photo: d.photo || "",
+            fcmToken: d.fcmToken || null,
+            lanCode: d.lanCode || "en",
+          };
+        } catch (error) {
+          // A profile we cannot read only costs the push and some cosmetic
+          // fields; the notification itself still gets stored.
+          console.error(`[${chatId}] Error loading ${role} profile ${uid}:`, error);
+          return { name: whenMissing, photo: "", fcmToken: null, lanCode: "en" };
+        }
+      };
+
       const bookingId = chatData.bookingId;
 
-      if (bookingId) {
-        try {
-          const bookingDoc = await db
-            .collection("bookings")
-            .doc(bookingId)
-            .get();
-          if (bookingDoc.exists) {
-            const bookingData = bookingDoc.data();
-            serviceName = bookingData.service?.name || "Service";
-            if (bookingData.warranty) {
-              isWarranty = "true";
-            }
-          }
-        } catch (e) {
-          console.error(`[${chatId}] Error fetching booking details:`, e);
-        }
-      }
+      const [sender, receiver, bookingDoc] = await Promise.all([
+        loadProfile(
+          senderId,
+          senderType,
+          "Someone",
+          senderType === "customer" ? "Customer" : "Technician"
+        ),
+        loadProfile(
+          receiverId,
+          receiverType,
+          "User",
+          receiverType === "customer"
+            ? "Customer"
+            : receiverType === "admin"
+              ? "Admin"
+              : "Technician"
+        ),
+        bookingId
+          ? db
+              .collection("bookings")
+              .doc(bookingId)
+              .get()
+              .catch((e) => {
+                console.error(`[${chatId}] Error fetching booking details:`, e);
+                return null;
+              })
+          : null,
+      ]);
 
-      // Get receiver's FCM token and language preference
-      let receiverFcmToken = null;
-      let receiverLanCode = "en";
+      const senderName = sender.name;
+      const senderPhoto = sender.photo;
+      const receiverName = receiver.name;
+      const receiverPhoto = receiver.photo;
+      const receiverFcmToken = receiver.fcmToken;
+      const receiverLanCode = receiver.lanCode;
 
-      try {
-        if (receiverType === "customer") {
-          const receiverDoc = await db
-            .collection("customers")
-            .doc(receiverId)
-            .get();
-          if (receiverDoc.exists) {
-            const receiverData = receiverDoc.data();
-            receiverFcmToken = receiverData.fcmToken;
-            receiverLanCode = receiverData.lanCode || "en";
-          }
-        } else {
-          // technician or admin
-          const coll = receiverType === "admin" ? "admins" : "users";
-          const receiverDoc = await db
-            .collection(coll)
-            .doc(receiverId)
-            .get();
-          if (receiverDoc.exists) {
-            const receiverData = receiverDoc.data();
-            receiverFcmToken = receiverData.fcmToken;
-            receiverLanCode = receiverData.lanCode || "en";
-          }
+      let serviceName = "Service";
+      let isWarranty = "false";
+      if (bookingDoc && bookingDoc.exists) {
+        const bookingData = bookingDoc.data();
+        serviceName = bookingData.service?.name || "Service";
+        if (bookingData.warranty) {
+          isWarranty = "true";
         }
-      } catch (error) {
-        // Losing the token only costs the push. Carry on so the message still
-        // lands in their in-app notification list.
-        console.error(`[${chatId}] Error fetching receiver data:`, error);
       }
 
       if (!receiverFcmToken || receiverFcmToken.trim() === "") {
@@ -3322,58 +3198,6 @@ exports.notifyOnNewChatMessage = onValueCreated(
       const titleEn = `New message from ${senderName}`;
       const titleAr = `رسالة جديدة من ${senderName}`;
       const titleUr = `${senderName} کی طرف سے نیا پیغام`;
-
-      // Get sender and receiver details for navigation
-      let senderPhoto = "";
-      let receiverName = "User";
-      let receiverPhoto = "";
-
-      try {
-        // Get sender photo
-        if (senderType === "customer") {
-          const senderDoc = await db
-            .collection("customers")
-            .doc(senderId)
-            .get();
-          if (senderDoc.exists) {
-            senderPhoto = senderDoc.data().photo || "";
-          }
-        } else {
-          const coll = senderType === "admin" ? "admins" : "users";
-          const senderDoc = await db.collection(coll).doc(senderId).get();
-          if (senderDoc.exists) {
-            senderPhoto = senderDoc.data().photo || "";
-          }
-        }
-
-        // Get receiver name and photo
-        if (receiverType === "customer") {
-          const receiverDoc = await db
-            .collection("customers")
-            .doc(receiverId)
-            .get();
-          if (receiverDoc.exists) {
-            const receiverData = receiverDoc.data();
-            receiverName =
-              receiverData.name || receiverData.fullName || "Customer";
-            receiverPhoto = receiverData.photo || "";
-          }
-        } else {
-          const coll = receiverType === "admin" ? "admins" : "users";
-          const receiverDoc = await db
-            .collection(coll)
-            .doc(receiverId)
-            .get();
-          if (receiverDoc.exists) {
-            const receiverData = receiverDoc.data();
-            receiverName =
-              receiverData.name || receiverData.fullName || (receiverType === "admin" ? "Admin" : "Technician");
-            receiverPhoto = receiverData.photo || "";
-          }
-        }
-      } catch (error) {
-        console.error(`[${chatId}] Error fetching user details:`, error);
-      }
 
       await sendAndStoreNotification({
         targetRole: receiverType,
@@ -3657,7 +3481,7 @@ exports.applyMonthlyBonus = onSchedule(
               });
             }
           });
-          logger.info(`Updated unified wallet for user ${userId} with bonus ₹${bonusAmount.toFixed(2)}`);
+          logger.info(`Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`);
         } catch (walletError) {
           logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
         }
@@ -3672,16 +3496,28 @@ exports.applyMonthlyBonus = onSchedule(
             targetId: userId,
             titleEn: "🎉 Monthly Bonus Received!",
             titleAr: "🎉 تم استلام المكافأة الشهرية!",
-            bodyEn: `Congratulations! You achieved ${tier} tier in ${previousMonthStr} and earned a bonus of ₹${bonusAmount.toFixed(
-              2
-            )} (${bonusPercentage * 100}% of ₹${totalEarnings.toFixed(
-              2
+            titleUr: "🎉 ماہانہ بونس موصول ہوا!",
+            bodyEn: `Congratulations! You achieved ${tier} tier in ${previousMonthStr} and earned a bonus of ${money(
+              bonusAmount.toFixed(2),
+              "en"
+            )} (${bonusPercentage * 100}% of ${money(
+              totalEarnings.toFixed(2),
+              "en"
             )} earnings).`,
-            bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة قدرها ₹${bonusAmount.toFixed(
-              2
-            )} (${bonusPercentage * 100}٪ من ₹${totalEarnings.toFixed(
-              2
+            bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة قدرها ${money(
+              bonusAmount.toFixed(2),
+              "ar"
+            )} (${bonusPercentage * 100}٪ من ${money(
+              totalEarnings.toFixed(2),
+              "ar"
             )} أرباح).`,
+            bodyUr: `مبارک ہو! آپ نے ${previousMonthStr} میں ${tier} ٹئیر حاصل کیا اور ${money(
+              bonusAmount.toFixed(2),
+              "ur"
+            )} کا بونس کمایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
+              totalEarnings.toFixed(2),
+              "ur"
+            )} کمائی)۔`,
             data: {
               category: "bonus",
               tier: tier,
@@ -3698,15 +3534,15 @@ exports.applyMonthlyBonus = onSchedule(
         totalBonusAmount += bonusAmount;
 
         logger.info(
-          `Applied ${tier} bonus of ₹${bonusAmount.toFixed(
+          `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
             2
-          )} to user ${userId} for ${previousMonthStr} (based on ₹${totalEarnings.toFixed(
+          )} to user ${userId} for ${previousMonthStr} (based on SAR ${totalEarnings.toFixed(
             2
           )} earnings)`
         );
       }
       logger.info(
-        `Monthly bonus calculation completed for ${previousMonthStr}. Bonuses applied: ${totalBonusesApplied}, Total amount: ₹${totalBonusAmount.toFixed(
+        `Monthly bonus calculation completed for ${previousMonthStr}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
           2
         )}`
       );
@@ -3842,10 +3678,13 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
               targetId: workerId,
               titleEn: `🎊 Tier Upgraded to ${newTier}!`,
               titleAr: `🎊 تمت ترقية المستوى إلى ${newTier}!`,
+              titleUr: `🎊 ٹئیر ${newTier} میں اپ گریڈ ہو گیا!`,
               bodyEn: `Congratulations! You've been upgraded to ${newTier} tier! You now earn ${bonusPercentages[newTier] || "0%"
                 } bonus on your monthly earnings. Keep up the great work!`,
               bodyAr: `تهانينا! تمت ترقيتك إلى مستوى ${newTier}! أنت الآن تكسب ${bonusPercentages[newTier] || "0%"
                 } مكافأة على أرباحك الشهرية. استمر في العمل الرائع!`,
+              bodyUr: `مبارک ہو! آپ کو ${newTier} ٹئیر میں اپ گریڈ کر دیا گیا ہے! اب آپ اپنی ماہانہ کمائی پر ${bonusPercentages[newTier] || "0%"
+                } بونس کماتے ہیں۔ اسی طرح بہترین کام جاری رکھیں!`,
               data: {
                 category: "tier_upgrade",
                 oldTier: currentTier,
@@ -3965,6 +3804,8 @@ exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
       // Get booking details
       const serviceName = afterData.service?.name || "Service";
       const serviceNameAr = afterData.service?.name_ar || serviceName;
+      const serviceNameUr =
+        afterData.service?.name_ur || serviceNameAr || serviceName;
       const customerName = afterData.customer?.name || "Customer";
       const customerId = afterData.customer?.uid || "";
 
@@ -3974,8 +3815,10 @@ exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
         targetId: afterTechnicianId,
         titleEn: "Warranty Repair Assigned",
         titleAr: "تم تعيينك لإصلاح ضمان",
+        titleUr: "وارنٹی کی مرمت تفویض کی گئی",
         bodyEn: `You have been assigned to a warranty repair for ${serviceName}. Customer: ${customerName}. Please review and accept.`,
         bodyAr: `تم تعيينك لإصلاح ضمان لـ ${serviceNameAr}. العميل: ${customerName}. يرجى المراجعة والقبول.`,
+        bodyUr: `آپ کو ${serviceNameUr} کی وارنٹی مرمت تفویض کی گئی ہے۔ صارف: ${customerName}۔ براہ کرم جائزہ لے کر قبول کریں۔`,
         data: {
           targetRole: "technician",
           category: "warranty",
@@ -4058,26 +3901,32 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
     const technicianName = technicianData?.name || "Technician";
 
     // Determine notification content based on payout type
-    let titleEn, titleAr, bodyEn, bodyAr;
+    let titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr;
 
     switch (type) {
       case "earnings":
         titleEn = "New Earnings Payout Request";
         titleAr = "طلب صرف أرباح جديد";
-        bodyEn = `${technicianName} has requested an earnings payout of ${amount}.`;
-        bodyAr = `طلب ${technicianName} صرف أرباح بقيمة ${amount}.`;
+        titleUr = "کمائی کی ادائیگی کی نئی درخواست";
+        bodyEn = `${technicianName} has requested an earnings payout of ${money(amount, "en")}.`;
+        bodyAr = `طلب ${technicianName} صرف أرباح بقيمة ${money(amount, "ar")}.`;
+        bodyUr = `${technicianName} نے ${money(amount, "ur")} کی کمائی کی ادائیگی کی درخواست کی ہے۔`;
         break;
       case "bonus":
         titleEn = "New Bonus Payout Request";
         titleAr = "طلب صرف مكافأة جديد";
-        bodyEn = `${technicianName} has requested a bonus payout of ${amount}.`;
-        bodyAr = `طلب ${technicianName} صرف مكافأة بقيمة ${amount}.`;
+        titleUr = "بونس کی ادائیگی کی نئی درخواست";
+        bodyEn = `${technicianName} has requested a bonus payout of ${money(amount, "en")}.`;
+        bodyAr = `طلب ${technicianName} صرف مكافأة بقيمة ${money(amount, "ar")}.`;
+        bodyUr = `${technicianName} نے ${money(amount, "ur")} کے بونس کی ادائیگی کی درخواست کی ہے۔`;
         break;
       default:
         titleEn = "New Payout Request";
         titleAr = "طلب صرف جديد";
-        bodyEn = `${technicianName} has requested a payout of ${amount}.`;
-        bodyAr = `طلب ${technicianName} صرف بقيمة ${amount}.`;
+        titleUr = "ادائیگی کی نئی درخواست";
+        bodyEn = `${technicianName} has requested a payout of ${money(amount, "en")}.`;
+        bodyAr = `طلب ${technicianName} صرف بقيمة ${money(amount, "ar")}.`;
+        bodyUr = `${technicianName} نے ${money(amount, "ur")} کی ادائیگی کی درخواست کی ہے۔`;
     }
 
     // Fetch all admin users
@@ -4107,8 +3956,10 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
           targetId: adminDoc.id,
           titleEn,
           titleAr,
+          titleUr,
           bodyEn,
           bodyAr,
+          bodyUr,
           data: {
             targetRole: "admin",
             category: "payout",
@@ -4171,9 +4022,9 @@ exports.notifyAdminsOnUnifiedPayoutRequest = onDocumentCreated(
     const titleEn = "New Payout Request";
     const titleAr = "طلب صرف جديد";
     const titleUr = "نئی پے آؤٹ کی درخواست";
-    const bodyEn = `${workerName} has requested a unified payout of ${totalAmount}. Please review the request.`;
-    const bodyAr = `طلب ${workerName} صرف مجمع بقيمة ${totalAmount}. يرجى مراجعة الطلب.`;
-    const bodyUr = `${workerName} نے ${totalAmount} کی یونیفائیڈ پے آؤٹ کی درخواست کی ہے۔ براہ کرم درخواست کا جائزہ لیں۔`;
+    const bodyEn = `${workerName} has requested a unified payout of ${money(totalAmount, "en")}. Please review the request.`;
+    const bodyAr = `طلب ${workerName} صرف مجمع بقيمة ${money(totalAmount, "ar")}. يرجى مراجعة الطلب.`;
+    const bodyUr = `${workerName} نے ${money(totalAmount, "ur")} کی یونیفائیڈ پے آؤٹ کی درخواست کی ہے۔ براہ کرم درخواست کا جائزہ لیں۔`;
 
     // Fetch all admin users
     try {
@@ -4293,8 +4144,10 @@ exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
           targetId: adminDoc.id,
           titleEn: "New Tips Payout Request",
           titleAr: "طلب صرف إكراميات جديد",
-          bodyEn: `${technicianName} has requested a tips payout of ${cardTips}.`,
-          bodyAr: `طلب ${technicianName} صرف إكراميات بقيمة ${cardTips}.`,
+          titleUr: "ٹپس کی ادائیگی کی نئی درخواست",
+          bodyEn: `${technicianName} has requested a tips payout of ${money(cardTips, "en")}.`,
+          bodyAr: `طلب ${technicianName} صرف إكراميات بقيمة ${money(cardTips, "ar")}.`,
+          bodyUr: `${technicianName} نے ${money(cardTips, "ur")} کی ٹپس ادائیگی کی درخواست کی ہے۔`,
           data: {
             targetRole: "admin",
             category: "tips_payout",
@@ -4390,8 +4243,10 @@ exports.notifyTechnicianOnTipPayoutCompletion = onDocumentWritten(
           targetId: agentId,
           titleEn: "Tips Payout Completed",
           titleAr: "تم صرف الإكراميات",
-          bodyEn: `Your tips payout of ${beforeCardTip} has been processed and sent to your account.`,
-          bodyAr: `تم معالجة صرف إكراميات ك بقيمة ${beforeCardTip} وإرسالها إلى حسابك.`,
+          titleUr: "ٹپس کی ادائیگی مکمل",
+          bodyEn: `Your tips payout of ${money(beforeCardTip, "en")} has been processed and sent to your account.`,
+          bodyAr: `تم معالجة صرف إكرامياتك بقيمة ${money(beforeCardTip, "ar")} وإرسالها إلى حسابك.`,
+          bodyUr: `آپ کی ${money(beforeCardTip, "ur")} کی ٹپس ادائیگی مکمل ہو کر آپ کے اکاؤنٹ میں بھیج دی گئی ہے۔`,
           data: {
             targetRole: "technician",
             category: "tips_payout",
@@ -4489,17 +4344,17 @@ exports.notifyTechnicianOnUnifiedPayoutStatusChange = onDocumentWritten(
       titleEn = "Payout Request Approved";
       titleAr = "تمت الموافقة على طلب الصرف";
       titleUr = "پے آؤٹ کی درخواست منظور ہو گئی";
-      bodyEn = `Your payout request of ${totalAmount} has been approved.`;
-      bodyAr = `تمت الموافقة على طلب الصرف الخاص بك بقيمة ${totalAmount}.`;
-      bodyUr = `آپ کی ${totalAmount} کی پے آؤٹ کی درخواست منظور کر لی گئی ہے۔`;
+      bodyEn = `Your payout request of ${money(totalAmount, "en")} has been approved.`;
+      bodyAr = `تمت الموافقة على طلب الصرف الخاص بك بقيمة ${money(totalAmount, "ar")}.`;
+      bodyUr = `آپ کی ${money(totalAmount, "ur")} کی پے آؤٹ کی درخواست منظور کر لی گئی ہے۔`;
     } else if (afterStatus === "R") {
       // Rejected
       titleEn = "Payout Request Rejected";
       titleAr = "تم رفض طلب الصرف";
       titleUr = "پے آؤٹ کی درخواست مسترد کر دی گئی";
-      bodyEn = `Your payout request of ${totalAmount} has been rejected.`;
-      bodyAr = `تم رفض طلب الصرف الخاص بك بقيمة ${totalAmount}.`;
-      bodyUr = `آپ کی ${totalAmount} کی پے آؤٹ کی درخواست مسترد کر دی گئی ہے۔`;
+      bodyEn = `Your payout request of ${money(totalAmount, "en")} has been rejected.`;
+      bodyAr = `تم رفض طلب الصرف الخاص بك بقيمة ${money(totalAmount, "ar")}.`;
+      bodyUr = `آپ کی ${money(totalAmount, "ur")} کی پے آؤٹ کی درخواست مسترد کر دی گئی ہے۔`;
     }
 
     // Send notification to technician
@@ -4605,13 +4460,13 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
     }
 
     // Determine notification content based on status and type
-    let titleEn, titleAr, bodyEn, bodyAr;
+    let titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr;
 
     // Get type-specific labels
     const typeLabels = {
-      earnings: { en: "earnings", ar: "الأرباح" },
-      bonus: { en: "bonus", ar: "المكافأة" },
-      tips: { en: "tips", ar: "الإكراميات" },
+      earnings: { en: "earnings", ar: "الأرباح", ur: "کمائی" },
+      bonus: { en: "bonus", ar: "المكافأة", ur: "بونس" },
+      tips: { en: "tips", ar: "الإكراميات", ur: "ٹپس" },
     };
 
     const typeLabel = typeLabels[type] || typeLabels.earnings;
@@ -4620,16 +4475,21 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
       // Approved
       titleEn = "Payout Request Approved";
       titleAr = "تمت الموافقة على طلب الصرف";
-      bodyEn = `Your ${typeLabel.en} payout request of ${amount} has been approved. Transaction number: ${transactionNumber}`;
-      bodyAr = `تمت الموافقة على طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${amount}. رقم المعاملة: ${transactionNumber}`;
+      titleUr = "ادائیگی کی درخواست منظور ہو گئی";
+      bodyEn = `Your ${typeLabel.en} payout request of ${money(amount, "en")} has been approved. Transaction number: ${transactionNumber}`;
+      bodyAr = `تمت الموافقة على طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${money(amount, "ar")}. رقم المعاملة: ${transactionNumber}`;
+      bodyUr = `آپ کی ${money(amount, "ur")} کی ${typeLabel.ur} ادائیگی کی درخواست منظور کر لی گئی ہے۔ ٹرانزیکشن نمبر: ${transactionNumber}`;
     } else if (afterStatus === "R") {
       // Rejected
       titleEn = "Payout Request Rejected";
       titleAr = "تم رفض طلب الصرف";
+      titleUr = "ادائیگی کی درخواست مسترد";
       bodyEn = `Your ${typeLabel.en
-        } payout request of ${amount} has been rejected.${rejectionReason ? ` Reason: ${rejectionReason}` : ""
+        } payout request of ${money(amount, "en")} has been rejected.${rejectionReason ? ` Reason: ${rejectionReason}` : ""
         }`;
-      bodyAr = `تم رفض طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${amount}.${rejectionReason ? ` السبب: ${rejectionReason}` : ""
+      bodyAr = `تم رفض طلب صرف ${typeLabel.ar} الخاص بك بقيمة ${money(amount, "ar")}.${rejectionReason ? ` السبب: ${rejectionReason}` : ""
+        }`;
+      bodyUr = `آپ کی ${money(amount, "ur")} کی ${typeLabel.ur} ادائیگی کی درخواست مسترد کر دی گئی ہے۔${rejectionReason ? ` وجہ: ${rejectionReason}` : ""
         }`;
     }
 
@@ -4640,8 +4500,10 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
         targetId: userId,
         titleEn,
         titleAr,
+        titleUr,
         bodyEn,
         bodyAr,
+        bodyUr,
         data: {
           targetRole: "technician",
           category: "payout",
@@ -4866,7 +4728,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
         return null;
       }
 
-      for (const { uid, token, lanCode } of adminTokens) {
+      await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
         await sendAndStoreNotification({
           targetRole: "admin",
           targetId: uid,
@@ -4887,7 +4749,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
           fcmToken: token,
           lanCode: lanCode,
         });
-      }
+      }));
       console.log(`[${userId}] Admin notifications sent for new technician registration.`);
     } catch (error) {
       console.error(`[${userId}] Error sending admin notifications for technician registration:`, error);
@@ -5011,57 +4873,14 @@ exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
   }
 );
 
-exports.notifyCustomerOnBroadcastAccepted = onDocumentUpdated(
-  "job_offers/{offerId}",
-  async (event) => {
-    const beforeData = event.data.before.data();
-    const afterData = event.data.after.data();
-
-    // Check if status changed to accepted_by_technician
-    if (beforeData.status !== "accepted_by_technician" && afterData.status === "accepted_by_technician") {
-      const customerId = afterData.customerId;
-      const technicianId = afterData.technicianId;
-      const offerId = event.params.offerId;
-
-      if (!customerId) return null;
-
-      // Fetch customer data for FCM token
-      const customerDoc = await admin.firestore().collection("users").doc(customerId).get();
-      if (!customerDoc.exists) return null;
-      const customerData = customerDoc.data();
-
-      if (!customerData.fcmToken) return null;
-
-      // Fetch technician data for name
-      const techDoc = await admin.firestore().collection("users").doc(technicianId).get();
-      const techName = techDoc.exists ? techDoc.data().name : "A technician";
-
-      const lanCode = customerData.lanCode || "en";
-
-      await sendAndStoreNotification({
-        targetRole: "customer",
-        targetId: customerId,
-        titleEn: "Technician Responded!",
-        titleAr: "الفني استجاب!",
-        titleUr: "ٹیکنیشن نے جواب دیا!",
-        bodyEn: `${techName} has accepted your service request. Tap to view and select them!`,
-        bodyAr: `لقد قبل ${techName} طلب الخدمة الخاص بك. اضغط للعرض والاختيار!`,
-        bodyUr: `${techName} نے آپ کی سروس کی درخواست قبول کر لی ہے۔ دیکھنے اور منتخب کرنے کے لیے ٹیپ کریں!`,
-        data: {
-          targetRole: "customer",
-          category: "broadcast_accepted",
-          requestId: afterData.requestId || "",
-          offerId: offerId,
-          type: "broadcast_accepted"
-        },
-        fcmToken: customerData.fcmToken,
-        lanCode: lanCode
-      });
-      console.log(`[${offerId}] Notification sent to customer ${customerId} for technician acceptance`);
-    }
-    return null;
-  }
-);
+// notifyCustomerOnBroadcastAccepted was removed here.
+//
+// It fired on the same job_offers status transition to "accepted_by_technician"
+// as onManualJobOfferUpdated in src/triggers/bookingTriggers.js, which already
+// notifies the customer. It never actually delivered: it looked the customer up
+// in "users", but customers live in "customers", so every invocation returned
+// early. Repairing the collection would only have produced two notifications for
+// one acceptance.
 
 // Helper for distance calculation
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
@@ -5306,7 +5125,7 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
           })
           .filter((t) => t !== null);
 
-        for (const { uid, token, lanCode } of adminTokens) {
+        await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
           await sendAndStoreNotification({
             targetRole: "admin",
             targetId: uid,
@@ -5325,7 +5144,7 @@ exports.notifyOnWarrantyStatusChange = onDocumentWritten(
             fcmToken: token,
             lanCode: lanCode,
           });
-        }
+        }));
       } catch (e) {
         console.error(`Error notifying admins for warranty cancel:`, e);
       }

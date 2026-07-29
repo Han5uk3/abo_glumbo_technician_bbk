@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 const db = admin.firestore();
 
 function extractCustomerCoordinates(request) {
@@ -76,14 +77,83 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
 module.exports.calculateDistanceKm = calculateDistanceKm;
 
 /**
- * How far back an identical notification suppresses a new one.
+ * Saudi riyal, written the way each language writes it.
  *
- * Long enough to absorb a retry or a trigger that fires twice for one event,
- * short enough that two genuinely separate events an hour apart both land.
+ * Every amount shown to a user goes through `money()`. The apps are KSA-only,
+ * so any other currency marker in a notification body is a copy bug.
  */
-const NOTIFICATION_DEDUP_WINDOW_MS = 15 * 60 * 1000;
+const CURRENCY = { en: "SAR", ar: "ر.س", ur: "سعودی ریال" };
 
-function sendAndStoreNotification({
+function money(amount, lang) {
+  return `${amount} ${CURRENCY[lang] || CURRENCY.en}`;
+}
+module.exports.money = money;
+module.exports.CURRENCY = CURRENCY;
+
+/**
+ * Stable identity for a notification, used directly as its Firestore document
+ * id so a duplicate cannot be written in the first place.
+ *
+ * The key describes the EVENT - what happened, to which record, for whom -
+ * rather than the rendered text. Text is translated, interpolates names and
+ * gets reworded, so it is only used as a tie-breaker between two different
+ * messages about the same record.
+ *
+ * Returns null when the payload carries nothing we can confidently key on. The
+ * caller then stores without dedup: letting a duplicate through is cheaper than
+ * silently swallowing a notification that was never a duplicate.
+ */
+function buildDedupeKey({ titleEn, data }) {
+  const d = data || {};
+
+  // Most specific identifier wins, because a payload usually carries several.
+  // messageId before bookingId, or a whole conversation collapses into one
+  // notification. offerId before bookingId, or a re-broadcast of an expired
+  // offer looks like a duplicate of the original and is never delivered.
+  const entityId =
+    d.messageId ||
+    d.offerId ||
+    d.payoutId ||
+    d.walletId ||
+    d.requestId ||
+    d.bookingId ||
+    d.chatId;
+  const scope = d.type || d.category;
+
+  if (!entityId || !scope) return null;
+
+  // Document ids may not contain "/" and may not match /^__.*__$/. Sanitising
+  // each part and joining with "__" keeps both rules satisfied, because `scope`
+  // is non-empty and never begins with an underscore.
+  const clean = (part) => String(part).replace(/[^A-Za-z0-9_-]/g, "-");
+  const parts = [scope, entityId, d.status, d.targetRole, fingerprint(titleEn)];
+
+  return parts.filter(Boolean).map(clean).join("__").slice(0, 400);
+}
+
+function fingerprint(value) {
+  return crypto
+    .createHash("sha1")
+    .update(String(value || ""))
+    .digest("hex")
+    .slice(0, 8);
+}
+
+// gRPC status code Firestore returns when create() hits an existing document.
+const ALREADY_EXISTS = 6;
+
+function isAlreadyExists(error) {
+  return error?.code === ALREADY_EXISTS || /ALREADY_EXISTS/i.test(error?.message || "");
+}
+
+/**
+ * Stores a notification for one recipient and pushes it to their device.
+ *
+ * This is the single implementation for the whole codebase - index.js imports
+ * it too. It used to be duplicated there, and the two copies drifted into
+ * writing different field names and building different FCM payloads.
+ */
+async function sendAndStoreNotification({
   targetRole, // "customer", "technician", "admin"
   targetId,
   titleEn,
@@ -95,6 +165,7 @@ function sendAndStoreNotification({
   data,
   fcmToken,
   lanCode,
+  sendPush = true, // false -> store the entry but skip the push
 }) {
   let collectionName = "users";
   if (targetRole === "customer") {
@@ -103,110 +174,127 @@ function sendAndStoreNotification({
     collectionName = "admins";
   }
 
-  if (data?.type !== "chat") {
-    const requestId = data?.requestId || data?.offerId;
-    let query = admin.firestore().collection(collectionName).doc(targetId).collection("notifications")
-      .where("titleEn", "==", titleEn)
-      .where("bodyEn", "==", bodyEn);
+  const notifications = admin
+    .firestore()
+    .collection(collectionName)
+    .doc(targetId)
+    .collection("notifications");
 
-    if (requestId) {
-      query = query.where("data.requestId", "==", requestId);
-    }
+  // 1. Store in Firestore, deduplicating on the event identity.
+  //
+  // All three languages live on the one document so the in-app list can render
+  // in whatever language the recipient has selected right now - switching
+  // language must not require rewriting their history.
+  const payload = {
+    titleEn,
+    titleAr,
+    titleUr: titleUr || "",
+    bodyEn,
+    bodyAr,
+    bodyUr: bodyUr || "",
+    data: data || {},
+    // Both apps read `read` and filter with .where('read', isEqualTo: false).
+    // Firestore equality does not match documents that lack the field, so this
+    // name has to stay exactly what the clients expect.
+    read: false,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
 
-    try {
-      return query.get().then(existing => {
-        // The dedup window exists to swallow retry storms and double-firing
-        // triggers, not to silence a message forever. Without a bound, any two
-        // genuinely separate events that render the same text for the same
-        // recipient — "You have been assigned to a booking." carries no
-        // requestId, so every assignment produces identical text — collapsed
-        // into one, and the recipient never heard about the second booking.
-        const cutoffMillis = Date.now() - NOTIFICATION_DEDUP_WINDOW_MS;
-        const hasRecentDuplicate = existing.docs.some(doc => {
-          const createdAt = doc.get("createdAt");
-          // A document whose serverTimestamp has not resolved yet was written
-          // moments ago, so it counts as recent.
-          if (!createdAt) return true;
-          return createdAt.toMillis() >= cutoffMillis;
-        });
+  const dedupeKey = buildDedupeKey({ titleEn, data });
 
-        if (hasRecentDuplicate) {
-          console.log(`Duplicate notification detected for ${targetRole} ${targetId} with requestId ${requestId}, skipping`);
-          return null;
-        }
-        return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
-      }).catch(error => {
-        console.error(`Error checking for duplicate notification:`, error);
-        return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
-      });
-    } catch (error) {
-      console.error(`Error checking for duplicate notification:`, error);
-    }
-  }
-
-  return proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode);
-}
-
-async function proceedToSend(collectionName, targetId, targetRole, titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr, data, fcmToken, lanCode) {
   try {
-    await admin
-      .firestore()
-      .collection(collectionName)
-      .doc(targetId)
-      .collection("notifications")
-      .add({
-        titleEn,
-        titleAr,
-        titleUr: titleUr || "",
-        bodyEn,
-        bodyAr,
-        bodyUr: bodyUr || "",
-        data: data || {},
-        read: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    console.log(`Notification stored for ${targetRole} ${targetId}`);
-  } catch (e) {
+    if (dedupeKey) {
+      // create() is a compare-and-set, so two invocations racing on the same
+      // event - a retry, or two triggers reacting to one write - settle into a
+      // single document without a query or a composite index.
+      await notifications.doc(dedupeKey).create(payload);
+    } else {
+      await notifications.add(payload);
+    }
+  } catch (error) {
+    if (dedupeKey && isAlreadyExists(error)) {
+      console.log(
+        `Duplicate notification ${dedupeKey} for ${targetRole} ${targetId}, skipping`
+      );
+      return null;
+    }
+    // Storage is best-effort: still push, so the recipient hears about it.
     console.error(
-      `Error storing notification for ${targetRole} ${targetId}:`,
-      e
+      `Error saving notification to Firestore for ${targetRole} ${targetId}:`,
+      error
     );
   }
 
+  // 2. Send FCM Push Notification
+  if (!sendPush) {
+    console.log(
+      `Push suppressed for ${targetRole} ${targetId} (receiver is viewing this chat)`
+    );
+    return null;
+  }
+
   if (fcmToken && fcmToken.trim() !== "") {
-    const title = lanCode === "ar"
-      ? (titleAr || titleEn)
+    const title = (lanCode === "ar"
+      ? (titleAr || titleEn || titleUr)
       : lanCode === "ur"
         ? (titleUr || titleAr || titleEn)
-        : titleEn;
-    const body = lanCode === "ar"
-      ? (bodyAr || bodyEn)
+        : (titleEn || titleAr || titleUr)) || "Notification";
+
+    const body = (lanCode === "ar"
+      ? (bodyAr || bodyEn || bodyUr)
       : lanCode === "ur"
         ? (bodyUr || bodyAr || bodyEn)
-        : bodyEn;
+        : (bodyEn || bodyAr || bodyUr)) || "New Update";
+
+    // Ensure all data payload values are strings (FCM requirement)
+    const safeData = { ...data };
+    for (const key in safeData) {
+      if (safeData[key] === null || safeData[key] === undefined) {
+        delete safeData[key];
+      } else if (typeof safeData[key] !== 'string') {
+        safeData[key] = String(safeData[key]);
+      }
+    }
+
+    const isCustom = safeData.type === "custom";
 
     const message = {
-      notification: { title, body },
       android: {
         priority: "high",
-        notification: {
-          channelId: "abo_glumbo_channel",
-          priority: "high",
-          defaultSound: true,
-          defaultVibrateTimings: true,
-          defaultLightSettings: true,
-          visibility: "public",
-          notificationPriority: "PRIORITY_HIGH",
+      },
+      apns: {
+        headers: {
+          "apns-priority": "10",
+        },
+        payload: {
+          aps: {
+            sound: "default",
+            badge: 1,
+            "content-available": 1,
+          },
         },
       },
       data: {
-        ...data,
+        ...safeData,
         lanCode: lanCode || "en",
         title: title,
         body: body,
       },
       token: fcmToken,
     };
+
+    if (!isCustom) {
+      message.notification = { title, body };
+      message.android.notification = {
+        channelId: "abo_glumbo_channel",
+        priority: "high",
+        defaultSound: true,
+        defaultVibrateTimings: true,
+        defaultLightSettings: true,
+        visibility: "public",
+        notificationPriority: "PRIORITY_HIGH",
+      };
+    }
 
     try {
       const response = await admin.messaging().send(message);
@@ -219,6 +307,7 @@ async function proceedToSend(collectionName, targetId, targetRole, titleEn, titl
   return null;
 }
 module.exports.sendAndStoreNotification = sendAndStoreNotification;
+module.exports.buildDedupeKey = buildDedupeKey;
 
 async function getAllAdminUsers() {
   try {

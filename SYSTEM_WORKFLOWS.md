@@ -441,14 +441,28 @@ Date is **UTC**.
 
 ## 11. Notifications
 
-All notifications go through `sendAndStoreNotification` ([bookingUtils.js:78](functions/src/utils/bookingUtils.js:78)):
-writes to `<customers|users|admins>/{id}/notifications` **and** sends FCM. Non-chat notifications are
-de-duplicated by querying for an existing doc with the same `titleEn` + `bodyEn` (+ `data.requestId`
-if present) — note this means a genuine repeat of the same message for the same request is suppressed
-forever, not just within a window.
+All notifications go through the single `sendAndStoreNotification` in
+[bookingUtils.js](functions/src/utils/bookingUtils.js): writes to `<customers|users|admins>/{id}/notifications`
+**and** sends FCM. `index.js` imports it; it used to keep a second copy, and the two drifted into
+writing different field names (`isRead` vs `read`) and building different FCM payloads.
+
+Role → collection is fixed: `technician` → `users`, `customer` → `customers`, `admin` → `admins`.
+Every profile lookup in the trigger layer must follow it; a mismatch fails silently, because a missing
+document just reads as "no FCM token".
+
+De-duplication is an **idempotency key**, not a content match: the notification's document id is
+derived from the event (`scope__entityId__status__targetRole__hash(titleEn)`) and written with
+`create()`. Entity precedence is `messageId → offerId → payoutId → walletId → requestId → bookingId →
+chatId`, most specific first — `messageId` before `bookingId` or a whole chat collapses into one
+notification; `offerId` before `bookingId` or a re-broadcast of an expired offer reads as a duplicate.
+No usable identifier means no dedup, so a real notification is never suppressed by accident.
 
 Payloads are trilingual (`en` / `ar` / `ur`); the FCM title/body is picked by the recipient's `lanCode`
-with `ur → ar → en` fallback.
+with `ur → ar → en` fallback. All 50 call sites supply all six fields — before, several supplied only
+`en`/`ar`, so Urdu users silently received Arabic.
+
+Money in notification bodies goes through `money(amount, lang)`, which renders Saudi riyal as
+`SAR` / `ر.س` / `سعودی ریال`. Any other currency marker in a notification body is a bug.
 
 ~50 Cloud Functions in `index.js` cover: new-booking alerts to admins, assignment alerts, status
 changes, payment completion/verification, cancellation (worker & customer, to both admins and the
@@ -521,9 +535,19 @@ pricing bands.
 > `DateFormat` calls through `KsaTime.fromInstant` — the helper is already there.
 
 ### 12.6 Notification de-duplication is unbounded — ✅ RESOLVED
-The dedup query in `sendAndStoreNotification` has no time bound. Two legitimately separate events that
+The dedup query in `sendAndStoreNotification` had no time bound. Two legitimately separate events that
 produce identical `titleEn`/`bodyEn` for the same recipient (e.g. "You have been assigned to a booking."
-with no `requestId` in `data`) will silently drop the second one permanently.
+with no `requestId` in `data`) silently dropped the second one permanently.
+
+**Resolution:** content-matching was replaced with an idempotency key (`buildDedupeKey`). The
+notification's Firestore document id is derived from the *event* — scope, entity id, status, recipient
+role, plus a hash of `titleEn` as a tie-breaker — and written with `create()`, which is a
+compare-and-set. This is race-proof (the old read-then-write let two concurrent invocations both pass),
+needs no composite index, and cannot suppress a genuinely different event. When the payload carries no
+identifier to key on, the notification is stored without dedup rather than risking a false suppression.
+
+The underlying cause was never the text: two triggers on the same document reacting to one write. See
+§12.12.
 
 ### 12.7 Rebook path skips most eligibility checks — ✅ RESOLVED
 `RebookWaitWidget` now re-reads the technician from Firestore before broadcasting, because the
@@ -609,6 +633,30 @@ The concurrent-selection half of the finding is **not** guarded, by design: the 
 account is used from one device at a time, so two devices racing to select different technicians for
 the same request is out of scope. The batch makes each individual conversion all-or-nothing, which is
 the part that could bite a single user.
+
+### 12.12 Overlapping notification triggers — ✅ RESOLVED
+A full audit of all 39 notifying triggers (50 emission sites) found **three** cases where two triggers
+watching the same document both reacted to a single write. Because the two messages differ in wording
+and payload, no content-based dedup could ever have caught them — this was the real source of the
+"two notifications for one action" reports.
+
+| Event | Triggers | Resolution |
+|---|---|---|
+| Warranty technician cancels | `notifyOnWarrantyStatusChange` (S→R) + `onBookingWarrantyUpdated` (`assignedTechnicianId` cleared) — a cancel does both in one write | `onBookingWarrantyUpdated` defers when the status also moved S→R; its branch still covers an assignment cleared *without* that transition |
+| Card tip payout processed | `notifyWorkerOnTipPayoutProcessed` + `notifyTechnicianOnTipPayoutCompletion` on the same `tipping` doc; the second's condition is a strict subset of the first's | the broader one defers when `cardtip` was cleared |
+| Technician accepts a job offer | `notifyCustomerOnBroadcastAccepted` + `onManualJobOfferUpdated`, same `status → accepted_by_technician` transition | `notifyCustomerOnBroadcastAccepted` **removed** — it looked the customer up in `users` instead of `customers`, so it had never delivered anything; repairing it would only have produced the duplicate |
+
+Five further suspects were checked and cleared: new-booking vs assignment (mutually exclusive `P`/`A`),
+the auto-assign cron vs `onAutoAssignmentRequestCreated` (the cron skips `techsWithOffers`), warranty
+accept → technician (`warranty_accepted` has no `technician` entry in `statusMessages`), warranty
+resolution (keys on `isEscalated`, not `warrantyStatusCode`), and the two registration triggers.
+
+**Still open:** `payouts` and `unified_payout_requests` are parallel systems, each with its own
+admin-notify and technician-notify trigger, and both are still written from the app
+([app_services.dart:1860](lib/services/app_services.dart:1860) and
+[unified_payout_services.dart:241](lib/services/unified_payout_services.dart:241)). They are disjoint at
+the trigger level today — unified approve touches `unified_wallets`, the legacy path touches `tipping` —
+so there is no duplicate, but the legacy triggers are notifications for a superseded flow.
 
 ---
 

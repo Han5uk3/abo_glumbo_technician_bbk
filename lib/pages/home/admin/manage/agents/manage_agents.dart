@@ -692,7 +692,7 @@ class _ManageAgentsState extends State<ManageAgents>
                                     AppLocalizations.of(
                                           context,
                                         )?.earningsPeriod ??
-                                        "Earnings Period",
+                                        "Total Transaction Value Period",
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey.shade600,
@@ -1111,7 +1111,7 @@ class _ManageAgentsState extends State<ManageAgents>
                       children: [
                         Text(
                           AppLocalizations.of(context)?.totalEarnings ??
-                              "Total Earnings",
+                              "Total Transaction Value",
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

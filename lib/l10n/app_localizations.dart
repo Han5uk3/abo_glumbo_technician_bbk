@@ -148,6 +148,12 @@ abstract class AppLocalizations {
   /// **'Awaiting Technician Action'**
   String get awaitingTechnicianAction;
 
+  /// No description provided for @searchingForTechnician.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for Technician'**
+  String get searchingForTechnician;
+
   /// No description provided for @bookingRequestDetails.
   ///
   /// In en, this message translates to:
@@ -271,7 +277,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyRevenue.
   ///
   /// In en, this message translates to:
-  /// **'Monthly Revenue'**
+  /// **'Monthly Total Transaction Value'**
   String get monthlyRevenue;
 
   /// No description provided for @admins.
@@ -3169,7 +3175,7 @@ abstract class AppLocalizations {
   /// No description provided for @earnings.
   ///
   /// In en, this message translates to:
-  /// **'Earnings'**
+  /// **'Total Transaction Value'**
   String get earnings;
 
   /// No description provided for @exitAppTitle.
@@ -5005,7 +5011,7 @@ abstract class AppLocalizations {
   /// No description provided for @earningsBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'Earnings Breakdown'**
+  /// **'Total Transaction Value Breakdown'**
   String get earningsBreakdown;
 
   /// No description provided for @bonuses.
@@ -5863,7 +5869,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalEarnings.
   ///
   /// In en, this message translates to:
-  /// **'Total Earnings'**
+  /// **'Total Transaction Value'**
   String get totalEarnings;
 
   /// No description provided for @pleaseEnterAValidAmount.
@@ -6187,7 +6193,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewAndManageEarnings.
   ///
   /// In en, this message translates to:
-  /// **'View and manage earnings'**
+  /// **'View and manage total transaction value'**
   String get viewAndManageEarnings;
 
   /// No description provided for @supportedFormats.
@@ -6223,7 +6229,7 @@ abstract class AppLocalizations {
   /// No description provided for @lifetimeEarnings.
   ///
   /// In en, this message translates to:
-  /// **'Lifetime Earnings'**
+  /// **'Lifetime Total Transaction Value'**
   String get lifetimeEarnings;
 
   /// No description provided for @uploadProof.
@@ -6805,19 +6811,19 @@ abstract class AppLocalizations {
   /// No description provided for @fifteenpercentBonusOnEarningsandASpecialBadge.
   ///
   /// In en, this message translates to:
-  /// **'15% Bonus on Earnings + Special Badge'**
+  /// **'15% Bonus on Total Transaction Value + Special Badge'**
   String get fifteenpercentBonusOnEarningsandASpecialBadge;
 
   /// No description provided for @tenpercentBonusOnEarnings.
   ///
   /// In en, this message translates to:
-  /// **'10% Bonus on Earnings'**
+  /// **'10% Bonus on Total Transaction Value'**
   String get tenpercentBonusOnEarnings;
 
   /// No description provided for @fivepercentBonusOnEarnings.
   ///
   /// In en, this message translates to:
-  /// **'5% Bonus on Earnings'**
+  /// **'5% Bonus on Total Transaction Value'**
   String get fivepercentBonusOnEarnings;
 
   /// No description provided for @invalidAccountNumberLength.
@@ -8258,7 +8264,7 @@ abstract class AppLocalizations {
   /// No description provided for @bonusIncludedInWallet.
   ///
   /// In en, this message translates to:
-  /// **'Bonus is included in your unified wallet. Request payout from Earnings page.'**
+  /// **'Bonus is included in your unified wallet. Request payout from Total Transaction Value page.'**
   String get bonusIncludedInWallet;
 
   /// No description provided for @claimText.
@@ -8504,7 +8510,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutEarningsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Transparent Monthly Earnings'**
+  /// **'Transparent Monthly Total Transaction Value'**
   String get aboutEarningsTitle;
 
   /// No description provided for @aboutEarningsDesc.
@@ -9326,19 +9332,19 @@ abstract class AppLocalizations {
   /// No description provided for @inAppEarnings.
   ///
   /// In en, this message translates to:
-  /// **'In-App Earnings'**
+  /// **'In-App Total Transaction Value'**
   String get inAppEarnings;
 
   /// No description provided for @outsideAppEarnings.
   ///
   /// In en, this message translates to:
-  /// **'Outside-App Earnings'**
+  /// **'Outside-App Total Transaction Value'**
   String get outsideAppEarnings;
 
   /// No description provided for @earningsPeriod.
   ///
   /// In en, this message translates to:
-  /// **'Earnings Period'**
+  /// **'Total Transaction Value Period'**
   String get earningsPeriod;
 
   /// No description provided for @selectPeriod.
@@ -9938,7 +9944,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalRevenue.
   ///
   /// In en, this message translates to:
-  /// **'Total Revenue'**
+  /// **'Total Transaction Value'**
   String get totalRevenue;
 }
 

@@ -72,11 +72,11 @@ class BookingRequestDetailsPage extends StatelessWidget {
         counterOffer?.status.toLowerCase() == 'pending';
     final statusLabel = isAwaitingCustomer
         ? localization.awaitingCustomerAction
-        : localization.awaitingTechnicianAction;
+        : localization.searchingForTechnician;
     final statusColor = isAwaitingCustomer ? Colors.blue : AppColors.primary;
     final statusIcon = isAwaitingCustomer
         ? Icons.hourglass_top_outlined
-        : Icons.engineering_outlined;
+        : Icons.search;
 
     return Scaffold(
       backgroundColor: Colors.white,

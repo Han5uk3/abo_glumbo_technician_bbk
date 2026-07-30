@@ -33,6 +33,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get awaitingTechnicianAction => 'Awaiting Technician Action';
 
   @override
+  String get searchingForTechnician => 'Searching for Technician';
+
+  @override
   String get bookingRequestDetails => 'Booking Request Details';
 
   @override
@@ -96,7 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
-  String get monthlyRevenue => 'Monthly Revenue';
+  String get monthlyRevenue => 'Monthly Total Transaction Value';
 
   @override
   String get admins => 'Admins';
@@ -1594,7 +1597,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sixtyPlusJobs => '60+ Jobs';
 
   @override
-  String get earnings => 'Earnings';
+  String get earnings => 'Total Transaction Value';
 
   @override
   String get exitAppTitle => 'Exit App';
@@ -2583,7 +2586,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemInfo => 'System Info';
 
   @override
-  String get earningsBreakdown => 'Earnings Breakdown';
+  String get earningsBreakdown => 'Total Transaction Value Breakdown';
 
   @override
   String get bonuses => 'Bonuses';
@@ -3036,7 +3039,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get asOf => 'As of';
 
   @override
-  String get totalEarnings => 'Total Earnings';
+  String get totalEarnings => 'Total Transaction Value';
 
   @override
   String get pleaseEnterAValidAmount => 'Please enter a valid amount';
@@ -3211,7 +3214,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionNumberRequired => 'Transaction number is required';
 
   @override
-  String get viewAndManageEarnings => 'View and manage earnings';
+  String get viewAndManageEarnings => 'View and manage total transaction value';
 
   @override
   String get supportedFormats => 'Supported formats:';
@@ -3230,7 +3233,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapToSelectFile => 'Tap to select file';
 
   @override
-  String get lifetimeEarnings => 'Lifetime Earnings';
+  String get lifetimeEarnings => 'Lifetime Total Transaction Value';
 
   @override
   String get uploadProof => 'Upload Proof';
@@ -3541,13 +3544,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fifteenpercentBonusOnEarningsandASpecialBadge =>
-      '15% Bonus on Earnings + Special Badge';
+      '15% Bonus on Total Transaction Value + Special Badge';
 
   @override
-  String get tenpercentBonusOnEarnings => '10% Bonus on Earnings';
+  String get tenpercentBonusOnEarnings =>
+      '10% Bonus on Total Transaction Value';
 
   @override
-  String get fivepercentBonusOnEarnings => '5% Bonus on Earnings';
+  String get fivepercentBonusOnEarnings =>
+      '5% Bonus on Total Transaction Value';
 
   @override
   String get invalidAccountNumberLength => 'Invalid account number length';
@@ -4376,7 +4381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bonusIncludedInWallet =>
-      'Bonus is included in your unified wallet. Request payout from Earnings page.';
+      'Bonus is included in your unified wallet. Request payout from Total Transaction Value page.';
 
   @override
   String get claimText =>
@@ -4512,7 +4517,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Climb through our tiered system (Bronze, Silver, Gold, Platinum). The more jobs you complete and the higher your rating you maintain (4.8+ for Platinum), the higher the bonus percentage you earn (up to 15% bonus).';
 
   @override
-  String get aboutEarningsTitle => 'Transparent Monthly Earnings';
+  String get aboutEarningsTitle =>
+      'Transparent Monthly Total Transaction Value';
 
   @override
   String get aboutEarningsDesc =>
@@ -4985,13 +4991,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offHour => 'Outside Working Hours';
 
   @override
-  String get inAppEarnings => 'In-App Earnings';
+  String get inAppEarnings => 'In-App Total Transaction Value';
 
   @override
-  String get outsideAppEarnings => 'Outside-App Earnings';
+  String get outsideAppEarnings => 'Outside-App Total Transaction Value';
 
   @override
-  String get earningsPeriod => 'Earnings Period';
+  String get earningsPeriod => 'Total Transaction Value Period';
 
   @override
   String get selectPeriod => 'Select Period';
@@ -5337,5 +5343,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearby20km => 'Nearby (20km)';
 
   @override
-  String get totalRevenue => 'Total Revenue';
+  String get totalRevenue => 'Total Transaction Value';
 }

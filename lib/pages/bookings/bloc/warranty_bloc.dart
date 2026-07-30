@@ -171,6 +171,10 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
       await AppFirestore.bookingsCollectionRef.doc(event.bookingId).update({
         'warranty.warrantyStatusCode': 'C',
         'warranty.availability': false,
+        // The claim is resolved, so this no longer counts as an active claim
+        // in progress — clears the flag that keeps the Directions button
+        // showing on the technician app's completed warranty card.
+        'warranty.claimrequested': false,
         'warranty.completedAt': Timestamp.now(),
         'warranty.updatedAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),

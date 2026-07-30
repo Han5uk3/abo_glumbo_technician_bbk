@@ -388,6 +388,27 @@ class AppServices {
         .delete();
   }
 
+  static Future<void> markAllFirestoreNotificationsAsRead() async {
+    String userId = LocalStore.getUID() ?? '';
+    if (userId.isEmpty) return;
+
+    final bool isAdminMode = LocalStore.isCurrentUserAdmin();
+    final collectionRef = isAdminMode
+        ? AppFirestore.adminsCollectionRef
+        : AppFirestore.usersCollectionRef;
+
+    final collection = collectionRef.doc(userId).collection('notifications');
+
+    final snapshot = await collection.where('read', isEqualTo: false).get();
+    if (snapshot.docs.isEmpty) return;
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (var doc in snapshot.docs) {
+      batch.update(doc.reference, {'read': true});
+    }
+    await batch.commit();
+  }
+
   static Future<void> deleteAllFirestoreNotifications() async {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) return;
@@ -1255,18 +1276,53 @@ class AppServices {
   }
 
   static Stream<List<RawBookingRequest>> getBookingRequestsStream() {
-    return AppFirestore.bookingRequestsCollectionRef
+    final firestoreStream = AppFirestore.bookingRequestsCollectionRef
         .where('status', whereIn: ['pending', 'searching'])
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) {
+        .snapshots();
+
+    // Combine with a periodic timer so an expired request disappears
+    // immediately client-side, instead of waiting for the server cleanup
+    // cron (which can lag up to 2 minutes).
+    final timerStream = Stream.periodic(
+      const Duration(seconds: 1),
+      (i) => i,
+    ).startWith(0);
+
+    return Rx.combineLatest2(
+      firestoreStream,
+      timerStream,
+      (snapshot, _) => snapshot,
+    ).map((snapshot) {
+      final now = TimeService.now;
+      return snapshot.docs
+          .where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final createdAt = data['createdAt'] as Timestamp?;
+            if (createdAt == null) return true;
+            final elapsed = now.difference(createdAt.toDate());
+            final acceptedTechnicians =
+                data['acceptedTechnicians'] as List? ?? [];
+            // Mirrors the customer app's own `showExpiredScreen` rule
+            // (embedded_technician_search.dart): nobody has 120 seconds to
+            // accept before the search is considered a failed attempt — the
+            // customer has to explicitly "Search again" (a fresh request
+            // doc), not sit on a dead card for the rest of the 5-minute
+            // window. Once someone HAS accepted, the customer is actively
+            // choosing between candidates for up to 5 minutes total, so the
+            // card stays live for that whole window.
+            if (acceptedTechnicians.isEmpty) {
+              return elapsed < const Duration(seconds: 120);
+            }
+            return elapsed < const Duration(minutes: 5);
+          })
+          .map((doc) {
             return RawBookingRequest(
               id: doc.id,
               data: doc.data() as Map<String, dynamic>,
             );
-          }).toList();
-        })
-        .onErrorReturn([]);
+          })
+          .toList();
+    }).onErrorReturn([]);
   }
 
   static Future<bool> isEmailRegistered(String email) async {

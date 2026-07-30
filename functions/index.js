@@ -2143,18 +2143,25 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
         );
       }
     }
-    // 10. Warranty Technician Assigned/Reassigned
-    // Only notify if assignedTechnicianId is different from original agent.uid
-    // AND status changed from R to S
+    // 10. Admin (re)assigns a technician to an already-requested claim.
+    // `AssignWarrantyTechnician` writes assignedTechnicianId and leaves the
+    // status at 'R' (assignment is not acceptance — the new technician still
+    // has to accept). That means this is an R -> R transition, not R -> S, so
+    // the previous condition here (which required afterStatusCode === "S")
+    // could never fire: any real R -> S transition is already claimed by
+    // case 3 above, which runs first in this if/else-if chain. Detecting the
+    // *reassignment itself* — most commonly after the first technician
+    // rejected the claim — needs to key on the technician id changing while
+    // status stays 'R', not on a status transition that doesn't happen.
     else if (
       beforeStatusCode === "R" &&
-      afterStatusCode === "S" &&
+      afterStatusCode === "R" &&
       afterWarranty.assignedTechnicianId &&
-      afterWarranty.assignedTechnicianId !== afterData.agent?.uid
+      beforeWarranty?.assignedTechnicianId !== afterWarranty.assignedTechnicianId
     ) {
       status = "warranty_technician_assigned";
       console.log(
-        `Warranty technician ${afterWarranty.assignedTechnicianId} assigned to booking ${bookingId} (different from original agent ${afterData.agent?.uid})`
+        `Warranty technician ${afterWarranty.assignedTechnicianId} (re)assigned to booking ${bookingId}`
       );
     }
 
@@ -2313,6 +2320,18 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           en: `Warranty expired for ${serviceName} - Customer: ${customerName}`,
           ar: `انتهى الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
           ur: `${serviceNameUr} کے لیے وارنٹی ختم ہو گئی ہے - صارف: ${customerName}`,
+        },
+      },
+      warranty_technician_assigned: {
+        customer: {
+          en: "A new technician has been assigned to your warranty repair. They will contact you soon.",
+          ar: "تم تعيين فني جديد لإصلاح الضمان الخاص بك. سيتصل بك قريبًا.",
+          ur: "آپ کی وارنٹی مرمت کے لیے ایک نیا ٹیکنیشن تفویض کر دیا گیا ہے۔ وہ جلد ہی آپ سے رابطہ کرے گا۔",
+        },
+        admin: {
+          en: `New technician assigned to warranty repair for ${serviceName} - Customer: ${customerName}`,
+          ar: `تم تعيين فني جديد لإصلاح الضمان لـ ${serviceNameAr} - العميل: ${customerName}`,
+          ur: `${serviceNameUr} کے لیے وارنٹی مرمت میں نیا ٹیکنیشن تفویض کر دیا گیا ہے - صارف: ${customerName}`,
         },
       },
       technician_rejected: {
@@ -5374,6 +5393,7 @@ exports.notifyTechnicianOnPaymentVerificationPending = onDocumentWritten(
 // Booking Triggers
 const bookingTriggers = require('./src/triggers/bookingTriggers');
 exports.onBookingRequestCreated = bookingTriggers.onBookingRequestCreated;
+exports.rebroadcastSearchingBookingRequests = bookingTriggers.rebroadcastSearchingBookingRequests;
 exports.onManualJobOfferUpdated = bookingTriggers.onManualJobOfferUpdated;
 exports.processAutoAssignments = bookingTriggers.processAutoAssignments;
 exports.onAutoAssignmentRequestCreated = bookingTriggers.onAutoAssignmentRequestCreated;
@@ -5389,4 +5409,5 @@ exports.notifyOnTechnicianRegistrationStatusChange = bookingTriggers.notifyOnTec
 // and inflating the admin dashboard's pending count.
 exports.onBookingWarrantyUpdated = bookingTriggers.onBookingWarrantyUpdated;
 exports.cleanupStaleBookingRequests = bookingTriggers.cleanupStaleBookingRequests;
+exports.cleanupStaleJobRequests = bookingTriggers.cleanupStaleJobRequests;
 

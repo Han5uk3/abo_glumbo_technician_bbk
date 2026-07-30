@@ -625,7 +625,7 @@ class _ManageTransactionsPageState extends State<ManageTransactionsPage> {
                         children: [
                           Text(
                             AppLocalizations.of(context)?.earningsPeriod ??
-                                "Earnings Period",
+                                "Total Transaction Value Period",
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.grey.shade600,

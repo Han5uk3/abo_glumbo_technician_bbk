@@ -33,6 +33,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get awaitingTechnicianAction => 'في انتظار إجراء الفني';
 
   @override
+  String get searchingForTechnician => 'جارٍ البحث عن فني';
+
+  @override
   String get bookingRequestDetails => 'تفاصيل طلب الحجز';
 
   @override
@@ -95,7 +98,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get login => 'تسجيل الدخول';
 
   @override
-  String get monthlyRevenue => 'الإيرادات الشهرية';
+  String get monthlyRevenue => 'إجمالي قيمة المعاملات الشهرية';
 
   @override
   String get admins => 'المشرفون';
@@ -1580,7 +1583,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sixtyPlusJobs => 'أكثر من 60 وظيفة';
 
   @override
-  String get earnings => 'الأرباح';
+  String get earnings => 'إجمالي قيمة المعاملات';
 
   @override
   String get exitAppTitle => 'الخروج من التطبيق';
@@ -2546,7 +2549,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get systemInfo => 'معلومات النظام';
 
   @override
-  String get earningsBreakdown => 'تفصيل الأرباح';
+  String get earningsBreakdown => 'تفصيل إجمالي قيمة المعاملات';
 
   @override
   String get bonuses => 'المكافآت';
@@ -2992,7 +2995,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get asOf => 'منذ';
 
   @override
-  String get totalEarnings => 'إجمالي الأرباح';
+  String get totalEarnings => 'إجمالي قيمة المعاملات';
 
   @override
   String get pleaseEnterAValidAmount => 'يرجى إدخال مبلغ صحيح';
@@ -3163,7 +3166,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionNumberRequired => 'رقم المعاملة مطلوب';
 
   @override
-  String get viewAndManageEarnings => 'عرض وإدارة الأرباح';
+  String get viewAndManageEarnings => 'عرض وإدارة إجمالي قيمة المعاملات';
 
   @override
   String get supportedFormats => 'الصيغ المدعومة:';
@@ -3182,7 +3185,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToSelectFile => 'اضغط لتحديد الملف';
 
   @override
-  String get lifetimeEarnings => 'إجمالي الأرباح';
+  String get lifetimeEarnings => 'إجمالي قيمة المعاملات مدى الحياة';
 
   @override
   String get uploadProof => 'رفع الإثبات';
@@ -3487,13 +3490,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fifteenpercentBonusOnEarningsandASpecialBadge =>
-      'مكافأة 15% على الأرباح + شارة خاصة';
+      'مكافأة 15% على إجمالي قيمة المعاملات + شارة خاصة';
 
   @override
-  String get tenpercentBonusOnEarnings => 'خصم 10% على الأرباح';
+  String get tenpercentBonusOnEarnings => 'خصم 10% على إجمالي قيمة المعاملات';
 
   @override
-  String get fivepercentBonusOnEarnings => 'خصم 5% على الأرباح';
+  String get fivepercentBonusOnEarnings => 'خصم 5% على إجمالي قيمة المعاملات';
 
   @override
   String get invalidAccountNumberLength => 'طول رقم الحساب غير صحيح';
@@ -4313,7 +4316,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get bonusIncludedInWallet =>
-      'المكافأة مدمجة ضمن محفظتك الموحدة. اطلب السحب من صفحة الأرباح.';
+      'المكافأة مدمجة ضمن محفظتك الموحدة. اطلب السحب من صفحة إجمالي قيمة المعاملات.';
 
   @override
   String get claimText =>
@@ -4449,7 +4452,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'ارتقِ في نظام المستويات الخاص بنا (Bronze, Silver, Gold, Platinum). كلما أكملت المزيد من الطلبات وحافظت على تقييم عالٍ (4.8+ في Platinum)، زادت نسبة البونص التي تحصل عليها (تصل إلى 15% بونص).';
 
   @override
-  String get aboutEarningsTitle => 'أرباح شهرية شفافة';
+  String get aboutEarningsTitle => 'إجمالي قيمة المعاملات الشهرية الشفافة';
 
   @override
   String get aboutEarningsDesc =>
@@ -4921,13 +4924,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get offHour => 'خارج أوقات العمل';
 
   @override
-  String get inAppEarnings => 'الأرباح داخل التطبيق';
+  String get inAppEarnings => 'إجمالي قيمة المعاملات داخل التطبيق';
 
   @override
-  String get outsideAppEarnings => 'الأرباح خارج التطبيق';
+  String get outsideAppEarnings => 'إجمالي قيمة المعاملات خارج التطبيق';
 
   @override
-  String get earningsPeriod => 'فترة الأرباح';
+  String get earningsPeriod => 'فترة إجمالي قيمة المعاملات';
 
   @override
   String get selectPeriod => 'اختر الفترة';
@@ -5266,5 +5269,5 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nearby20km => 'بالقرب (20 كم)';
 
   @override
-  String get totalRevenue => 'إجمالي الإيرادات';
+  String get totalRevenue => 'إجمالي قيمة المعاملات';
 }

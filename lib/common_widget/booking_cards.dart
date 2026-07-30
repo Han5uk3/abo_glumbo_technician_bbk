@@ -374,7 +374,7 @@ class BookingListTileWidget extends StatelessWidget {
                 // Action Buttons or Status Badge
                 if (isAdmin && isWarranty && booking.isEscalated == true)
                   _buildActionButton(
-                    label: 'Mark as Resolved',
+                    label: localization.markAsResolved,
                     color: Colors.green,
                     onPressed: () => _showResolveDialog(context, booking),
                   )
@@ -910,10 +910,56 @@ class BookingListTileWidget extends StatelessWidget {
   }
 }
 
-class BookingRequestTileWidget extends StatelessWidget {
+class BookingRequestTileWidget extends StatefulWidget {
   final RawBookingRequest request;
 
   const BookingRequestTileWidget({super.key, required this.request});
+
+  @override
+  State<BookingRequestTileWidget> createState() =>
+      _BookingRequestTileWidgetState();
+}
+
+class _BookingRequestTileWidgetState extends State<BookingRequestTileWidget> {
+  Timer? _countdownTimer;
+  int _secondsRemaining = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    final createdAt = widget.request.data['createdAt'] as Timestamp?;
+    if (createdAt == null) return;
+
+    void tick() {
+      if (!mounted) return;
+      // Mirrors the customer app's own search window
+      // (embedded_technician_search.dart): 120 seconds for anyone to accept
+      // at all; once someone has, the customer is actively choosing between
+      // candidates for up to 5 minutes total.
+      final acceptedTechnicians =
+          widget.request.data['acceptedTechnicians'] as List? ?? [];
+      final window = acceptedTechnicians.isEmpty
+          ? const Duration(seconds: 120)
+          : const Duration(minutes: 5);
+      final remaining =
+          window.inSeconds -
+          TimeService.now.difference(createdAt.toDate()).inSeconds;
+      setState(() => _secondsRemaining = remaining > 0 ? remaining : 0);
+    }
+
+    tick();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) => tick());
+  }
 
   Widget _buildDetailRow(IconData icon, String text, {Color? color}) {
     return Row(
@@ -935,7 +981,7 @@ class BookingRequestTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
-    final data = request.data;
+    final data = widget.request.data;
 
     final customerName = data['customer']?['name'] ?? 'Customer';
     final serviceName = locale == 'en'
@@ -986,13 +1032,15 @@ class BookingRequestTileWidget extends StatelessWidget {
     final isAwaitingCustomer = counterOfferStatus == 'pending';
     final requestStatusLabel = isAwaitingCustomer
         ? localization.awaitingCustomerAction
-        : localization.awaitingTechnicianAction;
+        : localization.searchingForTechnician;
     final requestStatusColor = isAwaitingCustomer
         ? Colors.blue
         : AppColors.primary;
     final requestStatusIcon = isAwaitingCustomer
         ? Icons.hourglass_top_outlined
-        : Icons.engineering_outlined;
+        : Icons.search;
+    final minutes = (_secondsRemaining ~/ 60).toString().padLeft(2, '0');
+    final seconds = (_secondsRemaining % 60).toString().padLeft(2, '0');
 
     return GestureDetector(
       onTap: () {
@@ -1000,7 +1048,7 @@ class BookingRequestTileWidget extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                BookingRequestDetailsPage(request: request),
+                BookingRequestDetailsPage(request: widget.request),
           ),
         );
       },
@@ -1093,6 +1141,17 @@ class BookingRequestTileWidget extends StatelessWidget {
                           color: requestStatusColor,
                         ),
                       ),
+                      if (!isAwaitingCustomer) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '($minutes:$seconds)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: requestStatusColor,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

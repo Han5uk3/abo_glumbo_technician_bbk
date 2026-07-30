@@ -33,6 +33,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get awaitingTechnicianAction => 'ٹیکنیشن کے اگلے اقدامات کا انتظار ہے';
 
   @override
+  String get searchingForTechnician => 'ٹیکنیشن تلاش کیا جا رہا ہے';
+
+  @override
   String get bookingRequestDetails => 'بکنگ کی درخواست کی تفصیلات';
 
   @override
@@ -97,7 +100,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get login => 'لاگ ان کریں';
 
   @override
-  String get monthlyRevenue => 'ماہانہ آمدنی';
+  String get monthlyRevenue => 'ماہانہ کل لین دین کی مالیت';
 
   @override
   String get admins => 'ایڈمنز';
@@ -1604,7 +1607,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get sixtyPlusJobs => '60+ جابز';
 
   @override
-  String get earnings => 'آمدنی';
+  String get earnings => 'کل لین دین کی مالیت';
 
   @override
   String get exitAppTitle => 'ایپ سے باہر نکلیں';
@@ -2592,7 +2595,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get systemInfo => 'سسٹم کی معلومات';
 
   @override
-  String get earningsBreakdown => 'آمدنی کی تفصیل';
+  String get earningsBreakdown => 'کل لین دین کی مالیت کی تفصیل';
 
   @override
   String get bonuses => 'بونس';
@@ -3046,7 +3049,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get asOf => 'تک';
 
   @override
-  String get totalEarnings => 'کل آمدنی';
+  String get totalEarnings => 'کل لین دین کی مالیت';
 
   @override
   String get pleaseEnterAValidAmount => 'براہ کرم ایک درست رقم درج کریں';
@@ -3220,7 +3223,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get transactionNumberRequired => 'トランザクション番号が必要です';
 
   @override
-  String get viewAndManageEarnings => 'آمدنی دیکھیں اور ان کا انتظام کریں';
+  String get viewAndManageEarnings =>
+      'کل لین دین کی مالیت دیکھیں اور اس کا انتظام کریں';
 
   @override
   String get supportedFormats => 'معاون فارمیٹس:';
@@ -3239,7 +3243,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get tapToSelectFile => 'فائل منتخب کرنے کے لیے تھپتھپائیں';
 
   @override
-  String get lifetimeEarnings => 'تاحیات آمدنی';
+  String get lifetimeEarnings => 'تاحیات کل لین دین کی مالیت';
 
   @override
   String get uploadProof => 'ثبوت اپ لوڈ کریں';
@@ -3553,13 +3557,13 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get fifteenpercentBonusOnEarningsandASpecialBadge =>
-      'آمدنی پر 15% بونس + ایک خصوصی بیج';
+      'کل لین دین کی مالیت پر 15% بونس + ایک خصوصی بیج';
 
   @override
-  String get tenpercentBonusOnEarnings => 'آمدنی پر 10% بونس';
+  String get tenpercentBonusOnEarnings => 'کل لین دین کی مالیت پر 10% بونس';
 
   @override
-  String get fivepercentBonusOnEarnings => 'آمدنی پر 5% بونس';
+  String get fivepercentBonusOnEarnings => 'کل لین دین کی مالیت پر 5% بونس';
 
   @override
   String get invalidAccountNumberLength => 'اکاؤنٹ نمبر کی لمبائی غلط ہے';
@@ -4388,7 +4392,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get bonusIncludedInWallet =>
-      'بونس آپ کے متحد بٹوے میں شامل ہے۔ آمدنی (Earnings) پیج سے ادائیگی کی درخواست کریں۔';
+      'بونس آپ کے متحد بٹوے میں شامل ہے۔ کل لین دین کی مالیت پیج سے ادائیگی کی درخواست کریں۔';
 
   @override
   String get claimText =>
@@ -4526,7 +4530,7 @@ class AppLocalizationsUr extends AppLocalizations {
       'ہمارے ٹائرڈ سسٹم (کانسی، چاندی، سونا، پلاٹینم) کے ذریعے ترقی کریں۔ آپ جتنی زیادہ جابز مکمل کریں گے اور آپ کی درجہ بندی جتنی زیادہ ہوگی (پلاٹینم کے لیے 4.8+)، آپ اتنا ہی زیادہ بونس فیصد کمائیں گے (15% بونس تک)۔';
 
   @override
-  String get aboutEarningsTitle => 'شفاف ماہانہ آمدنی';
+  String get aboutEarningsTitle => 'شفاف ماہانہ کل لین دین کی مالیت';
 
   @override
   String get aboutEarningsDesc =>
@@ -5006,13 +5010,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get offHour => 'آف آور بکنگ';
 
   @override
-  String get inAppEarnings => 'ان ایپ آمدنی';
+  String get inAppEarnings => 'ان ایپ کل لین دین کی مالیت';
 
   @override
-  String get outsideAppEarnings => 'خارج ایپ آمدنی';
+  String get outsideAppEarnings => 'خارج ایپ کل لین دین کی مالیت';
 
   @override
-  String get earningsPeriod => 'آمدنی کا دورانیہ';
+  String get earningsPeriod => 'کل لین دین کی مالیت کا دورانیہ';
 
   @override
   String get selectPeriod => 'دورانیہ منتخب کریں';
@@ -5360,5 +5364,5 @@ class AppLocalizationsUr extends AppLocalizations {
   String get nearby20km => 'قریب (20 کلومیٹر)';
 
   @override
-  String get totalRevenue => 'کل آمدنی';
+  String get totalRevenue => 'کل لین دین کی مالیت';
 }

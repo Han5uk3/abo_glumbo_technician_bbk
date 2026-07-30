@@ -63,20 +63,187 @@ async function loadTechniciansWithExistingOffers(bookingId) {
     .get();
 
   existingOffers.forEach((offerDoc) => {
-    const offer = offerDoc.data();
-    if (!offer.technicianId) return;
+    try {
+      const offer = offerDoc.data();
+      if (!offer.technicianId) return;
 
-    const expiresAt = offer.expiresAt ? offer.expiresAt.toDate().getTime() : 0;
-    const isExpired = expiresAt < nowTime;
+      // A malformed `expiresAt` on any one offer doc (wrong type, missing
+      // `.toDate`) must never throw out of this loop — this function is
+      // called once per pending request inside the auto-assign cron's shared
+      // try/catch, so an uncaught throw here silently aborts re-broadcasting
+      // for every OTHER request in that run too, not just this one.
+      let expiresAt = 0;
+      if (offer.expiresAt && typeof offer.expiresAt.toDate === "function") {
+        expiresAt = offer.expiresAt.toDate().getTime();
+      }
+      const isExpired = expiresAt < nowTime;
 
-    if (offer.status === "pending" && !isExpired) {
-      techsWithOffers.add(offer.technicianId);
-    } else if (offer.status !== "pending") {
-      techsWithOffers.add(offer.technicianId);
+      if (offer.status === "pending" && !isExpired) {
+        techsWithOffers.add(offer.technicianId);
+      } else if (offer.status !== "pending") {
+        techsWithOffers.add(offer.technicianId);
+      }
+    } catch (e) {
+      console.error(`[loadTechniciansWithExistingOffers] Skipping malformed offer ${offerDoc.id} for booking ${bookingId}:`, e);
     }
   });
 
   return techsWithOffers;
+}
+
+/**
+ * Fans job offers out to every eligible technician for one `booking_request`
+ * doc. Shared by the create trigger (first broadcast) and the re-broadcast
+ * cron below, so a technician who comes online / becomes eligible after the
+ * request was first created still gets offered before the customer's search
+ * window runs out — the create trigger alone only ever evaluates eligibility
+ * at the single instant the request was written.
+ */
+async function broadcastEligibleOffersForRequest(requestId, request) {
+  const coords = extractCustomerCoordinates(request);
+  if (!coords) {
+    console.error(`[Booking Request ${requestId}] Missing or invalid customer coordinates`);
+    return 0;
+  }
+  const custLat = coords.lat;
+  const custLon = coords.lon;
+  const customerAddress = extractCustomerAddress(request);
+
+  try {
+    // Fetch all online verified technicians (role is technician)
+    const techsSnapshot = await db.collection("users")
+      .where("role", "==", "technician")
+      .where("isOnline", "==", true)
+      .where("isVerified", "==", true)
+      .get();
+
+    const eligibleTechs = [];
+    const rejectedTechs = request.rejectedTechnicians || [];
+
+    // One batched read each, instead of one query per candidate technician.
+    const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
+    const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
+    const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+
+    for (const doc of techsSnapshot.docs) {
+      const tech = doc.data();
+      const techUid = doc.id;
+
+      if (rejectedTechs.includes(techUid)) {
+        console.log(`[Booking Request ${requestId}] Technician ${techUid} was previously rejected.`);
+        continue;
+      }
+
+      // Never send a second offer to someone who already holds/answered one for this request.
+      if (techsWithOffers.has(techUid)) {
+        console.log(`[Booking Request ${requestId}] Technician ${techUid} already has an offer for this request.`);
+        continue;
+      }
+
+      // 0. Job Role Check
+      const categoryId = request.service?.category;
+      const techJobRoles = tech.jobRoles || [];
+      if (categoryId && !techJobRoles.includes(categoryId)) {
+        console.log(`[Booking Request ${requestId}] Technician ${techUid} does not have required job role (category ${categoryId})`);
+        continue;
+      }
+
+      const techCoords = extractTechnicianCoordinates(tech);
+      if (!techCoords) continue;
+      const techLat = techCoords.lat;
+      const techLon = techCoords.lon;
+
+      const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
+      if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
+
+      if (startedJobAgentUids.has(techUid)) {
+        console.log(`[Booking Request ${requestId}] Technician ${techUid} has an active started job`);
+        continue;
+      }
+
+      const bookedInstants = bookedInstantsByAgent.get(techUid);
+      if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) {
+        console.log(`[Booking Request ${requestId}] Technician ${techUid} has a conflicting booking for the same date and time`);
+        continue;
+      }
+
+      eligibleTechs.push({ uid: techUid, data: tech, distance });
+    }
+
+    console.log(`[Booking Request ${requestId}] Found ${eligibleTechs.length} eligible technicians`);
+
+    if (eligibleTechs.length === 0) {
+      return 0;
+    }
+
+    const batch = db.batch();
+    const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
+    const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
+
+    // Create a job offer for each eligible technician
+    for (const tech of eligibleTechs) {
+      const offerId = db.collection("job_offers").doc().id;
+      const offerRef = db.collection("job_offers").doc(offerId);
+
+      batch.set(offerRef, {
+        id: offerId,
+        bookingId: requestId, // Document ID and booking ID are the same
+        requestId: requestId,
+        technicianId: tech.uid,
+        status: "pending",
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt: expiresAtTimestamp,
+        customerName: request.customer?.name || "Customer",
+        serviceLocation: {
+          fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+          streetName: customerAddress?.streetName || "",
+          lat: custLat,
+          lon: custLon
+        },
+        serviceName: request.service?.name || "Service",
+        serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+        serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+        notes: request.notes || "",
+        issueImage: request.issueImage || "",
+        issueVideo: request.issueVideo || "",
+        bookingDateTime: request.bookingDateTime,
+        isRebook: false,
+        customerId: request.customer?.uid || ""
+      });
+
+      // Send push notification
+      if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+        const lan = tech.data.lanCode || "en";
+        await sendAndStoreNotification({
+          targetRole: "technician",
+          targetId: tech.uid,
+          titleEn: "New Manual Job Offer",
+          titleAr: "عرض حجز يدوي جديد",
+          titleUr: "بکنگ کی نئی دستی پیشکش",
+          bodyEn: "A new job is available nearby. Tap to accept within 120 seconds.",
+          bodyAr: "هناك طلب عمل جديد متاح بالقرب منك. اضغط للقبول خلال 120 ثانية.",
+          bodyUr: "قریب ہی ایک نیا کام دستیاب ہے۔ 120 سیکنڈ کے اندر قبول کرنے کے لیے ٹیپ کریں۔",
+          data: {
+            bookingId: requestId,
+            requestId: requestId,
+            offerId: offerId,
+            targetRole: "technician",
+            category: "job_offer",
+            type: "job_offer"
+          },
+          fcmToken: tech.data.fcmToken,
+          lanCode: lan
+        });
+      }
+    }
+
+    await batch.commit();
+    console.log(`[Booking Request ${requestId}] Broadcast job offers created for ${eligibleTechs.length} technicians`);
+    return eligibleTechs.length;
+  } catch (e) {
+    console.error(`Error processing booking request ${requestId}:`, e);
+    return 0;
+  }
 }
 
 exports.onBookingRequestCreated = onDocumentCreated(
@@ -91,153 +258,37 @@ exports.onBookingRequestCreated = onDocumentCreated(
     const request = snap.data();
     const requestId = event.params.requestId;
 
-    const coords = extractCustomerCoordinates(request);
-    if (!coords) {
-      console.error(`[Booking Request ${requestId}] Missing or invalid customer coordinates`);
-      return null;
-    }
-    const custLat = coords.lat;
-    const custLon = coords.lon;
-    const customerAddress = extractCustomerAddress(request);
-
-    try {
-      // Fetch all online verified technicians (role is technician)
-      const techsSnapshot = await db.collection("users")
-        .where("role", "==", "technician")
-        .where("isOnline", "==", true)
-        .where("isVerified", "==", true)
-        .get();
-
-      const eligibleTechs = [];
-      const rejectedTechs = request.rejectedTechnicians || [];
-
-      // One batched read each, instead of one query per candidate technician.
-      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
-      const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
-      const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
-
-      for (const doc of techsSnapshot.docs) {
-        const tech = doc.data();
-        const techUid = doc.id;
-
-        if (rejectedTechs.includes(techUid)) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} was previously rejected.`);
-          continue;
-        }
-
-        // Never send a second offer to someone who already holds/answered one for this request.
-        if (techsWithOffers.has(techUid)) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} already has an offer for this request.`);
-          continue;
-        }
-
-        // 0. Job Role Check
-        const categoryId = request.service?.category;
-        const techJobRoles = tech.jobRoles || [];
-        if (categoryId && !techJobRoles.includes(categoryId)) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} does not have required job role (category ${categoryId})`);
-          continue;
-        }
-
-        const techCoords = extractTechnicianCoordinates(tech);
-        if (!techCoords) continue;
-        const techLat = techCoords.lat;
-        const techLon = techCoords.lon;
-
-        const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
-
-        if (startedJobAgentUids.has(techUid)) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} has an active started job`);
-          continue;
-        }
-
-        const bookedInstants = bookedInstantsByAgent.get(techUid);
-        if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) {
-          console.log(`[Booking Request ${requestId}] Technician ${techUid} has a conflicting booking for the same date and time`);
-          continue;
-        }
-
-        eligibleTechs.push({ uid: techUid, data: tech, distance });
-      }
-
-      console.log(`[Booking Request ${requestId}] Found ${eligibleTechs.length} eligible technicians`);
-
-      if (eligibleTechs.length === 0) {
-        return null;
-      }
-
-      const batch = db.batch();
-      const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
-      const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
-
-      // Create a job offer for each eligible technician
-      for (const tech of eligibleTechs) {
-        const offerId = db.collection("job_offers").doc().id;
-        const offerRef = db.collection("job_offers").doc(offerId);
-
-        batch.set(offerRef, {
-          id: offerId,
-          bookingId: requestId, // Document ID and booking ID are the same
-          requestId: requestId,
-          technicianId: tech.uid,
-          status: "pending",
-          createdAt: FieldValue.serverTimestamp(),
-          expiresAt: expiresAtTimestamp,
-          customerName: request.customer?.name || "Customer",
-          serviceLocation: {
-            fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
-            streetName: customerAddress?.streetName || "",
-            lat: custLat,
-            lon: custLon
-          },
-          serviceName: request.service?.name || "Service",
-          serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
-          serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
-          notes: request.notes || "",
-          issueImage: request.issueImage || "",
-          issueVideo: request.issueVideo || "",
-          bookingDateTime: request.bookingDateTime,
-          isRebook: false,
-          customerId: request.customer?.uid || ""
-        });
-
-        // Send push notification
-        if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
-          const lan = tech.data.lanCode || "en";
-          await sendAndStoreNotification({
-            targetRole: "technician",
-            targetId: tech.uid,
-            titleEn: "New Manual Job Offer",
-            titleAr: "عرض حجز يدوي جديد",
-            titleUr: "بکنگ کی نئی دستی پیشکش",
-            bodyEn: "A new job is available nearby. Tap to accept within 120 seconds.",
-            bodyAr: "هناك طلب عمل جديد متاح بالقرب منك. اضغط للقبول خلال 120 ثانية.",
-            bodyUr: "قریب ہی ایک نیا کام دستیاب ہے۔ 120 سیکنڈ کے اندر قبول کرنے کے لیے ٹیپ کریں۔",
-            data: {
-              bookingId: requestId,
-              requestId: requestId,
-              offerId: offerId,
-              targetRole: "technician",
-              category: "job_offer",
-              type: "job_offer"
-            },
-            fcmToken: tech.data.fcmToken,
-            lanCode: lan
-          });
-        }
-      }
-
-      await batch.commit();
-      console.log(`[Booking Request ${requestId}] Broadcast job offers created for ${eligibleTechs.length} technicians`);
-
-    } catch (e) {
-      console.error(`Error processing booking request ${requestId}:`, e);
-    }
-
+    await broadcastEligibleOffersForRequest(requestId, request);
     return null;
   }
 );
+
+/**
+ * Re-broadcasts still-searching manual requests every 30s so a technician who
+ * comes online, gets verified, or whose location updates *after* the request
+ * was created still receives an offer before the customer's search window
+ * (5 minutes client-side) elapses. Without this, eligibility was only ever
+ * evaluated once, at the exact instant of creation — an available technician
+ * who wasn't online/positioned yet at that instant would never be offered the
+ * job at all, even though they were free for the rest of the search window.
+ */
+exports.rebroadcastSearchingBookingRequests = onSchedule("every 1 minutes", async (event) => {
+  const searchingSnapshot = await db.collection("booking_request")
+    .where("status", "==", "searching")
+    .get();
+
+  if (searchingSnapshot.empty) return null;
+
+  let totalNewOffers = 0;
+  for (const doc of searchingSnapshot.docs) {
+    totalNewOffers += await broadcastEligibleOffersForRequest(doc.id, doc.data());
+  }
+
+  if (totalNewOffers > 0) {
+    console.log(`[Cron] rebroadcastSearchingBookingRequests created ${totalNewOffers} new offers.`);
+  }
+  return null;
+});
 
 // 2. Trigger when job offer status is updated
 exports.onManualJobOfferUpdated = onDocumentUpdated(
@@ -445,8 +496,15 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
 );
 
 // 3. Cron scheduled function for Auto-Assignment
+//
+// Runs every 4 minutes (within the intended 3-5 minute wave spacing) rather
+// than every 1: each pass is a broadcast "wave" to whichever technicians are
+// newly eligible since the last one (loadTechniciansWithExistingOffers skips
+// anyone who already holds/answered an offer), and waves that fire faster
+// than the customer's own 120s per-offer window just spam duplicate pushes
+// for no benefit.
 exports.processAutoAssignments = onSchedule(
-  "every 1 minutes",
+  "every 4 minutes",
   async (event) => {
     console.log("Processing scheduled auto-assignment requests...");
     const now = new Date();
@@ -468,6 +526,12 @@ exports.processAutoAssignments = onSchedule(
       for (const doc of snapshot.docs) {
         const request = doc.data();
         const requestId = doc.id;
+
+        // Isolated per request: one malformed/failing request (e.g. bad data
+        // on a stray job_offers doc) must not throw out of the shared loop
+        // and silently cancel re-broadcasting for every OTHER pending
+        // request in this run.
+        try {
 
         // Check if booking is still active/pending in bookings collection
         const bookingSnap = await db.collection("bookings").doc(requestId).get();
@@ -678,6 +742,9 @@ exports.processAutoAssignments = onSchedule(
         } else {
           console.log(`No new technicians eligible for auto-assignment ${requestId} in this iteration.`);
         }
+        } catch (perRequestError) {
+          console.error(`[Auto-Assignment ${requestId}] Error processing this request, skipping to the next:`, perRequestError);
+        }
       }
     } catch (e) {
       console.error("Error processing late auto assignments: ", e);
@@ -875,6 +942,30 @@ exports.syncAgentToAutoAssignment = onDocumentUpdated(
         }
       } catch (e) {
         console.error(`Error syncing agent to auto-assignment request ${bookingId}:`, e);
+      }
+
+      // Whichever path put an agent on this booking — the normal accept flow
+      // already deletes its own sibling offers client-side, but an admin's
+      // direct manual assignment (`AdminBloc._assignAgent`) never goes near
+      // `job_offers` at all. Left behind, a still-`pending`, still-unexpired
+      // offer keeps showing the newly-assigned technician a countdown card in
+      // their Pending tab for a job that is already sitting in their Assigned
+      // tab as a real booking. This is the single place that transition is
+      // guaranteed to be observed regardless of which path caused it, so it's
+      // the right place for a server-side safety net.
+      try {
+        const staleOffers = await db.collection("job_offers")
+          .where("bookingId", "==", bookingId)
+          .get();
+
+        if (!staleOffers.empty) {
+          const batch = db.batch();
+          staleOffers.forEach((doc) => batch.delete(doc.ref));
+          await batch.commit();
+          console.log(`[Sync Agent] Deleted ${staleOffers.size} stale job offers for booking ${bookingId}`);
+        }
+      } catch (e) {
+        console.error(`Error cleaning up job offers on assignment for booking ${bookingId}:`, e);
       }
     }
     return null;
@@ -1371,5 +1462,50 @@ exports.cleanupStaleBookingRequests = onSchedule("every 2 minutes", async (event
     }
   } catch (error) {
     console.error("[Cron] Error in cleanupStaleBookingRequests:", error);
+  }
+});
+
+/**
+ * Server-side backstop for the rebook flow's `job_requests` docs.
+ *
+ * The client (`RebookWaitWidget`/`BookServicePage`) deletes its own request on
+ * decline/expiry/customer-cancel, but only while the technician hasn't
+ * accepted yet — once accepted, the wizard moves on to the review step and
+ * relies on the customer actually confirming to mark the request
+ * `finalized`. If the customer instead abandons the flow at that point (backs
+ * out, force-quits, loses connectivity) nothing ever deletes the request or
+ * its `job_offers` doc, and because an `accepted_by_technician` offer is
+ * deliberately exempt from expiry everywhere it's read, it stays on the
+ * technician's Pending tab forever. This mirrors `cleanupStaleBookingRequests`
+ * for that collection: anything still `pending` (never finalized) after a
+ * generous window is stale by definition and gets swept, offers included.
+ */
+exports.cleanupStaleJobRequests = onSchedule("every 5 minutes", async (event) => {
+  try {
+    const staleCutoff = admin.firestore.Timestamp.fromDate(new Date(Date.now() - 15 * 60 * 1000));
+
+    const snapshot = await db.collection("job_requests").where("status", "==", "pending").get();
+
+    const batch = db.batch();
+    let count = 0;
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const createdAt = data.createdAt;
+      if (!createdAt || createdAt.toMillis() >= staleCutoff.toMillis()) continue;
+
+      batch.delete(doc.ref);
+      count++;
+
+      const offers = await db.collection("job_offers").where("requestId", "==", doc.id).get();
+      offers.forEach((offerDoc) => batch.delete(offerDoc.ref));
+    }
+
+    if (count > 0) {
+      await batch.commit();
+      console.log(`[Cron] Cleaned up ${count} stale job requests.`);
+    }
+  } catch (error) {
+    console.error("[Cron] Error in cleanupStaleJobRequests:", error);
   }
 });

@@ -180,7 +180,7 @@ class _AgentInfoState extends State<AgentInfo> {
         _buildStatItem(
           Icons.money_outlined,
           Colors.blue,
-          '${AppLocalizations.of(context)?.earnings ?? "Earned"} ${((widget.initialInAppEarnings ?? 0.0) + (widget.initialOutsideAppEarnings ?? 0.0)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+          '${AppLocalizations.of(context)?.earnings ?? "Total Transaction Value"} ${((widget.initialInAppEarnings ?? 0.0) + (widget.initialOutsideAppEarnings ?? 0.0)).toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
         ),
         const SizedBox(height: 8),
         Divider(

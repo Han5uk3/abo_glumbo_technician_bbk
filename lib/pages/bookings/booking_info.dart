@@ -4175,11 +4175,19 @@ class _BookingInfoState extends State<BookingInfo> {
   }
 
   bool _shouldShowDirections() {
+    final warranty = widget.booking.warranty;
+    // Directions only make sense while a claim is still active (requested or
+    // accepted) — never once it's completed, rejected or expired, regardless
+    // of the legacy `claimrequested` flag's lifecycle.
+    final isActiveWarrantyStatus =
+        warranty?.warrantyStatusCode == 'R' ||
+        warranty?.warrantyStatusCode == 'S';
     bool isWarrantyTech =
-        widget.booking.warranty != null &&
-        widget.booking.warranty!.claimrequested == true &&
+        warranty != null &&
+        isActiveWarrantyStatus &&
+        warranty.claimrequested == true &&
         FirebaseAuth.instance.currentUser?.uid ==
-            widget.booking.warranty!.assignedTechnicianId;
+            warranty.assignedTechnicianId;
 
     if (widget.booking.bookingStatusCode == 'C' ||
         widget.booking.arrivedAt != null) {

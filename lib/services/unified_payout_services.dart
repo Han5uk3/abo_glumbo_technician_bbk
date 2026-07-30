@@ -565,15 +565,37 @@ class UnifiedPayoutServices {
         if (completionData != null && completionData['mode'] == 1) {
           final amount =
               (completionData['totalCost'] as num?)?.toDouble() ?? 0.0;
-          // Check if payment was through app (has orderId/transactionId)
-          // or outside app (technician payment proof)
-          final hasOrderId =
-              data['orderId'] != null && (data['orderId'] as String).isNotEmpty;
-          final hasTechProof =
-              data['technicianPaymentProof'] != null &&
-              (data['technicianPaymentProof'] as List).isNotEmpty;
 
-          if (hasOrderId && !hasTechProof) {
+          // `walletCreditedAs` is the exact classification the crediting
+          // Cloud Function itself used ('inApp'/'outsideApp'), written on
+          // every booking it has credited. Falling back to inferring it from
+          // `orderId`/`technicianPaymentProof` for older bookings that predate
+          // the marker is fragile — every booking gets an `orderId` regardless
+          // of payment method (`updateBookingStatus` sets it unconditionally),
+          // so this heuristic only works by the side effect of outside-app
+          // payments also carrying a tech proof. Prefer the unambiguous
+          // `paymentModeCode` ('C'/'A' inside app, 'O' outside app) next, since
+          // that's the field actually set by the payment flow itself, before
+          // falling back to the heuristic as a last resort.
+          final walletCreditedAs = data['walletCreditedAs'] as String?;
+          final paymentModeCode = (data['paymentModeCode'] as String?)
+              ?.toUpperCase();
+          final bool isInApp;
+          if (walletCreditedAs != null) {
+            isInApp = walletCreditedAs == 'inApp';
+          } else if (paymentModeCode != null && paymentModeCode.isNotEmpty) {
+            isInApp = paymentModeCode == 'C' || paymentModeCode == 'A';
+          } else {
+            final hasOrderId =
+                data['orderId'] != null &&
+                (data['orderId'] as String).isNotEmpty;
+            final hasTechProof =
+                data['technicianPaymentProof'] != null &&
+                (data['technicianPaymentProof'] as List).isNotEmpty;
+            isInApp = hasOrderId && !hasTechProof;
+          }
+
+          if (isInApp) {
             lifetimeInAppEarnings += amount;
           } else {
             lifetimeOutsideAppEarnings += amount;

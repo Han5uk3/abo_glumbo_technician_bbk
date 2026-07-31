@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/models/admin_dashboard_data.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/notifications/notifications_page.dart';
@@ -33,8 +34,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
-      body: StreamBuilder<AdminDashboardData>(
-        stream: AppServices.getAdminDashboardStream(),
+      body: CachedStreamBuilder<AdminDashboardData>(
+        create: () => AppServices.getAdminDashboardStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildShimmerLoader(l10n);
@@ -120,8 +121,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         ),
                       ),
                       const Spacer(),
-                      StreamBuilder<int>(
-                        stream: AppServices.getUnreadNotificationsCountStream(),
+                      CachedStreamBuilder<int>(
+                        create: () =>
+                            AppServices.getUnreadNotificationsCountStream(),
                         builder: (context, snapshot) {
                           final unreadCount = snapshot.data ?? 0;
                           return ClipRRect(

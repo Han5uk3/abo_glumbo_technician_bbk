@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/chat_services.dart';
@@ -326,8 +327,9 @@ class _TechnicianChatScreenState extends State<TechnicianChatScreen>
         child: Column(
           children: [
             Expanded(
-              child: StreamBuilder<DatabaseEvent>(
-                stream: _chatService.getMessagesStream(widget.chatId),
+              child: CachedStreamBuilder<DatabaseEvent>(
+                create: () => _chatService.getMessagesStream(widget.chatId),
+                keys: [widget.chatId],
                 builder: (context, snapshot) {
                   // Only show loading on initial load, not on reconnections
                   if (snapshot.connectionState == ConnectionState.waiting &&

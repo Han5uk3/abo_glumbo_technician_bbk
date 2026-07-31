@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/highlighted_services.dart';
@@ -93,10 +94,11 @@ class HighlightedServiceWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: data.services?.length ?? 0,
                 itemBuilder: (context, index) {
-                  return FutureBuilder(
-                    future: AppFirestore.servicesCollectionRef
+                  return CachedFutureBuilder(
+                    create: () => AppFirestore.servicesCollectionRef
                         .doc(data.services![index])
                         .get(),
+                    keys: [data.services![index]],
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return _buildLoadingContainer(isRtlLanguage);

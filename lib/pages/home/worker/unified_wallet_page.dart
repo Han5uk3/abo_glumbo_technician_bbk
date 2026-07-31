@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -94,8 +95,10 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
             ),
         ],
       ),
-      body: StreamBuilder<UnifiedWalletModel>(
-        stream: UnifiedPayoutServices.getUnifiedWalletStream(widget.workerId),
+      body: CachedStreamBuilder<UnifiedWalletModel>(
+        create: () =>
+            UnifiedPayoutServices.getUnifiedWalletStream(widget.workerId),
+        keys: [widget.workerId],
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: Loader(color: AppColors.primary));
@@ -708,10 +711,11 @@ class _UnifiedWalletPageState extends State<UnifiedWalletPage> {
           ),
         ),
         const SizedBox(height: 16),
-        StreamBuilder<List<UnifiedPayoutRequestModel>>(
-          stream: UnifiedPayoutServices.getWorkerPayoutRequests(
+        CachedStreamBuilder<List<UnifiedPayoutRequestModel>>(
+          create: () => UnifiedPayoutServices.getWorkerPayoutRequests(
             widget.workerId,
           ),
+          keys: [widget.workerId],
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: Loader(color: AppColors.primary));

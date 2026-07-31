@@ -1,4 +1,5 @@
 import "package:aboglumbo_bbk_panel/styles/color.dart";
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/banner.dart';
@@ -55,8 +56,8 @@ class ManageBanners extends StatelessWidget {
           ),
           shape: Border.all(style: BorderStyle.none),
         ),
-        body: StreamBuilder(
-          stream: AppServices.getAllBannersStream(),
+        body: CachedStreamBuilder(
+          create: () => AppServices.getAllBannersStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const ManageShimmerLoading();

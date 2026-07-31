@@ -1,4 +1,5 @@
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/shimmer_loading.dart';
@@ -83,8 +84,8 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: FutureBuilder<Map<String, dynamic>>(
-        future: UnifiedPayoutServices.getPayoutStatistics(),
+      child: CachedFutureBuilder<Map<String, dynamic>>(
+        create: () => UnifiedPayoutServices.getPayoutStatistics(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildShimmerStats();
@@ -106,7 +107,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  label: AppLocalizations.of(context)!.pending,
+                  label: AppLocalizations.of(context)!.pending.toUpperCase(),
                   count: stats['pendingCount'].toString(),
                   icon: Icons.schedule_rounded,
                   color: Colors.orange,
@@ -115,7 +116,7 @@ class _ManageUnifiedPayoutsPageState extends State<ManageUnifiedPayoutsPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
-                  label: AppLocalizations.of(context)!.approved,
+                  label: AppLocalizations.of(context)!.approved.toUpperCase(),
                   count: stats['approvedCount'].toString(),
                   icon: Icons.check_circle_outline_rounded,
                   color: Colors.green,

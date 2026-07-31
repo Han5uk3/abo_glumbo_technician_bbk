@@ -158,6 +158,11 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_rounded),
+              color: Colors.black,
+              onPressed: () => Navigator.pop(context),
+            ),
             title: Text(
               AppLocalizations.of(context)?.notifications ?? 'Notifications',
               style: TextStyle(
@@ -169,7 +174,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
             actions: [
               if (_cachedNotifications.any((n) => !n.read))
                 IconButton(
-                  icon: const Icon(Icons.done_all_rounded),
+                  icon: const Icon(Icons.done_all_rounded, color: Colors.black),
                   tooltip: isAr
                       ? 'تحديد الكل كمقروء'
                       : isUr
@@ -200,7 +205,10 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                 ),
               if (_cachedNotifications.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.delete_sweep_rounded),
+                  icon: const Icon(
+                    Icons.delete_sweep_rounded,
+                    color: Colors.black,
+                  ),
                   tooltip: isAr
                       ? 'حذف الكل'
                       : isUr
@@ -493,7 +501,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                         border: notification.read
                             ? null
                             : Border.all(
-                                color: iconColor.withOpacity(0.3),
+                                color: AppColors.primary.withOpacity(0.3),
                                 width: 1.5,
                               ),
                       ),
@@ -627,7 +635,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                                                 right: isArOrUr ? 8 : 0,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: iconColor,
+                                                color: AppColors.primary,
                                                 shape: BoxShape.circle,
                                               ),
                                             ),

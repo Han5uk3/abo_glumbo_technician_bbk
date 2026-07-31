@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/highlighted_services/edit_highlighted_services.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/admin/manage/widgets/highlighted_service.dart';
@@ -35,8 +36,8 @@ class HighlightedServices extends StatelessWidget {
         ),
         shape: Border.all(style: BorderStyle.none),
       ),
-      body: StreamBuilder(
-        stream: AppServices.getAllHighlightedServicesStream(),
+      body: CachedStreamBuilder(
+        create: () => AppServices.getAllHighlightedServicesStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ManageShimmerLoading();

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -253,8 +254,8 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
               ),
             ),
             Expanded(
-              child: StreamBuilder(
-                stream: AppFirestore.servicesCollectionRef.snapshots(),
+              child: CachedStreamBuilder(
+                create: () => AppFirestore.servicesCollectionRef.snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

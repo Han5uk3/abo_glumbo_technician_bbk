@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -491,8 +492,9 @@ class _RewardsPageState extends State<RewardsPage> {
   }
 
   Widget _buildBonusPayoutCard() {
-    return FutureBuilder<double>(
-      future: AppServices.getWorkerBonusAmounts(widget.workerData.uid!),
+    return CachedFutureBuilder<double>(
+      create: () => AppServices.getWorkerBonusAmounts(widget.workerData.uid!),
+      keys: [widget.workerData.uid],
       builder: (context, snapshot) {
         final totalMonthlyBonus = snapshot.data ?? 0.0;
         final l10n = AppLocalizations.of(context)!;

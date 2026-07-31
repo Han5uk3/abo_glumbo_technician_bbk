@@ -1,4 +1,6 @@
 import 'package:aboglumbo_bbk_panel/common_widget/booking_cards.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/period_selector.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
@@ -506,6 +508,34 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     }
     var filtered = uniqueMap.values.toList();
 
+    // 1b. Defense-in-depth against a stale/closed booking_request still
+    // rendering. `AppServices.getBookingRequestsStream()` already excludes
+    // non-pending/searching statuses at the query level and expires requests
+    // client-side the same way the customer app does - but that guarantee
+    // only holds while the combined Pending-tab stream (job offers + bookings
+    // + raw requests, merged via `Rx.combineLatest3`) keeps delivering fresh
+    // snapshots. A transient error from any one of the three merged streams
+    // freezes the combined stream at its last good value with no visible
+    // error, silently pinning whatever was on screen - including a request
+    // that has since flipped to `closed` server-side - until something else
+    // forces a resubscribe. Re-checking status and the same expiry window
+    // here means a stale request can never render, independent of whether
+    // the stream is still healthy.
+    filtered = filtered.where((item) {
+      if (item is! RawBookingRequest) return true;
+      final data = item.data;
+      final status = data['status']?.toString();
+      if (status != 'pending' && status != 'searching') return false;
+
+      final createdAt = data['createdAt'] as Timestamp?;
+      if (createdAt == null) return true;
+      final acceptedTechnicians = data['acceptedTechnicians'] as List? ?? [];
+      final window = acceptedTechnicians.isEmpty
+          ? const Duration(seconds: 120)
+          : const Duration(minutes: 5);
+      return TimeService.now.difference(createdAt.toDate()) < window;
+    }).toList();
+
     // 2. Date filter (only if not searching for a specific ID)
     if (_startDate != null && _endDate != null && _searchQuery.isEmpty) {
       filtered = filtered.where((item) {
@@ -596,11 +626,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     }).toList();
   }
 
-  Widget _buildBookingsList(
-    BuildContext context, {
-    required String selectedBookingStatus,
-  }) {
-    Stream<List<dynamic>> stream;
+  Stream<List<dynamic>> _bookingsStreamFor(String selectedBookingStatus) {
     if (selectedBookingStatus == 'P') {
       final offers = AppServices.getJobOffersStream(isAdmin: true);
       final bookings = AppServices.getBookingsStream(
@@ -608,7 +634,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         isAdmin: true,
       );
       final rawRequests = AppServices.getBookingRequestsStream();
-      stream = Rx.combineLatest3(offers, bookings, rawRequests, (
+      return Rx.combineLatest3(offers, bookings, rawRequests, (
         List<JobOfferContainer> o,
         List<BookingModel> b,
         List<RawBookingRequest> r,
@@ -616,14 +642,27 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
         return [...o, ...b, ...r];
       }).cast<List<dynamic>>();
     } else {
-      stream = AppServices.getBookingsStream(
+      return AppServices.getBookingsStream(
         bookingStatusCode: selectedBookingStatus,
         isAdmin: true,
       ).cast<List<dynamic>>();
     }
+  }
 
-    return StreamBuilder<List<dynamic>>(
-      stream: stream,
+  Widget _buildBookingsList(
+    BuildContext context, {
+    required String selectedBookingStatus,
+  }) {
+    // Cached per tab (keyed on selectedBookingStatus, which is fixed for the
+    // lifetime of a given tab position) so re-subscribing to Firestore/RTDB
+    // only happens when the tab's status actually changes - not on every
+    // rebuild of _AdminHomeState (search text, date range, tab-switch
+    // repaint, or an interrupted iOS back-swipe gesture rebuilding the route
+    // underneath this page all trigger a rebuild here otherwise, which used
+    // to flash every tab back to its loading state).
+    return CachedStreamBuilder<List<dynamic>>(
+      create: () => _bookingsStreamFor(selectedBookingStatus),
+      keys: [selectedBookingStatus],
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {

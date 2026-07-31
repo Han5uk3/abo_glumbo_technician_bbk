@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
@@ -118,8 +119,8 @@ class ContactBottomSheet extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.4,
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: StreamBuilder(
-        stream: AppServices.getCustomerSupportdata(),
+      child: CachedStreamBuilder(
+        create: () => AppServices.getCustomerSupportdata(),
         builder: (context, asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: Loader(color: AppColors.primary));

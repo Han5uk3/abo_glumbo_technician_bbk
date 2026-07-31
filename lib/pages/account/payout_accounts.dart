@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
@@ -110,8 +111,8 @@ class _PayoutAccountsPageState extends State<PayoutAccountsPage> {
   }
 
   Widget _buildAccountsList(ColorScheme colorScheme) {
-    return StreamBuilder<List<PayoutAccountModel>>(
-      stream: AppServices.getPayoutAccount(userId),
+    return CachedStreamBuilder<List<PayoutAccountModel>>(
+      create: () => AppServices.getPayoutAccount(userId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return _ErrorStateWidget(error: snapshot.error.toString());

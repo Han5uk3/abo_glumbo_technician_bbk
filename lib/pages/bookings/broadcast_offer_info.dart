@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/cached_video_player.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -410,8 +411,8 @@ class _BroadcastOfferInfoState extends State<BroadcastOfferInfo> {
     }
 
     // Fallback to real-time GPS if cache is empty
-    return FutureBuilder(
-      future: Geolocator.getCurrentPosition(
+    return CachedFutureBuilder(
+      create: () => Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.low,
         timeLimit: const Duration(seconds: 5),
       ),

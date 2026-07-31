@@ -1933,5 +1933,6 @@
   "revenueFilter12Months": "12 Months",
   "revenueFilterCustomRange": "Custom Range...",
   "nearby20km": "Nearby (20km)",
-  "totalRevenue": "Total Transaction Value"
+  "totalRevenue": "Total Transaction Value",
+  "bonusCalculationNote": "Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation."
 }

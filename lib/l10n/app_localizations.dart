@@ -10006,6 +10006,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Transaction Value'**
   String get totalRevenue;
+
+  /// No description provided for @bonusCalculationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.'**
+  String get bonusCalculationNote;
 }
 
 class _AppLocalizationsDelegate

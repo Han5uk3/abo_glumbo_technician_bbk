@@ -3423,7 +3423,12 @@ exports.applyMonthlyBonus = onSchedule(
           continue;
         }
 
-        // Calculate earnings from PREVIOUS month
+        // Calculate total Inspection Fees from PREVIOUS month. The bonus is
+        // earned only on the inspection fee — never on spare parts, materials,
+        // or any other part of the job total — so this reads completed
+        // bookings directly rather than the `transactions` collection (which
+        // only records a combined totalCost + inspectionFee amount, and only
+        // for outside-app/cash payments).
         const firstDayOfPrevMonth = new Date(
           previousMonth.getFullYear(),
           previousMonth.getMonth(),
@@ -3438,32 +3443,56 @@ exports.applyMonthlyBonus = onSchedule(
           59
         );
 
-        // Query transactions for previous month
-        const transactionsSnapshot = await db
-          .collection("transactions")
-          .where("workerId", "==", userId)
-          .where("paymentStatus", "==", "completed")
-          .where("createdAt", ">=", firstDayOfPrevMonth.toISOString())
-          .where("createdAt", "<=", lastDayOfPrevMonth.toISOString())
+        // Two plain equality filters (no composite index needed — same pattern
+        // as `getCompletedJobsByWorkerId` in app_services.dart). Date-range
+        // filtering happens below in memory using `walletCreditedAt`, which is
+        // the exact moment `creditTechnicianWalletOnPaymentCompletion` settles
+        // the job, set for every payment mode (in-app and outside-app alike) —
+        // unlike `paymentCompletedAt`, which is only ever written for the
+        // outside-app cash-verification path.
+        const completedBookingsSnapshot = await db
+          .collection("bookings")
+          .where("agent.uid", "==", userId)
+          .where("bookingStatusCode", "==", "C")
           .get();
 
-        // Calculate total earnings from all transactions
-        let totalEarnings = 0;
-        transactionsSnapshot.forEach((doc) => {
-          const transaction = doc.data();
-          const amount =
-            typeof transaction.amount === "string"
-              ? parseFloat(transaction.amount)
-              : transaction.amount;
-          totalEarnings += amount || 0;
+        // Sum only the discounted inspection fee per booking — mirrors
+        // `creditTechnicianWalletOnPaymentCompletion`'s `effectiveInspectionFee`
+        // exactly, so the bonus base always matches what was actually credited.
+        let totalInspectionFees = 0;
+        completedBookingsSnapshot.forEach((doc) => {
+          const booking = doc.data();
+          const creditedAt = booking.walletCreditedAt;
+          if (!creditedAt) return;
+
+          const creditedDate = creditedAt.toDate();
+          if (
+            creditedDate < firstDayOfPrevMonth ||
+            creditedDate > lastDayOfPrevMonth
+          ) {
+            return;
+          }
+
+          const discountPercentage = booking.service?.discountPercentage || 0;
+          const baseInspectionFee =
+            Number(booking.completionData?.inspectionFee) || 0;
+          const effectiveInspectionFee =
+            discountPercentage > 0
+              ? baseInspectionFee -
+                (baseInspectionFee * discountPercentage) / 100
+              : baseInspectionFee;
+
+          totalInspectionFees += effectiveInspectionFee;
         });
 
-        if (totalEarnings === 0) {
-          logger.info(`No earnings for user ${userId} in ${previousMonthStr}`);
+        if (totalInspectionFees === 0) {
+          logger.info(
+            `No inspection fees for user ${userId} in ${previousMonthStr}`
+          );
           continue;
         }
 
-        const bonusAmount = totalEarnings * bonusPercentage;
+        const bonusAmount = totalInspectionFees * bonusPercentage;
 
         // Get current totalMonthlyBonus
         const currentTotalBonus = userData.totalMonthlyBonus;
@@ -3539,23 +3568,23 @@ exports.applyMonthlyBonus = onSchedule(
               bonusAmount.toFixed(2),
               "en"
             )} (${bonusPercentage * 100}% of ${money(
-              totalEarnings.toFixed(2),
+              totalInspectionFees.toFixed(2),
               "en"
-            )} earnings).`,
+            )} in Inspection Fees).`,
             bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة قدرها ${money(
               bonusAmount.toFixed(2),
               "ar"
             )} (${bonusPercentage * 100}٪ من ${money(
-              totalEarnings.toFixed(2),
+              totalInspectionFees.toFixed(2),
               "ar"
-            )} أرباح).`,
+            )} من رسوم الفحص).`,
             bodyUr: `مبارک ہو! آپ نے ${previousMonthStr} میں ${tier} ٹئیر حاصل کیا اور ${money(
               bonusAmount.toFixed(2),
               "ur"
             )} کا بونس کمایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
-              totalEarnings.toFixed(2),
+              totalInspectionFees.toFixed(2),
               "ur"
-            )} کمائی)۔`,
+            )} انسپیکشن فیس)۔`,
             data: {
               category: "bonus",
               tier: tier,
@@ -3574,9 +3603,9 @@ exports.applyMonthlyBonus = onSchedule(
         logger.info(
           `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
             2
-          )} to user ${userId} for ${previousMonthStr} (based on SAR ${totalEarnings.toFixed(
+          )} to user ${userId} for ${previousMonthStr} (based on SAR ${totalInspectionFees.toFixed(
             2
-          )} earnings)`
+          )} Inspection Fees)`
         );
       }
       logger.info(

@@ -5404,4 +5404,8 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get totalRevenue => 'کل لین دین کی مالیت';
+
+  @override
+  String get bonusCalculationNote =>
+      'آپ کا ماہانہ بونس صرف پچھلے مہینے کی کل انسپیکشن فیس کی بنیاد پر شمار کیا جاتا ہے۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔';
 }

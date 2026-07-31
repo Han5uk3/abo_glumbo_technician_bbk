@@ -5310,4 +5310,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get totalRevenue => 'إجمالي قيمة المعاملات';
+
+  @override
+  String get bonusCalculationNote =>
+      'يتم احتساب مكافأتك الشهرية بناءً فقط على إجمالي رسوم الفحص للشهر الماضي. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة.';
 }

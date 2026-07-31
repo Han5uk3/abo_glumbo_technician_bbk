@@ -290,6 +290,16 @@ class _RewardsPageState extends State<RewardsPage> {
                   l10n.fifteenpercentBonusOnly,
                   const Color(0xFF6366F1),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.bonusCalculationNote,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.start,
+                ),
               ],
             ),
           ),

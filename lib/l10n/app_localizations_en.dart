@@ -5383,4 +5383,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalRevenue => 'Total Transaction Value';
+
+  @override
+  String get bonusCalculationNote =>
+      'Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.';
 }

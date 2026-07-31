@@ -387,6 +387,18 @@ class TechnicianChatService {
 
   Timer? _presenceTimer;
 
+  /// Bumped by every setActiveChat/clearActiveChat call and captured by
+  /// setActiveChat before it awaits. setActiveChat's RTDB round trips
+  /// (onDisconnect registration, the presence write) can still be in flight
+  /// when a lifecycle change fires clearActiveChat - dispose/pause happening
+  /// right after the chat screen opens is the common trigger. Without this
+  /// guard, clearActiveChat's synchronous `_presenceTimer = null` runs before
+  /// setActiveChat's Timer even exists, so it cancels nothing; setActiveChat
+  /// then finishes and creates the periodic timer anyway, leaving presence
+  /// stuck at `active: true` forever - which silently suppresses every chat
+  /// push to this user, since the backend reads that flag as "still viewing".
+  int _presenceGeneration = 0;
+
   /// Marks this user as actively viewing [chatId], which is the only thing that
   /// stops the backend from pushing them the message.
   ///
@@ -396,6 +408,10 @@ class TechnicianChatService {
   Future<void> setActiveChat(String chatId) async {
     final String uid = currentUserId;
     if (uid.isEmpty || chatId.isEmpty) return;
+
+    final int myGeneration = ++_presenceGeneration;
+    _presenceTimer?.cancel();
+    _presenceTimer = null;
 
     final ref = _rtdb.child('chats/$chatId/presence/$uid');
     debugPrint('🚀 Presence start: path=chats/$chatId/presence/$uid');
@@ -408,10 +424,29 @@ class TechnicianChatService {
       debugPrint('⚠️ OnDisconnect register failed: $e');
     }
 
+    // A clearActiveChat() (or a newer setActiveChat()) may have already run
+    // while the awaits above were in flight - don't resurrect presence for a
+    // chat the user already left, or race a newer chat's setup.
+    if (myGeneration != _presenceGeneration) return;
+
     await _writePresence(ref);
 
-    _presenceTimer?.cancel();
+    if (myGeneration != _presenceGeneration) {
+      // clearActiveChat ran while _writePresence was in flight; undo it so
+      // the flag doesn't outlive the session that requested it.
+      try {
+        await ref.remove();
+      } catch (e) {
+        debugPrint('⚠️ Failed to undo stale presence write: $e');
+      }
+      return;
+    }
+
     _presenceTimer = Timer.periodic(_presenceHeartbeat, (_) {
+      if (myGeneration != _presenceGeneration) {
+        _presenceTimer?.cancel();
+        return;
+      }
       _writePresence(ref);
     });
   }
@@ -429,6 +464,7 @@ class TechnicianChatService {
   Future<void> clearActiveChat(String chatId) async {
     final String uid = currentUserId;
 
+    _presenceGeneration++;
     _presenceTimer?.cancel();
     _presenceTimer = null;
 

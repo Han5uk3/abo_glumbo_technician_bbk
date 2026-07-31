@@ -551,7 +551,8 @@ class UnifiedPayoutServices {
       final tippingData = await AppServices.getWorkerTippingData(workerId);
       final bonusAmount = await AppServices.getWorkerBonusAmounts(workerId);
 
-      // Get booking earnings (mode == 1 only, excluding inspection fees)
+      // Get booking earnings — both full-service (mode 1) and inspection-only
+      // (mode 0) completions, since the customer pays for both.
       final bookingsQuery = await AppFirestore.bookingsCollectionRef
           .where('agent.uid', isEqualTo: workerId)
           .where('bookingStatusCode', isEqualTo: 'C')
@@ -561,10 +562,29 @@ class UnifiedPayoutServices {
       double lifetimeOutsideAppEarnings = 0.0;
       for (var doc in bookingsQuery.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final completionData = data['completionData'];
-        if (completionData != null && completionData['mode'] == 1) {
-          final amount =
-              (completionData['totalCost'] as num?)?.toDouble() ?? 0.0;
+        final completionData = data['completionData'] as Map<String, dynamic>?;
+        if (completionData != null &&
+            (completionData['mode'] == 1 || completionData['mode'] == 0)) {
+          // Must match what the customer was actually charged
+          // (`sheets/payment.dart`'s `finalAmount` on the customer app): the
+          // discounted inspection fee is always part of it, and for
+          // inspection-only completions (mode 0) it's the *entire* charge —
+          // this used to exclude the inspection fee always and mode-0
+          // bookings entirely, understating the wallet against what was paid.
+          final service = data['service'] as Map<String, dynamic>?;
+          final discountPercentage =
+              (service?['discountPercentage'] as num?)?.toDouble() ?? 0.0;
+          final baseInspectionFee =
+              (completionData['inspectionFee'] as num?)?.toDouble() ?? 0.0;
+          final effectiveInspectionFee = discountPercentage > 0
+              ? baseInspectionFee - (baseInspectionFee * discountPercentage / 100)
+              : baseInspectionFee;
+
+          final isInspectionOnly = completionData['mode'] == 0;
+          final amount = isInspectionOnly
+              ? effectiveInspectionFee
+              : ((completionData['totalCost'] as num?)?.toDouble() ?? 0.0) +
+                    effectiveInspectionFee;
 
           // `walletCreditedAs` is the exact classification the crediting
           // Cloud Function itself used ('inApp'/'outsideApp'), written on

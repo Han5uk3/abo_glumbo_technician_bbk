@@ -529,11 +529,30 @@ exports.creditTechnicianWalletOnPaymentCompletion = onDocumentWritten(
       return;
     }
 
-    // Only full-service jobs earn. Inspection-only jobs (mode 0) are excluded,
-    // as are warranty repairs, whose costs are forced to zero on completion.
-    if (afterData.completionData?.mode !== 1) return;
+    // Warranty repairs need no explicit exclusion here: `CompleteWarranty` only
+    // ever writes `warranty.*` fields, never touching `bookingStatusCode` or
+    // `paymentCompleted` on the booking itself (both are already 'C'/true from
+    // the original job), so that write is never an entering transition and
+    // `wasPayable` above is already true — this trigger returns before
+    // reaching this line for that case.
+    //
+    // The credited amount must match what the customer was actually charged
+    // (`sheets/payment.dart`'s `finalAmount` on the customer app, and the
+    // outside-app payment proof's prefilled amount): full-service completions
+    // (mode 1) charge totalCost + the discounted inspection fee; inspection-
+    // only completions (mode 0) charge the discounted inspection fee alone.
+    // This mirrors `notifyTechnicianOnPaymentCompletion`'s `totalAmount`
+    // exactly, so the push notification and the wallet credit never disagree.
+    const discountPercentage = afterData.service?.discountPercentage || 0;
+    const baseInspectionFee = Number(afterData.completionData?.inspectionFee) || 0;
+    const effectiveInspectionFee = discountPercentage > 0
+      ? baseInspectionFee - (baseInspectionFee * discountPercentage / 100)
+      : baseInspectionFee;
 
-    const amount = Number(afterData.completionData?.totalCost) || 0;
+    const isInspectionOnly = afterData.completionData?.mode === 0;
+    const amount = isInspectionOnly
+      ? effectiveInspectionFee
+      : (Number(afterData.completionData?.totalCost) || 0) + effectiveInspectionFee;
     if (amount <= 0) return;
 
     const isInApp = IN_APP_PAYMENT_CODES.includes(afterData.paymentModeCode);

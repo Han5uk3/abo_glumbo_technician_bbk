@@ -193,6 +193,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get offWorkPrice => 'کام کے بعد کی قیمت';
 
   @override
+  String get workingHoursPricing => 'اوقات کار کی قیمت';
+
+  @override
+  String get outsideWorkingHoursPricing => 'اوقات کار سے باہر کی قیمت';
+
+  @override
   String get generalPrice => 'عام قیمت';
 
   @override
@@ -1016,6 +1022,39 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get pleaseEnterADiscountPercentage =>
       'براہ کرم رعایت کا فیصد درج کریں';
+
+  @override
+  String get nameUrdu => 'نام (اردو)';
+
+  @override
+  String get descriptionUrdu => 'تفصیل (اردو)';
+
+  @override
+  String get pleaseEnterNameInUrdu => 'براہ کرم اردو میں نام درج کریں';
+
+  @override
+  String get pleaseEnterDescriptionInUrdu => 'براہ کرم اردو میں تفصیل درج کریں';
+
+  @override
+  String get enterValueBetween0And100 => '0 اور 100 کے درمیان قیمت درج کریں';
+
+  @override
+  String hierarchySelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count درجہ بندیاں منتخب کی گئیں',
+      one: '$count درجہ بندی منتخب کی گئی',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeLocation => 'مقام ہٹائیں';
+
+  @override
+  String get areYouSureYouWantToRemoveThisLocation =>
+      'کیا آپ واقعی اس مقام کو ہٹانا چاہتے ہیں؟';
 
   @override
   String get highlightedServiceAddedSuccessfully =>

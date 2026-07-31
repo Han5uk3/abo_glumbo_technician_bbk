@@ -58,6 +58,8 @@
   "workEndTime": "Work End Time",
   "onWorkPrice": "On-Work Price",
   "offWorkPrice": "Off-Work Price",
+  "workingHoursPricing": "Working Hours Pricing",
+  "outsideWorkingHoursPricing": "Outside Working Hours Pricing",
   "generalPrice": "General Price (Fallback)",
   "chooseLocations": "Choose Locations",
   "pleaseEnterAnOnWorkPrice": "Please enter an on-work price",
@@ -322,6 +324,22 @@
   "pleaseSelectACategory": "Please Select Category",
   "discountPercentage": "Discount Percentage (%)",
   "pleaseEnterADiscountPercentage": "Please Enter Discount Percentage",
+  "nameUrdu": "Name (Urdu)",
+  "descriptionUrdu": "Description (Urdu)",
+  "pleaseEnterNameInUrdu": "Please Enter Name In Urdu",
+  "pleaseEnterDescriptionInUrdu": "Please Enter Description In Urdu",
+  "enterValueBetween0And100": "Enter a value between 0 and 100",
+  "hierarchySelectedCount": "{count, plural, one {{count} hierarchy selected} other {{count} hierarchies selected}}",
+  "@hierarchySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "removeLocation": "Remove Location",
+  "areYouSureYouWantToRemoveThisLocation": "Are you sure you want to remove this location?",
   "highlightedServiceAddedSuccessfully": "Highlighted Service Added Successfully",
   "highlightedServiceUpdatedSuccessfully": "Highlighted Service Updated Successfully",
   "selectServices": "Select Services",

@@ -266,8 +266,33 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
     }
   }
 
+  void _trimTextControllers() {
+    for (final controller in [
+      nameController,
+      nameArController,
+      nameUrController,
+      descriptionController,
+      descriptionArController,
+      descriptionUrController,
+      priceController,
+      onWorkHourPriceController,
+      offWorkHourPriceController,
+      discountPercentageController,
+    ]) {
+      final trimmed = controller.text.trim();
+      if (trimmed != controller.text) {
+        controller.value = controller.value.copyWith(
+          text: trimmed,
+          selection: TextSelection.collapsed(offset: trimmed.length),
+        );
+      }
+    }
+  }
+
   Future saveContent() async {
     if (isSaving) return;
+
+    _trimTextControllers();
 
     if (_formKey.currentState!.validate()) {
       setState(() => isSaving = true);
@@ -617,7 +642,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     ),
                   ),
                   Text(
-                    "Name (Urdu)",
+                    AppLocalizations.of(context)!.nameUrdu,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
@@ -628,10 +653,12 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: NewTextField(
                       controller: nameUrController,
-                      hintText: 'Name (Urdu)',
+                      hintText: AppLocalizations.of(context)!.nameUrdu,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter name in Urdu';
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterNameInUrdu;
                         }
                         return null;
                       },
@@ -694,7 +721,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     ),
                   ),
                   Text(
-                    "Description (Urdu)",
+                    AppLocalizations.of(context)!.descriptionUrdu,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
@@ -706,10 +733,12 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                     child: NewTextField(
                       controller: descriptionUrController,
                       isDescription: true,
-                      hintText: 'Description (Urdu)',
+                      hintText: AppLocalizations.of(context)!.descriptionUrdu,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter description in Urdu';
+                          return AppLocalizations.of(
+                            context,
+                          )!.pleaseEnterDescriptionInUrdu;
                         }
                         return null;
                       },
@@ -973,7 +1002,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                         }
                         final perc = double.tryParse(value);
                         if (perc == null || perc < 0 || perc > 100) {
-                          return 'Enter a value between 0 and 100';
+                          return AppLocalizations.of(
+                            context,
+                          )!.enterValueBetween0And100;
                         }
                         return null;
                       },
@@ -994,7 +1025,9 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
                         children: [
                           if (selectedCities.isNotEmpty)
                             Text(
-                              "${selectedCities.length} hierarchy selected",
+                              AppLocalizations.of(
+                                context,
+                              )!.hierarchySelectedCount(selectedCities.length),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey,

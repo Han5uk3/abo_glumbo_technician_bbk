@@ -145,7 +145,7 @@ class ServiceTileDevWidget extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  "${AppLocalizations.of(context)!.serviceCost}:",
+                  "${AppLocalizations.of(context)!.workingHoursPricing}:",
                   style: TextStyle(
                     color: AppColors.green1,
                     fontWeight: FontWeight.bold,
@@ -156,7 +156,35 @@ class ServiceTileDevWidget extends StatelessWidget {
               ),
               Flexible(
                 child: Text(
-                  "${service.price} ${AppLocalizations.of(context)!.sar}",
+                  "${service.onWorkHourPrice ?? 0} ${AppLocalizations.of(context)!.sar}",
+                  style: TextStyle(
+                    color: AppColors.green1,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "${AppLocalizations.of(context)!.outsideWorkingHoursPricing}:",
+                  style: TextStyle(
+                    color: AppColors.green1,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  "${service.offWorkHourPrice ?? 0} ${AppLocalizations.of(context)!.sar}",
                   style: TextStyle(
                     color: AppColors.green1,
                     fontWeight: FontWeight.bold,

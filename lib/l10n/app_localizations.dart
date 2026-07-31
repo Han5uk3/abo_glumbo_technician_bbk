@@ -454,6 +454,18 @@ abstract class AppLocalizations {
   /// **'Off-Work Price'**
   String get offWorkPrice;
 
+  /// No description provided for @workingHoursPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Hours Pricing'**
+  String get workingHoursPricing;
+
+  /// No description provided for @outsideWorkingHoursPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside Working Hours Pricing'**
+  String get outsideWorkingHoursPricing;
+
   /// No description provided for @generalPrice.
   ///
   /// In en, this message translates to:
@@ -2037,6 +2049,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please Enter Discount Percentage'**
   String get pleaseEnterADiscountPercentage;
+
+  /// No description provided for @nameUrdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Urdu)'**
+  String get nameUrdu;
+
+  /// No description provided for @descriptionUrdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Urdu)'**
+  String get descriptionUrdu;
+
+  /// No description provided for @pleaseEnterNameInUrdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Name In Urdu'**
+  String get pleaseEnterNameInUrdu;
+
+  /// No description provided for @pleaseEnterDescriptionInUrdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Description In Urdu'**
+  String get pleaseEnterDescriptionInUrdu;
+
+  /// No description provided for @enterValueBetween0And100.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a value between 0 and 100'**
+  String get enterValueBetween0And100;
+
+  /// No description provided for @hierarchySelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} hierarchy selected} other {{count} hierarchies selected}}'**
+  String hierarchySelectedCount(int count);
+
+  /// No description provided for @removeLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Location'**
+  String get removeLocation;
+
+  /// No description provided for @areYouSureYouWantToRemoveThisLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this location?'**
+  String get areYouSureYouWantToRemoveThisLocation;
 
   /// No description provided for @highlightedServiceAddedSuccessfully.
   ///

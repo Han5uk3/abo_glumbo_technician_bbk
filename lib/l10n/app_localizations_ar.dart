@@ -190,6 +190,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get offWorkPrice => 'سعر خارج وقت العمل';
 
   @override
+  String get workingHoursPricing => 'تسعير ساعات العمل';
+
+  @override
+  String get outsideWorkingHoursPricing => 'تسعير خارج ساعات العمل';
+
+  @override
   String get generalPrice => 'السعر العام';
 
   @override
@@ -999,6 +1005,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pleaseEnterADiscountPercentage => 'الرجاء إدخال نسبة الخصم';
+
+  @override
+  String get nameUrdu => 'الاسم (أردو)';
+
+  @override
+  String get descriptionUrdu => 'الوصف (أردو)';
+
+  @override
+  String get pleaseEnterNameInUrdu => 'الرجاء إدخال الاسم باللغة الأردية';
+
+  @override
+  String get pleaseEnterDescriptionInUrdu =>
+      'الرجاء إدخال الوصف باللغة الأردية';
+
+  @override
+  String get enterValueBetween0And100 => 'أدخل قيمة بين 0 و 100';
+
+  @override
+  String hierarchySelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اختيار $count تسلسلات هرمية',
+      one: 'تم اختيار $count تسلسل هرمي',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeLocation => 'إزالة الموقع';
+
+  @override
+  String get areYouSureYouWantToRemoveThisLocation =>
+      'هل أنت متأكد أنك تريد إزالة هذا الموقع؟';
 
   @override
   String get highlightedServiceAddedSuccessfully =>

@@ -192,6 +192,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offWorkPrice => 'Off-Work Price';
 
   @override
+  String get workingHoursPricing => 'Working Hours Pricing';
+
+  @override
+  String get outsideWorkingHoursPricing => 'Outside Working Hours Pricing';
+
+  @override
   String get generalPrice => 'General Price (Fallback)';
 
   @override
@@ -1007,6 +1013,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pleaseEnterADiscountPercentage =>
       'Please Enter Discount Percentage';
+
+  @override
+  String get nameUrdu => 'Name (Urdu)';
+
+  @override
+  String get descriptionUrdu => 'Description (Urdu)';
+
+  @override
+  String get pleaseEnterNameInUrdu => 'Please Enter Name In Urdu';
+
+  @override
+  String get pleaseEnterDescriptionInUrdu => 'Please Enter Description In Urdu';
+
+  @override
+  String get enterValueBetween0And100 => 'Enter a value between 0 and 100';
+
+  @override
+  String hierarchySelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hierarchies selected',
+      one: '$count hierarchy selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeLocation => 'Remove Location';
+
+  @override
+  String get areYouSureYouWantToRemoveThisLocation =>
+      'Are you sure you want to remove this location?';
 
   @override
   String get highlightedServiceAddedSuccessfully =>

@@ -341,6 +341,36 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     });
   }
 
+  Future<void> _confirmRemoveLocation(int index) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(AppLocalizations.of(context)!.removeLocation),
+        content: Text(
+          AppLocalizations.of(context)!.areYouSureYouWantToRemoveThisLocation,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              AppLocalizations.of(context)!.delete,
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _removeLocation(index);
+    }
+  }
+
   void _clearLocations() {
     setState(() {
       _selectedLocations.clear();
@@ -1396,7 +1426,8 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
                               size: 16,
                               color: Colors.red,
                             ),
-                            onPressed: () => _removeLocation(originalIndex),
+                            onPressed: () =>
+                                _confirmRemoveLocation(originalIndex),
                             padding: EdgeInsets.zero,
                             constraints: BoxConstraints(),
                           ),

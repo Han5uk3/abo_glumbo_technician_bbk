@@ -58,6 +58,8 @@
   "workEndTime": "کام ختم ہونے کا وقت",
   "onWorkPrice": "کام کے دوران کی قیمت",
   "offWorkPrice": "کام کے بعد کی قیمت",
+  "workingHoursPricing": "اوقات کار کی قیمت",
+  "outsideWorkingHoursPricing": "اوقات کار سے باہر کی قیمت",
   "generalPrice": "عام قیمت",
   "chooseLocations": "مقامات منتخب کریں",
   "pleaseEnterAnOnWorkPrice": "براہ کرم کام کے دوران کی قیمت درج کریں",
@@ -323,6 +325,22 @@
   "pleaseSelectACategory": "براہ کرم زمرہ منتخب کریں",
   "discountPercentage": "رعایت کا فیصد (%)",
   "pleaseEnterADiscountPercentage": "براہ کرم رعایت کا فیصد درج کریں",
+  "nameUrdu": "نام (اردو)",
+  "descriptionUrdu": "تفصیل (اردو)",
+  "pleaseEnterNameInUrdu": "براہ کرم اردو میں نام درج کریں",
+  "pleaseEnterDescriptionInUrdu": "براہ کرم اردو میں تفصیل درج کریں",
+  "enterValueBetween0And100": "0 اور 100 کے درمیان قیمت درج کریں",
+  "hierarchySelectedCount": "{count, plural, one {{count} درجہ بندی منتخب کی گئی} other {{count} درجہ بندیاں منتخب کی گئیں}}",
+  "@hierarchySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "removeLocation": "مقام ہٹائیں",
+  "areYouSureYouWantToRemoveThisLocation": "کیا آپ واقعی اس مقام کو ہٹانا چاہتے ہیں؟",
   "highlightedServiceAddedSuccessfully": "نمایاں خدمت کامیابی سے شامل ہو گئی",
   "highlightedServiceUpdatedSuccessfully": "نمایاں خدمت کامیابی سے اپ ڈیٹ ہو گئی",
   "selectServices": "خدمات منتخب کریں",

@@ -58,6 +58,8 @@
   "workEndTime": "وقت انتهاء العمل",
   "onWorkPrice": "سعر وقت العمل",
   "offWorkPrice": "سعر خارج وقت العمل",
+  "workingHoursPricing": "تسعير ساعات العمل",
+  "outsideWorkingHoursPricing": "تسعير خارج ساعات العمل",
   "generalPrice": "السعر العام",
   "chooseLocations": "اختر المواقع",
   "pleaseEnterAnOnWorkPrice": "يرجى إدخال سعر وقت العمل",
@@ -323,6 +325,22 @@
   "pleaseSelectACategory": "الرجاء اختيار قسم",
   "discountPercentage": "نسبة الخصم (%)",
   "pleaseEnterADiscountPercentage": "الرجاء إدخال نسبة الخصم",
+  "nameUrdu": "الاسم (أردو)",
+  "descriptionUrdu": "الوصف (أردو)",
+  "pleaseEnterNameInUrdu": "الرجاء إدخال الاسم باللغة الأردية",
+  "pleaseEnterDescriptionInUrdu": "الرجاء إدخال الوصف باللغة الأردية",
+  "enterValueBetween0And100": "أدخل قيمة بين 0 و 100",
+  "hierarchySelectedCount": "{count, plural, one {تم اختيار {count} تسلسل هرمي} other {تم اختيار {count} تسلسلات هرمية}}",
+  "@hierarchySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "removeLocation": "إزالة الموقع",
+  "areYouSureYouWantToRemoveThisLocation": "هل أنت متأكد أنك تريد إزالة هذا الموقع؟",
   "highlightedServiceAddedSuccessfully": "تم اضافة الخدمة المميزة بنجاح",
   "highlightedServiceUpdatedSuccessfully": "تم تحديث الخدمة المميزة بنجاح",
   "selectServices": "اختر الخدمات",

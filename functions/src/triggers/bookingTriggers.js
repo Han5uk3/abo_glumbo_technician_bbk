@@ -3,7 +3,7 @@ const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
-const { extractCustomerCoordinates, extractTechnicianCoordinates, calculateDistanceKm, sendAndStoreNotification, extractCustomerAddress, getAllAdminUsers } = require('../utils/bookingUtils');
+const { extractCustomerCoordinates, extractTechnicianCoordinates, calculateDistanceKm, sendAndStoreNotification, extractCustomerAddress, getAllAdminUsers, toNotificationRecipients } = require('../utils/bookingUtils');
 
 const MAX_ASSIGNMENT_DISTANCE_KM = 20.0;
 const OFFER_TTL_SECONDS = 120;
@@ -211,8 +211,10 @@ async function broadcastEligibleOffersForRequest(requestId, request) {
         customerId: request.customer?.uid || ""
       });
 
-      // Send push notification
-      if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+      // Send push notification. Not gated on the token: sendAndStoreNotification
+      // stores the in-app record before it pushes, so gating here would hide the
+      // offer from a technician whose device is not registered.
+      {
         const lan = tech.data.lanCode || "en";
         await sendAndStoreNotification({
           targetRole: "technician",
@@ -580,7 +582,9 @@ exports.processAutoAssignments = onSchedule(
                 const custData = customerDoc.data();
                 const fcmToken = custData.fcmToken || request.customer?.fcmToken;
                 const lan = custData.lanCode || request.customer?.lanCode || "en";
-                if (fcmToken && fcmToken.trim() !== "") {
+                // Not gated on the token: the customer app's notifications page
+                // lists what this stores.
+                {
                   await sendAndStoreNotification({
                     targetRole: "customer",
                     targetId: customerId,
@@ -707,8 +711,9 @@ exports.processAutoAssignments = onSchedule(
               customerId: request.customer?.uid || ""
             });
 
-            // Push notifications
-            if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+            // Push notifications. Not gated on the token - see the manual
+            // broadcast above.
+            {
               const lan = tech.data.lanCode || "en";
               await sendAndStoreNotification({
                 targetRole: "technician",
@@ -877,8 +882,9 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
           customerId: request.customer?.uid || ""
         });
 
-        // Push notification
-        if (tech.data.fcmToken && tech.data.fcmToken.trim() !== "") {
+        // Push notification. Not gated on the token - see the manual broadcast
+        // above.
+        {
           const lan = tech.data.lanCode || "en";
           await sendAndStoreNotification({
             targetRole: "technician",
@@ -1045,29 +1051,30 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     const rejectionReasonChanged = beforeData.rejectionReason !== afterData.rejectionReason;
 
     if (isNowUnverified && (wasRejected || rejectionReasonChanged) && afterData.rejectionReason) {
-      if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
-        try {
-          await sendAndStoreNotification({
+      // Not gated on the token: sendAndStoreNotification writes the in-app
+      // record before it pushes, and a technician who has not registered a
+      // device still needs to find out why their registration was rejected.
+      try {
+        await sendAndStoreNotification({
+          targetRole: "technician",
+          targetId: userId,
+          titleEn: "Registration Rejected",
+          titleAr: "تم رفض التسجيل",
+          titleUr: "رجسٹریشن مسترد کر دی گئی",
+          bodyEn: `Your registration was rejected. Reason: ${afterData.rejectionReason}`,
+          bodyAr: `تم رفض تسجيلك. السبب: ${afterData.rejectionReason}`,
+          bodyUr: `آپ کی رجسٹریشن مسترد کر دی گئی ہے۔ وجہ: ${afterData.rejectionReason}`,
+          data: {
             targetRole: "technician",
-            targetId: userId,
-            titleEn: "Registration Rejected",
-            titleAr: "تم رفض التسجيل",
-            titleUr: "رجسٹریشن مسترد کر دی گئی",
-            bodyEn: `Your registration was rejected. Reason: ${afterData.rejectionReason}`,
-            bodyAr: `تم رفض تسجيلك. السبب: ${afterData.rejectionReason}`,
-            bodyUr: `آپ کی رجسٹریشن مسترد کر دی گئی ہے۔ وجہ: ${afterData.rejectionReason}`,
-            data: {
-              targetRole: "technician",
-              category: "registration_rejected",
-              type: "registration_rejected"
-            },
-            fcmToken: afterData.fcmToken,
-            lanCode: afterData.lanCode || "en"
-          });
-          console.log(`[${userId}] Rejection notification sent to technician.`);
-        } catch (error) {
-          console.error(`[${userId}] Error sending rejection notification to technician:`, error);
-        }
+            category: "registration_rejected",
+            type: "registration_rejected"
+          },
+          fcmToken: afterData.fcmToken,
+          lanCode: afterData.lanCode || "en"
+        });
+        console.log(`[${userId}] Rejection notification sent to technician.`);
+      } catch (error) {
+        console.error(`[${userId}] Error sending rejection notification to technician:`, error);
       }
     }
 
@@ -1080,19 +1087,9 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
       try {
         const adminUsersDocs = await getAllAdminUsers();
 
-        const adminTokens = adminUsersDocs
-          .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
-          .map((doc) => {
-            const data = doc.data();
-            return data.fcmToken && data.fcmToken.trim() !== ""
-              ? {
-                uid: doc.id,
-                token: data.fcmToken,
-                lanCode: data.lanCode || "en",
-              }
-              : null;
-          })
-          .filter(Boolean);
+        const adminTokens = toNotificationRecipients(
+          adminUsersDocs.filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
+        );
 
         if (adminTokens.length > 0) {
           await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
@@ -1129,29 +1126,28 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
     const isNowVerified = afterData.isVerified === true;
 
     if (!wasVerified && isNowVerified) {
-      if (afterData.fcmToken && afterData.fcmToken.trim() !== "") {
-        try {
-          await sendAndStoreNotification({
+      // Not gated on the token - see the rejection branch above.
+      try {
+        await sendAndStoreNotification({
+          targetRole: "technician",
+          targetId: userId,
+          titleEn: "Registration Approved",
+          titleAr: "تمت الموافقة على التسجيل",
+          titleUr: "رجسٹریشن منظور کر لی گئی",
+          bodyEn: "Congratulations! Your registration has been approved. You can now start receiving requests.",
+          bodyAr: "مبارك! تمت الموافقة على تسجيلك. يمكنك الآن البدء في تلقي الطلبات.",
+          bodyUr: "مبارک ہو! آپ کی رجسٹریشن منظور کر لی گئی ہے۔ اب آپ درخواستیں وصول کرنا شروع کر سکتے ہیں۔",
+          data: {
             targetRole: "technician",
-            targetId: userId,
-            titleEn: "Registration Approved",
-            titleAr: "تمت الموافقة على التسجيل",
-            titleUr: "رجسٹریشن منظور کر لی گئی",
-            bodyEn: "Congratulations! Your registration has been approved. You can now start receiving requests.",
-            bodyAr: "مبارك! تمت الموافقة على تسجيلك. يمكنك الآن البدء في تلقي الطلبات.",
-            bodyUr: "مبارک ہو! آپ کی رجسٹریشن منظور کر لی گئی ہے۔ اب آپ درخواستیں وصول کرنا شروع کر سکتے ہیں۔",
-            data: {
-              targetRole: "technician",
-              category: "registration_approved",
-              type: "registration_approved"
-            },
-            fcmToken: afterData.fcmToken,
-            lanCode: afterData.lanCode || "en"
-          });
-          console.log(`[${userId}] Approval notification sent to technician.`);
-        } catch (error) {
-          console.error(`[${userId}] Error sending approval notification to technician:`, error);
-        }
+            category: "registration_approved",
+            type: "registration_approved"
+          },
+          fcmToken: afterData.fcmToken,
+          lanCode: afterData.lanCode || "en"
+        });
+        console.log(`[${userId}] Approval notification sent to technician.`);
+      } catch (error) {
+        console.error(`[${userId}] Error sending approval notification to technician:`, error);
       }
     }
 
@@ -1182,7 +1178,8 @@ exports.onJobOfferCreatedForRebook = onDocumentCreated(
         const serviceNameUr = offerData.serviceNameUr || serviceNameAr;
         const customerName = offerData.customerName || "Customer";
 
-        if (techData.fcmToken && techData.fcmToken.trim() !== "") {
+        // Not gated on the token: the technician app lists what this stores.
+        {
           const lanCode = techData.lanCode || "en";
           await sendAndStoreNotification({
             targetRole: "technician",
@@ -1212,33 +1209,31 @@ exports.onJobOfferCreatedForRebook = onDocumentCreated(
 
         // Also notify admins when customer completes a rebooking request
         const adminUsersDocs = await getAllAdminUsers();
-        for (const doc of adminUsersDocs) {
-          const user = doc.data();
-          if (user.fcmToken && user.fcmToken.trim() !== "") {
-            await sendAndStoreNotification({
+        // Not gated on the token: the admin panel lists what this stores.
+        for (const { uid, token, lanCode } of toNotificationRecipients(adminUsersDocs)) {
+          await sendAndStoreNotification({
+            targetRole: "admin",
+            targetId: uid,
+            titleEn: `New Booking Request: ${serviceName}`,
+            titleAr: `طلب حجز جديد: ${serviceNameAr}`,
+            titleUr: `بکنگ کی نئی درخواست: ${serviceNameUr}`,
+            bodyEn: `A new booking for ${serviceName} is pending approval.`,
+            bodyAr: `هناك حجز جديد لـ ${serviceNameAr} بانتظار الموافقة.`,
+            bodyUr: `${serviceNameUr} کے لیے ایک نئی بکنگ منظوری کا انتظار کر رہی ہے۔`,
+            data: {
+              bookingId: offerData.requestId || offerData.bookingId || "",
+              requestId: offerData.requestId || offerData.bookingId || "",
+              offerId: event.params.offerId,
               targetRole: "admin",
-              targetId: doc.id,
-              titleEn: `New Booking Request: ${serviceName}`,
-              titleAr: `طلب حجز جديد: ${serviceNameAr}`,
-              titleUr: `بکنگ کی نئی درخواست: ${serviceNameUr}`,
-              bodyEn: `A new booking for ${serviceName} is pending approval.`,
-              bodyAr: `هناك حجز جديد لـ ${serviceNameAr} بانتظار الموافقة.`,
-              bodyUr: `${serviceNameUr} کے لیے ایک نئی بکنگ منظوری کا انتظار کر رہی ہے۔`,
-              data: {
-                bookingId: offerData.requestId || offerData.bookingId || "",
-                requestId: offerData.requestId || offerData.bookingId || "",
-                offerId: event.params.offerId,
-                targetRole: "admin",
-                category: "booking",
-                serviceName: serviceName,
-                serviceNameAr: serviceNameAr,
-                serviceNameUr: serviceNameUr,
-                isAdmin: "true"
-              },
-              fcmToken: user.fcmToken,
-              lanCode: user.lanCode || "en"
-            });
-          }
+              category: "booking",
+              serviceName: serviceName,
+              serviceNameAr: serviceNameAr,
+              serviceNameUr: serviceNameUr,
+              isAdmin: "true"
+            },
+            fcmToken: token,
+            lanCode: lanCode
+          });
         }
         console.log(`[${event.params.offerId}] Rebooking push notification sent to admins.`);
       } catch (error) {

@@ -707,7 +707,8 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       ? effectiveInspectionFee
       : (afterData.completionData?.totalCost || 0) + effectiveInspectionFee;
 
-    if (fcmToken && fcmToken.trim() !== "") {
+    // Not gated on the token - the technician app lists what this stores.
+    {
       await sendAndStoreNotification({
         targetRole: "technician",
         targetId: agent.uid,
@@ -735,8 +736,6 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
       console.log(
         `[${bookingId}] Payment completion notification sent to technician ${agent.uid}`
       );
-    } else {
-      console.log(`[${bookingId}] Technician has no valid FCM token or fetch failed, skipping technician notification`);
     }
 
     // Determine admin notification texts based on payment method.
@@ -1156,9 +1155,11 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
     const fcmToken = workerData?.fcmToken;
     const lanCode = workerData?.lanCode || "en";
 
+    // Not gated on the token: sendAndStoreNotification stores the in-app
+    // record before it pushes, so returning here cost an unregistered
+    // technician the record too.
     if (!fcmToken || fcmToken.trim() === "") {
-      console.log("Worker has no valid FCM token.");
-      return null;
+      console.log("Worker has no valid FCM token; storing notification without a push.");
     }
 
     // Prepare notification messages
@@ -1256,9 +1257,10 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
     const fcmToken = workerData?.fcmToken;
     const lanCode = workerData?.lanCode || "en";
 
+    // Not gated on the token - see the note on the booking-request
+    // notification above.
     if (!fcmToken || fcmToken.trim() === "") {
-      console.log("Worker has no valid FCM token.");
-      return;
+      console.log("Worker has no valid FCM token; storing notification without a push.");
     }
 
     // Prepare notification
@@ -1635,7 +1637,8 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
         const workerDoc = await admin.firestore().collection("users").doc(lastCancelledWorker.uid).get();
         if (workerDoc.exists) {
           const workerData = workerDoc.data();
-          if (workerData.fcmToken) {
+          // Not gated on the token - the technician app lists what this stores.
+          {
             await sendAndStoreNotification({
               targetRole: "worker",
               targetId: lastCancelledWorker.uid,
@@ -1875,7 +1878,9 @@ exports.notifyWorkersOnCustomerCancellation = onDocumentUpdated(
         const workerFcmToken = workerData.fcmToken;
         const workerLanCode = workerData.lanCode || "en";
 
-        if (!workerFcmToken) continue;
+        // No `continue` on a missing token: sendAndStoreNotification writes the
+        // in-app record before it pushes, so skipping here hid the cancellation
+        // from any technician whose device is not registered.
 
         await sendAndStoreNotification({
           targetRole: "technician",
@@ -2392,7 +2397,8 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           .get();
         if (techDoc.exists) {
           const techData = techDoc.data();
-          if (techData.fcmToken && techData.fcmToken.trim() !== "") {
+          // Not gated on the token - the technician app lists what this stores.
+          {
             await sendAndStoreNotification({
               targetRole: "technician",
               targetId: workerId,
@@ -2712,9 +2718,16 @@ exports.notifyOnCounterOfferCreated = onDocumentCreated(
         }
       }
 
-      if (!targetId || !fcmToken || fcmToken.trim() === '') {
-        console.log(`No valid FCM token for ${targetRole} ${targetId}`);
+      if (!targetId) {
+        console.log(`No ${targetRole} to notify`);
         return null;
+      }
+
+      // A missing token is not a reason to bail: sendAndStoreNotification
+      // writes the in-app record before it pushes, so returning here cost the
+      // recipient their notification history as well as the push.
+      if (!fcmToken || fcmToken.trim() === '') {
+        console.log(`No valid FCM token for ${targetRole} ${targetId}; storing notification without a push`);
       }
 
       const serviceName = bookingData.service?.name || 'Service';
@@ -2824,9 +2837,16 @@ exports.notifyOnCounterOfferStatusChange = onDocumentUpdated(
         }
       }
 
-      if (!targetId || !fcmToken || fcmToken.trim() === '') {
-        console.log(`No valid FCM token for ${targetRole} ${targetId}`);
+      if (!targetId) {
+        console.log(`No ${targetRole} to notify`);
         return null;
+      }
+
+      // A missing token is not a reason to bail: sendAndStoreNotification
+      // writes the in-app record before it pushes, so returning here cost the
+      // recipient their notification history as well as the push.
+      if (!fcmToken || fcmToken.trim() === '') {
+        console.log(`No valid FCM token for ${targetRole} ${targetId}; storing notification without a push`);
       }
 
       const serviceName = bookingData.service?.name || 'Service';
@@ -3517,7 +3537,8 @@ exports.applyMonthlyBonus = onSchedule(
         const workerFcmToken = userData.fcmToken;
         const workerLanCode = userData.lanCode || "en";
 
-        if (workerFcmToken && workerFcmToken.trim() !== "") {
+        // Not gated on the token - the technician app lists what this stores.
+        {
           await sendAndStoreNotification({
             targetRole: "technician",
             targetId: userId,
@@ -3693,7 +3714,8 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
           const fcmToken = userData.fcmToken;
           const lanCode = userData.lanCode || "en";
 
-          if (fcmToken && fcmToken.trim() !== "") {
+          // Not gated on the token - the technician app lists what this stores.
+          {
             const bonusPercentages = {
               Silver: "5%",
               Gold: "10%",
@@ -3821,11 +3843,12 @@ exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
       const technicianFcmToken = technicianData?.fcmToken;
       const technicianLanCode = technicianData?.lanCode || "en";
 
+      // A missing token only means there is no push to send:
+      // sendAndStoreNotification still writes the in-app record.
       if (!technicianFcmToken || technicianFcmToken.trim() === "") {
         console.log(
-          `[${bookingId}] Technician ${afterTechnicianId} has no valid FCM token`
+          `[${bookingId}] Technician ${afterTechnicianId} has no valid FCM token; storing notification without a push`
         );
-        return;
       }
 
       // Get booking details
@@ -3971,11 +3994,12 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
         const adminFcmToken = adminData?.fcmToken;
         const adminLanCode = adminData?.lanCode || "en";
 
+        // A missing token only means there is no push to send:
+        // sendAndStoreNotification still writes the in-app record.
         if (!adminFcmToken || adminFcmToken.trim() === "") {
           console.log(
-            `[${payoutId}] Admin ${adminDoc.id} has no valid FCM token`
+            `[${payoutId}] Admin ${adminDoc.id} has no valid FCM token; storing notification without a push`
           );
-          continue;
         }
 
         await sendAndStoreNotification({
@@ -4068,11 +4092,12 @@ exports.notifyAdminsOnUnifiedPayoutRequest = onDocumentCreated(
         const adminFcmToken = adminData?.fcmToken;
         const adminLanCode = adminData?.lanCode || "en";
 
+        // A missing token only means there is no push to send:
+        // sendAndStoreNotification still writes the in-app record.
         if (!adminFcmToken || adminFcmToken.trim() === "") {
           console.log(
-            `[${requestId}] Admin ${adminDoc.id} has no valid FCM token`
+            `[${requestId}] Admin ${adminDoc.id} has no valid FCM token; storing notification without a push`
           );
-          continue;
         }
 
         await sendAndStoreNotification({
@@ -4159,11 +4184,12 @@ exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
         const adminFcmToken = adminData?.fcmToken;
         const adminLanCode = adminData?.lanCode || "en";
 
+        // A missing token only means there is no push to send:
+        // sendAndStoreNotification still writes the in-app record.
         if (!adminFcmToken || adminFcmToken.trim() === "") {
           console.log(
-            `[${agentId}] Admin ${adminDoc.id} has no valid FCM token`
+            `[${agentId}] Admin ${adminDoc.id} has no valid FCM token; storing notification without a push`
           );
-          continue;
         }
 
         await sendAndStoreNotification({
@@ -4258,9 +4284,10 @@ exports.notifyTechnicianOnTipPayoutCompletion = onDocumentWritten(
       const technicianFcmToken = technicianData?.fcmToken;
       const technicianLanCode = technicianData?.lanCode || "en";
 
+      // A missing token only means there is no push to send:
+      // sendAndStoreNotification still writes the in-app record.
       if (!technicianFcmToken || technicianFcmToken.trim() === "") {
-        console.log(`[${agentId}] Technician has no valid FCM token`);
-        return;
+        console.log(`[${agentId}] Technician has no valid FCM token; storing notification without a push`);
       }
 
       // Send notification to technician
@@ -4359,9 +4386,10 @@ exports.notifyTechnicianOnUnifiedPayoutStatusChange = onDocumentWritten(
     const technicianFcmToken = technicianData?.fcmToken;
     const technicianLanCode = technicianData?.lanCode || "en";
 
+    // A missing token only means there is no push to send:
+    // sendAndStoreNotification still writes the in-app record.
     if (!technicianFcmToken || technicianFcmToken.trim() === "") {
-      console.log(`[${requestId}] Technician has no valid FCM token`);
-      return;
+      console.log(`[${requestId}] Technician has no valid FCM token; storing notification without a push`);
     }
 
     let titleEn, titleAr, titleUr, bodyEn, bodyAr, bodyUr;
@@ -4481,9 +4509,10 @@ exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
     const technicianFcmToken = technicianData?.fcmToken;
     const technicianLanCode = technicianData?.lanCode || "en";
 
+    // A missing token only means there is no push to send:
+    // sendAndStoreNotification still writes the in-app record.
     if (!technicianFcmToken || technicianFcmToken.trim() === "") {
-      console.log(`[${payoutId}] Technician has no valid FCM token`);
-      return;
+      console.log(`[${payoutId}] Technician has no valid FCM token; storing notification without a push`);
     }
 
     // Determine notification content based on status and type
@@ -5264,9 +5293,10 @@ exports.notifyTechnicianOnPaymentVerificationPending = onDocumentWritten(
       console.error(`[${bookingId}] Error fetching technician data:`, error);
     }
 
+    // A missing token only means there is no push to send:
+    // sendAndStoreNotification still writes the in-app record.
     if (!fcmToken || fcmToken.trim() === "") {
-      console.log(`[${bookingId}] Technician has no valid FCM token, skipping`);
-      return;
+      console.log(`[${bookingId}] Technician has no valid FCM token; storing notification without a push`);
     }
 
     const customerName = afterData.customer?.name || "Customer";

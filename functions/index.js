@@ -11,6 +11,12 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
+// Every Firestore trigger is pinned to a region collocated with the eur3
+// database. These used to be unpinned, which let the CLI place newly created
+// functions in europe-west1 while older ones stayed in us-central1 - identical
+// source, different regions, and a transatlantic hop on every event.
+const FUNCTION_REGION = "europe-west1";
+
 
 // Single implementation, shared with src/triggers/bookingTriggers.js. This file
 // used to carry its own copy; the two drifted into writing different field
@@ -95,7 +101,7 @@ async function getAllAdminUsers() {
 }
 
 exports.notifyAdminsOnNewBooking = onDocumentCreated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) {
@@ -156,7 +162,7 @@ exports.notifyAdminsOnNewBooking = onDocumentCreated(
   }
 );
 exports.notifyAgentOnAssignment = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const beforeData = event.data?.before?.data() || {};
@@ -277,7 +283,7 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
   }
 );
 exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();
@@ -479,7 +485,7 @@ const IN_APP_PAYMENT_CODES = ['c', 'a', 'C', 'A', 'Inside App', 'inside app', 'i
  * `walletCreditedAt` marker written on the booking inside the same transaction.
  */
 exports.creditTechnicianWalletOnPaymentCompletion = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const beforeData = event.data?.before?.data();
@@ -613,7 +619,7 @@ exports.creditTechnicianWalletOnPaymentCompletion = onDocumentWritten(
 );
 
 exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const beforeData = event.data?.before?.data();
@@ -794,7 +800,7 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
 );
 
 exports.customerTrackingNotification = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const afterData = event.data?.after?.data();
     const beforeData = event.data?.before?.data();
@@ -897,7 +903,7 @@ exports.customerTrackingNotification = onDocumentWritten(
   }
 );
 exports.onBookingUpdateToTip = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const before = event.data?.before?.data();
@@ -1008,7 +1014,7 @@ exports.onBookingUpdateToTip = onDocumentWritten(
 );
 
 exports.updateServiceRating = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const change = event.data;
     const afterData = change.after.exists ? change.after.data() : null;
@@ -1103,7 +1109,7 @@ exports.sendNotificationToFCM = onRequest(async (req, res) => {
 });
 
 exports.notifyWorkerOnNewBooking = onDocumentCreated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) {
@@ -1192,7 +1198,7 @@ exports.notifyWorkerOnNewBooking = onDocumentCreated(
 
 
 exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
-  "tipping/{walletId}",
+  { document: "tipping/{walletId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();
@@ -1304,7 +1310,7 @@ exports.notifyWorkerOnTipPayoutProcessed = onDocumentWritten(
 // Send Custom Notification to Technicians (Bilingual)
 // ============================================
 exports.sendCustomNotificationToTechnicians = onDocumentCreated(
-  "notification_queue/{docId}",
+  { document: "notification_queue/{docId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) {
@@ -1532,7 +1538,7 @@ exports.sendCustomNotificationToTechnicians = onDocumentCreated(
 );
 
 exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeSnap = event.data.before;
     const afterSnap = event.data.after;
@@ -1671,7 +1677,7 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
 
 
 exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeSnap = event.data.before;
     const afterSnap = event.data.after;
@@ -1815,7 +1821,7 @@ exports.notifyAdminsOnWorkerCancellation = onDocumentUpdated(
 );
 
 exports.notifyWorkersOnCustomerCancellation = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeSnap = event.data.before;
     const afterSnap = event.data.after;
@@ -1917,7 +1923,7 @@ exports.notifyWorkersOnCustomerCancellation = onDocumentUpdated(
 );
 
 exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeSnap = event.data.before;
     const afterSnap = event.data.after;
@@ -2009,7 +2015,7 @@ exports.notifyAdminsOnCustomerCancellation = onDocumentUpdated(
 // Warranty Request Notifications
 // ============================================
 exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();
@@ -2486,7 +2492,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
 // Notify Admins on Warranty Escalation
 // ============================================
 exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();
@@ -2596,7 +2602,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
 // Notify Customer on Warranty Resolution
 // ============================================
 exports.notifyCustomerOnWarrantyResolution = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();
@@ -2664,7 +2670,7 @@ exports.notifyCustomerOnWarrantyResolution = onDocumentWritten(
 // Counter Offer Notifications
 // ============================================
 exports.notifyOnCounterOfferCreated = onDocumentCreated(
-  "counter_offers/{offerId}",
+  { document: "counter_offers/{offerId}", region: FUNCTION_REGION },
   async (event) => {
     const offerId = event.params.offerId;
     const offerData = event.data?.data();
@@ -2777,7 +2783,7 @@ exports.notifyOnCounterOfferCreated = onDocumentCreated(
 );
 
 exports.notifyOnCounterOfferStatusChange = onDocumentUpdated(
-  "counter_offers/{offerId}",
+  { document: "counter_offers/{offerId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data.before?.data();
     const afterData = event.data.after?.data();
@@ -3607,7 +3613,7 @@ exports.applyMonthlyBonus = onSchedule(
 // Triggers when a booking status changes to C and payment is completed
 // ============================================
 exports.attachWarrantyOnPaymentCompletion = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data.before.data();
     const afterData = event.data.after.data();
@@ -3653,7 +3659,7 @@ exports.attachWarrantyOnPaymentCompletion = onDocumentUpdated(
 // Triggers when a booking status changes to completed
 // ============================================
 exports.updateTierStatsOnJobComplete = onDocumentUpdated(
-  "bookings/{jobId}",
+  { document: "bookings/{jobId}", region: FUNCTION_REGION },
   async (event) => {
     const before = event.data.before.data();
     const after = event.data.after.data();
@@ -3770,7 +3776,7 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
 // Notify Technician on Warranty Assignment
 // ============================================
 exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const beforeData = event.data?.before?.data();
@@ -3903,7 +3909,7 @@ exports.notifyTechnicianOnWarrantyAssignment = onDocumentWritten(
 // ============================================
 
 exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
-  "payouts/{payoutId}",
+  { document: "payouts/{payoutId}", region: FUNCTION_REGION },
   async (event) => {
     const payoutId = event.params.payoutId;
     const payoutData = event.data?.data();
@@ -4045,7 +4051,7 @@ exports.notifyAdminsOnPayoutRequest = onDocumentCreated(
 // ============================================
 
 exports.notifyAdminsOnUnifiedPayoutRequest = onDocumentCreated(
-  "unified_payout_requests/{requestId}",
+  { document: "unified_payout_requests/{requestId}", region: FUNCTION_REGION },
   async (event) => {
     const requestId = event.params.requestId;
     const requestData = event.data?.data();
@@ -4143,7 +4149,7 @@ exports.notifyAdminsOnUnifiedPayoutRequest = onDocumentCreated(
 // ============================================
 
 exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
-  "tipping/{agentId}",
+  { document: "tipping/{agentId}", region: FUNCTION_REGION },
   async (event) => {
     const agentId = event.params.agentId;
     const beforeData = event.data?.before?.data();
@@ -4233,7 +4239,7 @@ exports.notifyAdminsOnTipPayoutRequest = onDocumentWritten(
 // Notify Technician on Tip Payout Completion
 // ============================================
 exports.notifyTechnicianOnTipPayoutCompletion = onDocumentWritten(
-  "tipping/{agentId}",
+  { document: "tipping/{agentId}", region: FUNCTION_REGION },
   async (event) => {
     const agentId = event.params.agentId;
     const beforeData = event.data?.before?.data();
@@ -4331,7 +4337,7 @@ exports.notifyTechnicianOnTipPayoutCompletion = onDocumentWritten(
 // Notify Technician on Unified Payout Approval/Rejection
 // ============================================
 exports.notifyTechnicianOnUnifiedPayoutStatusChange = onDocumentWritten(
-  "unified_payout_requests/{requestId}",
+  { document: "unified_payout_requests/{requestId}", region: FUNCTION_REGION },
   async (event) => {
     const requestId = event.params.requestId;
     const beforeData = event.data?.before?.data();
@@ -4448,7 +4454,7 @@ exports.notifyTechnicianOnUnifiedPayoutStatusChange = onDocumentWritten(
 // Notify Technician on Payout Approval/Rejection
 // ============================================
 exports.notifyTechnicianOnPayoutStatusChange = onDocumentWritten(
-  "payouts/{payoutId}",
+  { document: "payouts/{payoutId}", region: FUNCTION_REGION },
   async (event) => {
     const payoutId = event.params.payoutId;
     const beforeData = event.data?.before?.data();
@@ -4736,7 +4742,7 @@ function isAddressInServiceZones(lat, lon, serviceLocations) {
   return false;
 }
 exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
-  "users/{userId}",
+  { document: "users/{userId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data() || {};
     const afterData = event.data?.after?.data();
@@ -4806,7 +4812,7 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
 );
 
 exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
-  "users/{userId}",
+  { document: "users/{userId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data() || {};
     const afterData = event.data?.after?.data() || {};
@@ -5029,32 +5035,32 @@ function extractTechnicianCoordinates(tech) {
 
 // 1. Trigger when a manual booking request is created
 
-exports.assignNewBookingId_bookings = onDocumentCreated("bookings/{docId}", async (event) => {
+exports.assignNewBookingId_bookings = onDocumentCreated({ document: "bookings/{docId}", region: FUNCTION_REGION }, async (event) => {
   if (!event.data) return null;
   const bookingTriggers = require('./src/triggers/bookingTriggers');
   return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
-exports.assignNewBookingId_jobRequests = onDocumentCreated("job_requests/{docId}", async (event) => {
+exports.assignNewBookingId_jobRequests = onDocumentCreated({ document: "job_requests/{docId}", region: FUNCTION_REGION }, async (event) => {
   if (!event.data) return null;
   const bookingTriggers = require('./src/triggers/bookingTriggers');
   return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
-exports.assignNewBookingId_bookingRequest = onDocumentCreated("booking_request/{docId}", async (event) => {
+exports.assignNewBookingId_bookingRequest = onDocumentCreated({ document: "booking_request/{docId}", region: FUNCTION_REGION }, async (event) => {
   if (!event.data) return null;
   const bookingTriggers = require('./src/triggers/bookingTriggers');
   return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
-exports.assignNewBookingId_autoAssignment = onDocumentCreated("auto-assignment_requests/{docId}", async (event) => {
+exports.assignNewBookingId_autoAssignment = onDocumentCreated({ document: "auto-assignment_requests/{docId}", region: FUNCTION_REGION }, async (event) => {
   if (!event.data) return null;
   const bookingTriggers = require('./src/triggers/bookingTriggers');
   return bookingTriggers.assignNewBookingIdHelper(event.data.ref, event.data.data());
 });
 
 exports.updateTechnicianRatingOnReview = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const afterData = event.data.after ? event.data.after.data() : null;
     const beforeData = event.data.before ? event.data.before.data() : null;
@@ -5170,7 +5176,7 @@ async function deleteChatFromRTDB(chatId) {
 
 // 1. Delete inspection-only chatrooms on booking completion
 exports.chatCleanupOnCompletion = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data?.before?.data() || {};
     const afterData = event.data?.after?.data() || {};
@@ -5248,7 +5254,7 @@ exports.scheduledChatCleanup = onSchedule(
 });
 
 exports.notifyTechnicianOnPaymentVerificationPending = onDocumentWritten(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const bookingId = event.params.bookingId;
     const beforeData = event.data?.before?.data();

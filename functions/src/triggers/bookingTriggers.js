@@ -3,6 +3,12 @@ const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
+// Every Firestore trigger is pinned to a region collocated with the eur3
+// database. These used to be unpinned, which let the CLI place newly created
+// functions in europe-west1 while older ones stayed in us-central1 - identical
+// source, different regions, and a transatlantic hop on every event.
+const FUNCTION_REGION = "europe-west1";
+
 const { extractCustomerCoordinates, extractTechnicianCoordinates, calculateDistanceKm, sendAndStoreNotification, extractCustomerAddress, getAllAdminUsers, toNotificationRecipients } = require('../utils/bookingUtils');
 
 const MAX_ASSIGNMENT_DISTANCE_KM = 20.0;
@@ -249,7 +255,7 @@ async function broadcastEligibleOffersForRequest(requestId, request) {
 }
 
 exports.onBookingRequestCreated = onDocumentCreated(
-  "booking_request/{requestId}",
+  { document: "booking_request/{requestId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) {
@@ -294,7 +300,7 @@ exports.rebroadcastSearchingBookingRequests = onSchedule("every 1 minutes", asyn
 
 // 2. Trigger when job offer status is updated
 exports.onManualJobOfferUpdated = onDocumentUpdated(
-  "job_offers/{offerId}",
+  { document: "job_offers/{offerId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data.before.data();
     const afterData = event.data.after.data();
@@ -762,7 +768,7 @@ exports.processAutoAssignments = onSchedule(
 
 // 4. Trigger when auto-assignment request document is created
 exports.onAutoAssignmentRequestCreated = onDocumentCreated(
-  "auto-assignment_requests/{requestId}",
+  { document: "auto-assignment_requests/{requestId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) return null;
@@ -926,7 +932,7 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
 
 // 5. Trigger when a booking is assigned to copy the agent info to auto-assignment requests
 exports.syncAgentToAutoAssignment = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const afterData = event.data.after.data();
     const beforeData = event.data.before.data();
@@ -982,7 +988,7 @@ exports.syncAgentToAutoAssignment = onDocumentUpdated(
 
 // 6. Trigger when a booking is created to clean up all pending/stale job offers for that booking
 exports.onBookingCreatedCleanupOffers = onDocumentCreated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) return null;
@@ -1009,7 +1015,7 @@ exports.onBookingCreatedCleanupOffers = onDocumentCreated(
 
 // 7. Trigger when a booking request is deleted to clean up all corresponding job offers
 exports.onBookingRequestDeletedCleanupOffers = onDocumentDeleted(
-  "booking_request/{requestId}",
+  { document: "booking_request/{requestId}", region: FUNCTION_REGION },
   async (event) => {
     const requestId = event.params.requestId;
 
@@ -1033,7 +1039,7 @@ exports.onBookingRequestDeletedCleanupOffers = onDocumentDeleted(
 
 // 8. Trigger when technician registration is rejected or resubmitted
 exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
-  "users/{userId}",
+  { document: "users/{userId}", region: FUNCTION_REGION },
   async (event) => {
     const beforeData = event.data.before.data();
     const afterData = event.data.after.data();
@@ -1157,7 +1163,7 @@ exports.notifyOnTechnicianRegistrationStatusChange = onDocumentUpdated(
 
 // 9. Trigger when a rebooking job offer is created manually by the customer app
 exports.onJobOfferCreatedForRebook = onDocumentCreated(
-  "job_offers/{offerId}",
+  { document: "job_offers/{offerId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) return null;
@@ -1348,7 +1354,7 @@ exports.assignNewBookingIdHelper = assignNewBookingIdHelper;
  * expiry → E) is announced elsewhere and is filtered out below.
  */
 exports.onBookingWarrantyUpdated = onDocumentUpdated(
-  "bookings/{bookingId}",
+  { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const before = event.data.before.data();
     const after = event.data.after.data();

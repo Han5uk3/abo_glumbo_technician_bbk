@@ -1,6 +1,5 @@
 import 'package:aboglumbo_bbk_panel/common_widget/booking_cards.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
-import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/period_selector.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
@@ -523,17 +522,7 @@ class _AdminHomeState extends State<AdminHome> with TickerProviderStateMixin {
     // the stream is still healthy.
     filtered = filtered.where((item) {
       if (item is! RawBookingRequest) return true;
-      final data = item.data;
-      final status = data['status']?.toString();
-      if (status != 'pending' && status != 'searching') return false;
-
-      final createdAt = data['createdAt'] as Timestamp?;
-      if (createdAt == null) return true;
-      final acceptedTechnicians = data['acceptedTechnicians'] as List? ?? [];
-      final window = acceptedTechnicians.isEmpty
-          ? const Duration(seconds: 120)
-          : const Duration(minutes: 5);
-      return TimeService.now.difference(createdAt.toDate()) < window;
+      return AppServices.isBookingRequestLive(item.data);
     }).toList();
 
     // 2. Date filter (only if not searching for a specific ID)

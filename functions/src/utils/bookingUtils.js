@@ -335,6 +335,30 @@ async function getAllAdminUsers() {
 }
 module.exports.getAllAdminUsers = getAllAdminUsers;
 
+/**
+ * Maps recipient documents to the `{ uid, token, lanCode }` shape the
+ * notification call sites use.
+ *
+ * Deliberately keeps recipients whose `fcmToken` is missing or blank. Callers
+ * used to filter those out while building the list, but the list drives
+ * `sendAndStoreNotification`, which writes the in-app notification document
+ * before it pushes - so dropping a tokenless recipient there cost them their
+ * notification history as well as the push they were never going to get. The
+ * token is optional all the way down: `sendAndStoreNotification` stores first
+ * and simply skips the FCM call when there is nothing to send to.
+ */
+function toNotificationRecipients(docs) {
+  return docs.map((doc) => {
+    const data = doc.data();
+    return {
+      uid: doc.id,
+      token: data.fcmToken,
+      lanCode: data.lanCode || "en",
+    };
+  });
+}
+module.exports.toNotificationRecipients = toNotificationRecipients;
+
 function extractCustomerAddress(request) {
   const selectedAddressId = request.selectedAddressId;
   const addresses = request.customer?.addresses || [];

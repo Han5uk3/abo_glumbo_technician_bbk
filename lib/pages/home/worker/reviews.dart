@@ -2,8 +2,10 @@ import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
+import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 class WorkerReviewsPage extends StatefulWidget {
   final String workerId;
@@ -416,7 +418,10 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
                         _buildStarRating(rating?.toDouble() ?? 0.0, size: 14),
                         const SizedBox(width: 8),
                         Text(
-                          _formatReviewTime(review.createdAt?.toDate()),
+                          _formatReviewTime(
+                            review.createdAt?.toDate(),
+                            context,
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -457,20 +462,35 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
     );
   }
 
-  String _formatReviewTime(DateTime? date) {
-    if (date == null) return 'Recent';
-    final now = DateTime.now();
-    final difference = now.difference(date);
+  /// Same relative-time convention as the transaction and tip tiles: minute
+  /// granularity below an hour, and an absolute KSA date once a review is more
+  /// than a week old. The previous version had no minutes branch, so every
+  /// review from the last 59 minutes read "Just now", and it was hardcoded
+  /// English in a trilingual app.
+  String _formatReviewTime(DateTime? date, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (date == null) return l10n.notAvailable;
 
-    if (difference.inDays >= 7) {
-      final weeks = (difference.inDays / 7).floor();
-      return '$weeks ${weeks == 1 ? "week" : "weeks"} ago';
-    } else if (difference.inDays >= 1) {
-      return '${difference.inDays} ${difference.inDays == 1 ? "day" : "days"} ago';
-    } else if (difference.inHours >= 1) {
-      return '${difference.inHours} ${difference.inHours == 1 ? "hour" : "hours"} ago';
+    // TimeService, not DateTime.now(): a device with a skewed clock would
+    // otherwise mislabel every review, and can push `difference` negative.
+    final difference = TimeService.now.difference(date);
+
+    if (difference.isNegative) return l10n.justNow;
+
+    if (difference.inDays > 7) {
+      final locale = Localizations.localeOf(context).languageCode;
+      final formatter = DateFormat('dd-MM-yyyy hh:mm a', locale);
+      // The elapsed-time branches compare two instants, so they are
+      // zone-independent; only the absolute rendering needs the KSA wall clock.
+      return formatter.format(KsaTime.fromInstant(date));
+    } else if (difference.inDays > 0) {
+      return l10n.daysAgo(difference.inDays);
+    } else if (difference.inHours > 0) {
+      return l10n.hoursAgo(difference.inHours);
+    } else if (difference.inMinutes > 0) {
+      return l10n.minutesAgo(difference.inMinutes);
     } else {
-      return 'Just now';
+      return l10n.justNow;
     }
   }
 

@@ -274,63 +274,99 @@ class ServiceTileDevWidget extends StatelessWidget {
   }
 
   void _showDeleteConfirmDialog(BuildContext context) {
+    // Resolved from the tile, but captured up front: this tile is unmounted as
+    // soon as the services stream drops the deleted row, so the dialog must not
+    // depend on the tile's context to finish.
+    final bloc = context.read<ManageAppBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
-      builder: (dialogContext) => _buildDeleteConfirmDialog(context),
+      builder: (dialogContext) => _DeleteServiceDialog(
+        service: service,
+        bloc: bloc,
+        messenger: messenger,
+      ),
     );
   }
+}
 
-  Widget _buildDeleteConfirmDialog(BuildContext context) {
+class _DeleteServiceDialog extends StatefulWidget {
+  const _DeleteServiceDialog({
+    required this.service,
+    required this.bloc,
+    required this.messenger,
+  });
+
+  final ServiceModel service;
+  final ManageAppBloc bloc;
+  final ScaffoldMessengerState messenger;
+
+  @override
+  State<_DeleteServiceDialog> createState() => _DeleteServiceDialogState();
+}
+
+class _DeleteServiceDialogState extends State<_DeleteServiceDialog> {
+  /// Only react to delete results for the request this dialog started, so a
+  /// leftover state from another action can't drive it.
+  bool _requested = false;
+
+  void _onStateChanged(BuildContext dialogContext, ManageAppState state) {
+    if (!_requested || !mounted) return;
+
+    final l10n = AppLocalizations.of(dialogContext);
+    Navigator.of(dialogContext).pop();
+
+    if (state is ServiceDeleted) {
+      widget.messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.deletedSuccessfully ?? 'Service deleted successfully',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (state is ServiceDeleteError) {
+      widget.messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n?.deleteError ?? 'Delete error'}: ${state.error}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<ManageAppBloc, ManageAppState>(
-      listener: (blocContext, state) {
-        if (state is ServiceDeleted) {
-          // Close the dialog
-          Navigator.of(context).pop();
-
-          // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)?.deletedSuccessfully ??
-                    'Service deleted successfully',
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is ServiceDeleteError) {
-          // Close the dialog
-          Navigator.of(context).pop();
-
-          // Show error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${AppLocalizations.of(context)?.deleteError ?? 'Delete error'}: ${state.error}',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
+      bloc: widget.bloc,
+      listenWhen: (previous, current) =>
+          current is ServiceDeleted || current is ServiceDeleteError,
+      listener: (blocContext, state) => _onStateChanged(context, state),
+      buildWhen: (previous, current) =>
+          current is DeletingService ||
+          current is ServiceDeleted ||
+          current is ServiceDeleteError,
       builder: (blocContext, state) {
-        final isDeleting = state is DeletingService;
+        final isDeleting = _requested && state is DeletingService;
+        final l10n = AppLocalizations.of(context);
 
         return AlertDialog(
           backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
-          title: Text(
-            AppLocalizations.of(context)?.deleteService ?? 'Delete Service',
-          ),
+          title: Text(l10n?.deleteService ?? 'Delete Service'),
           content: Text(
-            AppLocalizations.of(context)?.deleteServiceConfirmation ??
+            l10n?.deleteServiceConfirmation ??
                 'Are you sure you want to delete this service? This action cannot be undone.',
           ),
           actions: [
             TextButton(
-              onPressed: isDeleting ? null : () => Navigator.pop(context),
+              onPressed: isDeleting ? null : () => Navigator.of(context).pop(),
               child: Text(
-                AppLocalizations.of(context)!.cancel,
-                style: TextStyle(color: Colors.black),
+                l10n!.cancel,
+                style: const TextStyle(color: Colors.black),
               ),
             ),
             eButton(
@@ -341,8 +377,9 @@ class ServiceTileDevWidget extends StatelessWidget {
               onPressed: isDeleting
                   ? null
                   : () {
-                      blocContext.read<ManageAppBloc>().add(
-                        DeleteServiceEvent(service.id ?? ''),
+                      setState(() => _requested = true);
+                      widget.bloc.add(
+                        DeleteServiceEvent(widget.service.id ?? ''),
                       );
                     },
               widget: isDeleting
@@ -352,7 +389,7 @@ class ServiceTileDevWidget extends StatelessWidget {
                       child: Loader(size: 12, color: AppColors.bgWhite),
                     )
                   : Text(
-                      AppLocalizations.of(context)!.delete,
+                      l10n.delete,
                       style: const TextStyle(color: Colors.white),
                     ),
             ),

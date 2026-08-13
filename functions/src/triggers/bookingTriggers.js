@@ -391,25 +391,27 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
                 const custSnap = await db.collection("customers").doc(customerId).get();
                 if (custSnap.exists) {
                   const custData = custSnap.data();
-                  if (custData.fcmToken && custData.fcmToken.trim() !== "") {
-                    await sendAndStoreNotification({
-                      targetRole: "customer",
-                      targetId: customerId,
-                      titleEn: "Technician Accepted!",
-                      titleAr: "قبل الفني العرض!",
-                      titleUr: "ٹیکنیشن نے قبول کر لیا!",
-                      bodyEn: `${techData.name || "A technician"} has accepted your booking request. Review and complete your booking.`,
-                      bodyAr: `لقد قبل الفني ${techData.name || "فني"} طلب الحجز الخاص بك. راجع وأكمل حجزك.`,
-                      bodyUr: `ٹیکنیشن ${techData.name || "فنی"} نے آپ کی بکنگ کی درخواست قبول کر لی ہے۔ جائزہ لیں اور اپنی بکنگ مکمل کریں۔`,
-                      data: {
-                        bookingId: bookingId,
-                        category: "manual_accepted",
-                        type: "manual_accepted"
-                      },
-                      fcmToken: custData.fcmToken,
-                      lanCode: custData.lanCode || "en"
-                    });
-                  }
+                  // Not gated on the token: sendAndStoreNotification writes the
+                  // customers/{uid}/notifications record the in-app list reads
+                  // before it pushes, so gating here cost unregistered devices
+                  // the record too.
+                  await sendAndStoreNotification({
+                    targetRole: "customer",
+                    targetId: customerId,
+                    titleEn: "Technician Accepted!",
+                    titleAr: "قبل الفني العرض!",
+                    titleUr: "ٹیکنیشن نے قبول کر لیا!",
+                    bodyEn: `${techData.name || "A technician"} has accepted your booking request. Review and complete your booking.`,
+                    bodyAr: `لقد قبل الفني ${techData.name || "فني"} طلب الحجز الخاص بك. راجع وأكمل حجزك.`,
+                    bodyUr: `ٹیکنیشن ${techData.name || "فنی"} نے آپ کی بکنگ کی درخواست قبول کر لی ہے۔ جائزہ لیں اور اپنی بکنگ مکمل کریں۔`,
+                    data: {
+                      bookingId: bookingId,
+                      category: "manual_accepted",
+                      type: "manual_accepted"
+                    },
+                    fcmToken: custData.fcmToken,
+                    lanCode: custData.lanCode || "en"
+                  });
                 }
               }
 
@@ -453,37 +455,37 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
           const custSnap = await db.collection("customers").doc(customerId).get();
           if (custSnap.exists) {
             const custData = custSnap.data();
-            if (custData.fcmToken && custData.fcmToken.trim() !== "") {
-              let timeString = "a new time";
-              if (afterData.proposedTime) {
-                const date = afterData.proposedTime.toDate();
-                timeString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-              }
-
-              const serviceName = afterData.serviceName || "your booking";
-              const serviceNameAr = afterData.serviceNameAr || serviceName;
-              const serviceNameUr = afterData.serviceNameUr || serviceNameAr;
-
-              await sendAndStoreNotification({
-                targetRole: "customer",
-                targetId: customerId,
-                titleEn: "Technician Proposed a New Time",
-                titleAr: "اقترح الفني وقتاً جديداً",
-                titleUr: "ٹیکنیشن نے نیا وقت تجویز کیا ہے",
-                bodyEn: `The technician has proposed a new time: ${timeString} for ${serviceName}.`,
-                bodyAr: `اقترح الفني وقتاً جديداً: ${timeString} لخدمة ${serviceNameAr}.`,
-                bodyUr: `ٹیکنیشن نے ${serviceNameUr} کے لیے نیا وقت تجویز کیا ہے: ${timeString}۔`,
-                data: {
-                  bookingId: bookingId,
-                  offerId: offerId,
-                  category: "counter_offer",
-                  type: "counter_offer"
-                },
-                fcmToken: custData.fcmToken,
-                lanCode: custData.lanCode || "en"
-              });
-              console.log(`[Offer ${offerId}] Sent counter-proposal notification to customer ${customerId}`);
+            let timeString = "a new time";
+            if (afterData.proposedTime) {
+              const date = afterData.proposedTime.toDate();
+              timeString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
             }
+
+            const serviceName = afterData.serviceName || "your booking";
+            const serviceNameAr = afterData.serviceNameAr || serviceName;
+            const serviceNameUr = afterData.serviceNameUr || serviceNameAr;
+
+            // Not gated on the token - see the note on the acceptance
+            // notification above.
+            await sendAndStoreNotification({
+              targetRole: "customer",
+              targetId: customerId,
+              titleEn: "Technician Proposed a New Time",
+              titleAr: "اقترح الفني وقتاً جديداً",
+              titleUr: "ٹیکنیشن نے نیا وقت تجویز کیا ہے",
+              bodyEn: `The technician has proposed a new time: ${timeString} for ${serviceName}.`,
+              bodyAr: `اقترح الفني وقتاً جديداً: ${timeString} لخدمة ${serviceNameAr}.`,
+              bodyUr: `ٹیکنیشن نے ${serviceNameUr} کے لیے نیا وقت تجویز کیا ہے: ${timeString}۔`,
+              data: {
+                bookingId: bookingId,
+                offerId: offerId,
+                category: "counter_offer",
+                type: "counter_offer"
+              },
+              fcmToken: custData.fcmToken,
+              lanCode: custData.lanCode || "en"
+            });
+            console.log(`[Offer ${offerId}] Sent counter-proposal notification to customer ${customerId}`);
           }
         }
       } catch (e) {
@@ -1341,11 +1343,14 @@ exports.assignNewBookingIdHelper = assignNewBookingIdHelper;
  * in index.js, and this function was never added to the exports list — so
  * wiring it up as it stood would have sent every one of them twice.
  *
- * What none of the index.js functions cover is a technician *leaving* a claim:
- * `notifyOnWarrantyRequestStatusChange` branches on A→R, R/A→S, →C, →X and →E,
- * and a technician rejection moves the claim S→R, which matches none of them.
- * That is the one case kept here, so the customer learns their repair lost its
- * technician and admins learn they need to reassign.
+ * What none of the index.js functions cover is an assigned technician being
+ * dropped while the claim stays at R (requested) — a technician declining a
+ * claim they were assigned but had not accepted. That is the one case kept
+ * here, so the customer learns their repair lost its technician and admins
+ * learn they need to reassign. Every other way the assignment gets cleared
+ * (admin rejection → X, technician cancelling an accepted claim S→R, any
+ * rejection recorded in warranty.rejectedTechnicians, completion → C,
+ * expiry → E) is announced elsewhere and is filtered out below.
  */
 exports.onBookingWarrantyUpdated = onDocumentUpdated(
   "bookings/{bookingId}",
@@ -1367,20 +1372,44 @@ exports.onBookingWarrantyUpdated = onDocumentUpdated(
 
     // Technician Rejection / Cancellation (removed assigned technician)
     if (beforeTechId && !afterTechId) {
-      // notifyOnWarrantyStatusChange (index.js) watches this same document and
-      // already covers the S -> R transition, with copy that names the
-      // technician. A technician cancelling clears assignedTechnicianId and
-      // moves the status code in one write, so without this guard a single
-      // cancellation notified the customer and every admin twice - the two
-      // messages differ in wording and payload, so no dedup could catch them.
-      // This branch stays for the case the other trigger does not see: an
-      // assignment cleared without the status going S -> R.
-      const handledByStatusCodeTrigger =
-        before.warranty?.warrantyStatusCode === "S" &&
-        after.warranty?.warrantyStatusCode === "R";
-      if (handledByStatusCodeTrigger) {
+      const beforeStatusCode = before.warranty?.warrantyStatusCode;
+      const afterStatusCode = after.warranty?.warrantyStatusCode;
+
+      // The point of this branch is "the claim is still open but just lost its
+      // technician, so someone has to reassign it". That is only true while the
+      // claim is back at R (requested).
+      //
+      // Every other way assignedTechnicianId gets cleared already has its own
+      // notification, and firing here as well sent the customer two unrelated
+      // messages for one action:
+      //   - Admin rejection clears the technician and sets X in a single write,
+      //     and notifyOnWarrantyRequestStatusChange (index.js, case 5) already
+      //     tells the customer the administrator rejected the repair request.
+      //     This trigger was adding a contradictory "Technician Unavailable /
+      //     a new technician will be assigned shortly" on top of it.
+      //   - A technician cancelling an accepted claim moves S -> R and grows
+      //     warranty.rejectedTechnicians, which case 7 of the same index.js
+      //     trigger covers with copy that names the technician and, for admins,
+      //     the rejection reason.
+      //   - Completion (C) and expiry (E) close the claim; nothing to reassign.
+      //
+      // The messages differ in wording and payload, so no dedup downstream
+      // could have caught them - the fix has to be here.
+      //
+      // The rejectedTechnicians check is what keeps this branch disjoint from
+      // case 7 rather than merely offset from it: case 7 keys on that list
+      // growing, whatever the status transition, so anything that records a
+      // named rejection belongs to it and anything that just clears the
+      // assignment (WarrantyBloc's RejectWarranty) belongs here.
+      const rejectionRecorded =
+        (before.warranty?.rejectedTechnicians?.length || 0) <
+        (after.warranty?.rejectedTechnicians?.length || 0);
+      const needsReassignment =
+        afterStatusCode === "R" && beforeStatusCode !== "S" && !rejectionRecorded;
+      if (!needsReassignment) {
         console.log(
-          `Warranty cancellation for ${bookingId} handled by notifyOnWarrantyStatusChange, skipping duplicate.`
+          `Warranty technician cleared for ${bookingId} (${beforeStatusCode} -> ${afterStatusCode}); ` +
+          `covered by the warranty status-change triggers, skipping duplicate.`
         );
         return null;
       }

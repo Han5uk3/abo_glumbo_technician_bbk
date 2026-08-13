@@ -19,6 +19,7 @@ const FieldValue = admin.firestore.FieldValue;
 // at module load.
 const {
   sendAndStoreNotification,
+  toNotificationRecipients,
   money,
 } = require("./src/utils/bookingUtils");
 
@@ -115,20 +116,10 @@ exports.notifyAdminsOnNewBooking = onDocumentCreated(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      const tokensWithLanguage = [];
-      adminUsersDocs.forEach((doc) => {
-        const user = doc.data();
-        if (user.fcmToken && user.fcmToken.trim() !== "") {
-          tokensWithLanguage.push({
-            uid: doc.id,
-            token: user.fcmToken,
-            lanCode: user.lanCode,
-          });
-        }
-      });
+      const tokensWithLanguage = toNotificationRecipients(adminUsersDocs);
 
       if (tokensWithLanguage.length === 0) {
-        console.log("No admin tokens found.");
+        console.log("No admins found.");
         return null;
       }
 
@@ -185,21 +176,10 @@ exports.notifyAgentOnAssignment = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      adminTokens = adminUsersDocs
-        .map((doc) => {
-          const data = doc.data();
-          return data.fcmToken && data.fcmToken.trim() !== ""
-            ? {
-              uid: doc.id,
-              token: data.fcmToken,
-              lanCode: data.lanCode || "en",
-            }
-            : null;
-        })
-        .filter(Boolean);
+      adminTokens = toNotificationRecipients(adminUsersDocs);
 
       if (adminTokens.length === 0) {
-        console.log(`[${bookingId}] No admin FCM tokens found`);
+        console.log(`[${bookingId}] No admins found`);
       }
     } catch (error) {
       console.error(`[${bookingId}] Error fetching admin users:`, error);
@@ -356,9 +336,15 @@ exports.notifyCustomerOnBookingStatusChange = onDocumentWritten(
     const fcmToken = customerData?.fcmToken;
     const lanCode = customerData?.lanCode || "en";
 
+    // No early return on a missing token. `sendAndStoreNotification` writes the
+    // customers/{uid}/notifications document first and only then pushes, so
+    // bailing out here cost the customer the in-app record as well - which is
+    // why an unregistered device showed an empty notifications page rather than
+    // just missing pushes. See the same note at every other token check below.
     if (!fcmToken || fcmToken.trim() === "") {
-      console.log("Customer has no valid FCM token.");
-      return;
+      console.log(
+        `Customer ${customerId} has no valid FCM token; storing notification without a push.`
+      );
     }
 
     const service = afterData.service;
@@ -768,19 +754,9 @@ exports.notifyTechnicianOnPaymentCompletion = onDocumentWritten(
     // Notify admins (excluding customer service)
     try {
       const adminUsersDocs = await getAllAdminUsers();
-      const adminTokens = adminUsersDocs
-        .filter((doc) => doc.data().accessLevel !== 2) // Exclude customer service admins
-        .map((doc) => {
-          const data = doc.data();
-          return data.fcmToken && data.fcmToken.trim() !== ""
-            ? {
-              uid: doc.id,
-              token: data.fcmToken,
-              lanCode: data.lanCode || "en",
-            }
-            : null;
-        })
-        .filter(Boolean);
+      const adminTokens = toNotificationRecipients(
+        adminUsersDocs.filter((doc) => doc.data().accessLevel !== 2) // Exclude customer service admins
+      );
 
       if (adminTokens.length > 0) {
         await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
@@ -855,9 +831,11 @@ exports.customerTrackingNotification = onDocumentWritten(
     const fcmToken = customerData?.fcmToken;
     const lanCode = customerData?.lanCode || "en";
 
+    // Store even without a token; only the push depends on it.
     if (!fcmToken || fcmToken.trim() === "") {
-      console.log("Customer has no valid FCM token.");
-      return;
+      console.log(
+        `Customer ${customerId} has no valid FCM token; storing notification without a push.`
+      );
     }
 
     const isAccepted = afterData.bookingStatusCode === "A" || afterData.warranty?.warrantyStatusCode === "S";
@@ -1604,9 +1582,11 @@ exports.notifyCustomerOnWorkerCancellation = onDocumentUpdated(
       const customerData = customerDoc.data();
       const customerFcmToken = customerData.fcmToken;
 
+      // Store even without a token; only the push depends on it.
       if (!customerFcmToken) {
-        console.log("Customer FCM token not found");
-        return;
+        console.log(
+          `Customer ${customerId} has no valid FCM token; storing notification without a push.`
+        );
       }
 
       // Get the worker details who just cancelled
@@ -2222,18 +2202,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      adminTokens = adminUsersDocs
-        .map((doc) => {
-          const data = doc.data();
-          return data.fcmToken && data.fcmToken.trim() !== ""
-            ? {
-              uid: doc.id,
-              token: data.fcmToken,
-              lanCode: data.lanCode || "en",
-            }
-            : null;
-        })
-        .filter(Boolean);
+      adminTokens = toNotificationRecipients(adminUsersDocs);
     } catch (error) {
       console.error("Error fetching admin users:", error);
     }
@@ -2376,9 +2345,11 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
       },
     };
 
-    // Notify customer
-    if (customerData?.fcmToken && customerData.fcmToken.trim() !== "") {
-      const customerLanCode = customerData.lanCode || "en";
+    // Notify customer. Not gated on the token: the in-app notifications list
+    // reads what this stores, so a customer whose device was never registered
+    // must still get the record even though there is no push to send.
+    if (customerId) {
+      const customerLanCode = customerData?.lanCode || "en";
 
       await sendAndStoreNotification({
         targetRole: "customer",
@@ -2406,7 +2377,7 @@ exports.notifyOnWarrantyRequestStatusChange = onDocumentWritten(
           requestId: `${bookingId}_warranty_${status}`,
           ...notificationData,
         },
-        fcmToken: customerData.fcmToken,
+        fcmToken: customerData?.fcmToken,
         lanCode: customerLanCode,
       });
     }
@@ -2552,18 +2523,7 @@ exports.notifyAdminsOnWarrantyEscalation = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      adminTokens = adminUsersDocs
-        .map((doc) => {
-          const data = doc.data();
-          return data.fcmToken && data.fcmToken.trim() !== ""
-            ? {
-              uid: doc.id,
-              token: data.fcmToken,
-              lanCode: data.lanCode || "en",
-            }
-            : null;
-        })
-        .filter(Boolean);
+      adminTokens = toNotificationRecipients(adminUsersDocs);
     } catch (error) {
       console.error("Error fetching admin users:", error);
       return;
@@ -4776,22 +4736,12 @@ exports.notifyAdminsOnNewTechnicianRegistration = onDocumentWritten(
     try {
       const adminUsersDocs = await getAllAdminUsers();
 
-      const adminTokens = adminUsersDocs
-        .filter(doc => doc.data().accessLevel !== 2) // Exclude customer service admins
-        .map((doc) => {
-          const data = doc.data();
-          return data.fcmToken && data.fcmToken.trim() !== ""
-            ? {
-              uid: doc.id,
-              token: data.fcmToken,
-              lanCode: data.lanCode || "en",
-            }
-            : null;
-        })
-        .filter(Boolean);
+      const adminTokens = toNotificationRecipients(
+        adminUsersDocs.filter((doc) => doc.data().accessLevel !== 2) // Exclude customer service admins
+      );
 
       if (adminTokens.length === 0) {
-        console.log(`[${userId}] No admin tokens found for registration notification.`);
+        console.log(`[${userId}] No admins found for registration notification.`);
         return null;
       }
 
@@ -4903,9 +4853,9 @@ exports.notifyCustomerWhenTechnicianIsNearby = onDocumentUpdated(
           const fcmToken = customerData?.fcmToken;
           const lanCode = customerData?.lanCode || "en";
 
+          // Store even without a token; only the push depends on it.
           if (!fcmToken || fcmToken.trim() === "") {
-            console.log(`[${bookingId}] Customer has no valid FCM token, skipping notification.`);
-            continue;
+            console.log(`[${bookingId}] Customer has no valid FCM token; storing notification without a push.`);
           }
 
           // Mark as sent first to prevent duplicate notifications from fast concurrent updates
@@ -5120,104 +5070,14 @@ exports.updateTechnicianRatingOnReview = onDocumentWritten(
   }
 );
 
-exports.notifyOnWarrantyStatusChange = onDocumentWritten(
-  "bookings/{bookingId}",
-  async (event) => {
-    const bookingId = event.params.bookingId;
-    const beforeData = event.data?.before?.data() || {};
-    const afterData = event.data?.after?.data() || {};
-
-    if (!afterData || Object.keys(afterData).length === 0) {
-      return;
-    }
-
-    const beforeWarrantyStatus = beforeData.warranty?.warrantyStatusCode;
-    const afterWarrantyStatus = afterData.warranty?.warrantyStatusCode;
-
-    // Check if warranty was cancelled by technician (S -> R)
-    if (beforeWarrantyStatus === "S" && afterWarrantyStatus === "R") {
-      // Find the technician who cancelled it
-      const beforeTech = beforeData.warranty?.assignedTechnician;
-      const techNameEn = beforeTech?.name || beforeTech?.name_en || "the technician";
-      const techNameAr = beforeTech?.name_ar || techNameEn;
-      const techNameUr = beforeTech?.name_ur || techNameAr || techNameEn;
-
-      // 1. Notify Customer
-      const customer = afterData.customer;
-      const customerId = customer?.uid;
-
-      if (customerId) {
-        try {
-          const customerDoc = await admin.firestore().collection("customers").doc(customerId).get();
-          if (customerDoc.exists) {
-            const customerData = customerDoc.data();
-            const fcmToken = customerData?.fcmToken;
-            const lanCode = customerData?.lanCode || "en";
-
-            if (fcmToken && fcmToken.trim() !== "") {
-              await sendAndStoreNotification({
-                targetRole: "customer",
-                targetId: customerId,
-                titleEn: "Warranty Request Update",
-                titleAr: "تحديث طلب الضمان",
-                titleUr: "وارنٹی کی درخواست کی تازہ کاری",
-                bodyEn: `Your warranty repair request was cancelled by ${techNameEn}. We will assign a new technician shortly.`,
-                bodyAr: `تم إلغاء طلب إصلاح الضمان الخاص بك بواسطة ${techNameAr}. سنقوم بتعيين فني جديد قريباً.`,
-                bodyUr: `آپ کی وارنٹی کی مرمت کی درخواست ${techNameUr} کی طرف سے منسوخ کر دی گئی ہے۔ ہم جلد ہی نیا ٹیکنیشن تفویض کریں گے۔`,
-                data: {
-                  customerId: customerId,
-                  targetRole: "customer",
-                  bookingId: bookingId,
-                  status: "warranty_cancelled",
-                },
-                fcmToken: fcmToken,
-                lanCode: lanCode,
-              });
-            }
-          }
-        } catch (e) {
-          console.error(`Error notifying customer for warranty cancel:`, e);
-        }
-      }
-
-      // 2. Notify Admins
-      try {
-        const adminUsersDocs = await getAllAdminUsers();
-        const adminTokens = adminUsersDocs
-          .map((doc) => {
-            const data = doc.data();
-            return data.fcmToken && data.fcmToken.trim() !== ""
-              ? { uid: doc.id, token: data.fcmToken, lanCode: data.lanCode || "en" }
-              : null;
-          })
-          .filter((t) => t !== null);
-
-        await Promise.allSettled(adminTokens.map(async ({ uid, token, lanCode }) => {
-          await sendAndStoreNotification({
-            targetRole: "admin",
-            targetId: uid,
-            titleEn: "Warranty Cancelled by Technician",
-            titleAr: "إلغاء الضمان من قبل الفني",
-            titleUr: "ٹیکنیشن کی طرف سے وارنٹی منسوخ",
-            bodyEn: `Technician ${techNameEn} has cancelled the warranty repair request for booking ${bookingId}. Please assign a new technician.`,
-            bodyAr: `قام الفني ${techNameAr} بإلغاء طلب إصلاح الضمان للحجز ${bookingId}. يرجى تعيين فني جديد.`,
-            bodyUr: `ٹیکنیشن ${techNameUr} نے بکنگ ${bookingId} کے لیے وارنٹی کی مرمت کی درخواست منسوخ کر دی ہے۔ براہ کرم نیا ٹیکنیشن تفویض کریں۔`,
-            data: {
-              targetRole: "admin",
-              bookingId: bookingId,
-              status: "warranty_cancelled",
-              isAdmin: "true",
-            },
-            fcmToken: token,
-            lanCode: lanCode,
-          });
-        }));
-      } catch (e) {
-        console.error(`Error notifying admins for warranty cancel:`, e);
-      }
-    }
-  }
-)
+// notifyOnWarrantyStatusChange used to live here: a second trigger on the same
+// document whose only branch was the technician-cancelled S -> R transition. It
+// notified the customer and every admin, and so did case 7 ("technician
+// rejected") of notifyOnWarrantyRequestStatusChange above, which fires on the
+// same write because cancelling grows warranty.rejectedTechnicians. One
+// cancellation therefore produced two differently-worded notifications per
+// recipient, which no dedup key could collapse. Case 7 is the one kept: it
+// covers the same audience and its admin copy carries the rejection reason.
 
 // Cleanup issueMedia folder once a month
 // Monthly at 00:00 Riyadh — every scheduled job in this codebase runs on the

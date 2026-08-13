@@ -22,6 +22,14 @@ part 'manage_app_event.dart';
 part 'manage_app_state.dart';
 
 class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
+  /// Firestore writes stay pending (never completing, never failing) while the
+  /// client cannot reach the backend, so every awaited call needs a deadline.
+  static const Duration _firestoreTimeout = Duration(seconds: 20);
+
+  static Never _onFirestoreTimeout() => throw Exception(
+    'Request timed out. Check your connection and try again.',
+  );
+
   ManageAppBloc() : super(ManageAppInitial()) {
     on<ClearTipWalletEvent>(_clearTipWallet);
     on<ApproveRejectAgentEvent>(_approveRejectAgent);
@@ -503,9 +511,18 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
     DeleteCategoryEvent event,
     Emitter<ManageAppState> emit,
   ) async {
+    final categoryId = event.categoryId.trim();
+    if (categoryId.isEmpty) {
+      emit(const CategoryDeleteError('Missing category id'));
+      return;
+    }
+
     emit(DeletingCategory());
     try {
-      await AppFirestore.categoriesCollectionRef.doc(event.categoryId).delete();
+      await AppFirestore.categoriesCollectionRef
+          .doc(categoryId)
+          .delete()
+          .timeout(_firestoreTimeout, onTimeout: _onFirestoreTimeout);
       emit(CategoryDeleted(true));
     } catch (e) {
       emit(CategoryDeleteError(e.toString()));
@@ -516,15 +533,35 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
     DeleteServiceEvent event,
     Emitter<ManageAppState> emit,
   ) async {
+    final serviceId = event.serviceId.trim();
+    if (serviceId.isEmpty) {
+      emit(const ServiceDeleteError('Missing service id'));
+      return;
+    }
+
     emit(DeletingService());
     try {
-      await AppFirestore.servicesCollectionRef.doc(event.serviceId).delete();
-      await removeServiceFromHighlightedServices(event.serviceId);
-
-      emit(ServiceDeleted(true));
+      // Firestore write futures only complete once the server acknowledges the
+      // write, so without a timeout an unacknowledged write leaves the UI
+      // waiting forever.
+      await AppFirestore.servicesCollectionRef
+          .doc(serviceId)
+          .delete()
+          .timeout(_firestoreTimeout, onTimeout: _onFirestoreTimeout);
     } catch (e) {
       emit(ServiceDeleteError(e.toString()));
+      return;
     }
+
+    // The service itself is already gone, so cleanup failures must not keep the
+    // caller waiting on a terminal state.
+    try {
+      await removeServiceFromHighlightedServices(serviceId);
+    } catch (e) {
+      debugPrint('Failed to detach $serviceId from highlighted services: $e');
+    }
+
+    emit(ServiceDeleted(true));
   }
 
   Future<void> removeServiceFromHighlightedServices(String serviceId) async {
@@ -532,16 +569,20 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
         AppFirestore.highlightedServicesCollectionRef;
     final query = await highlightedServicesRef
         .where('services', arrayContains: serviceId)
-        .get();
+        .get()
+        .timeout(_firestoreTimeout, onTimeout: _onFirestoreTimeout);
+    if (query.docs.isEmpty) return;
+
+    final batch = FirebaseFirestore.instance.batch();
     for (final doc in query.docs) {
-      final data = doc.data();
-      if (data == null) continue;
-      final map = data is Map<String, dynamic> ? data : null;
-      if (map == null) continue;
-      final List<dynamic> services = (map['services'] ?? []) as List<dynamic>;
-      services.removeWhere((id) => id == serviceId);
-      await highlightedServicesRef.doc(doc.id).update({'services': services});
+      batch.update(doc.reference, {
+        'services': FieldValue.arrayRemove([serviceId]),
+      });
     }
+    await batch.commit().timeout(
+      _firestoreTimeout,
+      onTimeout: _onFirestoreTimeout,
+    );
   }
 
   Future<void> _toggleServiceStatus(

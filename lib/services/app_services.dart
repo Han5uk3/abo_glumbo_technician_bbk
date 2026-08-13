@@ -1275,6 +1275,41 @@ class AppServices {
     });
   }
 
+  /// Whether a `booking_request` doc is still live from the client's point of
+  /// view, independent of the server-side cleanup cron.
+  ///
+  /// Mirrors the customer app's own `showExpiredScreen` rule
+  /// (embedded_technician_search.dart): nobody has 120 seconds to accept
+  /// before the search is considered a failed attempt — the customer has to
+  /// explicitly "Search again" (a fresh request doc), not sit on a dead card
+  /// for the rest of the 5-minute window. Once someone HAS accepted, the
+  /// customer is actively choosing between candidates for up to 5 minutes
+  /// total, so the card stays live for that whole window.
+  ///
+  /// Single source of truth on purpose: the Pending tab hides these cards on
+  /// this rule, so any other surface counting the same requests (the admin
+  /// dashboard tile) has to expire them on exactly the same rule or it reports
+  /// a backlog that the tab refuses to show.
+  static bool isBookingRequestLive(Map<String, dynamic> data, {DateTime? now}) {
+    final status = data['status']?.toString();
+    if (status != 'pending' && status != 'searching') return false;
+
+    final createdAt = data['createdAt'] as Timestamp?;
+    if (createdAt == null) return true;
+
+    final elapsed = (now ?? TimeService.now).difference(createdAt.toDate());
+    final acceptedTechnicians = data['acceptedTechnicians'] as List? ?? [];
+    if (acceptedTechnicians.isEmpty) {
+      return elapsed < const Duration(seconds: 120);
+    }
+    return elapsed < const Duration(minutes: 5);
+  }
+
+  /// Ticks once a second so time-based filters re-evaluate without waiting for
+  /// a new Firestore snapshot.
+  static Stream<int> _expiryTicker() =>
+      Stream.periodic(const Duration(seconds: 1), (i) => i).startWith(0);
+
   static Stream<List<RawBookingRequest>> getBookingRequestsStream() {
     final firestoreStream = AppFirestore.bookingRequestsCollectionRef
         .where('status', whereIn: ['pending', 'searching'])
@@ -1283,44 +1318,20 @@ class AppServices {
     // Combine with a periodic timer so an expired request disappears
     // immediately client-side, instead of waiting for the server cleanup
     // cron (which can lag up to 2 minutes).
-    final timerStream = Stream.periodic(
-      const Duration(seconds: 1),
-      (i) => i,
-    ).startWith(0);
-
     return Rx.combineLatest2(
       firestoreStream,
-      timerStream,
+      _expiryTicker(),
       (snapshot, _) => snapshot,
     ).map((snapshot) {
       final now = TimeService.now;
       return snapshot.docs
-          .where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final createdAt = data['createdAt'] as Timestamp?;
-            if (createdAt == null) return true;
-            final elapsed = now.difference(createdAt.toDate());
-            final acceptedTechnicians =
-                data['acceptedTechnicians'] as List? ?? [];
-            // Mirrors the customer app's own `showExpiredScreen` rule
-            // (embedded_technician_search.dart): nobody has 120 seconds to
-            // accept before the search is considered a failed attempt — the
-            // customer has to explicitly "Search again" (a fresh request
-            // doc), not sit on a dead card for the rest of the 5-minute
-            // window. Once someone HAS accepted, the customer is actively
-            // choosing between candidates for up to 5 minutes total, so the
-            // card stays live for that whole window.
-            if (acceptedTechnicians.isEmpty) {
-              return elapsed < const Duration(seconds: 120);
-            }
-            return elapsed < const Duration(minutes: 5);
-          })
-          .map((doc) {
-            return RawBookingRequest(
+          .map(
+            (doc) => RawBookingRequest(
               id: doc.id,
               data: doc.data() as Map<String, dynamic>,
-            );
-          })
+            ),
+          )
+          .where((request) => isBookingRequestLive(request.data, now: now))
           .toList();
     }).onErrorReturn([]);
   }
@@ -2613,11 +2624,29 @@ class AppServices {
         .map((s) => s.docs.map((doc) => doc.id).toList())
         .onErrorReturn([]);
 
-    final rawBookingRequests = AppFirestore.bookingRequestsCollectionRef
-        .where('status', whereIn: ['pending', 'searching'])
-        .snapshots()
-        .map((s) => s.docs.map((doc) => doc.id).toList())
-        .onErrorReturn([]);
+    // Expired requests have to drop out of the count on the same rule the
+    // Pending tab hides them on, ticker included - otherwise the tile keeps
+    // reporting a request the tab will not show, for as long as it takes the
+    // cleanup cron to close it server-side (and forever if that never runs).
+    final rawBookingRequests =
+        Rx.combineLatest2(
+          AppFirestore.bookingRequestsCollectionRef
+              .where('status', whereIn: ['pending', 'searching'])
+              .snapshots(),
+          _expiryTicker(),
+          (snapshot, _) => snapshot,
+        ).map((s) {
+          final now = TimeService.now;
+          return s.docs
+              .where(
+                (doc) => isBookingRequestLive(
+                  doc.data() as Map<String, dynamic>,
+                  now: now,
+                ),
+              )
+              .map((doc) => doc.id)
+              .toList();
+        }).onErrorReturn(<String>[]);
 
     final pending = Rx.combineLatest2(
       pendingBookings,

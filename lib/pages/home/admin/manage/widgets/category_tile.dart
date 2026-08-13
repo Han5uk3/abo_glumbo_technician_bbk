@@ -81,13 +81,7 @@ class CategoryTileDevWidget extends StatelessWidget {
             icon: Icon(Icons.edit_outlined, size: 20, color: AppColors.primary),
           ),
           IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) =>
-                    showDeleteConfirmDialog(dialogContext),
-              );
-            },
+            onPressed: () => _showDeleteConfirmDialog(context),
             icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
           ),
         ],
@@ -95,48 +89,97 @@ class CategoryTileDevWidget extends StatelessWidget {
     );
   }
 
-  // Updated showDeleteConfirmDialog method with delete functionality
-  Widget showDeleteConfirmDialog(BuildContext context) {
+  void _showDeleteConfirmDialog(BuildContext context) {
+    // Resolved from the tile, but captured up front: this tile is unmounted as
+    // soon as the categories stream drops the deleted row, so the dialog must
+    // not depend on the tile's context to finish.
+    final bloc = context.read<ManageAppBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _DeleteCategoryDialog(
+        category: category,
+        bloc: bloc,
+        messenger: messenger,
+      ),
+    );
+  }
+}
+
+class _DeleteCategoryDialog extends StatefulWidget {
+  const _DeleteCategoryDialog({
+    required this.category,
+    required this.bloc,
+    required this.messenger,
+  });
+
+  final CategoryModel category;
+  final ManageAppBloc bloc;
+  final ScaffoldMessengerState messenger;
+
+  @override
+  State<_DeleteCategoryDialog> createState() => _DeleteCategoryDialogState();
+}
+
+class _DeleteCategoryDialogState extends State<_DeleteCategoryDialog> {
+  /// Only react to delete results for the request this dialog started, so a
+  /// leftover state from another action can't drive it.
+  bool _requested = false;
+
+  void _onStateChanged(BuildContext dialogContext, ManageAppState state) {
+    if (!_requested || !mounted) return;
+
+    final l10n = AppLocalizations.of(dialogContext);
+    Navigator.of(dialogContext).pop();
+
+    if (state is CategoryDeleted) {
+      widget.messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.deletedSuccessfully ?? 'Category deleted successfully',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (state is CategoryDeleteError) {
+      widget.messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n?.deleteError ?? 'Delete error'}: ${state.error}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<ManageAppBloc, ManageAppState>(
-      listener: (blocContext, state) {
-        if (state is CategoryDeleted) {
-          // Generic deletion success
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.deletedSuccessfully),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is CategoryDeleteError) {
-          // Generic deletion error
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${AppLocalizations.of(context)?.deleteError}: ${state is BannerDeleteError ? (state).error : (state as FaqDeleteError).error}',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
+      bloc: widget.bloc,
+      listenWhen: (previous, current) =>
+          current is CategoryDeleted || current is CategoryDeleteError,
+      listener: (blocContext, state) => _onStateChanged(context, state),
+      buildWhen: (previous, current) =>
+          current is DeletingCategory ||
+          current is CategoryDeleted ||
+          current is CategoryDeleteError,
       builder: (blocContext, state) {
-        final isDeleting = state is DeletingCategory;
+        final isDeleting = _requested && state is DeletingCategory;
+        final l10n = AppLocalizations.of(context)!;
 
         return AlertDialog(
           backgroundColor: AppColors.bgWhite,
           actionsAlignment: MainAxisAlignment.start,
-          title: Text(AppLocalizations.of(context)!.deleteCategory),
-          content: Text(
-            AppLocalizations.of(context)!.deleteCategoryConfirmation,
-          ),
+          title: Text(l10n.deleteCategory),
+          content: Text(l10n.deleteCategoryConfirmation),
           actions: [
             TextButton(
-              onPressed: isDeleting ? null : () => Navigator.pop(context),
+              onPressed: isDeleting ? null : () => Navigator.of(context).pop(),
               child: Text(
-                AppLocalizations.of(context)!.cancel,
-                style: TextStyle(color: Colors.black),
+                l10n.cancel,
+                style: const TextStyle(color: Colors.black),
               ),
             ),
             eButton(
@@ -144,9 +187,9 @@ class CategoryTileDevWidget extends StatelessWidget {
               onPressed: isDeleting
                   ? null
                   : () {
-                      // Trigger delete event
-                      context.read<ManageAppBloc>().add(
-                        DeleteCategoryEvent(category.id ?? ''),
+                      setState(() => _requested = true);
+                      widget.bloc.add(
+                        DeleteCategoryEvent(widget.category.id ?? ''),
                       );
                     },
               widget: isDeleting
@@ -156,8 +199,8 @@ class CategoryTileDevWidget extends StatelessWidget {
                       child: Loader(size: 12, color: Colors.white),
                     )
                   : Text(
-                      AppLocalizations.of(context)!.delete,
-                      style: TextStyle(color: Colors.white),
+                      l10n.delete,
+                      style: const TextStyle(color: Colors.white),
                     ),
               context: context,
               textColor: Colors.white,

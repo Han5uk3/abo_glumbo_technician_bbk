@@ -30,11 +30,21 @@ const {
 } = require("./src/utils/bookingUtils");
 
 // How long a chat presence heartbeat stays trustworthy.
-// Clients refresh the heartbeat every 15s (see `_presenceHeartbeat` in each
-// app's chat_services.dart). Anything older than this is treated as "the user
-// is no longer looking at the chat", so a presence flag left behind by a
-// suspended, killed or disconnected app can never permanently swallow pushes.
-const CHAT_PRESENCE_TTL_MS = 45 * 1000;
+// Anything older than this is treated as "the user is no longer looking at the
+// chat", so a presence flag left behind by a suspended, killed or disconnected
+// app can never permanently swallow pushes.
+//
+// Kept tight so a killed app un-mutes quickly when onDisconnect is slow to
+// fire. Clients refresh every 5s (`_presenceHeartbeat` in each app's
+// chat_services.dart), leaving a 3x margin for a late beat.
+//
+// That margin is load-bearing on iOS. Those builds call
+// setForegroundNotificationPresentationOptions(alert: true), so the system
+// presents a foreground banner before Dart can drop it - this check is the
+// only suppression an open chat gets there. Android is covered twice: the
+// on-device currentActiveChatId check in onMessage catches whatever slips
+// past this one.
+const CHAT_PRESENCE_TTL_MS = 15 * 1000;
 
 // Returns true only when we can PROVE the receiver has this chat open in the
 // foreground right now. Every uncertain case returns false so the push goes out.

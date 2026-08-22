@@ -289,7 +289,7 @@ class _BookingInfoState extends State<BookingInfo> {
 
   void _autoDeclineExpiredOffer() {
     if (_offerId == null) return;
-    _declineJobOffer();
+    _declineJobOffer(autoDeclined: true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -381,11 +381,11 @@ class _BookingInfoState extends State<BookingInfo> {
     }
   }
 
-  Future<void> _declineJobOffer() async {
+  Future<void> _declineJobOffer({bool autoDeclined = false}) async {
     if (_offerId == null) return;
     setState(() => _isOfferLoading = true);
     try {
-      await AppServices.declineJobOffer(_offerId!);
+      await AppServices.declineJobOffer(_offerId!, autoDeclined: autoDeclined);
       if (mounted) {
         setState(() => _offerId = null);
         Navigator.pop(context);

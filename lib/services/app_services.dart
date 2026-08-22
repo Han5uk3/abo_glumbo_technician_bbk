@@ -3179,31 +3179,17 @@ class AppServices {
     final offerRef = AppFirestore.jobOffersCollectionRef.doc(offerId);
 
     if (requestId != null) {
-      // It's a broadcast request - just signify interest
+      // It's a broadcast request - just signify interest.
+      //
+      // The customer is not written to from here. For a rebook, their
+      // "requested technician has accepted your booking request" notification
+      // is raised by the `onManualJobOfferUpdated` Cloud Function off this same
+      // status transition, so it arrives as an actual push on their device
+      // instead of only appearing in the in-app list the next time they open it.
       await offerRef.update({
         'status': 'accepted_by_technician',
         'acceptedAt': FieldValue.serverTimestamp(),
       });
-
-      final offerSnap = await offerRef.get();
-      if (offerSnap.exists) {
-        final offerData = offerSnap.data() as Map<String, dynamic>;
-        final customerId = offerData['customerId'];
-        final isRebook = offerData['isRebook'] == true;
-        if (customerId != null) {
-          if (isRebook) {
-            await _recordCustomerNotification(
-              customerId: customerId,
-              titleEn: 'Technician Accepted!',
-              titleAr: 'تم قبول الفني!',
-              bodyEn: '${technician.name} accepted your rebooking request.',
-              bodyAr: 'قبل ${technician.name} طلب إعادة الجدولة الخاص بك.',
-              type: 'offer_accepted',
-              data: {'requestId': requestId},
-            );
-          }
-        }
-      }
       return;
     }
 
@@ -3334,41 +3320,32 @@ class AppServices {
     }
   }
 
-  static Future<void> declineJobOffer(String offerId) async {
+  /// Declines a job offer.
+  ///
+  /// [autoDeclined] marks a decline the technician never actually made - the
+  /// offer's countdown simply ran out. The distinction is written to the offer
+  /// because the customer must not be told a rebook was "rejected" when their
+  /// technician only failed to answer; `onManualJobOfferUpdated` reads this
+  /// flag and stays silent for a timeout.
+  static Future<void> declineJobOffer(
+    String offerId, {
+    bool autoDeclined = false,
+  }) async {
     try {
       final offerDoc = await AppFirestore.jobOffersCollectionRef
           .doc(offerId)
           .get();
       if (!offerDoc.exists) return;
 
-      final data = offerDoc.data() as Map<String, dynamic>;
-      final bool isRebook = data['isRebook'] == true;
-
       final batch = FirebaseFirestore.instance.batch();
 
       batch.update(AppFirestore.jobOffersCollectionRef.doc(offerId), {
         'status': 'declined',
         'declinedAt': FieldValue.serverTimestamp(),
+        'autoDeclined': autoDeclined,
       });
 
       await batch.commit();
-
-      if (isRebook) {
-        final customerId = data['customerId'];
-        if (customerId != null) {
-          final technician = LocalStore.getCachedUserData();
-          final techName = technician?.name ?? 'The technician';
-          await _recordCustomerNotification(
-            customerId: customerId,
-            titleEn: 'Request Declined',
-            titleAr: 'تم رفض الطلب',
-            bodyEn: '$techName has declined your rebooking request.',
-            bodyAr: 'لقد رفض $techName طلب إعادة الجدولة الخاص بك.',
-            type: 'offer_declined',
-            data: {'offerId': offerId},
-          );
-        }
-      }
     } catch (e) {
       debugPrint('Error declining job offer: $e');
       rethrow;

@@ -310,6 +310,105 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
     const offerId = event.params.offerId;
     const bookingId = afterData.bookingId;
 
+    // Rebook offers belong to the `job_requests` flow and carry a `requestId`
+    // but never a `bookingId` - the booking document only comes into existence
+    // once the customer confirms the review step. They therefore fell out of the
+    // `!bookingId` guard below, and the customer was never told server-side
+    // whether the one technician they asked for had said yes or no.
+    //
+    // The copy is deliberately different from the broadcast path: a rebook is a
+    // direct request to a specific person, so it reads as an answer to that
+    // request rather than "a technician is interested".
+    //
+    // A technician who simply never answers stays silent by design. That case
+    // reaches us as the technician app's own countdown auto-declining the offer,
+    // which stamps `autoDeclined`; a timeout is not a rejection and must not
+    // push anything to the customer.
+    if (afterData.isRebook === true) {
+      const accepted =
+        beforeData.status !== "accepted_by_technician" &&
+        afterData.status === "accepted_by_technician";
+      // A decline the technician never made: their app's countdown fired. New
+      // builds say so outright with `autoDeclined`; the expiry comparison covers
+      // the ones already in the field, because that countdown can only reach zero
+      // at `expiresAt` while a real tap always lands before it.
+      const expiresAt = afterData.expiresAt;
+      const timedOut =
+        afterData.autoDeclined === true ||
+        (expiresAt && typeof expiresAt.toMillis === "function" && Date.now() >= expiresAt.toMillis());
+
+      // Only a technician answering the original offer counts as a rejection.
+      // The customer turning down a counter-offer lands on the same "declined"
+      // status (respondToJobOfferForRequest in the customer app), but comes from
+      // "counter_offered" - telling them their technician rejected them, when
+      // they are the one who just said no, would be backwards.
+      const rejected =
+        beforeData.status === "pending" &&
+        afterData.status === "declined" &&
+        !timedOut;
+
+      if (!accepted && !rejected) return null;
+
+      const customerId = afterData.customerId;
+      if (!customerId) return null;
+
+      try {
+        const custSnap = await db.collection("customers").doc(customerId).get();
+        if (!custSnap.exists) {
+          console.log(`[Offer ${offerId}] Rebook customer ${customerId} not found, skipping notification.`);
+          return null;
+        }
+        const custData = custSnap.data();
+
+        const copy = accepted
+          ? {
+            titleEn: "Booking Request Accepted",
+            titleAr: "تم قبول طلب الحجز",
+            titleUr: "بکنگ کی درخواست قبول",
+            bodyEn: "Requested technician has accepted your booking request.",
+            bodyAr: "قبل الفني المطلوب طلب الحجز الخاص بك.",
+            bodyUr: "درخواست کردہ ٹیکنیشن نے آپ کی بکنگ کی درخواست قبول کر لی ہے۔",
+            type: "rebook_accepted",
+          }
+          : {
+            titleEn: "Booking Request Rejected",
+            titleAr: "تم رفض طلب الحجز",
+            titleUr: "بکنگ کی درخواست مسترد",
+            bodyEn: "Requested technician has rejected your booking request.",
+            bodyAr: "رفض الفني المطلوب طلب الحجز الخاص بك.",
+            bodyUr: "درخواست کردہ ٹیکنیشن نے آپ کی بکنگ کی درخواست مسترد کر دی ہے۔",
+            type: "rebook_declined",
+          };
+
+        // Not gated on the token: sendAndStoreNotification writes the
+        // customers/{uid}/notifications record the in-app list reads before it
+        // pushes, so gating here would cost unregistered devices the record too.
+        await sendAndStoreNotification({
+          targetRole: "customer",
+          targetId: customerId,
+          titleEn: copy.titleEn,
+          titleAr: copy.titleAr,
+          titleUr: copy.titleUr,
+          bodyEn: copy.bodyEn,
+          bodyAr: copy.bodyAr,
+          bodyUr: copy.bodyUr,
+          data: {
+            requestId: afterData.requestId || "",
+            offerId: offerId,
+            targetRole: "customer",
+            category: "rebook",
+            type: copy.type,
+          },
+          fcmToken: custData.fcmToken,
+          lanCode: custData.lanCode || "en",
+        });
+        console.log(`[Offer ${offerId}] Rebook ${copy.type} notification sent to customer ${customerId}.`);
+      } catch (e) {
+        console.error(`Error notifying customer about rebook offer ${offerId}:`, e);
+      }
+      return null;
+    }
+
     if (!bookingId) return null;
 
     // Check if status changed to accepted_by_technician

@@ -250,10 +250,18 @@ At step 2 the wizard renders `RebookWaitWidget` instead of the search UI
 CF `onJobOfferCreatedForRebook` ([bookingTriggers.js:1036](functions/src/triggers/bookingTriggers.js:1036)) pushes
 "New Booking Assigned: {service}" to the technician and a "New Booking Request" to **all** admins.
 
-**Technician response:**
+**Technician response:** the customer's accept/decline notification is raised server-side by
+`onManualJobOfferUpdated` (rebook branch), which stores it *and* pushes it. It used to be written
+straight to `customers/{uid}/notifications` by the technician app, which meant no push at all.
 - Accept → offer `accepted_by_technician`; customer's listener fires `onAccepted` and the wizard jumps
-  to review. Customer notification "Technician Accepted!".
-- Decline → `declined`; customer sees the failure screen. Customer notification "Request Declined".
+  to review. Customer notification "Requested technician has accepted your booking request."
+- Decline → `declined`; customer sees the failure screen. Customer notification "Requested technician
+  has rejected your booking request." Only a `pending` → `declined` transition without
+  `autoDeclined` counts, so the two look-alike transitions stay silent: the technician app's countdown
+  auto-declining an offer nobody answered (`autoDeclined: true`, or — for builds predating that flag —
+  a decline landing at or after `expiresAt`), and the customer rejecting a counter-offer
+  (`counter_offered` → `declined`).
+- No response → nothing is sent to the customer.
 - Counter-offer → the customer sees an accept/reject card with the proposed time; accepting updates
   `job_requests.bookingDateTime` and carries `_counterProposedTime` into the review step.
 

@@ -1344,7 +1344,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
 
     final remaining = expiresAt.toDate().difference(TimeService.now).inSeconds;
     if (remaining <= 0) {
-      _declineOffer(context);
+      _declineOffer(context, autoDeclined: true);
       return;
     }
 
@@ -1358,7 +1358,7 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
       setState(() => _secondsRemaining--);
       if (_secondsRemaining <= 0) {
         timer.cancel();
-        _declineOffer(context);
+        _declineOffer(context, autoDeclined: true);
       }
     });
   }
@@ -1536,10 +1536,16 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
     );
   }
 
-  Future<void> _declineOffer(BuildContext context) async {
+  Future<void> _declineOffer(
+    BuildContext context, {
+    bool autoDeclined = false,
+  }) async {
     setState(() => _isLoading = true);
     try {
-      await AppServices.declineJobOffer(widget.offer.offerId);
+      await AppServices.declineJobOffer(
+        widget.offer.offerId,
+        autoDeclined: autoDeclined,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

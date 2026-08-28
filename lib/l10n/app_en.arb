@@ -44,6 +44,7 @@
   "areYouSureYouWantToRejectThisOrder": "Are you sure you want to reject this order?",
   "loadingAgents": "Loading Technicians...",
   "bonusCardDesc": "Earned Bonus will be included in your wallet for Payout.",
+  "lastBonus": "Last Bonus",
   "noReview": "No Review",
   "areYouSureYouWantToAcceptThisNewTime": "Are you sure you want to accept this new time?",
   "reject": "Reject",
@@ -190,8 +191,8 @@
   "bonusAmount": "Bonus Amount",
   "requestBonusPayout": "Request Bonus Payout",
   "noBonusAvailableToClaim": "No bonus available to claim",
-  "monthlyBonusEarned": "Monthly Bonus Earned",
-  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "Are you sure you want to request a payout for your monthly bonus?",
+  "bonusEarned": "Bonus Earned",
+  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "Are you sure you want to request a payout for your bonus?",
   "evening": "Evening",
   "serviceBookedSuccessfully": "Service Booked Successfully",
   "checkForBookingStatus": "Check your booking status in 'My Bookings' section",
@@ -519,16 +520,18 @@
   "fifteenpercentBonus": "15% Bonus + Badge",
   "greaterThan3dot5rating": "3.5+ rating",
   "greaterThan4dot0rating": "4.0+ rating",
+  "tierJobsRequirement": "{count}+ Jobs",
+  "@tierJobsRequirement": {
+    "description": "Minimum completed jobs a reward tier requires",
+    "placeholders": { "count": { "type": "int" } }
+  },
   "greaterThan4dot5rating": "4.5+ rating",
   "greaterThan4dot8rating": "4.8+ rating",
   "searchByTechnicianName": "Search by technician name",
   "bookingWasRejectedByAdmin": "Booking was rejected by admin",
   "bonus": "Bonus",
   "jobs": "Jobs",
-  "twentyPlusJobs": "20+ Jobs",
   "thirtyPlusJobs": "30+ Jobs",
-  "fortyPlusJobs": "40+ Jobs",
-  "sixtyPlusJobs": "60+ Jobs",
   "earnings": "Total Transaction Value",
   "exitAppTitle": "Exit App",
   "recentTransactions": "Recent Transactions",
@@ -1934,5 +1937,5 @@
   "revenueFilterCustomRange": "Custom Range...",
   "nearby20km": "Nearby (20km)",
   "totalRevenue": "Total Transaction Value",
-  "bonusCalculationNote": "Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation."
+  "bonusCalculationNote": "Your bonus is paid every night, based only on the Inspection Fees you settled that day. Spare parts, materials, and other charges are not included in the bonus calculation."
 }

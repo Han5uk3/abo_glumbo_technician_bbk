@@ -147,6 +147,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bonusCardDesc => 'المكافأة المكتسبة سيتم تضمينها في محفظتك للدفع.';
 
   @override
+  String get lastBonus => 'آخر مكافأة';
+
+  @override
   String get noReview => 'لا توجد مراجعات';
 
   @override
@@ -597,11 +600,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noBonusAvailableToClaim => 'لا توجد مكافأة متاحة للمطالبة';
 
   @override
-  String get monthlyBonusEarned => 'المكافأة الشهرية المكتسبة';
+  String get bonusEarned => 'المكافأة المكتسبة';
 
   @override
   String get areYouSureYouWantToRequestAPayoutForYourMonthlyBonus =>
-      'هل أنت متأكد أنك تريد طلب صرف مكافأتك الشهرية؟';
+      'هل أنت متأكد أنك تريد طلب صرف مكافأتك؟';
 
   @override
   String get evening => 'مساءً';
@@ -1593,6 +1596,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get greaterThan4dot0rating => 'تقييم 4.0+';
 
   @override
+  String tierJobsRequirement(int count) {
+    return 'أكثر من $count وظيفة';
+  }
+
+  @override
   String get greaterThan4dot5rating => 'تقييم 4.5+';
 
   @override
@@ -1611,16 +1619,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get jobs => 'وظائف';
 
   @override
-  String get twentyPlusJobs => 'أكثر من 20 وظيفة';
-
-  @override
   String get thirtyPlusJobs => 'أكثر من 30 وظيفة';
-
-  @override
-  String get fortyPlusJobs => 'أكثر من 40 وظيفة';
-
-  @override
-  String get sixtyPlusJobs => 'أكثر من 60 وظيفة';
 
   @override
   String get earnings => 'إجمالي قيمة المعاملات';
@@ -5313,5 +5312,5 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get bonusCalculationNote =>
-      'يتم احتساب مكافأتك الشهرية بناءً فقط على إجمالي رسوم الفحص للشهر الماضي. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة.';
+      'تُدفع مكافأتك كل ليلة، بناءً فقط على رسوم الفحص التي تمت تسويتها في ذلك اليوم. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة.';
 }

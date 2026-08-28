@@ -126,7 +126,7 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
       final serviceCost = widget.booking.completionData?.totalCost ?? 0.0;
       final totalAmount = widget.booking.completionData != null
           ? (serviceCost + inspectionFee)
-          : (widget.booking.service.price ?? 0.0);
+          : widget.booking.effectiveInspectionFee;
 
       final orderId = widget.booking.orderId?.isNotEmpty == true
           ? widget.booking.orderId!

@@ -44,6 +44,7 @@
   "areYouSureYouWantToRejectThisOrder": "هل أنت متأكد من رغبتك في رفض هذا الطلب؟",
   "loadingAgents": "جاري تحميل الفنيين...",
   "bonusCardDesc": "المكافأة المكتسبة سيتم تضمينها في محفظتك للدفع.",
+  "lastBonus": "آخر مكافأة",
   "noReview": "لا توجد مراجعات",
   "areYouSureYouWantToAcceptThisNewTime": "هل أنت متأكد من رغبتك في قبول هذا الوقت الجديد؟",
   "reject": "رفض",
@@ -190,8 +191,8 @@
   "bonusAmount": "مبلغ المكافأة",
   "requestBonusPayout": "طلب صرف المكافأة",
   "noBonusAvailableToClaim": "لا توجد مكافأة متاحة للمطالبة",
-  "monthlyBonusEarned": "المكافأة الشهرية المكتسبة",
-  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "هل أنت متأكد أنك تريد طلب صرف مكافأتك الشهرية؟",
+  "bonusEarned": "المكافأة المكتسبة",
+  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "هل أنت متأكد أنك تريد طلب صرف مكافأتك؟",
   "evening": "مساءً",
   "serviceBookedSuccessfully": "تم حجز الخدمة بنجاح",
   "checkForBookingStatus": "تحقق من حالة الحجز في قسم 'حجوزاتي'",
@@ -520,16 +521,18 @@
   "fifteenpercentBonus": "15% مكافأة + بيج",
   "greaterThan3dot5rating": "تقييم 3.5+",
   "greaterThan4dot0rating": "تقييم 4.0+",
+  "tierJobsRequirement": "أكثر من {count} وظيفة",
+  "@tierJobsRequirement": {
+    "description": "Minimum completed jobs a reward tier requires",
+    "placeholders": { "count": { "type": "int" } }
+  },
   "greaterThan4dot5rating": "تقييم 4.5+",
   "greaterThan4dot8rating": "تقييم 4.8+",
   "searchByTechnicianName": "البحث باسم الفنّي",
   "bookingWasRejectedByAdmin": "تم رفض الحجز بواسطة المسؤول",
   "bonus": "مكافأة",
   "jobs": "وظائف",
-  "twentyPlusJobs": "أكثر من 20 وظيفة",
   "thirtyPlusJobs": "أكثر من 30 وظيفة",
-  "fortyPlusJobs": "أكثر من 40 وظيفة",
-  "sixtyPlusJobs": "أكثر من 60 وظيفة",
   "earnings": "إجمالي قيمة المعاملات",
   "exitAppTitle": "الخروج من التطبيق",
   "recentTransactions": "المعاملات الحديثة",
@@ -1937,5 +1940,5 @@
       }
     }
   },
-  "bonusCalculationNote": "يتم احتساب مكافأتك الشهرية بناءً فقط على إجمالي رسوم الفحص للشهر الماضي. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة."
+  "bonusCalculationNote": "تُدفع مكافأتك كل ليلة، بناءً فقط على رسوم الفحص التي تمت تسويتها في ذلك اليوم. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة."
 }

@@ -44,6 +44,7 @@
   "areYouSureYouWantToRejectThisOrder": "کیا آپ واقعی اس آرڈر کو مسترد کرنا چاہتے ہیں؟",
   "loadingAgents": "ٹیکنیشنز لوڈ ہو رہے ہیں...",
   "bonusCardDesc": "حاصل کردہ بونس ادائیگی کے لیے آپ کے بٹوے میں شامل کیا جائے گا۔",
+  "lastBonus": "آخری بونس",
   "noReview": "کوئی تبصرہ نہیں",
   "areYouSureYouWantToAcceptThisNewTime": "کیا آپ واقعی اس نئے وقت کو قبول کرنا چاہتے ہیں؟",
   "reject": "مسترد کریں",
@@ -190,8 +191,8 @@
   "bonusAmount": "بونس کی رقم",
   "requestBonusPayout": "بونس کی ادائیگی کی درخواست کریں",
   "noBonusAvailableToClaim": "کلیم کرنے کے لیے کوئی بونس دستیاب نہیں ہے",
-  "monthlyBonusEarned": "ماہانہ بونس حاصل کیا گیا",
-  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "کیا آپ واقعی اپنے ماہانہ بونس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟",
+  "bonusEarned": "حاصل کردہ بونس",
+  "areYouSureYouWantToRequestAPayoutForYourMonthlyBonus": "کیا آپ واقعی اپنے بونس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟",
   "evening": "شام",
   "serviceBookedSuccessfully": "خدمت کامیابی سے بک ہو گئی",
   "checkForBookingStatus": "اپنی بکنگ کا اسٹیٹس 'میری بکنگ' سیکشن میں چیک کریں",
@@ -525,16 +526,18 @@
   "fifteenpercentBonus": "15% بونس + بیج",
   "greaterThan3dot5rating": "3.5+ درجہ بندی",
   "greaterThan4dot0rating": "4.0+ درجہ بندی",
+  "tierJobsRequirement": "{count}+ جابز",
+  "@tierJobsRequirement": {
+    "description": "Minimum completed jobs a reward tier requires",
+    "placeholders": { "count": { "type": "int" } }
+  },
   "greaterThan4dot5rating": "4.5+ درجہ بندی",
   "greaterThan4dot8rating": "4.8+ درجہ بندی",
   "searchByTechnicianName": "ٹیکنیشن کے نام سے تلاش کریں",
   "bookingWasRejectedByAdmin": "بکنگ ایڈمن نے مسترد کر دی تھی",
   "bonus": "بونس",
   "jobs": "جابز",
-  "twentyPlusJobs": "20+ جابز",
   "thirtyPlusJobs": "30+ جابز",
-  "fortyPlusJobs": "40+ جابز",
-  "sixtyPlusJobs": "60+ جابز",
   "earnings": "کل لین دین کی مالیت",
   "exitAppTitle": "ایپ سے باہر نکلیں",
   "recentTransactions": "حالیہ لین دین",
@@ -1936,5 +1939,5 @@
   "filter": "فلٹر",
   "nearby20km": "قریب (20 کلومیٹر)",
   "totalRevenue": "کل لین دین کی مالیت",
-  "bonusCalculationNote": "آپ کا ماہانہ بونس صرف پچھلے مہینے کی کل انسپیکشن فیس کی بنیاد پر شمار کیا جاتا ہے۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔"
+  "bonusCalculationNote": "آپ کا بونس ہر رات ادا کیا جاتا ہے، صرف اس دن طے شدہ انسپیکشن فیس کی بنیاد پر۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔"
 }

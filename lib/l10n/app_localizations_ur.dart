@@ -150,6 +150,9 @@ class AppLocalizationsUr extends AppLocalizations {
       'حاصل کردہ بونس ادائیگی کے لیے آپ کے بٹوے میں شامل کیا جائے گا۔';
 
   @override
+  String get lastBonus => 'آخری بونس';
+
+  @override
   String get noReview => 'کوئی تبصرہ نہیں';
 
   @override
@@ -609,11 +612,11 @@ class AppLocalizationsUr extends AppLocalizations {
       'کلیم کرنے کے لیے کوئی بونس دستیاب نہیں ہے';
 
   @override
-  String get monthlyBonusEarned => 'ماہانہ بونس حاصل کیا گیا';
+  String get bonusEarned => 'حاصل کردہ بونس';
 
   @override
   String get areYouSureYouWantToRequestAPayoutForYourMonthlyBonus =>
-      'کیا آپ واقعی اپنے ماہانہ بونس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟';
+      'کیا آپ واقعی اپنے بونس کی ادائیگی کی درخواست کرنا چاہتے ہیں؟';
 
   @override
   String get evening => 'شام';
@@ -1616,6 +1619,11 @@ class AppLocalizationsUr extends AppLocalizations {
   String get greaterThan4dot0rating => '4.0+ درجہ بندی';
 
   @override
+  String tierJobsRequirement(int count) {
+    return '$count+ جابز';
+  }
+
+  @override
   String get greaterThan4dot5rating => '4.5+ درجہ بندی';
 
   @override
@@ -1634,16 +1642,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get jobs => 'جابز';
 
   @override
-  String get twentyPlusJobs => '20+ جابز';
-
-  @override
   String get thirtyPlusJobs => '30+ جابز';
-
-  @override
-  String get fortyPlusJobs => '40+ جابز';
-
-  @override
-  String get sixtyPlusJobs => '60+ جابز';
 
   @override
   String get earnings => 'کل لین دین کی مالیت';
@@ -5407,5 +5406,5 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get bonusCalculationNote =>
-      'آپ کا ماہانہ بونس صرف پچھلے مہینے کی کل انسپیکشن فیس کی بنیاد پر شمار کیا جاتا ہے۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔';
+      'آپ کا بونس ہر رات ادا کیا جاتا ہے، صرف اس دن طے شدہ انسپیکشن فیس کی بنیاد پر۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔';
 }

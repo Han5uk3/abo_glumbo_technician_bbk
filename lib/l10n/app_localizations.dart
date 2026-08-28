@@ -370,6 +370,12 @@ abstract class AppLocalizations {
   /// **'Earned Bonus will be included in your wallet for Payout.'**
   String get bonusCardDesc;
 
+  /// No description provided for @lastBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Bonus'**
+  String get lastBonus;
+
   /// No description provided for @noReview.
   ///
   /// In en, this message translates to:
@@ -1246,16 +1252,16 @@ abstract class AppLocalizations {
   /// **'No bonus available to claim'**
   String get noBonusAvailableToClaim;
 
-  /// No description provided for @monthlyBonusEarned.
+  /// No description provided for @bonusEarned.
   ///
   /// In en, this message translates to:
-  /// **'Monthly Bonus Earned'**
-  String get monthlyBonusEarned;
+  /// **'Bonus Earned'**
+  String get bonusEarned;
 
   /// No description provided for @areYouSureYouWantToRequestAPayoutForYourMonthlyBonus.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to request a payout for your monthly bonus?'**
+  /// **'Are you sure you want to request a payout for your bonus?'**
   String get areYouSureYouWantToRequestAPayoutForYourMonthlyBonus;
 
   /// No description provided for @evening.
@@ -3172,6 +3178,12 @@ abstract class AppLocalizations {
   /// **'4.0+ rating'**
   String get greaterThan4dot0rating;
 
+  /// Minimum completed jobs a reward tier requires
+  ///
+  /// In en, this message translates to:
+  /// **'{count}+ Jobs'**
+  String tierJobsRequirement(int count);
+
   /// No description provided for @greaterThan4dot5rating.
   ///
   /// In en, this message translates to:
@@ -3208,29 +3220,11 @@ abstract class AppLocalizations {
   /// **'Jobs'**
   String get jobs;
 
-  /// No description provided for @twentyPlusJobs.
-  ///
-  /// In en, this message translates to:
-  /// **'20+ Jobs'**
-  String get twentyPlusJobs;
-
   /// No description provided for @thirtyPlusJobs.
   ///
   /// In en, this message translates to:
   /// **'30+ Jobs'**
   String get thirtyPlusJobs;
-
-  /// No description provided for @fortyPlusJobs.
-  ///
-  /// In en, this message translates to:
-  /// **'40+ Jobs'**
-  String get fortyPlusJobs;
-
-  /// No description provided for @sixtyPlusJobs.
-  ///
-  /// In en, this message translates to:
-  /// **'60+ Jobs'**
-  String get sixtyPlusJobs;
 
   /// No description provided for @earnings.
   ///
@@ -10010,7 +10004,7 @@ abstract class AppLocalizations {
   /// No description provided for @bonusCalculationNote.
   ///
   /// In en, this message translates to:
-  /// **'Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.'**
+  /// **'Your bonus is paid every night, based only on the Inspection Fees you settled that day. Spare parts, materials, and other charges are not included in the bonus calculation.'**
   String get bonusCalculationNote;
 }
 

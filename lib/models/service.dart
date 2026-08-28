@@ -481,21 +481,17 @@ class ServiceModel {
 
   bool get isCurrentlyOnHour => isOnWorkHour();
 
+  /// The price for the given moment: the on-hour or off-hour band, and 0 when
+  /// that band is not priced.
+  ///
+  /// Kept identical to the customer app's copy of this model on purpose — the
+  /// general [price] is not a fallback in either. It is the basis for the
+  /// technician's monthly bonus instead, captured at completion onto
+  /// `completionData.generalServicePrice`.
   double getCurrentPrice({DateTime? currentTime}) {
-    if (workStartTime == null ||
-        workEndTime == null ||
-        onWorkHourPrice == null ||
-        offWorkHourPrice == null ||
-        onWorkHourPrice == 0 ||
-        offWorkHourPrice == 0) {
-      return price ?? 0.0;
-    }
-
-    if (isOnWorkHour(currentTime: currentTime)) {
-      return onWorkHourPrice!;
-    } else {
-      return offWorkHourPrice!;
-    }
+    return isOnWorkHour(currentTime: currentTime)
+        ? (onWorkHourPrice ?? 0.0)
+        : (offWorkHourPrice ?? 0.0);
   }
 
   double getDiscountedPrice(double currentPrice) {

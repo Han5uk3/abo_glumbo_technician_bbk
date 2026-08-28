@@ -17,6 +17,14 @@ class RewardsPage extends StatefulWidget {
 }
 
 class _RewardsPageState extends State<RewardsPage> {
+  // Job counts each tier requires. These must match `TIER_*_JOBS` in
+  // `functions/index.js`, which is what actually decides a worker's tier —
+  // showing a worker a target the server does not use is worse than showing
+  // none, so change both together.
+  static const int _silverJobs = 10;
+  static const int _goldJobs = 12;
+  static const int _platinumJobs = 60;
+
   int totalJobsCount = 0;
   double currentRating = 0.0;
   String currentTier = 'Bronze';
@@ -211,7 +219,7 @@ class _RewardsPageState extends State<RewardsPage> {
                       child: _buildCompactVerticalStat(
                         Icons.card_giftcard_rounded,
                         bonusAmount.toStringAsFixed(2),
-                        l10n.bonus,
+                        l10n.lastBonus,
                         const Color(0xFF00C853),
                         const Color(0xFFE8F5E9),
                       ),
@@ -275,19 +283,19 @@ class _RewardsPageState extends State<RewardsPage> {
                 ),
                 _buildPremiumTierCard(
                   'Silver',
-                  '${l10n.twentyPlusJobs}, ${l10n.greaterThan4dot0rating}',
+                  '${l10n.tierJobsRequirement(_silverJobs)}, ${l10n.greaterThan4dot0rating}',
                   l10n.fivepercentBonusOnly,
                   const Color(0xFF64748B),
                 ),
                 _buildPremiumTierCard(
                   'Gold',
-                  '${l10n.fortyPlusJobs}, ${l10n.greaterThan4dot5rating}',
+                  '${l10n.tierJobsRequirement(_goldJobs)}, ${l10n.greaterThan4dot5rating}',
                   l10n.tenpercentBonusOnly,
                   const Color(0xFFD97706),
                 ),
                 _buildPremiumTierCard(
                   'Platinum',
-                  '${l10n.sixtyPlusJobs}, ${l10n.greaterThan4dot8rating}',
+                  '${l10n.tierJobsRequirement(_platinumJobs)}, ${l10n.greaterThan4dot8rating}',
                   l10n.fifteenpercentBonusOnly,
                   const Color(0xFF6366F1),
                 ),
@@ -543,7 +551,7 @@ class _RewardsPageState extends State<RewardsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.monthlyBonusEarned,
+                      l10n.bonusEarned,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 15,

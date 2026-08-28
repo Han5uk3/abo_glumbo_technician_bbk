@@ -33,6 +33,11 @@ class CompleteBooking extends BookingEvent {
   final String customerId;
   final double inspectionFee;
 
+  /// Service document id, used to capture the service's general price onto the
+  /// completion details for the monthly bonus. Nullable because a booking
+  /// written by an older build may carry no service id.
+  final String? serviceId;
+
   const CompleteBooking({
     required this.mode,
     required this.selectedFiles,
@@ -43,6 +48,7 @@ class CompleteBooking extends BookingEvent {
     required this.technicianId,
     required this.customerId,
     required this.inspectionFee,
+    this.serviceId,
   });
 
   @override
@@ -56,6 +62,7 @@ class CompleteBooking extends BookingEvent {
     technicianId,
     inspectionFee,
     customerId,
+    serviceId ?? '',
   ];
 }
 

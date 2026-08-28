@@ -14,6 +14,29 @@ const { extractCustomerCoordinates, extractTechnicianCoordinates, calculateDista
 const MAX_ASSIGNMENT_DISTANCE_KM = 20.0;
 const OFFER_TTL_SECONDS = 120;
 
+// How long an auto-assignment offer stays live.
+//
+// Deliberately longer than the live-broadcast TTL above, and longer than two
+// `processAutoAssignments` waves, because the two flows are nothing alike:
+//
+//  * A live broadcast is a 5-minute window with the customer sitting on the
+//    "searching" screen. 120s is the right amount of pressure there.
+//  * An auto-assignment search runs for up to three hours before a *scheduled*
+//    appointment. A 120s countdown on a job that does not start for another two
+//    hours is meaningless urgency, and because the wave interval (4 min) was
+//    longer than the TTL, every offer lapsed ~2 minutes before the next wave
+//    could replace it - so a technician opening the app had a better than even
+//    chance of seeing an empty Pending tab during a search that was supposedly
+//    running.
+//
+// Offers are renewed in place on each wave (see `loadAutoAssignOfferState`), so
+// this only has to outlast the gap between waves, including one missed run.
+const AUTO_ASSIGN_OFFER_TTL_SECONDS = 600;
+
+// How long after its appointment time a still-unassigned auto-assignment
+// request keeps searching before it is given up on and handed to the admins.
+const AUTO_ASSIGN_ABANDON_GRACE_MS = 60 * 60 * 1000;
+
 /**
  * Loads every currently-assigned booking in a SINGLE query and indexes it by agent uid.
  *
@@ -95,6 +118,305 @@ async function loadTechniciansWithExistingOffers(bookingId) {
   });
 
   return techsWithOffers;
+}
+
+/** Millis an offer expires at, or 0 when it carries no usable `expiresAt`. */
+function offerExpiryMillis(offer) {
+  if (offer.expiresAt && typeof offer.expiresAt.toDate === "function") {
+    return offer.expiresAt.toDate().getTime();
+  }
+  return 0;
+}
+
+/**
+ * True when a `declined` offer was never actually declined by anyone - the
+ * technician app's own countdown reached zero and auto-declined it on their
+ * behalf (`AppServices.declineJobOffer(autoDeclined: true)`).
+ *
+ * Current builds say so outright with `autoDeclined`. For documents written by
+ * older builds the timestamps still tell the two apart: an auto-decline can only
+ * be sent when the countdown hits zero, i.e. at `expiresAt`, whereas a real tap
+ * always lands before it. Anything we cannot classify is treated as a genuine
+ * refusal, because re-offering a job to someone who actually said no is the
+ * worse mistake.
+ */
+function isTimedOutOffer(offer) {
+  if (offer.status !== "declined") return false;
+  if (offer.autoDeclined === true) return true;
+  if (offer.autoDeclined === false) return false;
+
+  const expiry = offerExpiryMillis(offer);
+  const declinedAt = offer.declinedAt && typeof offer.declinedAt.toMillis === "function"
+    ? offer.declinedAt.toMillis()
+    : 0;
+  if (!expiry || !declinedAt) return false;
+
+  // 5s of slack absorbs the round trip between the countdown firing and the
+  // write landing, plus any clock skew on the device.
+  return declinedAt >= expiry - 5000;
+}
+
+/**
+ * Offer bookkeeping for one auto-assignment booking.
+ *
+ * Kept separate from `loadTechniciansWithExistingOffers` - which the live
+ * broadcast path goes on using unchanged - because the two flows disagree about
+ * what a finished offer means.
+ *
+ * For a live broadcast, an offer that ran out really is a dead end: the whole
+ * search lasts five minutes and the technician was expected to be looking. An
+ * auto-assignment search runs for up to three hours, re-broadcasting every few
+ * minutes, and the technician is emphatically not expected to be staring at the
+ * app the moment the first wave lands.
+ *
+ * That difference was never encoded here, and it is why auto-assignment looked
+ * dead in testing. The old filter excluded any technician whose offer was not
+ * `pending`, and the technician app auto-declines an unanswered offer when its
+ * countdown expires - so wave one handed every eligible technician a 120-second
+ * offer, each one auto-declined itself two minutes later, and every one of them
+ * was then permanently barred from the booking. Within a few minutes the
+ * eligible pool was burnt out and the job could never be offered to anyone
+ * again, no matter how many hours of search window remained.
+ *
+ * The `autoDeclined` flag exists precisely to tell a timeout from a refusal -
+ * `onManualJobOfferUpdated` already refuses to treat a timeout as a rejection
+ * when notifying the customer. This applies the same reading to eligibility.
+ *
+ * Returns:
+ *   refusedTechs  Set<uid>                  - answered deliberately, or already bound; never re-offer
+ *   openOffers    Map<uid, {ref, expiresAtMs}> - the offer doc to reuse for this technician
+ */
+async function loadAutoAssignOfferState(bookingId) {
+  const refusedTechs = new Set();
+  const openOffers = new Map();
+
+  const existingOffers = await db.collection("job_offers")
+    .where("bookingId", "==", bookingId)
+    .get();
+
+  existingOffers.forEach((offerDoc) => {
+    try {
+      const offer = offerDoc.data();
+      const techUid = offer.technicianId;
+      if (!techUid) return;
+
+      // A deliberate answer is final, in either direction. Checked first and
+      // allowed to evict an already-collected open offer so the outcome does
+      // not depend on the order documents come back in - bookings created
+      // before offers were renewed in place can still hold several docs for
+      // the same technician.
+      if (offer.status !== "pending" && !isTimedOutOffer(offer)) {
+        refusedTechs.add(techUid);
+        openOffers.delete(techUid);
+        return;
+      }
+
+      if (refusedTechs.has(techUid)) return;
+
+      // Still pending, or declined only because the countdown ran out. Either
+      // way the document is reusable: renewing it keeps one offer per
+      // technician per booking for the whole search instead of accumulating a
+      // fresh doc on every wave, and spares the technician a duplicate push
+      // every few minutes for a job they have already been told about.
+      const expiresAtMs = offerExpiryMillis(offer);
+      const previous = openOffers.get(techUid);
+      if (!previous || expiresAtMs > previous.expiresAtMs) {
+        openOffers.set(techUid, { ref: offerDoc.ref, expiresAtMs });
+      }
+    } catch (e) {
+      console.error(`[loadAutoAssignOfferState] Skipping malformed offer ${offerDoc.id} for booking ${bookingId}:`, e);
+    }
+  });
+
+  return { refusedTechs, openOffers };
+}
+
+/**
+ * Stages the offer writes for one auto-assignment request onto `batch` and
+ * returns the pushes to send once that batch has committed.
+ *
+ * Shared by the instant create-trigger and the scheduled wave. Those two used
+ * to carry near-identical copies of this logic and had already drifted apart
+ * once - the cron computed the same-instant conflict inputs and then never
+ * tested them, so only the instant path enforced it. One implementation removes
+ * that whole class of divergence.
+ *
+ * Notifications are returned rather than sent inline so the caller can push
+ * only after the batch commits; a failed commit no longer leaves technicians
+ * holding a notification for an offer that does not exist.
+ */
+async function stageAutoAssignOffers({ batch, requestId, request, schedules, cancelledWorkerUids, coords, customerAddress }) {
+  const { startedJobAgentUids, bookedInstantsByAgent } = schedules;
+  const { refusedTechs, openOffers } = await loadAutoAssignOfferState(requestId);
+
+  const techsSnapshot = await db.collection("users")
+    .where("role", "==", "technician")
+    .where("isOnline", "==", true)
+    .where("isVerified", "==", true)
+    .get();
+
+  // Exact instant this request is for, used for the same-minute conflict check
+  // below. Null when the request carries no booking time, in which case there
+  // is nothing to collide with.
+  const reqBookingTime = request.bookingDateTime && typeof request.bookingDateTime.toMillis === "function"
+    ? request.bookingDateTime.toMillis()
+    : null;
+
+  const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(
+    new Date(Date.now() + AUTO_ASSIGN_OFFER_TTL_SECONDS * 1000)
+  );
+
+  const pendingNotifications = [];
+  let createdCount = 0;
+  let renewedCount = 0;
+
+  for (const techDoc of techsSnapshot.docs) {
+    const tech = techDoc.data();
+    const techUid = techDoc.id;
+
+    // Already answered this booking, or bound to it.
+    if (refusedTechs.has(techUid)) continue;
+
+    // Previously cancelled this booking.
+    if (cancelledWorkerUids.includes(techUid)) continue;
+
+    // Job role check.
+    const categoryId = request.service?.category;
+    const techJobRoles = tech.jobRoles || [];
+    if (categoryId && !techJobRoles.includes(categoryId)) continue;
+
+    const techCoords = extractTechnicianCoordinates(tech);
+    if (!techCoords) continue;
+
+    const distance = calculateDistanceKm(techCoords.lat, techCoords.lon, coords.lat, coords.lon);
+    if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
+
+    // Already out on a job.
+    if (startedJobAgentUids.has(techUid)) continue;
+
+    // Same-instant conflict.
+    const bookedInstants = bookedInstantsByAgent.get(techUid);
+    if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) continue;
+
+    const existing = openOffers.get(techUid);
+    if (existing) {
+      // Renew in place. `status` is reset because the technician app may have
+      // auto-declined it when its countdown ran out; the technician never
+      // refused, so the same card comes back rather than a duplicate doc.
+      //
+      // `update` (not `set`/merge) on purpose. If the offer is deleted between
+      // the read above and this commit - which happens exactly when someone
+      // accepts the booking, since acceptance deletes the sibling offers - the
+      // batch fails and this wave does nothing. That is the outcome we want:
+      // the booking is now assigned, so the next wave skips the request
+      // entirely. A merging write would instead resurrect an offer for a job
+      // that already has a technician.
+      batch.update(existing.ref, {
+        status: "pending",
+        expiresAt: expiresAtTimestamp,
+        autoDeclined: FieldValue.delete(),
+        declinedAt: FieldValue.delete(),
+        updatedAt: FieldValue.serverTimestamp()
+      });
+      renewedCount++;
+      continue;
+    }
+
+    const offerId = db.collection("job_offers").doc().id;
+    batch.set(db.collection("job_offers").doc(offerId), {
+      id: offerId,
+      bookingId: requestId,
+      technicianId: techUid,
+      status: "pending",
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt: expiresAtTimestamp,
+      customerName: request.customer?.name || "Customer",
+      serviceLocation: {
+        fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
+        streetName: customerAddress?.streetName || "",
+        lat: coords.lat,
+        lon: coords.lon
+      },
+      serviceName: request.service?.name || "Service",
+      serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
+      serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
+      notes: request.notes || "",
+      issueImage: request.issueImage || "",
+      issueVideo: request.issueVideo || "",
+      bookingDateTime: request.bookingDateTime,
+      isRebook: false,
+      customerId: request.customer?.uid || ""
+    });
+    createdCount++;
+
+    // Not gated on the token: sendAndStoreNotification stores the in-app record
+    // before it pushes, so gating here would hide the offer from a technician
+    // whose device is not registered.
+    pendingNotifications.push({
+      targetRole: "technician",
+      targetId: techUid,
+      titleEn: "New Auto-Assignment Job Available",
+      titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
+      titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
+      bodyEn: "A new scheduled booking is available to accept.",
+      bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
+      bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
+      data: {
+        bookingId: requestId,
+        offerId: offerId,
+        targetRole: "technician",
+        category: "job_offer",
+        type: "job_offer"
+      },
+      fcmToken: tech.fcmToken,
+      lanCode: tech.lanCode || "en"
+    });
+  }
+
+  return { pendingNotifications, createdCount, renewedCount };
+}
+
+/**
+ * Tells the admins that an auto-assignment search ran out of road, so the
+ * booking can be assigned by hand.
+ *
+ * Best-effort by design: failing to notify must never stop the cron from
+ * retiring the request, or the caller would re-broadcast a dead booking for
+ * ever - the exact failure this escalation exists to end.
+ */
+async function notifyAdminsAutoAssignmentFailed(requestId, request) {
+  try {
+    const serviceName = request.service?.name || "a service";
+    const serviceNameAr = request.service?.name_ar || serviceName;
+    const serviceNameUr = request.service?.name_ur || serviceNameAr;
+    const customerName = request.customer?.name || "a customer";
+
+    const adminUsersDocs = await getAllAdminUsers();
+    for (const { uid, token, lanCode } of toNotificationRecipients(adminUsersDocs)) {
+      await sendAndStoreNotification({
+        targetRole: "admin",
+        targetId: uid,
+        titleEn: "Auto-Assignment Failed",
+        titleAr: "فشل التعيين التلقائي",
+        titleUr: "خودکار تفویض ناکام",
+        bodyEn: `No technician accepted ${serviceName} for ${customerName}. Please assign one manually.`,
+        bodyAr: `لم يقبل أي فني ${serviceNameAr} للعميل ${customerName}. يرجى التعيين يدويًا.`,
+        bodyUr: `${customerName} کے لیے ${serviceNameUr} کوئی ٹیکنیشن قبول نہیں کیا۔ براہ کرم دستی طور پر تفویض کریں۔`,
+        data: {
+          bookingId: requestId,
+          targetRole: "admin",
+          category: "booking",
+          type: "auto_assignment_failed",
+          isAdmin: "true"
+        },
+        fcmToken: token,
+        lanCode: lanCode
+      });
+    }
+    console.log(`[Auto-Assignment ${requestId}] Admins notified that auto-assignment found no technician.`);
+  } catch (e) {
+    console.error(`[Auto-Assignment ${requestId}] Failed to notify admins of auto-assignment failure:`, e);
+  }
 }
 
 /**
@@ -608,10 +930,11 @@ exports.onManualJobOfferUpdated = onDocumentUpdated(
 //
 // Runs every 4 minutes (within the intended 3-5 minute wave spacing) rather
 // than every 1: each pass is a broadcast "wave" to whichever technicians are
-// newly eligible since the last one (loadTechniciansWithExistingOffers skips
-// anyone who already holds/answered an offer), and waves that fire faster
-// than the customer's own 120s per-offer window just spam duplicate pushes
-// for no benefit.
+// newly eligible since the last one, and waves that fire faster than that just
+// add load for no benefit. Offers now outlive the gap between waves and are
+// renewed in place (AUTO_ASSIGN_OFFER_TTL_SECONDS), so the wave interval no
+// longer punches holes in the search: a technician opening the app at any point
+// during the window sees the offer, and is pushed about it exactly once.
 exports.processAutoAssignments = onSchedule(
   "every 4 minutes",
   async (event) => {
@@ -630,7 +953,7 @@ exports.processAutoAssignments = onSchedule(
       // Loaded once per cron run rather than once per candidate technician per request.
       // Offers do not themselves assign anyone (assignment happens later, when a
       // technician accepts), so a per-run snapshot yields the same eligibility answers.
-      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
+      const schedules = await loadActiveAgentSchedules();
 
       for (const doc of snapshot.docs) {
         const request = doc.data();
@@ -658,11 +981,30 @@ exports.processAutoAssignments = onSchedule(
           continue;
         }
 
+        const appointmentMs = request.bookingDateTime && typeof request.bookingDateTime.toMillis === "function"
+          ? request.bookingDateTime.toMillis()
+          : null;
+
+        // Give up on a request whose appointment has come and gone. Without
+        // this the request stays `P` and is re-broadcast on every wave for
+        // ever, because "within 3 hours of the appointment" stays true once
+        // the appointment is in the past. Handing it to the admins is the only
+        // useful outcome left: the booking is deliberately left at `P` with no
+        // agent so it can still be assigned by hand from the admin panel.
+        if (appointmentMs !== null && now.getTime() > appointmentMs + AUTO_ASSIGN_ABANDON_GRACE_MS) {
+          console.log(`[Auto-Assignment ${requestId}] Appointment time passed with no technician. Handing over to admins.`);
+          await db.collection("auto-assignment_requests").doc(requestId).update({
+            status: "expired",
+            updatedAt: FieldValue.serverTimestamp()
+          });
+          await notifyAdminsAutoAssignmentFailed(requestId, request);
+          continue;
+        }
+
         if (request.type === "instant") {
           // Always process instant bookings (broadcasting again to new techs)
-        } else if (request.bookingDateTime) {
-          const bookingDate = request.bookingDateTime.toDate();
-          if (bookingDate > threeHoursFromNow) {
+        } else if (appointmentMs !== null) {
+          if (appointmentMs > threeHoursFromNow.getTime()) {
             continue; // Not within 3 hours yet
           }
         } else {
@@ -671,8 +1013,6 @@ exports.processAutoAssignments = onSchedule(
 
         const coords = extractCustomerCoordinates(request);
         if (!coords) continue;
-        const custLat = coords.lat;
-        const custLon = coords.lon;
         const customerAddress = extractCustomerAddress(request);
 
         // --- Send Customer Search Notification (For late bookings starting search for the first time) ---
@@ -716,132 +1056,21 @@ exports.processAutoAssignments = onSchedule(
           }
         }
 
-        // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
-        const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
-
         // --- Skip Cancelled Technicians ---
         const cancelledWorkerUids = request.cancelledWorkerUids || bookingData.cancelledWorkerUids || [];
 
-        // Query eligible technicians
-        const techsSnapshot = await db.collection("users")
-          .where("role", "==", "technician")
-          .where("isOnline", "==", true)
-          .where("isVerified", "==", true)
-          .get();
+        const batch = db.batch();
+        const { pendingNotifications, createdCount, renewedCount } = await stageAutoAssignOffers({
+          batch,
+          requestId,
+          request,
+          schedules,
+          cancelledWorkerUids,
+          coords,
+          customerAddress
+        });
 
-        const eligibleTechs = [];
-
-        // Exact instant this request is for, used for the same-minute conflict
-        // check below. Null when the request carries no booking time, in which
-        // case there is nothing to collide with.
-        const reqBookingTime = request.bookingDateTime
-          ? request.bookingDateTime.toMillis()
-          : null;
-
-        for (const techDoc of techsSnapshot.docs) {
-          const tech = techDoc.data();
-          const techUid = techDoc.id;
-
-          // Skip if technician has already been offered this job
-          if (techsWithOffers.has(techUid)) {
-            continue;
-          }
-
-          // Skip if technician previously cancelled this booking
-          if (cancelledWorkerUids.includes(techUid)) {
-            continue;
-          }
-
-          // Job Role Check
-          const categoryId = request.service?.category;
-          const techJobRoles = tech.jobRoles || [];
-          if (categoryId && !techJobRoles.includes(categoryId)) {
-            continue;
-          }
-
-          const techCoords = extractTechnicianCoordinates(tech);
-          if (!techCoords) continue;
-          const techLat = techCoords.lat;
-          const techLon = techCoords.lon;
-
-          const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-          if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
-
-          // Started work check
-          if (startedJobAgentUids.has(techUid)) continue;
-
-          // Same-instant conflict check. The instant and manual paths have always
-          // enforced this; the cron computed the inputs and then never tested
-          // them, so a technician could be offered two "late" auto-assign
-          // bookings for the exact same minute.
-          const bookedInstants = bookedInstantsByAgent.get(techUid);
-          if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) {
-            continue;
-          }
-
-          eligibleTechs.push({ uid: techUid, data: tech });
-        }
-
-        if (eligibleTechs.length > 0 || shouldSendCustomerNotification) {
-          const batch = db.batch();
-          const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
-          const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
-
-          for (const tech of eligibleTechs) {
-            const offerId = db.collection("job_offers").doc().id;
-            const offerRef = db.collection("job_offers").doc(offerId);
-
-            batch.set(offerRef, {
-              id: offerId,
-              bookingId: requestId,
-              technicianId: tech.uid,
-              status: "pending",
-              createdAt: FieldValue.serverTimestamp(),
-              expiresAt: expiresAtTimestamp,
-              customerName: request.customer?.name || "Customer",
-              serviceLocation: {
-                fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
-                streetName: customerAddress?.streetName || "",
-                lat: custLat,
-                lon: custLon
-              },
-              serviceName: request.service?.name || "Service",
-              serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
-              serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
-              notes: request.notes || "",
-              issueImage: request.issueImage || "",
-              issueVideo: request.issueVideo || "",
-              bookingDateTime: request.bookingDateTime,
-              isRebook: false,
-              customerId: request.customer?.uid || ""
-            });
-
-            // Push notifications. Not gated on the token - see the manual
-            // broadcast above.
-            {
-              const lan = tech.data.lanCode || "en";
-              await sendAndStoreNotification({
-                targetRole: "technician",
-                targetId: tech.uid,
-                titleEn: "New Auto-Assignment Job Available",
-                titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
-                titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
-                bodyEn: "A new scheduled booking is available to accept.",
-                bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
-                bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
-                data: {
-                  bookingId: requestId,
-                  offerId: offerId,
-                  targetRole: "technician",
-                  category: "job_offer",
-                  type: "job_offer"
-                },
-                fcmToken: tech.data.fcmToken,
-                lanCode: lan
-              });
-            }
-          }
-
+        if (createdCount > 0 || renewedCount > 0 || shouldSendCustomerNotification) {
           if (shouldSendCustomerNotification) {
             batch.update(db.collection("auto-assignment_requests").doc(requestId), {
               notificationSent: true,
@@ -850,7 +1079,15 @@ exports.processAutoAssignments = onSchedule(
           }
 
           await batch.commit();
-          console.log(`[Auto-Assignment ${requestId}] Processed. Offers sent to ${eligibleTechs.length} technicians.`);
+
+          // Pushed only after the offers are durably written, so a failed
+          // commit can no longer leave a technician holding a notification
+          // for an offer that does not exist.
+          for (const notification of pendingNotifications) {
+            await sendAndStoreNotification(notification);
+          }
+
+          console.log(`[Auto-Assignment ${requestId}] Processed. ${createdCount} new offer(s), ${renewedCount} renewed.`);
         } else {
           console.log(`No new technicians eligible for auto-assignment ${requestId} in this iteration.`);
         }
@@ -886,131 +1123,32 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       console.error(`[Auto-Assignment ${requestId}] Invalid customer coordinates`);
       return null;
     }
-    const custLat = coords.lat;
-    const custLon = coords.lon;
     const customerAddress = extractCustomerAddress(request);
 
     try {
-      // --- Get Existing Job Offers to Avoid Duplicate Notifications ---
-      const techsWithOffers = await loadTechniciansWithExistingOffers(requestId);
-
       // One batched read instead of one query per candidate technician.
-      const { startedJobAgentUids, bookedInstantsByAgent } = await loadActiveAgentSchedules();
-      const reqBookingTime = request.bookingDateTime ? request.bookingDateTime.toMillis() : null;
+      const schedules = await loadActiveAgentSchedules();
 
       // --- Skip Cancelled Technicians ---
       const cancelledWorkerUids = request.cancelledWorkerUids || [];
 
-      // Find eligible technicians
-      const techsSnapshot = await db.collection("users")
-        .where("role", "==", "technician")
-        .where("isOnline", "==", true)
-        .where("isVerified", "==", true)
-        .get();
-
-      const eligibleTechs = [];
-
-      for (const techDoc of techsSnapshot.docs) {
-        const tech = techDoc.data();
-        const techUid = techDoc.id;
-
-        // Skip if technician has already been offered this job
-        if (techsWithOffers.has(techUid)) {
-          continue;
-        }
-
-        // Skip if technician previously cancelled this booking
-        if (cancelledWorkerUids.includes(techUid)) {
-          continue;
-        }
-
-        // Job Role Check
-        const categoryId = request.service?.category;
-        const techJobRoles = tech.jobRoles || [];
-        if (categoryId && !techJobRoles.includes(categoryId)) {
-          continue;
-        }
-
-        const techCoords = extractTechnicianCoordinates(tech);
-        if (!techCoords) continue;
-        const techLat = techCoords.lat;
-        const techLon = techCoords.lon;
-
-        const distance = calculateDistanceKm(techLat, techLon, custLat, custLon);
-        if (distance > MAX_ASSIGNMENT_DISTANCE_KM) continue;
-
-        // Active booking & Time Conflict check (from the batched schedule index)
-        if (startedJobAgentUids.has(techUid)) continue;
-
-        const bookedInstants = bookedInstantsByAgent.get(techUid);
-        if (reqBookingTime && bookedInstants && bookedInstants.has(reqBookingTime)) continue;
-
-        eligibleTechs.push({ uid: techUid, data: tech });
-      }
-
-      console.log(`[Auto-Assignment Instant ${requestId}] Found ${eligibleTechs.length} eligible technicians`);
-
-      if (eligibleTechs.length === 0) {
-        return null;
-      }
-
       const batch = db.batch();
-      const expiresAtDate = new Date(Date.now() + OFFER_TTL_SECONDS * 1000);
-      const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(expiresAtDate);
+      const { pendingNotifications, createdCount, renewedCount } = await stageAutoAssignOffers({
+        batch,
+        requestId,
+        request,
+        schedules,
+        cancelledWorkerUids,
+        coords,
+        customerAddress
+      });
 
-      for (const tech of eligibleTechs) {
-        const offerId = db.collection("job_offers").doc().id;
-        const offerRef = db.collection("job_offers").doc(offerId);
+      console.log(`[Auto-Assignment Instant ${requestId}] ${createdCount} new offer(s), ${renewedCount} renewed.`);
 
-        batch.set(offerRef, {
-          id: offerId,
-          bookingId: requestId,
-          technicianId: tech.uid,
-          status: "pending",
-          createdAt: FieldValue.serverTimestamp(),
-          expiresAt: expiresAtTimestamp,
-          customerName: request.customer?.name || "Customer",
-          serviceLocation: {
-            fullAddress: customerAddress?.fullName || customerAddress?.streetName || "Service Location",
-            streetName: customerAddress?.streetName || "",
-            lat: custLat,
-            lon: custLon
-          },
-          serviceName: request.service?.name || "Service",
-          serviceNameAr: request.service?.name_ar || request.service?.name || "Service",
-          serviceNameUr: request.service?.name_ur || request.service?.name_ar || "Service",
-          notes: request.notes || "",
-          issueImage: request.issueImage || "",
-          issueVideo: request.issueVideo || "",
-          bookingDateTime: request.bookingDateTime,
-          isRebook: false,
-          customerId: request.customer?.uid || ""
-        });
-
-        // Push notification. Not gated on the token - see the manual broadcast
-        // above.
-        {
-          const lan = tech.data.lanCode || "en";
-          await sendAndStoreNotification({
-            targetRole: "technician",
-            targetId: tech.uid,
-            titleEn: "New Auto-Assignment Job Available",
-            titleAr: "وظيفة تعيين تلقائي جديدة متاحة",
-            titleUr: "بکنگ کی نئی خودکار تفویض دستیاب ہے",
-            bodyEn: "A new scheduled booking is available to accept.",
-            bodyAr: "هناك حجز مجدول جديد متاح للقبول.",
-            bodyUr: "قبول کرنے کے لیے ایک نئی طے شدہ بکنگ دستیاب ہے۔",
-            data: {
-              bookingId: requestId,
-              offerId: offerId,
-              targetRole: "technician",
-              category: "job_offer",
-              type: "job_offer"
-            },
-            fcmToken: tech.data.fcmToken,
-            lanCode: lan
-          });
-        }
+      if (createdCount === 0 && renewedCount === 0) {
+        // Nobody eligible right now. The request stays `P` and the cron keeps
+        // waving at it, so a technician who comes online later still gets it.
+        return null;
       }
 
       // Set notificationSent = true
@@ -1020,7 +1158,11 @@ exports.onAutoAssignmentRequestCreated = onDocumentCreated(
       });
 
       await batch.commit();
-      console.log(`[Auto-Assignment Instant ${requestId}] Offers and notifications sent to ${eligibleTechs.length} technicians`);
+
+      for (const notification of pendingNotifications) {
+        await sendAndStoreNotification(notification);
+      }
+      console.log(`[Auto-Assignment Instant ${requestId}] Offers committed and ${pendingNotifications.length} notification(s) sent.`);
 
     } catch (e) {
       console.error(`Error processing instant auto-assignment ${requestId}:`, e);
@@ -1086,12 +1228,33 @@ exports.syncAgentToAutoAssignment = onDocumentUpdated(
 );
 
 // 6. Trigger when a booking is created to clean up all pending/stale job offers for that booking
+//
+// Only offers that already existed when the booking was created are stale.
+//
+// This used to delete every offer carrying the booking's id, unconditionally,
+// which put it in a race it could not win. The auto-assignment path writes
+// `bookings/{id}` and `auto-assignment_requests/{id}` in a single atomic batch,
+// so this trigger and `onAutoAssignmentRequestCreated` - which creates the very
+// first wave of offers for that same id - are dispatched together with no
+// ordering guarantee between them. Whenever this one ran second (a cold start is
+// enough, and off-peak traffic is exactly when cold starts are the norm) it
+// deleted the offers that had just been created, and the booking silently lost
+// its entire opening broadcast with nothing in the logs to say so.
+//
+// Anchoring the sweep to the booking's own creation time makes it order-
+// independent: a leftover offer from the `booking_request`/`job_request` this
+// booking was converted from always predates the booking, and an offer produced
+// by the auto-assign broadcast always follows it.
 exports.onBookingCreatedCleanupOffers = onDocumentCreated(
   { document: "bookings/{bookingId}", region: FUNCTION_REGION },
   async (event) => {
     const snap = event.data;
     if (!snap) return null;
     const bookingId = event.params.bookingId;
+
+    const bookingCreatedAtMs = snap.createTime && typeof snap.createTime.toMillis === "function"
+      ? snap.createTime.toMillis()
+      : (event.time ? new Date(event.time).getTime() : Date.now());
 
     try {
       // Find all job offers matching this booking ID or request ID
@@ -1100,11 +1263,18 @@ exports.onBookingCreatedCleanupOffers = onDocumentCreated(
         .get();
 
       const batch = db.batch();
+      let deleted = 0;
       snapshot.forEach((doc) => {
+        const createdAt = doc.get("createdAt");
+        if (createdAt && typeof createdAt.toMillis === "function" && createdAt.toMillis() > bookingCreatedAtMs) {
+          return; // Created after this booking: a live broadcast, not a leftover.
+        }
         batch.delete(doc.ref);
+        deleted++;
       });
-      await batch.commit();
-      console.log(`[Booking Created Cleanup] Deleted ${snapshot.size} job offers for booking ${bookingId}`);
+
+      if (deleted > 0) await batch.commit();
+      console.log(`[Booking Created Cleanup] Deleted ${deleted} stale job offers for booking ${bookingId} (kept ${snapshot.size - deleted} newer).`);
     } catch (e) {
       console.error(`Error cleaning up job offers for booking ${bookingId}:`, e);
     }

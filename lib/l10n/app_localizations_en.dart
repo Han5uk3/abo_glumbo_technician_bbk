@@ -149,6 +149,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Earned Bonus will be included in your wallet for Payout.';
 
   @override
+  String get lastBonus => 'Last Bonus';
+
+  @override
   String get noReview => 'No Review';
 
   @override
@@ -601,11 +604,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBonusAvailableToClaim => 'No bonus available to claim';
 
   @override
-  String get monthlyBonusEarned => 'Monthly Bonus Earned';
+  String get bonusEarned => 'Bonus Earned';
 
   @override
   String get areYouSureYouWantToRequestAPayoutForYourMonthlyBonus =>
-      'Are you sure you want to request a payout for your monthly bonus?';
+      'Are you sure you want to request a payout for your bonus?';
 
   @override
   String get evening => 'Evening';
@@ -1606,6 +1609,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get greaterThan4dot0rating => '4.0+ rating';
 
   @override
+  String tierJobsRequirement(int count) {
+    return '$count+ Jobs';
+  }
+
+  @override
   String get greaterThan4dot5rating => '4.5+ rating';
 
   @override
@@ -1624,16 +1632,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobs => 'Jobs';
 
   @override
-  String get twentyPlusJobs => '20+ Jobs';
-
-  @override
   String get thirtyPlusJobs => '30+ Jobs';
-
-  @override
-  String get fortyPlusJobs => '40+ Jobs';
-
-  @override
-  String get sixtyPlusJobs => '60+ Jobs';
 
   @override
   String get earnings => 'Total Transaction Value';
@@ -5386,5 +5385,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bonusCalculationNote =>
-      'Your monthly bonus is calculated based only on your total Inspection Fees from the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.';
+      'Your bonus is paid every night, based only on the Inspection Fees you settled that day. Spare parts, materials, and other charges are not included in the bonus calculation.';
 }

@@ -3286,12 +3286,116 @@ exports.notifyOnNewChatMessage = onValueCreated(
 // REWARDS SYSTEM CLOUD FUNCTIONS
 // ============================================
 
-// Function 1: Reset Tiers Monthly (1st at 00:00 Saudi Arabia Time)
+// Which bonus scheme is live.
+//
+//   "daily"   -> `applyDailyBonus` pays every night for the day just ended,
+//                on the 10/12/60 job ladder.
+//   "monthly" -> `applyMonthlyBonus` pays once, on the 1st, for the whole
+//                previous month, on the original 20/40/60 ladder.
+//
+// BOTH functions stay deployed so switching back is a one-line change plus a
+// redeploy — no function has to be recreated and no Cloud Scheduler job has to
+// be rebuilt. The inactive one exits immediately on every invocation.
+//
+// ****************************************************************************
+// * Exactly one value is valid at a time. If both schemes could ever run,     *
+// * technicians would be paid twice for the same work: the monthly job sums   *
+// * a whole month of inspection fees that the daily job has already paid out  *
+// * night by night, and its `lastBonusMonth` guard does not know about the    *
+// * daily job's `lastBonusDay` guard (or the reverse). That is exactly why    *
+// * this switch exists rather than simply leaving both schedules armed.       *
+// ****************************************************************************
+//
+// To revert: set BONUS_MODE = "monthly", update the three job constants in the
+// technician app's `rewards_page.dart` back to 20/40/60 so workers are shown
+// the ladder they are actually paid on, then redeploy both.
+const BONUS_MODE = "daily"; // "daily" | "monthly"
+
+// Tier qualification thresholds, evaluated against the worker's job count
+// (month-to-date under "daily", the previous month under "monthly") and their
+// overall average rating.
+//
+// The job counts are mirrored in the technician app's rewards page
+// (`_silverJobs`/`_goldJobs`/`_platinumJobs` in `rewards_page.dart`), which
+// cannot read this file. Change both together — a worker chasing a number the
+// server does not use is worse than no number at all.
+const TIER_JOB_LADDERS = {
+  daily: { silver: 10, gold: 12, platinum: 60 },
+  monthly: { silver: 20, gold: 40, platinum: 60 },
+};
+const TIER_JOBS = TIER_JOB_LADDERS[BONUS_MODE];
+
+const TIER_SILVER_JOBS = TIER_JOBS.silver;
+const TIER_SILVER_RATING = 4.0;
+const TIER_GOLD_JOBS = TIER_JOBS.gold;
+const TIER_GOLD_RATING = 4.5;
+const TIER_PLATINUM_JOBS = TIER_JOBS.platinum;
+const TIER_PLATINUM_RATING = 4.8;
+
+/**
+ * The one place a tier is decided.
+ *
+ * Both the live tier badge (`updateWorkerTierOnJobCompletion`, which recomputes
+ * on every completed job) and the nightly bonus run read this. They used to
+ * carry separate copies of the same ladder, so the tier a worker was shown and
+ * the tier they were paid for could disagree after any edit to one of them.
+ */
+function resolveTier(jobs, averageRating) {
+  if (averageRating >= TIER_PLATINUM_RATING && jobs >= TIER_PLATINUM_JOBS) {
+    return { tier: "Platinum", bonusPercentage: 0.15 };
+  }
+  if (averageRating >= TIER_GOLD_RATING && jobs >= TIER_GOLD_JOBS) {
+    return { tier: "Gold", bonusPercentage: 0.1 };
+  }
+  if (averageRating >= TIER_SILVER_RATING && jobs >= TIER_SILVER_JOBS) {
+    return { tier: "Silver", bonusPercentage: 0.05 };
+  }
+  return { tier: "Bronze", bonusPercentage: 0 };
+}
+
+// Saudi Arabia is permanently UTC+3 and has never observed DST, so a fixed
+// offset is exact. Shifting the epoch by it and then reading UTC fields gives
+// the KSA calendar date without depending on the server's own timezone (Cloud
+// Functions run in UTC).
+const KSA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/** KSA calendar day ("YYYY-MM-DD") that an absolute instant falls in. */
+function ksaDayKey(instantMs) {
+  const d = new Date(instantMs + KSA_OFFSET_MS);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+/** The absolute millis a KSA calendar day spans, end inclusive. */
+function ksaDayBounds(dayKey) {
+  const [y, m, d] = dayKey.split("-").map(Number);
+  const startMs = Date.UTC(y, m - 1, d) - KSA_OFFSET_MS;
+  return { startMs, endMs: startMs + 24 * 60 * 60 * 1000 - 1 };
+}
+
+/**
+ * The KSA day before the one `instantMs` falls in.
+ *
+ * Derived by stepping back from the start of the current KSA day rather than by
+ * subtracting 24h from "now", so it still names the right day when the schedule
+ * fires a few seconds or minutes late.
+ */
+function previousKsaDayKey(instantMs) {
+  const { startMs } = ksaDayBounds(ksaDayKey(instantMs));
+  return ksaDayKey(startMs - 1);
+}
+
+// Function 1: Reset Tiers Monthly (1st at 00:30 Saudi Arabia Time)
 // Resets all worker tier progress at the start of each month
+//
+// Runs at 00:30, not 00:00, because it zeroes `currentMonthJobs` — which is the
+// tier input `applyDailyBonus` reads at 00:00. Reset first and the last day of
+// every month would be paid at Bronze (no bonus) for everyone. The old monthly
+// bonus wanted the opposite order, since it read the `previousMonth*` snapshot
+// this function writes; both schedules moved together when the bonus went daily.
 // ============================================
 exports.resetMonthlyTiers = onSchedule(
   {
-    schedule: "0 0 1 * *", // 1st of every month at 00:00
+    schedule: "30 0 1 * *", // 1st of every month at 00:30
     timeZone: "Asia/Riyadh",
   },
   async (event) => {
@@ -3346,10 +3450,306 @@ exports.resetMonthlyTiers = onSchedule(
 );
 
 // ============================================
-// Function 2: Calculate and Apply Monthly Bonuses
-// Runs on 1st of month at 01:00 (after reset at 00:00)
-// Calculates bonuses for PREVIOUS month and adds them
-// Example: January's bonus is calculated and added on February 1st
+// Function 2: Calculate and Apply Daily Bonuses
+// Runs every day at 00:00 Riyadh, for the KSA day that just ended.
+//
+// This used to run once, on the 1st at 01:00, for the whole previous month.
+// Workers now earn every night for the jobs they settled that day, at whatever
+// tier their month-to-date performance qualifies for, instead of waiting up to
+// 31 days to see anything.
+//
+// Ordering note: `resetMonthlyTiers` zeroes `currentMonthJobs`, which is the
+// tier input here, so on the 1st it must run *after* this. It is scheduled at
+// 00:30 for that reason — the old monthly bonus depended on the opposite order
+// (it read the `previousMonth*` snapshot the reset wrote), so the two schedules
+// were swapped together.
+// ============================================
+exports.applyDailyBonus = onSchedule(
+  {
+    schedule: "0 0 * * *", // every day at 00:00
+    timeZone: "Asia/Riyadh",
+  },
+  async (event) => {
+    if (BONUS_MODE !== "daily") {
+      logger.info(`Daily bonus is disabled (BONUS_MODE=${BONUS_MODE}). Skipping.`);
+      return null;
+    }
+
+    // The KSA day that just ended.
+    const dayKey = previousKsaDayKey(Date.now());
+    const { startMs, endMs } = ksaDayBounds(dayKey);
+
+    logger.info(`Calculating daily bonuses for ${dayKey}...`);
+
+    try {
+      // Inspection fees settled during that day, for every technician at once.
+      //
+      // The old monthly job ran one `bookings` query per user over their entire
+      // history and filtered in memory. At 30x the frequency that is no longer
+      // affordable, so this narrows to the day in the query itself and buckets
+      // the results by agent. `walletCreditedAt` is the moment
+      // `creditTechnicianWalletOnPaymentCompletion` settles a job, and is set
+      // for every payment mode — unlike `paymentCompletedAt`, which only the
+      // outside-app cash path writes.
+      const startTs = admin.firestore.Timestamp.fromMillis(startMs);
+      const endTs = admin.firestore.Timestamp.fromMillis(endMs);
+
+      let dayBookingDocs;
+      try {
+        const snapshot = await db
+          .collection("bookings")
+          .where("bookingStatusCode", "==", "C")
+          .where("walletCreditedAt", ">=", startTs)
+          .where("walletCreditedAt", "<=", endTs)
+          .get();
+        dayBookingDocs = snapshot.docs;
+      } catch (indexErr) {
+        // Needs a composite index on (bookingStatusCode, walletCreditedAt). If
+        // it has not been created yet the query fails with FAILED_PRECONDITION,
+        // so fall back to the original scan-and-filter rather than paying
+        // nobody. Same pattern as the completed-jobs aggregation above.
+        logger.warn(
+          `Daily bonus range query unavailable, falling back to full scan: ${indexErr.message}`
+        );
+        const snapshot = await db
+          .collection("bookings")
+          .where("bookingStatusCode", "==", "C")
+          .get();
+        dayBookingDocs = snapshot.docs.filter((doc) => {
+          const creditedAt = doc.data().walletCreditedAt;
+          if (!creditedAt || typeof creditedAt.toMillis !== "function") return false;
+          const ms = creditedAt.toMillis();
+          return ms >= startMs && ms <= endMs;
+        });
+      }
+
+      // Sum the discounted inspection fee per technician — mirrors
+      // `creditTechnicianWalletOnPaymentCompletion`'s `effectiveInspectionFee`
+      // exactly, so the bonus base always matches what was actually credited.
+      const feesByAgent = new Map();
+      for (const doc of dayBookingDocs) {
+        const booking = doc.data();
+        const agentUid = booking.agent && booking.agent.uid;
+        if (!agentUid) continue;
+
+        const discountPercentage = booking.service?.discountPercentage || 0;
+
+        // The inspection fee actually charged. It is 0 whenever the booking's
+        // on-hour/off-hour band carries no price — the apps deliberately do
+        // not fall back to the service's general price for anything the
+        // customer sees or pays.
+        //
+        // The general price is still the right *bonus* basis in that case, so
+        // it stands in here. `completionData.generalServicePrice` is written
+        // by `AppServices.completeBooking` at completion time and is never
+        // shown to the customer. It cannot be read from
+        // `booking.service.price`: every booking creation path overwrites
+        // that field with the resolved band price, so on the booking document
+        // it is the frozen charged amount, not the general price.
+        const chargedInspectionFee =
+          Number(booking.completionData?.inspectionFee) || 0;
+        const baseInspectionFee =
+          chargedInspectionFee > 0
+            ? chargedInspectionFee
+            : Number(booking.completionData?.generalServicePrice) || 0;
+
+        const effectiveInspectionFee =
+          discountPercentage > 0
+            ? baseInspectionFee - (baseInspectionFee * discountPercentage) / 100
+            : baseInspectionFee;
+
+        if (effectiveInspectionFee <= 0) continue;
+        feesByAgent.set(
+          agentUid,
+          (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
+        );
+      }
+
+      logger.info(
+        `${feesByAgent.size} technician(s) settled inspection fees on ${dayKey}`
+      );
+
+      let totalBonusesApplied = 0;
+      let totalBonusAmount = 0;
+
+      for (const [userId, totalInspectionFees] of feesByAgent) {
+        // One bad user must not abort the payout run for everyone after them.
+        try {
+          const userRef = db.collection("users").doc(userId);
+          const userDoc = await userRef.get();
+          if (!userDoc.exists) {
+            logger.warn(`Bonus skipped: user ${userId} not found`);
+            continue;
+          }
+          const userData = userDoc.data() || {};
+
+          // Idempotency. Keyed on the day being paid for, so re-running the
+          // job on the same day is a no-op while a later day still pays.
+          if (userData.lastBonusDay === dayKey) {
+            logger.info(`Bonus already applied to ${userId} for ${dayKey}`);
+            continue;
+          }
+
+          // Month-to-date jobs and the worker's overall average rating — the
+          // same inputs the live tier badge uses, through the same helper, so
+          // the tier a worker sees is the tier they are paid for.
+          const jobs = userData.currentMonthJobs || 0;
+          const ratingSum = userData.rating || 0.0;
+          const reviewCount = userData.reviewCount || 0;
+          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
+
+          const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
+          if (bonusPercentage === 0) {
+            logger.info(`User ${userId} in Bronze tier on ${dayKey}. No bonus.`);
+            continue;
+          }
+
+          const bonusAmount = totalInspectionFees * bonusPercentage;
+          if (bonusAmount <= 0) continue;
+
+          const currentTotalBonus = userData.totalMonthlyBonus;
+          const currentTotalBonusNum =
+            typeof currentTotalBonus === "string"
+              ? parseFloat(currentTotalBonus) || 0
+              : currentTotalBonus || 0;
+          const newTotalBonus = currentTotalBonusNum + bonusAmount;
+
+          await userRef.update({
+            // Field name kept for compatibility with the technician app's
+            // rewards screen (`getWorkerBonusAmounts`); it is a running total
+            // of bonuses earned, now credited daily rather than monthly.
+            totalMonthlyBonus: newTotalBonus.toFixed(2),
+            bonusAmount: bonusAmount,
+            lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
+            lastBonusDay: dayKey,
+            lastBonusTier: tier,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+          // Update unified wallet with bonus amount
+          try {
+            const walletRef = db.collection("unified_wallets").doc(userId);
+            await db.runTransaction(async (transaction) => {
+              const walletDoc = await transaction.get(walletRef);
+              if (walletDoc.exists) {
+                transaction.update(walletRef, {
+                  totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                  availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                  totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
+                  lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              } else {
+                transaction.set(walletRef, {
+                  workerId: userId,
+                  totalTips: 0.0,
+                  cardTips: 0.0,
+                  cashTips: 0.0,
+                  paidTips: 0.0,
+                  totalBonus: bonusAmount,
+                  paidBonus: 0.0,
+                  availableBonus: bonusAmount,
+                  inAppEarnings: 0.0,
+                  outsideAppEarnings: 0.0,
+                  totalCompletionAmount: 0.0,
+                  totalAvailableBalance: bonusAmount,
+                  lifetimeTotal: bonusAmount,
+                  payoutRequested: false,
+                  requestedAmount: 0.0,
+                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              }
+            });
+            logger.info(
+              `Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`
+            );
+          } catch (walletError) {
+            logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
+          }
+
+          // Not gated on the token - the technician app lists what this stores.
+          {
+            await sendAndStoreNotification({
+              targetRole: "technician",
+              targetId: userId,
+              titleEn: "🎉 Daily Bonus Received!",
+              titleAr: "🎉 تم استلام المكافأة اليومية!",
+              titleUr: "🎉 روزانہ بونس موصول ہوا!",
+              bodyEn: `Nice work! Your ${tier} tier earned you a bonus of ${money(
+                bonusAmount.toFixed(2),
+                "en"
+              )} (${bonusPercentage * 100}% of ${money(
+                totalInspectionFees.toFixed(2),
+                "en"
+              )} in Inspection Fees).`,
+              bodyAr: `عمل رائع! حصلت بفضل مستوى ${tier} على مكافأة قدرها ${money(
+                bonusAmount.toFixed(2),
+                "ar"
+              )} (${bonusPercentage * 100}٪ من ${money(
+                totalInspectionFees.toFixed(2),
+                "ar"
+              )} من رسوم الفحص).`,
+              bodyUr: `شاباش! آپ کے ${tier} ٹئیر نے آپ کو ${money(
+                bonusAmount.toFixed(2),
+                "ur"
+              )} کا بونس دلایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
+                totalInspectionFees.toFixed(2),
+                "ur"
+              )} انسپیکشن فیس)۔`,
+              data: {
+                category: "bonus",
+                tier: tier,
+                amount: bonusAmount.toFixed(2),
+                bonusPercentage: (bonusPercentage * 100).toString(),
+                day: dayKey,
+              },
+              fcmToken: userData.fcmToken,
+              lanCode: userData.lanCode || "en",
+            });
+          }
+
+          totalBonusesApplied++;
+          totalBonusAmount += bonusAmount;
+
+          logger.info(
+            `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
+              2
+            )} to user ${userId} for ${dayKey} (based on SAR ${totalInspectionFees.toFixed(
+              2
+            )} Inspection Fees)`
+          );
+        } catch (userError) {
+          logger.error(`Error applying daily bonus to user ${userId}:`, userError);
+        }
+      }
+
+      logger.info(
+        `Daily bonus calculation completed for ${dayKey}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
+          2
+        )}`
+      );
+      return null;
+    } catch (error) {
+      logger.error("Error calculating daily bonuses:", error);
+      throw error;
+    }
+  }
+);
+
+// ============================================
+// Function 2b: Calculate and Apply Monthly Bonuses (PREVIOUS SCHEME)
+//
+// Kept deployed, and inert, so the previous scheme can be restored with a
+// one-line change to BONUS_MODE instead of recreating the function and its
+// Cloud Scheduler job. It exits immediately unless BONUS_MODE is "monthly",
+// which is what stops it double-paying alongside applyDailyBonus.
+//
+// Two deliberate differences from the version this was copied from:
+//   * the tier ladder comes from the shared resolveTier(), so the badge a
+//     worker sees and the tier they are paid on cannot drift apart;
+//   * the inspection fee falls back to completionData.generalServicePrice,
+//     carried over from the pricing change - that was a separate decision and
+//     is not part of what reverting the schedule is meant to undo.
 // ============================================
 exports.applyMonthlyBonus = onSchedule(
   {
@@ -3357,6 +3757,11 @@ exports.applyMonthlyBonus = onSchedule(
     timeZone: "Asia/Riyadh",
   },
   async (event) => {
+    if (BONUS_MODE !== "monthly") {
+      logger.info(`Monthly bonus is disabled (BONUS_MODE=${BONUS_MODE}). Skipping.`);
+      return null;
+    }
+
     const today = new Date();
 
     // Calculate for PREVIOUS month
@@ -3399,20 +3804,10 @@ exports.applyMonthlyBonus = onSchedule(
         
         const previousTier = userData.previousMonthTier || "Bronze";
 
-        // Calculate tier and bonus percentage based on previous month performance
-        let tier = "Bronze";
-        let bonusPercentage = 0;
-
-        if (averageRating >= 4.8 && jobs >= 60) {
-          tier = "Platinum";
-          bonusPercentage = 0.15;
-        } else if (averageRating >= 4.5 && jobs >= 40) {
-          tier = "Gold";
-          bonusPercentage = 0.1;
-        } else if (averageRating >= 4.0 && jobs >= 20) {
-          tier = "Silver";
-          bonusPercentage = 0.05;
-        }
+        // Shared with the live tier badge and the daily scheme - see
+        // `resolveTier`. Under BONUS_MODE="monthly" this reads the original
+        // 20/40/60 ladder.
+        const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
 
         if (bonusPercentage === 0) {
           logger.info(`User ${userId} in Bronze tier. No bonus.`);
@@ -3470,8 +3865,16 @@ exports.applyMonthlyBonus = onSchedule(
           }
 
           const discountPercentage = booking.service?.discountPercentage || 0;
-          const baseInspectionFee =
+
+          // Charged fee, with the service general price standing in when the
+          // booking band carries no price. Same rule as the daily scheme -
+          // see the comment there.
+          const chargedInspectionFee =
             Number(booking.completionData?.inspectionFee) || 0;
+          const baseInspectionFee =
+            chargedInspectionFee > 0
+              ? chargedInspectionFee
+              : Number(booking.completionData?.generalServicePrice) || 0;
           const effectiveInspectionFee =
             discountPercentage > 0
               ? baseInspectionFee -
@@ -3704,18 +4107,13 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
       const currentTier = userData.tier || "Bronze";
 
       const newJobCount = currentJobs + 1;
-      
+
       const averageRating = reviewCount > 0 ? parseFloat((totalRating / reviewCount).toFixed(2)) : 0.0;
 
-      // Calculate new tier based on total jobs and overall rating
-      let newTier = "Bronze";
-      if (averageRating >= 4.8 && newJobCount >= 60) {
-        newTier = "Platinum";
-      } else if (averageRating >= 4.5 && newJobCount >= 40) {
-        newTier = "Gold";
-      } else if (averageRating >= 4.0 && newJobCount >= 20) {
-        newTier = "Silver";
-      }
+      // Same ladder the nightly bonus pays on — see `resolveTier`. These were
+      // two separate copies of the thresholds, so editing one moved the badge
+      // a worker sees without moving the tier they actually get paid for.
+      const { tier: newTier } = resolveTier(newJobCount, averageRating);
 
       // Update user document with job count and tier
       await userRef.update({

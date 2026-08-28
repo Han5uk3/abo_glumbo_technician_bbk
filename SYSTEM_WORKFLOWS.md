@@ -76,9 +76,19 @@ Distinction that matters:
 2. Compare minutes-of-day against `workStartTime`/`workEndTime`; handles the wrap-around case (start > end).
 3. If either bound is null → defaults to **on-hour**.
 
-`getCurrentPrice()` returns `onWorkHourPrice` or `offWorkHourPrice`, falling back to `price` if either
-is null or zero. The resolved price is frozen onto the booking's `service.price` at creation time, and
+`getCurrentPrice()` returns `onWorkHourPrice` or `offWorkHourPrice`, and **0 when that band is not
+priced**. The resolved price is frozen onto the booking's `service.price` at creation time, and
 `booking.isOnHour` records which band applied. `effectiveInspectionFee` re-derives it on read.
+
+> ⚠️ **The general `price` field is not a customer-facing price.** It used to be the fallback whenever
+> either band was null or zero, so an unpriced band silently billed the customer the general price.
+> It is now read **nowhere in the customer app** — an unpriced band charges 0. Its one remaining job
+> is to be the basis for the technician's monthly bonus; see §17.
+>
+> Note that `booking.service.price` is *not* the general price. All three creation paths overwrite it
+> with the resolved band price (`service.copyWith(price: bookingTimePrice)`), so on a booking document
+> it is the frozen charged amount. The general price only lives on `services/{id}`, which is why it is
+> copied onto `completionData.generalServicePrice` when a technician completes a job.
 
 Note: on-hour is evaluated against **`DateTime.now()` (device local time)** in the UI gate
 `_isCurrentTimeOffHour()` ([book_service_page.dart:2537](../abo_glumbo_bkk/lib/pages/bookings/book_service_page.dart:2537)), but
@@ -176,7 +186,13 @@ On `→ declined` it adds the tech to `booking_request.rejectedTechnicians` **an
 `_selectTechnician` ([searching_technicians_screen.dart:327](../abo_glumbo_bkk/lib/pages/bookings/searching_technicians_screen.dart:327))
 copies the request into `bookings/{sameId}` with `bookingStatusCode: 'A'`, `assignedAt`,
 `technicianSelectedAt`, then **deletes** the `booking_request`.
-CF `onBookingCreatedCleanupOffers` then deletes every `job_offers` doc for that id.
+CF `onBookingCreatedCleanupOffers` then deletes the `job_offers` docs for that id that **predate the
+booking** — it compares each offer's `createdAt` against the booking's own `createTime`. The
+comparison is not cosmetic: the auto-assign path writes `bookings/{id}` and
+`auto-assignment_requests/{id}` in one atomic batch, so this trigger and `onAutoAssignmentRequestCreated`
+fire concurrently on the same id, and an unconditional delete used to wipe the offers that had just
+been created whenever this one happened to run second (a cold start is enough — and off-peak traffic
+is exactly when cold starts are normal).
 
 The in-wizard variant ([book_service_page.dart:2854](../abo_glumbo_bkk/lib/pages/bookings/book_service_page.dart:2854)) does the
 same but strips `status`/`acceptedTechnicians`/`rejectedTechnicians` and re-uploads media to a
@@ -195,25 +211,43 @@ writes **two** docs with the same id:
 - `auto-assignment_requests/{id}` — `status: 'P'`, `notificationSent: false`,
   `type: 'instant'` if the booking is **≤ 180 min** away, else `'late'`
 
-**Instant** (CF `onAutoAssignmentRequestCreated`, [bookingTriggers.js:623](functions/src/triggers/bookingTriggers.js:623))
-fires immediately on create. Same eligibility filter as §3.2 **plus**:
-- skip technicians who already hold a non-expired `pending` offer, or any non-`pending` offer, for this booking
-- skip `cancelledWorkerUids`
+**Instant** (CF `onAutoAssignmentRequestCreated`) fires immediately on create.
 
-**Late** — handled by the cron `processAutoAssignments`, **every 1 minute**
-([bookingTriggers.js:367](functions/src/triggers/bookingTriggers.js:367)):
+**Late** — handled by the cron `processAutoAssignments`, **every 4 minutes**:
 1. Load all `auto-assignment_requests` with `status == 'P'`.
-2. Verify the `bookings` doc still exists and is `P` or `SR`; otherwise copy its status onto the
+2. Verify the `bookings` doc still exists and is `P`; otherwise copy its status onto the
    request and skip.
-3. `instant` requests are re-broadcast every tick (to newly-online techs); `late` requests only start
-   once the booking is **within 3 hours**.
-4. First time a `late` request enters the window, push "Searching for Technician" to the customer and
+3. If the appointment is more than **1 hour in the past**, retire the request (`status: 'expired'`),
+   notify admins ("Auto-Assignment Failed") and stop. The booking stays `P` with no agent so it can
+   still be assigned by hand.
+4. `instant` requests are re-broadcast every tick (to newly-online techs); `late` requests only start
+   once the booking is **within 3 hours**. This is deliberate policy, not a latency bug: a booking
+   made at 22:00 for tomorrow 15:00 does nothing at all until 12:00 the next day.
+5. First time a `late` request enters the window, push "Searching for Technician" to the customer and
    set `notificationSent: true`.
-5. Re-run eligibility and create offers for anyone not yet offered.
+6. Re-run eligibility, then **create or renew** an offer for everyone still eligible.
 
-> Note: the cron's eligibility loop computes `hasTimeConflict` but **never applies it** — only
-> `hasStartedJob` is enforced ([bookingTriggers.js:538](functions/src/triggers/bookingTriggers.js:538)). The instant path
-> and the manual path both enforce it. See §12.3.
+Both auto-assign paths share one implementation — `stageAutoAssignOffers` — so they can no longer
+drift apart the way they did in §12.4. Eligibility is §3.2's filter plus `cancelledWorkerUids`, minus
+anyone who has already *answered* (see below).
+
+**Offer lifetime differs from the broadcast path, and must.** Auto-assign offers use
+`AUTO_ASSIGN_OFFER_TTL_SECONDS` (600 s), not the 120 s `OFFER_TTL_SECONDS` the live broadcast uses,
+and each wave **renews the existing offer doc in place** rather than writing a new one. One offer doc
+and exactly one push per technician per booking, for the whole search.
+
+> ⚠️ **Why a timeout must not count as a refusal.** The technician app auto-declines an offer when its
+> countdown hits zero (`declineJobOffer(autoDeclined: true)` → `status: 'declined'`). The auto-assign
+> eligibility filter used to exclude *any* technician whose offer was not `pending`, so wave one handed
+> every eligible technician a 120-second offer, each auto-declined itself two minutes later, and every
+> one of them was then permanently barred from that booking — the pool burnt out within minutes of a
+> search meant to run for three hours, and the booking could never be auto-assigned. `isTimedOutOffer`
+> now separates a timeout (`autoDeclined: true`, or `declinedAt ≈ expiresAt` for docs written by older
+> builds) from a deliberate decline; only the latter is permanent. This mirrors the reading
+> `onManualJobOfferUpdated` already applied when deciding what to tell the customer.
+>
+> The live-broadcast path keeps the old, stricter semantics via `loadTechniciansWithExistingOffers` —
+> a 5-minute window with the customer watching is a different problem, and is intentionally untouched.
 
 **Technician accepts** — because `booking.autoAssignmentStatus != null`, `acceptJobOffer` takes the
 transactional branch ([app_services.dart:3140](lib/services/app_services.dart:3140)):
@@ -866,3 +900,235 @@ and push notifications were reviewed only where they touch the changes above.
    already recomputes from `bookings` and is reachable from the wallet screen's sync action.
 4. **`_showResolveDialog`** in `booking_info.dart` is declared but never referenced — the admin can only
    resolve a complaint from the booking card, not the details page. Wire it up or delete it.
+
+---
+
+## 16. Change log — auto-assignment repair (2026-08-28)
+
+Tester report: *"service for later bookings done during off hours are not being auto-assigned."*
+The 3-hour policy itself was confirmed correct and is unchanged — a booking scheduled within 3 hours
+searches immediately, one scheduled further out starts searching 3 hours before its slot. Four
+defects underneath that policy were making the search fail once it did start.
+
+`functions/` passes `node --check` and `eslint --rule no-undef`. A stubbed-Firestore harness exercises
+both auto-assign paths, the cleanup trigger and the untouched broadcast path: 44 assertions, all green.
+
+| # | Defect | Fix |
+|---|---|---|
+| 16.1 | **A timed-out offer permanently burnt the technician.** The technician app auto-declines an unanswered offer when its 120 s countdown ends (`declineJobOffer(autoDeclined: true)` → `status: 'declined'`), and the auto-assign eligibility filter excluded *any* technician whose offer was not `pending`. Wave one offered every eligible technician, each offer auto-declined itself two minutes later, and the whole pool was permanently barred within minutes of a three-hour search. This is the defect that made auto-assignment look completely dead. | New `isTimedOutOffer` / `loadAutoAssignOfferState` read the `autoDeclined` flag (falling back to `declinedAt ≈ expiresAt` for older docs) and treat a timeout as "not yet answered". Only a deliberate decline is permanent. |
+| 16.2 | **Offers were dead for half of every cycle.** The wave interval moved from 1 min to 4 min in `4c025dd` but `OFFER_TTL_SECONDS` stayed at 120 s, so every offer lapsed ~2 minutes before the next wave could replace it. A technician opening the app had a better-than-even chance of an empty Pending tab mid-search. | `AUTO_ASSIGN_OFFER_TTL_SECONDS` (600 s) for auto-assign offers only, and each wave **renews the existing offer in place** instead of writing a new doc. Continuous coverage, one offer doc and one push per technician per booking instead of ~45 of each over a three-hour search. |
+| 16.3 | **`onBookingCreatedCleanupOffers` raced the instant broadcast.** `bookings/{id}` and `auto-assignment_requests/{id}` are written in one atomic batch, so the cleanup trigger and `onAutoAssignmentRequestCreated` fire together on the same id with no ordering guarantee. An unconditional delete wiped the freshly created offers whenever cleanup ran second — likeliest on a cold start, i.e. off-peak, i.e. exactly when off-hours bookings are made. | The sweep is anchored to the booking's own `createTime`: offers created *before* the booking are leftovers and are deleted, offers created *after* it belong to the live broadcast and are kept. Correct in either execution order. |
+| 16.4 | **A missed request broadcast for ever.** Once an appointment time passed, "within 3 hours of the appointment" stayed true permanently, so the request kept re-broadcasting with nobody watching and no escalation. | One hour past the appointment the request is retired (`status: 'expired'`) and admins get an "Auto-Assignment Failed" notification. The booking is deliberately left at `P` with no agent so it can still be assigned by hand. |
+
+Two structural changes came with the above:
+
+- Both auto-assign paths now share one `stageAutoAssignOffers` implementation. They previously carried
+  near-identical copies of the eligibility and offer-writing logic and had already drifted once (§12.4).
+- Technician pushes are sent **after** the batch commits, so a failed commit can no longer leave
+  technicians holding notifications for offers that do not exist.
+
+**Deliberately not changed:**
+
+- The 3-hour policy, per product decision.
+- The live-broadcast path (`broadcastEligibleOffersForRequest` / `loadTechniciansWithExistingOffers` /
+  the 120 s `OFFER_TTL_SECONDS` / the 1-minute rebroadcast cron). A 5-minute window with the customer
+  watching is a genuinely different problem, and there a lapsed offer really is a dead end.
+- Both client apps. Every fix is server-side, so it takes effect for technicians and customers already
+  on the current builds without a release.
+
+---
+
+## 17. Pricing change — the general price is bonus-only (2026-08-28)
+
+**Rule:** the customer is never charged, shown, or filtered by the service's general `price`. An
+on-hour/off-hour band that carries no price is worth **0**. The general price becomes the basis for the
+technician's monthly bonus when the band price is 0.
+
+Both apps pass `flutter analyze` with no new issues (10 and 12 pre-existing, unchanged); `functions/`
+passes `node --check`. A stubbed-Firestore harness runs the real `applyMonthlyBonus` handler over the
+fee-selection cases: 7 assertions, all green.
+
+### 17.1 Customer app — every general-price read removed
+
+| Where | Was | Now |
+|---|---|---|
+| `ServiceModel.getCurrentPrice()` | fell back to `price` when either band was null **or zero** | returns the band price, `0` if unset |
+| `BookingModel.effectiveInspectionFee` | `onWorkHourPrice ?? price ?? 0` | `onWorkHourPrice ?? 0` (same for off-hour) |
+| `sheets/payment.dart` | `completionData.inspectionFee ?? service.price ?? 0` | `completionData.inspectionFee ?? effectiveInspectionFee` |
+| `sheets/payment.dart` (Apple Pay ×2) | charged `service.price` | charge the new `_payableAmount` getter |
+| `service_tile.dart` | listed `service.price` | `service.getCurrentPrice()` |
+| `filter_criteria.dart` | filtered on `service.price` | `service.getCurrentPrice()` |
+| `booking_details_page.dart` | showed `service.price` as "Inspection Fee" | `booking.effectiveInspectionFee` |
+| `processing_payment_page.dart` (×2) | `getDiscountedPrice(service.price)` | `getDiscountedPrice(service.getCurrentPrice())` |
+
+The Apple Pay change also fixes a real inconsistency it exposed: within the same `processPayment()`,
+the card route already charged the computed total while the Apple Pay route sent `service.price`. Both
+now read one `_payableAmount` getter.
+
+### 17.2 Technician app — kept in step, and captures the bonus basis
+
+- `BookingModel.effectiveInspectionFee` drops the `service.price` fallback too. This one is not
+  cosmetic: it is what `completionData.inspectionFee` is written from, which is what the wallet credit
+  and the technician's payment notification read. Left as it was, the technician would have been
+  credited an amount the customer is no longer billed.
+- `ServiceModel.getCurrentPrice()` matches the customer app's copy (it has no call sites here, but the
+  two model copies are maintained in parallel and divergence between them is how bugs start).
+- `verify_payment_sheet.dart`'s no-completion-data fallback moves from `service.price` to
+  `effectiveInspectionFee`.
+- `AppServices.completeBooking` now writes **`completionData.generalServicePrice`**, read from
+  `services/{serviceId}` at completion. It is plumbed through `CompleteBooking` → `BookingBloc`, and
+  round-trips through the technician's `CompletionDataModel` so re-serialising a completed booking
+  cannot drop it.
+- `booking_info.dart` still displays `booking.service.price` — that is the frozen *charged* price on an
+  internal technician/admin screen, not the general price, so it is correct as-is.
+
+The customer app's `CompletionDataModel` deliberately does **not** parse `generalServicePrice`, so the
+figure cannot reach a customer-facing widget at all.
+
+### 17.3 Bonus calculation
+
+`applyMonthlyBonus` picks its base per booking:
+
+```js
+const chargedInspectionFee = Number(booking.completionData?.inspectionFee) || 0;
+const baseInspectionFee = chargedInspectionFee > 0
+  ? chargedInspectionFee
+  : Number(booking.completionData?.generalServicePrice) || 0;
+```
+
+The existing discount treatment then applies to whichever base was chosen, so the rule stays "the bonus
+is earned on the discounted inspection fee, with the general price standing in when that fee is zero".
+
+**Backfill note:** bookings completed before this change carry no `generalServicePrice`. Ones with a
+non-zero `inspectionFee` are unaffected. Ones whose fee was 0 score nothing — the same as before the
+field existed — so no historical bonus changes value.
+
+---
+
+## 18. Rewards — daily bonus, new tier thresholds (2026-08-28)
+
+The bonus moved from one monthly payout to a **nightly** one, and the Silver/Gold job requirements
+dropped. `functions/` passes `node --check`; the technician app passes `flutter analyze` with no new
+issues and `untranslated.json` empty. A stubbed-Firestore harness runs the real handler: 32 assertions,
+all green.
+
+### 18.1 What changed
+
+| | Before | After |
+|---|---|---|
+| Export | `applyMonthlyBonus` | **`applyDailyBonus`** |
+| Schedule | 1st of month, 01:00 Riyadh | **every day, 00:00 Riyadh** |
+| Period paid | the whole previous calendar month | the **KSA day that just ended** |
+| Tier input | `previousMonthJobs` (a once-a-month snapshot) | `currentMonthJobs` — month-to-date |
+| Idempotency | `lastBonusMonth === currentMonthKey` | `lastBonusDay === dayKey` |
+| Silver | 20 jobs, 4.0 rating | **10 jobs**, 4.0 |
+| Gold | 40 jobs, 4.5 rating | **12 jobs**, 4.5 |
+| Platinum | 60 jobs, 4.8 rating | unchanged |
+
+A worker now earns every night on the inspection fees they settled that day, at whatever tier their
+month-to-date record qualifies for, instead of waiting up to 31 days.
+
+### 18.2 Two ordering/consistency traps this had to fix
+
+**`resetMonthlyTiers` moved to 00:30 on the 1st** (was 00:00). It zeroes `currentMonthJobs`, which is
+now the bonus's tier input. Left at 00:00 it would race the 00:00 payout and, whenever it won, pay the
+last day of every month at Bronze — i.e. nothing — for everybody. The old monthly bonus wanted the
+opposite order (it read the `previousMonth*` snapshot the reset writes), so the two schedules had to
+move together.
+
+**The tier ladder existed in three places** — the bonus calculation, `updateWorkerTierOnJobCompletion`
+(the live badge, recomputed on every completed job), and the technician app's rewards screen. Editing
+one moved the badge a worker sees without moving the tier they are actually paid for. The two
+server-side copies now share one `resolveTier()`; the app keeps its own constants
+(`_silverJobs`/`_goldJobs`/`_platinumJobs` in `rewards_page.dart`) with a comment tying them to
+`TIER_*_JOBS`, since it cannot read the function's source.
+
+### 18.3 KSA day boundaries
+
+The day being paid for is a **Riyadh** calendar day, not a UTC one — Cloud Functions run in UTC, so
+`new Date()` would have straddled two KSA days. `ksaDayKey` / `ksaDayBounds` / `previousKsaDayKey`
+derive it from the fixed UTC+3 offset, the same technique `assignNewBookingIdHelper` already uses for
+booking numbers. `previousKsaDayKey` steps back from the start of the current KSA day rather than
+subtracting 24h from "now", so a schedule that fires a few minutes late still names the right day.
+
+### 18.4 Query cost
+
+The monthly job ran one `bookings` query **per user** over their entire history and filtered in memory.
+At 30x the frequency that was not affordable, so the daily run does a single range query
+(`bookingStatusCode == 'C'` + `walletCreditedAt` within the day) and buckets by agent, then reads only
+the user documents that actually earned.
+
+That range query needs a composite index on **(`bookingStatusCode`, `walletCreditedAt`)**. If it is not
+present the query fails with `FAILED_PRECONDITION`, and the function falls back to the old
+scan-and-filter rather than paying nobody — same pattern as the completed-jobs aggregation. **Create
+the index** to get the cost benefit; the fallback is a safety net, not the intended path.
+
+### 18.5 Copy
+
+`bonusCalculationNote` said "your monthly bonus … from the previous month" — now describes the nightly
+payment, in all three languages. `monthlyBonusEarned` → `bonusEarned` (it is a running total, not a
+monthly one). The rewards stat tile showing the most recent payout was labelled just "Bonus", which
+next to a month-to-date job count read as a monthly figure; it is now `lastBonus` / "Last Bonus".
+`twentyPlusJobs`/`fortyPlusJobs`/`sixtyPlusJobs` were replaced by one parameterised
+`tierJobsRequirement(count)`, so the strings cannot state a number the ladder no longer uses.
+
+### 18.6 Note on the ladder shape
+
+Silver at 10 jobs and Gold at 12 are two apart, while Platinum stays at 60. That is what was asked for
+and it works, but the middle of the ladder is now very compressed relative to the top — worth a second
+look if Platinum was meant to come down too.
+
+### 18.7 BONUS_MODE — both schemes deployed, one live
+
+`applyMonthlyBonus` was **not** deleted. Both functions are deployed and a single constant at the top
+of the rewards section decides which one pays:
+
+```js
+const BONUS_MODE = "daily"; // "daily" | "monthly"
+```
+
+The inactive function returns immediately on every invocation. This is not tidiness — it is the only
+thing standing between the two schemes and a double payout. The monthly job sums a whole month of
+inspection fees that the daily job has already paid out night by night, and the two guards
+(`lastBonusMonth` vs `lastBonusDay`) know nothing about each other, so if both schedules were armed
+every technician would be paid twice for the same work.
+
+`BONUS_MODE` also selects the job ladder, so reverting the schedule reverts the thresholds with it:
+
+| Mode | Silver | Gold | Platinum |
+|---|---|---|---|
+| `daily` | 10 | 12 | 60 |
+| `monthly` | 20 | 40 | 60 |
+
+**To revert to the previous scheme:**
+1. Set `BONUS_MODE = "monthly"` in `functions/index.js`.
+2. Set `_silverJobs = 20` and `_goldJobs = 40` in the technician app's `rewards_page.dart` — the app
+   cannot read the function's constants, so this does not follow automatically.
+3. Restore the monthly wording of `bonusCalculationNote` (and `bonusEarned`/`lastBonus` if the
+   "Monthly Bonus Earned" phrasing is wanted back) in the three `.arb` files, then `flutter gen-l10n`.
+4. `firebase deploy --only functions`.
+
+No function has to be recreated and no Cloud Scheduler job has to be rebuilt.
+
+Two deliberate differences between the restored monthly function and the version it was copied from:
+it takes its ladder from the shared `resolveTier()`, and it keeps the
+`completionData.generalServicePrice` fallback from the pricing change — that was a separate decision
+and is not part of what reverting the schedule is meant to undo.
+
+### 18.8 Required Firestore index
+
+The daily run's range query needs a composite index that **Firestore does not create on its own**:
+
+| Collection | Fields | Scope |
+|---|---|---|
+| `bookings` | `bookingStatusCode` ASC, then `walletCreditedAt` ASC | Collection |
+
+Firestore auto-creates single-field indexes only; anything combining an equality filter with a range
+filter on a different field needs an explicit composite index. Without it the query throws
+`FAILED_PRECONDITION` and the function falls back to scanning every completed booking and filtering in
+memory — correct, but it gives up the whole cost saving.
+
+`firestore.indexes.json` at the repo root holds the project's full index set (41 pre-existing, exported
+with `firebase firestore:indexes`, plus this one), so it can be deployed without proposing to delete
+anything. It is **not** wired into `firebase.json`; add a `"firestore": { "indexes": "firestore.indexes.json" }`
+entry before running `firebase deploy --only firestore:indexes`.

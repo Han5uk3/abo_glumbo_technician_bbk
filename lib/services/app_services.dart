@@ -1388,6 +1388,32 @@ class AppServices {
     }
   }
 
+  /// Reads the service's *general* price straight from `services/{id}`.
+  ///
+  /// It cannot be taken from `booking.service.price`: all three booking
+  /// creation paths overwrite that field with the resolved on-hour/off-hour
+  /// band price at booking time (`service.copyWith(price: bookingTimePrice)` in
+  /// the customer app's `save_booking.dart`), so on the booking document
+  /// `service.price` is the frozen charged amount, not the general price.
+  ///
+  /// Returns 0 when the service has been deleted or carries no general price;
+  /// the bonus then simply has no fallback basis for this job, which is the
+  /// same outcome as before this field existed.
+  static Future<double> _fetchGeneralServicePrice(String? serviceId) async {
+    if (serviceId == null || serviceId.isEmpty) return 0.0;
+    try {
+      final doc = await AppFirestore.servicesCollectionRef.doc(serviceId).get();
+      if (!doc.exists) return 0.0;
+      final data = doc.data() as Map<String, dynamic>?;
+      return (data?['price'] as num?)?.toDouble() ?? 0.0;
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Could not read general price for service $serviceId: $e');
+      }
+      return 0.0;
+    }
+  }
+
   static Future<bool> completeBooking({
     required String bookingId,
     required String technicianId,
@@ -1397,9 +1423,21 @@ class AppServices {
     required List<Map<String, dynamic>> serviceItems,
     required double totalCost,
     required double inspectionFee,
+    String? serviceId,
   }) async {
     try {
       final String status = 'CP';
+
+      // Captured at completion for the monthly bonus only, and never shown to
+      // the customer (`CompletionDataModel` in the customer app parses named
+      // fields, so an extra key is invisible there). `applyMonthlyBonus` uses
+      // it as the bonus basis when `inspectionFee` is 0 because the booking's
+      // on-hour/off-hour band carries no price. Recorded here rather than
+      // looked up by the monthly cron so the value is the one that applied
+      // when the job was done, and so the cron stays a fixed number of reads.
+      final double generalServicePrice = await _fetchGeneralServicePrice(
+        serviceId,
+      );
 
       await AppFirestore.bookingsCollectionRef.doc(bookingId).update({
         'bookingStatusCode': status,
@@ -1415,6 +1453,7 @@ class AppServices {
           'totalCost': totalCost,
           'mode': mode,
           'inspectionFee': inspectionFee,
+          'generalServicePrice': generalServicePrice,
         },
       });
       return true;

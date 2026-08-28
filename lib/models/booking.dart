@@ -78,11 +78,23 @@ class BookingModel {
   final String? invoicePdfUrlUr;
 
   /// Returns the correct inspection fee based on the on-hour/off-hour status
+  /// The inspection fee for this booking's on-hour/off-hour band, and 0 when
+  /// that band is not priced.
+  ///
+  /// `service.price` is deliberately not a fallback. It must stay in step with
+  /// the customer app's `BookingModel.effectiveInspectionFee`, which is what
+  /// the customer is actually shown and charged — if this one fell back to a
+  /// price the customer app no longer uses, the technician would be credited
+  /// an amount the customer was never billed.
+  ///
+  /// The service's general price is not lost by this: it is captured onto
+  /// `completionData.generalServicePrice` at completion, where it is the basis
+  /// for the monthly bonus. See `AppServices.completeBooking`.
   double get effectiveInspectionFee {
     if (isOnHour == true) {
-      return service.onWorkHourPrice ?? service.price ?? 0.0;
+      return service.onWorkHourPrice ?? 0.0;
     } else {
-      return service.offWorkHourPrice ?? service.price ?? 0.0;
+      return service.offWorkHourPrice ?? 0.0;
     }
   }
 
@@ -518,6 +530,12 @@ class CompletionDataModel {
   final List<BookingServiceItem> serviceItems;
   final double inspectionFee;
 
+  /// The service's general price, captured at completion purely as the basis
+  /// for the technician's monthly bonus when [inspectionFee] is 0 (the
+  /// booking's on-hour/off-hour band carries no price). Never shown to the
+  /// customer - their app's CompletionDataModel does not even parse it.
+  final double generalServicePrice;
+
   CompletionDataModel({
     required this.fileUrls, // Changed
     required this.mode,
@@ -526,6 +544,7 @@ class CompletionDataModel {
     required this.totalCost,
     required this.serviceItems,
     required this.inspectionFee,
+    this.generalServicePrice = 0.0,
   });
 
   factory CompletionDataModel.fromMap(Map<String, dynamic> data) {
@@ -542,6 +561,8 @@ class CompletionDataModel {
       serviceCost: data['serviceCost']?.toDouble() ?? 0.0,
       totalCost: data['totalCost']?.toDouble() ?? 0.0,
       inspectionFee: data['inspectionFee']?.toDouble() ?? 0.0,
+      generalServicePrice:
+          data['generalServicePrice']?.toDouble() ?? 0.0,
       serviceItems:
           (data['serviceItems'] as List<dynamic>?)
               ?.map(
@@ -564,6 +585,9 @@ class CompletionDataModel {
       'serviceCost': serviceCost,
       'totalCost': totalCost,
       'inspectionFee': inspectionFee,
+      // Preserved on round-trip so re-serialising a completed booking cannot
+      // silently drop the monthly bonus basis.
+      'generalServicePrice': generalServicePrice,
       'serviceItems': serviceItems.map((e) => e.toMap()).toList(),
     };
   }

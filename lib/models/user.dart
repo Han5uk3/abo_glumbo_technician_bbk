@@ -283,8 +283,16 @@ class UserModel {
           ? List<String>.from(json['certifications'])
           : <String>[],
       isOnline: json['isOnline'],
-      currentMonthJobs: json['currentMonthJobs'] as int?,
-      previousMonthJobs: json['previousMonthJobs'] as int?,
+      currentMonthJobs: json['currentMonthJobs'] != null
+          ? (json['currentMonthJobs'] is int
+                ? json['currentMonthJobs'] as int
+                : int.tryParse(json['currentMonthJobs'].toString()) ?? 0)
+          : null,
+      previousMonthJobs: json['previousMonthJobs'] != null
+          ? (json['previousMonthJobs'] is int
+                ? json['previousMonthJobs'] as int
+                : int.tryParse(json['previousMonthJobs'].toString()) ?? 0)
+          : null,
       tier: json['tier'],
       bonusAmount: json['bonusAmount'] != null
           ? (json['bonusAmount'] as num).toDouble()
@@ -295,7 +303,11 @@ class UserModel {
           : null,
       lastBonusMonth: json['lastBonusMonth'],
       isGrantedAdminByMain: json['isGrantedAdminByMain'] ?? false,
-      adminAccessLevel: json['adminAccessLevel'] as int?,
+      adminAccessLevel: json['adminAccessLevel'] != null
+          ? (json['adminAccessLevel'] is int
+                ? json['adminAccessLevel'] as int
+                : int.tryParse(json['adminAccessLevel'].toString()) ?? 1)
+          : null,
       grantedAdminAt: json['grantedAdminAt'],
       lastKnownLocation: json['last_known_location'],
       geohash: json['geohash'],

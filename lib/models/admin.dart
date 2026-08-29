@@ -25,12 +25,24 @@ class AdminModel {
   });
 
   factory AdminModel.fromJson(Map<String, dynamic> json, {String? id}) {
+    int accessLevel = 1;
+    final accessLevelValue = json['accessLevel'];
+    if (accessLevelValue != null) {
+      if (accessLevelValue is int) {
+        accessLevel = accessLevelValue;
+      } else if (accessLevelValue is String) {
+        accessLevel = int.tryParse(accessLevelValue) ?? 1;
+      } else if (accessLevelValue is num) {
+        accessLevel = accessLevelValue.toInt();
+      }
+    }
+    
     return AdminModel(
       uid: id ?? json['uid'],
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
-      accessLevel: json['accessLevel'] ?? 1,
+      accessLevel: accessLevel,
       createdAt: json['createdAt'],
       isCoreAdmin: json['isCoreAdmin'] ?? false,
       lanCode: json['lanCode'],

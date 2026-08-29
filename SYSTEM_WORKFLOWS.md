@@ -1087,17 +1087,16 @@ of the rewards section decides which one pays:
 const BONUS_MODE = "hourly"; // "hourly" | "daily" | "monthly"
 ```
 
-The inactive functions return immediately on every invocation. In `hourly` mode:
-- `applyHourlyBonus` runs every hour (`0 * * * *` Asia/Riyadh).
-- It queries completed bookings whose inspection fees settled (`walletCreditedAt`) within the 1-hour window that just ended.
-- It evaluates each technician's tier using the **jobs completed in that 1-hour window** (`jobsByAgent`), combined with their average rating.
-- Idempotency is keyed on `userData.lastBonusHour === hourKey` (e.g. `"2026-08-29 13:00"`).
+The inactive functions return immediately on every invocation. Across all schemes (`hourly`, `daily`, `monthly`), tier qualification is evaluated against the worker's **month-to-date completed jobs** (`userData.currentMonthJobs`), while the calculation interval determines the inspection fees paid:
+- `hourly`: runs every hour (`0 * * * *` Asia/Riyadh), paying on inspection fees settled in the 1-hour window that just ended. Idempotency is keyed on `userData.lastBonusHour === hourKey` (e.g. `"2026-08-29 13:00"`).
+- `daily`: runs nightly at 00:00 Asia/Riyadh, paying on inspection fees settled that day. Idempotency is keyed on `userData.lastBonusDay === dayKey`.
+- `monthly`: runs on the 1st at 01:00 Asia/Riyadh, paying on inspection fees settled in the previous calendar month.
 
-`BONUS_MODE` also selects the job ladder:
+`BONUS_MODE` selects the active job ladder:
 
 | Mode | Silver | Gold | Platinum |
 |---|---|---|---|
-| `hourly` | 10 | 12 | 60 |
+| `hourly` | 3 | 5 | 10 |
 | `daily` | 10 | 12 | 60 |
 | `monthly` | 20 | 40 | 60 |
 

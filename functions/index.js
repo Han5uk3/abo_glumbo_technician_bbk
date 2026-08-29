@@ -3300,9 +3300,8 @@ exports.notifyOnNewChatMessage = onValueCreated(
 // be rebuilt. Inactive functions exit immediately on every invocation.
 const BONUS_MODE = "hourly"; // "hourly" | "daily" | "monthly"
 
-// Tier qualification thresholds, evaluated against the worker's job count
-// (in the 1-hour window under "hourly", month-to-date under "daily", the previous month under "monthly")
-// and their overall average rating.
+// Tier qualification thresholds, evaluated against the worker's month-to-date
+// job count (`currentMonthJobs`) and their overall average rating across all schemes.
 const TIER_JOB_LADDERS = {
   hourly: { silver: 3, gold: 5, platinum: 10 },
   daily: { silver: 10, gold: 12, platinum: 60 },
@@ -3786,7 +3785,6 @@ exports.applyHourlyBonus = onSchedule(
       }
 
       const feesByAgent = new Map();
-      const jobsByAgent = new Map();
 
       for (const doc of hourBookingDocs) {
         const booking = doc.data();
@@ -3813,10 +3811,6 @@ exports.applyHourlyBonus = onSchedule(
           agentUid,
           (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
         );
-        jobsByAgent.set(
-          agentUid,
-          (jobsByAgent.get(agentUid) || 0) + 1
-        );
       }
 
       logger.info(
@@ -3842,8 +3836,9 @@ exports.applyHourlyBonus = onSchedule(
             continue;
           }
 
-          // Jobs done in that 1-hour window
-          const jobs = jobsByAgent.get(userId) || 0;
+          // Use month-to-date completed jobs (`currentMonthJobs`), identical to daily
+          // mode and the live tier badge `updateWorkerTierOnJobCompletion`.
+          const jobs = userData.currentMonthJobs || 0;
           const ratingSum = userData.rating || 0.0;
           const reviewCount = userData.reviewCount || 0;
           const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
@@ -3851,7 +3846,7 @@ exports.applyHourlyBonus = onSchedule(
           const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
           if (bonusPercentage === 0) {
             logger.info(
-              `User ${userId} in Bronze tier for ${hourKey} (${jobs} jobs in hour, ${averageRating.toFixed(2)} rating). No bonus.`
+              `User ${userId} in Bronze tier for ${hourKey} (${jobs} month-to-date jobs, ${averageRating.toFixed(2)} rating). No bonus.`
             );
             continue;
           }

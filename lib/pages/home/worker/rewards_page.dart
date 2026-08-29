@@ -21,9 +21,9 @@ class _RewardsPageState extends State<RewardsPage> {
   // `functions/index.js`, which is what actually decides a worker's tier —
   // showing a worker a target the server does not use is worse than showing
   // none, so change both together.
-  static const int _silverJobs = 10;
-  static const int _goldJobs = 12;
-  static const int _platinumJobs = 60;
+  static const int _silverJobs = 3;
+  static const int _goldJobs = 5;
+  static const int _platinumJobs = 10;
 
   int totalJobsCount = 0;
   double currentRating = 0.0;

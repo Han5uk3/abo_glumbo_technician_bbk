@@ -10004,7 +10004,7 @@ abstract class AppLocalizations {
   /// No description provided for @bonusCalculationNote.
   ///
   /// In en, this message translates to:
-  /// **'Your bonus is paid every night, based only on the Inspection Fees you settled that day. Spare parts, materials, and other charges are not included in the bonus calculation.'**
+  /// **'Your bonus is paid every hour, based only on the Inspection Fees you settled during that hour. Spare parts, materials, and other charges are not included in the bonus calculation.'**
   String get bonusCalculationNote;
 }
 

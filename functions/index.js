@@ -3288,38 +3288,23 @@ exports.notifyOnNewChatMessage = onValueCreated(
 
 // Which bonus scheme is live.
 //
+//   "hourly"  -> `applyHourlyBonus` pays every hour on the hour for the hour
+//                just ended, evaluated against the jobs done in that 1-hour window.
 //   "daily"   -> `applyDailyBonus` pays every night for the day just ended,
 //                on the 10/12/60 job ladder.
 //   "monthly" -> `applyMonthlyBonus` pays once, on the 1st, for the whole
 //                previous month, on the original 20/40/60 ladder.
 //
-// BOTH functions stay deployed so switching back is a one-line change plus a
+// ALL functions stay deployed so switching is a one-line change plus a
 // redeploy — no function has to be recreated and no Cloud Scheduler job has to
-// be rebuilt. The inactive one exits immediately on every invocation.
-//
-// ****************************************************************************
-// * Exactly one value is valid at a time. If both schemes could ever run,     *
-// * technicians would be paid twice for the same work: the monthly job sums   *
-// * a whole month of inspection fees that the daily job has already paid out  *
-// * night by night, and its `lastBonusMonth` guard does not know about the    *
-// * daily job's `lastBonusDay` guard (or the reverse). That is exactly why    *
-// * this switch exists rather than simply leaving both schedules armed.       *
-// ****************************************************************************
-//
-// To revert: set BONUS_MODE = "monthly", update the three job constants in the
-// technician app's `rewards_page.dart` back to 20/40/60 so workers are shown
-// the ladder they are actually paid on, then redeploy both.
-const BONUS_MODE = "daily"; // "daily" | "monthly"
+// be rebuilt. Inactive functions exit immediately on every invocation.
+const BONUS_MODE = "hourly"; // "hourly" | "daily" | "monthly"
 
 // Tier qualification thresholds, evaluated against the worker's job count
-// (month-to-date under "daily", the previous month under "monthly") and their
-// overall average rating.
-//
-// The job counts are mirrored in the technician app's rewards page
-// (`_silverJobs`/`_goldJobs`/`_platinumJobs` in `rewards_page.dart`), which
-// cannot read this file. Change both together — a worker chasing a number the
-// server does not use is worse than no number at all.
+// (in the 1-hour window under "hourly", month-to-date under "daily", the previous month under "monthly")
+// and their overall average rating.
 const TIER_JOB_LADDERS = {
+  hourly: { silver: 3, gold: 5, platinum: 10 },
   daily: { silver: 10, gold: 12, platinum: 60 },
   monthly: { silver: 20, gold: 40, platinum: 60 },
 };
@@ -3382,6 +3367,21 @@ function ksaDayBounds(dayKey) {
 function previousKsaDayKey(instantMs) {
   const { startMs } = ksaDayBounds(ksaDayKey(instantMs));
   return ksaDayKey(startMs - 1);
+}
+
+/** KSA calendar hour ("YYYY-MM-DD HH:00") that an absolute instant falls in. */
+function ksaHourKey(instantMs) {
+  const d = new Date(instantMs + KSA_OFFSET_MS);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")} ${String(d.getUTCHours()).padStart(2, "0")}:00`;
+}
+
+/** The previous hour bounds for instantMs in UTC millis, end inclusive, and its KSA hour key. */
+function previousKsaHourBounds(instantMs) {
+  const currentHourStartMs = Math.floor(instantMs / (60 * 60 * 1000)) * (60 * 60 * 1000);
+  const startMs = currentHourStartMs - 60 * 60 * 1000;
+  const endMs = currentHourStartMs - 1;
+  const hourKey = ksaHourKey(startMs);
+  return { hourKey, startMs, endMs };
 }
 
 // Function 1: Reset Tiers Monthly (1st at 00:30 Saudi Arabia Time)
@@ -3731,6 +3731,253 @@ exports.applyDailyBonus = onSchedule(
       return null;
     } catch (error) {
       logger.error("Error calculating daily bonuses:", error);
+      throw error;
+    }
+  }
+);
+
+// ============================================
+// Function 2c: Calculate and Apply Hourly Bonuses
+// Runs every hour at minute 0 Riyadh, for the hour that just ended.
+// Tier is evaluated against the jobs completed by the technician in that 1-hour window.
+// ============================================
+exports.applyHourlyBonus = onSchedule(
+  {
+    schedule: "0 * * * *", // every hour at minute 0
+    timeZone: "Asia/Riyadh",
+  },
+  async (event) => {
+    if (BONUS_MODE !== "hourly") {
+      logger.info(`Hourly bonus is disabled (BONUS_MODE=${BONUS_MODE}). Skipping.`);
+      return null;
+    }
+
+    const { hourKey, startMs, endMs } = previousKsaHourBounds(Date.now());
+
+    logger.info(`Calculating hourly bonuses for ${hourKey}...`);
+
+    try {
+      const startTs = admin.firestore.Timestamp.fromMillis(startMs);
+      const endTs = admin.firestore.Timestamp.fromMillis(endMs);
+
+      let hourBookingDocs;
+      try {
+        const snapshot = await db
+          .collection("bookings")
+          .where("bookingStatusCode", "==", "C")
+          .where("walletCreditedAt", ">=", startTs)
+          .where("walletCreditedAt", "<=", endTs)
+          .get();
+        hourBookingDocs = snapshot.docs;
+      } catch (indexErr) {
+        logger.warn(
+          `Hourly bonus range query unavailable, falling back to full scan: ${indexErr.message}`
+        );
+        const snapshot = await db
+          .collection("bookings")
+          .where("bookingStatusCode", "==", "C")
+          .get();
+        hourBookingDocs = snapshot.docs.filter((doc) => {
+          const creditedAt = doc.data().walletCreditedAt;
+          if (!creditedAt || typeof creditedAt.toMillis !== "function") return false;
+          const ms = creditedAt.toMillis();
+          return ms >= startMs && ms <= endMs;
+        });
+      }
+
+      const feesByAgent = new Map();
+      const jobsByAgent = new Map();
+
+      for (const doc of hourBookingDocs) {
+        const booking = doc.data();
+        const agentUid = booking.agent && booking.agent.uid;
+        if (!agentUid) continue;
+
+        const discountPercentage = booking.service?.discountPercentage || 0;
+
+        const chargedInspectionFee =
+          Number(booking.completionData?.inspectionFee) || 0;
+        const baseInspectionFee =
+          chargedInspectionFee > 0
+            ? chargedInspectionFee
+            : Number(booking.completionData?.generalServicePrice) || 0;
+
+        const effectiveInspectionFee =
+          discountPercentage > 0
+            ? baseInspectionFee - (baseInspectionFee * discountPercentage) / 100
+            : baseInspectionFee;
+
+        if (effectiveInspectionFee <= 0) continue;
+
+        feesByAgent.set(
+          agentUid,
+          (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
+        );
+        jobsByAgent.set(
+          agentUid,
+          (jobsByAgent.get(agentUid) || 0) + 1
+        );
+      }
+
+      logger.info(
+        `${feesByAgent.size} technician(s) settled inspection fees in ${hourKey}`
+      );
+
+      let totalBonusesApplied = 0;
+      let totalBonusAmount = 0;
+
+      for (const [userId, totalInspectionFees] of feesByAgent) {
+        try {
+          const userRef = db.collection("users").doc(userId);
+          const userDoc = await userRef.get();
+          if (!userDoc.exists) {
+            logger.warn(`Bonus skipped: user ${userId} not found`);
+            continue;
+          }
+          const userData = userDoc.data() || {};
+
+          // Idempotency. Keyed on the hour being paid for
+          if (userData.lastBonusHour === hourKey) {
+            logger.info(`Bonus already applied to ${userId} for ${hourKey}`);
+            continue;
+          }
+
+          // Jobs done in that 1-hour window
+          const jobs = jobsByAgent.get(userId) || 0;
+          const ratingSum = userData.rating || 0.0;
+          const reviewCount = userData.reviewCount || 0;
+          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
+
+          const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
+          if (bonusPercentage === 0) {
+            logger.info(
+              `User ${userId} in Bronze tier for ${hourKey} (${jobs} jobs in hour, ${averageRating.toFixed(2)} rating). No bonus.`
+            );
+            continue;
+          }
+
+          const bonusAmount = totalInspectionFees * bonusPercentage;
+          if (bonusAmount <= 0) continue;
+
+          const currentTotalBonus = userData.totalMonthlyBonus;
+          const currentTotalBonusNum =
+            typeof currentTotalBonus === "string"
+              ? parseFloat(currentTotalBonus) || 0
+              : currentTotalBonus || 0;
+          const newTotalBonus = currentTotalBonusNum + bonusAmount;
+
+          await userRef.update({
+            totalMonthlyBonus: newTotalBonus.toFixed(2),
+            bonusAmount: bonusAmount,
+            lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
+            lastBonusHour: hourKey,
+            lastBonusTier: tier,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+          // Update unified wallet with bonus amount
+          try {
+            const walletRef = db.collection("unified_wallets").doc(userId);
+            await db.runTransaction(async (transaction) => {
+              const walletDoc = await transaction.get(walletRef);
+              if (walletDoc.exists) {
+                transaction.update(walletRef, {
+                  totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                  availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
+                  totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
+                  lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              } else {
+                transaction.set(walletRef, {
+                  workerId: userId,
+                  totalTips: 0.0,
+                  cardTips: 0.0,
+                  cashTips: 0.0,
+                  paidTips: 0.0,
+                  totalBonus: bonusAmount,
+                  paidBonus: 0.0,
+                  availableBonus: bonusAmount,
+                  inAppEarnings: 0.0,
+                  outsideAppEarnings: 0.0,
+                  totalCompletionAmount: 0.0,
+                  totalAvailableBalance: bonusAmount,
+                  lifetimeTotal: bonusAmount,
+                  payoutRequested: false,
+                  requestedAmount: 0.0,
+                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              }
+            });
+            logger.info(
+              `Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`
+            );
+          } catch (walletError) {
+            logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
+          }
+
+          // Send notification to worker
+          await sendAndStoreNotification({
+            targetRole: "technician",
+            targetId: userId,
+            titleEn: "🎉 Hourly Bonus Received!",
+            titleAr: "🎉 تم استلام مكافأة الساعة!",
+            titleUr: "🎉 فی گھنٹہ بونس موصول ہوا!",
+            bodyEn: `Nice work! Your ${tier} tier earned you a bonus of ${money(
+              bonusAmount.toFixed(2),
+              "en"
+            )} (${bonusPercentage * 100}% of ${money(
+              totalInspectionFees.toFixed(2),
+              "en"
+            )} in Inspection Fees).`,
+            bodyAr: `عمل رائع! حصلت بفضل مستوى ${tier} على مكافأة قدرها ${money(
+              bonusAmount.toFixed(2),
+              "ar"
+            )} (${bonusPercentage * 100}٪ من ${money(
+              totalInspectionFees.toFixed(2),
+              "ar"
+            )} من رسوم الفحص).`,
+            bodyUr: `شاباش! آپ کے ${tier} ٹئیر نے آپ کو ${money(
+              bonusAmount.toFixed(2),
+              "ur"
+            )} کا بونس دلایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
+              totalInspectionFees.toFixed(2),
+              "ur"
+            )} انسپیکشن فیس)۔`,
+            data: {
+              category: "bonus",
+              tier: tier,
+              amount: bonusAmount.toFixed(2),
+              bonusPercentage: (bonusPercentage * 100).toString(),
+              hour: hourKey,
+            },
+            fcmToken: userData.fcmToken,
+            lanCode: userData.lanCode || "en",
+          });
+
+          totalBonusesApplied++;
+          totalBonusAmount += bonusAmount;
+
+          logger.info(
+            `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
+              2
+            )} to user ${userId} for ${hourKey} (based on ${jobs} jobs and SAR ${totalInspectionFees.toFixed(
+              2
+            )} Inspection Fees)`
+          );
+        } catch (userError) {
+          logger.error(`Error applying hourly bonus to user ${userId}:`, userError);
+        }
+      }
+
+      logger.info(
+        `Hourly bonus calculation completed for ${hourKey}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
+          2
+        )}`
+      );
+      return null;
+    } catch (error) {
+      logger.error("Error calculating hourly bonuses:", error);
       throw error;
     }
   }

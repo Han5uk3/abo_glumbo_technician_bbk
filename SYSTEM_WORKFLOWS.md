@@ -1078,25 +1078,26 @@ Silver at 10 jobs and Gold at 12 are two apart, while Platinum stays at 60. That
 and it works, but the middle of the ladder is now very compressed relative to the top — worth a second
 look if Platinum was meant to come down too.
 
-### 18.7 BONUS_MODE — both schemes deployed, one live
+### 18.7 BONUS_MODE — hourly, daily, and monthly schemes deployed, one live
 
-`applyMonthlyBonus` was **not** deleted. Both functions are deployed and a single constant at the top
+`applyDailyBonus` and `applyMonthlyBonus` were **not** deleted. All three functions (`applyHourlyBonus`, `applyDailyBonus`, `applyMonthlyBonus`) are deployed and a single constant at the top
 of the rewards section decides which one pays:
 
 ```js
-const BONUS_MODE = "daily"; // "daily" | "monthly"
+const BONUS_MODE = "hourly"; // "hourly" | "daily" | "monthly"
 ```
 
-The inactive function returns immediately on every invocation. This is not tidiness — it is the only
-thing standing between the two schemes and a double payout. The monthly job sums a whole month of
-inspection fees that the daily job has already paid out night by night, and the two guards
-(`lastBonusMonth` vs `lastBonusDay`) know nothing about each other, so if both schedules were armed
-every technician would be paid twice for the same work.
+The inactive functions return immediately on every invocation. In `hourly` mode:
+- `applyHourlyBonus` runs every hour (`0 * * * *` Asia/Riyadh).
+- It queries completed bookings whose inspection fees settled (`walletCreditedAt`) within the 1-hour window that just ended.
+- It evaluates each technician's tier using the **jobs completed in that 1-hour window** (`jobsByAgent`), combined with their average rating.
+- Idempotency is keyed on `userData.lastBonusHour === hourKey` (e.g. `"2026-08-29 13:00"`).
 
-`BONUS_MODE` also selects the job ladder, so reverting the schedule reverts the thresholds with it:
+`BONUS_MODE` also selects the job ladder:
 
 | Mode | Silver | Gold | Platinum |
 |---|---|---|---|
+| `hourly` | 10 | 12 | 60 |
 | `daily` | 10 | 12 | 60 |
 | `monthly` | 20 | 40 | 60 |
 

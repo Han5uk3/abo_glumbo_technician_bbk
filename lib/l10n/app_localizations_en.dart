@@ -5385,5 +5385,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bonusCalculationNote =>
-      'Your bonus is paid every night, based only on the Inspection Fees you settled that day. Spare parts, materials, and other charges are not included in the bonus calculation.';
+      'Your bonus is paid every hour, based only on the Inspection Fees you settled during that hour. Spare parts, materials, and other charges are not included in the bonus calculation.';
 }

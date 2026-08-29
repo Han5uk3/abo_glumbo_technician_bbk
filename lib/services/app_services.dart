@@ -2702,7 +2702,36 @@ class AppServices {
       },
     ).onErrorReturn(0);
 
-    final jobRequests = Stream.value(0);
+    // Count active job offers (expired offers are filtered out, matching the pending tab display logic)
+    final jobRequests =
+        Rx.combineLatest2(
+              AppFirestore.jobOffersCollectionRef
+                  .where(
+                    'status',
+                    whereIn: [
+                      'pending',
+                      'counter_offered',
+                      'customer_counter_offered',
+                      'accepted_by_technician',
+                    ],
+                  )
+                  .snapshots(),
+              _expiryTicker(),
+              (snapshot, _) => snapshot,
+            )
+            .map((snapshot) {
+              final now = TimeService.now;
+              return snapshot.docs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final expiresAt = data['expiresAt'] as Timestamp?;
+                final status = data['status'] as String?;
+                final isExpired =
+                    expiresAt != null && expiresAt.toDate().isBefore(now);
+                final isAcceptedByMe = status == 'accepted_by_technician';
+                return !isExpired || isAcceptedByMe;
+              }).length;
+            })
+            .onErrorReturn(0);
 
     final assigned = AppFirestore.bookingsCollectionRef
         .where('bookingStatusCode', isEqualTo: 'A')

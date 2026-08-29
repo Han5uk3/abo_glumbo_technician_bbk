@@ -2050,7 +2050,11 @@ class AppServices {
   static Future<double> getWorkerBonusAmounts(String workerId) async {
     final snapshot = await AppFirestore.usersCollectionRef.doc(workerId).get();
     final data = snapshot.data() as Map<String, dynamic>?;
-    return (data?['totalMonthlyBonus'] as num?)?.toDouble() ?? 0.0;
+    final val = data?['totalMonthlyBonus'];
+    if (val == null) return 0.0;
+    if (val is num) return val.toDouble();
+    if (val is String) return double.tryParse(val) ?? 0.0;
+    return 0.0;
   }
 
   static Future<UserModel> getWorkerById(String workerId) async {

@@ -273,11 +273,15 @@ class UserModel {
       paidAmounts: json['paidAmounts']?.toString(),
       highestTier: json['highestTier'],
       totalMonthlyBonus: json['totalMonthlyBonus'] != null
-          ? (json['totalMonthlyBonus'] as num).toDouble()
+          ? (json['totalMonthlyBonus'] is num
+              ? (json['totalMonthlyBonus'] as num).toDouble()
+              : double.tryParse(json['totalMonthlyBonus'].toString()))
           : null,
       lastBonusDate: json['lastBonusDate'],
       paidoutTips: json['paidoutTips'] != null
-          ? (json['paidoutTips'] as num).toDouble()
+          ? (json['paidoutTips'] is num
+              ? (json['paidoutTips'] as num).toDouble()
+              : double.tryParse(json['paidoutTips'].toString()))
           : null,
       certifications: json['certifications'] != null
           ? List<String>.from(json['certifications'])
@@ -295,11 +299,15 @@ class UserModel {
           : null,
       tier: json['tier'],
       bonusAmount: json['bonusAmount'] != null
-          ? (json['bonusAmount'] as num).toDouble()
+          ? (json['bonusAmount'] is num
+              ? (json['bonusAmount'] as num).toDouble()
+              : double.tryParse(json['bonusAmount'].toString()))
           : null,
       previousMonthTier: json['previousMonthTier'],
       previousMonthRating: json['previousMonthRating'] != null
-          ? (json['previousMonthRating'] as num).toDouble()
+          ? (json['previousMonthRating'] is num
+              ? (json['previousMonthRating'] as num).toDouble()
+              : double.tryParse(json['previousMonthRating'].toString()))
           : null,
       lastBonusMonth: json['lastBonusMonth'],
       isGrantedAdminByMain: json['isGrantedAdminByMain'] ?? false,

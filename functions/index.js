@@ -555,10 +555,20 @@ exports.creditTechnicianWalletOnPaymentCompletion = onDocumentWritten(
     const amount = isInspectionOnly
       ? effectiveInspectionFee
       : (Number(afterData.completionData?.totalCost) || 0) + effectiveInspectionFee;
-    if (amount <= 0) return;
 
     const isInApp = IN_APP_PAYMENT_CODES.includes(afterData.paymentModeCode);
     const bookingRef = event.data.after.ref;
+
+    if (amount <= 0) {
+      await bookingRef.update({
+        walletCreditedAt: admin.firestore.FieldValue.serverTimestamp(),
+        walletCreditedAmount: 0,
+        walletCreditedTo: agentUid,
+        walletCreditedAs: isInApp ? "inApp" : "outsideApp",
+      });
+      return;
+    }
+
     const walletRef = db.collection("unified_wallets").doc(agentUid);
 
     try {
@@ -3337,6 +3347,41 @@ function resolveTier(jobs, averageRating) {
   return { tier: "Bronze", bonusPercentage: 0 };
 }
 
+/**
+ * Resolves the effective inspection fee for bonus calculation.
+ * If the charged inspection fee is 0 (e.g. on-hour / off-hour fee is 0),
+ * falls back to the service general price (completionData.generalServicePrice,
+ * booking.service.price, or fetches from services collection).
+ */
+async function resolveInspectionFeeForBonus(booking) {
+  const chargedInspectionFee = Number(booking.completionData?.inspectionFee) || 0;
+  let baseFee = chargedInspectionFee;
+
+  if (baseFee <= 0) {
+    baseFee = Number(booking.completionData?.generalServicePrice) || 0;
+  }
+  if (baseFee <= 0 && booking.service?.price != null) {
+    baseFee = Number(booking.service.price) || 0;
+  }
+  if (baseFee <= 0 && booking.service?.id) {
+    try {
+      const serviceDoc = await db.collection("services").doc(booking.service.id).get();
+      if (serviceDoc.exists) {
+        baseFee = Number(serviceDoc.data()?.price) || 0;
+      }
+    } catch (err) {
+      logger.warn(`Could not fetch general service price for ${booking.service.id}:`, err);
+    }
+  }
+
+  const discountPercentage = Number(booking.service?.discountPercentage) || 0;
+  const effectiveFee = discountPercentage > 0
+    ? baseFee - (baseFee * discountPercentage) / 100
+    : baseFee;
+
+  return effectiveFee > 0 ? effectiveFee : 0;
+}
+
 // Saudi Arabia is permanently UTC+3 and has never observed DST, so a fixed
 // offset is exact. Shifting the epoch by it and then reading UTC fields gives
 // the KSA calendar date without depending on the server's own timezone (Cloud
@@ -3531,33 +3576,9 @@ exports.applyDailyBonus = onSchedule(
         const agentUid = booking.agent && booking.agent.uid;
         if (!agentUid) continue;
 
-        const discountPercentage = booking.service?.discountPercentage || 0;
-
-        // The inspection fee actually charged. It is 0 whenever the booking's
-        // on-hour/off-hour band carries no price — the apps deliberately do
-        // not fall back to the service's general price for anything the
-        // customer sees or pays.
-        //
-        // The general price is still the right *bonus* basis in that case, so
-        // it stands in here. `completionData.generalServicePrice` is written
-        // by `AppServices.completeBooking` at completion time and is never
-        // shown to the customer. It cannot be read from
-        // `booking.service.price`: every booking creation path overwrites
-        // that field with the resolved band price, so on the booking document
-        // it is the frozen charged amount, not the general price.
-        const chargedInspectionFee =
-          Number(booking.completionData?.inspectionFee) || 0;
-        const baseInspectionFee =
-          chargedInspectionFee > 0
-            ? chargedInspectionFee
-            : Number(booking.completionData?.generalServicePrice) || 0;
-
-        const effectiveInspectionFee =
-          discountPercentage > 0
-            ? baseInspectionFee - (baseInspectionFee * discountPercentage) / 100
-            : baseInspectionFee;
-
+        const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
         if (effectiveInspectionFee <= 0) continue;
+
         feesByAgent.set(
           agentUid,
           (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
@@ -3595,7 +3616,7 @@ exports.applyDailyBonus = onSchedule(
           const jobs = userData.currentMonthJobs || 0;
           const ratingSum = userData.rating || 0.0;
           const reviewCount = userData.reviewCount || 0;
-          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
+          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 5.0;
 
           const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
           if (bonusPercentage === 0) {
@@ -3613,12 +3634,14 @@ exports.applyDailyBonus = onSchedule(
               : currentTotalBonus || 0;
           const newTotalBonus = currentTotalBonusNum + bonusAmount;
 
+          const roundedBonus = Number(bonusAmount.toFixed(2));
+          const roundedNewTotal = Number(newTotalBonus.toFixed(2));
+
           await userRef.update({
-            // Field name kept for compatibility with the technician app's
-            // rewards screen (`getWorkerBonusAmounts`); it is a running total
-            // of bonuses earned, now credited daily rather than monthly.
-            totalMonthlyBonus: newTotalBonus.toFixed(2),
-            bonusAmount: bonusAmount,
+            totalMonthlyBonus: roundedNewTotal,
+            bonusAmount: roundedBonus,
+            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+            tier: tier,
             lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
             lastBonusDay: dayKey,
             lastBonusTier: tier,
@@ -3632,10 +3655,10 @@ exports.applyDailyBonus = onSchedule(
               const walletDoc = await transaction.get(walletRef);
               if (walletDoc.exists) {
                 transaction.update(walletRef, {
-                  totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                  availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                  totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
-                  lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                  totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                  availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                  totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+                  lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
                   lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
                 });
               } else {
@@ -3645,14 +3668,14 @@ exports.applyDailyBonus = onSchedule(
                   cardTips: 0.0,
                   cashTips: 0.0,
                   paidTips: 0.0,
-                  totalBonus: bonusAmount,
+                  totalBonus: roundedBonus,
                   paidBonus: 0.0,
-                  availableBonus: bonusAmount,
+                  availableBonus: roundedBonus,
                   inAppEarnings: 0.0,
                   outsideAppEarnings: 0.0,
                   totalCompletionAmount: 0.0,
-                  totalAvailableBalance: bonusAmount,
-                  lifetimeTotal: bonusAmount,
+                  totalAvailableBalance: roundedBonus,
+                  lifetimeTotal: roundedBonus,
                   payoutRequested: false,
                   requestedAmount: 0.0,
                   lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
@@ -3660,7 +3683,7 @@ exports.applyDailyBonus = onSchedule(
               }
             });
             logger.info(
-              `Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`
+              `Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`
             );
           } catch (walletError) {
             logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
@@ -3671,30 +3694,12 @@ exports.applyDailyBonus = onSchedule(
             await sendAndStoreNotification({
               targetRole: "technician",
               targetId: userId,
-              titleEn: "🎉 Daily Bonus Received!",
-              titleAr: "🎉 تم استلام المكافأة اليومية!",
-              titleUr: "🎉 روزانہ بونس موصول ہوا!",
-              bodyEn: `Nice work! Your ${tier} tier earned you a bonus of ${money(
-                bonusAmount.toFixed(2),
-                "en"
-              )} (${bonusPercentage * 100}% of ${money(
-                totalInspectionFees.toFixed(2),
-                "en"
-              )} in Inspection Fees).`,
-              bodyAr: `عمل رائع! حصلت بفضل مستوى ${tier} على مكافأة قدرها ${money(
-                bonusAmount.toFixed(2),
-                "ar"
-              )} (${bonusPercentage * 100}٪ من ${money(
-                totalInspectionFees.toFixed(2),
-                "ar"
-              )} من رسوم الفحص).`,
-              bodyUr: `شاباش! آپ کے ${tier} ٹئیر نے آپ کو ${money(
-                bonusAmount.toFixed(2),
-                "ur"
-              )} کا بونس دلایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
-                totalInspectionFees.toFixed(2),
-                "ur"
-              )} انسپیکشن فیس)۔`,
+              titleEn: "🎉 Bonus Received!",
+              titleAr: "🎉 تم استلام المكافأة!",
+              titleUr: "🎉 بونس موصول ہوا!",
+              bodyEn: `Nice work! You have received a bonus for your ${tier} tier. Check your rewards and wallet for details.`,
+              bodyAr: `عمل رائع! لقد حصلت على مكافأة لمستوى ${tier} الخاص بك. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
+              bodyUr: `شاباش! آپ نے اپنے ${tier} ٹئیر کے لیے بونس حاصل کیا ہے۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
               data: {
                 category: "bonus",
                 tier: tier,
@@ -3769,19 +3774,27 @@ exports.applyHourlyBonus = onSchedule(
           .get();
         hourBookingDocs = snapshot.docs;
       } catch (indexErr) {
-        logger.warn(
-          `Hourly bonus range query unavailable, falling back to full scan: ${indexErr.message}`
-        );
-        const snapshot = await db
-          .collection("bookings")
-          .where("bookingStatusCode", "==", "C")
-          .get();
-        hourBookingDocs = snapshot.docs.filter((doc) => {
-          const creditedAt = doc.data().walletCreditedAt;
-          if (!creditedAt || typeof creditedAt.toMillis !== "function") return false;
-          const ms = creditedAt.toMillis();
-          return ms >= startMs && ms <= endMs;
-        });
+        hourBookingDocs = [];
+      }
+
+      // If no docs matched walletCreditedAt range (or index unavailable),
+      // scan completed bookings and match on completedAt / paymentCompletedAt / walletCreditedAt
+      if (!hourBookingDocs || hourBookingDocs.length === 0) {
+        try {
+          const snapshot = await db
+            .collection("bookings")
+            .where("bookingStatusCode", "==", "C")
+            .get();
+          hourBookingDocs = snapshot.docs.filter((doc) => {
+            const data = doc.data();
+            const ts = data.walletCreditedAt || data.completedAt || data.paymentCompletedAt;
+            if (!ts || typeof ts.toMillis !== "function") return false;
+            const ms = ts.toMillis();
+            return ms >= startMs && ms <= endMs;
+          });
+        } catch (scanErr) {
+          logger.warn(`Fallback scan failed for ${hourKey}:`, scanErr);
+        }
       }
 
       const feesByAgent = new Map();
@@ -3791,20 +3804,7 @@ exports.applyHourlyBonus = onSchedule(
         const agentUid = booking.agent && booking.agent.uid;
         if (!agentUid) continue;
 
-        const discountPercentage = booking.service?.discountPercentage || 0;
-
-        const chargedInspectionFee =
-          Number(booking.completionData?.inspectionFee) || 0;
-        const baseInspectionFee =
-          chargedInspectionFee > 0
-            ? chargedInspectionFee
-            : Number(booking.completionData?.generalServicePrice) || 0;
-
-        const effectiveInspectionFee =
-          discountPercentage > 0
-            ? baseInspectionFee - (baseInspectionFee * discountPercentage) / 100
-            : baseInspectionFee;
-
+        const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
         if (effectiveInspectionFee <= 0) continue;
 
         feesByAgent.set(
@@ -3841,7 +3841,7 @@ exports.applyHourlyBonus = onSchedule(
           const jobs = userData.currentMonthJobs || 0;
           const ratingSum = userData.rating || 0.0;
           const reviewCount = userData.reviewCount || 0;
-          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
+          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 5.0;
 
           const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
           if (bonusPercentage === 0) {
@@ -3861,9 +3861,14 @@ exports.applyHourlyBonus = onSchedule(
               : currentTotalBonus || 0;
           const newTotalBonus = currentTotalBonusNum + bonusAmount;
 
+          const roundedBonus = Number(bonusAmount.toFixed(2));
+          const roundedNewTotal = Number(newTotalBonus.toFixed(2));
+
           await userRef.update({
-            totalMonthlyBonus: newTotalBonus.toFixed(2),
-            bonusAmount: bonusAmount,
+            totalMonthlyBonus: roundedNewTotal,
+            bonusAmount: roundedBonus,
+            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+            tier: tier,
             lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
             lastBonusHour: hourKey,
             lastBonusTier: tier,
@@ -3877,10 +3882,10 @@ exports.applyHourlyBonus = onSchedule(
               const walletDoc = await transaction.get(walletRef);
               if (walletDoc.exists) {
                 transaction.update(walletRef, {
-                  totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                  availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                  totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
-                  lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                  totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                  availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                  totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+                  lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
                   lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
                 });
               } else {
@@ -3890,14 +3895,14 @@ exports.applyHourlyBonus = onSchedule(
                   cardTips: 0.0,
                   cashTips: 0.0,
                   paidTips: 0.0,
-                  totalBonus: bonusAmount,
+                  totalBonus: roundedBonus,
                   paidBonus: 0.0,
-                  availableBonus: bonusAmount,
+                  availableBonus: roundedBonus,
                   inAppEarnings: 0.0,
                   outsideAppEarnings: 0.0,
                   totalCompletionAmount: 0.0,
-                  totalAvailableBalance: bonusAmount,
-                  lifetimeTotal: bonusAmount,
+                  totalAvailableBalance: roundedBonus,
+                  lifetimeTotal: roundedBonus,
                   payoutRequested: false,
                   requestedAmount: 0.0,
                   lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
@@ -3905,7 +3910,7 @@ exports.applyHourlyBonus = onSchedule(
               }
             });
             logger.info(
-              `Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`
+              `Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`
             );
           } catch (walletError) {
             logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
@@ -3915,30 +3920,12 @@ exports.applyHourlyBonus = onSchedule(
           await sendAndStoreNotification({
             targetRole: "technician",
             targetId: userId,
-            titleEn: "🎉 Hourly Bonus Received!",
-            titleAr: "🎉 تم استلام مكافأة الساعة!",
-            titleUr: "🎉 فی گھنٹہ بونس موصول ہوا!",
-            bodyEn: `Nice work! Your ${tier} tier earned you a bonus of ${money(
-              bonusAmount.toFixed(2),
-              "en"
-            )} (${bonusPercentage * 100}% of ${money(
-              totalInspectionFees.toFixed(2),
-              "en"
-            )} in Inspection Fees).`,
-            bodyAr: `عمل رائع! حصلت بفضل مستوى ${tier} على مكافأة قدرها ${money(
-              bonusAmount.toFixed(2),
-              "ar"
-            )} (${bonusPercentage * 100}٪ من ${money(
-              totalInspectionFees.toFixed(2),
-              "ar"
-            )} من رسوم الفحص).`,
-            bodyUr: `شاباش! آپ کے ${tier} ٹئیر نے آپ کو ${money(
-              bonusAmount.toFixed(2),
-              "ur"
-            )} کا بونس دلایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
-              totalInspectionFees.toFixed(2),
-              "ur"
-            )} انسپیکشن فیس)۔`,
+            titleEn: "🎉 Bonus Received!",
+            titleAr: "🎉 تم استلام المكافأة!",
+            titleUr: "🎉 بونس موصول ہوا!",
+            bodyEn: `Nice work! You have received a bonus for your ${tier} tier. Check your rewards and wallet for details.`,
+            bodyAr: `عمل رائع! لقد حصلت على مكافأة لمستوى ${tier} الخاص بك. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
+            bodyUr: `شاباش! آپ نے اپنے ${tier} ٹئیر کے لیے بونس حاصل کیا ہے۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
             data: {
               category: "bonus",
               tier: tier,
@@ -4042,7 +4029,7 @@ exports.applyMonthlyBonus = onSchedule(
         // previousMonthRating stores the sum of all rating values
         const totalRating = userData.previousMonthRating || 0.0;
         const reviewCount = userData.previousMonthReviewCount || userData.reviewCount || 0;
-        const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0.0;
+        const averageRating = reviewCount > 0 ? totalRating / reviewCount : 5.0;
         
         const previousTier = userData.previousMonthTier || "Bronze";
 
@@ -4093,38 +4080,22 @@ exports.applyMonthlyBonus = onSchedule(
         // `creditTechnicianWalletOnPaymentCompletion`'s `effectiveInspectionFee`
         // exactly, so the bonus base always matches what was actually credited.
         let totalInspectionFees = 0;
-        completedBookingsSnapshot.forEach((doc) => {
+        for (const doc of completedBookingsSnapshot.docs) {
           const booking = doc.data();
-          const creditedAt = booking.walletCreditedAt;
-          if (!creditedAt) return;
+          const creditedAt = booking.walletCreditedAt || booking.completedAt || booking.paymentCompletedAt;
+          if (!creditedAt) continue;
 
-          const creditedDate = creditedAt.toDate();
+          const creditedDate = typeof creditedAt.toDate === "function" ? creditedAt.toDate() : new Date(creditedAt);
           if (
             creditedDate < firstDayOfPrevMonth ||
             creditedDate > lastDayOfPrevMonth
           ) {
-            return;
+            continue;
           }
 
-          const discountPercentage = booking.service?.discountPercentage || 0;
-
-          // Charged fee, with the service general price standing in when the
-          // booking band carries no price. Same rule as the daily scheme -
-          // see the comment there.
-          const chargedInspectionFee =
-            Number(booking.completionData?.inspectionFee) || 0;
-          const baseInspectionFee =
-            chargedInspectionFee > 0
-              ? chargedInspectionFee
-              : Number(booking.completionData?.generalServicePrice) || 0;
-          const effectiveInspectionFee =
-            discountPercentage > 0
-              ? baseInspectionFee -
-                (baseInspectionFee * discountPercentage) / 100
-              : baseInspectionFee;
-
+          const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
           totalInspectionFees += effectiveInspectionFee;
-        });
+        }
 
         if (totalInspectionFees === 0) {
           logger.info(
@@ -4143,13 +4114,18 @@ exports.applyMonthlyBonus = onSchedule(
             : currentTotalBonus || 0;
         const newTotalBonus = currentTotalBonusNum + bonusAmount;
 
+        const roundedBonus = Number(bonusAmount.toFixed(2));
+        const roundedNewTotal = Number(newTotalBonus.toFixed(2));
+
         // Update user's totalMonthlyBonus and bonus info
         await db
           .collection("users")
           .doc(userId)
           .update({
-            totalMonthlyBonus: newTotalBonus.toFixed(2),
-            bonusAmount: bonusAmount,
+            totalMonthlyBonus: roundedNewTotal,
+            bonusAmount: roundedBonus,
+            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+            tier: tier,
             lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
             lastBonusMonth: currentMonthKey,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -4162,10 +4138,10 @@ exports.applyMonthlyBonus = onSchedule(
             const walletDoc = await transaction.get(walletRef);
             if (walletDoc.exists) {
               transaction.update(walletRef, {
-                totalBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                availableBonus: admin.firestore.FieldValue.increment(bonusAmount),
-                totalAvailableBalance: admin.firestore.FieldValue.increment(bonusAmount),
-                lifetimeTotal: admin.firestore.FieldValue.increment(bonusAmount),
+                totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
+                totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
+                lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
                 lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
               });
             } else {
@@ -4175,21 +4151,21 @@ exports.applyMonthlyBonus = onSchedule(
                 cardTips: 0.0,
                 cashTips: 0.0,
                 paidTips: 0.0,
-                totalBonus: bonusAmount,
+                totalBonus: roundedBonus,
                 paidBonus: 0.0,
-                availableBonus: bonusAmount,
+                availableBonus: roundedBonus,
                 inAppEarnings: 0.0,
                 outsideAppEarnings: 0.0,
                 totalCompletionAmount: 0.0,
-                totalAvailableBalance: bonusAmount,
-                lifetimeTotal: bonusAmount,
+                totalAvailableBalance: roundedBonus,
+                lifetimeTotal: roundedBonus,
                 payoutRequested: false,
                 requestedAmount: 0.0,
                 lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
               });
             }
           });
-          logger.info(`Updated unified wallet for user ${userId} with bonus SAR ${bonusAmount.toFixed(2)}`);
+          logger.info(`Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`);
         } catch (walletError) {
           logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
         }
@@ -4206,27 +4182,9 @@ exports.applyMonthlyBonus = onSchedule(
             titleEn: "🎉 Monthly Bonus Received!",
             titleAr: "🎉 تم استلام المكافأة الشهرية!",
             titleUr: "🎉 ماہانہ بونس موصول ہوا!",
-            bodyEn: `Congratulations! You achieved ${tier} tier in ${previousMonthStr} and earned a bonus of ${money(
-              bonusAmount.toFixed(2),
-              "en"
-            )} (${bonusPercentage * 100}% of ${money(
-              totalInspectionFees.toFixed(2),
-              "en"
-            )} in Inspection Fees).`,
-            bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة قدرها ${money(
-              bonusAmount.toFixed(2),
-              "ar"
-            )} (${bonusPercentage * 100}٪ من ${money(
-              totalInspectionFees.toFixed(2),
-              "ar"
-            )} من رسوم الفحص).`,
-            bodyUr: `مبارک ہو! آپ نے ${previousMonthStr} میں ${tier} ٹئیر حاصل کیا اور ${money(
-              bonusAmount.toFixed(2),
-              "ur"
-            )} کا بونس کمایا (${bonusPercentage * 100}٪ بمقابلہ ${money(
-              totalInspectionFees.toFixed(2),
-              "ur"
-            )} انسپیکشن فیس)۔`,
+            bodyEn: `Congratulations! You achieved ${tier} tier in ${previousMonthStr} and earned a monthly bonus. Check your rewards and wallet for details.`,
+            bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة شهرية. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
+            bodyUr: `مبارک ہو! آپ نے ${previousMonthStr} میں ${tier} ٹئیر حاصل کیا اور ماہانہ بونس کمایا۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
             data: {
               category: "bonus",
               tier: tier,
@@ -4350,7 +4308,7 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
 
       const newJobCount = currentJobs + 1;
 
-      const averageRating = reviewCount > 0 ? parseFloat((totalRating / reviewCount).toFixed(2)) : 0.0;
+      const averageRating = reviewCount > 0 ? parseFloat((totalRating / reviewCount).toFixed(2)) : 5.0;
 
       // Same ladder the nightly bonus pays on — see `resolveTier`. These were
       // two separate copies of the thresholds, so editing one moved the badge

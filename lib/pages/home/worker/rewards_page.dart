@@ -1,10 +1,8 @@
-import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
-import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:flutter/material.dart';
 
@@ -29,6 +27,7 @@ class _RewardsPageState extends State<RewardsPage> {
   double currentRating = 0.0;
   String currentTier = 'Bronze';
   double bonusAmount = 0.0;
+  double totalMonthlyBonus = 0.0;
   bool isLoading = true;
 
   @override
@@ -51,6 +50,7 @@ class _RewardsPageState extends State<RewardsPage> {
           currentRating = reviewCount > 0 ? ratingSum / reviewCount : 0.0;
           currentTier = data?['tier'] ?? 'Bronze';
           bonusAmount = _toDouble(data?['bonusAmount']);
+          totalMonthlyBonus = _toDouble(data?['totalMonthlyBonus']);
           isLoading = false;
         });
       }
@@ -500,124 +500,116 @@ class _RewardsPageState extends State<RewardsPage> {
   }
 
   Widget _buildBonusPayoutCard() {
-    return CachedFutureBuilder<double>(
-      create: () => AppServices.getWorkerBonusAmounts(widget.workerData.uid!),
-      keys: [widget.workerData.uid],
-      builder: (context, snapshot) {
-        final totalMonthlyBonus = snapshot.data ?? 0.0;
-        final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
-        const Color darkGreen = Color(0xFF007A33);
-        const Color midGreen = Color(0xFF10A453);
+    const Color darkGreen = Color(0xFF007A33);
+    const Color midGreen = Color(0xFF10A453);
 
-        return Container(
-          width: double.infinity,
-          height: 140,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [darkGreen, midGreen, darkGreen],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.green.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      height: 140,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [darkGreen, midGreen, darkGreen],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    "assets/images/walletbgpattern.png",
-                    fit: BoxFit.fill,
-                    color: Colors.black,
-                    opacity: const AlwaysStoppedAnimation(0.1),
-                    colorBlendMode: BlendMode.dstIn,
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                "assets/images/walletbgpattern.png",
+                fit: BoxFit.fill,
+                color: Colors.black,
+                opacity: const AlwaysStoppedAnimation(0.1),
+                colorBlendMode: BlendMode.dstIn,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.bonusEarned,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.bonusEarned,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            totalMonthlyBonus.toStringAsFixed(2),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-
-                              height: 1,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            l10n.sar,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: List.generate(
-                        40,
-                        (index) => Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            height: 1,
-                            color: Colors.white.withOpacity(0.25),
-                          ),
+                const SizedBox(height: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        totalMonthlyBonus.toStringAsFixed(2),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          height: 1,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      l10n.bonusCardDesc,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.sar,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const Spacer(),
+                Row(
+                  children: List.generate(
+                    40,
+                    (index) => Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        height: 1,
+                        color: Colors.white.withOpacity(0.25),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  l10n.bonusCardDesc,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

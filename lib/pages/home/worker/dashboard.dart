@@ -38,10 +38,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late ValueNotifier<bool> _isOnlineNotifier;
 
   late Stream<int> _unreadCountStream;
+  String _currentTier = 'Bronze';
 
   @override
   void initState() {
     super.initState();
+    _currentTier = widget.workerData.tier ?? 'Bronze';
     _appServices = AppServices();
     _dashboardStream = AppServices.getCompleteDashboardStreamWithRefresh(
       widget.workerData.uid ?? "",
@@ -56,8 +58,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _listenToOnlineStatus() {
     AppServices.getUserStream(widget.workerData.uid ?? "").listen((userData) {
-      if (mounted) {
-        _isOnlineNotifier.value = userData?.isOnline ?? false;
+      if (mounted && userData != null) {
+        _isOnlineNotifier.value = userData.isOnline ?? false;
+        if (userData.tier != null && userData.tier != _currentTier) {
+          setState(() {
+            _currentTier = userData.tier ?? 'Bronze';
+          });
+        }
       }
     });
   }
@@ -650,30 +657,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
               builder: (_) => RewardsPage(workerData: widget.workerData),
             ),
           ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEE2E2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.shield, color: Color(0xFF991B1B), size: 14),
-                const SizedBox(width: 4),
-                Text(
-                  l10n.bronze,
-                  style: const TextStyle(
-                    color: Color(0xFF991B1B),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          trailing: _buildTierBadge(_currentTier),
         ),
       ],
+    );
+  }
+
+  Widget _buildTierBadge(String tier) {
+    final l10n = AppLocalizations.of(context)!;
+    final lower = tier.toLowerCase();
+    String tierName = l10n.bronze;
+    Color color = const Color(0xFF991B1B);
+    Color bgColor = const Color(0xFFFEE2E2);
+
+    if (lower == 'silver') {
+      tierName = l10n.silver;
+      color = const Color(0xFF64748B);
+      bgColor = const Color(0xFFF1F5F9);
+    } else if (lower == 'gold') {
+      tierName = l10n.gold;
+      color = const Color(0xFFD97706);
+      bgColor = const Color(0xFFFEF3C7);
+    } else if (lower == 'platinum') {
+      tierName = l10n.platinum;
+      color = const Color(0xFF6366F1);
+      bgColor = const Color(0xFFEEF2FF);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.shield, color: color, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            tierName,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

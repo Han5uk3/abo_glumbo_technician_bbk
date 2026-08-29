@@ -3382,11 +3382,248 @@ async function resolveInspectionFeeForBonus(booking) {
   return effectiveFee > 0 ? effectiveFee : 0;
 }
 
+/**
+ * Resolves the effective inspection fee from a `completedJobs` array entry.
+ * Uses `generalPrice` when `inspectionFee` is 0, and applies the discount
+ * percentage stored on the entry.
+ */
+function resolveInspectionFeeFromEntry(entry) {
+  let baseFee = Number(entry.inspectionFee) || 0;
+  if (baseFee <= 0) {
+    baseFee = Number(entry.generalPrice) || 0;
+  }
+  const discountPercentage = Number(entry.discountPercentage) || 0;
+  const effectiveFee = discountPercentage > 0
+    ? baseFee - (baseFee * discountPercentage) / 100
+    : baseFee;
+  return effectiveFee > 0 ? effectiveFee : 0;
+}
+
+/**
+ * Shared bonus calculation and crediting logic used by all three bonus modes
+ * (hourly, daily, monthly). Each mode calls this with a different
+ * `idempotencyField` / `idempotencyValue` pair so the same run is never paid
+ * twice, but the same month-to-date logic applies identically.
+ *
+ * Flow:
+ *  1. Iterate every user who has `completedJobs` entries.
+ *  2. Sum the effective inspection fees from the list.
+ *  3. Resolve the tier from `currentMonthJobs` + average rating.
+ *  4. Calculate the full month-to-date bonus = totalFees × bonusPercentage.
+ *  5. Credit only the unpaid delta = fullBonus − totalMonthlyBonus.
+ *  6. Update the user document & unified wallet, send notification.
+ */
+async function calculateAndApplyBonuses({
+  idempotencyField,
+  idempotencyValue,
+  logLabel,
+  targetMonthKey = ksaMonthKey(Date.now()),
+}) {
+  logger.info(
+    `Calculating bonuses (${logLabel}) for ${idempotencyValue} in month ${targetMonthKey}...`
+  );
+
+  const usersSnapshot = await db.collection("users").get();
+  let totalBonusesApplied = 0;
+  let totalBonusAmount = 0;
+
+  for (const userDoc of usersSnapshot.docs) {
+    const userId = userDoc.id;
+    try {
+      const userData = userDoc.data() || {};
+
+      // Quick filter: only process if the technician has a monthly record
+      const monthRecordRef = db
+        .collection("users")
+        .doc(userId)
+        .collection("monthly_records")
+        .doc(targetMonthKey);
+
+      const monthRecordSnap = await monthRecordRef.get();
+      if (!monthRecordSnap.exists) {
+        continue; // No jobs recorded for this month
+      }
+
+      const monthData = monthRecordSnap.data() || {};
+
+      // Idempotency: skip if already paid for this cycle
+      if (monthData[idempotencyField] === idempotencyValue) {
+        logger.info(
+          `Bonus already applied to ${userId} for ${idempotencyValue} in ${targetMonthKey}`
+        );
+        continue;
+      }
+
+      const completedJobs = monthData.completedJobs;
+      if (!Array.isArray(completedJobs) || completedJobs.length === 0) {
+        continue;
+      }
+
+      // Sum effective inspection fees from the subcollection list
+      let totalInspectionFees = 0;
+      for (const entry of completedJobs) {
+        totalInspectionFees += resolveInspectionFeeFromEntry(entry);
+      }
+
+      if (totalInspectionFees <= 0) continue;
+
+      // Tier from month-to-date job count + average rating
+      const effectiveJobs =
+        monthData.jobsCount ||
+        completedJobs.length ||
+        userData.currentMonthJobs ||
+        0;
+      const ratingSum = userData.rating || 0.0;
+      const reviewCount = userData.reviewCount || 0;
+      const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 5.0;
+
+      const { tier, bonusPercentage } = resolveTier(effectiveJobs, averageRating);
+      if (bonusPercentage === 0) {
+        logger.info(
+          `User ${userId} in Bronze tier for ${idempotencyValue} in ${targetMonthKey}. No bonus.`
+        );
+        continue;
+      }
+
+      // Full month-to-date bonus
+      const fullBonus = totalInspectionFees * bonusPercentage;
+      const alreadyPaid =
+        Number(monthData.totalMonthlyBonus) ||
+        Number(userData.totalMonthlyBonus) ||
+        0;
+
+      const delta = fullBonus - alreadyPaid;
+      if (delta <= 0) {
+        logger.info(
+          `User ${userId}: full bonus SAR ${fullBonus.toFixed(2)} already covered by paid SAR ${alreadyPaid.toFixed(2)}. Skipping.`
+        );
+        continue;
+      }
+
+      const roundedDelta = Number(delta.toFixed(2));
+      const roundedFullBonus = Number(fullBonus.toFixed(2));
+
+      // 1. Update subcollection document
+      await monthRecordRef.update({
+        totalMonthlyBonus: roundedFullBonus,
+        bonusAmount: roundedDelta,
+        totalInspectionFees: totalInspectionFees,
+        tier: tier,
+        bonusPercentage: bonusPercentage,
+        [idempotencyField]: idempotencyValue,
+        lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // 2. Update user root document (for fast UI display and balance)
+      const userRef = db.collection("users").doc(userId);
+      await userRef.update({
+        totalMonthlyBonus: roundedFullBonus,
+        bonusAmount: roundedDelta,
+        availableBalance: admin.firestore.FieldValue.increment(roundedDelta),
+        tier: tier,
+        lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
+        [idempotencyField]: idempotencyValue,
+        lastBonusTier: tier,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // 3. Update unified wallet
+      try {
+        const walletRef = db.collection("unified_wallets").doc(userId);
+        await db.runTransaction(async (transaction) => {
+          const walletDoc = await transaction.get(walletRef);
+          if (walletDoc.exists) {
+            transaction.update(walletRef, {
+              totalBonus: admin.firestore.FieldValue.increment(roundedDelta),
+              availableBonus: admin.firestore.FieldValue.increment(roundedDelta),
+              totalAvailableBalance: admin.firestore.FieldValue.increment(roundedDelta),
+              lifetimeTotal: admin.firestore.FieldValue.increment(roundedDelta),
+              lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          } else {
+            transaction.set(walletRef, {
+              workerId: userId,
+              totalTips: 0.0,
+              cardTips: 0.0,
+              cashTips: 0.0,
+              paidTips: 0.0,
+              totalBonus: roundedDelta,
+              paidBonus: 0.0,
+              availableBonus: roundedDelta,
+              inAppEarnings: 0.0,
+              outsideAppEarnings: 0.0,
+              totalCompletionAmount: 0.0,
+              totalAvailableBalance: roundedDelta,
+              lifetimeTotal: roundedDelta,
+              payoutRequested: false,
+              requestedAmount: 0.0,
+              lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        });
+        logger.info(
+          `Updated unified wallet for user ${userId} with bonus SAR ${roundedDelta}`
+        );
+      } catch (walletError) {
+        logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
+      }
+
+      // 4. Send notification to worker
+      await sendAndStoreNotification({
+        targetRole: "technician",
+        targetId: userId,
+        titleEn: "🎉 Bonus Received!",
+        titleAr: "🎉 تم استلام المكافأة!",
+        titleUr: "🎉 بونس موصول ہوا!",
+        bodyEn: `Nice work! You have received a bonus for your ${tier} tier. Check your rewards and wallet for details.`,
+        bodyAr: `عمل رائع! لقد حصلت على مكافأة لمستوى ${tier} الخاص بك. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
+        bodyUr: `شاباش! آپ نے اپنے ${tier} ٹئیر کے لیے بونس حاصل کیا ہے۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
+        data: {
+          category: "bonus",
+          tier: tier,
+          amount: roundedDelta.toFixed(2),
+          bonusPercentage: (bonusPercentage * 100).toString(),
+        },
+        fcmToken: userData.fcmToken,
+        lanCode: userData.lanCode || "en",
+      });
+
+      totalBonusesApplied++;
+      totalBonusAmount += roundedDelta;
+
+      logger.info(
+        `Applied ${tier} bonus of SAR ${roundedDelta.toFixed(2)} to user ${userId} for ${idempotencyValue} in ${targetMonthKey} (full month bonus SAR ${roundedFullBonus.toFixed(2)}, based on ${effectiveJobs} jobs and SAR ${totalInspectionFees.toFixed(2)} Inspection Fees)`
+      );
+    } catch (userError) {
+      logger.error(`Error applying bonus to user ${userId}:`, userError);
+    }
+  }
+
+  logger.info(
+    `Bonus calculation completed (${logLabel}) for ${idempotencyValue}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(2)}`
+  );
+}
+
 // Saudi Arabia is permanently UTC+3 and has never observed DST, so a fixed
 // offset is exact. Shifting the epoch by it and then reading UTC fields gives
 // the KSA calendar date without depending on the server's own timezone (Cloud
 // Functions run in UTC).
 const KSA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/** KSA calendar month ("YYYY-MM") that an absolute instant falls in. */
+function ksaMonthKey(instantMs = Date.now()) {
+  const d = new Date(instantMs + KSA_OFFSET_MS);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** The KSA calendar month prior to the one instantMs falls in ("YYYY-MM"). */
+function previousKsaMonthKey(instantMs = Date.now()) {
+  const d = new Date(instantMs + KSA_OFFSET_MS);
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() - 1);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
 
 /** KSA calendar day ("YYYY-MM-DD") that an absolute instant falls in. */
 function ksaDayKey(instantMs) {
@@ -3458,14 +3695,21 @@ exports.resetMonthlyTiers = onSchedule(
         const userData = userDoc.data();
         const userRef = db.collection("users").doc(userId);
 
-        // Reset tier and job count at user level
+        // Reset tier, job count, and bonus accumulators at user level for the new month.
+        // Historical job records remain permanently preserved in the
+        // `users/{userId}/monthly_records/{monthKey}` subcollection.
         batch.update(userRef, {
           tier: "Bronze",
           previousMonthTier: userData.tier || "Bronze",
           previousMonthJobs: userData.currentMonthJobs || 0,
           previousMonthRating: userData.rating || 0.0,
           previousMonthReviewCount: userData.reviewCount || 0,
+          previousMonthBonus: userData.totalMonthlyBonus || 0,
           currentMonthJobs: 0,
+          totalMonthlyBonus: 0,
+          bonusAmount: 0,
+          lastBonusHour: admin.firestore.FieldValue.delete(),
+          lastBonusDay: admin.firestore.FieldValue.delete(),
           lastResetDate: admin.firestore.FieldValue.serverTimestamp(),
         });
 
@@ -3495,18 +3739,9 @@ exports.resetMonthlyTiers = onSchedule(
 
 // ============================================
 // Function 2: Calculate and Apply Daily Bonuses
-// Runs every day at 00:00 Riyadh, for the KSA day that just ended.
-//
-// This used to run once, on the 1st at 01:00, for the whole previous month.
-// Workers now earn every night for the jobs they settled that day, at whatever
-// tier their month-to-date performance qualifies for, instead of waiting up to
-// 31 days to see anything.
-//
-// Ordering note: `resetMonthlyTiers` zeroes `currentMonthJobs`, which is the
-// tier input here, so on the 1st it must run *after* this. It is scheduled at
-// 00:30 for that reason — the old monthly bonus depended on the opposite order
-// (it read the `previousMonth*` snapshot the reset wrote), so the two schedules
-// were swapped together.
+// Runs every day at 00:00 Riyadh. Uses the same month-to-date logic as hourly
+// and monthly — reads `completedJobs` from the user document, recalculates the
+// full bonus, and credits the unpaid delta.
 // ============================================
 exports.applyDailyBonus = onSchedule(
   {
@@ -3519,219 +3754,14 @@ exports.applyDailyBonus = onSchedule(
       return null;
     }
 
-    // The KSA day that just ended.
     const dayKey = previousKsaDayKey(Date.now());
-    const { startMs, endMs } = ksaDayBounds(dayKey);
-
-    logger.info(`Calculating daily bonuses for ${dayKey}...`);
 
     try {
-      // Inspection fees settled during that day, for every technician at once.
-      //
-      // The old monthly job ran one `bookings` query per user over their entire
-      // history and filtered in memory. At 30x the frequency that is no longer
-      // affordable, so this narrows to the day in the query itself and buckets
-      // the results by agent. `walletCreditedAt` is the moment
-      // `creditTechnicianWalletOnPaymentCompletion` settles a job, and is set
-      // for every payment mode — unlike `paymentCompletedAt`, which only the
-      // outside-app cash path writes.
-      const startTs = admin.firestore.Timestamp.fromMillis(startMs);
-      const endTs = admin.firestore.Timestamp.fromMillis(endMs);
-
-      let dayBookingDocs;
-      try {
-        const snapshot = await db
-          .collection("bookings")
-          .where("bookingStatusCode", "==", "C")
-          .where("walletCreditedAt", ">=", startTs)
-          .where("walletCreditedAt", "<=", endTs)
-          .get();
-        dayBookingDocs = snapshot.docs;
-      } catch (indexErr) {
-        // Needs a composite index on (bookingStatusCode, walletCreditedAt). If
-        // it has not been created yet the query fails with FAILED_PRECONDITION,
-        // so fall back to the original scan-and-filter rather than paying
-        // nobody. Same pattern as the completed-jobs aggregation above.
-        logger.warn(
-          `Daily bonus range query unavailable, falling back to full scan: ${indexErr.message}`
-        );
-        const snapshot = await db
-          .collection("bookings")
-          .where("bookingStatusCode", "==", "C")
-          .get();
-        dayBookingDocs = snapshot.docs.filter((doc) => {
-          const creditedAt = doc.data().walletCreditedAt;
-          if (!creditedAt || typeof creditedAt.toMillis !== "function") return false;
-          const ms = creditedAt.toMillis();
-          return ms >= startMs && ms <= endMs;
-        });
-      }
-
-      // Sum the discounted inspection fee per technician — mirrors
-      // `creditTechnicianWalletOnPaymentCompletion`'s `effectiveInspectionFee`
-      // exactly, so the bonus base always matches what was actually credited.
-      const feesByAgent = new Map();
-      for (const doc of dayBookingDocs) {
-        const booking = doc.data();
-        const agentUid = booking.agent && booking.agent.uid;
-        if (!agentUid) continue;
-
-        const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
-        if (effectiveInspectionFee <= 0) continue;
-
-        feesByAgent.set(
-          agentUid,
-          (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
-        );
-      }
-
-      logger.info(
-        `${feesByAgent.size} technician(s) settled inspection fees on ${dayKey}`
-      );
-
-      let totalBonusesApplied = 0;
-      let totalBonusAmount = 0;
-
-      for (const [userId, totalInspectionFees] of feesByAgent) {
-        // One bad user must not abort the payout run for everyone after them.
-        try {
-          const userRef = db.collection("users").doc(userId);
-          const userDoc = await userRef.get();
-          if (!userDoc.exists) {
-            logger.warn(`Bonus skipped: user ${userId} not found`);
-            continue;
-          }
-          const userData = userDoc.data() || {};
-
-          // Idempotency. Keyed on the day being paid for, so re-running the
-          // job on the same day is a no-op while a later day still pays.
-          if (userData.lastBonusDay === dayKey) {
-            logger.info(`Bonus already applied to ${userId} for ${dayKey}`);
-            continue;
-          }
-
-          // Month-to-date jobs and the worker's overall average rating — the
-          // same inputs the live tier badge uses, through the same helper, so
-          // the tier a worker sees is the tier they are paid for.
-          const jobs = userData.currentMonthJobs || 0;
-          const ratingSum = userData.rating || 0.0;
-          const reviewCount = userData.reviewCount || 0;
-          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 5.0;
-
-          const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
-          if (bonusPercentage === 0) {
-            logger.info(`User ${userId} in Bronze tier on ${dayKey}. No bonus.`);
-            continue;
-          }
-
-          const bonusAmount = totalInspectionFees * bonusPercentage;
-          if (bonusAmount <= 0) continue;
-
-          const currentTotalBonus = userData.totalMonthlyBonus;
-          const currentTotalBonusNum =
-            typeof currentTotalBonus === "string"
-              ? parseFloat(currentTotalBonus) || 0
-              : currentTotalBonus || 0;
-          const newTotalBonus = currentTotalBonusNum + bonusAmount;
-
-          const roundedBonus = Number(bonusAmount.toFixed(2));
-          const roundedNewTotal = Number(newTotalBonus.toFixed(2));
-
-          await userRef.update({
-            totalMonthlyBonus: roundedNewTotal,
-            bonusAmount: roundedBonus,
-            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-            tier: tier,
-            lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
-            lastBonusDay: dayKey,
-            lastBonusTier: tier,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-
-          // Update unified wallet with bonus amount
-          try {
-            const walletRef = db.collection("unified_wallets").doc(userId);
-            await db.runTransaction(async (transaction) => {
-              const walletDoc = await transaction.get(walletRef);
-              if (walletDoc.exists) {
-                transaction.update(walletRef, {
-                  totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                  availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                  totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-                  lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
-                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-                });
-              } else {
-                transaction.set(walletRef, {
-                  workerId: userId,
-                  totalTips: 0.0,
-                  cardTips: 0.0,
-                  cashTips: 0.0,
-                  paidTips: 0.0,
-                  totalBonus: roundedBonus,
-                  paidBonus: 0.0,
-                  availableBonus: roundedBonus,
-                  inAppEarnings: 0.0,
-                  outsideAppEarnings: 0.0,
-                  totalCompletionAmount: 0.0,
-                  totalAvailableBalance: roundedBonus,
-                  lifetimeTotal: roundedBonus,
-                  payoutRequested: false,
-                  requestedAmount: 0.0,
-                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-                });
-              }
-            });
-            logger.info(
-              `Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`
-            );
-          } catch (walletError) {
-            logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
-          }
-
-          // Not gated on the token - the technician app lists what this stores.
-          {
-            await sendAndStoreNotification({
-              targetRole: "technician",
-              targetId: userId,
-              titleEn: "🎉 Bonus Received!",
-              titleAr: "🎉 تم استلام المكافأة!",
-              titleUr: "🎉 بونس موصول ہوا!",
-              bodyEn: `Nice work! You have received a bonus for your ${tier} tier. Check your rewards and wallet for details.`,
-              bodyAr: `عمل رائع! لقد حصلت على مكافأة لمستوى ${tier} الخاص بك. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
-              bodyUr: `شاباش! آپ نے اپنے ${tier} ٹئیر کے لیے بونس حاصل کیا ہے۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
-              data: {
-                category: "bonus",
-                tier: tier,
-                amount: bonusAmount.toFixed(2),
-                bonusPercentage: (bonusPercentage * 100).toString(),
-                day: dayKey,
-              },
-              fcmToken: userData.fcmToken,
-              lanCode: userData.lanCode || "en",
-            });
-          }
-
-          totalBonusesApplied++;
-          totalBonusAmount += bonusAmount;
-
-          logger.info(
-            `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
-              2
-            )} to user ${userId} for ${dayKey} (based on SAR ${totalInspectionFees.toFixed(
-              2
-            )} Inspection Fees)`
-          );
-        } catch (userError) {
-          logger.error(`Error applying daily bonus to user ${userId}:`, userError);
-        }
-      }
-
-      logger.info(
-        `Daily bonus calculation completed for ${dayKey}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
-          2
-        )}`
-      );
+      await calculateAndApplyBonuses({
+        idempotencyField: "lastBonusDay",
+        idempotencyValue: dayKey,
+        logLabel: "daily",
+      });
       return null;
     } catch (error) {
       logger.error("Error calculating daily bonuses:", error);
@@ -3742,8 +3772,10 @@ exports.applyDailyBonus = onSchedule(
 
 // ============================================
 // Function 2c: Calculate and Apply Hourly Bonuses
-// Runs every hour at minute 0 Riyadh, for the hour that just ended.
-// Tier is evaluated against the jobs completed by the technician in that 1-hour window.
+// Runs every hour at minute 0 Riyadh.
+// Uses the same month-to-date logic as daily and monthly — reads `completedJobs`
+// from the user document, recalculates the full bonus, and credits the unpaid
+// delta. Hourly is purely for testing the same flow at higher frequency.
 // ============================================
 exports.applyHourlyBonus = onSchedule(
   {
@@ -3756,207 +3788,14 @@ exports.applyHourlyBonus = onSchedule(
       return null;
     }
 
-    const { hourKey, startMs, endMs } = previousKsaHourBounds(Date.now());
-
-    logger.info(`Calculating hourly bonuses for ${hourKey}...`);
+    const { hourKey } = previousKsaHourBounds(Date.now());
 
     try {
-      const startTs = admin.firestore.Timestamp.fromMillis(startMs);
-      const endTs = admin.firestore.Timestamp.fromMillis(endMs);
-
-      let hourBookingDocs;
-      try {
-        const snapshot = await db
-          .collection("bookings")
-          .where("bookingStatusCode", "==", "C")
-          .where("walletCreditedAt", ">=", startTs)
-          .where("walletCreditedAt", "<=", endTs)
-          .get();
-        hourBookingDocs = snapshot.docs;
-      } catch (indexErr) {
-        hourBookingDocs = [];
-      }
-
-      // If no docs matched walletCreditedAt range (or index unavailable),
-      // scan completed bookings and match on completedAt / paymentCompletedAt / walletCreditedAt
-      if (!hourBookingDocs || hourBookingDocs.length === 0) {
-        try {
-          const snapshot = await db
-            .collection("bookings")
-            .where("bookingStatusCode", "==", "C")
-            .get();
-          hourBookingDocs = snapshot.docs.filter((doc) => {
-            const data = doc.data();
-            const ts = data.walletCreditedAt || data.completedAt || data.paymentCompletedAt;
-            if (!ts || typeof ts.toMillis !== "function") return false;
-            const ms = ts.toMillis();
-            return ms >= startMs && ms <= endMs;
-          });
-        } catch (scanErr) {
-          logger.warn(`Fallback scan failed for ${hourKey}:`, scanErr);
-        }
-      }
-
-      const feesByAgent = new Map();
-
-      for (const doc of hourBookingDocs) {
-        const booking = doc.data();
-        const agentUid = booking.agent && booking.agent.uid;
-        if (!agentUid) continue;
-
-        const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
-        if (effectiveInspectionFee <= 0) continue;
-
-        feesByAgent.set(
-          agentUid,
-          (feesByAgent.get(agentUid) || 0) + effectiveInspectionFee
-        );
-      }
-
-      logger.info(
-        `${feesByAgent.size} technician(s) settled inspection fees in ${hourKey}`
-      );
-
-      let totalBonusesApplied = 0;
-      let totalBonusAmount = 0;
-
-      for (const [userId, totalInspectionFees] of feesByAgent) {
-        try {
-          const userRef = db.collection("users").doc(userId);
-          const userDoc = await userRef.get();
-          if (!userDoc.exists) {
-            logger.warn(`Bonus skipped: user ${userId} not found`);
-            continue;
-          }
-          const userData = userDoc.data() || {};
-
-          // Idempotency. Keyed on the hour being paid for
-          if (userData.lastBonusHour === hourKey) {
-            logger.info(`Bonus already applied to ${userId} for ${hourKey}`);
-            continue;
-          }
-
-          // Use month-to-date completed jobs (`currentMonthJobs`), identical to daily
-          // mode and the live tier badge `updateWorkerTierOnJobCompletion`.
-          const jobs = userData.currentMonthJobs || 0;
-          const ratingSum = userData.rating || 0.0;
-          const reviewCount = userData.reviewCount || 0;
-          const averageRating = reviewCount > 0 ? ratingSum / reviewCount : 5.0;
-
-          const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
-          if (bonusPercentage === 0) {
-            logger.info(
-              `User ${userId} in Bronze tier for ${hourKey} (${jobs} month-to-date jobs, ${averageRating.toFixed(2)} rating). No bonus.`
-            );
-            continue;
-          }
-
-          const bonusAmount = totalInspectionFees * bonusPercentage;
-          if (bonusAmount <= 0) continue;
-
-          const currentTotalBonus = userData.totalMonthlyBonus;
-          const currentTotalBonusNum =
-            typeof currentTotalBonus === "string"
-              ? parseFloat(currentTotalBonus) || 0
-              : currentTotalBonus || 0;
-          const newTotalBonus = currentTotalBonusNum + bonusAmount;
-
-          const roundedBonus = Number(bonusAmount.toFixed(2));
-          const roundedNewTotal = Number(newTotalBonus.toFixed(2));
-
-          await userRef.update({
-            totalMonthlyBonus: roundedNewTotal,
-            bonusAmount: roundedBonus,
-            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-            tier: tier,
-            lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
-            lastBonusHour: hourKey,
-            lastBonusTier: tier,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-
-          // Update unified wallet with bonus amount
-          try {
-            const walletRef = db.collection("unified_wallets").doc(userId);
-            await db.runTransaction(async (transaction) => {
-              const walletDoc = await transaction.get(walletRef);
-              if (walletDoc.exists) {
-                transaction.update(walletRef, {
-                  totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                  availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                  totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-                  lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
-                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-                });
-              } else {
-                transaction.set(walletRef, {
-                  workerId: userId,
-                  totalTips: 0.0,
-                  cardTips: 0.0,
-                  cashTips: 0.0,
-                  paidTips: 0.0,
-                  totalBonus: roundedBonus,
-                  paidBonus: 0.0,
-                  availableBonus: roundedBonus,
-                  inAppEarnings: 0.0,
-                  outsideAppEarnings: 0.0,
-                  totalCompletionAmount: 0.0,
-                  totalAvailableBalance: roundedBonus,
-                  lifetimeTotal: roundedBonus,
-                  payoutRequested: false,
-                  requestedAmount: 0.0,
-                  lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-                });
-              }
-            });
-            logger.info(
-              `Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`
-            );
-          } catch (walletError) {
-            logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
-          }
-
-          // Send notification to worker
-          await sendAndStoreNotification({
-            targetRole: "technician",
-            targetId: userId,
-            titleEn: "🎉 Bonus Received!",
-            titleAr: "🎉 تم استلام المكافأة!",
-            titleUr: "🎉 بونس موصول ہوا!",
-            bodyEn: `Nice work! You have received a bonus for your ${tier} tier. Check your rewards and wallet for details.`,
-            bodyAr: `عمل رائع! لقد حصلت على مكافأة لمستوى ${tier} الخاص بك. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
-            bodyUr: `شاباش! آپ نے اپنے ${tier} ٹئیر کے لیے بونس حاصل کیا ہے۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
-            data: {
-              category: "bonus",
-              tier: tier,
-              amount: bonusAmount.toFixed(2),
-              bonusPercentage: (bonusPercentage * 100).toString(),
-              hour: hourKey,
-            },
-            fcmToken: userData.fcmToken,
-            lanCode: userData.lanCode || "en",
-          });
-
-          totalBonusesApplied++;
-          totalBonusAmount += bonusAmount;
-
-          logger.info(
-            `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
-              2
-            )} to user ${userId} for ${hourKey} (based on ${jobs} jobs and SAR ${totalInspectionFees.toFixed(
-              2
-            )} Inspection Fees)`
-          );
-        } catch (userError) {
-          logger.error(`Error applying hourly bonus to user ${userId}:`, userError);
-        }
-      }
-
-      logger.info(
-        `Hourly bonus calculation completed for ${hourKey}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
-          2
-        )}`
-      );
+      await calculateAndApplyBonuses({
+        idempotencyField: "lastBonusHour",
+        idempotencyValue: hourKey,
+        logLabel: "hourly",
+      });
       return null;
     } catch (error) {
       logger.error("Error calculating hourly bonuses:", error);
@@ -3966,19 +3805,12 @@ exports.applyHourlyBonus = onSchedule(
 );
 
 // ============================================
-// Function 2b: Calculate and Apply Monthly Bonuses (PREVIOUS SCHEME)
-//
-// Kept deployed, and inert, so the previous scheme can be restored with a
-// one-line change to BONUS_MODE instead of recreating the function and its
-// Cloud Scheduler job. It exits immediately unless BONUS_MODE is "monthly",
-// which is what stops it double-paying alongside applyDailyBonus.
-//
-// Two deliberate differences from the version this was copied from:
-//   * the tier ladder comes from the shared resolveTier(), so the badge a
-//     worker sees and the tier they are paid on cannot drift apart;
-//   * the inspection fee falls back to completionData.generalServicePrice,
-//     carried over from the pricing change - that was a separate decision and
-//     is not part of what reverting the schedule is meant to undo.
+// Function 2b: Calculate and Apply Monthly Bonuses
+// Runs on the 1st of every month at 01:00 Riyadh.
+// Uses the same month-to-date logic as daily and hourly — reads `completedJobs`
+// from the user document, recalculates the full bonus, and credits the unpaid
+// delta. Kept so the bonus mode can be switched back to monthly with a one-line
+// change to BONUS_MODE.
 // ============================================
 exports.applyMonthlyBonus = onSchedule(
   {
@@ -3991,231 +3823,18 @@ exports.applyMonthlyBonus = onSchedule(
       return null;
     }
 
-    const today = new Date();
-
-    // Calculate for PREVIOUS month
-    const previousMonth = new Date(today);
-    previousMonth.setMonth(previousMonth.getMonth() - 1);
-
-    const previousMonthStr = previousMonth.toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
-
-    logger.info(`Calculating bonuses for ${previousMonthStr}...`);
+    const previousMonthKey = previousKsaMonthKey(Date.now());
 
     try {
-      const usersSnapshot = await db.collection("users").get();
-      let totalBonusesApplied = 0;
-      let totalBonusAmount = 0;
-
-      for (const userDoc of usersSnapshot.docs) {
-        const userId = userDoc.id;
-        const userData = userDoc.data();
-
-        // Check if bonus already applied for this month
-        const lastBonusMonth = userData.lastBonusMonth;
-        const currentMonthKey = `${today.getFullYear()}-${today.getMonth() + 1
-          }`;
-
-        if (lastBonusMonth === currentMonthKey) {
-          logger.info(`Bonus already applied for user ${userId}`);
-          continue;
-        }
-
-        // Use PREVIOUS month's data (stored before reset)
-        const jobs = userData.previousMonthJobs || 0;
-        
-        // previousMonthRating stores the sum of all rating values
-        const totalRating = userData.previousMonthRating || 0.0;
-        const reviewCount = userData.previousMonthReviewCount || userData.reviewCount || 0;
-        const averageRating = reviewCount > 0 ? totalRating / reviewCount : 5.0;
-        
-        const previousTier = userData.previousMonthTier || "Bronze";
-
-        // Shared with the live tier badge and the daily scheme - see
-        // `resolveTier`. Under BONUS_MODE="monthly" this reads the original
-        // 20/40/60 ladder.
-        const { tier, bonusPercentage } = resolveTier(jobs, averageRating);
-
-        if (bonusPercentage === 0) {
-          logger.info(`User ${userId} in Bronze tier. No bonus.`);
-          continue;
-        }
-
-        // Calculate total Inspection Fees from PREVIOUS month. The bonus is
-        // earned only on the inspection fee — never on spare parts, materials,
-        // or any other part of the job total — so this reads completed
-        // bookings directly rather than the `transactions` collection (which
-        // only records a combined totalCost + inspectionFee amount, and only
-        // for outside-app/cash payments).
-        const firstDayOfPrevMonth = new Date(
-          previousMonth.getFullYear(),
-          previousMonth.getMonth(),
-          1
-        );
-        const lastDayOfPrevMonth = new Date(
-          previousMonth.getFullYear(),
-          previousMonth.getMonth() + 1,
-          0,
-          23,
-          59,
-          59
-        );
-
-        // Two plain equality filters (no composite index needed — same pattern
-        // as `getCompletedJobsByWorkerId` in app_services.dart). Date-range
-        // filtering happens below in memory using `walletCreditedAt`, which is
-        // the exact moment `creditTechnicianWalletOnPaymentCompletion` settles
-        // the job, set for every payment mode (in-app and outside-app alike) —
-        // unlike `paymentCompletedAt`, which is only ever written for the
-        // outside-app cash-verification path.
-        const completedBookingsSnapshot = await db
-          .collection("bookings")
-          .where("agent.uid", "==", userId)
-          .where("bookingStatusCode", "==", "C")
-          .get();
-
-        // Sum only the discounted inspection fee per booking — mirrors
-        // `creditTechnicianWalletOnPaymentCompletion`'s `effectiveInspectionFee`
-        // exactly, so the bonus base always matches what was actually credited.
-        let totalInspectionFees = 0;
-        for (const doc of completedBookingsSnapshot.docs) {
-          const booking = doc.data();
-          const creditedAt = booking.walletCreditedAt || booking.completedAt || booking.paymentCompletedAt;
-          if (!creditedAt) continue;
-
-          const creditedDate = typeof creditedAt.toDate === "function" ? creditedAt.toDate() : new Date(creditedAt);
-          if (
-            creditedDate < firstDayOfPrevMonth ||
-            creditedDate > lastDayOfPrevMonth
-          ) {
-            continue;
-          }
-
-          const effectiveInspectionFee = await resolveInspectionFeeForBonus(booking);
-          totalInspectionFees += effectiveInspectionFee;
-        }
-
-        if (totalInspectionFees === 0) {
-          logger.info(
-            `No inspection fees for user ${userId} in ${previousMonthStr}`
-          );
-          continue;
-        }
-
-        const bonusAmount = totalInspectionFees * bonusPercentage;
-
-        // Get current totalMonthlyBonus
-        const currentTotalBonus = userData.totalMonthlyBonus;
-        const currentTotalBonusNum =
-          typeof currentTotalBonus === "string"
-            ? parseFloat(currentTotalBonus) || 0
-            : currentTotalBonus || 0;
-        const newTotalBonus = currentTotalBonusNum + bonusAmount;
-
-        const roundedBonus = Number(bonusAmount.toFixed(2));
-        const roundedNewTotal = Number(newTotalBonus.toFixed(2));
-
-        // Update user's totalMonthlyBonus and bonus info
-        await db
-          .collection("users")
-          .doc(userId)
-          .update({
-            totalMonthlyBonus: roundedNewTotal,
-            bonusAmount: roundedBonus,
-            availableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-            tier: tier,
-            lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
-            lastBonusMonth: currentMonthKey,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-
-        // Update unified wallet with bonus amount
-        try {
-          const walletRef = db.collection("unified_wallets").doc(userId);
-          await db.runTransaction(async (transaction) => {
-            const walletDoc = await transaction.get(walletRef);
-            if (walletDoc.exists) {
-              transaction.update(walletRef, {
-                totalBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                availableBonus: admin.firestore.FieldValue.increment(roundedBonus),
-                totalAvailableBalance: admin.firestore.FieldValue.increment(roundedBonus),
-                lifetimeTotal: admin.firestore.FieldValue.increment(roundedBonus),
-                lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-              });
-            } else {
-              transaction.set(walletRef, {
-                workerId: userId,
-                totalTips: 0.0,
-                cardTips: 0.0,
-                cashTips: 0.0,
-                paidTips: 0.0,
-                totalBonus: roundedBonus,
-                paidBonus: 0.0,
-                availableBonus: roundedBonus,
-                inAppEarnings: 0.0,
-                outsideAppEarnings: 0.0,
-                totalCompletionAmount: 0.0,
-                totalAvailableBalance: roundedBonus,
-                lifetimeTotal: roundedBonus,
-                payoutRequested: false,
-                requestedAmount: 0.0,
-                lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
-              });
-            }
-          });
-          logger.info(`Updated unified wallet for user ${userId} with bonus SAR ${roundedBonus}`);
-        } catch (walletError) {
-          logger.error(`Error updating unified wallet for user ${userId}:`, walletError);
-        }
-
-        // Send notification to worker
-        const workerFcmToken = userData.fcmToken;
-        const workerLanCode = userData.lanCode || "en";
-
-        // Not gated on the token - the technician app lists what this stores.
-        {
-          await sendAndStoreNotification({
-            targetRole: "technician",
-            targetId: userId,
-            titleEn: "🎉 Monthly Bonus Received!",
-            titleAr: "🎉 تم استلام المكافأة الشهرية!",
-            titleUr: "🎉 ماہانہ بونس موصول ہوا!",
-            bodyEn: `Congratulations! You achieved ${tier} tier in ${previousMonthStr} and earned a monthly bonus. Check your rewards and wallet for details.`,
-            bodyAr: `تهانينا! لقد حققت مستوى ${tier} في ${previousMonthStr} وحصلت على مكافأة شهرية. تحقق من المكافآت والمحفظة لمعرفة التفاصيل.`,
-            bodyUr: `مبارک ہو! آپ نے ${previousMonthStr} میں ${tier} ٹئیر حاصل کیا اور ماہانہ بونس کمایا۔ تفصیلات کے لیے اپنے انعامات اور والیٹ چیک کریں۔`,
-            data: {
-              category: "bonus",
-              tier: tier,
-              amount: bonusAmount.toFixed(2),
-              bonusPercentage: (bonusPercentage * 100).toString(),
-              month: previousMonthStr,
-            },
-            fcmToken: workerFcmToken,
-            lanCode: workerLanCode,
-          });
-        }
-
-        totalBonusesApplied++;
-        totalBonusAmount += bonusAmount;
-
-        logger.info(
-          `Applied ${tier} bonus of SAR ${bonusAmount.toFixed(
-            2
-          )} to user ${userId} for ${previousMonthStr} (based on SAR ${totalInspectionFees.toFixed(
-            2
-          )} Inspection Fees)`
-        );
-      }
-      logger.info(
-        `Monthly bonus calculation completed for ${previousMonthStr}. Bonuses applied: ${totalBonusesApplied}, Total amount: SAR ${totalBonusAmount.toFixed(
-          2
-        )}`
-      );
+      await calculateAndApplyBonuses({
+        idempotencyField: "lastBonusMonth",
+        idempotencyValue: previousMonthKey,
+        logLabel: "monthly",
+        targetMonthKey: previousMonthKey,
+      });
       return null;
     } catch (error) {
-      logger.error("Error calculating bonuses:", error);
+      logger.error("Error calculating monthly bonuses:", error);
       throw error;
     }
   }
@@ -4315,11 +3934,45 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
       // a worker sees without moving the tier they actually get paid for.
       const { tier: newTier } = resolveTier(newJobCount, averageRating);
 
-      // Update user document with job count and tier
-      await userRef.update({
+      // Build the completed-job record for bonus calculation. Stored in
+      // subcollection users/{workerId}/monthly_records/{monthKey} so the
+      // root user profile remains small and light.
+      const inspectionFee = Number(after.completionData?.inspectionFee) || 0;
+      const generalPrice =
+        Number(after.completionData?.generalServicePrice) ||
+        Number(after.service?.price) ||
+        0;
+      const discountPercentage = Number(after.service?.discountPercentage) || 0;
+
+      const completedJobEntry = {
+        bookingId: event.params.jobId,
+        inspectionFee: inspectionFee,
+        generalPrice: generalPrice,
+        discountPercentage: discountPercentage,
+        completedDate: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      const monthKey = ksaMonthKey(Date.now());
+      const monthRecordRef = userRef.collection("monthly_records").doc(monthKey);
+
+      const batch = db.batch();
+      batch.update(userRef, {
         currentMonthJobs: admin.firestore.FieldValue.increment(1),
         tier: newTier,
       });
+      batch.set(
+        monthRecordRef,
+        {
+          monthKey: monthKey,
+          workerId: workerId,
+          jobsCount: admin.firestore.FieldValue.increment(1),
+          completedJobs: admin.firestore.FieldValue.arrayUnion(completedJobEntry),
+          tier: newTier,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      await batch.commit();
 
       // Send notification if tier upgraded
       if (newTier !== currentTier) {

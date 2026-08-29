@@ -28,6 +28,7 @@ class BookingModel {
   completionData; // This now contains List<String> imageUrls
   late String paymentModeCode;
   String? chatroomId = "";
+  bool isRatingSheetShown = false;
 
   ReviewModel? review;
   UserModel? agent;
@@ -208,6 +209,7 @@ class BookingModel {
     this.invoicePdfUrlEn,
     this.invoicePdfUrlAr,
     this.invoicePdfUrlUr,
+    this.isRatingSheetShown = false,
   });
 
   BookingModel.fromMap(Map<String, dynamic> data)
@@ -289,7 +291,8 @@ class BookingModel {
       invoicePdfUrl = data['invoicePdfUrl'] as String?,
       invoicePdfUrlEn = data['invoicePdfUrlEn'] as String?,
       invoicePdfUrlAr = data['invoicePdfUrlAr'] as String?,
-      invoicePdfUrlUr = data['invoicePdfUrlUr'] as String?;
+      invoicePdfUrlUr = data['invoicePdfUrlUr'] as String?,
+      isRatingSheetShown = data['isRatingSheetShown'] ?? false;
 
   factory BookingModel.fromQueryDocumentSnapshot(
     QueryDocumentSnapshot snapshot,
@@ -353,6 +356,7 @@ class BookingModel {
       if (invoicePdfUrlEn != null) 'invoicePdfUrlEn': invoicePdfUrlEn,
       if (invoicePdfUrlAr != null) 'invoicePdfUrlAr': invoicePdfUrlAr,
       if (invoicePdfUrlUr != null) 'invoicePdfUrlUr': invoicePdfUrlUr,
+      'isRatingSheetShown': isRatingSheetShown,
     };
 
     map['id'] = id;

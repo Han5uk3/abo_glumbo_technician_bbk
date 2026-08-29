@@ -1426,7 +1426,11 @@ class AppServices {
     String? serviceId,
   }) async {
     try {
-      final String status = 'CP';
+      // Determine booking status based on inspection fee and service type
+      // If inspection fee is 0 and mode is 0 (inspection only, no full service),
+      // mark booking as completed directly instead of pending payment
+      final bool isInspectionOnlyWithZeroFee = inspectionFee == 0 && mode == 0;
+      final String status = isInspectionOnlyWithZeroFee ? 'C' : 'CP';
 
       // Captured at completion for the monthly bonus only, and never shown to
       // the customer (`CompletionDataModel` in the customer app parses named
@@ -1444,7 +1448,7 @@ class AppServices {
         'isStarted': false,
         'completedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'paymentCompleted': false,
+        'paymentCompleted': isInspectionOnlyWithZeroFee ? true : false,
         'paymentRequestedAt': FieldValue.serverTimestamp(),
         'completionData': {
           'fileUrls': fileUrls,

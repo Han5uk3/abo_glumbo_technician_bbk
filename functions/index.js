@@ -3828,15 +3828,25 @@ exports.attachWarrantyOnPaymentCompletion = onDocumentUpdated(
 exports.updateTierStatsOnJobComplete = onDocumentUpdated(
   { document: "bookings/{jobId}", region: FUNCTION_REGION },
   async (event) => {
-    const before = event.data.before.data();
-    const after = event.data.after.data();
+    const before = event.data?.before?.data() || {};
+    const after = event.data?.after?.data();
 
-    // Only proceed if status changed to completed
-    if (before.bookingStatusCode === "C" || after.bookingStatusCode !== "C") {
+    if (!after) return null;
+
+    const beforeCode = (before.bookingStatusCode || "").toUpperCase();
+    const afterCode = (after.bookingStatusCode || "").toUpperCase();
+
+    // Only proceed if status changed to completed (C)
+    if (beforeCode === "C" || afterCode !== "C") {
       return null;
     }
 
-    const workerId = after.agent?.uid;
+    if (after.tierStatsUpdatedAt) {
+      logger.info(`Tier stats already updated for booking ${event.params.jobId}`);
+      return null;
+    }
+
+    const workerId = after.agent?.uid || after.workerId || after.technicianId;
     const serviceName = after.service?.name;
     const rating = after.review?.rating || 0;
 
@@ -3873,10 +3883,22 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
       // subcollection users/{workerId}/monthly_records/{monthKey} so the
       // root user profile remains small and light.
       const inspectionFee = Number(after.completionData?.inspectionFee) || 0;
-      const generalPrice =
+      let generalPrice =
         Number(after.completionData?.generalServicePrice) ||
         Number(after.service?.price) ||
         0;
+
+      if (generalPrice <= 0 && inspectionFee <= 0 && after.service?.id) {
+        try {
+          const serviceDoc = await db.collection("services").doc(after.service.id).get();
+          if (serviceDoc.exists) {
+            generalPrice = Number(serviceDoc.data()?.price) || 0;
+          }
+        } catch (err) {
+          logger.warn(`Could not fetch general service price for ${after.service.id}:`, err);
+        }
+      }
+
       const discountPercentage = Number(after.service?.discountPercentage) || 0;
 
       const completedJobEntry = {
@@ -3884,7 +3906,7 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
         inspectionFee: inspectionFee,
         generalPrice: generalPrice,
         discountPercentage: discountPercentage,
-        completedDate: admin.firestore.FieldValue.serverTimestamp(),
+        completedDate: admin.firestore.Timestamp.now(),
       };
 
       const monthKey = ksaMonthKey(Date.now());
@@ -3907,6 +3929,9 @@ exports.updateTierStatsOnJobComplete = onDocumentUpdated(
         },
         { merge: true }
       );
+      batch.update(event.data.after.ref, {
+        tierStatsUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
       await batch.commit();
 
       // Send notification if tier upgraded

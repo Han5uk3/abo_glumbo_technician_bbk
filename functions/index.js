@@ -8,7 +8,9 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onValueCreated } = require("firebase-functions/v2/database");
 const { logger } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
-admin.initializeApp();
+admin.initializeApp({
+  databaseURL: "https://worker-app-tnext-default-rtdb.firebaseio.com",
+});
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 // Every Firestore trigger is pinned to a region collocated with the eur3
@@ -3016,7 +3018,11 @@ exports.expireUnchangedWarranties = onSchedule(
 );
 
 exports.notifyOnNewChatMessage = onValueCreated(
-  "messages/{chatId}/{messageId}",
+  {
+    ref: "messages/{chatId}/{messageId}",
+    instance: "worker-app-tnext-default-rtdb",
+    region: "us-central1",
+  },
   async (event) => {
     const chatId = event.params.chatId;
     const messageId = event.params.messageId;
@@ -3028,7 +3034,7 @@ exports.notifyOnNewChatMessage = onValueCreated(
     }
 
     const senderId = messageData.senderId;
-    const senderType = messageData.senderType; // 'technician', 'admin', or 'customer'
+    let senderType = messageData.senderType; // 'technician', 'admin', or 'customer'
     const messageText = messageData.text || "";
     const mediaType = messageData.mediaType;
 
@@ -3038,7 +3044,7 @@ exports.notifyOnNewChatMessage = onValueCreated(
 
     try {
       // Get chat details from Realtime Database
-      const rtdb = admin.database();
+      const rtdb = admin.database("https://worker-app-tnext-default-rtdb.firebaseio.com");
       const chatSnapshot = await rtdb.ref(`chats/${chatId}`).once("value");
 
       if (!chatSnapshot.exists()) {
@@ -3064,6 +3070,14 @@ exports.notifyOnNewChatMessage = onValueCreated(
       if (!receiverId) {
         console.log(`[${chatId}] No receiver found`);
         return null;
+      }
+
+      if (!receiverType || typeof receiverType !== "string" || !["customer", "technician", "admin"].includes(receiverType)) {
+        receiverType = senderType === "customer" ? "technician" : "customer";
+      }
+
+      if (!senderType || typeof senderType !== "string") {
+        senderType = participants[senderId] || (receiverType === "customer" ? "technician" : "customer");
       }
 
       console.log(`[${chatId}] Receiver: ${receiverType} (${receiverId})`);
@@ -5372,7 +5386,7 @@ exports.cleanupIssueMedia = onSchedule(
 async function deleteChatFromRTDB(chatId) {
   if (!chatId) return;
   try {
-    const rtdb = admin.database();
+    const rtdb = admin.database("https://worker-app-tnext-default-rtdb.firebaseio.com");
     const chatSnap = await rtdb.ref(`chats/${chatId}`).get();
     if (chatSnap.exists()) {
       const chatData = chatSnap.val();

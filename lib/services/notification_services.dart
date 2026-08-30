@@ -66,6 +66,27 @@ class NotificationServices {
     debugPrint('🔔 Active chat set to: $chatId');
   }
 
+  /// Clear the current active chat ID safely to prevent race conditions
+  static void clearActiveChatId(String? chatId) {
+    if (chatId == null || currentActiveChatId == chatId) {
+      currentActiveChatId = null;
+      debugPrint('🔔 Active chat cleared for: $chatId');
+    } else {
+      debugPrint(
+        '🔔 Ignoring clearActiveChatId for $chatId (current active is: $currentActiveChatId)',
+      );
+    }
+  }
+
+  /// Check if the user is currently actively viewing the given chat
+  static bool isChatActive(String? chatId) {
+    if (currentActiveChatId == null) return false;
+    // If the incoming notification has no chatId, we can't confirm it belongs
+    // to the active conversation — let it through so it's never silently lost.
+    if (chatId == null || chatId.isEmpty) return false;
+    return currentActiveChatId == chatId;
+  }
+
   /// Initialize local notifications
   static Future<void> initializeNotifications() async {
     try {
@@ -74,9 +95,9 @@ class NotificationServices {
 
       const DarwinInitializationSettings initializationSettingsDarwin =
           DarwinInitializationSettings(
-            requestAlertPermission: false, // We'll request manually
-            requestBadgePermission: false,
-            requestSoundPermission: false,
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true,
           );
 
       const InitializationSettings initializationSettings =
@@ -111,7 +132,26 @@ class NotificationServices {
             ),
           );
 
-      debugPrint('✅ Local notifications initialized');
+      // Request notification permissions explicitly on both iOS and Android
+      if (Platform.isIOS) {
+        await _flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >()
+            ?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+      } else if (Platform.isAndroid) {
+        await _flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
+      }
+
+      debugPrint('✅ Local notifications initialized with permissions');
     } catch (e) {
       debugPrint('❌ Error initializing local notifications: $e');
     }
@@ -134,11 +174,13 @@ class NotificationServices {
       _isRequestingPermission = true;
 
       // Set foreground notification options
+      // Disable alert presentation so iOS doesn't automatically show APNs banner
+      // in foreground, allowing onMessage to suppress or display via local notifications.
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
-            alert: true,
-            badge: true,
-            sound: true,
+            alert: false,
+            badge: false,
+            sound: false,
           );
 
       // Request permission
@@ -161,44 +203,49 @@ class NotificationServices {
 
           final data = message.data;
           final String? incomingChatId = data['chatId']?.toString();
+          final String? type = data['type']?.toString();
 
-          // Suppress notification if user is already in this chat
-          if (incomingChatId != null && incomingChatId == currentActiveChatId) {
+          // ONLY chat notifications can ever be suppressed when user is in chat screen
+          final bool isChatNotification =
+              type == 'chat' || (incomingChatId != null && incomingChatId.isNotEmpty);
+
+          if (isChatNotification && isChatActive(incomingChatId)) {
             debugPrint(
-              '🤫 Suppressing foreground notification for active chat: $incomingChatId',
+              '🤫 Suppressing chat push notification because user is inside active chat: $incomingChatId (currentActiveChatId: $currentActiveChatId)',
             );
             return;
           }
 
+          // ALL OTHER NOTIFICATIONS (job_offer, booking, warranty, custom, etc.)
+          // MUST appear as a push notification, even if user is currently inside chatscreen!
+          debugPrint(
+            '🔔 Showing push notification for foreground message (type: $type, chatId: $incomingChatId)',
+          );
+
           RemoteNotification? notification = message.notification;
-          if (notification != null && Platform.isAndroid) {
-            showNotification(
-              id: notification.hashCode,
-              title: notification.title ?? 'Notification',
-              body: notification.body ?? '',
-              payload: json.encode(message.data),
-            );
-          } else if (notification == null) {
-            if (data['type'] == 'custom' || data.containsKey('titleEn')) {
-              String lang = 'en';
-              try {
-                lang = LocalStore.getUserlanguage();
-              } catch (e) {
-                lang = 'en';
-              }
-              String capLang = lang.substring(0, 1).toUpperCase() + lang.substring(1);
-              String title = data['title$capLang'] ?? data['titleEn'] ?? data['title'] ?? 'Notification';
-              String body = data['body$capLang'] ?? data['bodyEn'] ?? data['body'] ?? '';
-              if (title.isNotEmpty) {
-                showNotification(
-                  id: message.hashCode,
-                  title: title,
-                  body: body,
-                  payload: json.encode(message.data),
-                );
-              }
+          String? title = notification?.title ?? data['title'];
+          String? body = notification?.body ?? data['body'];
+
+          if (title == null || body == null || title.isEmpty) {
+            String lang = 'en';
+            try {
+              lang = LocalStore.getUserlanguage();
+            } catch (e) {
+              lang = 'en';
             }
+            String capLang = lang.isNotEmpty
+                ? lang.substring(0, 1).toUpperCase() + lang.substring(1)
+                : 'En';
+            title ??= data['title$capLang'] ?? data['titleEn'] ?? 'Notification';
+            body ??= data['body$capLang'] ?? data['bodyEn'] ?? '';
           }
+
+          showNotification(
+            id: (notification?.hashCode ?? message.hashCode) & 0x7FFFFFFF,
+            title: title ?? 'Notification',
+            body: body ?? '',
+            payload: json.encode(message.data),
+          );
         });
 
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {

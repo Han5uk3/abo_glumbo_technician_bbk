@@ -29,55 +29,6 @@ const {
   money,
 } = require("./src/utils/bookingUtils");
 
-// How long a chat presence heartbeat stays trustworthy.
-// Anything older than this is treated as "the user is no longer looking at the
-// chat", so a presence flag left behind by a suspended, killed or disconnected
-// app can never permanently swallow pushes.
-//
-// Kept tight so a killed app un-mutes quickly when onDisconnect is slow to
-// fire. Clients refresh every 5s (`_presenceHeartbeat` in each app's
-// chat_services.dart), leaving a 3x margin for a late beat.
-//
-// That margin is load-bearing on iOS. Those builds call
-// setForegroundNotificationPresentationOptions(alert: true), so the system
-// presents a foreground banner before Dart can drop it - this check is the
-// only suppression an open chat gets there. Android is covered twice: the
-// on-device currentActiveChatId check in onMessage catches whatever slips
-// past this one.
-const CHAT_PRESENCE_TTL_MS = 15 * 1000;
-
-// Returns true only when we can PROVE the receiver has this chat open in the
-// foreground right now. Every uncertain case returns false so the push goes out.
-async function isReceiverViewingChat(rtdb, chatId, receiverId) {
-  try {
-    const snapshot = await rtdb
-      .ref(`chats/${chatId}/presence/${receiverId}`)
-      .once("value");
-    const presence = snapshot.val();
-
-    // Old clients wrote a bare `true` here that was never refreshed and
-    // survived app suspension - that is exactly what used to mute pushes.
-    // Those builds still suppress the alert on-device while the chat is on
-    // screen, so treat the legacy shape as "not viewing" and let the push out.
-    if (!presence || typeof presence !== "object" || presence.active !== true) {
-      return false;
-    }
-
-    const updatedAt = Number(presence.updatedAt);
-    if (!Number.isFinite(updatedAt)) return false;
-
-    // Bounded on both sides so neither a stale flag nor a clock-skewed future
-    // timestamp can suppress the notification.
-    const age = Date.now() - updatedAt;
-    return age <= CHAT_PRESENCE_TTL_MS && age > -CHAT_PRESENCE_TTL_MS;
-  } catch (error) {
-    console.error(
-      `[${chatId}] Presence lookup failed, sending push anyway:`,
-      error
-    );
-    return false;
-  }
-}
 
 
 // Helper function to get all admin users (main admins + granted admins)
@@ -3199,22 +3150,6 @@ exports.notifyOnNewChatMessage = onValueCreated(
         );
       }
 
-      // Only hold the push back when the receiver can be proven to be sitting
-      // in this chat, in the foreground, right now. Presence is a heartbeat
-      // with a TTL (see isReceiverViewingChat), so backgrounding the app,
-      // switching pages or killing the app all fall through to a real push -
-      // and any failure to read presence falls through too.
-      const receiverIsViewingChat = await isReceiverViewingChat(
-        rtdb,
-        chatId,
-        receiverId
-      );
-
-      if (receiverIsViewingChat) {
-        console.log(
-          `[${chatId}] Receiver ${receiverId} has this chat open; storing the notification without a push.`
-        );
-      }
 
       // Prepare notification message
       let bodyEn = messageText;
@@ -3282,7 +3217,7 @@ exports.notifyOnNewChatMessage = onValueCreated(
         },
         fcmToken: receiverFcmToken,
         lanCode: receiverLanCode,
-        sendPush: !receiverIsViewingChat,
+        sendPush: true,
       });
 
       return null;

@@ -262,8 +262,15 @@ async function stageAutoAssignOffers({ batch, requestId, request, schedules, can
     ? request.bookingDateTime.toMillis()
     : null;
 
+  // "Service Now" (type === 'instant') or on-hour bookings (isOnHour === true)
+  // have the customer waiting on the 120s searching screen, so offer TTL is 120s (2 minutes).
+  // For off-hour scheduled bookings, the customer does not wait, so it uses
+  // the longer background auto-assignment TTL (600s / 10 minutes).
+  const isWaitingOnScreen = request.type === "instant" || request.isOnHour === true;
+  const ttlSeconds = isWaitingOnScreen ? OFFER_TTL_SECONDS : AUTO_ASSIGN_OFFER_TTL_SECONDS;
+
   const expiresAtTimestamp = admin.firestore.Timestamp.fromDate(
-    new Date(Date.now() + AUTO_ASSIGN_OFFER_TTL_SECONDS * 1000)
+    new Date(Date.now() + ttlSeconds * 1000)
   );
 
   const pendingNotifications = [];

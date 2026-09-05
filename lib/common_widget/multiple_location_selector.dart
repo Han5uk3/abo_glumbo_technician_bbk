@@ -109,10 +109,10 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
           final nameMatch = location.name.toLowerCase().contains(
             query.toLowerCase(),
           );
-          final nameArMatch = location.name_ar.toLowerCase().contains(
+          final nameArMatch = location.nameAr.toLowerCase().contains(
             query.toLowerCase(),
           );
-          final nameUrMatch = location.name_ur.toLowerCase().contains(
+          final nameUrMatch = location.nameUr.toLowerCase().contains(
             query.toLowerCase(),
           );
           return nameMatch || nameArMatch || nameUrMatch;
@@ -129,11 +129,11 @@ class _LocationSelectorWidgetState extends State<LocationSelectorWidget> {
 
   String _getLocationName(ServiceLocationModel location) {
     if (languageCode == 'ur') {
-      return location.name_ur.isNotEmpty
-          ? location.name_ur
-          : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+      return location.nameUr.isNotEmpty
+          ? location.nameUr
+          : (location.nameAr.isNotEmpty ? location.nameAr : location.name);
     } else if (languageCode == 'ar') {
-      return location.name_ar.isNotEmpty ? location.name_ar : location.name;
+      return location.nameAr.isNotEmpty ? location.nameAr : location.name;
     }
     return location.name;
   }
@@ -472,11 +472,11 @@ class LocationSelectorHelper {
   }) {
     return locations.map((location) {
       if (languageCode == 'ur') {
-        return location.name_ur.isNotEmpty
-            ? location.name_ur
-            : (location.name_ar.isNotEmpty ? location.name_ar : location.name);
+        return location.nameUr.isNotEmpty
+            ? location.nameUr
+            : (location.nameAr.isNotEmpty ? location.nameAr : location.name);
       } else if (languageCode == 'ar') {
-        return location.name_ar.isNotEmpty ? location.name_ar : location.name;
+        return location.nameAr.isNotEmpty ? location.nameAr : location.name;
       }
       return location.name;
     }).toList();

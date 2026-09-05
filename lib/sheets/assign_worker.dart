@@ -117,8 +117,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
               return ServiceLocationModel(
                 id: map['en_name']?.toString() ?? 'zone_$index',
                 name: map['en_name']?.toString() ?? '',
-                name_ar: map['ar_name']?.toString() ?? '',
-                name_ur: map['ar_name']?.toString() ?? '',
+                nameAr: map['ar_name']?.toString() ?? '',
+                nameUr: map['ur_name']?.toString() ?? '',
                 polygon:
                     (map['polygon'] as List<dynamic>?)?.map((point) {
                       final p = point as Map<String, dynamic>;
@@ -672,8 +672,8 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
                       final zone = _availableZones[index];
                       final lang = LocalStore.getUserlanguage();
                       final zoneName = lang == 'ar'
-                          ? zone.name_ar
-                          : (lang == 'ur' ? zone.name_ur : zone.name);
+                                ? zone.nameAr
+                                : (lang == 'ur' ? zone.nameUr : zone.name);
                       final isSelected = tempSelected.contains(zone.id);
                       return CheckboxListTile(
                         title: Text(zoneName, style: TextStyle()),
@@ -764,7 +764,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       final selectedNames = _availableZones
           .where((z) => _selectedZoneIds.contains(z.id))
           .map(
-            (z) => lang == 'ar' ? z.name_ar : (lang == 'ur' ? z.name_ur : z.name),
+            (z) => lang == 'ar' ? z.nameAr : (lang == 'ur' ? z.nameUr : z.name),
           )
           .join(', ');
       if (selectedNames.isNotEmpty) activeFilters.add(selectedNames);

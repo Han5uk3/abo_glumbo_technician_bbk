@@ -89,7 +89,7 @@ class _BookingInfoState extends State<BookingInfo> {
       bool chatExists = false;
       if (latestChatroomId != null && latestChatroomId.isNotEmpty) {
         // Verify the chat actually exists in Realtime Database using the service method
-        chatExists = await chatService.chatExists(latestChatroomId);
+        chatExists = await chatService.isChatUsable(latestChatroomId);
 
         if (chatExists) {
           log(

@@ -8,11 +8,53 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onValueCreated } = require("firebase-functions/v2/database");
 const { logger } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
+const DATABASE_URL = "https://worker-app-tnext-default-rtdb.firebaseio.com";
 admin.initializeApp({
-  databaseURL: "https://worker-app-tnext-default-rtdb.firebaseio.com",
+  databaseURL: DATABASE_URL,
 });
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
+
+// `admin.database` is the namespace accessor: its argument is an App, never a
+// URL. `admin.database(someUrl)` compiles, deploys, and then throws
+// "this.ensureApp(...).database is not a function" on the first line of every
+// invocation - which the callers' own try/catch swallowed into a logged error
+// and a `return null`, so every chat push was lost, for both apps, with the
+// cause visible only in the function logs. The URL belongs to App.database().
+const getRtdb = () => admin.app().database(DATABASE_URL);
+
+// A chat's `participants` map is keyed by ROLE, not by uid.
+//
+// Both apps sign in against this one Firebase project with phone auth, so a
+// uid identifies a person and not a person-in-a-role: someone who is both a
+// customer and a technician has exactly ONE uid. The old uid -> role map
+// collapsed those two entries into one, and the receiver lookup - "the
+// participant who is not the sender" - then found nobody. A chat has exactly
+// one participant per role, so role is a key that cannot collide.
+const CHAT_ROLES = ["customer", "technician", "admin"];
+
+/** The uid holding `role`, accepting the role -> uid map or the legacy uid -> role one. */
+function participantUid(participants, role) {
+  const direct = participants[role];
+  if (typeof direct === "string" && direct) return direct;
+  for (const [key, value] of Object.entries(participants)) {
+    if (value === role && !CHAT_ROLES.includes(key)) return key;
+  }
+  return null;
+}
+
+/** Every uid named in a `participants` map, in either shape. */
+function participantUids(participants) {
+  const uids = new Set();
+  for (const [key, value] of Object.entries(participants || {})) {
+    if (CHAT_ROLES.includes(key)) {
+      if (typeof value === "string" && value) uids.add(value);
+    } else if (key) {
+      uids.add(key);
+    }
+  }
+  return [...uids];
+}
 // Every Firestore trigger is pinned to a region collocated with the eur3
 // database. These used to be unpinned, which let the CLI place newly created
 // functions in europe-west1 while older ones stayed in us-central1 - identical
@@ -3044,26 +3086,80 @@ exports.notifyOnNewChatMessage = onValueCreated(
 
     try {
       // Get chat details from Realtime Database
-      const rtdb = admin.database("https://worker-app-tnext-default-rtdb.firebaseio.com");
+      const rtdb = getRtdb();
       const chatSnapshot = await rtdb.ref(`chats/${chatId}`).once("value");
 
-      if (!chatSnapshot.exists()) {
-        console.log(`[${chatId}] Chat not found`);
-        return null;
-      }
-
-      const chatData = chatSnapshot.val();
+      const chatData = chatSnapshot.exists() ? chatSnapshot.val() : {};
       const participants = chatData.participants || {};
 
-      // Determine receiver ID (the participant who is NOT the sender)
-      let receiverId = null;
-      let receiverType = null;
+      // Determine the receiver by ROLE. Never by "the uid that is not the
+      // sender" - that question has no answer when both roles are held by the
+      // same person, which is exactly what phone auth on a shared project
+      // produces.
+      const senderRole = CHAT_ROLES.includes(senderType)
+        ? senderType
+        : participantUid(participants, "customer") === senderId
+          ? "customer"
+          : "technician";
 
-      for (const [userId, userType] of Object.entries(participants)) {
-        if (userId !== senderId) {
-          receiverId = userId;
-          receiverType = userType;
-          break;
+      // The counterpart of a customer is the technician, or the admin when the
+      // chat is a support conversation; everyone else's counterpart is the
+      // customer. Never "the uid that is not the sender" - that question has no
+      // answer when both roles are held by the same person, which is exactly
+      // what phone auth on a shared project produces.
+      let receiverType = null;
+      let receiverId = null;
+
+      if (senderRole === "customer") {
+        for (const role of ["technician", "admin"]) {
+          const uid = participantUid(participants, role);
+          if (uid) {
+            receiverType = role;
+            receiverId = uid;
+            break;
+          }
+        }
+      } else {
+        receiverId = participantUid(participants, "customer");
+        if (receiverId) receiverType = "customer";
+      }
+
+      // Nothing named: leave the role at the ordinary counterpart so the
+      // recovery below loads the right profile collection rather than whichever
+      // role the search happened to give up on.
+      if (!receiverId) {
+        receiverType = senderRole === "customer" ? "technician" : "customer";
+      }
+
+      // The chat metadata node is not a dependency of delivering the message.
+      //
+      // It can legitimately be missing or half-written: a client that reuses a
+      // stale `chatroomId` never calls createChat, so nothing writes
+      // `participants`, and `markAsRead` can create `chats/<id>` holding
+      // nothing but an unread counter - which exists but names nobody. Bailing
+      // out here used to drop the push silently, and the very first message of
+      // a conversation is exactly when this node is most likely to be absent.
+      //
+      // The id itself carries the answer. `generateChatId` builds
+      // `<bookingId>_<uidA>_<uidB>` from the two sorted uids, and Firebase Auth
+      // uids never contain an underscore, so the last two segments are the
+      // participants no matter what the booking id looks like.
+      if (!receiverId) {
+        const segments = chatId.split("_");
+        if (segments.length >= 3) {
+          const pair = segments.slice(-2);
+          // Only trust the pair if the sender is in it AND the two uids differ.
+          // `<booking>_<uid>_<uid>` names one person twice, so there is no
+          // second party to recover and guessing would push the message back
+          // to its own sender.
+          if (pair.includes(senderId) && pair[0] !== pair[1]) {
+            receiverId = pair.find((uid) => uid && uid !== senderId) || null;
+          }
+        }
+        if (receiverId) {
+          console.warn(
+            `[${chatId}] Chat participants unreadable (chat node ${chatSnapshot.exists() ? "incomplete" : "missing"}); recovered receiver ${receiverId} from the chat id`
+          );
         }
       }
 
@@ -3072,13 +3168,10 @@ exports.notifyOnNewChatMessage = onValueCreated(
         return null;
       }
 
-      if (!receiverType || typeof receiverType !== "string" || !["customer", "technician", "admin"].includes(receiverType)) {
-        receiverType = senderType === "customer" ? "technician" : "customer";
-      }
-
-      if (!senderType || typeof senderType !== "string") {
-        senderType = participants[senderId] || (receiverType === "customer" ? "technician" : "customer");
-      }
+      // `receiverType` is one of the three roles by construction above, so it
+      // needs no further guarding. `senderType` came off the message and may be
+      // missing or junk; `senderRole` is the validated version of it.
+      senderType = senderRole;
 
       console.log(`[${chatId}] Receiver: ${receiverType} (${receiverId})`);
 
@@ -3110,7 +3203,10 @@ exports.notifyOnNewChatMessage = onValueCreated(
         }
       };
 
-      const bookingId = chatData.bookingId;
+      // Same recovery for the booking id: it prefixes the chat id, so a
+      // missing chat node costs the payload nothing.
+      const bookingId =
+        chatData.bookingId || chatId.split("_").slice(0, -2).join("_") || "";
 
       const [sender, receiver, bookingDoc] = await Promise.all([
         loadProfile(
@@ -3191,6 +3287,28 @@ exports.notifyOnNewChatMessage = onValueCreated(
       const titleEn = `New message from ${senderName}`;
       const titleAr = `رسالة جديدة من ${senderName}`;
       const titleUr = `${senderName} کی طرف سے نیا پیغام`;
+
+      // Put the metadata node back if it was the thing that was broken. The
+      // notification above does not depend on it, but everything else does -
+      // the chat list, unread counts, and deleteChatFromRTDB, which reads
+      // `participants` to know whose userChats entries to remove.
+      const namedRoles = CHAT_ROLES.filter((role) =>
+        participantUid(participants, role)
+      ).length;
+      if (!chatSnapshot.exists() || namedRoles < 2) {
+        try {
+          await rtdb.ref(`chats/${chatId}`).update({
+            bookingId: bookingId,
+            participants: {
+              [senderRole]: senderId,
+              [receiverType]: receiverId,
+            },
+          });
+          console.log(`[${chatId}] Repaired chat metadata node`);
+        } catch (repairError) {
+          console.error(`[${chatId}] Could not repair chat node:`, repairError);
+        }
+      }
 
       await sendAndStoreNotification({
         targetRole: receiverType,
@@ -5386,7 +5504,7 @@ exports.cleanupIssueMedia = onSchedule(
 async function deleteChatFromRTDB(chatId) {
   if (!chatId) return;
   try {
-    const rtdb = admin.database("https://worker-app-tnext-default-rtdb.firebaseio.com");
+    const rtdb = getRtdb();
     const chatSnap = await rtdb.ref(`chats/${chatId}`).get();
     if (chatSnap.exists()) {
       const chatData = chatSnap.val();
@@ -5395,7 +5513,7 @@ async function deleteChatFromRTDB(chatId) {
       await rtdb.ref(`messages/${chatId}`).remove();
 
       // Delete userChats entries BEFORE deleting the main chat so participant rules still pass
-      for (const userId of Object.keys(participants)) {
+      for (const userId of participantUids(participants)) {
         await rtdb.ref(`userChats/${userId}/${chatId}`).remove();
       }
 

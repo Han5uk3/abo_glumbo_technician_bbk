@@ -2848,10 +2848,18 @@ class AppServices {
           return DateFormat('dd MMM').format(today.subtract(Duration(days: i)));
         }).reversed.toList();
 
-        for (var m in last6Months) revenue[m] = 0.0;
-        for (var m in last12Months) rev12[m] = 0.0;
-        for (var d in last30Days) rev30[d] = 0.0;
-        for (var d in last7Days) rev7[d] = 0.0;
+        for (var m in last6Months) {
+          revenue[m] = 0.0;
+        }
+        for (var m in last12Months) {
+          rev12[m] = 0.0;
+        }
+        for (var d in last30Days) {
+          rev30[d] = 0.0;
+        }
+        for (var d in last7Days) {
+          rev7[d] = 0.0;
+        }
 
         for (var booking in bookings) {
           final instant =

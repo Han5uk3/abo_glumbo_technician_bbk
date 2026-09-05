@@ -380,11 +380,6 @@ class TechnicianChatService {
     }
   }
 
-  /// Presence flag has been removed in favor of app-side notification suppression.
-  Future<void> setActiveChat(String chatId) async {}
-
-  Future<void> clearActiveChat(String chatId) async {}
-
   Stream<DatabaseEvent> getMessagesStream(String chatId) {
     return _rtdb.child('messages/$chatId').orderByChild('timestamp').onValue;
   }

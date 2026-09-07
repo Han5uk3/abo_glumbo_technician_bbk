@@ -111,6 +111,42 @@ class NotificationServices {
     return currentActiveChatId == chatId;
   }
 
+  /// Notification taps that have already been navigated for, keyed by the
+  /// FCM message id.
+  ///
+  /// One tap can be reported twice. Handling the launch intent, the Android
+  /// plugin BOTH emits `onMessageOpenedApp` and stores the message for
+  /// `getInitialMessage()` - and that getter's fast path hands the stored copy
+  /// back without consulting the plugin's own consumed-message set:
+  ///
+  ///     if (initialMessage != null) { ...setResult(...); initialMessage = null; }
+  ///
+  /// Navigating from the tap rebuilds Home, whose init calls
+  /// `checkForInitialMessage()` again once its startup location fix resolves,
+  /// and that replay opened a second copy of the chat screen on top of the
+  /// first - which is why the chat appeared to reload a few seconds in.
+  static final Set<String> _handledTapIds = <String>{};
+
+  /// Claims [id] for this tap, returning false if it has already been handled.
+  static bool _claimTapId(String? id) {
+    if (id == null || id.isEmpty) return true; // nothing to key on, let it run
+
+    if (_handledTapIds.contains(id)) {
+      debugPrint('🔁 Ignoring duplicate notification tap for message $id');
+      return false;
+    }
+
+    // Claim it only once there is a navigator to act on, so a tap arriving
+    // before the app has a route stack is retried rather than swallowed.
+    if (navigatorKey?.currentState == null) return true;
+
+    _handledTapIds.add(id);
+    if (_handledTapIds.length > 50) {
+      _handledTapIds.remove(_handledTapIds.first);
+    }
+    return true;
+  }
+
   /// Initialize local notifications
   static Future<void> initializeNotifications() async {
     try {
@@ -511,6 +547,73 @@ class NotificationServices {
     }
   }
 
+  /// Brings the app to Home and hands back the navigator, or null when there
+  /// is no navigator to act on.
+  ///
+  /// When a plain Home is already on the stack this pops down to it rather than
+  /// rebuilding one, so its startup work - the location fix, the user-data
+  /// refresh, the FCM setup - is not re-run just to open a screen on top of it.
+  /// A tap that needs a particular tab or filter still builds a fresh Home,
+  /// because that configuration is constructor-level; those paths behave
+  /// exactly as they did before.
+  static NavigatorState? _resetToHome({int? index, String? filter}) {
+    final navigator = navigatorKey?.currentState;
+    if (navigator == null) {
+      debugPrint('⚠️ Navigator key is null, cannot navigate');
+      return null;
+    }
+
+    final homeRoute = Home.activeRoute;
+    if (homeRoute != null && index == null && filter == null) {
+      debugPrint('🏠 Reusing the Home already on the stack');
+      navigator.popUntil((route) => identical(route, homeRoute));
+      return navigator;
+    }
+
+    navigator.pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => Home(newIndex: index, selectedFilter: filter),
+      ),
+      (route) => false,
+    );
+    return navigator;
+  }
+
+  /// Opens [chatId] with Home beneath it, so back from the chat lands home.
+  static void _openChatFromNotification({
+    required String chatId,
+    required String participantName,
+    required String participantId,
+    required String participantPhoto,
+    required bool isAdmin,
+    required String technicianName,
+    required String technicianPhoto,
+  }) {
+    final navigator = _resetToHome();
+    if (navigator == null) return;
+
+    navigator
+        .push(
+          MaterialPageRoute(
+            builder: (context) => TechnicianChatScreen(
+              chatId: chatId,
+              participantName: participantName,
+              participantId: participantId,
+              participantPhoto: participantPhoto,
+              isAdmin: isAdmin,
+              technicianName: technicianName,
+              technicianPhoto: technicianPhoto,
+            ),
+          ),
+        )
+        .then((_) {
+          debugPrint('✅ Chat screen navigation completed');
+        })
+        .catchError((error) {
+          debugPrint('❌ Error pushing chat screen: $error');
+        });
+  }
+
   /// Handle notification tap and navigate accordingly
   static void _handleNotificationTap(String? payload) {
     if (payload == null || payload.isEmpty) {
@@ -521,6 +624,11 @@ class NotificationServices {
     try {
       final data = json.decode(payload) as Map<String, dynamic>;
       debugPrint('📱 Full notification payload: $data');
+
+      // Shares the id space with the remote-tap path above, so a local
+      // notification and a replayed RemoteMessage for the same push cannot
+      // both navigate.
+      if (!_claimTapId(data['messageId']?.toString())) return;
 
       final type = data['type'] as String?;
       final chatId = data['chatId'] as String?;
@@ -545,42 +653,15 @@ class NotificationServices {
 
         if (chatId != null && chatId.isNotEmpty) {
           debugPrint('🚀 Starting navigation to chat screen...');
-
-          // Use the global navigator key to navigate
-          if (navigatorKey?.currentState != null) {
-            debugPrint('✅ Navigator is available');
-
-            // Clear stack and set up: Home -> ChatScreen
-            // This ensures back button from chat goes directly to home
-            navigatorKey!.currentState!.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const Home()),
-              (route) => false,
-            );
-
-            // Immediately push chat screen on top of home
-            navigatorKey!.currentState!
-                .push(
-                  MaterialPageRoute(
-                    builder: (context) => TechnicianChatScreen(
-                      chatId: chatId,
-                      participantName: participantName,
-                      participantId: participantId,
-                      participantPhoto: participantPhoto,
-                      isAdmin: isAdmin,
-                      technicianName: technicianName,
-                      technicianPhoto: technicianPhoto,
-                    ),
-                  ),
-                )
-                .then((_) {
-                  debugPrint('✅ Chat screen navigation completed');
-                })
-                .catchError((error) {
-                  debugPrint('❌ Error pushing chat screen: $error');
-                });
-          } else {
-            debugPrint('⚠️ Navigator key is null, cannot navigate');
-          }
+          _openChatFromNotification(
+            chatId: chatId,
+            participantName: participantName,
+            participantId: participantId,
+            participantPhoto: participantPhoto,
+            isAdmin: isAdmin,
+            technicianName: technicianName,
+            technicianPhoto: technicianPhoto,
+          );
         } else {
           debugPrint('⚠️ Chat ID is missing in notification payload');
         }
@@ -588,35 +669,20 @@ class NotificationServices {
       // Check if this is a job offer notification
       else if (type == 'job_offer' || data['category'] == 'job_offer') {
         debugPrint('📋 Job offer notification detected!');
-        if (navigatorKey?.currentState != null) {
-          navigatorKey!.currentState!.pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => const Home(
-                newIndex: 1, // Orders tab
-                selectedFilter: 'P', // Pending filter (which shows job offers)
-              ),
-            ),
-            (route) => false,
-          );
-        }
+        _resetToHome(
+          index: 1, // Orders tab
+          filter: 'P', // Pending filter (which shows job offers)
+        );
       }
       // Check if this is a booking notification
       else if (type == 'booking' || data['category'] == 'booking') {
         debugPrint('📋 Booking notification detected!');
-        if (navigatorKey?.currentState != null) {
-          final isAdmin = data['isAdmin'] == 'true';
-          navigatorKey!.currentState!.pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => Home(
-                newIndex: 1, // Orders tab
-                selectedFilter: isAdmin
-                    ? 'P'
-                    : 'A', // Pending for admin, Accepted for technician
-              ),
-            ),
-            (route) => false,
-          );
-        }
+        final isAdmin = data['isAdmin'] == 'true';
+        _resetToHome(
+          index: 1, // Orders tab
+          // Pending for admin, Accepted for technician
+          filter: isAdmin ? 'P' : 'A',
+        );
       } else {
         debugPrint('ℹ️ Not a recognized notification type, ignoring');
       }
@@ -645,41 +711,15 @@ class NotificationServices {
       debugPrint('   participantId: $participantId');
 
       if (chatId != null && chatId.isNotEmpty) {
-        // Use the global navigator key to navigate
-        if (navigatorKey?.currentState != null) {
-          debugPrint('✅ Navigator is available');
-
-          // Clear stack and set up: Home -> ChatScreen
-          // This ensures back button from chat goes directly to home
-          navigatorKey!.currentState!.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const Home()),
-            (route) => false,
-          );
-
-          // Immediately push chat screen on top of home
-          navigatorKey!.currentState!
-              .push(
-                MaterialPageRoute(
-                  builder: (context) => TechnicianChatScreen(
-                    chatId: chatId,
-                    participantName: participantName,
-                    participantId: participantId,
-                    participantPhoto: participantPhoto,
-                    isAdmin: isAdmin,
-                    technicianName: technicianName,
-                    technicianPhoto: technicianPhoto,
-                  ),
-                ),
-              )
-              .then((_) {
-                debugPrint('✅ Chat screen navigation completed');
-              })
-              .catchError((error) {
-                debugPrint('❌ Error pushing chat screen: $error');
-              });
-        } else {
-          debugPrint('⚠️ Navigator key is null, cannot navigate');
-        }
+        _openChatFromNotification(
+          chatId: chatId,
+          participantName: participantName,
+          participantId: participantId,
+          participantPhoto: participantPhoto,
+          isAdmin: isAdmin,
+          technicianName: technicianName,
+          technicianPhoto: technicianPhoto,
+        );
       } else {
         debugPrint('⚠️ Chat ID is missing in notification payload');
       }
@@ -691,6 +731,12 @@ class NotificationServices {
   /// Handle generic notification tap from background (extracted for reuse)
   static void _handleGenericNotificationTap(RemoteMessage message) {
     try {
+      if (!_claimTapId(
+        message.messageId ?? message.data['messageId']?.toString(),
+      )) {
+        return;
+      }
+
       final data = message.data;
       final type = data['type'] as String?;
       final category = data['category'] as String?;
@@ -699,33 +745,15 @@ class NotificationServices {
         _handleChatNotificationTap(message);
       } else if (type == 'job_offer' || category == 'job_offer') {
         debugPrint('📋 Job offer notification detected from background!');
-        if (navigatorKey?.currentState != null) {
-          navigatorKey!.currentState!.pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => const Home(
-                newIndex: 1,
-                selectedFilter: 'P', // Pending filter
-              ),
-            ),
-            (route) => false,
-          );
-        }
+        _resetToHome(index: 1, filter: 'P'); // Orders tab, Pending filter
       } else if (type == 'booking' || category == 'booking') {
         debugPrint('📋 Booking notification detected from background!');
-        if (navigatorKey?.currentState != null) {
-          final isAdmin = data['isAdmin'] == 'true';
-          navigatorKey!.currentState!.pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => Home(
-                newIndex: 1, // Orders tab
-                selectedFilter: isAdmin
-                    ? 'P'
-                    : 'A', // Pending for admin, Accepted for technician
-              ),
-            ),
-            (route) => false,
-          );
-        }
+        final isAdmin = data['isAdmin'] == 'true';
+        _resetToHome(
+          index: 1, // Orders tab
+          // Pending for admin, Accepted for technician
+          filter: isAdmin ? 'P' : 'A',
+        );
       }
     } catch (e) {
       debugPrint('❌ Error handling background notification tap: $e');

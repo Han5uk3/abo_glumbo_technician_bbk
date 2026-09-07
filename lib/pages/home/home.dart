@@ -42,9 +42,26 @@ class Home extends StatefulWidget {
 
   @override
   State<Home> createState() => _HomeState();
+
+  /// The route of the Home currently in the navigator, or null when there is
+  /// none (or its route has since left the stack).
+  ///
+  /// Notification taps used to reach the chat screen by replacing the whole
+  /// stack with a fresh Home and pushing the chat on top of it. That threw away
+  /// a live Home and re-ran its entire startup - a GPS fix, a user-data refresh
+  /// and the FCM setup - only to land the user back where they already were.
+  /// Holding the route object lets a tap pop down to the existing Home instead,
+  /// with no route name to keep in sync across the many places Home is built.
+  static ModalRoute<dynamic>? get activeRoute {
+    final route = _HomeState._activeRoute;
+    return (route != null && route.isActive) ? route : null;
+  }
 }
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
+  static ModalRoute<dynamic>? _activeRoute;
+  ModalRoute<dynamic>? _route;
+
   int currentIndex = 0;
   String selectedBookingStatus = 'P';
 
@@ -103,7 +120,19 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _route = ModalRoute.of(context);
+    _activeRoute = _route;
+  }
+
+  @override
   void dispose() {
+    // Only clear the shared slot if it is still ours. When two Homes are
+    // stacked, the newer one owns it and must keep it when the older unwinds.
+    if (identical(_activeRoute, _route)) {
+      _activeRoute = null;
+    }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

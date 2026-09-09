@@ -65,7 +65,14 @@ android {
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("upload")
-            isMinifyEnabled = false
+            // R8 renames the Java/Kotlin classes; without it Play reports
+            // the app as ~2% obfuscated. Dart code is obfuscated separately,
+            // by building with --obfuscate --split-debug-info.
+            isMinifyEnabled = true
+            // Left off deliberately: a Flutter app keeps its assets outside
+            // Android resources, so resource shrinking buys very little here
+            // while adding a way for dynamically-referenced resources to
+            // disappear from release builds only.
             isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

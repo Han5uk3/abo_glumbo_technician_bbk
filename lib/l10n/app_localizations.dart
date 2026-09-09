@@ -8354,7 +8354,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeDescription.
   ///
   /// In en, this message translates to:
-  /// **'We are happy to have you join the Abo Glumbo team.\n\nâ€¢ One-week warranty for every service\nâ€¢ Higher ratings increase future selection chances\nâ€¢ Special rewards for high-performing technicians'**
+  /// **'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians'**
   String get welcomeDescription;
 
   /// No description provided for @welcomeToAboGlumboTechnician.
@@ -8630,7 +8630,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapPickerInstructions.
   ///
   /// In en, this message translates to:
-  /// **'â€¢ Click \'Add Region\' to start drawing a new area\nâ€¢ Tap on the map to add boundary points (at least 4 points required)\nâ€¢ Click \'Complete Region\' when finished\nâ€¢ Enter location details and confirm\nâ€¢ Use the Edit icon to update details or the Red X to remove an area'**
+  /// **'• Click \'Add Region\' to start drawing a new area\n• Tap on the map to add boundary points (at least 4 points required)\n• Click \'Complete Region\' when finished\n• Enter location details and confirm\n• Use the Edit icon to update details or the Red X to remove an area'**
   String get mapPickerInstructions;
 
   /// No description provided for @tapOnMapToDrawPolygonPoints.
@@ -10004,7 +10004,7 @@ abstract class AppLocalizations {
   /// No description provided for @bonusCalculationNote.
   ///
   /// In en, this message translates to:
-  /// **'Your bonus is paid every hour, based only on the Inspection Fees you settled during that hour. Spare parts, materials, and other charges are not included in the bonus calculation.'**
+  /// **'Your bonus is paid once a month, on the 1st, based only on the Inspection Fees you settled during the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.'**
   String get bonusCalculationNote;
 }
 

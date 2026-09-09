@@ -3369,13 +3369,14 @@ exports.notifyOnNewChatMessage = onValueCreated(
 //                just ended, evaluated against the jobs done in that 1-hour window.
 //   "daily"   -> `applyDailyBonus` pays every night for the day just ended,
 //                on the 10/12/60 job ladder.
-//   "monthly" -> `applyMonthlyBonus` pays once, on the 1st, for the whole
-//                previous month, on the original 20/40/60 ladder.
+//   "monthly" -> `applyMonthlyBonus` pays once, on the 1st at 01:00, for the
+//                whole previous month, on the original 20/40/60 ladder.
+//                THIS IS THE LIVE SCHEME.
 //
 // ALL functions stay deployed so switching is a one-line change plus a
 // redeploy — no function has to be recreated and no Cloud Scheduler job has to
 // be rebuilt. Inactive functions exit immediately on every invocation.
-const BONUS_MODE = "hourly"; // "hourly" | "daily" | "monthly"
+const BONUS_MODE = "monthly"; // "hourly" | "daily" | "monthly"
 
 // Tier qualification thresholds, evaluated against the worker's month-to-date
 // job count (`currentMonthJobs`) and their overall average rating across all schemes.
@@ -3486,6 +3487,11 @@ async function calculateAndApplyBonuses({
   logLabel,
   targetMonthKey = ksaMonthKey(Date.now()),
 }) {
+  // `hourly` and `daily` settle a slice of the month in progress; `monthly`
+  // settles a month that has already closed and been reset. A few writes below
+  // are only meaningful for the former.
+  const payingForCurrentMonth = targetMonthKey === ksaMonthKey();
+
   logger.info(
     `Calculating bonuses (${logLabel}) for ${idempotencyValue} in month ${targetMonthKey}...`
   );
@@ -3554,10 +3560,17 @@ async function calculateAndApplyBonuses({
 
       // Full month-to-date bonus
       const fullBonus = totalInspectionFees * bonusPercentage;
-      const alreadyPaid =
-        Number(monthData.totalMonthlyBonus) ||
-        Number(userData.totalMonthlyBonus) ||
-        0;
+      // `users/{uid}.totalMonthlyBonus` only ever describes the month in
+      // progress, so it is a valid fallback for the in-month modes and for
+      // nothing else. `monthly` pays for the *previous* month, half an hour
+      // after `resetMonthlyTiers` has zeroed that field and started reusing it
+      // for the new month — reading it there would compare last month's bonus
+      // against another month's total and suppress a payment that is owed.
+      const alreadyPaid = payingForCurrentMonth
+        ? Number(monthData.totalMonthlyBonus) ||
+          Number(userData.totalMonthlyBonus) ||
+          0
+        : Number(monthData.totalMonthlyBonus) || 0;
 
       const delta = fullBonus - alreadyPaid;
       if (delta <= 0) {
@@ -3584,16 +3597,25 @@ async function calculateAndApplyBonuses({
 
       // 2. Update user root document (for fast UI display and balance)
       const userRef = db.collection("users").doc(userId);
-      await userRef.update({
+      const userUpdate = {
         totalMonthlyBonus: roundedFullBonus,
         bonusAmount: roundedDelta,
         availableBalance: admin.firestore.FieldValue.increment(roundedDelta),
-        tier: tier,
         lastBonusDate: admin.firestore.FieldValue.serverTimestamp(),
         [idempotencyField]: idempotencyValue,
         lastBonusTier: tier,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      };
+      // `tier` is the live badge, recomputed from month-to-date jobs on every
+      // completed job. In `monthly` mode this runs 30 minutes after
+      // `resetMonthlyTiers` set it to Bronze for the month that just started,
+      // so writing the finished month's tier back would show a badge the
+      // worker's 0 jobs do not support until their next job corrects it.
+      // `lastBonusTier` records the tier actually paid in every mode.
+      if (payingForCurrentMonth) {
+        userUpdate.tier = tier;
+      }
+      await userRef.update(userUpdate);
 
       // 3. Update unified wallet
       try {
@@ -3735,11 +3757,17 @@ function previousKsaHourBounds(instantMs) {
 // Function 1: Reset Tiers Monthly (1st at 00:30 Saudi Arabia Time)
 // Resets all worker tier progress at the start of each month
 //
-// Runs at 00:30, not 00:00, because it zeroes `currentMonthJobs` — which is the
-// tier input `applyDailyBonus` reads at 00:00. Reset first and the last day of
-// every month would be paid at Bronze (no bonus) for everyone. The old monthly
-// bonus wanted the opposite order, since it read the `previousMonth*` snapshot
-// this function writes; both schedules moved together when the bonus went daily.
+// Runs at 00:30, between the two schedules that care about it.
+//
+// It must run AFTER `applyDailyBonus` (00:00), because it zeroes
+// `currentMonthJobs` — the tier input that job reads. Reset first and the last
+// day of every month would be paid at Bronze (no bonus) for everyone.
+//
+// It must run BEFORE `applyMonthlyBonus` (01:00), which settles the month that
+// just ended. That job takes its jobs, fees and paid-to-date from the closed
+// month's `monthly_records` document, which this reset does not touch, so the
+// order is not load-bearing for the amount — but resetting first is what leaves
+// the user-level accumulators describing the new month rather than the old one.
 // ============================================
 exports.resetMonthlyTiers = onSchedule(
   {

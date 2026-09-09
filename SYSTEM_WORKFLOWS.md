@@ -1132,3 +1132,180 @@ memory — correct, but it gives up the whole cost saving.
 with `firebase firestore:indexes`, plus this one), so it can be deployed without proposing to delete
 anything. It is **not** wired into `firebase.json`; add a `"firestore": { "indexes": "firestore.indexes.json" }`
 entry before running `firebase deploy --only firestore:indexes`.
+
+---
+
+## 19. Rewards — bonus switched to monthly (2026-09-09)
+
+`BONUS_MODE` is now `"monthly"`. The bonus is paid **once a month, on the 1st at 01:00 Asia/Riyadh**,
+for the whole previous calendar month, on the 20/40/60 job ladder. `functions/` passes `node --check`;
+the technician app passes `flutter analyze` on the touched files with no issues and `untranslated.json`
+is empty. A stubbed-Firestore harness drives the real `applyMonthlyBonus` handler: 18 assertions, all
+green.
+
+### 19.1 What changed
+
+| | Before (`hourly`) | After (`monthly`) |
+|---|---|---|
+| Paying function | `applyHourlyBonus` | **`applyMonthlyBonus`** |
+| Schedule | every hour, `0 * * * *` | **1st of the month, `0 1 1 * *`** |
+| Period paid | the KSA hour just ended | the **previous KSA calendar month** |
+| Idempotency | `lastBonusHour` on the month record | `lastBonusMonth` on the month record |
+| Silver / Gold / Platinum | 3 / 5 / 10 jobs | **20 / 40 / 60 jobs** |
+| Rating gates | 4.0 / 4.5 / 4.8 | unchanged |
+| Percentages | 5% / 10% / 15% | unchanged |
+
+`applyHourlyBonus` and `applyDailyBonus` stay deployed and return immediately, exactly as §18.7
+describes. Switching schemes is still a one-line change to `BONUS_MODE` plus a redeploy, and the ladder
+follows from it via `TIER_JOB_LADDERS[BONUS_MODE]`.
+
+Tier qualification is unchanged in shape: it is still evaluated against the **month's** job count, read
+from `monthly_records/{monthKey}.jobsCount`. Under `monthly` that is the completed month's own total,
+which is what the 20/40/60 ladder was written for.
+
+### 19.2 Two things the switch exposed, now fixed
+
+Both live in the shared `calculateAndApplyBonuses`, and both were dormant while an in-month scheme was
+live. They matter the moment the target month is one that has already closed and been reset. The
+function now derives `payingForCurrentMonth` (`targetMonthKey === ksaMonthKey()`) once and gates on it.
+
+**A stale user-level total could suppress a payment.** `alreadyPaid` fell back from
+`monthRecord.totalMonthlyBonus` to `users/{uid}.totalMonthlyBonus`. That user-level field only ever
+describes the month *in progress*, so for `hourly`/`daily` the two agree. `monthly` pays for September
+on the 1st of October, by which time the field has been zeroed and re-adopted for October — and any
+non-zero value in it would have been compared against September's total and subtracted from what was
+owed. The fallback is now used only when the target month **is** the current month.
+
+**The live tier badge would have been overwritten with a finished month's tier.** The run wrote
+`tier: tier` onto the user document. At 01:00 on the 1st, `resetMonthlyTiers` (00:30) has just set
+`tier: "Bronze"` and `currentMonthJobs: 0` for the month that started an hour ago, so writing September's
+Gold back would show a badge the worker's 0 jobs do not support until their next completed job
+recomputed it — the exact badge/paid-tier disagreement §18.2 set out to remove. `tier` is now written
+only when paying for the current month; `lastBonusTier` still records what was actually paid, in every
+mode.
+
+### 19.3 Schedule ordering
+
+`resetMonthlyTiers` stays at **00:30 on the 1st**, unchanged, and the comment on it now states both
+constraints rather than only the daily one:
+
+- it must run **after** `applyDailyBonus` (00:00), whose tier input is `currentMonthJobs`;
+- it must run **before** `applyMonthlyBonus` (01:00). This is not load-bearing for the amount — the
+  monthly run takes its jobs, fees and paid-to-date from the closed month's `monthly_records` document,
+  which the reset does not touch — but resetting first is what leaves the user-level accumulators
+  describing the new month instead of the old one.
+
+### 19.4 No handover to do
+
+The hourly scheme never ran in production, and monthly is the only scheme going forward. There is no
+migration, no backfill and no ladder transition for anyone to notice.
+
+The delta logic still protects the case anyway: `applyMonthlyBonus` credits `fullBonus - alreadyPaid`
+from the month's own record, so a month that had somehow been partly paid gets only the remainder — a
+worker owed SAR 400 against SAR 250 already recorded receives SAR 150, not another 400. Covered by the
+harness; it is a safety property, not a live path.
+
+### 19.5 App changes
+
+`rewards_page.dart` carries its own copy of the ladder — it cannot read the function's constants — and
+is now `_silverJobs = 20`, `_goldJobs = 40`, `_platinumJobs = 60`, with the comment pointing at
+`TIER_JOB_LADDERS[BONUS_MODE]` rather than at `TIER_*_JOBS`. The tier cards render these through
+`tierJobsRequirement(count)`, so no string states a number the ladder does not use.
+
+`bonusCalculationNote` now reads "paid once a month, on the 1st, based only on the Inspection Fees you
+settled during the previous month" in all three languages (`app_en.arb`, `app_ar.arb`, `app_ur.arb`,
+then `flutter gen-l10n`). `bonusEarned`, `lastBonus` and `progressResetsMonthlyDesc` were left alone —
+they are accurate under either scheme.
+
+### 19.6 Payout ledger — unpaid bonus was being truncated (fixed 2026-09-09)
+
+Switching to monthly did not cause this, but it made it easy to hit, so it was fixed in the same pass.
+`flutter test test/wallet_math_test.dart` covers it: 25 assertions, all green.
+
+**What was wrong.** Bonus is credited by **increment** to `unified_wallets/{uid}.availableBonus` and
+`users/{uid}.availableBalance`. `resetMonthlyTiers` touches neither, so unclaimed bonus stacks across
+months and never expires — SAR 10 for August plus SAR 15 for September leaves SAR 25 claimable in
+October. But `AppServices.getWorkerBonusAmounts()` read `users/{uid}.totalMonthlyBonus`, a
+**month-scoped** field the reset zeroes on the 1st, and
+`UnifiedPayoutServices.syncExistingDataToUnifiedWallet()` rebuilds the wallet from it:
+
+```dart
+double availableBonus = bonusAmount - totalPaidBonus;   // 15 - 0, not 25 - 0
+```
+
+It then wrote that over the correct figure. **A sync truncated the payout-requestable bonus to the most
+recent month's bonus alone** — the longer a technician went without cashing out, the more a refresh
+cost them. Reachable from pull-to-refresh and the sync button on the wallet page, from
+`requestUnifiedPayout` (which synced immediately *after* creating a correctly-valued request), and from
+payout approve/reject/cancel.
+
+**The fix.** `getWorkerBonusAmounts` now sums `totalMonthlyBonus` across the permanent
+`users/{uid}/monthly_records/*` documents. Those are written only when a bonus is actually credited and
+nothing ever resets them, so the sum is exactly what the wallet was incremented by over the
+technician's whole history. A technician with no month records at all — one predating the subcollection
+— still falls back to the root field rather than being reported as zero. Because the rebuild derives
+everything rather than carrying values forward, **a wallet a previous sync already truncated repairs
+itself on the next sync**; no backfill or migration is needed.
+
+### 19.7 The rest of the payout routine, hardened
+
+The same pass audited the money path around that fix. Five things were wrong or missing:
+
+**Money was never rounded.** Balances are `double`s, so `10.10 + 15.20` gives `25.299999999999997` and a
+technician requesting the SAR 25.30 the app had just shown them was refused for "Insufficient bonus
+balance". Every derived amount is now rounded to whole halalas (half away from zero) before it is
+stored or compared, and NaN/infinity collapse to 0 instead of being written into a wallet.
+
+**Requests were validated against a cache.** `requestUnifiedPayout` read the stored wallet document,
+which could be stale or truncated by an older sync. It now rebuilds from source first, then validates —
+so the request path is self-healing and cannot be beaten by a concurrent approval.
+
+**Nothing stopped two pending requests.** The wallet screen hides the button while `payoutRequested` is
+set, but the service accepted stacked requests, each validated against the same undiminished balance.
+One pending request at a time is now enforced in the service.
+
+**The SAR 10 minimum lived only in the UI.** It is now `WalletMath.minimumPayoutSar`, enforced in the
+service too. Negative amounts are rejected outright.
+
+**`clearWallet` silently undid itself.** An admin clear zeroed the available balances, and the next
+rebuild — a pull-to-refresh was enough — recomputed them from source data that knows nothing of the
+clear and handed every riyal back. Clears are now recorded cumulatively on the wallet as
+`manualClearedTips` / `manualClearedBonus` / `manualClearedEarnings` and subtracted by the rebuild
+alongside approved payouts, so a clear sticks and money earned *after* it is unaffected. Clears made
+before this change were never durable and cannot be recovered.
+
+Pending requests deliberately still do **not** reduce the displayed available balance: the money is the
+technician's until an admin approves, and a rejected or cancelled request must leave them exactly where
+they were. Double-spending is prevented by the one-pending-request rule instead.
+
+### 19.8 `lib/services/wallet_math.dart`
+
+The arithmetic moved into a pure module with no Firestore, `dart:io` or Flutter imports, so it can be
+driven directly under `flutter test` — the project has no fake-Firestore package and adding one was not
+worth a dependency bump. `UnifiedPayoutServices` keeps all the I/O and the queries and delegates every
+number to `WalletMath`, so the tested arithmetic is the arithmetic that runs.
+
+`WalletMath.balances()` derives every balance as **lifetime − gone** (approved payouts + admin clears),
+clamped at zero and rounded. `WalletMath.refuseRequest()` holds the request rules and returns a
+`PayoutRefusal` rather than throwing, so both the service and the tests read the same decisions.
+
+`test/wallet_math_test.dart` is the project's first test file. It covers the August/September
+accumulation case, rebuild idempotency, rounding (including the 25.30 refusal), clamping on
+over-payment, clears interacting with payouts, cash tips and outside-app earnings staying
+non-payoutable, and every refusal branch.
+
+### 19.9 Known, unchanged
+
+`resetMonthlyTiers` writes `previousMonthBonus` from `users/{uid}.totalMonthlyBonus`. Under `monthly`
+that field holds the bonus paid on the 1st of the month *for the month before it*, so
+`previousMonthBonus` is one month stale. Nothing reads it — not the functions, not either app — so it
+was left as-is rather than given new semantics as part of a schedule change.
+
+### 19.10 Deploy
+
+```
+firebase deploy --only functions
+```
+
+No function has to be recreated and no Cloud Scheduler job rebuilt. The composite index in §18.8 is
+only needed by the daily run's fallback path and is unaffected.

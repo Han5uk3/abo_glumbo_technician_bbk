@@ -1,6 +1,7 @@
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/unified_payout.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/services/wallet_math.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,16 @@ import 'package:image_picker/image_picker.dart';
 /// - Outside-app payments (mode 1, cash/manual) are tracked for lifetime totals, NOT payoutable
 /// - Inspection fees (mode 0) are NEVER tracked in the wallet
 class UnifiedPayoutServices {
+  /// Smallest payout a technician may request, in SAR. Enforced here as well
+  /// as in the wallet UI so the rule cannot be bypassed by any other caller.
+  static const double minimumPayoutSar = WalletMath.minimumPayoutSar;
+
+  /// Every amount this service writes or compares goes through [WalletMath],
+  /// which is where the payout arithmetic lives and where it is tested.
+  static double _money(double value) => WalletMath.money(value);
+
+  static double _asDouble(dynamic value) => WalletMath.asDouble(value);
+
   /// Get or create unified wallet for a worker
   static Future<UnifiedWalletModel> getUnifiedWallet(String workerId) async {
     try {
@@ -150,16 +161,18 @@ class UnifiedPayoutServices {
 
       // Calculate totals
       // PAYOUT-REQUESTABLE: Inside App (card) tips + available bonus + in-app earnings
-      final totalAvailable =
-          (wallet.cardTips ?? 0.0) +
-          (wallet.availableBonus ?? 0.0) +
-          (wallet.inAppEarnings ?? 0.0);
+      final totalAvailable = _money(
+        (wallet.cardTips ?? 0.0) +
+            (wallet.availableBonus ?? 0.0) +
+            (wallet.inAppEarnings ?? 0.0),
+      );
 
       // LIFETIME TOTAL: All earnings + tips + bonus (display only)
-      final lifetimeTotal =
-          (wallet.totalTips ?? 0.0) +
-          (wallet.totalBonus ?? 0.0) +
-          (wallet.totalCompletionAmount ?? 0.0);
+      final lifetimeTotal = _money(
+        (wallet.totalTips ?? 0.0) +
+            (wallet.totalBonus ?? 0.0) +
+            (wallet.totalCompletionAmount ?? 0.0),
+      );
 
       wallet = wallet.copyWith(
         totalAvailableBalance: totalAvailable,
@@ -184,6 +197,29 @@ class UnifiedPayoutServices {
     }
   }
 
+  /// English text for a refused payout request. The wallet UI blocks these
+  /// cases before they are reached, so this is a backstop for any other caller
+  /// rather than user-facing copy.
+  static String refusalMessage(PayoutRefusal refusal) {
+    switch (refusal) {
+      case PayoutRefusal.pendingRequestExists:
+        return 'A payout request is already pending';
+      case PayoutRefusal.negativeAmount:
+        return 'Payout amounts cannot be negative';
+      case PayoutRefusal.insufficientTips:
+        return 'Insufficient tips balance';
+      case PayoutRefusal.insufficientBonus:
+        return 'Insufficient bonus balance';
+      case PayoutRefusal.insufficientEarnings:
+        return 'Insufficient in-app earnings balance';
+      case PayoutRefusal.nothingToPayOut:
+        return 'Total amount must be greater than 0';
+      case PayoutRefusal.belowMinimum:
+        return 'Minimum payout amount is '
+            '${WalletMath.minimumPayoutSar.toStringAsFixed(0)} SAR';
+    }
+  }
+
   /// Request a unified payout (Inside App tips + bonus only)
   static Future<String> requestUnifiedPayout({
     required String workerId,
@@ -201,23 +237,41 @@ class UnifiedPayoutServices {
         throw Exception('No payout account found');
       }
 
-      // Get current wallet
+      // Rebuild the wallet from source data before validating anything against
+      // it. The stored document is a cache — an older sync may have written a
+      // truncated bonus (see `AppServices.getWorkerBonusAmounts`), and a
+      // concurrent approval may have spent part of the balance since the screen
+      // was drawn. Validating against a stale cache either refuses money the
+      // technician is owed or lets them request money that is already gone.
+      await syncExistingDataToUnifiedWallet(workerId);
       final wallet = await getUnifiedWallet(workerId);
 
-      // Validate amounts
-      if (tipsAmount > (wallet.cardTips ?? 0.0)) {
-        throw Exception('Insufficient tips balance');
-      }
-      if (bonusAmount > (wallet.availableBonus ?? 0.0)) {
-        throw Exception('Insufficient bonus balance');
-      }
-      if (earningsAmount > (wallet.inAppEarnings ?? 0.0)) {
-        throw Exception('Insufficient in-app earnings balance');
-      }
+      // Round the requested amounts to whole halalas before comparing them
+      // against the wallet, so a floating-point tail cannot refuse a technician
+      // the exact balance the wallet screen just showed them. Every rule below
+      // lives in WalletMath, where it is covered by tests.
+      final tips = _money(tipsAmount);
+      final bonus = _money(bonusAmount);
+      final earnings = _money(earningsAmount);
+      final totalAmount = _money(tips + bonus + earnings);
 
-      final totalAmount = tipsAmount + bonusAmount + earningsAmount;
-      if (totalAmount <= 0) {
-        throw Exception('Total amount must be greater than 0');
+      final refusal = WalletMath.refuseRequest(
+        tips: tips,
+        bonus: bonus,
+        earnings: earnings,
+        // The wallet was rebuilt a moment ago, so its stored figures are the
+        // available balances; nothing further is owed against them here.
+        hasPendingRequest: wallet.payoutRequested == true,
+        balances: WalletMath.balances(
+          lifetimeCardTips: wallet.cardTips ?? 0.0,
+          lifetimeCashTips: 0.0,
+          lifetimeBonus: wallet.availableBonus ?? 0.0,
+          lifetimeInAppEarnings: wallet.inAppEarnings ?? 0.0,
+          lifetimeOutsideAppEarnings: 0.0,
+        ),
+      );
+      if (refusal != null) {
+        throw Exception(refusalMessage(refusal));
       }
 
       // Create payout request
@@ -228,9 +282,9 @@ class UnifiedPayoutServices {
         id: requestId,
         workerId: workerId,
         workerName: worker.name,
-        tipsAmount: tipsAmount,
-        bonusAmount: bonusAmount,
-        earningsAmount: earningsAmount,
+        tipsAmount: tips,
+        bonusAmount: bonus,
+        earningsAmount: earnings,
         totalAmount: totalAmount,
         payoutAccount: payoutAccount.toJson(),
         status: 'P', // Pending
@@ -623,8 +677,6 @@ class UnifiedPayoutServices {
         }
       }
 
-      final totalEarnings = lifetimeInAppEarnings + lifetimeOutsideAppEarnings;
-
       // Query all approved/pending payouts to calculate exactly what has been withdrawn
       final payoutsQuery = await AppFirestore.unifiedPayoutRequestsCollectionRef
           .where('workerId', isEqualTo: workerId)
@@ -654,18 +706,40 @@ class UnifiedPayoutServices {
         }
       }
 
+      // An admin "clear wallet" is part of the ledger too. This rebuild derives
+      // every available balance from source data minus what has left the
+      // wallet, so unless a manual clear is recorded and subtracted here the
+      // next rebuild — a pull-to-refresh is enough — hands the balance straight
+      // back and the clear silently undoes itself.
+      final existingWalletDoc = await AppFirestore.unifiedWalletCollectionRef
+          .doc(workerId)
+          .get();
+      final existingWalletData =
+          existingWalletDoc.data() as Map<String, dynamic>?;
+      final clearedTips = _asDouble(existingWalletData?['manualClearedTips']);
+      final clearedBonus = _asDouble(existingWalletData?['manualClearedBonus']);
+      final clearedEarnings = _asDouble(
+        existingWalletData?['manualClearedEarnings'],
+      );
+
       final lifetimeCardTips = tippingData.cardtip ?? 0.0;
       final lifetimeCashTips = tippingData.cashtip ?? 0.0;
 
-      // Calculate safe available balances (clamp to 0 to avoid negatives)
-      double availableCardTips = lifetimeCardTips - totalPaidTips;
-      if (availableCardTips < 0) availableCardTips = 0;
-
-      double availableBonus = bonusAmount - totalPaidBonus;
-      if (availableBonus < 0) availableBonus = 0;
-
-      double availableInAppEarnings = lifetimeInAppEarnings - totalPaidEarnings;
-      if (availableInAppEarnings < 0) availableInAppEarnings = 0;
+      // Every balance below is derived, never carried forward from the stored
+      // document, so a wallet an earlier bug truncated repairs itself here.
+      final balances = WalletMath.balances(
+        lifetimeCardTips: lifetimeCardTips,
+        lifetimeCashTips: lifetimeCashTips,
+        lifetimeBonus: bonusAmount,
+        lifetimeInAppEarnings: lifetimeInAppEarnings,
+        lifetimeOutsideAppEarnings: lifetimeOutsideAppEarnings,
+        paidTips: totalPaidTips,
+        paidBonus: totalPaidBonus,
+        paidEarnings: totalPaidEarnings,
+        clearedTips: clearedTips,
+        clearedBonus: clearedBonus,
+        clearedEarnings: clearedEarnings,
+      );
 
       // Ensure payoutRequested is correctly reflected based on actual pending requests
       // Fallback to legacy tippingData if true and we didn't find one
@@ -675,30 +749,28 @@ class UnifiedPayoutServices {
       // Create/update unified wallet
       final wallet = UnifiedWalletModel(
         workerId: workerId,
-        totalTips: lifetimeCardTips + lifetimeCashTips,
-        cardTips: availableCardTips, // Store available for payout
-        cashTips: lifetimeCashTips,
-        paidTips: totalPaidTips, // Accurate from historical requests
-        totalBonus: bonusAmount,
-        paidBonus: totalPaidBonus,
-        availableBonus: availableBonus,
-        inAppEarnings: availableInAppEarnings, // Store available
-        outsideAppEarnings: lifetimeOutsideAppEarnings, // Lifetime info
-        totalCompletionAmount: totalEarnings, // Lifetime sum
+        totalTips: balances.totalTips,
+        cardTips: balances.availableCardTips, // Store available for payout
+        cashTips: balances.cashTips,
+        // Money that has left the wallet, whether paid out on an approved
+        // request or written off by an admin clear.
+        paidTips: balances.paidTips,
+        totalBonus: balances.totalBonus,
+        paidBonus: balances.paidBonus,
+        availableBonus: balances.availableBonus,
+        inAppEarnings: balances.availableInAppEarnings, // Store available
+        outsideAppEarnings: balances.outsideAppEarnings, // Lifetime info
+        totalCompletionAmount: balances.totalCompletionAmount, // Lifetime sum
         payoutRequested: isPayoutRequested,
-        requestedAmount: isPayoutRequested ? pendingAmount : 0.0,
+        requestedAmount: isPayoutRequested ? _money(pendingAmount) : 0.0,
         lastUpdated: Timestamp.now(),
       );
 
       // Calculate totals
       // PAYOUT-REQUESTABLE: Inside App (card) tips + bonus + in-app earnings
-      final totalAvailable =
-          availableCardTips + availableBonus + availableInAppEarnings;
+      final totalAvailable = balances.totalAvailable;
       // LIFETIME: Everything combined
-      final lifetimeTotal =
-          (wallet.totalTips ?? 0.0) +
-          (wallet.totalBonus ?? 0.0) +
-          (wallet.totalCompletionAmount ?? 0.0);
+      final lifetimeTotal = balances.lifetimeTotal;
 
       final updatedWallet = wallet.copyWith(
         totalAvailableBalance: totalAvailable,
@@ -714,7 +786,9 @@ class UnifiedPayoutServices {
         print(
           '   Payout-Requestable: $totalAvailable (card tips + bonus + in-app earnings)',
         );
-        print('   In-App Earnings (Available): $availableInAppEarnings');
+        print(
+          '   In-App Earnings (Available): ${balances.availableInAppEarnings}',
+        );
         print(
           '   Outside-App Earnings (Lifetime): $lifetimeOutsideAppEarnings',
         );
@@ -754,14 +828,23 @@ class UnifiedPayoutServices {
           requestedAmount: 0.0,
           lastUpdated: Timestamp.now(),
         );
-        await walletRef.set(clearedWallet.toJson());
+        await walletRef.set({
+          ...clearedWallet.toJson(),
+          'manualClearedTips': 0.0,
+          'manualClearedBonus': 0.0,
+          'manualClearedEarnings': 0.0,
+        });
       } else {
         // Preserve lifetime data, clear only available balances
         final wallet = UnifiedWalletModel.fromSnapshot(walletDoc);
+        final walletData = walletDoc.data() as Map<String, dynamic>?;
 
-        final newPaidTips = (wallet.paidTips ?? 0.0) + (wallet.cardTips ?? 0.0);
-        final newPaidBonus =
-            (wallet.paidBonus ?? 0.0) + (wallet.availableBonus ?? 0.0);
+        final clearingTips = wallet.cardTips ?? 0.0;
+        final clearingBonus = wallet.availableBonus ?? 0.0;
+        final clearingEarnings = wallet.inAppEarnings ?? 0.0;
+
+        final newPaidTips = _money((wallet.paidTips ?? 0.0) + clearingTips);
+        final newPaidBonus = _money((wallet.paidBonus ?? 0.0) + clearingBonus);
 
         await walletRef.update({
           'cardTips': 0.0,
@@ -769,6 +852,19 @@ class UnifiedPayoutServices {
           'inAppEarnings': 0.0,
           'paidTips': newPaidTips,
           'paidBonus': newPaidBonus,
+          // Recorded cumulatively so `syncExistingDataToUnifiedWallet` honours
+          // the clear. Without these the very next rebuild recomputes the
+          // balance from source data, which knows nothing about the clear, and
+          // hands every cleared riyal back.
+          'manualClearedTips': _money(
+            _asDouble(walletData?['manualClearedTips']) + clearingTips,
+          ),
+          'manualClearedBonus': _money(
+            _asDouble(walletData?['manualClearedBonus']) + clearingBonus,
+          ),
+          'manualClearedEarnings': _money(
+            _asDouble(walletData?['manualClearedEarnings']) + clearingEarnings,
+          ),
           'totalAvailableBalance': 0.0,
           'payoutRequested': false,
           'requestedAmount': 0.0,

@@ -15,13 +15,14 @@ class RewardsPage extends StatefulWidget {
 }
 
 class _RewardsPageState extends State<RewardsPage> {
-  // Job counts each tier requires. These must match `TIER_*_JOBS` in
-  // `functions/index.js`, which is what actually decides a worker's tier —
-  // showing a worker a target the server does not use is worse than showing
-  // none, so change both together.
-  static const int _silverJobs = 3;
-  static const int _goldJobs = 5;
-  static const int _platinumJobs = 10;
+  // Job counts each tier requires. These must match the ladder
+  // `TIER_JOB_LADDERS[BONUS_MODE]` selects in `functions/index.js`, which is
+  // what actually decides a worker's tier — showing a worker a target the
+  // server does not use is worse than showing none, so change both together.
+  // These are the `monthly` ladder, matching the live BONUS_MODE.
+  static const int _silverJobs = 20;
+  static const int _goldJobs = 40;
+  static const int _platinumJobs = 60;
 
   int totalJobsCount = 0;
   double currentRating = 0.0;

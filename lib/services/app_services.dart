@@ -2047,13 +2047,48 @@ class AppServices {
     return paidAmounts.toDouble();
   }
 
+  /// Total bonus ever credited to a technician, in SAR.
+  ///
+  /// Sums the permanent `users/{uid}/monthly_records/{YYYY-MM}` documents
+  /// rather than reading `users/{uid}.totalMonthlyBonus`. That root field is
+  /// **month-scoped** — `resetMonthlyTiers` zeroes it at 00:30 on the 1st of
+  /// every month — so using it here truncated a technician's payout-requestable
+  /// bonus to whatever the most recent month happened to pay, silently
+  /// discarding everything they had earned but not yet cashed out. A technician
+  /// owed SAR 10 for August and SAR 15 for September saw SAR 15 the moment
+  /// anything triggered a wallet rebuild.
+  ///
+  /// Each month record's `totalMonthlyBonus` is written only when a bonus is
+  /// actually credited, and nothing ever resets it, so this sum is exactly what
+  /// the wallet was incremented by over the technician's whole history.
   static Future<double> getWorkerBonusAmounts(String workerId) async {
+    final records = await AppFirestore.usersCollectionRef
+        .doc(workerId)
+        .collection('monthly_records')
+        .get();
+
+    if (records.docs.isNotEmpty) {
+      double total = 0.0;
+      for (final doc in records.docs) {
+        total += _asDouble(doc.data()['totalMonthlyBonus']);
+      }
+      return total;
+    }
+
+    // A technician with no month records at all predates the subcollection.
+    // Fall back to the root field rather than reporting zero and wiping a
+    // balance that may still be owed.
     final snapshot = await AppFirestore.usersCollectionRef.doc(workerId).get();
     final data = snapshot.data() as Map<String, dynamic>?;
-    final val = data?['totalMonthlyBonus'];
-    if (val == null) return 0.0;
-    if (val is num) return val.toDouble();
-    if (val is String) return double.tryParse(val) ?? 0.0;
+    return _asDouble(data?['totalMonthlyBonus']);
+  }
+
+  /// Firestore has handed these back as `int`, `double` and `String` over the
+  /// life of the schema, so every money read goes through one coercion.
+  static double _asDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
   }
 

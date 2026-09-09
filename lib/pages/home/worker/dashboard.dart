@@ -408,23 +408,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            // Semi-transparent Currency Icon
-            PositionedDirectional(
-              end: 16,
-              top: 16,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.attach_money_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -443,19 +426,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        "${AppLocalizations.of(context)!.sar} ",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
                         stats['availableBalance']?.toString() ?? "0.00",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.sar,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],

@@ -22,14 +22,17 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Stripped: open_filex declares these, but every OpenFilex.open() call in this app
+         targets a file inside app-private storage (file_picker/image_picker cache or
+         getTemporaryDirectory), which the plugin opens without any media permission. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove" />
     
     <!-- Biometric permissions -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-    
-    <!-- SMS permissions for OTP autofill -->
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <!-- Optional fingerprint hardware feature -->
     <uses-feature android:name="android.hardware.fingerprint" android:required="false" />

@@ -23,6 +23,22 @@
           }
         },
         {
+          "client_id": "629201660527-jktthvpcemt1c8lpheepaafp3m9hdktv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aboglumbo",
+            "certificate_hash": "1de6c3414aa83a2a75b21802c41b49252602b3ce"
+          }
+        },
+        {
+          "client_id": "629201660527-mktunh3tm3minui2p5bguss5iqk1c6s2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aboglumbo",
+            "certificate_hash": "f82ab6b94ed43935d3f5204860f6e83f4c4865d4"
+          }
+        },
+        {
           "client_id": "629201660527-o8r6b9ht1ktmc92nr91iennntqkj18jj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -38,6 +54,9 @@
       "api_key": [
         {
           "current_key": "AIzaSyBk_ntYzCiL1uhCfuNBS9jqdK_Pmmzm0V8"
+        },
+        {
+          "current_key": "AIzaSyASGaFUfEWmVepBFU8nOLhVtFhf5VJsn5E"
         }
       ],
       "services": {
@@ -48,10 +67,11 @@
               "client_type": 3
             },
             {
-              "client_id": "629201660527-g3q673rcg9087klcj1hevmaolktfapsb.apps.googleusercontent.com",
+              "client_id": "629201660527-9q80rvt86qudun13pgumtn0sjcn4u95a.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.aboglumbo.cPanel"
+                "bundle_id": "com.aboglumbo",
+                "app_store_id": "6737537602"
               }
             }
           ]
@@ -91,6 +111,14 @@
           }
         },
         {
+          "client_id": "629201660527-ja91a9c7a78otroggrundqlc0aqjd62q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aboglumbo.cPanel",
+            "certificate_hash": "1de6c3414aa83a2a75b21802c41b49252602b3ce"
+          }
+        },
+        {
           "client_id": "629201660527-rf61ij2p943l2hgmen7ng1229t1i05vt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -114,6 +142,9 @@
       "api_key": [
         {
           "current_key": "AIzaSyBk_ntYzCiL1uhCfuNBS9jqdK_Pmmzm0V8"
+        },
+        {
+          "current_key": "AIzaSyASGaFUfEWmVepBFU8nOLhVtFhf5VJsn5E"
         }
       ],
       "services": {
@@ -124,10 +155,11 @@
               "client_type": 3
             },
             {
-              "client_id": "629201660527-g3q673rcg9087klcj1hevmaolktfapsb.apps.googleusercontent.com",
+              "client_id": "629201660527-9q80rvt86qudun13pgumtn0sjcn4u95a.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.aboglumbo.cPanel"
+                "bundle_id": "com.aboglumbo",
+                "app_store_id": "6737537602"
               }
             }
           ]

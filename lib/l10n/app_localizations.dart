@@ -4561,8 +4561,32 @@ abstract class AppLocalizations {
   /// No description provided for @backgroundLocationPermissionRequired.
   ///
   /// In en, this message translates to:
-  /// **'Background location tracking requires Always Allow permission. Please enable this in your device settings.'**
+  /// **'Abo Glumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.'**
   String get backgroundLocationPermissionRequired;
+
+  /// No description provided for @locationDisclosureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Access & Data Use'**
+  String get locationDisclosureTitle;
+
+  /// No description provided for @locationDisclosureTrackingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and shared with the customer so they can see your live location and track your arrival and job progress during an active job.\n\nBackground collection runs only while you are tracking a job and stops when you stop tracking. You can change location access at any time in your device settings.'**
+  String get locationDisclosureTrackingMessage;
+
+  /// No description provided for @locationDisclosureJobOffersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and used to match you with nearby job requests and to show your current service area to our team, including the approximate city and area you are in.\n\nYou can change location access at any time in your device settings.'**
+  String get locationDisclosureJobOffersMessage;
+
+  /// No description provided for @locationAccessDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is needed to start tracking this job. You can allow it when you are ready.'**
+  String get locationAccessDeclined;
 
   /// No description provided for @locationPermissionDeniedPleaseGrant.
   ///

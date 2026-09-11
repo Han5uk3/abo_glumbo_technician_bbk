@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:aboglumbo_bbk_panel/common_widget/location_disclosure_dialog.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -353,6 +354,23 @@ class BookingTrackerService {
     if (LocalStore.isCurrentUserAdmin()) return;
     LocationPermission permission = await Geolocator.checkPermission();
 
+    // Prominent disclosure: Google Play requires that the user is told what
+    // location data is collected and how it is used *before* the system
+    // permission dialog, whenever background location is involved.
+    if (permission != LocationPermission.always) {
+      final localizations = AppLocalizations.of(context);
+      final declined = Exception(
+        localizations?.locationAccessDeclined ??
+            'Location access is needed to start tracking this job. You can allow it when you are ready.',
+      );
+      if (!context.mounted) throw declined;
+      final accepted = await LocationDisclosureDialog.show(
+        context,
+        type: LocationDisclosureType.jobTracking,
+      );
+      if (!accepted) throw declined;
+    }
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
@@ -380,7 +398,7 @@ class BookingTrackerService {
           final localizations = AppLocalizations.of(context);
           throw Exception(
             localizations?.backgroundLocationPermissionRequired ??
-                'Background location permission is required for tracking.',
+                'Abo Glumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.',
           );
         }
       } else if (Platform.isIOS) {

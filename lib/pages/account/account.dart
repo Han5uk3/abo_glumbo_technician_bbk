@@ -20,6 +20,7 @@ import 'package:aboglumbo_bbk_panel/pages/account/widgets/language_dialog.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/worker/contact_bottom_sheet.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
+import 'package:aboglumbo_bbk_panel/services/app_settings_service.dart';
 import 'package:aboglumbo_bbk_panel/services/biometric_service.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 
@@ -49,6 +50,10 @@ class _AccountPageState extends State<AccountPage> {
 
   bool isMainAdmin = false;
 
+  /// Remote flag from `app_settings/technician_app_v1.showDeleteAccount`.
+  /// Created once so rebuilds do not re-subscribe.
+  late final Stream<bool> _deleteAccountEnabled;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +62,7 @@ class _AccountPageState extends State<AccountPage> {
 
     final cachedUser = LocalStore.getCachedUserData();
     currentWorkerData = cachedUser ?? widget.workerData;
+    _deleteAccountEnabled = AppSettingsService.watchDeleteAccountEnabled();
     _loadBiometricSettings();
   }
 
@@ -408,8 +414,25 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildDangerZone() {
-    // Hidden per user request
-    return const SizedBox.shrink();
+    if (isMainAdmin) return const SizedBox.shrink();
+    return StreamBuilder<bool>(
+      stream: _deleteAccountEnabled,
+      initialData: false,
+      builder: (context, snapshot) {
+        // Stays hidden unless the remote flag is explicitly enabled.
+        if (snapshot.data != true) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: AccountListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            textcolor: Colors.red,
+            title: AppLocalizations.of(context)?.deleteAccount ?? '',
+            onTap: _showDeleteAccountConfirmation,
+            dense: true,
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildAuthSection() {

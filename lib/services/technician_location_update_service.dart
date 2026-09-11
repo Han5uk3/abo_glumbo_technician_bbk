@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
+import 'package:aboglumbo_bbk_panel/common_widget/location_disclosure_dialog.dart';
 
 /// Service for automatically updating technician's current location
 /// - Auto-fetches on app startup
@@ -88,11 +89,11 @@ class TechnicianLocationUpdateService {
       // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          debugPrint('⚠️ Location permissions denied');
-          return;
-        }
+        // This also runs headless, so there is no UI to show the prominent
+        // disclosure in. Never request location permission without it --
+        // leave the request to a foreground flow that can disclose first.
+        debugPrint('⚠️ Location permission not granted yet, skipping update');
+        return;
       }
 
       if (permission == LocationPermission.deniedForever) {
@@ -245,6 +246,14 @@ class TechnicianLocationUpdateService {
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
+      // Prominent disclosure before the system permission dialog.
+      if (!context.mounted) return;
+      final accepted = await LocationDisclosureDialog.show(
+        context,
+        type: LocationDisclosureType.jobOffers,
+      );
+      if (!accepted) return;
+
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         // Still denied

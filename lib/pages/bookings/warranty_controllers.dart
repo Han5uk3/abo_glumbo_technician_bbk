@@ -278,7 +278,7 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                 ],
               ),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 6),
+              duration: Duration(seconds: isPermissionError ? 12 : 6),
               action: isPermissionError
                   ? SnackBarAction(
                       label: AppLocalizations.of(context)!.openSettings,

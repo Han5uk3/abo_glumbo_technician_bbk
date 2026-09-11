@@ -1,20 +1,59 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:ntp/ntp.dart';
 
 class TimeService {
   static Duration _offset = Duration.zero;
+  static bool _synced = false;
 
-  /// Initializes the time service by fetching the true network time.
+  /// Hard ceiling on a clock-sync attempt.
+  ///
+  /// This has to bound the *whole* call, not just the UDP receive. `NTP.now`'s
+  /// own `timeout` parameter is applied only to the datagram socket, leaving the
+  /// `InternetAddress.lookup` that precedes it unbounded; and when a network
+  /// silently drops outbound UDP/123 (common on corporate, captive and review
+  /// networks) the socket stream neither emits nor closes, so the future it
+  /// returns completes *never* rather than with an error. A `try`/`catch` cannot
+  /// rescue a hang, so the timeout is what turns it back into a catchable error.
+  static const Duration _syncTimeout = Duration(seconds: 5);
+
+  /// Whether the offset below came from a real NTP response.
+  static bool get isSynced => _synced;
+
+  /// Fetches the true network time and records the local clock's skew.
+  ///
+  /// Never throws and never hangs. On any failure it leaves the offset at zero,
+  /// which degrades to the device clock — correct for the overwhelming majority
+  /// of devices and always better than blocking.
+  ///
+  /// Do not `await` this on the launch path; use [syncInBackground].
   static Future<void> init() async {
     try {
       final myTime = DateTime.now();
-      final ntpTime = await NTP.now();
+      final ntpTime = await NTP.now(
+        timeout: _syncTimeout,
+      ).timeout(_syncTimeout);
       _offset = ntpTime.difference(myTime);
-      debugPrint('TimeService initialized. Clock skew offset: ${_offset.inMilliseconds}ms');
+      _synced = true;
+      debugPrint(
+        'TimeService initialized. Clock skew offset: ${_offset.inMilliseconds}ms',
+      );
     } catch (e) {
-      debugPrint('TimeService failed to initialize, falling back to local clock: $e');
+      debugPrint(
+        'TimeService failed to initialize, falling back to local clock: $e',
+      );
       _offset = Duration.zero;
+      _synced = false;
     }
+  }
+
+  /// Starts a sync without blocking the caller.
+  ///
+  /// Launch must never wait on the network: until the response lands (or the
+  /// timeout above fires) [now] simply reads the device clock.
+  static void syncInBackground() {
+    unawaited(init());
   }
 
   /// Returns the current synchronized time.

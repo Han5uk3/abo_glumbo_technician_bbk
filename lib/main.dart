@@ -107,7 +107,14 @@ GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+
+  // Outside the try below this could abort main() before runApp() and leave the
+  // user on a permanently blank screen, so it gets its own guard.
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('WARNING: Could not load .env, continuing without it: $e');
+  }
 
   try {
     // STEP 1: Initialize Firebase FIRST
@@ -134,7 +141,15 @@ void main() async {
     // STEP 3: Initialize Hive
     debugPrint('🔄 Initializing Hive...');
     await Hive.initFlutter();
-    await Hive.openBox(hiveBoxName);
+    try {
+      await Hive.openBox(hiveBoxName);
+    } catch (e) {
+      // A corrupt box would otherwise make every LocalStore call throw. Losing
+      // the cache costs the user a re-login; failing to open costs them the app.
+      debugPrint('⚠️ Hive box corrupt, recreating: $e');
+      await Hive.deleteBoxFromDisk(hiveBoxName);
+      await Hive.openBox(hiveBoxName);
+    }
     debugPrint('✅ Hive initialized');
 
     // STEP 4: Setup FCM Background Handler
@@ -142,10 +157,12 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     debugPrint('✅ FCM background handler registered');
 
-    // STEP 5: Initialize Time Service
-    debugPrint('🔄 Initializing TimeService...');
-    await TimeService.init();
-    debugPrint('✅ TimeService initialized');
+    // STEP 5: Kick off clock sync WITHOUT awaiting it.
+    // Awaiting this is what blanked the app on networks that drop UDP/123: the
+    // NTP future never completed, so runApp() below was never reached. Until it
+    // lands, TimeService.now falls back to the device clock.
+    debugPrint('🔄 Starting TimeService sync (non-blocking)...');
+    TimeService.syncInBackground();
 
     // STEP 6: Setup System UI (with One UI 8 fix)
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -185,7 +202,7 @@ void main() async {
           debugPrint('Background fetch timeout: $taskId');
           backgroundFetchHeadlessTask(HeadlessTask(taskId, true));
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       debugPrint('✅ Background fetch configured successfully');
     } catch (e) {

@@ -98,22 +98,40 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Only autologin if we have a local UID, a valid Firebase session, and the user hasn't logged out
       if (localUid != null && currentUser != null && !_isUserLogout) {
-        context.read<LoginBloc>().add(LoadWorkerData(uid: localUid));
         final loginBloc = context.read<LoginBloc>();
-        await for (final state in loginBloc.stream) {
-          if (state is LoginSuccess || state is LoginLoadWorkerData) {
-            final user = state is LoginSuccess
-                ? state.user
-                : (state as LoginLoadWorkerData).user;
-            if (user.isAdmin != true && user.role != 'admin') {
-              TechnicianLocationUpdateService.updateLocationNow();
-            }
-            _navigateWithFadeOut(() => const Home());
-            break;
-          } else if (state is LoginLoadWorkerDataFailure) {
-            _navigateWithFadeOut(() => const OnboardingPage());
-            break;
+        loginBloc.add(LoadWorkerData(uid: localUid));
+
+        // Auto-login must not be able to strand the user on the splash screen.
+        // A Firestore read against an unreachable network retries indefinitely
+        // instead of failing, so the wait is bounded and falls through to manual
+        // login rather than waiting on a state that may never arrive.
+        LoginState? resolved;
+        try {
+          resolved = await loginBloc.stream
+              .firstWhere(
+                (s) =>
+                    s is LoginSuccess ||
+                    s is LoginLoadWorkerData ||
+                    s is LoginLoadWorkerDataFailure,
+              )
+              .timeout(const Duration(seconds: 15));
+        } catch (e) {
+          debugPrint('Auto-login did not resolve, showing onboarding: $e');
+          resolved = null;
+        }
+
+        if (!mounted) return;
+
+        if (resolved is LoginSuccess || resolved is LoginLoadWorkerData) {
+          final user = resolved is LoginSuccess
+              ? resolved.user
+              : (resolved as LoginLoadWorkerData).user;
+          if (user.isAdmin != true && user.role != 'admin') {
+            TechnicianLocationUpdateService.updateLocationNow();
           }
+          _navigateWithFadeOut(() => const Home());
+        } else {
+          _navigateWithFadeOut(() => const OnboardingPage());
         }
       } else {
         // If Firebase session is gone but we still have a local UID, clear it

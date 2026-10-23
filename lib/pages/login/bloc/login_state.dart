@@ -44,6 +44,14 @@ final class OTPVerifiedForRegistration extends LoginState {
   List<Object?> get props => [uid];
 }
 
+/// Android verified the number by itself (instant verification): no SMS was
+/// sent and there is no code to type. The user is already signed in.
+final class OTPAutoVerified extends LoginState {
+  final UserCredential userCredential;
+
+  OTPAutoVerified({required this.userCredential});
+}
+
 final class LoginRememberMeToggled extends LoginState {
   final bool value;
   LoginRememberMeToggled(this.value);

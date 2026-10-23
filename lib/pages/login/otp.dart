@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -37,7 +38,7 @@ class _OtpPageState extends State<OtpPage> {
   bool _isSmsAutofillListening = false;
   int resendSeconds = 60;
   Timer? _timer;
-  Timer? _smsListeningTimer;
+  int _smsListenGeneration = 0;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _otpController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -135,6 +136,7 @@ class _OtpPageState extends State<OtpPage> {
 
             startTimer();
             debugPrint('⏱️ [RESEND OTP] Timer restarted');
+            _startSmsAutofillListener();
           }
         },
         onAutoRetrievalTimeout: (verificationId) {
@@ -498,51 +500,42 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-  /// Start listening for incoming SMS
+  /// Android only: Google asks the user to share the OTP SMS, then the code
+  /// is filled in and verified. On iOS the keyboard offers the code from
+  /// Messages instead, through Pinput's default oneTimeCode autofill hint.
+  /// Called when the page opens (first send) and after every resend.
   void _startSmsAutofillListener() {
+    if (!Platform.isAndroid || !mounted) return;
     debugPrint('🎯 [PANEL OTP] Starting SMS autofill listener...');
-
-    if (!mounted) return;
 
     setState(() {
       _isSmsAutofillListening = true;
     });
 
-    // Set a timeout for SMS listening (30 seconds)
-    _smsListeningTimer = Timer(const Duration(seconds: 30), () {
-      if (mounted) {
-        setState(() {
-          _isSmsAutofillListening = false;
-        });
-        _smsAutofillService.cancelListening();
-        debugPrint('⏰ [PANEL OTP] SMS listening timeout reached');
-      }
-    });
-
-    _listenForSmsCode();
+    _listenForSmsCode(++_smsListenGeneration);
   }
 
   /// Listen for SMS code and auto-fill the OTP field
-  void _listenForSmsCode() async {
+  void _listenForSmsCode(int generation) async {
     try {
       debugPrint('👂 [PANEL OTP] Listening for SMS code...');
 
       final smsCode = await _smsAutofillService.listenForSms(
-        timeout: const Duration(seconds: 30),
+        timeout: const Duration(minutes: 5),
       );
 
-      if (smsCode != null && smsCode.isNotEmpty && mounted) {
+      // A resend restarted listening; the newer listener owns the UI.
+      if (!mounted || generation != _smsListenGeneration) return;
+
+      setState(() {
+        _isSmsAutofillListening = false;
+      });
+
+      if (smsCode != null && smsCode.isNotEmpty) {
         _otpController.text = smsCode;
 
         // Clear the form to reset validation
         _formKey.currentState?.reset();
-
-        setState(() {
-          _isSmsAutofillListening = false;
-        });
-
-        // Cancel the listening timer
-        _smsListeningTimer?.cancel();
 
         // Automatically verify the OTP after a short delay
         await Future.delayed(const Duration(milliseconds: 500));
@@ -553,7 +546,7 @@ class _OtpPageState extends State<OtpPage> {
       }
     } catch (e) {
       debugPrint('❌ [PANEL OTP] Error listening for SMS: $e');
-      if (mounted) {
+      if (mounted && generation == _smsListenGeneration) {
         setState(() {
           _isSmsAutofillListening = false;
         });
@@ -564,7 +557,6 @@ class _OtpPageState extends State<OtpPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    _smsListeningTimer?.cancel();
     _smsAutofillService.cancelListening();
     _otpController.dispose();
     _focusNode.dispose();
@@ -652,6 +644,9 @@ class _OtpPageState extends State<OtpPage> {
                                 length: 6,
                                 controller: _otpController,
                                 focusNode: _focusNode,
+                                // Keyboard up on open, so iOS can offer the
+                                // code from Messages without a tap first.
+                                autofocus: true,
                                 defaultPinTheme: PinTheme(
                                   width: 45,
                                   height: 60,

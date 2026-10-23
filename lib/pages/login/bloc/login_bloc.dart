@@ -63,6 +63,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             completer.complete({'success': false, 'error': e.code});
           }
         },
+        // Instant verification can finish without codeSent ever firing.
+        // If codeSent already fired, the user is on the OTP page and the
+        // code is verified there instead, so this is ignored.
+        onVerificationCompleted: (PhoneAuthCredential credential) {
+          if (!completer.isCompleted) {
+            if (kDebugMode) {
+              print('✅ Phone number verified instantly, no SMS needed');
+            }
+            completer.complete({'success': true, 'credential': credential});
+          }
+        },
       );
 
       // ✅ Wait for the callback to complete (with 120 second timeout for iOS reCAPTCHA)
@@ -71,7 +82,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         onTimeout: () => {'success': false, 'error': 'timeout'},
       );
 
-      if (result['success'] == true) {
+      if (result['credential'] != null) {
+        try {
+          final userCredential = await FirebaseAuth.instance
+              .signInWithCredential(result['credential'] as PhoneAuthCredential);
+          emit(OTPAutoVerified(userCredential: userCredential));
+        } on FirebaseAuthException catch (e) {
+          emit(OTPSentFailure(error: e.code));
+        }
+      } else if (result['success'] == true) {
         emit(
           OTPSentSuccess(
             verificationId: result['verificationId'] as String,

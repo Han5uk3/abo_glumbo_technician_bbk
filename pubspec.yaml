@@ -47,7 +47,7 @@ dependencies:
   shimmer: ^3.0.0
   url_launcher: ^6.3.2
   video_player: ^2.10.0
-  sms_autofill: ^2.4.1
+  smart_auth: ^3.2.0
   google_maps_flutter: ^2.14.2
   fl_chart: ^0.70.2
   rxdart: ^0.28.0

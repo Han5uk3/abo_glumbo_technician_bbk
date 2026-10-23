@@ -66,6 +66,7 @@ class AuthServices {
     required String phoneNumber,
     required Function(String verificationId, {int? resendToken}) onCodeSent,
     required Function(FirebaseAuthException e) onError,
+    Function(PhoneAuthCredential credential)? onVerificationCompleted,
     int? forceResendingToken,
   }) async {
     debugPrint('🟢 [AUTH SERVICE] sendOTP method called');
@@ -103,6 +104,12 @@ class AuthServices {
         timeout: const Duration(seconds: 120),
         verificationCompleted: (PhoneAuthCredential credential) async {
           debugPrint('✅ [AUTH SERVICE] verificationCompleted triggered');
+          // Android only: the caller decides what to do with the credential
+          // (sign in and route the user) instead of a silent sign-in here.
+          if (onVerificationCompleted != null) {
+            onVerificationCompleted(credential);
+            return;
+          }
           try {
             AuthServices.phoneNumber = sanitizedPhoneNumber;
             await _auth.signInWithCredential(credential);

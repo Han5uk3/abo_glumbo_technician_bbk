@@ -9,6 +9,7 @@ import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/widgets/language_selector.dart';
+import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
 import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/app_color.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart' as localcolor;
@@ -36,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isCheckUserEnableTwoStepVerification = false;
   String? customerLastUid;
   bool isUserLogout = false;
-  bool _isBiometricLoading = false;
+  bool _isLoggingIn = false;
   String? _detectedCountryCode;
   String? _displayCountryCode;
   String? _detectedFlag;
@@ -130,6 +131,31 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Android verified the number without an SMS, so the OTP page is skipped.
+  /// Routes exactly like a typed code: checkUser sends admins, pending admins
+  /// and technicians to Home and unknown numbers to Signup.
+  Future<void> _completeAutoVerifiedLogin(UserCredential userCredential) async {
+    setState(() {
+      _isLoggingIn = true;
+    });
+    try {
+      await AuthServices().checkUser(
+        userCredential: userCredential,
+        context: context,
+      );
+    } catch (e) {
+      debugPrint('❌ [PANEL LOGIN] Auto-verified login failed: $e');
+      if (!mounted) return;
+      setState(() {
+        _isLoggingIn = false;
+      });
+      _showSnackBar(
+        AppLocalizations.of(context)?.errorDuringLogin ?? 'Error during login',
+        Colors.red,
+      );
+    }
+  }
+
   void _onRememberMeChanged(bool? value) {
     setState(() {
       _isRememberMeChecked = value ?? false;
@@ -176,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
         // ✅ Show loading overlay
         if (mounted) {
           setState(() {
-            _isBiometricLoading = true;
+            _isLoggingIn = true;
           });
         }
 
@@ -201,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
           // ✅ Hide loading on error
           if (mounted) {
             setState(() {
-              _isBiometricLoading = false;
+              _isLoggingIn = false;
             });
           }
           _showSnackBar(
@@ -323,6 +349,8 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(builder: (context) => Signup(uid: state.uid)),
             (route) => false,
           );
+        } else if (state is OTPAutoVerified) {
+          _completeAutoVerifiedLogin(state.userCredential);
         } else if (state is LoginFailure) {
           String errorMessage;
           switch (state.error) {
@@ -511,7 +539,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            if (_isBiometricLoading)
+            if (_isLoggingIn)
               Material(
                 color: Colors.black.withOpacity(0.7),
                 child: Center(

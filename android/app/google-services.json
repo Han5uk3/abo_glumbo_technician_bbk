@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "629201660527-k6f8h9bv1otk33r65h5dphk9j7l3qqu3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aboglumbo",
+            "certificate_hash": "b3777d07524dda97ce1c94182ec3137744c29e62"
+          }
+        },
+        {
           "client_id": "629201660527-mktunh3tm3minui2p5bguss5iqk1c6s2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -92,6 +100,14 @@
           "android_info": {
             "package_name": "com.aboglumbo.cPanel",
             "certificate_hash": "f82ab6b94ed43935d3f5204860f6e83f4c4865d4"
+          }
+        },
+        {
+          "client_id": "629201660527-592fu3u33sapta4g2utok7hgmm7piblo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aboglumbo.cPanel",
+            "certificate_hash": "97ece694dbd815ee5fe09a74484172116e07df6f"
           }
         },
         {

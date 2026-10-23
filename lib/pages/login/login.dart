@@ -605,6 +605,7 @@ class _LoginPageState extends State<LoginPage> {
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   isDense: true,

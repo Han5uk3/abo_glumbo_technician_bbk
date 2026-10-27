@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:rxdart/rxdart.dart';
+import 'package:aboglumbo_bbk_panel/helpers/country_code_detector.dart';
 import 'package:aboglumbo_bbk_panel/helpers/custom_exception.dart';
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -187,7 +188,9 @@ class AppServices {
         // Only include fields that are being updated
         Map<String, dynamic> userData = {
           'name': user.name,
-          'phone': user.phone,
+          'phone': user.phone == null
+              ? null
+              : CountryCodeDetector.normalizeSaudiPhone(user.phone!),
           'districtName': user.districtName,
           'jobRoles': user.jobRoles,
           'updatedAt': Timestamp.now(),
@@ -2954,11 +2957,9 @@ class AppServices {
     String? excludeUid,
   }) async {
     try {
-      String normalizedPhoneNumber = phoneNumber.replaceAll(
-        RegExp(r'[^\d+]'),
-        '',
+      String convertedNumber = CountryCodeDetector.normalizeSaudiPhone(
+        phoneNumber,
       );
-      String convertedNumber = "+966${normalizedPhoneNumber.substring(1)}";
 
       // Query technicians with the phone number (converted format)
       var technicianQuery = AppFirestore.usersCollectionRef.where(

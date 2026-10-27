@@ -1,5 +1,6 @@
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/text_form.dart';
+import 'package:aboglumbo_bbk_panel/helpers/country_code_detector.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -7,6 +8,7 @@ import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddAdminPage extends StatefulWidget {
   final AdminModel? adminToEdit;
@@ -65,13 +67,9 @@ class _AddAdminPageState extends State<AddAdminPage> {
       _nameController.text = widget.adminToEdit!.name;
       _emailController.text = widget.adminToEdit!.email;
 
-      String rawPhone = widget.adminToEdit!.phoneNumber;
-      if (rawPhone.startsWith('+966')) {
-        rawPhone = rawPhone.substring(4);
-      } else if (rawPhone.startsWith('966')) {
-        rawPhone = rawPhone.substring(3);
-      }
-      _phoneController.text = rawPhone;
+      _phoneController.text = CountryCodeDetector.saudiLocalNumber(
+        widget.adminToEdit!.phoneNumber,
+      );
       _accessLevel = widget.adminToEdit!.accessLevel;
     }
   }
@@ -107,16 +105,14 @@ class _AddAdminPageState extends State<AddAdminPage> {
     setState(() => _isLoading = true);
 
     try {
-      String phone = _phoneController.text.trim();
-      if (!phone.startsWith('+')) {
-        if (phone.startsWith('0')) {
-          phone = '+966${phone.substring(1)}';
-        } else if (!phone.startsWith('966')) {
-          phone = '+966$phone';
-        } else {
-          phone = '+$phone';
-        }
+      if (!CountryCodeDetector.isValidSaudiPhone(_phoneController.text)) {
+        throw AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
+            'Please enter a valid phone number';
       }
+      // "+966" plus 9 digits, matching the number Firebase Auth gives at login.
+      final phone = CountryCodeDetector.normalizeSaudiPhone(
+        _phoneController.text,
+      );
 
       // Check if phone number already exists, ignoring the current admin if editing
       if (widget.adminToEdit == null ||
@@ -357,6 +353,10 @@ class _AddAdminPageState extends State<AddAdminPage> {
                 controller: controller,
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  PhoneNumberInputFormatter(),
+                  LengthLimitingTextInputFormatter(15),
+                ],
                 textAlignVertical: TextAlignVertical.center,
                 style: TextStyle(
                   color: Colors.black,

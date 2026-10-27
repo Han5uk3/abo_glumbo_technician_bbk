@@ -38,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
   String? customerLastUid;
   bool isUserLogout = false;
   bool _isLoggingIn = false;
-  String? _detectedCountryCode;
   String? _displayCountryCode;
   String? _detectedFlag;
 
@@ -56,16 +55,9 @@ class _LoginPageState extends State<LoginPage> {
     _isRememberMeChecked = LocalStore.getRememberMe();
 
     if (_isRememberMeChecked) {
-      String savedPhone = LocalStore.getRememberedPhone() ?? '';
-      if (savedPhone.startsWith('+966')) {
-        savedPhone = savedPhone.substring(4);
-      } else if (savedPhone.startsWith('966')) {
-        savedPhone = savedPhone.substring(3);
-      }
-      if (savedPhone.startsWith('0')) {
-        savedPhone = savedPhone.substring(1);
-      }
-      _phoneController.text = savedPhone;
+      _phoneController.text = CountryCodeDetector.saudiLocalNumber(
+        LocalStore.getRememberedPhone() ?? '',
+      );
     } else {
       _phoneController.clear();
     }
@@ -99,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       final phoneNumber = _phoneController.text.trim();
 
-      if (phoneNumber.length < 9) {
+      if (!CountryCodeDetector.isValidSaudiPhone(phoneNumber)) {
         _showSnackBar(
           AppLocalizations.of(context)?.pleaseEnterAValidPhoneNumber ??
               'Please enter a valid phone number',
@@ -108,10 +100,9 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // Format phone number with country code
-      final formattedPhoneNumber = CountryCodeDetector.formatPhoneNumber(
+      // Always "+966" plus 9 digits, whether typed as 5…, 05…, 966…, 00966… or +966…
+      final formattedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
         phoneNumber,
-        countryCode: _detectedCountryCode,
       );
       debugPrint('📱 [PANEL LOGIN] Original: $phoneNumber');
       debugPrint('📱 [PANEL LOGIN] Formatted: $formattedPhoneNumber');
@@ -297,9 +288,8 @@ class _LoginPageState extends State<LoginPage> {
             context,
             MaterialPageRoute(
               builder: (context) => OtpPage(
-                phoneNumber: CountryCodeDetector.formatPhoneNumber(
+                phoneNumber: CountryCodeDetector.normalizeSaudiPhone(
                   _phoneController.text.trim(),
-                  countryCode: "SA",
                 ),
                 verificationId: state.verificationId,
                 resendToken: state.resendToken,
@@ -633,7 +623,10 @@ class _LoginPageState extends State<LoginPage> {
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  PhoneNumberInputFormatter(),
+                  LengthLimitingTextInputFormatter(15),
+                ],
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   isDense: true,

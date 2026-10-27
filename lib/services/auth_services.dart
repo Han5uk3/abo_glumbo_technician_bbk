@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:aboglumbo_bbk_panel/helpers/country_code_detector.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
@@ -14,28 +15,6 @@ class AuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static String? phoneNumber;
 
-  String _sanitizePhoneNumber(String input) {
-    if (input.startsWith("+966")) {
-      String countryCode = "+966";
-      String numberPart = input.substring(4);
-      String sanitizedNumberPart = _sanitizeNumberPart(numberPart);
-      String result = countryCode + sanitizedNumberPart;
-      return result;
-    }
-    String sanitizedNumberPart = _sanitizeNumberPart(input);
-    return sanitizedNumberPart;
-  }
-
-  String _sanitizeNumberPart(String input) {
-    String result = input.replaceAll(RegExp(r'\s'), '');
-    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
-    const asciiDigits = '0123456789';
-    for (int i = 0; i < arabicDigits.length; i++) {
-      result = result.replaceAll(arabicDigits[i], asciiDigits[i]);
-    }
-    return result;
-  }
-
   String _sanitizeOTP(String input) {
     // Remove spaces and convert Arabic digits to ASCII for OTP
     String result = input.replaceAll(RegExp(r'\s'), '');
@@ -45,18 +24,6 @@ class AuthServices {
       result = result.replaceAll(arabicDigits[i], asciiDigits[i]);
     }
     return result;
-  }
-
-  String _formatToE164(String phoneNumber) {
-    String sanitized = phoneNumber;
-    if (sanitized.startsWith('+966')) {
-      return sanitized;
-    }
-    while (sanitized.startsWith('0')) {
-      sanitized = sanitized.substring(1);
-    }
-    String e164Number = '+966$sanitized';
-    return e164Number;
   }
 
   String? _verificationId;
@@ -72,8 +39,8 @@ class AuthServices {
     debugPrint('🟢 [AUTH SERVICE] sendOTP method called');
     debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
 
-    String sanitizedPhoneNumber = _formatToE164(
-      _sanitizePhoneNumber(phoneNumber),
+    String sanitizedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
+      phoneNumber,
     );
     debugPrint('🔢 [AUTH SERVICE] Sanitized number: $sanitizedPhoneNumber');
     debugPrint(
@@ -158,8 +125,8 @@ class AuthServices {
     debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
     debugPrint('🔑 [AUTH SERVICE] Resend token: $resendToken');
 
-    String sanitizedPhoneNumber = _formatToE164(
-      _sanitizePhoneNumber(phoneNumber),
+    String sanitizedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
+      phoneNumber,
     );
     debugPrint(
       '🔢 [AUTH SERVICE] Sanitized phone number: $sanitizedPhoneNumber',

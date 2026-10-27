@@ -1,3 +1,4 @@
+import 'package:aboglumbo_bbk_panel/helpers/country_code_detector.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminModel {
@@ -54,7 +55,7 @@ class AdminModel {
       'uid': uid,
       'name': name,
       'email': email,
-      'phoneNumber': phoneNumber,
+      'phoneNumber': CountryCodeDetector.normalizeSaudiPhone(phoneNumber),
       'accessLevel': accessLevel,
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
       'isCoreAdmin': isCoreAdmin,

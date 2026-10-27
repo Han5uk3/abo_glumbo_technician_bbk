@@ -31,10 +31,7 @@ target 'Runner' do
   use_frameworks!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  
-  # Add RecaptchaEnterprise for Firebase Phone Authentication
-  pod 'RecaptchaEnterprise'
-  
+
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -43,13 +40,9 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-    # Ensure FirebaseAuth is properly linked with reCAPTCHA support
     if target.name == 'FirebaseAuth'
       target.build_configurations.each do |config|
-              config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= '$(inherited)'
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << ' FIREBASE_AUTH_ENABLE_RECAPTCHA=1'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       end
     end
   end

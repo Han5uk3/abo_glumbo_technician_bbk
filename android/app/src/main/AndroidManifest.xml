@@ -81,11 +81,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${GOOGLE_MAPS_API_KEY}"/>
 
-        <!-- Add reCAPTCHA verification site key for Firebase Auth -->
-        <meta-data
-            android:name="com.google.android.gms.safetynet.API_KEY"
-            android:value="AIzaSyBk_ntYzCiL1uhCfuNBS9jqdK_Pmmzm0V8" />
-
 
 
             <activity

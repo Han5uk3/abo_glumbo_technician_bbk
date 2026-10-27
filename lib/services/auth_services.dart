@@ -138,20 +138,13 @@ class AuthServices {
         phoneNumber: sanitizedPhoneNumber,
         forceResendingToken: resendToken,
         timeout: const Duration(seconds: 120),
-        verificationCompleted: (PhoneAuthCredential credential) async {
+        verificationCompleted: (PhoneAuthCredential credential) {
+          // Ignored, as after the first send: the OTP page verifies the code
+          // the user types or shares. A silent sign-in here would use the
+          // code up, and the user's own attempt would then fail as expired.
           debugPrint(
-            '✅ [AUTH SERVICE] verificationCompleted callback triggered',
+            '✅ [AUTH SERVICE] verificationCompleted on resend (OTP page verifies the code)',
           );
-          debugPrint('🔐 [AUTH SERVICE] Auto-signing in with credential...');
-          try {
-            debugPrint("Auto-verification completed during resend OTP");
-            await _auth.signInWithCredential(credential);
-            debugPrint('✅ [AUTH SERVICE] Auto sign-in successful');
-          } catch (e) {
-            debugPrint(
-              "❌ [AUTH SERVICE] Auto verification failed during resend: $e",
-            );
-          }
         },
         verificationFailed: (FirebaseAuthException e) {
           debugPrint('❌ [AUTH SERVICE] verificationFailed callback triggered');

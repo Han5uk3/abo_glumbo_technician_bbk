@@ -35,11 +35,6 @@ PODS:
     - Flutter
   - printing (1.0.0):
     - Flutter
-  - RecaptchaEnterprise (18.8.2):
-    - RecaptchaEnterpriseSDK (= 18.8.2)
-    - RecaptchaInterop (~> 101.0.0)
-  - RecaptchaEnterpriseSDK (18.8.2)
-  - RecaptchaInterop (101.0.0)
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -54,7 +49,6 @@ DEPENDENCIES:
   - open_filex (from `.symlinks/plugins/open_filex/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
-  - RecaptchaEnterprise
 
 SPEC REPOS:
   trunk:
@@ -62,9 +56,6 @@ SPEC REPOS:
     - GoogleMaps
     - libwebp
     - Mantle
-    - RecaptchaEnterprise
-    - RecaptchaEnterpriseSDK
-    - RecaptchaInterop
     - SDWebImage
     - SDWebImageWebPCoder
 
@@ -93,12 +84,9 @@ SPEC CHECKSUMS:
   open_filex: 432f3cd11432da3e39f47fcc0df2b1603854eff1
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
-  RecaptchaEnterprise: 2d06f415c94253c3e92214a4d1472b5875442cdc
-  RecaptchaEnterpriseSDK: 2fd06a12a27f943c24f643f8814404a27cc74288
-  RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
 
-PODFILE CHECKSUM: 34943a1a5b8cb79ce7b5f5cb4ccb3921a792ad4e
+PODFILE CHECKSUM: adf1bcdd66d096f194d5964a51915d34846d8b74
 
 COCOAPODS: 1.16.2

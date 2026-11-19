@@ -5422,4 +5422,16 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get bonusCalculationNote =>
       'آپ کا بونس مہینے میں ایک بار، ہر مہینے کی پہلی تاریخ کو ادا کیا جاتا ہے، صرف پچھلے مہینے کے دوران طے شدہ انسپیکشن فیس کی بنیاد پر۔ اسپیئر پارٹس، میٹیریلز اور دیگر چارجز بونس کے حساب میں شامل نہیں ہیں۔';
+
+  @override
+  String get signInAgainToChangePhone =>
+      'اپنا فون نمبر تبدیل کرنے کے لیے براہ کرم دوبارہ سائن ان کریں۔';
+
+  @override
+  String get phoneChangeUnavailable =>
+      'فون نمبر کی تبدیلی عارضی طور پر دستیاب نہیں ہے۔ براہ کرم بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get phoneNumberChangedSuccessfully =>
+      'فون نمبر کامیابی سے اپ ڈیٹ ہو گیا';
 }

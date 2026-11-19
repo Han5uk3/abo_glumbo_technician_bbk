@@ -1,0 +1,11 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "challenges", "fieldPath": "expireAt", "ttl": true, "indexes": [] },
+    { "collectionGroup": "phones", "fieldPath": "expireAt", "ttl": true, "indexes": [] },
+    { "collectionGroup": "ips", "fieldPath": "expireAt", "ttl": true, "indexes": [] },
+    { "collectionGroup": "uids", "fieldPath": "expireAt", "ttl": true, "indexes": [] },
+    { "collectionGroup": "counters", "fieldPath": "expireAt", "ttl": true, "indexes": [] },
+    { "collectionGroup": "phoneChanges", "fieldPath": "expireAt", "ttl": true, "indexes": [] }
+  ]
+}

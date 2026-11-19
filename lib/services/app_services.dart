@@ -185,12 +185,10 @@ class AppServices {
       String userId = user.uid ?? '';
 
       if (userId.isNotEmpty) {
-        // Only include fields that are being updated
+        // Only include fields that are being updated. The phone number is left
+        // out on purpose: it only changes through OTP verification on the backend.
         Map<String, dynamic> userData = {
           'name': user.name,
-          'phone': user.phone == null
-              ? null
-              : CountryCodeDetector.normalizeSaudiPhone(user.phone!),
           'districtName': user.districtName,
           'jobRoles': user.jobRoles,
           'updatedAt': Timestamp.now(),

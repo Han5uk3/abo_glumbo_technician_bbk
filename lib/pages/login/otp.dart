@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
-import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
-import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
-import 'package:aboglumbo_bbk_panel/pages/login/login.dart';
 import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
+import 'package:aboglumbo_bbk_panel/services/otp_api.dart';
 import 'package:aboglumbo_bbk_panel/services/sms_autofill_service.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
@@ -19,12 +16,16 @@ class OtpPage extends StatefulWidget {
   final String? verificationId;
   final int? resendToken;
   final bool? isFromProfile;
+
+  /// The account whose number is being changed, when [isFromProfile] is true.
+  final String? expectedUid;
   const OtpPage({
     super.key,
     this.phoneNumber,
     this.verificationId,
     this.resendToken,
     this.isFromProfile,
+    this.expectedUid,
   });
 
   @override
@@ -34,7 +35,6 @@ class OtpPage extends StatefulWidget {
 class _OtpPageState extends State<OtpPage> {
   bool isLoading = false;
   bool isResendingOtp = false;
-  bool _isMigratingCustomerData = false;
   bool _isSmsAutofillListening = false;
   int resendSeconds = 60;
   Timer? _timer;
@@ -45,7 +45,6 @@ class _OtpPageState extends State<OtpPage> {
 
   String? _verificationId;
   int? _resendToken;
-  bool _isDialogShowing = false;
   final SmsAutofillService _smsAutofillService = SmsAutofillService();
 
   @override
@@ -107,6 +106,12 @@ class _OtpPageState extends State<OtpPage> {
       await AuthServices().resendOTP(
         phoneNumber: widget.phoneNumber ?? '',
         resendToken: _resendToken,
+        currentVerificationId: _verificationId,
+        purpose: widget.isFromProfile == true
+            ? OtpPurpose.changePhone
+            : OtpPurpose.login,
+        locale: Localizations.localeOf(context).languageCode,
+        expectedUid: widget.expectedUid,
         onCodeSent: (verificationId, {int? resendToken}) {
           debugPrint('✅ [RESEND OTP] onCodeSent callback triggered!');
           debugPrint('🆔 [RESEND OTP] New verification ID: $verificationId');
@@ -259,105 +264,8 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-  Future<void> migrateUserData(
-    String oldUid,
-    String newUid,
-    String newPhone,
-  ) async {
-    try {
-      if (mounted) {
-        setState(() => _isMigratingCustomerData = true);
-        _showMigrationDialog();
-      }
-
-      // Migrate from users collection
-      final oldUserDoc = await AppFirestore.usersCollectionRef
-          .doc(oldUid)
-          .get();
-      if (oldUserDoc.exists) {
-        final oldData = oldUserDoc.data() as Map<String, dynamic>;
-        final newData = <String, dynamic>{
-          ...oldData,
-          'uid': newUid,
-          'phone': newPhone,
-          'updatedAt': FieldValue.serverTimestamp(),
-        };
-        await AppFirestore.usersCollectionRef.doc(newUid).set(newData);
-        await AppFirestore.usersCollectionRef.doc(oldUid).delete();
-      }
-
-      // Migrate from admins collection
-      final oldAdminDoc = await AppFirestore.adminsCollectionRef
-          .doc(oldUid)
-          .get();
-      if (oldAdminDoc.exists) {
-        final oldData = oldAdminDoc.data() as Map<String, dynamic>;
-        final newData = <String, dynamic>{
-          ...oldData,
-          'uid': newUid,
-          'phone': newPhone,
-          'updatedAt': FieldValue.serverTimestamp(),
-        };
-        await AppFirestore.adminsCollectionRef.doc(newUid).set(newData);
-        await AppFirestore.adminsCollectionRef.doc(oldUid).delete();
-      }
-
-      // Update bookings where this user is the agent
-      final bookingsQuery = await AppFirestore.bookingsCollectionRef
-          .where('agent.uid', isEqualTo: oldUid)
-          .get();
-      if (bookingsQuery.docs.isNotEmpty) {
-        for (final bookingDoc in bookingsQuery.docs) {
-          final Map<String, dynamic> updatedAgent = Map<String, dynamic>.from(
-            bookingDoc['agent'] ?? {},
-          );
-          updatedAgent['uid'] = newUid;
-          updatedAgent['phone'] = newPhone;
-          updatedAgent['updatedAt'] = FieldValue.serverTimestamp();
-
-          await AppFirestore.bookingsCollectionRef.doc(bookingDoc.id).update({
-            'agent': updatedAgent,
-          });
-        }
-      }
-
-      final notificationQuery = await AppFirestore.notificationsCollectionRef
-          .where('userId', isEqualTo: oldUid)
-          .get();
-      if (notificationQuery.docs.isNotEmpty) {
-        for (final notificationDoc in notificationQuery.docs) {
-          await AppFirestore.notificationsCollectionRef
-              .doc(notificationDoc.id)
-              .update({'userId': newUid});
-        }
-      }
-
-      if (mounted) {
-        setState(() => _isMigratingCustomerData = false);
-        _closeMigrationDialog();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isMigratingCustomerData = false);
-        _closeMigrationDialog();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)?.unexpectedErrorOccurred}: $e',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
   void verifyOtp() async {
     if (isLoading) return;
-
-    setState(() {
-      isLoading = true;
-    });
 
     final otp = _fullOtp;
 
@@ -380,9 +288,6 @@ class _OtpPageState extends State<OtpPage> {
     final verificationId = _verificationId ?? widget.verificationId;
 
     if (verificationId == null) {
-      setState(() {
-        isLoading = false;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -395,7 +300,25 @@ class _OtpPageState extends State<OtpPage> {
       return;
     }
 
+    setState(() {
+      isLoading = true;
+    });
+
     try {
+      if (widget.isFromProfile == true) {
+        // The account moves to the verified number on the same UID, and the
+        // user stays signed in.
+        final newPhone = await AuthServices().confirmPhoneChange(
+          verificationId: verificationId,
+          otp: otp,
+          expectedUid: widget.expectedUid ?? '',
+        );
+        if (!mounted) return;
+        setState(() => isLoading = false);
+        Navigator.pop(context, newPhone);
+        return;
+      }
+
       final UserCredential? userCredential = await AuthServices().verifyOTP(
         context,
         otp,
@@ -403,35 +326,11 @@ class _OtpPageState extends State<OtpPage> {
         smsCode: otp,
         phoneNumber: widget.phoneNumber ?? '',
       );
-      if (userCredential == null) return;
-      if (widget.isFromProfile == true) {
-        final String oldUid = LocalStore.getUID() ?? '';
-        final String newUid = userCredential.user?.uid ?? '';
-        if (oldUid.isNotEmpty && newUid.isNotEmpty && oldUid != newUid) {
-          await migrateUserData(
-            oldUid,
-            newUid,
-            userCredential.user?.phoneNumber ?? '',
-          );
-        }
-        LocalStore.clearUID();
-        LocalStore.putlogoutStatus(true);
-        await FirebaseAuth.instance.signOut();
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) {
-          setState(() => isLoading = false);
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
-        }
-      } else {
-        await AuthServices().checkUser(
-          userCredential: userCredential,
-          context: context,
-        );
-      }
+      if (userCredential == null || !mounted) return;
+      await AuthServices().checkUser(
+        userCredential: userCredential,
+        context: context,
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -472,6 +371,16 @@ class _OtpPageState extends State<OtpPage> {
               errorMessage =
                   AppLocalizations.of(context)?.internalError ??
                   'An internal error occurred. Please try again later.';
+              break;
+            case 'phone-already-in-use':
+              errorMessage =
+                  AppLocalizations.of(context)?.phoneNumberAlreadyExists ??
+                  'Phone number already exists';
+              break;
+            case 'requires-recent-login':
+              errorMessage =
+                  AppLocalizations.of(context)?.signInAgainToChangePhone ??
+                  'Please sign in again to change your phone number.';
               break;
             default:
               errorMessage =
@@ -590,7 +499,7 @@ class _OtpPageState extends State<OtpPage> {
         ),
       ),
       body: AbsorbPointer(
-        absorbing: _isMigratingCustomerData,
+        absorbing: isLoading,
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
@@ -789,137 +698,6 @@ class _OtpPageState extends State<OtpPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _closeMigrationDialog() {
-    if (_isDialogShowing && mounted) {
-      _isDialogShowing = false;
-      Navigator.of(context).pop();
-    }
-  }
-
-  void _showMigrationDialog() {
-    if (!_isDialogShowing && mounted) {
-      _isDialogShowing = true;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        barrierColor: Colors.black.withOpacity(0.85),
-        builder: (context) => _migratingDataDialog(),
-      );
-    }
-  }
-
-  Widget _migratingDataDialog() {
-    return AlertDialog(
-      backgroundColor: AppColors.bgWhite,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      contentPadding: const EdgeInsets.all(32),
-      content: WillPopScope(
-        onWillPop: () async => false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.sync_alt_rounded,
-                  size: 40,
-                  color: AppColors.secondary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Loader(),
-            const SizedBox(height: 28),
-            Text(
-              AppLocalizations.of(context)!.migratingData,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.weAreMigratingYourData,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-                color: Colors.black54,
-                height: 1.5,
-                letterSpacing: 0.1,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              width: double.infinity,
-              height: 6,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.secondary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.shade200, width: 1),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.orange.shade600,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)!.pleaseDontCloseTheApp,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.orange.shade700,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              AppLocalizations.of(context)!.transferringData,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
         ),
       ),
     );

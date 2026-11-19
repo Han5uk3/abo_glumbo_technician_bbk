@@ -10030,6 +10030,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your bonus is paid once a month, on the 1st, based only on the Inspection Fees you settled during the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.'**
   String get bonusCalculationNote;
+
+  /// No description provided for @signInAgainToChangePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again to change your phone number.'**
+  String get signInAgainToChangePhone;
+
+  /// No description provided for @phoneChangeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing your phone number is temporarily unavailable. Please try again later.'**
+  String get phoneChangeUnavailable;
+
+  /// No description provided for @phoneNumberChangedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number updated successfully'**
+  String get phoneNumberChangedSuccessfully;
 }
 
 class _AppLocalizationsDelegate

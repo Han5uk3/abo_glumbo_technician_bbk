@@ -7,6 +7,8 @@ import 'package:aboglumbo_bbk_panel/pages/home/home.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/signup.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
+import 'package:aboglumbo_bbk_panel/services/app_settings_service.dart';
+import 'package:aboglumbo_bbk_panel/services/otp_api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +37,8 @@ class AuthServices {
     required Function(FirebaseAuthException e) onError,
     Function(PhoneAuthCredential credential)? onVerificationCompleted,
     int? forceResendingToken,
+    OtpPurpose purpose = OtpPurpose.login,
+    String? expectedUid,
   }) async {
     debugPrint('🟢 [AUTH SERVICE] sendOTP method called');
     debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
@@ -49,6 +53,21 @@ class AuthServices {
 
     AuthServices.phoneNumber = sanitizedPhoneNumber;
     _verificationId = null;
+
+    // Read before the first await, while the context is certainly valid.
+    final locale = Localizations.localeOf(context).languageCode;
+    final provider = await AppSettingsService.resolveOtpProvider();
+    if (provider == OtpProvider.taqnyat) {
+      await _sendTaqnyatOtp(
+        phoneNumber: sanitizedPhoneNumber,
+        purpose: purpose,
+        locale: locale,
+        expectedUid: expectedUid,
+        onCodeSent: onCodeSent,
+        onError: onError,
+      );
+      return;
+    }
 
     try {
       if (Platform.isIOS) {
@@ -114,12 +133,59 @@ class AuthServices {
     debugPrint('🏁 [AUTH SERVICE] sendOTP method complete');
   }
 
+  Future<void> _sendTaqnyatOtp({
+    required String phoneNumber,
+    required OtpPurpose purpose,
+    required String locale,
+    required String? expectedUid,
+    required Function(String verificationId, {int? resendToken}) onCodeSent,
+    required Function(FirebaseAuthException e) onError,
+  }) async {
+    try {
+      final verificationId = await OtpApi.requestOtp(
+        phone: phoneNumber,
+        purpose: purpose,
+        locale: locale,
+        expectedUid: expectedUid,
+      );
+      onCodeSent(verificationId);
+    } on FirebaseAuthException catch (e) {
+      onError(e);
+    }
+  }
+
+  /// Moves the signed-in account to the number the code was sent to, keeping
+  /// its UID, and returns the new number.
+  Future<String> confirmPhoneChange({
+    required String verificationId,
+    required String otp,
+    required String expectedUid,
+  }) async {
+    final newPhone = await OtpApi.verifyPhoneChange(
+      verificationId: verificationId,
+      code: _sanitizeOTP(otp),
+      expectedUid: expectedUid,
+    );
+    AuthServices.phoneNumber = newPhone;
+    try {
+      await _auth.currentUser?.reload();
+    } catch (e) {
+      // The change is already saved; the session refreshes on its own later.
+      debugPrint('⚠️ [AUTH SERVICE] Could not reload user: $e');
+    }
+    return newPhone;
+  }
+
   Future<void> resendOTP({
     required String phoneNumber,
     required int? resendToken,
     required Function(String verificationId, {int? resendToken}) onCodeSent,
     required Function(FirebaseAuthException e) onError,
     Function(String verificationId)? onAutoRetrievalTimeout,
+    String? currentVerificationId,
+    OtpPurpose purpose = OtpPurpose.login,
+    String locale = 'ar',
+    String? expectedUid,
   }) async {
     debugPrint('🔵 [AUTH SERVICE] resendOTP method called');
     debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
@@ -131,6 +197,18 @@ class AuthServices {
     debugPrint(
       '🔢 [AUTH SERVICE] Sanitized phone number: $sanitizedPhoneNumber',
     );
+
+    if (OtpApi.isTaqnyatVerification(currentVerificationId)) {
+      await _sendTaqnyatOtp(
+        phoneNumber: sanitizedPhoneNumber,
+        purpose: purpose,
+        locale: locale,
+        expectedUid: expectedUid,
+        onCodeSent: onCodeSent,
+        onError: onError,
+      );
+      return;
+    }
 
     try {
       debugPrint('📞 [AUTH SERVICE] Calling Firebase verifyPhoneNumber...');
@@ -218,6 +296,16 @@ class AuthServices {
           code: 'invalid-verification-code',
           message: 'Invalid OTP format. Please enter a 6-digit code.',
         );
+      }
+
+      if (OtpApi.isTaqnyatVerification(verificationId)) {
+        final token = await OtpApi.verifyLogin(
+          verificationId: verificationId,
+          code: sanitizedOTP,
+        );
+        final userCredential = await _auth.signInWithCustomToken(token);
+        AuthServices.phoneNumber = userCredential.user?.phoneNumber ?? '';
+        return userCredential;
       }
 
       final credential = PhoneAuthProvider.credential(
@@ -446,37 +534,10 @@ class AuthServices {
         }
       }
 
-      // 5. Core admin bootstrap (hardcoded phone for initial setup)
-      if (phone == '+966501234567') {
-        debugPrint(
-          "✅ [TECH AUTH] Core admin phone detected, creating core admin",
-        );
-        final coreAdmin = AdminModel(
-          uid: uid,
-          name: 'Core Admin',
-          email: 'core@admin.com',
-          phoneNumber: '+966501234567',
-          accessLevel: 2, // Full Admin
-          isCoreAdmin: true,
-        );
-        await AppFirestore.adminsCollectionRef.doc(uid).set(coreAdmin.toJson());
-
-        await LocalStore.putUID(uid);
-        await LocalStore.putlogoutStatus(false);
-        await LocalStore.storeAdminData(coreAdmin);
-        if (!context.mounted) return;
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-          (route) => false,
-        );
-        return;
-      }
-
-      // 6. Check if phone exists in users collection as technician (prevents duplicate accounts)
+      // 5. Check if phone exists in users collection as technician (prevents duplicate accounts)
       if (phone != null) {
         debugPrint(
-          "🔍 [TECH AUTH] Step 6: Checking users collection by phone: $phone",
+          "🔍 [TECH AUTH] Step 5: Checking users collection by phone: $phone",
         );
         final techByPhoneQuery = await AppFirestore.usersCollectionRef
             .where('phone', isEqualTo: phone)
@@ -526,7 +587,7 @@ class AuthServices {
         }
       }
 
-      // 7. User not found in any collection — redirect to signup
+      // 6. User not found in any collection — redirect to signup
       debugPrint(
         "📝 [TECH AUTH] Redirecting to Signup (User not found or invalid role): $uid",
       );

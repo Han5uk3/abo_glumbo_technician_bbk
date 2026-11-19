@@ -5736,3 +5736,9 @@ exports.onBookingWarrantyUpdated = bookingTriggers.onBookingWarrantyUpdated;
 exports.cleanupStaleBookingRequests = bookingTriggers.cleanupStaleBookingRequests;
 exports.cleanupStaleJobRequests = bookingTriggers.cleanupStaleJobRequests;
 
+// Taqnyat OTP login
+const otpAuth = require("./src/auth/otp");
+exports.requestOtp = otpAuth.requestOtp;
+exports.verifyOtp = otpAuth.verifyOtp;
+exports.sweepPhoneChanges = otpAuth.sweepPhoneChanges;
+

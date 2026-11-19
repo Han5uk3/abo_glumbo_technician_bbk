@@ -5401,4 +5401,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get bonusCalculationNote =>
       'Your bonus is paid once a month, on the 1st, based only on the Inspection Fees you settled during the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.';
+
+  @override
+  String get signInAgainToChangePhone =>
+      'Please sign in again to change your phone number.';
+
+  @override
+  String get phoneChangeUnavailable =>
+      'Changing your phone number is temporarily unavailable. Please try again later.';
+
+  @override
+  String get phoneNumberChangedSuccessfully =>
+      'Phone number updated successfully';
 }

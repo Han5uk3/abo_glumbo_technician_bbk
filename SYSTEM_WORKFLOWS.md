@@ -1309,3 +1309,82 @@ firebase deploy --only functions
 
 No function has to be recreated and no Cloud Scheduler job rebuilt. The composite index in §18.8 is
 only needed by the daily run's fallback path and is unaffected.
+
+---
+
+## 20. Authentication — Taqnyat OTP (2026-11-18)
+
+Both apps log in with an OTP sent through Taqnyat. The backend verifies the code and returns a Firebase
+custom token, so everything after sign-in (`checkUser`, profiles, UIDs) works as it did with Firebase Phone Auth.
+
+```
+App -> requestOtp(phone, purpose, locale) -> limits -> store HMAC of code -> Taqnyat SMS
+App <- verificationId "otp1:<challengeId>"
+App -> verifyOtp(verificationId, code, requestId) -> find or create Auth user by phone -> custom token
+App -> signInWithCustomToken(token) -> checkUser()
+```
+
+### Where the code lives
+
+| Piece | Location |
+|---|---|
+| Callables and scheduled sweeper | `functions/src/auth/otp.js` |
+| Request and verify flow | `functions/src/auth/otpService.js` |
+| Pure rules: limits, hashing, attempt decisions, SMS text | `functions/src/auth/otpCore.js` |
+| Taqnyat client | `functions/src/auth/taqnyat.js` |
+| Phone change on the same UID | `functions/src/auth/phoneChange.js` |
+| Tests (`npm test` in `functions/`) | `functions/test/` |
+| App client, in both apps | `lib/services/otp_api.dart` |
+| Provider switch, in both apps | `lib/services/app_settings_service.dart` |
+
+### Rules that must stay true
+
+- **OTP state lives in the separate `auth-otp` Firestore database**, with deny-all rules. A permissive rule in the default database could not be overridden by a narrower deny.
+- **A wrong code must be recorded, not thrown, inside the verify transaction.** Throwing rolls back the attempt counter and allows unlimited guesses.
+- **On a phone change, Firestore moves before Auth.** `checkUser` gives a profile to whoever signs in with a number still stored on it.
+- **`+966501234567` never receives an SMS.** It is hardcoded in `NEVER_SMS_NUMBERS`, and logs in with a private code held as a hash in `OTP_RESERVED_ACCOUNTS`. App Store and Play reviewer numbers use the same mechanism and must never be admins.
+- **Nothing except the backend writes a phone number** to a profile after signup.
+
+### Limits
+
+| Scope | Default |
+|---|---|
+| Code lifetime and attempts | 5 minutes, 5 attempts |
+| Per number | 60s cooldown, 5 per hour, 10 per day |
+| Per IP | 30 per hour (`OTP_IP_HOURLY_LIMIT`) |
+| Phone changes per account | 5 per day |
+| All numbers, with valid App Check | 600 per hour (`OTP_GLOBAL_HOURLY_LIMIT`) |
+| All numbers, without App Check | 120 per hour (`OTP_UNATTESTED_HOURLY_LIMIT`) |
+| Reserved number lock | 1 hour after 5 consecutive failures |
+
+### Falling back to Firebase SMS
+
+Set `otpProvider` to `firebase` in `app_settings/customer_app_v1` or `app_settings/technician_app_v1`. Any other value, or none, uses Taqnyat. Phone changes are unavailable during fallback, because they only run on the Taqnyat flow. The Firebase Phone provider must stay enabled while this fallback exists.
+
+### First-time setup
+
+Run from the repo root unless noted. `PROJECT` is `worker-app-tnext`.
+
+1. Run `functions/scripts/setupOtpInfra.sh` in Google Cloud Shell. It creates the `auth-otp` database, the `otp-auth` service account and the static outbound IP.
+2. Have the client add the IP the script prints to Taqnyat's API allowlist.
+3. Generate a long random `OTP_PEPPER` and store it: `firebase functions:secrets:set OTP_PEPPER`
+4. In `functions/`, preview and then apply the core admin setup: `OTP_PEPPER=<pepper> node scripts/setupCoreAdmins.js --real <real number>`, then again with `--apply`. Keep the printed login code private.
+5. Store the printed JSON: `firebase functions:secrets:set OTP_RESERVED_ACCOUNTS`
+6. Store the Taqnyat token: `firebase functions:secrets:set TAQ_API`
+7. Confirm the sender in `functions/.env.worker-app-tnext` (`TAQ_SENDNAME=Aboglumbo`, case sensitive).
+8. Deploy the rules and TTL policies: `firebase deploy --only firestore:auth-otp`
+9. Deploy the functions by name: `firebase deploy --only functions:requestOtp,functions:verifyOtp,functions:sweepPhoneChanges`
+
+Do not run a plain `firebase deploy`: `firebase.json` references a `database.rules.json` that is not in the repo.
+
+While `TAQ_API` or `TAQ_SENDNAME` still hold their placeholder names, ordinary numbers get an error and no SMS is attempted.
+
+The Taqnyat account only accepts API calls from approved IP addresses (error 102). `requestOtp` therefore sends all outbound traffic through the `otp-egress` VPC connector and a Cloud NAT that owns the static IP `otp-egress-ip` (`34.156.231.87`). If that IP ever changes, Taqnyat's allowlist must change with it, or SMS sending stops.
+
+### Turning on App Check enforcement
+
+Register both apps in Firebase App Check (Play Integrity and App Attest), and enable App Attest on both App IDs in the Apple Developer portal. Logs show `otp_app_check` with `attested: true` or `false` on every call. Once release builds on both platforms show `true`, set `enforceAppCheck: true` in `functions/src/auth/otp.js` and redeploy the two callables. Do not enforce App Check on Firestore, RTDB or Storage.
+
+### Alerts to wire up
+
+Create log-based alerts on the `alert` field of these entries: `otp_sms_failed`, `otp_sms_not_configured`, `otp_config_invalid`, `otp_reserved_failure`, `otp_reserved_login`, `otp_reserved_login_blocked`, `phone_change_failed`.

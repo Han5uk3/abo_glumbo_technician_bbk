@@ -1941,5 +1941,8 @@
   "revenueFilterCustomRange": "Custom Range...",
   "nearby20km": "Nearby (20km)",
   "totalRevenue": "Total Transaction Value",
-  "bonusCalculationNote": "Your bonus is paid once a month, on the 1st, based only on the Inspection Fees you settled during the previous month. Spare parts, materials, and other charges are not included in the bonus calculation."
+  "bonusCalculationNote": "Your bonus is paid once a month, on the 1st, based only on the Inspection Fees you settled during the previous month. Spare parts, materials, and other charges are not included in the bonus calculation.",
+  "signInAgainToChangePhone": "Please sign in again to change your phone number.",
+  "phoneChangeUnavailable": "Changing your phone number is temporarily unavailable. Please try again later.",
+  "phoneNumberChangedSuccessfully": "Phone number updated successfully"
 }

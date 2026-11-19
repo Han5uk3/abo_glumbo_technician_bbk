@@ -14,7 +14,9 @@ import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/bloc/login_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/login/otp.dart';
+import 'package:aboglumbo_bbk_panel/services/app_settings_service.dart';
 import 'package:aboglumbo_bbk_panel/services/auth_services.dart';
+import 'package:aboglumbo_bbk_panel/services/otp_api.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -47,6 +49,7 @@ class _EditProfileState extends State<EditProfile> {
   bool isLoading = false;
   bool _isUpdatingPhone = false;
   int? _resendToken;
+  String? _verifiedPhone;
 
   final emailRegex = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -1187,6 +1190,18 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+  /// The verified number: the one just changed to, else the one on the profile.
+  String? get _currentPhone => _verifiedPhone ?? widget.workerData?.phone;
+
+  void _stopPhoneUpdate() {
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+        _isUpdatingPhone = false;
+      });
+    }
+  }
+
   void _updatePhoneNumber() async {
     // Prevent multiple clicks
     if (_isUpdatingPhone) return;
@@ -1206,14 +1221,38 @@ class _EditProfileState extends State<EditProfile> {
     );
 
     if (newPhone !=
-        CountryCodeDetector.normalizeSaudiPhone(
-          widget.workerData?.phone ?? '',
-        )) {
+        CountryCodeDetector.normalizeSaudiPhone(_currentPhone ?? '')) {
       if (mounted) {
         setState(() {
           isLoading = true;
           _isUpdatingPhone = true;
         });
+      }
+
+      // The backend changes the number on this signed-in account, so it needs
+      // a real session for the profile being edited.
+      final uid = widget.workerData?.uid ?? '';
+      final sessionUser = FirebaseAuth.instance.currentUser;
+      if (sessionUser == null ||
+          sessionUser.isAnonymous ||
+          sessionUser.uid != uid) {
+        _stopPhoneUpdate();
+        _showSnackBar(
+          AppLocalizations.of(context)?.signInAgainToChangePhone ?? '',
+          backgroundColor: AppColors.red,
+        );
+        return;
+      }
+
+      final otpProvider = await AppSettingsService.resolveOtpProvider();
+      if (!mounted) return;
+      if (otpProvider != OtpProvider.taqnyat) {
+        _stopPhoneUpdate();
+        _showSnackBar(
+          AppLocalizations.of(context)?.phoneChangeUnavailable ?? '',
+          backgroundColor: AppColors.red,
+        );
+        return;
       }
 
       bool isNumberAlreadyExists =
@@ -1240,28 +1279,37 @@ class _EditProfileState extends State<EditProfile> {
         context,
         phoneNumber: newPhone,
         forceResendingToken: _resendToken,
-        onCodeSent: (String verificationId, {int? resendToken}) {
-          if (mounted) {
-            setState(() {
-              _resendToken = resendToken;
-              isLoading = false;
-              _isUpdatingPhone = false;
-            });
-          }
+        purpose: OtpPurpose.changePhone,
+        expectedUid: uid,
+        onCodeSent: (String verificationId, {int? resendToken}) async {
+          if (!mounted) return;
+          setState(() {
+            _resendToken = resendToken;
+            isLoading = false;
+            _isUpdatingPhone = false;
+          });
           showSnackBar(
             AppLocalizations.of(context)?.sendingOTP ?? 'Sending OTP...',
             backgroundColor: AppColors.primary,
             context,
           );
-          Navigator.push(
+          final changedPhone = await Navigator.push<String>(
             context,
             MaterialPageRoute(
               builder: (context) => OtpPage(
                 phoneNumber: newPhone,
                 verificationId: verificationId,
                 isFromProfile: true,
+                expectedUid: uid,
               ),
             ),
+          );
+          if (changedPhone == null || !mounted) return;
+          setState(() => _verifiedPhone = changedPhone);
+          context.read<LoginBloc>().add(RefreshUserData());
+          _showSnackBar(
+            AppLocalizations.of(context)?.phoneNumberChangedSuccessfully ?? '',
+            backgroundColor: Colors.green,
           );
         },
         onError: (FirebaseAuthException e) {
@@ -1321,9 +1369,7 @@ class _EditProfileState extends State<EditProfile> {
                   role: 'technician',
                   name: nameController.text,
                   email: emailController.text,
-                  phone: CountryCodeDetector.normalizeSaudiPhone(
-                    phoneController.text,
-                  ),
+                  phone: _currentPhone,
                   location: _currentPosition != null
                       ? LocationModel.fromGPS(
                           lat: _currentPosition!.latitude,
@@ -2325,9 +2371,7 @@ class _EditProfileState extends State<EditProfile> {
                     uid: widget.workerData?.uid ?? '',
                     name: nameController.text,
                     email: emailController.text,
-                    phone: CountryCodeDetector.normalizeSaudiPhone(
-                      phoneController.text,
-                    ),
+                    phone: _currentPhone,
                     location: newLocation,
                     lastKnownLocation: _currentPosition != null
                         ? GeoPoint(

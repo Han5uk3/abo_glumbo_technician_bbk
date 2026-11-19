@@ -40,6 +40,13 @@
       ]
     }
   ],
+  "firestore": [
+    {
+      "database": "auth-otp",
+      "rules": "firestore.auth-otp.rules",
+      "indexes": "firestore.auth-otp.indexes.json"
+    }
+  ],
   "database": {
     "rules": "database.rules.json"
   }

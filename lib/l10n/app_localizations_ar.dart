@@ -5328,4 +5328,15 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get bonusCalculationNote =>
       'تُدفع مكافأتك مرة واحدة شهرياً، في اليوم الأول من الشهر، بناءً فقط على رسوم الفحص التي تمت تسويتها خلال الشهر السابق. لا يتم تضمين قطع الغيار أو المواد أو أي رسوم أخرى في احتساب المكافأة.';
+
+  @override
+  String get signInAgainToChangePhone =>
+      'يرجى تسجيل الدخول مرة أخرى لتغيير رقم هاتفك.';
+
+  @override
+  String get phoneChangeUnavailable =>
+      'تغيير رقم الهاتف غير متاح مؤقتاً. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get phoneNumberChangedSuccessfully => 'تم تحديث رقم الهاتف بنجاح';
 }

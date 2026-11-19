@@ -48,6 +48,17 @@ class LocalStore {
   }
 
   // ============================================
+  // OTP Provider (last value read from remote settings)
+  // ============================================
+  static Future<void> putOtpProvider(String provider) async {
+    await MyApp.box.put('otp_provider', provider);
+  }
+
+  static String? getOtpProvider() {
+    return MyApp.box.get('otp_provider');
+  }
+
+  // ============================================
   // Remember Me Feature
   // ============================================
   static Future<void> putRememberMe(bool rememberMe) async {

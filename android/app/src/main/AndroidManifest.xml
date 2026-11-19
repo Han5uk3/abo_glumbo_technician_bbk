@@ -36,6 +36,11 @@
 
     <!-- Optional fingerprint hardware feature -->
     <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+    <!-- The crop screen is locked to portrait, which would otherwise make Play
+         require a portrait screen and hide the app from some devices. -->
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
+    <!-- ACCESS_WIFI_STATE above would otherwise make Play require Wi-Fi hardware. -->
+    <uses-feature android:name="android.hardware.wifi" android:required="false" />
     <application
 
         android:enableOnBackInvokedCallback="true"

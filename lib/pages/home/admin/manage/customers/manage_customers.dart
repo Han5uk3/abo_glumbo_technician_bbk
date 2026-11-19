@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
@@ -153,7 +152,6 @@ class _ManageCustomersPageState extends State<ManageCustomersPage>
     return BlocListener<ManageAppBloc, ManageAppState>(
       listener: (context, state) {
         if (state is BlockUnblockCustomer) {
-          log('state.isBlocked=${state.isBlocked}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(

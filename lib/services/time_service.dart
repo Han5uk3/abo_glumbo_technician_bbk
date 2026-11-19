@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:ntp/ntp.dart';
 
 class TimeService {
@@ -36,13 +35,7 @@ class TimeService {
       ).timeout(_syncTimeout);
       _offset = ntpTime.difference(myTime);
       _synced = true;
-      debugPrint(
-        'TimeService initialized. Clock skew offset: ${_offset.inMilliseconds}ms',
-      );
     } catch (e) {
-      debugPrint(
-        'TimeService failed to initialize, falling back to local clock: $e',
-      );
       _offset = Duration.zero;
       _synced = false;
     }

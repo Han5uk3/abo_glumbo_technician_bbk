@@ -1,7 +1,6 @@
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 /// Which service delivers login codes.
 enum OtpProvider { taqnyat, firebase }
@@ -47,7 +46,6 @@ class AppSettingsService {
       await LocalStore.putOtpProvider(provider.name);
       return provider;
     } catch (e) {
-      debugPrint('⚠️ Failed to read $otpProviderField flag: $e');
       return _parseOtpProvider(LocalStore.getOtpProvider());
     }
   }
@@ -69,7 +67,6 @@ class AppSettingsService {
     try {
       return _readShowDeleteAccount(await _docRef.get());
     } catch (e) {
-      debugPrint('⚠️ Failed to read $showDeleteAccountField flag: $e');
       return false;
     }
   }
@@ -80,7 +77,6 @@ class AppSettingsService {
     return _docRef.snapshots().map(_readShowDeleteAccount).handleError((
       Object e,
     ) {
-      debugPrint('⚠️ Failed to watch $showDeleteAccountField flag: $e');
     });
   }
 }

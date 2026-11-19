@@ -60,7 +60,6 @@ class _AgentInfoState extends State<AgentInfo> {
         });
       }
     } catch (e) {
-      debugPrint('Error fetching job categories: $e');
       if (mounted) {
         setState(() {
           isLoadingCategories = false;
@@ -1121,8 +1120,7 @@ class _AgentInfoState extends State<AgentInfo> {
           return;
         }
       }
-    } catch (e) {
-      debugPrint('Error peeking file content: $e');
+    } catch (_) {
     }
 
     if (!context.mounted) return;
@@ -1215,7 +1213,6 @@ class _AgentInfoState extends State<AgentInfo> {
       }
     } catch (e) {
       if (context.mounted) Navigator.of(context).pop();
-      debugPrint('Error opening document: $e');
     }
   }
 

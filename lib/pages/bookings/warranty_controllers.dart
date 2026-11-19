@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/warranty_bloc.dart';
 import 'package:aboglumbo_bbk_panel/services/location_services.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
@@ -288,7 +287,6 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
                   : null,
             ),
           );
-          log('start tracking error: ${state.error}');
         } else if (state is WarrantyStopWorkingSuccess) {
           setState(() => isCancelButtonBlocked = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -303,7 +301,6 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
-          log("stop tracking error: ${state.error}");
         } else if (state is WarrantyPauseWorkingSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -317,7 +314,6 @@ class _WarrantyControlsWidgetState extends State<WarrantyControlsWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
-          log("pause tracking error: ${state.error}");
         } else if (state is WarrantyAcceptSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

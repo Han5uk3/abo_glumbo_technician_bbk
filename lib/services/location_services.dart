@@ -6,7 +6,6 @@ import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/main.dart';
-import 'package:aboglumbo_bbk_panel/services/battery_optimization_service.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -124,11 +123,7 @@ class BookingTrackerService {
         },
       }, SetOptions(merge: true));
 
-      debugPrint(
-        'Background location updated: ${position.latitude}, ${position.longitude}',
-      );
-    } catch (e) {
-      debugPrint('Error updating background location: $e');
+    } catch (_) {
     }
   }
 
@@ -179,14 +174,12 @@ class BookingTrackerService {
 
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        debugPrint('Location services disabled, cannot restore tracking');
         return;
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        debugPrint('Location permission denied, cannot restore tracking');
         return;
       }
 
@@ -221,14 +214,6 @@ class BookingTrackerService {
               await _updateLocationToFirestore(position, uid, 'foreground');
             },
             onError: (error) {
-              debugPrint('Location stream error during restore: $error');
-
-              if (Platform.isIOS && error.toString().contains('1')) {
-                debugPrint(
-                  'iOS location permission error during restore - may need "Always" permission',
-                );
-              }
-
               Timer(const Duration(seconds: 5), () {
                 if (isTracking.value) {
                   _restoreLocationTracking();
@@ -236,14 +221,8 @@ class BookingTrackerService {
               });
             },
           );
-
-      debugPrint('Location tracking restored successfully');
     } catch (e) {
-      debugPrint('Error restoring location tracking: $e');
-
-      if (Platform.isIOS && e.toString().contains('1')) {
-        debugPrint('iOS location permission issue during restore');
-      }
+      // Tracking restarts on the next foreground or background trigger.
     }
   }
 
@@ -276,7 +255,7 @@ class BookingTrackerService {
         final localizations = AppLocalizations.of(context);
         throw Exception(
           localizations?.locationPermissionErrorIOS ??
-              'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Abo Glumbo Worker and select \'Always\' to enable background tracking.',
+              'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Aboglumbo Technician and select \'Always\' to enable background tracking.',
         );
       }
       rethrow;
@@ -398,50 +377,18 @@ class BookingTrackerService {
           final localizations = AppLocalizations.of(context);
           throw Exception(
             localizations?.backgroundLocationPermissionRequired ??
-                'Abo Glumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.',
+                'Aboglumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.',
           );
         }
       } else if (Platform.isIOS) {
         try {
           permission = await Geolocator.requestPermission();
-
-          if (permission == LocationPermission.whileInUse) {
-            debugPrint(
-              "iOS: Only 'When In Use' permission granted. Background tracking will be limited.",
-            );
-          } else if (permission == LocationPermission.always) {
-            debugPrint(
-              "iOS: 'Always' permission granted. Full background tracking available.",
-            );
-          }
         } catch (e) {
-          debugPrint("iOS: Error requesting always permission: $e");
-
-          if (permission == LocationPermission.whileInUse) {
-            debugPrint("iOS: Continuing with 'When In Use' permission only.");
-          } else {
+          if (permission != LocationPermission.whileInUse) {
             rethrow;
           }
         }
       }
-    }
-
-    if (Platform.isAndroid) {
-      await _checkBatteryOptimization();
-    }
-  }
-
-  Future<void> _checkBatteryOptimization() async {
-    try {
-      bool isOptimizationDisabled =
-          await BatteryOptimizationService.isBatteryOptimizationDisabled();
-      if (!isOptimizationDisabled) {
-        debugPrint(
-          'Battery optimization is enabled, may affect background location',
-        );
-      }
-    } catch (e) {
-      debugPrint('Error checking battery optimization: $e');
     }
   }
 
@@ -455,7 +402,7 @@ class BookingTrackerService {
           "Tracking your location for service delivery";
       final notificationTitle =
           localizations?.aboGlumboLocationTracking ??
-          "Abo Glumbo - Location Tracking";
+          "Aboglumbo Technician - Location Tracking";
 
       return AndroidSettings(
         accuracy: LocationAccuracy.high,
@@ -504,11 +451,7 @@ class BookingTrackerService {
         },
       }, SetOptions(merge: true));
 
-      debugPrint(
-        'Location updated ($source): ${position.latitude}, ${position.longitude}',
-      );
-    } catch (e) {
-      debugPrint('Error updating location to Firestore: $e');
+    } catch (_) {
     }
   }
 
@@ -517,9 +460,6 @@ class BookingTrackerService {
       if (Platform.isIOS) {
         LocationPermission permission = await Geolocator.checkPermission();
         if (permission != LocationPermission.always) {
-          debugPrint(
-            'iOS: Skipping background fetch - requires Always permission',
-          );
           return;
         }
       }
@@ -537,25 +477,16 @@ class BookingTrackerService {
           requiredNetworkType: NetworkType.ANY,
         ),
         (String taskId) async {
-          debugPrint('Background fetch triggered: $taskId');
           backgroundFetchHeadlessTask(HeadlessTask(taskId, false));
         },
         (String taskId) async {
-          debugPrint('Background fetch timeout: $taskId');
           backgroundFetchHeadlessTask(HeadlessTask(taskId, true));
         },
       );
 
       await BackgroundFetch.start();
-      debugPrint('Background fetch configured and started');
     } catch (e) {
-      debugPrint('Error configuring background fetch: $e');
-
-      if (Platform.isIOS && e.toString().contains('1')) {
-        debugPrint(
-          'iOS background fetch not available - continuing with foreground tracking only',
-        );
-      }
+      // Background fetch is optional; foreground tracking keeps working.
     }
   }
 
@@ -574,12 +505,10 @@ class BookingTrackerService {
           'isStartTracking': false,
           'isTrackingPaused': true,
         });
-      } catch (e) {
-        debugPrint('Error updating booking status for pause: $e');
+      } catch (_) {
       }
     }
 
-    debugPrint('Location tracking paused');
   }
 
   Future<void> stopTracking() async {
@@ -593,8 +522,7 @@ class BookingTrackerService {
 
     try {
       await BackgroundFetch.stop();
-    } catch (e) {
-      debugPrint('Error stopping background fetch: $e');
+    } catch (_) {
     }
 
     if (_bookingId != null) {
@@ -606,15 +534,13 @@ class BookingTrackerService {
           'trackingStoppedAt': FieldValue.serverTimestamp(),
           'arrivedAt': FieldValue.serverTimestamp(),
         });
-      } catch (e) {
-        debugPrint('Error updating booking status: $e');
+      } catch (_) {
       }
     }
 
     LocalStore.setActiveBookingId('');
     _bookingId = null;
 
-    debugPrint('Location tracking stopped');
   }
 
   void dispose() {
@@ -642,12 +568,10 @@ class BookingTrackerService {
           'isTrackingPaused': true,
           'warranty.isTracking': false,
         });
-      } catch (e) {
-        debugPrint('Error updating booking status for pause warranty: $e');
+      } catch (_) {
       }
     }
 
-    debugPrint('Location tracking paused for warranty');
   }
 
   Future<void> stopTrackingWarranty() async {
@@ -661,8 +585,7 @@ class BookingTrackerService {
 
     try {
       await BackgroundFetch.stop();
-    } catch (e) {
-      debugPrint('Error stopping background fetch: $e');
+    } catch (_) {
     }
 
     if (_bookingId != null) {
@@ -675,15 +598,13 @@ class BookingTrackerService {
           'warranty.arrivedAt': FieldValue.serverTimestamp(),
           'warranty.isTracking': false,
         });
-      } catch (e) {
-        debugPrint('Error updating booking status: $e');
+      } catch (_) {
       }
     }
 
     LocalStore.setActiveBookingId('');
     _bookingId = null;
 
-    debugPrint('Location tracking stopped');
   }
 
   Future<void> startWorkingWarranty({
@@ -715,7 +636,7 @@ class BookingTrackerService {
         final localizations = AppLocalizations.of(context);
         throw Exception(
           localizations?.locationPermissionErrorIOS ??
-              'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Abo Glumbo Worker and select \'Always\' to enable background tracking.',
+              'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Aboglumbo Technician and select \'Always\' to enable background tracking.',
         );
       }
       rethrow;

@@ -187,7 +187,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo'**
+  /// **'Aboglumbo Technician'**
   String get appName;
 
   /// No description provided for @enterYourFullName.
@@ -4219,7 +4219,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationPermissionErrorIOS.
   ///
   /// In en, this message translates to:
-  /// **'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Abo Glumbo Technician and select \'Always\' to enable background tracking.'**
+  /// **'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Aboglumbo Technician and select \'Always\' to enable background tracking.'**
   String get locationPermissionErrorIOS;
 
   /// No description provided for @youHaveAnActiveBookingAlready.
@@ -4261,7 +4261,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboGlumboTechnician.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo Technician'**
+  /// **'Aboglumbo Technician'**
   String get aboGlumboTechnician;
 
   /// No description provided for @now.
@@ -4561,7 +4561,7 @@ abstract class AppLocalizations {
   /// No description provided for @backgroundLocationPermissionRequired.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.'**
+  /// **'Aboglumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.'**
   String get backgroundLocationPermissionRequired;
 
   /// No description provided for @locationDisclosureTitle.
@@ -4573,13 +4573,13 @@ abstract class AppLocalizations {
   /// No description provided for @locationDisclosureTrackingMessage.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and shared with the customer so they can see your live location and track your arrival and job progress during an active job.\n\nBackground collection runs only while you are tracking a job and stops when you stop tracking. You can change location access at any time in your device settings.'**
+  /// **'Aboglumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and shared with the customer so they can see your live location and track your arrival and job progress during an active job.\n\nBackground collection runs only while you are tracking a job and stops when you stop tracking. You can change location access at any time in your device settings.'**
   String get locationDisclosureTrackingMessage;
 
   /// No description provided for @locationDisclosureJobOffersMessage.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and used to match you with nearby job requests and to show your current service area to our team, including the approximate city and area you are in.\n\nYou can change location access at any time in your device settings.'**
+  /// **'Aboglumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and used to match you with nearby job requests and to show your current service area to our team, including the approximate city and area you are in.\n\nYou can change location access at any time in your device settings.'**
   String get locationDisclosureJobOffersMessage;
 
   /// No description provided for @locationAccessDeclined.
@@ -4675,7 +4675,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboGlumboLocationTracking.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo - Location Tracking'**
+  /// **'Aboglumbo Technician - Location Tracking'**
   String get aboGlumboLocationTracking;
 
   /// No description provided for @backgroundLocationUpdated.
@@ -8378,7 +8378,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeDescription.
   ///
   /// In en, this message translates to:
-  /// **'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians'**
+  /// **'We are happy to have you join the Aboglumbo Technician team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians'**
   String get welcomeDescription;
 
   /// No description provided for @welcomeToAboGlumboTechnician.
@@ -9332,7 +9332,7 @@ abstract class AppLocalizations {
   /// No description provided for @thankYouInvoice.
   ///
   /// In en, this message translates to:
-  /// **'Thank you for choosing Abo Glumbo!'**
+  /// **'Thank you for choosing Aboglumbo Technician!'**
   String get thankYouInvoice;
 
   /// No description provided for @technicianLabel.
@@ -9494,7 +9494,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboGlumboWorker.
   ///
   /// In en, this message translates to:
-  /// **'Abo Glumbo Technician'**
+  /// **'Aboglumbo Technician'**
   String get aboGlumboWorker;
 
   /// No description provided for @workerCannotBeAssignedMultipleTimes.
@@ -10048,6 +10048,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone number updated successfully'**
   String get phoneNumberChangedSuccessfully;
+
+  /// No description provided for @biometricSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Please sign in with your phone number again.'**
+  String get biometricSessionExpired;
 }
 
 class _AppLocalizationsDelegate

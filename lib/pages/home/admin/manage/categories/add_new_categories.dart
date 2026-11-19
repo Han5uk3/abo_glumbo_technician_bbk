@@ -58,7 +58,6 @@ class _AddNewCategoriesState extends State<AddNewCategories> {
         selectedImage = image;
       });
     } catch (e) {
-      debugPrint('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

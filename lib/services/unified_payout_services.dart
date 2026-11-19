@@ -4,7 +4,6 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:aboglumbo_bbk_panel/services/wallet_math.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Unified Payout Services
@@ -62,9 +61,6 @@ class UnifiedPayoutServices {
         return wallet;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error getting unified wallet: $e');
-      }
       rethrow;
     }
   }
@@ -182,17 +178,7 @@ class UnifiedPayoutServices {
 
       await walletRef.set(wallet.toJson(), SetOptions(merge: true));
 
-      if (kDebugMode) {
-        print('✅ Wallet updated for worker $workerId');
-        print(
-          '   Payout-Requestable Balance: ${wallet.totalAvailableBalance} (tips + bonus only)',
-        );
-        print('   Lifetime Total: ${wallet.lifetimeTotal}');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error updating wallet amounts: $e');
-      }
       rethrow;
     }
   }
@@ -299,16 +285,9 @@ class UnifiedPayoutServices {
       // Sync wallet to accurately calculate pending amounts
       await syncExistingDataToUnifiedWallet(workerId);
 
-      if (kDebugMode) {
-        print('✅ Payout request created: $requestId');
-        print('   Total Amount: $totalAmount');
-      }
 
       return requestId;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error requesting payout: $e');
-      }
       rethrow;
     }
   }
@@ -414,14 +393,7 @@ class UnifiedPayoutServices {
         await syncExistingDataToUnifiedWallet(request.workerId!);
       }
 
-      if (kDebugMode) {
-        print('✅ Payout approved: $requestId');
-        print('   Transaction ID: $transactionId');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error approving payout: $e');
-      }
       rethrow;
     }
   }
@@ -458,14 +430,7 @@ class UnifiedPayoutServices {
         await syncExistingDataToUnifiedWallet(request.workerId!);
       }
 
-      if (kDebugMode) {
-        print('✅ Payout rejected: $requestId');
-        print('   Reason: $reason');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error rejecting payout: $e');
-      }
       rethrow;
     }
   }
@@ -524,13 +489,7 @@ class UnifiedPayoutServices {
         await syncExistingDataToUnifiedWallet(request.workerId!);
       }
 
-      if (kDebugMode) {
-        print('✅ Payout request cancelled: $requestId');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error cancelling payout request: $e');
-      }
       rethrow;
     }
   }
@@ -563,15 +522,9 @@ class UnifiedPayoutServices {
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      if (kDebugMode) {
-        print('✅ Payment proof uploaded: $downloadUrl');
-      }
 
       return downloadUrl;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error uploading payment proof: $e');
-      }
       return null;
     }
   }
@@ -781,23 +734,7 @@ class UnifiedPayoutServices {
           .doc(workerId)
           .set(updatedWallet.toJson(), SetOptions(merge: true));
 
-      if (kDebugMode) {
-        print('✅ Synced existing data to unified wallet for worker $workerId');
-        print(
-          '   Payout-Requestable: $totalAvailable (card tips + bonus + in-app earnings)',
-        );
-        print(
-          '   In-App Earnings (Available): ${balances.availableInAppEarnings}',
-        );
-        print(
-          '   Outside-App Earnings (Lifetime): $lifetimeOutsideAppEarnings',
-        );
-        print('   Lifetime Total: $lifetimeTotal');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error syncing data to unified wallet: $e');
-      }
       rethrow;
     }
   }
@@ -872,13 +809,7 @@ class UnifiedPayoutServices {
         });
       }
 
-      if (kDebugMode) {
-        print('✅ Wallet balances cleared successfully for worker: $workerId');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error clearing wallet balances: $e');
-      }
       rethrow;
     }
   }
@@ -916,9 +847,6 @@ class UnifiedPayoutServices {
         'totalApprovedAmount': totalApprovedAmount,
       };
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error getting payout statistics: $e');
-      }
       return {
         'pendingCount': 0,
         'approvedCount': 0,

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -101,7 +100,6 @@ class _CachedVideoPlayerState extends State<CachedVideoPlayer> {
           _isLoading = false;
         });
       }
-      log('Failed to load cached video.');
     }
   }
 
@@ -121,8 +119,7 @@ class _CachedVideoPlayerState extends State<CachedVideoPlayer> {
       if (response.statusCode == 200) {
         return filePath;
       }
-    } catch (e) {
-      log('Error downloading video: $e');
+    } catch (_) {
     }
     return null;
   }

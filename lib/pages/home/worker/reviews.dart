@@ -47,7 +47,6 @@ class _WorkerReviewsPageState extends State<WorkerReviewsPage> {
 
       _calculateStatistics();
     } catch (e) {
-      debugPrint('Error loading reviews: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

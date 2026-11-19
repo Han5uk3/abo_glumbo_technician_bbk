@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/pages/bookings/bloc/booking_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/bookings/widgets/complete_work_bottom_sheet.dart';
 import 'package:aboglumbo_bbk_panel/services/location_services.dart';
@@ -137,7 +136,6 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
                   : null,
             ),
           );
-          log('start tracking error: ${state.error}');
         } else if (state is BookingStopWorkingSuccess) {
           setState(() => isCancelBookingButtonBlocked = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -152,7 +150,6 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
-          log("stop tracking error: ${state.error}");
         } else if (state is BookingPauseWorkingSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -166,7 +163,6 @@ class _BookingControlsWidgetState extends State<BookingControlsWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
-          log("pause tracking error: ${state.error}");
         }
       },
       builder: (context, state) {

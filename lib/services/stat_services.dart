@@ -1,5 +1,4 @@
 import 'package:aboglumbo_bbk_panel/services/time_service.dart';
-import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -54,7 +53,6 @@ class StatServices {
           .where('service.category', isEqualTo: category)
           .where("review", isNull: false)
           .get();
-      log(bookings.docs.length.toString());
 
       final reviews = bookings.docs.map((doc) => doc['review']).toList();
 

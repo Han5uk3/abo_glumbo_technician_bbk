@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/new_text_field.dart';
@@ -118,7 +117,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
       // Fetch map-based locations
       await fetchMapLocations();
     } catch (e) {
-      log('Error initializing data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -207,8 +205,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
               // New format - use directly
               selectedCities.add(SelectedCity.fromJson(locationMap));
             }
-          } catch (e) {
-            log('Error parsing location: $e');
+          } catch (_) {
           }
         }
       } else {
@@ -219,8 +216,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
         selectedCategory = categories.firstWhere(
           (element) => element.id == widget.service?.category,
         );
-      } catch (e) {
-        log('Error: $e');
+      } catch (_) {
       }
 
       setState(() {});
@@ -253,8 +249,7 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
             );
           });
         }
-      } catch (e) {
-        log('Error fetching map locations: $e');
+      } catch (_) {
       }
     }
   }
@@ -405,7 +400,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
           );
         }
       } catch (e) {
-        log('Error saving service: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -464,7 +458,6 @@ class _AddServicesDevPageState extends State<AddServicesDevPage> {
         }
       }
     } catch (e) {
-      log('Error saving map locations: $e');
       rethrow;
     }
   }

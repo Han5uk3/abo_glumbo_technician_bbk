@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
@@ -89,8 +88,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           );
         }
       }
-    } catch (e) {
-      log('Error loading category: $e');
+    } catch (_) {
     } finally {
       if (mounted) _isLoadingCategory.value = false;
     }
@@ -135,8 +133,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
           }
         }
       }
-    } catch (e) {
-      log('Error loading service zones: $e');
+    } catch (_) {
     } finally {
       if (mounted) {
         _isLoadingZones = false;
@@ -156,8 +153,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
       for (var category in categories) {
         if (category.id != null) _categoryCache[category.id!] = category;
       }
-    } catch (e) {
-      log('Error loading categories: $e');
+    } catch (_) {
     }
   }
 
@@ -231,8 +227,7 @@ class _AssignUserBottomSheetState extends State<AssignUserBottomSheet> {
         booking: widget.booking,
         cancelledWorkerUids: _cachedConflictUids!,
       );
-    } catch (e) {
-      log('Error preloading conflicts: $e');
+    } catch (_) {
     } finally {
       if (mounted) setState(() => _isDataFullyLoaded = true);
     }

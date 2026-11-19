@@ -13,7 +13,6 @@ import '../main.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint('📨 Background message received: ${message.messageId}');
   final data = message.data;
   if (message.notification == null && (data['type'] == 'custom' || data.containsKey('titleEn'))) {
     try {
@@ -27,8 +26,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await flutterLocalNotificationsPlugin.initialize(initializationSettings);
       
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'abo_glumbo_channel', 'Abo Glumbo Notifications',
-        channelDescription: 'Notifications related to Abo Glumbo tasks and updates',
+        'abo_glumbo_channel', 'Aboglumbo Technician Notifications',
+        channelDescription: 'Notifications related to Aboglumbo Technician tasks and updates',
         importance: Importance.max, priority: Priority.high,
       );
       const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails();
@@ -38,8 +37,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         message.hashCode, title, body, platformDetails,
         payload: json.encode(data),
       );
-    } catch (e) {
-      debugPrint('❌ Error showing background data notification: $e');
+    } catch (_) {
     }
   }
   // Note: Notification is already stored by backend in sendAndStoreNotification
@@ -79,14 +77,11 @@ class NotificationServices {
   static void registerActiveChatProbe(String? Function() probe) {
     if (!_activeChatProbes.contains(probe)) {
       _activeChatProbes.add(probe);
-      debugPrint('🔔 Active chat probe registered (${_activeChatProbes.length})');
     }
   }
 
   static void unregisterActiveChatProbe(String? Function() probe) {
-    if (_activeChatProbes.remove(probe)) {
-      debugPrint('🔔 Active chat probe removed (${_activeChatProbes.length})');
-    }
+    _activeChatProbes.remove(probe);
   }
 
   /// The chat the user is looking at right now, or null if none is.
@@ -97,7 +92,6 @@ class NotificationServices {
         if (chatId != null && chatId.isNotEmpty) return chatId;
       } catch (e) {
         // A probe that throws must never cost the user a notification.
-        debugPrint('⚠️ Active chat probe failed, treating chat as inactive: $e');
       }
     }
     return null;
@@ -132,7 +126,6 @@ class NotificationServices {
     if (id == null || id.isEmpty) return true; // nothing to key on, let it run
 
     if (_handledTapIds.contains(id)) {
-      debugPrint('🔁 Ignoring duplicate notification tap for message $id');
       return false;
     }
 
@@ -169,7 +162,6 @@ class NotificationServices {
       await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          debugPrint('👆 Notification tapped: ${response.payload}');
           _handleNotificationTap(response.payload);
         },
       );
@@ -185,9 +177,9 @@ class NotificationServices {
           ?.createNotificationChannel(
             const AndroidNotificationChannel(
               'abo_glumbo_channel',
-              'Abo Glumbo Notifications',
+              'Aboglumbo Technician Notifications',
               description:
-                  'Notifications related to Abo Glumbo tasks and updates',
+                  'Notifications related to Aboglumbo Technician tasks and updates',
               importance: Importance.max,
             ),
           );
@@ -211,9 +203,7 @@ class NotificationServices {
             ?.requestNotificationsPermission();
       }
 
-      debugPrint('✅ Local notifications initialized with permissions');
-    } catch (e) {
-      debugPrint('❌ Error initializing local notifications: $e');
+    } catch (_) {
     }
   }
 
@@ -221,12 +211,10 @@ class NotificationServices {
   static Future<void> setupFCMListeners() async {
     // Prevent duplicate permission requests
     if (_isRequestingPermission) {
-      debugPrint('⚠️ Permission request already in progress, skipping...');
       return;
     }
 
     if (_isInitialized) {
-      debugPrint('⚠️ FCM already initialized, skipping...');
       return;
     }
 
@@ -249,8 +237,6 @@ class NotificationServices {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
-        debugPrint('✅ FCM permission granted');
-
         // Get FCM token
         await _getFCMTokenAndUpdate();
 
@@ -259,8 +245,6 @@ class NotificationServices {
 
         // Setup message handlers
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-          debugPrint('📨 Foreground message received: ${message.messageId}');
-
           final data = message.data;
           final String? incomingChatId = data['chatId']?.toString();
           final String? type = data['type']?.toString();
@@ -270,17 +254,11 @@ class NotificationServices {
               type == 'chat' || (incomingChatId != null && incomingChatId.isNotEmpty);
 
           if (isChatNotification && isChatActive(incomingChatId)) {
-            debugPrint(
-              '🤫 Suppressing chat push notification because user is inside active chat: $incomingChatId (currentActiveChatId: $currentActiveChatId)',
-            );
             return;
           }
 
           // ALL OTHER NOTIFICATIONS (job_offer, booking, warranty, custom, etc.)
           // MUST appear as a push notification, even if user is currently inside chatscreen!
-          debugPrint(
-            '🔔 Showing push notification for foreground message (type: $type, chatId: $incomingChatId)',
-          );
 
           RemoteNotification? notification = message.notification;
           String? title = notification?.title ?? data['title'];
@@ -309,25 +287,16 @@ class NotificationServices {
         });
 
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-          debugPrint('👆 Message opened from background: ${message.messageId}');
           if (message.notification != null) {
             _handleGenericNotificationTap(message);
           }
         });
 
         _isInitialized = true;
-        debugPrint('✅ FCM listeners setup complete');
-      } else {
-        debugPrint('❌ FCM permission denied');
       }
     } catch (e) {
-      debugPrint('❌ Error setting up FCM: $e');
-
       // Handle "already running" error gracefully
       if (e.toString().contains('already running')) {
-        debugPrint(
-          '⚠️ Permission request already running - marking as initialized',
-        );
         _isInitialized = true;
       }
     } finally {
@@ -350,11 +319,8 @@ class NotificationServices {
 
       if (token != null && token.isNotEmpty) {
         await AppServices.updateFCMToken(token);
-      } else {
-        debugPrint('⚠️ No FCM token available');
       }
-    } catch (e) {
-      debugPrint('❌ Error getting FCM token: $e');
+    } catch (_) {
     }
   }
 
@@ -369,75 +335,52 @@ class NotificationServices {
         apnsToken = await _firebaseMessaging.getAPNSToken();
         attempts++;
       }
-
-      if (apnsToken != null) {
-        debugPrint('✅ APNS token obtained');
-      } else {
-        debugPrint('⚠️ APNS token not available after 10 seconds');
-      }
-    } catch (e) {
-      debugPrint('❌ Error waiting for APNS token: $e');
+    } catch (_) {
     }
   }
 
   /// Setup token refresh listener
   static void _setupTokenRefreshListener() {
     if (_tokenRefreshListenerSet) {
-      debugPrint('⚠️ Token refresh listener already set');
       return;
     }
 
     _firebaseMessaging.onTokenRefresh.listen(
       (fcmToken) {
         if (fcmToken.isNotEmpty) {
-          debugPrint('🔄 FCM Token refreshed: ${fcmToken.substring(0, 20)}...');
           AppServices.updateFCMToken(fcmToken)
               .then((_) {
-                debugPrint('✅ Refreshed FCM Token updated successfully');
               })
               .catchError((error) {
-                debugPrint('❌ Error updating refreshed FCM token: $error');
               });
         }
       },
       onError: (error) {
-        debugPrint('❌ Error in token refresh listener: $error');
       },
     );
 
     _tokenRefreshListenerSet = true;
-    debugPrint('✅ Token refresh listener set up');
   }
 
   /// Manually refresh FCM token (use sparingly)
   static Future<void> refreshFCMToken() async {
     if (_isRequestingPermission) {
-      debugPrint('⚠️ Cannot refresh token - permission request in progress');
       return;
     }
 
     try {
-      debugPrint('🔄 Manually refreshing FCM token...');
       await _firebaseMessaging.deleteToken();
       await Future.delayed(const Duration(milliseconds: 500));
       await _getFCMTokenAndUpdate();
-    } catch (e) {
-      debugPrint('❌ Error manually refreshing FCM token: $e');
+    } catch (_) {
     }
   }
 
   /// Get current FCM token
   static Future<String?> getCurrentFCMToken() async {
     try {
-      String? token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        debugPrint('🔑 Current FCM Token: ${token.substring(0, 20)}...');
-      } else {
-        debugPrint('❌ No FCM token available');
-      }
-      return token;
+      return await _firebaseMessaging.getToken();
     } catch (e) {
-      debugPrint('❌ Error getting current FCM token: $e');
       return null;
     }
   }
@@ -446,40 +389,7 @@ class NotificationServices {
   static Future<void> deleteFCMToken() async {
     try {
       await _firebaseMessaging.deleteToken();
-      debugPrint('🗑️ FCM token deleted successfully');
-    } catch (e) {
-      debugPrint('❌ Error deleting FCM token: $e');
-    }
-  }
-
-  /// Debug FCM status
-  static Future<void> debugFCMStatus() async {
-    try {
-      debugPrint('🔍 FCM Debug Status:');
-      debugPrint('   - Initialized: $_isInitialized');
-      debugPrint('   - Token refresh listener set: $_tokenRefreshListenerSet');
-      debugPrint('   - Requesting permission: $_isRequestingPermission');
-
-      String? token = await getCurrentFCMToken();
-      if (token != null) {
-        debugPrint('   - Current token available: Yes');
-        debugPrint('   - Token length: ${token.length}');
-      } else {
-        debugPrint('   - Current token available: No');
-      }
-
-      if (Platform.isIOS) {
-        String? apnsToken = await _firebaseMessaging.getAPNSToken();
-        debugPrint(
-          '   - APNS Token available: ${apnsToken != null ? "Yes" : "No"}',
-        );
-      }
-
-      NotificationSettings settings = await _firebaseMessaging
-          .getNotificationSettings();
-      debugPrint('   - Permission status: ${settings.authorizationStatus}');
-    } catch (e) {
-      debugPrint('❌ Error getting FCM debug status: $e');
+    } catch (_) {
     }
   }
 
@@ -493,9 +403,9 @@ class NotificationServices {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'abo_glumbo_channel',
-          'Abo Glumbo Notifications',
+          'Aboglumbo Technician Notifications',
           channelDescription:
-              'Notifications related to Abo Glumbo tasks and updates',
+              'Notifications related to Aboglumbo Technician tasks and updates',
           importance: Importance.max,
           priority: Priority.high,
           showWhen: true,
@@ -534,7 +444,6 @@ class NotificationServices {
           .getInitialMessage();
 
       if (initialMessage != null) {
-        debugPrint('📬 Initial message found: ${initialMessage.messageId}');
         if (initialMessage.notification != null) {
           _handleGenericNotificationTap(initialMessage);
         }
@@ -542,8 +451,7 @@ class NotificationServices {
 
       // Note: onMessageOpenedApp listener is already set up in setupFCMListeners()
       // No need to add it here again to avoid duplicate navigation
-    } catch (e) {
-      debugPrint('❌ Error checking initial message: $e');
+    } catch (_) {
     }
   }
 
@@ -559,13 +467,11 @@ class NotificationServices {
   static NavigatorState? _resetToHome({int? index, String? filter}) {
     final navigator = navigatorKey?.currentState;
     if (navigator == null) {
-      debugPrint('⚠️ Navigator key is null, cannot navigate');
       return null;
     }
 
     final homeRoute = Home.activeRoute;
     if (homeRoute != null && index == null && filter == null) {
-      debugPrint('🏠 Reusing the Home already on the stack');
       navigator.popUntil((route) => identical(route, homeRoute));
       return navigator;
     }
@@ -607,23 +513,19 @@ class NotificationServices {
           ),
         )
         .then((_) {
-          debugPrint('✅ Chat screen navigation completed');
         })
         .catchError((error) {
-          debugPrint('❌ Error pushing chat screen: $error');
         });
   }
 
   /// Handle notification tap and navigate accordingly
   static void _handleNotificationTap(String? payload) {
     if (payload == null || payload.isEmpty) {
-      debugPrint('⚠️ No payload in notification');
       return;
     }
 
     try {
       final data = json.decode(payload) as Map<String, dynamic>;
-      debugPrint('📱 Full notification payload: $data');
 
       // Shares the id space with the remote-tap path above, so a local
       // notification and a replayed RemoteMessage for the same push cannot
@@ -632,8 +534,6 @@ class NotificationServices {
 
       final type = data['type'] as String?;
       final chatId = data['chatId'] as String?;
-
-      debugPrint('📱 Notification type: $type, chatId: $chatId');
 
       // Check if this is a chat notification (either by type or presence of chatId)
       if (type == 'chat' || (chatId != null && chatId.isNotEmpty)) {
@@ -646,13 +546,8 @@ class NotificationServices {
         final technicianName = data['technicianName'] as String? ?? '';
         final technicianPhoto = data['technicianPhoto'] as String? ?? '';
 
-        debugPrint('💬 Chat notification detected!');
-        debugPrint('   chatId: $chatId');
-        debugPrint('   participantName: $participantName');
-        debugPrint('   participantId: $participantId');
 
         if (chatId != null && chatId.isNotEmpty) {
-          debugPrint('🚀 Starting navigation to chat screen...');
           _openChatFromNotification(
             chatId: chatId,
             participantName: participantName,
@@ -662,13 +557,10 @@ class NotificationServices {
             technicianName: technicianName,
             technicianPhoto: technicianPhoto,
           );
-        } else {
-          debugPrint('⚠️ Chat ID is missing in notification payload');
         }
       }
       // Check if this is a job offer notification
       else if (type == 'job_offer' || data['category'] == 'job_offer') {
-        debugPrint('📋 Job offer notification detected!');
         _resetToHome(
           index: 1, // Orders tab
           filter: 'P', // Pending filter (which shows job offers)
@@ -676,18 +568,14 @@ class NotificationServices {
       }
       // Check if this is a booking notification
       else if (type == 'booking' || data['category'] == 'booking') {
-        debugPrint('📋 Booking notification detected!');
         final isAdmin = data['isAdmin'] == 'true';
         _resetToHome(
           index: 1, // Orders tab
           // Pending for admin, Accepted for technician
           filter: isAdmin ? 'P' : 'A',
         );
-      } else {
-        debugPrint('ℹ️ Not a recognized notification type, ignoring');
       }
-    } catch (e) {
-      debugPrint('❌ Error handling notification tap: $e');
+    } catch (_) {
     }
   }
 
@@ -695,7 +583,6 @@ class NotificationServices {
   static void _handleChatNotificationTap(RemoteMessage message) {
     try {
       final data = message.data;
-      debugPrint('📱 Chat notification data: $data');
 
       final chatId = data['chatId'] as String?;
       final participantName = data['participantName'] as String? ?? 'Customer';
@@ -705,10 +592,6 @@ class NotificationServices {
       final technicianName = data['technicianName'] as String? ?? '';
       final technicianPhoto = data['technicianPhoto'] as String? ?? '';
 
-      debugPrint('💬 Navigating to chat screen...');
-      debugPrint('   chatId: $chatId');
-      debugPrint('   participantName: $participantName');
-      debugPrint('   participantId: $participantId');
 
       if (chatId != null && chatId.isNotEmpty) {
         _openChatFromNotification(
@@ -720,11 +603,8 @@ class NotificationServices {
           technicianName: technicianName,
           technicianPhoto: technicianPhoto,
         );
-      } else {
-        debugPrint('⚠️ Chat ID is missing in notification payload');
       }
-    } catch (e) {
-      debugPrint('❌ Error handling chat notification tap: $e');
+    } catch (_) {
     }
   }
 
@@ -744,10 +624,8 @@ class NotificationServices {
       if (type == 'chat' || data['chatId'] != null) {
         _handleChatNotificationTap(message);
       } else if (type == 'job_offer' || category == 'job_offer') {
-        debugPrint('📋 Job offer notification detected from background!');
         _resetToHome(index: 1, filter: 'P'); // Orders tab, Pending filter
       } else if (type == 'booking' || category == 'booking') {
-        debugPrint('📋 Booking notification detected from background!');
         final isAdmin = data['isAdmin'] == 'true';
         _resetToHome(
           index: 1, // Orders tab
@@ -755,8 +633,7 @@ class NotificationServices {
           filter: isAdmin ? 'P' : 'A',
         );
       }
-    } catch (e) {
-      debugPrint('❌ Error handling background notification tap: $e');
+    } catch (_) {
     }
   }
 
@@ -764,8 +641,7 @@ class NotificationServices {
   static Future<void> initializeFCM() async {
     try {
       await setupFCMListeners();
-    } catch (e) {
-      debugPrint('❌ Error initializing FCM: $e');
+    } catch (_) {
     }
   }
 }

@@ -116,7 +116,6 @@ class _SplashScreenState extends State<SplashScreen>
               )
               .timeout(const Duration(seconds: 15));
         } catch (e) {
-          debugPrint('Auto-login did not resolve, showing onboarding: $e');
           resolved = null;
         }
 
@@ -221,34 +220,14 @@ class _SplashScreenState extends State<SplashScreen>
                           opacity: _logoFadeAnimation,
                           child: ScaleTransition(
                             scale: _logoScaleAnimation,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Logo
-                                SizedBox(
-                                  width: 120,
-                                  height: 120,
-                                  child: Image.asset(
-                                    'assets/images/app_icon_new.png',
-
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                // Text
-                                Text(
-                                  state.locale.languageCode == "ar"
-                                      ? "ابو جلمبو"
-                                      : "Abo Glumbo",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                              ),
+                              child: Image.asset(
+                                'assets/images/abo_new_2.png',
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         );

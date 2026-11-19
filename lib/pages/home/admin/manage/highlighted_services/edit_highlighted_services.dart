@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/saving_stack.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
@@ -55,7 +54,6 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
 
   void fillContents() async {
     if (widget.service != null) {
-      log('widget.service: ${widget.service?.toJson()}');
       titleController.text = widget.service?.title ?? '';
       titleArController.text = widget.service?.title_ar ?? '';
       sortOrder = widget.service!.sortOrder ?? 0;
@@ -82,8 +80,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
           if (doc.exists) {
             cachedServices[serviceId] = ServiceModel.fromDocumentSnapshot(doc);
           }
-        } catch (e) {
-          debugPrint(e.toString());
+        } catch (_) {
         }
       }
     }
@@ -107,8 +104,7 @@ class _AddHighlightedServicesState extends State<AddHighlightedServices> {
             });
           }
         }
-      } catch (e) {
-        log(e.toString());
+      } catch (_) {
       }
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class BatteryOptimizationService {
@@ -14,8 +13,7 @@ class BatteryOptimizationService {
         'isBatteryOptimizationDisabled',
       );
       return isDisabled;
-    } on PlatformException catch (e) {
-      debugPrint('Error checking battery optimization: $e');
+    } on PlatformException {
       return false;
     }
   }
@@ -26,8 +24,8 @@ class BatteryOptimizationService {
 
     try {
       await _channel.invokeMethod('requestDisableBatteryOptimization');
-    } on PlatformException catch (e) {
-      debugPrint('Error requesting battery optimization disable: $e');
+    } on PlatformException {
+      // Not supported on this device; nothing to request.
     }
   }
 
@@ -37,8 +35,8 @@ class BatteryOptimizationService {
 
     try {
       await _channel.invokeMethod('openBatteryOptimizationSettings');
-    } on PlatformException catch (e) {
-      debugPrint('Error opening battery optimization settings: $e');
+    } on PlatformException {
+      // Settings screen not available on this device.
     }
   }
 }

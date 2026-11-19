@@ -24,7 +24,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/geohash_helper.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -146,8 +145,7 @@ class _EditProfileState extends State<EditProfile> {
       if (file != null) {
         setState(() => selectedSponsorWorkPermitFile = file);
       }
-    } catch (e) {
-      debugPrint('Error picking sponsor permit: $e');
+    } catch (_) {
     }
   }
 
@@ -180,8 +178,7 @@ class _EditProfileState extends State<EditProfile> {
       if (file != null) {
         setState(() => selectedChamberOfCommerceFile = file);
       }
-    } catch (e) {
-      debugPrint('Error picking chamber approval: $e');
+    } catch (_) {
     }
   }
 
@@ -271,10 +268,7 @@ class _EditProfileState extends State<EditProfile> {
           });
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error picking ID image: $e');
-      }
+    } catch (_) {
     }
   }
 
@@ -345,10 +339,7 @@ class _EditProfileState extends State<EditProfile> {
           });
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error picking certifications: $e');
-      }
+    } catch (_) {
     }
   }
 
@@ -587,8 +578,7 @@ class _EditProfileState extends State<EditProfile> {
           position.latitude,
           position.longitude,
         );
-      } catch (e) {
-        debugPrint('Geocoding error: $e');
+      } catch (_) {
       }
 
       if (mounted) {
@@ -728,7 +718,6 @@ class _EditProfileState extends State<EditProfile> {
         isCategoriesLoading = false;
       });
     } catch (e) {
-      debugPrint('Error loading categories: $e');
       setState(() {
         isCategoriesLoading = false;
       });
@@ -1088,8 +1077,6 @@ class _EditProfileState extends State<EditProfile> {
           return;
         }
 
-        debugPrint('Selected image size: $fileSize bytes');
-
         if (isProfile) {
           setState(() => selectedProfileImage = image);
           await cropImage(true);
@@ -1149,7 +1136,6 @@ class _EditProfileState extends State<EditProfile> {
         }
       }
     } catch (e) {
-      debugPrint('Error cropping image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -2453,9 +2439,6 @@ class _EditProfileState extends State<EditProfile> {
       final Uri uri = Uri.parse(url);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error opening certificate: $e');
-      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -31,6 +31,7 @@ const {
   normalizeLocale,
   refundPhoneSend,
   reservedCodeHmac,
+  resolveApp,
   smsBody,
   stateKey,
 } = require("./otpCore");
@@ -39,7 +40,7 @@ const CHALLENGE_ID = /^[0-9a-f]{32}$/;
 const OTP_CODE = /^\d{6}$/;
 const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/;
 
-function parseRequestInput(data) {
+function parseRequestInput(data, attestedAppId) {
   const phone = typeof data?.phone === "string" ? data.phone.trim() : "";
   if (!isSaudiMobile(phone)) throw otpError("invalid-phone-number");
   const purpose = data?.purpose ?? PURPOSE_LOGIN;
@@ -50,6 +51,7 @@ function parseRequestInput(data) {
     phone,
     purpose,
     locale: normalizeLocale(data?.locale),
+    app: resolveApp(attestedAppId, data?.app),
     expectedUid: typeof data?.expectedUid === "string" ? data.expectedUid : null,
   };
 }
@@ -202,7 +204,7 @@ function createOtpService({
       token: config.taqToken,
       sender: config.taqSender,
       phone: input.phone,
-      body: smsBody(code, input.locale),
+      body: smsBody(code, input.locale, input.app),
     });
     if (result.status === "sent") return;
     if (result.status === "ambiguous") {
@@ -224,7 +226,7 @@ function createOtpService({
 
   async function handleRequestOtp(request) {
     const config = getConfig();
-    const input = parseRequestInput(request.data);
+    const input = parseRequestInput(request.data, request.app?.appId);
     logAppCheck("requestOtp", request);
 
     const reserved = isReserved(input.phone, config.reserved);

@@ -56,7 +56,6 @@ class _RewardsPageState extends State<RewardsPage> {
         });
       }
     } catch (e) {
-      debugPrint('Error fetching rewards data: $e');
       if (mounted) {
         setState(() {
           isLoading = false;

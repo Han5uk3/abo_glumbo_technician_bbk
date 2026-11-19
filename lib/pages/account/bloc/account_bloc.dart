@@ -173,8 +173,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           sponsorUrl = await fileRef.getDownloadURL();
           event.user.sponsorWorkPermitUrl = sponsorUrl;
           sponsorUpdated = true;
-        } catch (e) {
-          debugPrint('Failed to upload sponsor permit: $e');
+        } catch (_) {
         }
       }
 
@@ -193,8 +192,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           chamberUrl = await fileRef.getDownloadURL();
           event.user.chamberOfCommerceApprovalUrl = chamberUrl;
           chamberUpdated = true;
-        } catch (e) {
-          debugPrint('Failed to upload chamber approval: $e');
+        } catch (_) {
         }
       }
 
@@ -215,10 +213,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
                 currentCertifications.add(downloadUrl);
                 certificationsUpdated = true;
               }
-            } catch (e) {
-              debugPrint(
-                'Failed to upload certification: ${cert.name}, error: $e',
-              );
+            } catch (_) {
             }
           }
         }

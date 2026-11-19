@@ -3,7 +3,6 @@ import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SendNotificationPage extends StatefulWidget {
@@ -73,7 +72,6 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         _filterUsers();
       });
     } catch (e) {
-      if (kDebugMode) print('Error loading $_recipientType: $e');
       _showSnackBar('Error loading $_recipientType');
     } finally {
       setState(() => _isLoading = false);
@@ -175,10 +173,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
             'createdAt': timestamp,
             'processed': false,
           });
-        } catch (e) {
-          if (kDebugMode) {
-            print('Error processing recipient $recipientId: $e');
-          }
+        } catch (_) {
         }
       }
 
@@ -205,7 +200,6 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         _searchController.clear();
       }
     } catch (e) {
-      if (kDebugMode) print('Error sending notifications: $e');
       _showSnackBar(AppLocalizations.of(context)!.errorSendingNotifications);
     } finally {
       setState(() => _isSending = false);
@@ -1163,8 +1157,8 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                               Expanded(
                                 child: Text(
                                   _recipientType == "technician"
-                                      ? "Abo Glumbo - Technician"
-                                      : "Abo Glumbo - Customer",
+                                      ? "Aboglumbo Technician"
+                                      : "Aboglumbo Tools",
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,

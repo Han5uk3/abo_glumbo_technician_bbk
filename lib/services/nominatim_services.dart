@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +23,6 @@ class NominatimService {
     }
 
     final uri = Uri.https(_host, '/search', params);
-    log('Nominatim request: $uri');
 
     final response = await http.get(
       uri,
@@ -36,7 +34,6 @@ class NominatimService {
         'Accept-Language': 'ar',
       },
     );
-    log('Nominatim response [${response.statusCode}]: ${response.body}');
 
     if (response.statusCode != 200) {
       throw Exception(

@@ -84,25 +84,16 @@ class _OtpPageState extends State<OtpPage> {
 
   void resendOTP() async {
     if (resendSeconds > 0) {
-      debugPrint(
-        '🚫 [RESEND OTP] Cannot resend - timer still active: $resendSeconds seconds remaining',
-      );
       return;
     }
     if (isResendingOtp) return;
 
-    debugPrint('🔄 [RESEND OTP] Starting resend OTP process');
-    debugPrint('📱 [RESEND OTP] Phone number: ${widget.phoneNumber}');
-    debugPrint('🔑 [RESEND OTP] Current resend token: $_resendToken');
-    debugPrint('🆔 [RESEND OTP] Current verification ID: $_verificationId');
 
     setState(() {
       isResendingOtp = true;
     });
-    debugPrint('⏳ [RESEND OTP] Loading state set to TRUE');
 
     try {
-      debugPrint('📞 [RESEND OTP] Calling AuthServices().resendOTP...');
       await AuthServices().resendOTP(
         phoneNumber: widget.phoneNumber ?? '',
         resendToken: _resendToken,
@@ -113,9 +104,6 @@ class _OtpPageState extends State<OtpPage> {
         locale: Localizations.localeOf(context).languageCode,
         expectedUid: widget.expectedUid,
         onCodeSent: (verificationId, {int? resendToken}) {
-          debugPrint('✅ [RESEND OTP] onCodeSent callback triggered!');
-          debugPrint('🆔 [RESEND OTP] New verification ID: $verificationId');
-          debugPrint('🔑 [RESEND OTP] New resend token: $resendToken');
 
           if (mounted) {
             setState(() {
@@ -140,17 +128,10 @@ class _OtpPageState extends State<OtpPage> {
             );
 
             startTimer();
-            debugPrint('⏱️ [RESEND OTP] Timer restarted');
             _startSmsAutofillListener();
           }
         },
         onAutoRetrievalTimeout: (verificationId) {
-          debugPrint(
-            '⏰ [RESEND OTP] onAutoRetrievalTimeout callback triggered',
-          );
-          debugPrint(
-            '🆔 [RESEND OTP] Timeout verification ID: $verificationId',
-          );
 
           if (mounted) {
             setState(() {
@@ -174,9 +155,6 @@ class _OtpPageState extends State<OtpPage> {
           }
         },
         onError: (error) {
-          debugPrint('❌ [RESEND OTP] onError callback triggered');
-          debugPrint('❌ [RESEND OTP] Error code: ${error.code}');
-          debugPrint('❌ [RESEND OTP] Error message: ${error.message}');
 
           if (mounted) {
             String errorMessage;
@@ -210,7 +188,6 @@ class _OtpPageState extends State<OtpPage> {
                 errorMessage = error.message ?? 'Failed to resend OTP';
             }
 
-            debugPrint('📢 [RESEND OTP] Showing error message: $errorMessage');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(errorMessage.isEmpty ? 'Error' : errorMessage),
@@ -226,12 +203,7 @@ class _OtpPageState extends State<OtpPage> {
           }
         },
       );
-      debugPrint(
-        '✅ [RESEND OTP] AuthServices().resendOTP completed (await finished)',
-      );
     } catch (e) {
-      debugPrint('💥 [RESEND OTP] Exception caught in try-catch: $e');
-      debugPrint('💥 [RESEND OTP] Exception type: ${e.runtimeType}');
 
       // Catch any unexpected errors that weren't handled by onError callback
       if (mounted) {
@@ -252,15 +224,12 @@ class _OtpPageState extends State<OtpPage> {
         );
       }
     } finally {
-      debugPrint('🏁 [RESEND OTP] Finally block executing');
       // Always reset the loading state, regardless of success or failure
       if (mounted) {
         setState(() {
           isResendingOtp = false;
         });
-        debugPrint('⏳ [RESEND OTP] Loading state set to FALSE');
       }
-      debugPrint('🏁 [RESEND OTP] Resend OTP process complete');
     }
   }
 
@@ -415,7 +384,6 @@ class _OtpPageState extends State<OtpPage> {
   /// Called when the page opens (first send) and after every resend.
   void _startSmsAutofillListener() {
     if (!Platform.isAndroid || !mounted) return;
-    debugPrint('🎯 [PANEL OTP] Starting SMS autofill listener...');
 
     setState(() {
       _isSmsAutofillListening = true;
@@ -427,8 +395,6 @@ class _OtpPageState extends State<OtpPage> {
   /// Listen for SMS code and auto-fill the OTP field
   void _listenForSmsCode(int generation) async {
     try {
-      debugPrint('👂 [PANEL OTP] Listening for SMS code...');
-
       final smsCode = await _smsAutofillService.listenForSms(
         timeout: const Duration(minutes: 5),
       );
@@ -449,12 +415,10 @@ class _OtpPageState extends State<OtpPage> {
         // Automatically verify the OTP after a short delay
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          debugPrint('🔐 [PANEL OTP] Auto-verifying OTP from SMS...');
           verifyOtp();
         }
       }
     } catch (e) {
-      debugPrint('❌ [PANEL OTP] Error listening for SMS: $e');
       if (mounted && generation == _smsListenGeneration) {
         setState(() {
           _isSmsAutofillListening = false;

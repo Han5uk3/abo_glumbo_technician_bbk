@@ -110,8 +110,7 @@ class _WorkerHomeState extends State<WorkerHome> with TickerProviderStateMixin {
           _tabController.animateTo(index);
         }
       }
-    } catch (e) {
-      debugPrint("Error searching booking: $e");
+    } catch (_) {
     }
   }
 

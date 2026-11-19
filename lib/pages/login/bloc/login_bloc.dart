@@ -10,7 +10,6 @@ import 'package:aboglumbo_bbk_panel/services/app_services.dart';
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 part 'login_event.dart';
@@ -45,9 +44,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         phoneNumber: event.phoneNumber,
         onCodeSent: (String verificationId, {int? resendToken}) {
           if (!completer.isCompleted) {
-            if (kDebugMode) {
-              print('✅ OTP sent successfully. VerificationId: $verificationId');
-            }
             completer.complete({
               'success': true,
               'verificationId': verificationId,
@@ -57,9 +53,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         },
         onError: (FirebaseAuthException e) {
           if (!completer.isCompleted) {
-            if (kDebugMode) {
-              print('❌ OTP send failed: ${e.code} - ${e.message}');
-            }
             completer.complete({'success': false, 'error': e.code});
           }
         },
@@ -68,9 +61,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // code is verified there instead, so this is ignored.
         onVerificationCompleted: (PhoneAuthCredential credential) {
           if (!completer.isCompleted) {
-            if (kDebugMode) {
-              print('✅ Phone number verified instantly, no SMS needed');
-            }
             completer.complete({'success': true, 'credential': credential});
           }
         },
@@ -105,9 +95,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Send OTP error: $e');
-      }
       emit(OTPSentFailure(error: e.toString()));
     }
   }
@@ -127,9 +114,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       );
 
       if (userCredential != null && userCredential.user != null) {
-        if (kDebugMode) {
-          print('✅ OTP verified. UID: ${userCredential.user!.uid}');
-        }
 
         // Check if user exists in WORKERS collection with role "technician"
         UserModel? user = await _checkWorkerUser(userCredential.user!.uid);
@@ -175,29 +159,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           _updateToken(user);
           emit(LoginSuccess(user: user));
         } else {
-          if (kDebugMode) {
-            print(
-              '📝 User not found in any collection — redirecting to signup',
-            );
-          }
           // No account found → redirect to create account page
           emit(OTPVerifiedForRegistration(uid: userCredential.user!.uid));
         }
       } else {
-        if (kDebugMode) {
-          print('❌ OTP verification returned null');
-        }
         emit(LoginFailure(error: "invalid-verification-code"));
       }
     } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        print('❌ Firebase Auth error: ${e.code}');
-      }
       emit(LoginFailure(error: e.code));
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Verify OTP error: $e');
-      }
       emit(LoginFailure(error: e.toString()));
     }
   }
@@ -219,27 +189,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (userCredential != null && userCredential.user != null) {
         final uid = userCredential.user!.uid;
 
-        if (kDebugMode) {
-          print('✅ OTP verified for registration. UID: $uid');
-        }
 
         // Emit state with UID to navigate to signup
         emit(OTPVerifiedForRegistration(uid: uid));
       } else {
-        if (kDebugMode) {
-          print('❌ OTP verification returned null');
-        }
         emit(LoginFailure(error: "invalid-verification-code"));
       }
     } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        print('❌ Firebase Auth error: ${e.code}');
-      }
       emit(LoginFailure(error: e.code));
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Verify OTP error: $e');
-      }
       emit(LoginFailure(error: e.toString()));
     }
   }
@@ -248,24 +206,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     RememberMeToggled event,
     Emitter<LoginState> emit,
   ) async {
-    if (kDebugMode) {
-      print('RememberMeToggled - value: ${event.value}');
-    }
 
     if (event.value) {
       await LocalStore.putRememberMe(true);
       if (event.phone != null && event.phone!.isNotEmpty) {
         await LocalStore.rememberPhone(event.phone!);
-        if (kDebugMode) {
-          print('Saved phone to local storage');
-        }
       }
     } else {
       await LocalStore.putRememberMe(false);
       await LocalStore.clearRememberedPhone();
-      if (kDebugMode) {
-        print('Remember me disabled, cleared phone');
-      }
     }
     emit(LoginRememberMeToggled(event.value));
   }
@@ -363,37 +312,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         // Only accept users with role "technician"
         if (userRole != 'technician') {
-          if (kDebugMode) {
-            print(
-              '❌ User found but role is "$userRole", not "technician". Skipping.',
-            );
-          }
           return null;
         }
 
         await LocalStore.putUID(userData?['uid'] ?? uid);
         await LocalStore.putlogoutStatus(false);
 
-        if (kDebugMode) {
-          print(
-            '✅ Worker user found with role "technician": ${userData?['name']}',
-          );
-        }
 
         // Caching for local access
         await LocalStore.storeUserData(user);
 
         return user;
       } else {
-        if (kDebugMode) {
-          print('❌ Worker user not found in users collection');
-        }
         return null;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error fetching worker user: $e');
-      }
       return null;
     }
   }
@@ -423,9 +356,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
 
-        if (kDebugMode) {
-          print('✅ Admin user found: ${user.name}');
-        }
 
         // Store both in local storage
         await LocalStore.storeUserData(user);
@@ -437,9 +367,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error fetching admin user: $e');
-      }
       return null;
     }
   }
@@ -461,17 +388,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final userRole =
             oldData['role']?.toString().toLowerCase() ?? 'technician';
         if (userRole != 'technician') {
-          if (kDebugMode) {
-            print(
-              '❌ User found by phone but role is "$userRole", not "technician". Skipping.',
-            );
-          }
           return null;
         }
 
-        if (kDebugMode) {
-          print('✅ Technician found by phone: $phone (old UID: $oldDocId)');
-        }
 
         // Migrate doc to new UID
         oldData['uid'] = uid;
@@ -481,9 +400,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // Delete old document
         if (oldDocId != uid) {
           await AppFirestore.usersCollectionRef.doc(oldDocId).delete();
-          if (kDebugMode) {
-            print('🔄 Technician doc migrated from $oldDocId to $uid');
-          }
         }
 
         final user = UserModel.fromJson(oldData);
@@ -496,9 +412,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error checking technician by phone: $e');
-      }
       return null;
     }
   }
@@ -516,11 +429,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
         final oldDocId = adminByPhoneQuery.docs.first.id;
 
-        if (kDebugMode) {
-          print(
-            '✅ Admin found by phone: $phone, accessLevel: ${adminData?['accessLevel']}',
-          );
-        }
 
         // Create admin model
         final adminModel = AdminModel.fromJson(adminData ?? {}, id: oldDocId);
@@ -531,9 +439,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               .doc(uid)
               .set(adminModel.copyWith(uid: uid).toJson());
           await AppFirestore.adminsCollectionRef.doc(oldDocId).delete();
-          if (kDebugMode) {
-            print('🔄 Admin doc migrated from $oldDocId to $uid');
-          }
         }
 
         // Map AdminModel fields to UserModel structure for Home compatibility
@@ -562,9 +467,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         return user;
       } else {
         // If not found in active admins, check in pendingAdminsCollectionRef
-        if (kDebugMode) {
-          print('🔍 Checking pending admins for phone: $phone');
-        }
         final pendingAdminQuery = await AppFirestore.pendingAdminsCollectionRef
             .where('phoneNumber', isEqualTo: phone)
             .limit(1)
@@ -575,11 +477,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               pendingAdminQuery.docs.first.data() as Map<String, dynamic>;
           final pendingDocId = pendingAdminQuery.docs.first.id;
 
-          if (kDebugMode) {
-            print(
-              '✅ Pending admin found by phone: $phone, promoting to active admin',
-            );
-          }
 
           // Create admin model using the pending data and the pending doc ID
           final pendingAdminModel = AdminModel.fromJson(
@@ -597,11 +494,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               .doc(pendingDocId)
               .delete();
 
-          if (kDebugMode) {
-            print(
-              '🔄 Pending admin $pendingDocId promoted to active admin under UID: $uid',
-            );
-          }
 
           // Map to UserModel structure for Home compatibility
           final user = UserModel(
@@ -631,9 +523,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error checking admin by phone: $e');
-      }
       return null;
     }
   }
@@ -648,19 +537,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       bool exists = querySnapshot.docs.isNotEmpty;
 
-      if (kDebugMode) {
-        print(
-          exists
-              ? '⚠️ Phone already registered as worker'
-              : '✅ Phone available for registration',
-        );
-      }
 
       return exists;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error checking phone registration: $e');
-      }
       return false;
     }
   }
@@ -672,10 +551,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (token != null && token.isNotEmpty) {
         await AppServices.updateFCMToken(token, isAdmin: user.isAdmin ?? false);
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error updating FCM token: $e');
-      }
+    } catch (_) {
     }
   }
 }

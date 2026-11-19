@@ -53,7 +53,6 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         });
       }
     } catch (e) {
-      debugPrint('Error picking files: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -184,7 +183,6 @@ class _VerifyPaymentSheetState extends State<VerifyPaymentSheet> {
         );
       }
     } catch (e) {
-      debugPrint('Error verifying payment: $e');
       if (mounted) {
         setState(() {
           _isUploading = false;

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:aboglumbo_bbk_panel/firebase_options.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
+import 'package:aboglumbo_bbk_panel/helpers/secure_box.dart';
 import 'package:aboglumbo_bbk_panel/l10n/app_localizations.dart';
 import 'package:aboglumbo_bbk_panel/pages/account/bloc/account_bloc.dart';
 import 'package:aboglumbo_bbk_panel/pages/splash.dart';
@@ -31,19 +32,13 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool timeout = task.timeout;
 
-  debugPrint('Background fetch executing: $taskId, timeout: $timeout');
-
   if (timeout) {
-    debugPrint('Background fetch timeout for task: $taskId');
     BackgroundFetch.finish(taskId);
     return;
   }
 
   try {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint(
-        'ℹ️ Headless background fetch: User is admin, skipping background location update',
-      );
       BackgroundFetch.finish(taskId);
       return;
     }
@@ -52,9 +47,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
     final String? uid = LocalStore.getUID();
 
     if (bookingId == null || bookingId.isEmpty || uid == null) {
-      debugPrint(
-        'No active booking or user ID, skipping background location update',
-      );
       BackgroundFetch.finish(taskId);
       return;
     }
@@ -62,7 +54,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
     // Check if location services are available
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      debugPrint('Location services disabled, skipping background update');
       BackgroundFetch.finish(taskId);
       return;
     }
@@ -71,7 +62,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      debugPrint('Location permission denied, skipping background update');
       BackgroundFetch.finish(taskId);
       return;
     }
@@ -94,17 +84,12 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
       },
     }, SetOptions(merge: true));
 
-    debugPrint(
-      'Background location updated successfully: ${position.latitude}, ${position.longitude}',
-    );
-  } catch (e) {
-    debugPrint('Error in background fetch: $e');
+  } catch (_) {
   } finally {
     BackgroundFetch.finish(taskId);
   }
 }
 
-final String hiveBoxName = 'myBox';
 GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 
 /// Proves requests come from the genuine app. Never awaited: startup must not
@@ -119,70 +104,57 @@ Future<void> _activateAppCheck() async {
           ? const AppleDebugProvider()
           : const AppleAppAttestWithDeviceCheckFallbackProvider(),
     );
-  } catch (e) {
-    debugPrint('⚠️ App Check activation failed: $e');
+  } catch (_) {
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Release builds print nothing, including debugPrint calls made inside
+  // plugins, so no tokens, phone numbers or IDs end up in device logs.
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
+
   // Outside the try below this could abort main() before runApp() and leave the
   // user on a permanently blank screen, so it gets its own guard.
   try {
     await dotenv.load(fileName: ".env");
-  } catch (e) {
-    debugPrint('WARNING: Could not load .env, continuing without it: $e');
+  } catch (_) {
   }
 
   try {
     // STEP 1: Initialize Firebase FIRST
-    debugPrint('🚀 Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    debugPrint('✅ Firebase initialized');
 
     _activateAppCheck();
 
     // STEP 2: Set Database Persistence IMMEDIATELY after Firebase init
     // This must be done BEFORE any other Firebase Database usage
-    debugPrint('🔄 Setting Firebase Database persistence...');
     try {
       FirebaseDatabase.instance.setPersistenceEnabled(true);
       FirebaseDatabase.instance.setPersistenceCacheSizeBytes(
         10000000,
       ); // 10MB cache
-      debugPrint('✅ Firebase Database persistence enabled');
     } catch (e) {
-      debugPrint('⚠️ Could not set persistence (may already be set): $e');
       // This is not critical - continue without persistence or it's already enabled
     }
 
-    // STEP 3: Initialize Hive
-    debugPrint('🔄 Initializing Hive...');
+    // STEP 3: Open the encrypted local store (recovers from a corrupt or
+    // unreadable box by starting empty, which costs a re-login, not the app).
     await Hive.initFlutter();
-    try {
-      await Hive.openBox(hiveBoxName);
-    } catch (e) {
-      // A corrupt box would otherwise make every LocalStore call throw. Losing
-      // the cache costs the user a re-login; failing to open costs them the app.
-      debugPrint('⚠️ Hive box corrupt, recreating: $e');
-      await Hive.deleteBoxFromDisk(hiveBoxName);
-      await Hive.openBox(hiveBoxName);
-    }
-    debugPrint('✅ Hive initialized');
+    await SecureBox.open();
 
     // STEP 4: Setup FCM Background Handler
-    debugPrint('🔄 Registering FCM background handler...');
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    debugPrint('✅ FCM background handler registered');
 
     // STEP 5: Kick off clock sync WITHOUT awaiting it.
     // Awaiting this is what blanked the app on networks that drop UDP/123: the
     // NTP future never completed, so runApp() below was never reached. Until it
     // lands, TimeService.now falls back to the device clock.
-    debugPrint('🔄 Starting TimeService sync (non-blocking)...');
     TimeService.syncInBackground();
 
     // STEP 6: Setup System UI (with One UI 8 fix)
@@ -197,11 +169,9 @@ void main() async {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-    debugPrint('✅ System UI configured (One UI 8 compatible)');
 
     // STEP 7: Configure Background Fetch
     try {
-      debugPrint('🔄 Configuring background fetch...');
       BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 
       await BackgroundFetch.configure(
@@ -216,31 +186,24 @@ void main() async {
           requiredNetworkType: NetworkType.ANY,
         ),
         (String taskId) async {
-          debugPrint('Foreground background fetch: $taskId');
           backgroundFetchHeadlessTask(HeadlessTask(taskId, false));
         },
         (String taskId) async {
-          debugPrint('Background fetch timeout: $taskId');
           backgroundFetchHeadlessTask(HeadlessTask(taskId, true));
         },
       ).timeout(const Duration(seconds: 10));
 
-      debugPrint('✅ Background fetch configured successfully');
-    } catch (e) {
-      debugPrint('⚠️ Background Fetch registration failed: $e');
+    } catch (_) {
     }
 
-    debugPrint('🎉 All initialization complete! Starting app...');
-  } catch (e, stackTrace) {
-    debugPrint('❌ Error during app initialization: $e');
-    debugPrint('Stack trace: $stackTrace');
+  } catch (_) {
   }
 
   runApp(MyApp(navigatorKey: navigatorKey));
 }
 
 class MyApp extends StatelessWidget {
-  static Box box = Hive.box(hiveBoxName);
+  static Box box = Hive.box(SecureBox.boxName);
   final GlobalKey<NavigatorState>? navigatorKey;
   const MyApp({super.key, this.navigatorKey});
 
@@ -262,7 +225,7 @@ class MyApp extends StatelessWidget {
               child: MaterialApp(
                 key: ValueKey(state.locale.languageCode),
                 navigatorKey: navigatorKey,
-                title: 'Abo Glumbo - Technician',
+                title: 'Aboglumbo Technician',
                 debugShowCheckedModeBanner: false,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 locale: state.locale,

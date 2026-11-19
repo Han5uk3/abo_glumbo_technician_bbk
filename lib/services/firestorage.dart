@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UploadToFireStorage {
@@ -10,7 +9,6 @@ class UploadToFireStorage {
     try {
       final fileToCompress = File(file.path);
       if (!await fileToCompress.exists()) {
-        debugPrint('Source file for compression does not exist: ${file.path}');
         return file;
       }
 
@@ -55,7 +53,6 @@ class UploadToFireStorage {
       }
       return file;
     } catch (e) {
-      debugPrint('Compression error: $e');
       return file;
     }
   }
@@ -83,14 +80,11 @@ class UploadToFireStorage {
       );
 
       if (compressedFile != null && await File(compressedFile.path).exists()) {
-        final compressedSize = await File(compressedFile.path).length();
-        debugPrint('PNG compressed file size: $compressedSize bytes');
         return compressedFile;
       }
 
       return file;
     } catch (e) {
-      debugPrint('PNG compression error: $e');
       return file;
     }
   }
@@ -123,9 +117,6 @@ class UploadToFireStorage {
 
       final fileToUpload = File(finalFile.path);
       if (!await fileToUpload.exists()) {
-        debugPrint(
-          'Upload error: Target file not found at ${finalFile.path}. Falling back to original.',
-        );
         final originalFile = File(file.path);
         if (!await originalFile.exists()) {
           throw Exception('The selected file could not be found.');
@@ -153,8 +144,6 @@ class UploadToFireStorage {
         contentType: _getContentType(finalExt),
       );
     } on FirebaseException catch (e) {
-      debugPrint('Firebase error: ${e.code} - ${e.message}');
-
       String errorMessage;
       switch (e.code) {
         case 'unknown':
@@ -193,7 +182,6 @@ class UploadToFireStorage {
       }
       rethrow;
     } catch (e) {
-      debugPrint('Unexpected upload error: $e');
       throw Exception(
         'Unexpected error during upload. Please try again with a different image.',
       );
@@ -263,8 +251,7 @@ class UploadToFireStorage {
           await File(compressedFile.path).delete();
         }
       }
-    } catch (e) {
-      debugPrint('Error deleting temporary file: $e');
+    } catch (_) {
     }
 
     return downloadUrl;

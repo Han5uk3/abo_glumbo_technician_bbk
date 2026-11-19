@@ -53,7 +53,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get appName => 'أبو جلمبو';
+  String get appName => 'Aboglumbo Technician';
 
   @override
   String get enterYourFullName => 'أدخل اسمك الكامل';
@@ -2131,7 +2131,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationPermissionErrorIOS =>
-      'حدث خطأ في إذن الموقع على نظام iOS. يرجى الذهاب إلى الإعدادات > الخصوصية والأمان > خدمات الموقع > Abo Glumbo Worker واختيار \'دائمًا\' لتمكين التتبع في الخلفية.';
+      'حدث خطأ في إذن الموقع على نظام iOS. يرجى الذهاب إلى الإعدادات > الخصوصية والأمان > خدمات الموقع > Aboglumbo Technician واختيار \'دائمًا\' لتمكين التتبع في الخلفية.';
 
   @override
   String get youHaveAnActiveBookingAlready => 'لديك حجز نشط بالفعل.';
@@ -2153,7 +2153,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterYourNotificationMessageHere => 'أدخل رسالة الإشعار هنا';
 
   @override
-  String get aboGlumboTechnician => 'لم يتم العثور على فنيين';
+  String get aboGlumboTechnician => 'Aboglumbo Technician';
 
   @override
   String get now => 'الان';
@@ -2306,18 +2306,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get backgroundLocationPermissionRequired =>
-      'يجمع تطبيق أبو جلمبو للفنيين بيانات موقعك، بما في ذلك عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام، لمشاركة موقعك المباشر مع العميل حتى يتمكن من تتبع وصولك وسير العمل. يرجى ضبط إذن الموقع على \'السماح طوال الوقت\' في إعدادات جهازك.';
+      'يجمع تطبيق Aboglumbo Technician بيانات موقعك، بما في ذلك عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام، لمشاركة موقعك المباشر مع العميل حتى يتمكن من تتبع وصولك وسير العمل. يرجى ضبط إذن الموقع على \'السماح طوال الوقت\' في إعدادات جهازك.';
 
   @override
   String get locationDisclosureTitle => 'الوصول إلى الموقع واستخدام البيانات';
 
   @override
   String get locationDisclosureTrackingMessage =>
-      'يجمع تطبيق أبو جلمبو للفنيين بيانات موقعك، بما في ذلك في الخلفية عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام.\n\nيتم رفع بيانات الموقع هذه إلى خوادمنا ومشاركتها مع العميل حتى يتمكن من رؤية موقعك المباشر وتتبع وصولك وسير العمل أثناء وجودك في مهمة نشطة.\n\nيعمل الجمع في الخلفية فقط أثناء تتبعك لمهمة، ويتوقف عند إيقاف التتبع. يمكنك تغيير إذن الموقع في أي وقت من إعدادات جهازك.';
+      'يجمع تطبيق Aboglumbo Technician بيانات موقعك، بما في ذلك في الخلفية عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام.\n\nيتم رفع بيانات الموقع هذه إلى خوادمنا ومشاركتها مع العميل حتى يتمكن من رؤية موقعك المباشر وتتبع وصولك وسير العمل أثناء وجودك في مهمة نشطة.\n\nيعمل الجمع في الخلفية فقط أثناء تتبعك لمهمة، ويتوقف عند إيقاف التتبع. يمكنك تغيير إذن الموقع في أي وقت من إعدادات جهازك.';
 
   @override
   String get locationDisclosureJobOffersMessage =>
-      'يجمع تطبيق أبو جلمبو للفنيين بيانات موقعك، بما في ذلك في الخلفية عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام.\n\nيتم رفع بيانات الموقع هذه إلى خوادمنا وتُستخدم لمطابقتك مع طلبات العمل القريبة ولعرض نطاق خدمتك الحالي لفريقنا، بما في ذلك المدينة والمنطقة التقريبية التي تتواجد فيها.\n\nيمكنك تغيير إذن الموقع في أي وقت من إعدادات جهازك.';
+      'يجمع تطبيق Aboglumbo Technician بيانات موقعك، بما في ذلك في الخلفية عندما يكون التطبيق مغلقاً أو غير قيد الاستخدام.\n\nيتم رفع بيانات الموقع هذه إلى خوادمنا وتُستخدم لمطابقتك مع طلبات العمل القريبة ولعرض نطاق خدمتك الحالي لفريقنا، بما في ذلك المدينة والمنطقة التقريبية التي تتواجد فيها.\n\nيمكنك تغيير إذن الموقع في أي وقت من إعدادات جهازك.';
 
   @override
   String get locationAccessDeclined =>
@@ -2380,7 +2380,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تتبع موقعك لتسليم الخدمة';
 
   @override
-  String get aboGlumboLocationTracking => 'أبو جلمبو - تتبع الموقع';
+  String get aboGlumboLocationTracking => 'Aboglumbo Technician - تتبع الموقع';
 
   @override
   String get backgroundLocationUpdated => 'تم تحديث الموقع تلقائيًا';
@@ -4390,7 +4390,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'يسعدنا انضمامك لفريق أبو جلمبو.\n\n• ضمان لمدة أسبوع لكل خدمة\n• التقييمات الأعلى تزيد من فرص الاختيار مستقبلاً\n• مكافآت خاصة للفنيين المتميزين';
+      'يسعدنا انضمامك لفريق Aboglumbo Technician.\n\n• ضمان لمدة أسبوع لكل خدمة\n• التقييمات الأعلى تزيد من فرص الاختيار مستقبلاً\n• مكافآت خاصة للفنيين المتميزين';
 
   @override
   String welcomeToAboGlumboTechnician(String name) {
@@ -4919,7 +4919,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get totalLabel => 'الإجمالي:';
 
   @override
-  String get thankYouInvoice => 'شكراً لاختيارك أبو جلمبو!';
+  String get thankYouInvoice => 'شكراً لاختيارك Aboglumbo Technician!';
 
   @override
   String technicianLabel(String technician) {
@@ -5025,7 +5025,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يتم التحقق من حسابك من قبل المشرف، يرجى العودة لاحقًا';
 
   @override
-  String get aboGlumboWorker => 'فني أبو جلمبو';
+  String get aboGlumboWorker => 'Aboglumbo Technician';
 
   @override
   String get workerCannotBeAssignedMultipleTimes =>
@@ -5339,4 +5339,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneNumberChangedSuccessfully => 'تم تحديث رقم الهاتف بنجاح';
+
+  @override
+  String get biometricSessionExpired =>
+      'انتهت جلستك. يرجى تسجيل الدخول برقم هاتفك مرة أخرى.';
 }

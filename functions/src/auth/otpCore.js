@@ -276,22 +276,58 @@ function normalizeLocale(locale) {
   return language === "en" || language === "ur" ? language : "ar";
 }
 
+const APP_CUSTOMER = "customer";
+const APP_TECHNICIAN = "technician";
+
+// Both apps live in this Firebase project. A verified App Check token names
+// the calling app by these IDs, which a client cannot fake.
+const APP_BY_FIREBASE_APP_ID = Object.freeze({
+  "1:629201660527:android:830540db26fc90fb2dfb9a": APP_CUSTOMER,
+  "1:629201660527:ios:975df7f9cab623bc2dfb9a": APP_CUSTOMER,
+  "1:629201660527:android:2e4177f0e86629d12dfb9a": APP_TECHNICIAN,
+  "1:629201660527:ios:bb1f3d34b1a5dd122dfb9a": APP_TECHNICIAN,
+});
+
+const APP_NAMES = Object.freeze({
+  [APP_CUSTOMER]: "Aboglumbo Tools",
+  [APP_TECHNICIAN]: "Aboglumbo Technician",
+});
+
+// Builds from before the `app` field was sent.
+const DEFAULT_APP_NAME = "Aboglumbo";
+
+/**
+ * Which app asked for the code: the App Check identity when present,
+ * otherwise the app the client says it is. Only the SMS wording depends on
+ * it, so an unverified claim is acceptable.
+ */
+function resolveApp(attestedAppId, claimedApp) {
+  const attested = APP_BY_FIREBASE_APP_ID[attestedAppId];
+  if (attested) return attested;
+  return claimedApp === APP_CUSTOMER || claimedApp === APP_TECHNICIAN ? claimedApp : null;
+}
+
 /**
  * Exactly one 6-digit number per message: both apps' SMS autofill matches
- * \b\d{6}\b. Arabic and Urdu stay within one 70-character SMS segment.
+ * \b\d{6}\b. Arabic and Urdu stay within one 70-character SMS segment, and
+ * open with their own script so phones lay them out right to left.
  */
-function smsBody(code, locale) {
+function smsBody(code, locale, app = null) {
+  const name = APP_NAMES[app] || DEFAULT_APP_NAME;
   switch (normalizeLocale(locale)) {
     case "en":
-      return `Your Abo Glumbo verification code is ${code}. It expires in 5 minutes.`;
+      return `Your ${name} verification code is ${code}. It expires in 5 minutes.`;
     case "ur":
-      return `ابو گلمبو تصدیقی کوڈ ${code} ہے۔ 5 منٹ کے لیے درست ہے۔`;
+      return `آپ کا ${name} تصدیقی کوڈ ${code} ہے۔ 5 منٹ تک درست ہے۔`;
     default:
-      return `رمز التحقق في أبو جلمبو هو ${code}. صالح لمدة 5 دقائق.`;
+      return `رمز التحقق في ${name} هو ${code}. صالح لمدة 5 دقائق.`;
   }
 }
 
 module.exports = {
+  APP_CUSTOMER,
+  APP_NAMES,
+  APP_TECHNICIAN,
   DAY_MS,
   GLOBAL_COUNTER_SHARDS,
   HOUR_MS,
@@ -323,6 +359,7 @@ module.exports = {
   parseReservedAccounts,
   refundPhoneSend,
   reservedCodeHmac,
+  resolveApp,
   smsBody,
   stateKey,
 };

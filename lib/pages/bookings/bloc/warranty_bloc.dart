@@ -7,7 +7,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 part 'warranty_event.dart';
@@ -225,10 +224,7 @@ class WarrantyBloc extends Bloc<WarrantyEvent, WarrantyState> {
             BackgroundFetch.finish(taskId);
           },
         );
-      } catch (backgroundFetchError) {
-        if (kDebugMode) {
-          print('Background fetch configuration failed: $backgroundFetchError');
-        }
+      } catch (_) {
       }
 
       emit(WarrantyStartWorkingSuccess());

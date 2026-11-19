@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/common_widget/cached_async_builder.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -11,12 +10,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 class ContactService {
   static Future<void> launchEmail(BuildContext context, String email) async {
     final url = "mailto:$email";
-    log('Attempting to launch email: $url');
     try {
-      final success = await launchUrlString(url);
-      log('Email launch result: $success');
+      await launchUrlString(url);
     } catch (e) {
-      log('Cannot launch email: $url; Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -36,26 +32,18 @@ class ContactService {
   ) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
     final whatsappUrl = 'https://wa.me/$cleanPhone';
-    log('Attempting to launch WhatsApp: $whatsappUrl');
     try {
       final success = await launchUrlString(
         whatsappUrl,
         mode: LaunchMode.externalApplication,
       );
       if (!success) {
-        log(
-          'canLaunchUrlString returned false or failed; attempting fallback launch...',
-        );
         await launchUrlString(whatsappUrl);
       }
     } catch (e) {
-      log(
-        'WhatsApp launch failed; attempting direct launch fallback... Error: $e',
-      );
       try {
         await launchUrlString(whatsappUrl);
       } catch (err) {
-        log('All WhatsApp launch attempts failed: $err');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -76,27 +64,13 @@ class ContactService {
   ) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
     final url = "tel:$cleanPhone";
-    log('Attempting to launch phone: $url');
     try {
-      if (await canLaunchUrlString(url)) {
-        log('Url can be launched: $url');
-        final success = await launchUrlString(
-          url,
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-        log('Phone launch result: $success');
-      } else {
-        log('canLaunchUrlString returned false for: $url');
-        // Try direct launch as fallback for some devices where canLaunch fails
-        log('Attempting direct launch without canLaunch check...');
-        final success = await launchUrlString(
-          url,
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-        log('Direct phone launch result: $success');
-      }
+      // canLaunch is unreliable for tel: on some devices; launch either way.
+      await launchUrlString(
+        url,
+        mode: LaunchMode.externalNonBrowserApplication,
+      );
     } catch (e) {
-      log('Error launching phone: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -142,9 +116,6 @@ class ContactBottomSheet extends StatelessWidget {
           }
           final data = asyncSnapshot.data!;
 
-          log(
-            'Customer support data: ${data.map((e) => "${e.type}: ${e.detail}").toList()}',
-          );
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -91,7 +91,7 @@ class LocationDisclosureDialog extends StatelessWidget {
 const _fallbackTitle = 'Location Access & Data Use';
 
 const _fallbackTrackingMessage =
-    'Abo Glumbo Technician collects your location data, including in the '
+    'Aboglumbo Technician collects your location data, including in the '
     'background when the app is closed or not in use. This location data is '
     'uploaded to our servers and shared with the customer so they can see your '
     'live location and track your arrival and job progress during an active '
@@ -100,7 +100,7 @@ const _fallbackTrackingMessage =
     'in your device settings.';
 
 const _fallbackJobOffersMessage =
-    'Abo Glumbo Technician collects your location data, including in the '
+    'Aboglumbo Technician collects your location data, including in the '
     'background when the app is closed or not in use. This location data is '
     'uploaded to our servers and used to match you with nearby job requests '
     'and to show your current service area to our team, including the '

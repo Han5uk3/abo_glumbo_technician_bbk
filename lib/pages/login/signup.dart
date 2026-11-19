@@ -130,8 +130,7 @@ class _SignupState extends State<Signup> {
           }
         }
       }
-    } catch (e) {
-      debugPrint('Error loading existing user data: $e');
+    } catch (_) {
     } finally {
       if (mounted) {
         setState(() {
@@ -154,8 +153,7 @@ class _SignupState extends State<Signup> {
               entry.value['ur'] ?? entry.value['ar'] ?? entry.value['en'] ?? '',
         };
       }).toList();
-    } catch (e) {
-      debugPrint('Error loading job categories: $e');
+    } catch (_) {
     } finally {
       if (mounted) {
         setState(() => isLoadingCategories = false);
@@ -196,8 +194,7 @@ class _SignupState extends State<Signup> {
           position.latitude,
           position.longitude,
         );
-      } catch (e) {
-        debugPrint('Geocoding error: $e');
+      } catch (_) {
       }
 
       if (mounted) {
@@ -351,7 +348,6 @@ class _SignupState extends State<Signup> {
       }
       return null;
     } catch (e) {
-      debugPrint('Error picking image: $e');
       return null;
     }
   }
@@ -387,7 +383,6 @@ class _SignupState extends State<Signup> {
       }
       return null;
     } catch (e) {
-      debugPrint('Error picking file: $e');
       return null;
     }
   }
@@ -455,8 +450,7 @@ class _SignupState extends State<Signup> {
           });
         }
       }
-    } catch (e) {
-      debugPrint('Error picking certifications: $e');
+    } catch (_) {
     }
   }
 
@@ -662,7 +656,6 @@ class _SignupState extends State<Signup> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_currentPosition == null) {
-      debugPrint('Signup Error: Current position is null');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -675,7 +668,6 @@ class _SignupState extends State<Signup> {
     }
 
     if (selectedJobRoles.isEmpty) {
-      debugPrint('Signup Error: No job roles selected');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -700,7 +692,6 @@ class _SignupState extends State<Signup> {
             existingChamberOfCommerceUrl!.isNotEmpty);
 
     if (!hasResidenceId || !hasSponsorWorkPermit || !hasChamberOfCommerce) {
-      debugPrint('Signup Error: Missing mandatory documents');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -812,8 +803,7 @@ class _SignupState extends State<Signup> {
         if (fcmToken != null) {
           await AppServices.updateFCMToken(fcmToken);
         }
-      } catch (e) {
-        debugPrint('FCM Token error: $e');
+      } catch (_) {
       }
 
       if (mounted) {
@@ -825,7 +815,6 @@ class _SignupState extends State<Signup> {
         );
       }
     } catch (e) {
-      debugPrint('Signup Exception: $e');
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

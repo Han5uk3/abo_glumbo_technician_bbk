@@ -9,7 +9,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 part 'booking_event.dart';
@@ -169,10 +168,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
             BackgroundFetch.finish(taskId);
           },
         );
-      } catch (backgroundFetchError) {
-        if (kDebugMode) {
-          print('Background fetch configuration failed: $backgroundFetchError');
-        }
+      } catch (_) {
       }
 
       emit(BookingStartWorkingSuccess());

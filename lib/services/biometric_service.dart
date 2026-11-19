@@ -18,7 +18,6 @@ class BiometricService {
         ),
       );
     } catch (e) {
-      debugPrint('Biometric auth error: $e');
       return false;
     }
   }

@@ -2,7 +2,6 @@ import 'package:aboglumbo_bbk_panel/main.dart';
 import 'package:aboglumbo_bbk_panel/models/user.dart';
 import 'package:aboglumbo_bbk_panel/models/admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 class LocalStore {
   // ============================================
@@ -228,7 +227,6 @@ class LocalStore {
 
         return UserModel.fromJson(convertedData);
       } catch (e) {
-        debugPrint('Error parsing cached user data: $e');
         return null;
       }
     }
@@ -263,7 +261,6 @@ class LocalStore {
         );
         return AdminModel.fromJson(convertedData);
       } catch (e) {
-        debugPrint('Error parsing cached admin data: $e');
         return null;
       }
     }

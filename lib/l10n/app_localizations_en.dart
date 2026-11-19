@@ -53,7 +53,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get appName => 'Abo Glumbo';
+  String get appName => 'Aboglumbo Technician';
 
   @override
   String get enterYourFullName => 'Enter Your Full Name';
@@ -2159,7 +2159,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationPermissionErrorIOS =>
-      'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Abo Glumbo Technician and select \'Always\' to enable background tracking.';
+      'Location permission error on iOS. Please go to Settings > Privacy & Security > Location Services > Aboglumbo Technician and select \'Always\' to enable background tracking.';
 
   @override
   String get youHaveAnActiveBookingAlready =>
@@ -2183,7 +2183,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter your notification message here';
 
   @override
-  String get aboGlumboTechnician => 'Abo Glumbo Technician';
+  String get aboGlumboTechnician => 'Aboglumbo Technician';
 
   @override
   String get now => 'Now';
@@ -2337,18 +2337,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backgroundLocationPermissionRequired =>
-      'Abo Glumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.';
+      'Aboglumbo Technician collects your location data, including when the app is closed or not in use, to share your live location with the customer so they can track your arrival and job progress. Please set location access to \'Allow all the time\' in your device settings.';
 
   @override
   String get locationDisclosureTitle => 'Location Access & Data Use';
 
   @override
   String get locationDisclosureTrackingMessage =>
-      'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and shared with the customer so they can see your live location and track your arrival and job progress during an active job.\n\nBackground collection runs only while you are tracking a job and stops when you stop tracking. You can change location access at any time in your device settings.';
+      'Aboglumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and shared with the customer so they can see your live location and track your arrival and job progress during an active job.\n\nBackground collection runs only while you are tracking a job and stops when you stop tracking. You can change location access at any time in your device settings.';
 
   @override
   String get locationDisclosureJobOffersMessage =>
-      'Abo Glumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and used to match you with nearby job requests and to show your current service area to our team, including the approximate city and area you are in.\n\nYou can change location access at any time in your device settings.';
+      'Aboglumbo Technician collects your location data, including in the background when the app is closed or not in use.\n\nThis location data is uploaded to our servers and used to match you with nearby job requests and to show your current service area to our team, including the approximate city and area you are in.\n\nYou can change location access at any time in your device settings.';
 
   @override
   String get locationAccessDeclined =>
@@ -2411,7 +2411,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tracking your location for service delivery';
 
   @override
-  String get aboGlumboLocationTracking => 'Abo Glumbo - Location Tracking';
+  String get aboGlumboLocationTracking =>
+      'Aboglumbo Technician - Location Tracking';
 
   @override
   String get backgroundLocationUpdated => 'Background location updated';
@@ -4454,7 +4455,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'We are happy to have you join the Abo Glumbo team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians';
+      'We are happy to have you join the Aboglumbo Technician team.\n\n• One-week warranty for every service\n• Higher ratings increase future selection chances\n• Special rewards for high-performing technicians';
 
   @override
   String welcomeToAboGlumboTechnician(String name) {
@@ -4985,7 +4986,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalLabel => 'Total:';
 
   @override
-  String get thankYouInvoice => 'Thank you for choosing Abo Glumbo!';
+  String get thankYouInvoice => 'Thank you for choosing Aboglumbo Technician!';
 
   @override
   String technicianLabel(String technician) {
@@ -5091,7 +5092,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account is being verified by the admin. Please check back later.';
 
   @override
-  String get aboGlumboWorker => 'Abo Glumbo Technician';
+  String get aboGlumboWorker => 'Aboglumbo Technician';
 
   @override
   String get workerCannotBeAssignedMultipleTimes =>
@@ -5413,4 +5414,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phoneNumberChangedSuccessfully =>
       'Phone number updated successfully';
+
+  @override
+  String get biometricSessionExpired =>
+      'Your session has ended. Please sign in with your phone number again.';
 }

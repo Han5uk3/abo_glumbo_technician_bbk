@@ -24,9 +24,6 @@ class TechnicianLocationUpdateService {
   /// Should be called once on app startup
   static Future<void> initializeBackgroundLocationUpdates() async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint(
-        'ℹ️ User is admin, skipping background location service initialization',
-      );
       return;
     }
 
@@ -46,27 +43,22 @@ class TechnicianLocationUpdateService {
         _onBackgroundFetchTimeout,
       );
 
-      debugPrint('✅ Background location update service initialized');
-    } catch (e) {
-      debugPrint('❌ Failed to initialize background location updates: $e');
+    } catch (_) {
     }
   }
 
   /// Callback for background fetch tasks
   static void _backgroundFetchHeadlessTask(String taskId) async {
     try {
-      debugPrint('🔄 Running background location update task');
       await _updateTechnicianLocation();
       BackgroundFetch.finish(taskId);
     } catch (e) {
-      debugPrint('❌ Background task failed: $e');
       BackgroundFetch.finish(taskId);
     }
   }
 
   /// Callback for background fetch timeout
   static void _onBackgroundFetchTimeout(String taskId) {
-    debugPrint('⏱️ Background task timeout: $taskId');
     BackgroundFetch.finish(taskId);
   }
 
@@ -75,16 +67,12 @@ class TechnicianLocationUpdateService {
   static Future<void> _updateTechnicianLocation() async {
     try {
       if (LocalStore.isCurrentUserAdmin()) {
-        debugPrint('ℹ️ User is admin, skipping background location update');
         return;
       }
       final uid = LocalStore.getUID();
       if (uid == null || uid.isEmpty) {
-        debugPrint('⚠️ No user UID found');
         return;
       }
-
-      debugPrint('📍 Starting location update for UID: $uid');
 
       // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
@@ -92,45 +80,33 @@ class TechnicianLocationUpdateService {
         // This also runs headless, so there is no UI to show the prominent
         // disclosure in. Never request location permission without it --
         // leave the request to a foreground flow that can disclose first.
-        debugPrint('⚠️ Location permission not granted yet, skipping update');
         return;
       }
 
       if (permission == LocationPermission.deniedForever) {
-        debugPrint('⚠️ Location permissions permanently denied');
         return;
       }
 
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        debugPrint('⚠️ Location services disabled');
         return;
       }
 
       // Try to get last known position first for faster update
       Position? position = await Geolocator.getLastKnownPosition();
       if (position != null) {
-        debugPrint(
-          '📍 Found last known position: ${position.latitude}, ${position.longitude}',
-        );
         await _updateFirestoreLocation(uid, position);
       }
 
       // Then get fresh position
-      debugPrint('🛰️ Requesting fresh position...');
       position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 15),
       );
 
-      debugPrint(
-        '✅ Got fresh position: ${position.latitude}, ${position.longitude}',
-      );
-
       await _updateFirestoreLocation(uid, position);
-    } catch (e) {
-      debugPrint('❌ Error updating location: $e');
+    } catch (_) {
     }
   }
 
@@ -183,14 +159,11 @@ class TechnicianLocationUpdateService {
         if (parts.isNotEmpty) {
           updateData['location.fullAddress'] = parts.join(', ');
         }
-        debugPrint('📍 Address updated: ${updateData['location.fullAddress']}');
       }
-    } catch (e) {
-      debugPrint('⚠️ Reverse geocoding failed or timed out: $e');
+    } catch (_) {
     }
 
     await _firestore.collection('users').doc(uid).update(updateData);
-    debugPrint('✅ Firestore updated for UID: $uid');
   }
 
   /// Manually trigger location update (call this when app comes to foreground)
@@ -198,17 +171,14 @@ class TechnicianLocationUpdateService {
   static Future<void> updateLocationNow({BuildContext? context}) async {
     try {
       if (LocalStore.isCurrentUserAdmin()) {
-        debugPrint('ℹ️ User is admin, skipping manual location update');
         return;
       }
-      debugPrint('🔄 Manually updating location...');
       if (context != null) {
         await ensureLocationPermissionAndFetch(context);
       } else {
         await _updateTechnicianLocation();
       }
-    } catch (e) {
-      debugPrint('❌ Failed to update location: $e');
+    } catch (_) {
     }
   }
 
@@ -218,9 +188,6 @@ class TechnicianLocationUpdateService {
     BuildContext context,
   ) async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint(
-        'ℹ️ User is admin, skipping manual location permission request',
-      );
       return;
     }
     final locale = AppLocalizations.of(context);
@@ -339,25 +306,18 @@ class TechnicianLocationUpdateService {
   static Future<void> stopBackgroundLocationUpdates() async {
     try {
       await BackgroundFetch.stop();
-      debugPrint('✅ Background location updates stopped');
-    } catch (e) {
-      debugPrint('❌ Failed to stop background updates: $e');
+    } catch (_) {
     }
   }
 
   /// Start background location updates
   static Future<void> startBackgroundLocationUpdates() async {
     if (LocalStore.isCurrentUserAdmin()) {
-      debugPrint(
-        'ℹ️ User is admin, skipping start background location updates',
-      );
       return;
     }
     try {
       await BackgroundFetch.start();
-      debugPrint('✅ Background location updates started');
-    } catch (e) {
-      debugPrint('❌ Failed to start background updates: $e');
+    } catch (_) {
     }
   }
 }

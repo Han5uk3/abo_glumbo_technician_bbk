@@ -120,8 +120,7 @@ class _WarrantyPageState extends State<WarrantyPage>
           }
         }
       }
-    } catch (e) {
-      debugPrint("Error searching warranty: $e");
+    } catch (_) {
     }
   }
 

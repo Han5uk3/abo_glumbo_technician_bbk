@@ -851,15 +851,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Handle pull-to-refresh
   Future<void> _handleRefresh() async {
-    debugPrint('🔄 Pull-to-refresh triggered');
     setState(() => _isRefreshing = true);
     try {
       await Future.delayed(const Duration(milliseconds: 500));
       _appServices.triggerDashboardRefresh();
       await _dashboardStream.first;
-      debugPrint('✅ Refresh completed');
-    } catch (e) {
-      debugPrint('❌ Refresh error: $e');
+    } catch (_) {
     } finally {
       if (mounted) setState(() => _isRefreshing = false);
     }

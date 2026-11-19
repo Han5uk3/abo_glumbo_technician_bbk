@@ -502,8 +502,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         setState(() => _isLoading = true);
         final results = await getPlaceSuggestions(input);
         if (mounted) setState(() => _predictions = results);
-      } catch (e) {
-        debugPrint('Search error: $e');
+      } catch (_) {
       } finally {
         setState(() => _isLoading = false);
       }

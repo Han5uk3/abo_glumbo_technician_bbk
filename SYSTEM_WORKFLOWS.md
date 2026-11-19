@@ -1318,7 +1318,7 @@ Both apps log in with an OTP sent through Taqnyat. The backend verifies the code
 custom token, so everything after sign-in (`checkUser`, profiles, UIDs) works as it did with Firebase Phone Auth.
 
 ```
-App -> requestOtp(phone, purpose, locale) -> limits -> store HMAC of code -> Taqnyat SMS
+App -> requestOtp(phone, purpose, locale, app) -> limits -> store HMAC of code -> Taqnyat SMS
 App <- verificationId "otp1:<challengeId>"
 App -> verifyOtp(verificationId, code, requestId) -> find or create Auth user by phone -> custom token
 App -> signInWithCustomToken(token) -> checkUser()
@@ -1357,6 +1357,18 @@ App -> signInWithCustomToken(token) -> checkUser()
 | All numbers, without App Check | 120 per hour (`OTP_UNATTESTED_HOURLY_LIMIT`) |
 | Reserved number lock | 1 hour after 5 consecutive failures |
 
+### SMS wording per app (2026-11-19)
+
+The SMS names the app that asked: **Aboglumbo Tools** (customer) or **Aboglumbo Technician**. `resolveApp` in `otpCore.js` takes the app from the App Check token's Firebase app ID when one is present, otherwise from the `app` field (`customer` or `technician`) that `otp_api.dart` sends. Builds older than 2.0.7+37 (customer) and 2.1.9+69 (technician) send no `app` field and get the plain name **Aboglumbo**. The four Firebase app IDs are listed in `APP_BY_FIREBASE_APP_ID`; a newly registered app needs adding there. Every app and language combination is tested to fit one SMS segment.
+
+### Session storage on the device (2026-11-19)
+
+- **The local store is encrypted.** Each app's Hive store (UID, cached profile and role, remembered phone, biometric flags) is the AES-256 box `secure_store`, opened by `lib/helpers/secure_box.dart`. Its key is kept in the Android Keystore or the iOS Keychain (`first_unlock_this_device`, so it never syncs or restores to another device). On first launch after the update, the old plaintext `myBox` is copied in and then deleted. If the key can't be read, the box is recreated empty and the user logs in again. If the keystore itself fails, that launch runs on a memory-only box, so nothing is written unencrypted.
+- **Biometrics unlock the session; they never sign in.** Biometric login only goes ahead when the device still holds a Firebase session for the same UID and a forced token refresh succeeds (`AuthServices.hasValidSessionFor`). Otherwise the biometric flag is cleared and the user verifies their number by OTP. The old fallback, `signInAnonymously()` plus a UID read from local storage, has been removed.
+- **A full logout forgets the account.** Without biometrics enabled, logout also clears `last_valid_uid`.
+- **No backups of auth data on Android.** `allowBackup="false"` and `res/xml/data_extraction_rules.xml` keep Firebase Auth tokens and the local store out of cloud backup and device-to-device transfer.
+- **Release builds print nothing.** The apps contain no `print`/`debugPrint`/`log` calls, and `main()` replaces `debugPrint` with a no-op in release mode, which also silences plugins.
+
 ### Falling back to Firebase SMS
 
 Set `otpProvider` to `firebase` in `app_settings/customer_app_v1` or `app_settings/technician_app_v1`. Any other value, or none, uses Taqnyat. Phone changes are unavailable during fallback, because they only run on the Taqnyat flow. The Firebase Phone provider must stay enabled while this fallback exists.
@@ -1376,6 +1388,8 @@ Run from the repo root unless noted. `PROJECT` is `worker-app-tnext`.
 9. Deploy the functions by name: `firebase deploy --only functions:requestOtp,functions:verifyOtp,functions:sweepPhoneChanges`
 
 Do not run a plain `firebase deploy`: `firebase.json` references a `database.rules.json` that is not in the repo.
+
+**Lost the reserved login code?** Issue a new one; the old code stops working once the deploy finishes. In `functions/`, with the current secrets loaded from `firebase functions:secrets:access`, run `OTP_PEPPER=<pepper> OTP_RESERVED_ACCOUNTS=<current value> node scripts/rotateReservedCode.js --out <file>`. Then run `firebase functions:secrets:set OTP_RESERVED_ACCOUNTS --data-file <file>`, deploy `functions:requestOtp,functions:verifyOtp`, and delete the file. The script prints the new code once and keeps every other entry. Last rotated: 2026-11-19.
 
 While `TAQ_API` or `TAQ_SENDNAME` still hold their placeholder names, ordinary numbers get an error and no SMS is attempted.
 

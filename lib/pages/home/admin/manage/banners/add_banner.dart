@@ -37,7 +37,6 @@ class _AddBannerState extends State<AddBanner> {
         });
       }
     } catch (e) {
-      debugPrint('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

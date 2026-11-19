@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/local_store.dart';
 import 'package:aboglumbo_bbk_panel/helpers/localization_helper.dart';
@@ -580,8 +579,7 @@ class BookingListTileWidget extends StatelessWidget {
                         'warranty.updatedAt': FieldValue.serverTimestamp(),
                       });
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
-                } catch (e) {
-                  log('Error resolving: $e');
+                } catch (_) {
                 }
               },
               child: Text(
@@ -1324,7 +1322,6 @@ class _JobOfferTileWidgetState extends State<JobOfferTileWidget> {
         });
       }
     } catch (e) {
-      debugPrint('Error calculating distance: $e');
       if (mounted) {
         setState(() {
           _isCalculatingDistance = false;

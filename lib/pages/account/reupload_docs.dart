@@ -147,7 +147,6 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
       }
       return null;
     } catch (e) {
-      debugPrint('Error picking image: $e');
       return null;
     }
   }
@@ -182,7 +181,6 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
       }
       return null;
     } catch (e) {
-      debugPrint('Error picking file: $e');
       return null;
     }
   }
@@ -250,8 +248,7 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
           });
         }
       }
-    } catch (e) {
-      debugPrint('Error picking certifications: $e');
+    } catch (_) {
     }
   }
 
@@ -424,7 +421,6 @@ class _ReuploadDocsPageState extends State<ReuploadDocsPage> {
         Navigator.pop(context, true);
       }
     } catch (e) {
-      debugPrint('Reupload Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.reuploadFailed(e.toString()))),

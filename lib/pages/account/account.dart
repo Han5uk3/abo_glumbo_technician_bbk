@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:aboglumbo_bbk_panel/common_widget/danger_alerts.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
@@ -27,7 +26,6 @@ import 'package:aboglumbo_bbk_panel/services/notification_services.dart';
 import 'package:aboglumbo_bbk_panel/styles/color.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -453,10 +451,7 @@ class _AccountPageState extends State<AccountPage> {
     try {
       await AppServices.clearFCMToken();
       await NotificationServices.deleteFCMToken();
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error clearing FCM tokens during logout: $e');
-      }
+    } catch (_) {
     }
 
     final lastUid = LocalStore.getUID();
@@ -470,12 +465,12 @@ class _AccountPageState extends State<AccountPage> {
 
     try {
       if (!keepFirebaseAuth) {
+        // Fully signed out: nothing on the device should still name the
+        // account. With biometrics on, the session stays for the unlock.
+        await LocalStore.clearLastValidUID();
         await FirebaseAuth.instance.signOut();
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error signing out from Firebase Auth: $e');
-      }
+    } catch (_) {
     }
 
     if (context.mounted) {
@@ -721,10 +716,7 @@ class _AccountPageState extends State<AccountPage> {
       try {
         await AppServices.clearFCMToken();
         await NotificationServices.deleteFCMToken();
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error clearing FCM tokens during account deletion: $e');
-        }
+      } catch (_) {
       }
 
       // Clear local biometric settings and credentials immediately to guarantee biometrics are disabled
@@ -913,7 +905,6 @@ class _AccountPageState extends State<AccountPage> {
       if (confirmed == true && mounted) {
         setState(() => _isBiometricEnabled = false);
         BiometricService.setBiometricEnabled(false);
-        log('Biometric authentication disabled');
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:aboglumbo_bbk_panel/helpers/firestore.dart';
 import 'package:aboglumbo_bbk_panel/models/booking.dart';
@@ -62,7 +61,6 @@ class ConflictCheckService {
       _cacheTimestamp = DateTime.now();
       return results;
     } catch (e) {
-      log('Error in batchCheckConflicts: $e');
       return {};
     }
   }

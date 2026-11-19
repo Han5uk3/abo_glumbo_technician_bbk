@@ -41,10 +41,8 @@ class ImagePickerHelper {
         return null;
       }
 
-      debugPrint('Selected image size: $fileSize bytes');
       return image;
     } catch (e) {
-      debugPrint('Error picking image: $e');
       return null;
     }
   }
@@ -85,7 +83,6 @@ class ImagePickerHelper {
 
       return null;
     } catch (e) {
-      debugPrint('Error cropping image: $e');
       return null;
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as console;
 import 'dart:math';
 import 'package:aboglumbo_bbk_panel/models/payout_request.dart';
 import 'package:aboglumbo_bbk_panel/models/transaction.dart';
@@ -48,7 +47,6 @@ class AppServices {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isEmpty) {
-        debugPrint('❌ Cannot update FCM token: User ID is empty');
         return;
       }
 
@@ -67,11 +65,7 @@ class AppServices {
         'fcmToken': token,
         'fcmTokenUpdatedAt': Timestamp.now(),
       });
-      debugPrint(
-        '✅ FCM token updated in ${isUserAdmin ? 'admins' : 'users'} collection',
-      );
-    } catch (e) {
-      debugPrint('❌ Error updating FCM token: $e');
+    } catch (_) {
     }
   }
 
@@ -87,16 +81,8 @@ class AppServices {
             : AppFirestore.usersCollectionRef;
 
         await collection.doc(userId).update({'fcmToken': FieldValue.delete()});
-        if (kDebugMode) {
-          print(
-            '✅ FCM token cleared from ${isAdmin ? 'admins' : 'users'} collection',
-          );
-        }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error clearing FCM token: $e');
-      }
+    } catch (_) {
     }
   }
 
@@ -114,17 +100,14 @@ class AppServices {
           // Background execution - try to get userId from message data
           userId = message.data['userId']?.toString() ?? '';
 
-          debugPrint('⚠️ Background notification - Hive not available');
         }
       } catch (e) {
-        debugPrint('⚠️ Error accessing LocalStore: $e');
         // Continue with empty userId if Hive is not available
         userId = message.data['userId']?.toString() ?? '';
       }
 
       // If we don't have a userId, we can't store the notification
       if (userId.isEmpty) {
-        debugPrint('⚠️ No userId available, cannot store notification');
         return;
       }
 
@@ -154,13 +137,7 @@ class AppServices {
           .collection('notifications')
           .add(notificationData);
 
-      debugPrint(
-        '✅ Notification stored in users/$userId/notifications subcollection',
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error storing notification in Firestore: $e');
-      }
+    } catch (_) {
     }
   }
 
@@ -233,9 +210,6 @@ class AppServices {
         await collection.doc(userId).update(userData);
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error updating user profile: $e');
-      }
       rethrow;
     }
   }
@@ -249,9 +223,6 @@ class AppServices {
           )
           .toList();
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error fetching districts: $e');
-      }
       return [];
     }
   }
@@ -260,9 +231,6 @@ class AppServices {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isEmpty) {
-        if (kDebugMode) {
-          print('⚠️ No user logged in, cannot update worker language');
-        }
         return;
       }
 
@@ -289,10 +257,7 @@ class AppServices {
           );
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error updating worker language: $e');
-      }
+    } catch (_) {
     }
   }
 
@@ -315,10 +280,7 @@ class AppServices {
           return isAdmin ? 'admin' : 'worker';
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error getting current user role: $e');
-      }
+    } catch (_) {
     }
     return 'worker';
   }
@@ -326,7 +288,6 @@ class AppServices {
   static Stream<List<NotificationModel>> getNotificationsStream() {
     String userId = LocalStore.getUID() ?? '';
     if (userId.isEmpty) {
-      if (kDebugMode) print('getNotificationsStream: userId is empty');
       return Stream.value([]);
     }
     
@@ -335,10 +296,6 @@ class AppServices {
         ? AppFirestore.adminsCollectionRef 
         : AppFirestore.usersCollectionRef;
 
-    if (kDebugMode) {
-      print('getNotificationsStream: isAdminMode=$isAdminMode, userId=$userId');
-      print('getNotificationsStream: querying ${isAdminMode ? 'admins' : 'users'}/$userId/notifications');
-    }
 
     return collectionRef
         .doc(userId)
@@ -346,9 +303,6 @@ class AppServices {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          if (kDebugMode) {
-            print('getNotificationsStream: got ${snapshot.docs.length} notifications');
-          }
           return snapshot.docs
               .map((doc) => NotificationModel.fromFirestore(doc))
               .toList();
@@ -474,7 +428,6 @@ class AppServices {
       await batch.commit();
       return true;
     } catch (e) {
-      debugPrint('Error marking all notifications as read: $e');
       return false;
     }
   }
@@ -486,15 +439,8 @@ class AppServices {
     try {
       String userId = LocalStore.getUID() ?? '';
       if (userId.isEmpty) {
-        if (kDebugMode) {
-          print('⚠️ No user logged in, cannot retrieve notifications');
-        }
         return [];
       }
-
-      UserModel? currentUser = LocalStore.getCachedUserData();
-      bool isCurrentUserAdmin = currentUser?.isAdmin ?? false;
-      String currentUserRole = isCurrentUserAdmin ? 'admin' : 'worker';
 
       final bool isAdminMode = LocalStore.isCurrentUserAdmin();
       final collectionRef = isAdminMode 
@@ -535,17 +481,9 @@ class AppServices {
         };
       }).toList();
 
-      if (kDebugMode) {
-        print(
-          '📱 Retrieved ${notifications.length} notifications for $currentUserRole from subcollection',
-        );
-      }
 
       return notifications;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error retrieving notifications: $e');
-      }
       return [];
     }
   }
@@ -902,9 +840,6 @@ class AppServices {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error fetching booking by ID: $e');
-      }
       return null;
     }
   }
@@ -1003,9 +938,6 @@ class AppServices {
                 try {
                   return UserModel.fromDocumentSnapshot(doc);
                 } catch (e) {
-                  if (kDebugMode) {
-                    print('⚠️ Error parsing user document ${doc.id}: $e');
-                  }
                   return null;
                 }
               })
@@ -1067,9 +999,6 @@ class AppServices {
       if (image != null) {
         imageUrl = await _uploadProofImage(agentId, image);
         if (imageUrl == null) {
-          if (kDebugMode) {
-            print('❌ Failed to upload proof image');
-          }
           return false;
         }
       }
@@ -1101,9 +1030,6 @@ class AppServices {
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error clearing tipping amount: $e');
-      }
       return false;
     }
   }
@@ -1142,15 +1068,9 @@ class AppServices {
       // Get the download URL
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
-      if (kDebugMode) {
-        print('✅ Image uploaded successfully: $downloadUrl');
-      }
 
       return downloadUrl;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error uploading image: $e');
-      }
       return null;
     }
   }
@@ -1196,9 +1116,6 @@ class AppServices {
       await AppFirestore.usersCollectionRef.doc(agentId).update(updateData);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error approving/rejecting agent: $e');
-      }
       return false;
     }
   }
@@ -1214,9 +1131,6 @@ class AppServices {
       });
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error blocking/unblocking agent: $e');
-      }
       return false;
     }
   }
@@ -1228,9 +1142,6 @@ class AppServices {
           .set(banner.toJson());
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error adding banner: $e');
-      }
       return false;
     }
   }
@@ -1242,9 +1153,6 @@ class AppServices {
           .update(banner.toJson());
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error updating banner: $e');
-      }
       return false;
     }
   }
@@ -1254,9 +1162,6 @@ class AppServices {
       await AppFirestore.bannersCollectionRef.doc(bannerId).delete();
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error deleting banner: $e');
-      }
       return false;
     }
   }
@@ -1345,9 +1250,6 @@ class AppServices {
           .get();
       return snapshot.docs.isNotEmpty;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error checking email registration: $e');
-      }
       return false;
     }
   }
@@ -1382,9 +1284,6 @@ class AppServices {
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error canceling booking: $e');
-      }
       return false;
     }
   }
@@ -1408,9 +1307,6 @@ class AppServices {
       final data = doc.data() as Map<String, dynamic>?;
       return (data?['price'] as num?)?.toDouble() ?? 0.0;
     } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Could not read general price for service $serviceId: $e');
-      }
       return 0.0;
     }
   }
@@ -1463,9 +1359,6 @@ class AppServices {
       });
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error completing booking: $e');
-      }
       return false;
     }
   }
@@ -1526,9 +1419,6 @@ class AppServices {
       await AppFirestore.faqCollectionRef.doc(faqId).delete();
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error deleting FAQ: $e');
-      }
       return false;
     }
   }
@@ -1545,9 +1435,6 @@ class AppServices {
                     doc.data() as Map<String, dynamic>,
                   );
                 } catch (e) {
-                  if (kDebugMode) {
-                    print('⚠️ Error parsing customer document ${doc.id}: $e');
-                  }
                   return null;
                 }
               })
@@ -1567,9 +1454,6 @@ class AppServices {
       });
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error approving/rejecting agent: $e');
-      }
       return false;
     }
   }
@@ -1608,9 +1492,6 @@ class AppServices {
       await AppFirestore.customerServiceCollectionRef.doc(id).delete();
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error deleting customer service: $e');
-      }
       return false;
     }
   }
@@ -1624,9 +1505,6 @@ class AppServices {
           .update(contact.toJson());
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error updating customer service: $e');
-      }
       return false;
     }
   }
@@ -2110,10 +1988,6 @@ class AppServices {
 
   static Future<List<AllTipsModel>> getTipsById(String workerId) async {
     try {
-      // Get the specific document
-      final docPath = 'tipping/$workerId/totalTipsCollectionRef/$workerId';
-      debugPrint('🔍 Querying tips from path: $docPath');
-
       final docSnapshot = await AppFirestore.tippingCollectionRef
           .doc(workerId)
           .collection("totalTipsCollectionRef")
@@ -2121,34 +1995,21 @@ class AppServices {
           .get();
 
       if (!docSnapshot.exists) {
-        debugPrint(
-          '❌ No tips document found for worker: $workerId at path: $docPath',
-        );
         return [];
       }
-
-      debugPrint('✅ Tips document exists for worker: $workerId');
 
       final data = docSnapshot.data();
       if (data == null) {
-        debugPrint('⚠️ Document exists but data is null for worker: $workerId');
         return [];
       }
 
-      debugPrint('📄 Document data keys: ${data.keys.toList()}');
-
       if (data['tipData'] == null) {
-        debugPrint(
-          '⚠️ No tipData field found in document for worker: $workerId',
-        );
         return [];
       }
 
       // Get the tipdata array field and convert to List<AllTipsModel>
       final List<dynamic> tipdataList = data['tipData'] as List<dynamic>;
 
-      debugPrint('📊 tipData array length: ${tipdataList.length}');
-      debugPrint('📊 tipData contents: $tipdataList');
 
       final List<AllTipsModel> tipsList = tipdataList
           .map(
@@ -2156,19 +2017,8 @@ class AppServices {
           )
           .toList();
 
-      debugPrint('✅ Fetched ${tipsList.length} tips for worker: $workerId');
-
-      // Log each tip's details
-      for (int i = 0; i < tipsList.length; i++) {
-        final tip = tipsList[i];
-        debugPrint(
-          '  Tip $i: ID=${tip.id}, Amount=${tip.totalTipAmount}, PaymentMethod=${tip.paymentMethod}, CreatedAt=${tip.createdAt}',
-        );
-      }
-
       return tipsList;
     } catch (e) {
-      debugPrint('❌ Error fetching tips: $e');
       return [];
     }
   }
@@ -2196,7 +2046,6 @@ class AppServices {
 
       return categories;
     } catch (e) {
-      debugPrint('Error fetching job categories: $e');
       return {};
     }
   }
@@ -2239,9 +2088,6 @@ class AppServices {
             return bTime.compareTo(aTime);
           });
 
-          debugPrint(
-            '✅ Fetched ${allPayouts.length} total tip payouts from all workers',
-          );
           return allPayouts;
         });
   }
@@ -2259,7 +2105,6 @@ class AppServices {
           List<AllTipsModel> payouts = [];
 
           if (!docSnapshot.exists) {
-            debugPrint('❌ No tip payout history found for worker: $workerId');
             return payouts;
           }
 
@@ -2268,7 +2113,6 @@ class AppServices {
           final tipDataField = data?['tipdata'] ?? data?['tipData'];
 
           if (data == null || tipDataField == null) {
-            debugPrint('⚠️ No tipdata found for worker: $workerId');
             return payouts;
           }
 
@@ -2287,9 +2131,6 @@ class AppServices {
             return bTime.compareTo(aTime);
           });
 
-          debugPrint(
-            '✅ Fetched ${payouts.length} tip payouts for worker: $workerId',
-          );
           return payouts;
         });
   }
@@ -2345,13 +2186,6 @@ class AppServices {
         .where('paymentCompleted', isEqualTo: false)
         .snapshots()
         .map((snapshot) => snapshot.docs.length)
-        // A failure here (a missing Firestore index, most likely) would otherwise
-        // be indistinguishable from "nothing pending" — the counter would just
-        // read 0, which is exactly the symptom this query was fixed for. Log it
-        // so the cause is visible while debugging.
-        .doOnError(
-          (e, _) => debugPrint('❌ paymentPending counter query failed: $e'),
-        )
         .onErrorReturn(0);
 
     final Stream<double> rating = AppFirestore.bookingsCollectionRef
@@ -2414,10 +2248,6 @@ class AppServices {
         int warrantyClaimsCount,
         UnifiedWalletModel walletData,
       ) {
-        debugPrint(
-          '✅ Stats Combined - Completed: $completedCount, Latest: $latestCount, '
-          'Accepted: $acceptedCount, Wallet: ${walletData.lifetimeTotal}',
-        );
         return {
           'completed': completedCount,
           'latest': latestCount,
@@ -2507,7 +2337,6 @@ class AppServices {
 
   /// Trigger manual refresh by adding a timestamp
   void triggerDashboardRefresh() {
-    debugPrint('🔄 Manual dashboard refresh triggered');
     _dashboardRefreshController.add(DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -2521,14 +2350,9 @@ class AppServices {
     String uid,
     Stream<int> refreshTrigger,
   ) {
-    debugPrint(
-      '🚀 Setting up complete dashboard stream with refresh for: $uid',
-    );
-
     return refreshTrigger
         .startWith(0) // Start immediately
         .switchMap((_) {
-          debugPrint('📊 Dashboard data refresh initiated');
           return Rx.combineLatest5(
             _getStatsStream(uid),
             _getTransactionsRealTimeStream(uid),
@@ -2542,8 +2366,6 @@ class AppServices {
               double bookingEarnings,
               TippingModel liveTips,
             ) {
-              debugPrint('📊 Dashboard stream updated - combining all data');
-
               return DashboardDataStream(
                 stats: stats,
                 totalEarnings: stats['paidAmounts'] ?? 0.0,
@@ -2555,7 +2377,6 @@ class AppServices {
           );
         })
         .handleError((error) {
-          debugPrint('❌ Dashboard stream error: $error');
           return DashboardDataStream(
             stats: {
               'completed': 0,
@@ -3092,9 +2913,6 @@ class AppServices {
                 .update(updateData);
           } else {
             // Document doesn't exist anywhere we expect it to
-            debugPrint(
-              'Warning: resolvedBookingId $resolvedBookingId not found in bookings, job_requests, or booking_request collections',
-            );
           }
         }
       }
@@ -3117,7 +2935,6 @@ class AppServices {
 
       return true;
     } catch (e) {
-      debugPrint('Error sending counter offer: $e');
       return false;
     }
   }
@@ -3145,8 +2962,7 @@ class AppServices {
             'createdAt': FieldValue.serverTimestamp(),
             'isRead': false,
           });
-    } catch (e) {
-      debugPrint('Error recording customer notification: $e');
+    } catch (_) {
     }
   }
 
@@ -3157,16 +2973,13 @@ class AppServices {
         .where("warranty.availability", isEqualTo: true)
         .snapshots()
         .map((snapshot) {
-          console.log('Total docs found: ${snapshot.docs.length}');
           return snapshot.docs
               .map((doc) {
                 try {
                   final data = doc.data() as Map<String, dynamic>;
-                  console.log('Processing doc ${doc.id}');
 
                   // Check if warranty field exists
                   if (data['warranty'] == null) {
-                    console.log('Skipping doc ${doc.id}: warranty is null');
                     return null;
                   }
 
@@ -3174,7 +2987,6 @@ class AppServices {
                     data['warranty'] as Map<String, dynamic>,
                   );
                 } catch (e) {
-                  debugPrint('Error processing doc ${doc.id}: $e');
                   return null;
                 }
               })
@@ -3277,8 +3089,7 @@ class AppServices {
               offerData: data,
             );
           }
-        } catch (e) {
-          debugPrint('Error fetching data for offer ${doc.id}: $e');
+        } catch (_) {
         }
         return null;
       }).toList();
@@ -3404,13 +3215,9 @@ class AppServices {
           }
           if (deletedCount > 0) {
             await batch.commit();
-            debugPrint(
-              'Cleaned up $deletedCount lingering job offers for booking $bookingId',
-            );
           }
         }
-      } catch (e) {
-        debugPrint('Error cleaning up lingering job offers: $e');
+      } catch (_) {
       }
     }
 
@@ -3433,8 +3240,7 @@ class AppServices {
           );
         }
       }
-    } catch (e) {
-      debugPrint('Error sending acceptance notification: $e');
+    } catch (_) {
     }
   }
 
@@ -3465,7 +3271,6 @@ class AppServices {
 
       await batch.commit();
     } catch (e) {
-      debugPrint('Error declining job offer: $e');
       rethrow;
     }
   }

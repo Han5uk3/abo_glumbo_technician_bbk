@@ -557,8 +557,7 @@ class ManageAppBloc extends Bloc<ManageAppEvent, ManageAppState> {
     // caller waiting on a terminal state.
     try {
       await removeServiceFromHighlightedServices(serviceId);
-    } catch (e) {
-      debugPrint('Failed to detach $serviceId from highlighted services: $e');
+    } catch (_) {
     }
 
     emit(ServiceDeleted(true));

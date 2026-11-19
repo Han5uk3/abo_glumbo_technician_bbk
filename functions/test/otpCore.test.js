@@ -178,13 +178,30 @@ describe("challenge binding", () => {
 });
 
 describe("SMS text", () => {
-  for (const locale of ["ar", "en", "ur"]) {
-    it(`${locale} has exactly one 6-digit code and fits one segment`, () => {
-      const body = core.smsBody("123456", locale);
-      assert.deepEqual(body.match(/\b\d{6}\b/g), ["123456"]);
-      assert.ok(body.length <= (locale === "en" ? 160 : 70), `length ${body.length}`);
-    });
+  for (const app of [core.APP_CUSTOMER, core.APP_TECHNICIAN, null]) {
+    for (const locale of ["ar", "en", "ur"]) {
+      it(`${app} ${locale} has exactly one 6-digit code and fits one segment`, () => {
+        const body = core.smsBody("123456", locale, app);
+        assert.deepEqual(body.match(/\b\d{6}\b/g), ["123456"]);
+        assert.ok(body.length <= (locale === "en" ? 160 : 70), `length ${body.length}`);
+      });
+    }
   }
+
+  it("names the app that asked", () => {
+    assert.match(core.smsBody("123456", "en", core.APP_CUSTOMER), /Aboglumbo Tools/);
+    assert.match(core.smsBody("123456", "ar", core.APP_TECHNICIAN), /Aboglumbo Technician/);
+    assert.match(core.smsBody("123456", "ur", null), /Aboglumbo /);
+  });
+
+  it("prefers the App Check identity over the client's claim", () => {
+    const technicianAndroid = "1:629201660527:android:2e4177f0e86629d12dfb9a";
+    assert.equal(core.resolveApp(technicianAndroid, "customer"), core.APP_TECHNICIAN);
+    assert.equal(core.resolveApp(undefined, "customer"), core.APP_CUSTOMER);
+    assert.equal(core.resolveApp("1:0:android:unknown", "technician"), core.APP_TECHNICIAN);
+    assert.equal(core.resolveApp(undefined, "admin"), null);
+    assert.equal(core.resolveApp(undefined, undefined), null);
+  });
 
   it("defaults unknown languages to Arabic", () => {
     assert.equal(core.normalizeLocale("fr"), "ar");

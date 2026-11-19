@@ -20,8 +20,7 @@ class CustomerInfo extends StatelessWidget {
       } else {
         throw 'Could not launch $launchUri';
       }
-    } catch (e) {
-      debugPrint('Error launching phone call: $e');
+    } catch (_) {
     }
   }
 
@@ -34,8 +33,7 @@ class CustomerInfo extends StatelessWidget {
       } else {
         throw 'Could not launch $launchUri';
       }
-    } catch (e) {
-      debugPrint('Error launching WhatsApp: $e');
+    } catch (_) {
     }
   }
 

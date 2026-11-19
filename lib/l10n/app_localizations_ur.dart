@@ -53,7 +53,7 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get appName => 'ابو جلمبو';
+  String get appName => 'Aboglumbo Technician';
 
   @override
   String get enterYourFullName => 'اپنا پورا نام درج کریں';
@@ -2169,7 +2169,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get locationPermissionErrorIOS =>
-      'آئی او ایس پر مقام کی اجازت کی خرابی۔ براہ کرم ترتیبات > رازداری اور سیکیورٹی > مقام کی خدمات > ابو جلمبو ٹیکنیشن پر جائیں اور بیک گراؤنڈ ٹریکنگ فعال کرنے کے لیے \'ہمیشہ\' منتخب کریں۔';
+      'آئی او ایس پر مقام کی اجازت کی خرابی۔ براہ کرم ترتیبات > رازداری اور سیکیورٹی > مقام کی خدمات > Aboglumbo Technician پر جائیں اور بیک گراؤنڈ ٹریکنگ فعال کرنے کے لیے \'ہمیشہ\' منتخب کریں۔';
 
   @override
   String get youHaveAnActiveBookingAlready =>
@@ -2193,7 +2193,7 @@ class AppLocalizationsUr extends AppLocalizations {
       'اپنا اطلاعی پیغام یہاں درج کریں';
 
   @override
-  String get aboGlumboTechnician => 'ابو جلمبو ٹیکنیشن';
+  String get aboGlumboTechnician => 'Aboglumbo Technician';
 
   @override
   String get now => 'ابھی';
@@ -2347,18 +2347,18 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get backgroundLocationPermissionRequired =>
-      'ابو جلمبو ٹیکنیشن آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول اس وقت جب ایپ بند ہو یا زیرِ استعمال نہ ہو، تاکہ آپ کی لائیو لوکیشن کسٹمر کے ساتھ شیئر کی جا سکے اور وہ آپ کی آمد اور کام کی پیش رفت کو ٹریک کر سکے۔ براہ کرم اپنے آلے کی ترتیبات میں لوکیشن کی اجازت \'ہر وقت اجازت دیں\' پر سیٹ کریں۔';
+      'Aboglumbo Technician آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول اس وقت جب ایپ بند ہو یا زیرِ استعمال نہ ہو، تاکہ آپ کی لائیو لوکیشن کسٹمر کے ساتھ شیئر کی جا سکے اور وہ آپ کی آمد اور کام کی پیش رفت کو ٹریک کر سکے۔ براہ کرم اپنے آلے کی ترتیبات میں لوکیشن کی اجازت \'ہر وقت اجازت دیں\' پر سیٹ کریں۔';
 
   @override
   String get locationDisclosureTitle => 'لوکیشن تک رسائی اور ڈیٹا کا استعمال';
 
   @override
   String get locationDisclosureTrackingMessage =>
-      'ابو جلمبو ٹیکنیشن آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول بیک گراؤنڈ میں جب ایپ بند ہو یا زیرِ استعمال نہ ہو۔\n\nیہ لوکیشن ڈیٹا ہمارے سرورز پر اپ لوڈ کیا جاتا ہے اور کسٹمر کے ساتھ شیئر کیا جاتا ہے تاکہ وہ فعال کام کے دوران آپ کی لائیو لوکیشن دیکھ سکے اور آپ کی آمد اور کام کی پیش رفت کو ٹریک کر سکے۔\n\nبیک گراؤنڈ میں ڈیٹا صرف اُس وقت جمع ہوتا ہے جب آپ کسی کام کو ٹریک کر رہے ہوں، اور ٹریکنگ بند کرنے پر رک جاتا ہے۔ آپ اپنے آلے کی ترتیبات میں کسی بھی وقت لوکیشن کی اجازت تبدیل کر سکتے ہیں۔';
+      'Aboglumbo Technician آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول بیک گراؤنڈ میں جب ایپ بند ہو یا زیرِ استعمال نہ ہو۔\n\nیہ لوکیشن ڈیٹا ہمارے سرورز پر اپ لوڈ کیا جاتا ہے اور کسٹمر کے ساتھ شیئر کیا جاتا ہے تاکہ وہ فعال کام کے دوران آپ کی لائیو لوکیشن دیکھ سکے اور آپ کی آمد اور کام کی پیش رفت کو ٹریک کر سکے۔\n\nبیک گراؤنڈ میں ڈیٹا صرف اُس وقت جمع ہوتا ہے جب آپ کسی کام کو ٹریک کر رہے ہوں، اور ٹریکنگ بند کرنے پر رک جاتا ہے۔ آپ اپنے آلے کی ترتیبات میں کسی بھی وقت لوکیشن کی اجازت تبدیل کر سکتے ہیں۔';
 
   @override
   String get locationDisclosureJobOffersMessage =>
-      'ابو جلمبو ٹیکنیشن آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول بیک گراؤنڈ میں جب ایپ بند ہو یا زیرِ استعمال نہ ہو۔\n\nیہ لوکیشن ڈیٹا ہمارے سرورز پر اپ لوڈ کیا جاتا ہے اور آپ کو قریبی کام کی درخواستوں سے ملانے اور ہماری ٹیم کو آپ کا موجودہ سروس ایریا دکھانے کے لیے استعمال ہوتا ہے، بشمول آپ کے تقریبی شہر اور علاقے کے۔\n\nآپ اپنے آلے کی ترتیبات میں کسی بھی وقت لوکیشن کی اجازت تبدیل کر سکتے ہیں۔';
+      'Aboglumbo Technician آپ کے مقام کا ڈیٹا جمع کرتا ہے، بشمول بیک گراؤنڈ میں جب ایپ بند ہو یا زیرِ استعمال نہ ہو۔\n\nیہ لوکیشن ڈیٹا ہمارے سرورز پر اپ لوڈ کیا جاتا ہے اور آپ کو قریبی کام کی درخواستوں سے ملانے اور ہماری ٹیم کو آپ کا موجودہ سروس ایریا دکھانے کے لیے استعمال ہوتا ہے، بشمول آپ کے تقریبی شہر اور علاقے کے۔\n\nآپ اپنے آلے کی ترتیبات میں کسی بھی وقت لوکیشن کی اجازت تبدیل کر سکتے ہیں۔';
 
   @override
   String get locationAccessDeclined =>
@@ -2421,7 +2421,8 @@ class AppLocalizationsUr extends AppLocalizations {
       'سروس کی فراہمی کے لیے آپ کے مقام کو ٹریک کیا جا رہا ہے';
 
   @override
-  String get aboGlumboLocationTracking => 'ابو جلمبو - لوکیشن ٹریکنگ';
+  String get aboGlumboLocationTracking =>
+      'Aboglumbo Technician - لوکیشن ٹریکنگ';
 
   @override
   String get backgroundLocationUpdated => 'بیک گراؤنڈ مقام اپ ڈیٹ ہو گیا';
@@ -4465,7 +4466,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get welcomeDescription =>
-      'ہمیں آپ کو ابو جلمبو ٹیم میں شامل کرنے پر خوشی ہے۔\n\n• ہر سروس کے لیے ایک ہفتے کی وارنٹی\n• اعلی درجہ بندی مستقبل میں انتخاب کے امکانات کو بڑھاتی ہے\n• اعلی کارکردگی دکھانے والے ٹیکنیشنز کے لیے خصوصی انعامات';
+      'ہمیں آپ کو Aboglumbo Technician ٹیم میں شامل کرنے پر خوشی ہے۔\n\n• ہر سروس کے لیے ایک ہفتے کی وارنٹی\n• اعلی درجہ بندی مستقبل میں انتخاب کے امکانات کو بڑھاتی ہے\n• اعلی کارکردگی دکھانے والے ٹیکنیشنز کے لیے خصوصی انعامات';
 
   @override
   String welcomeToAboGlumboTechnician(String name) {
@@ -5004,7 +5005,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get totalLabel => 'کل:';
 
   @override
-  String get thankYouInvoice => 'ابو جلمبو منتخب کرنے کے لیے آپ کا شکریہ!';
+  String get thankYouInvoice =>
+      'Aboglumbo Technician منتخب کرنے کے لیے آپ کا شکریہ!';
 
   @override
   String technicianLabel(String technician) {
@@ -5110,7 +5112,7 @@ class AppLocalizationsUr extends AppLocalizations {
       'آپ کا اکاؤنٹ ایڈمن کے ذریعے تصدیق ہو رہا ہے۔ براہ کرم بعد میں دوبارہ چیک کریں۔';
 
   @override
-  String get aboGlumboWorker => 'ابو گلمبو ٹیکنیشن';
+  String get aboGlumboWorker => 'Aboglumbo Technician';
 
   @override
   String get workerCannotBeAssignedMultipleTimes =>
@@ -5434,4 +5436,8 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get phoneNumberChangedSuccessfully =>
       'فون نمبر کامیابی سے اپ ڈیٹ ہو گیا';
+
+  @override
+  String get biometricSessionExpired =>
+      'آپ کا سیشن ختم ہو گیا ہے۔ براہ کرم اپنے فون نمبر سے دوبارہ سائن ان کریں۔';
 }

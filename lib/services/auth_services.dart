@@ -17,6 +17,29 @@ class AuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static String? phoneNumber;
 
+  /// Whether this device still holds a Firebase session for [uid] that the
+  /// server accepts. A disabled or deleted account or a revoked session fails;
+  /// an unreachable network does not, since the SDK re-checks on its next
+  /// token refresh anyway.
+  static Future<bool> hasValidSessionFor(String? uid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (uid == null ||
+        uid.isEmpty ||
+        user == null ||
+        user.isAnonymous ||
+        user.uid != uid) {
+      return false;
+    }
+    try {
+      await user.getIdToken(true);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      return e.code == 'network-request-failed';
+    } catch (_) {
+      return false;
+    }
+  }
+
   String _sanitizeOTP(String input) {
     // Remove spaces and convert Arabic digits to ASCII for OTP
     String result = input.replaceAll(RegExp(r'\s'), '');
@@ -40,15 +63,9 @@ class AuthServices {
     OtpPurpose purpose = OtpPurpose.login,
     String? expectedUid,
   }) async {
-    debugPrint('🟢 [AUTH SERVICE] sendOTP method called');
-    debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
 
     String sanitizedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
       phoneNumber,
-    );
-    debugPrint('🔢 [AUTH SERVICE] Sanitized number: $sanitizedPhoneNumber');
-    debugPrint(
-      '📱 [AUTH SERVICE] Platform: ${Platform.isIOS ? "iOS" : "Android"}',
     );
 
     AuthServices.phoneNumber = sanitizedPhoneNumber;
@@ -71,25 +88,17 @@ class AuthServices {
 
     try {
       if (Platform.isIOS) {
-        debugPrint(
-          '🍎 [AUTH SERVICE] Explicitly setting appVerificationDisabledForTesting to false to clear cache',
-        );
         await FirebaseAuth.instance.setSettings(
           appVerificationDisabledForTesting: false,
           userAccessGroup: null,
         );
       }
 
-      debugPrint(
-        '📞 [AUTH SERVICE] Calling Firebase verifyPhoneNumber (no-await version)...',
-      );
-
       _auth.verifyPhoneNumber(
         phoneNumber: sanitizedPhoneNumber,
         forceResendingToken: forceResendingToken,
         timeout: const Duration(seconds: 120),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          debugPrint('✅ [AUTH SERVICE] verificationCompleted triggered');
           // Android only: the caller decides what to do with the credential
           // (sign in and route the user) instead of a silent sign-in here.
           if (onVerificationCompleted != null) {
@@ -99,30 +108,20 @@ class AuthServices {
           try {
             AuthServices.phoneNumber = sanitizedPhoneNumber;
             await _auth.signInWithCredential(credential);
-            debugPrint('✅ [AUTH SERVICE] Auto sign-in successful');
-          } catch (e) {
-            debugPrint("❌ [AUTH SERVICE] Auto verification sign-in failed: $e");
+          } catch (_) {
           }
         },
         verificationFailed: (FirebaseAuthException e) {
-          debugPrint('❌ [AUTH SERVICE] verificationFailed triggered');
-          debugPrint('❌ [AUTH SERVICE] Code: ${e.code}');
-          debugPrint('❌ [AUTH SERVICE] Message: ${e.message}');
           onError(e);
         },
         codeSent: (String verificationId, int? resendToken) {
-          debugPrint('✅ [AUTH SERVICE] codeSent triggered');
-          debugPrint('🆔 [AUTH SERVICE] ID: $verificationId');
           onCodeSent(verificationId, resendToken: resendToken);
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint('⏰ [AUTH SERVICE] codeAutoRetrievalTimeout triggered');
         },
       );
 
-      debugPrint('✅ [AUTH SERVICE] verifyPhoneNumber call initiated');
     } catch (e) {
-      debugPrint('💥 [AUTH SERVICE] Exception in sendOTP: $e');
       if (e is FirebaseAuthException) {
         onError(e);
       } else {
@@ -130,7 +129,6 @@ class AuthServices {
       }
       rethrow;
     }
-    debugPrint('🏁 [AUTH SERVICE] sendOTP method complete');
   }
 
   Future<void> _sendTaqnyatOtp({
@@ -171,7 +169,6 @@ class AuthServices {
       await _auth.currentUser?.reload();
     } catch (e) {
       // The change is already saved; the session refreshes on its own later.
-      debugPrint('⚠️ [AUTH SERVICE] Could not reload user: $e');
     }
     return newPhone;
   }
@@ -187,15 +184,9 @@ class AuthServices {
     String locale = 'ar',
     String? expectedUid,
   }) async {
-    debugPrint('🔵 [AUTH SERVICE] resendOTP method called');
-    debugPrint('📱 [AUTH SERVICE] Phone number: $phoneNumber');
-    debugPrint('🔑 [AUTH SERVICE] Resend token: $resendToken');
 
     String sanitizedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
       phoneNumber,
-    );
-    debugPrint(
-      '🔢 [AUTH SERVICE] Sanitized phone number: $sanitizedPhoneNumber',
     );
 
     if (OtpApi.isTaqnyatVerification(currentVerificationId)) {
@@ -211,7 +202,6 @@ class AuthServices {
     }
 
     try {
-      debugPrint('📞 [AUTH SERVICE] Calling Firebase verifyPhoneNumber...');
       await _auth.verifyPhoneNumber(
         phoneNumber: sanitizedPhoneNumber,
         forceResendingToken: resendToken,
@@ -220,64 +210,32 @@ class AuthServices {
           // Ignored, as after the first send: the OTP page verifies the code
           // the user types or shares. A silent sign-in here would use the
           // code up, and the user's own attempt would then fail as expired.
-          debugPrint(
-            '✅ [AUTH SERVICE] verificationCompleted on resend (OTP page verifies the code)',
-          );
         },
         verificationFailed: (FirebaseAuthException e) {
-          debugPrint('❌ [AUTH SERVICE] verificationFailed callback triggered');
-          debugPrint('❌ [AUTH SERVICE] Error code: ${e.code}');
-          debugPrint('❌ [AUTH SERVICE] Error message: ${e.message}');
 
-          debugPrint('❌ [AUTH SERVICE] Calling onError callback');
           onError(e);
         },
         codeSent: (String verificationId, int? token) {
-          debugPrint('✅ [AUTH SERVICE] codeSent callback triggered');
-          debugPrint('🆔 [AUTH SERVICE] Verification ID: $verificationId');
-          debugPrint('🔑 [AUTH SERVICE] New resend token: $token');
 
           _verificationId = verificationId;
-          debugPrint('📞 [AUTH SERVICE] Calling onCodeSent callback');
           onCodeSent(verificationId, resendToken: token);
-          debugPrint('✅ [AUTH SERVICE] onCodeSent callback completed');
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint(
-            '⏰ [AUTH SERVICE] codeAutoRetrievalTimeout callback triggered',
-          );
-          debugPrint(
-            '🆔 [AUTH SERVICE] Timeout verification ID: $verificationId',
-          );
 
           _verificationId = verificationId;
           if (onAutoRetrievalTimeout != null) {
-            debugPrint(
-              '📞 [AUTH SERVICE] Calling onAutoRetrievalTimeout callback',
-            );
             onAutoRetrievalTimeout(verificationId);
           }
         },
       );
-      debugPrint(
-        '✅ [AUTH SERVICE] verifyPhoneNumber call completed (setup done, waiting for callbacks)',
-      );
     } catch (e) {
-      debugPrint('💥 [AUTH SERVICE] Exception caught in resendOTP: $e');
       if (e is FirebaseAuthException) {
-        debugPrint(
-          '❌ [AUTH SERVICE] Calling onError callback from catch block',
-        );
         onError(e);
       } else {
-        debugPrint(
-          '❌ [AUTH SERVICE] Unknown error - wrapping in FirebaseAuthException',
-        );
         onError(FirebaseAuthException(code: 'unknown', message: e.toString()));
       }
       rethrow;
     }
-    debugPrint('🏁 [AUTH SERVICE] resendOTP method complete');
   }
 
   Future<UserCredential?> verifyOTP(
@@ -319,25 +277,7 @@ class AuthServices {
 
       return tempUserCredential;
     } catch (e) {
-      debugPrint("Error verifying OTP: $e");
       if (e is FirebaseAuthException) {
-        // Enhanced error handling for iOS-specific issues
-        switch (e.code) {
-          case 'invalid-verification-code':
-            debugPrint("iOS: Invalid verification code provided");
-            break;
-          case 'session-expired':
-            debugPrint("iOS: OTP session expired");
-            break;
-          case 'too-many-requests':
-            debugPrint("iOS: Too many requests - temporarily blocked");
-            break;
-          case 'network-request-failed':
-            debugPrint("iOS: Network request failed");
-            break;
-          default:
-            debugPrint("iOS: Unknown error - ${e.code}: ${e.message}");
-        }
         rethrow;
       } else {
         throw FirebaseAuthException(
@@ -363,8 +303,7 @@ class AuthServices {
             .doc(pendingAdmin.uid)
             .delete();
       }
-    } catch (e) {
-      debugPrint("Error promoting admin: $e");
+    } catch (_) {
     }
   }
 
@@ -377,19 +316,13 @@ class AuthServices {
       final phone = userCredential.user?.phoneNumber;
 
       if (uid == null) {
-        debugPrint("Error: User UID is null");
         return;
       }
 
       // 1. Check if user is in ACTIVE admins collection (by UID)
-      debugPrint(
-        "🔍 [TECH AUTH] Step 1: Checking admins collection for UID: $uid",
-      );
       final adminDoc = await AppFirestore.adminsCollectionRef.doc(uid).get();
       if (adminDoc.exists) {
         final adminData = adminDoc.data() as Map<String, dynamic>?;
-        final accessLevel = adminData?['accessLevel'] ?? 1;
-        debugPrint("✅ [TECH AUTH] Admin found with accessLevel: $accessLevel");
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
         await LocalStore.storeAdminData(
@@ -405,9 +338,6 @@ class AuthServices {
       }
 
       // 2. Check if user is in PENDING admins collection by phone
-      debugPrint(
-        "🔍 [TECH AUTH] Step 2: Checking pending admins for phone: $phone",
-      );
       if (phone != null) {
         final pendingAdminQuery = await AppFirestore.pendingAdminsCollectionRef
             .where('phoneNumber', isEqualTo: phone)
@@ -418,9 +348,6 @@ class AuthServices {
           final pendingAdmin = AdminModel.fromJson(
             pendingAdminQuery.docs.first.data() as Map<String, dynamic>,
             id: pendingAdminQuery.docs.first.id,
-          );
-          debugPrint(
-            "✅ [TECH AUTH] Pending admin found, promoting to active admin",
           );
 
           // Promote to active admin
@@ -440,9 +367,6 @@ class AuthServices {
       }
 
       // 3. Check users collection for role "technician"
-      debugPrint(
-        "🔍 [TECH AUTH] Step 3: Checking users collection for UID: $uid",
-      );
       final userDoc = await AppFirestore.usersCollectionRef.doc(uid).get();
       bool isValidTechnician = false;
 
@@ -450,22 +374,16 @@ class AuthServices {
         final userData = userDoc.data() as Map<String, dynamic>?;
         final userRole =
             userData?['role']?.toString().toLowerCase() ?? 'technician';
-        debugPrint("🔍 [TECH AUTH] User found with role: $userRole");
 
         if (userRole == 'technician' &&
             userData != null &&
             userData['uid'] != null &&
             userData['uid'].toString().isNotEmpty) {
           isValidTechnician = true;
-        } else if (userRole != 'technician') {
-          debugPrint(
-            "❌ [TECH AUTH] User role is '$userRole', not 'technician'. Access denied.",
-          );
         }
       }
 
       if (isValidTechnician) {
-        debugPrint("✅ [TECH AUTH] Valid technician found, logging in");
         await LocalStore.putUID(uid);
         await LocalStore.putlogoutStatus(false);
         final userData =
@@ -487,9 +405,6 @@ class AuthServices {
       // 4. Check if phone number belongs to an admin in the admins collection (by phone)
       //    This handles admin users who log in for the first time on a new device
       if (phone != null) {
-        debugPrint(
-          "🔍 [TECH AUTH] Step 4: Checking admins collection by phone: $phone",
-        );
         final adminByPhoneQuery = await AppFirestore.adminsCollectionRef
             .where('phoneNumber', isEqualTo: phone)
             .limit(1)
@@ -498,10 +413,6 @@ class AuthServices {
         if (adminByPhoneQuery.docs.isNotEmpty) {
           final existingAdminData =
               adminByPhoneQuery.docs.first.data() as Map<String, dynamic>?;
-          final accessLevel = existingAdminData?['accessLevel'] ?? 1;
-          debugPrint(
-            "✅ [TECH AUTH] Admin found by phone with accessLevel: $accessLevel",
-          );
 
           // Create/update admin doc with current UID
           final adminModel = AdminModel.fromJson(
@@ -536,9 +447,6 @@ class AuthServices {
 
       // 5. Check if phone exists in users collection as technician (prevents duplicate accounts)
       if (phone != null) {
-        debugPrint(
-          "🔍 [TECH AUTH] Step 5: Checking users collection by phone: $phone",
-        );
         final techByPhoneQuery = await AppFirestore.usersCollectionRef
             .where('phone', isEqualTo: phone)
             .limit(1)
@@ -551,15 +459,7 @@ class AuthServices {
 
           final userRole =
               oldData['role']?.toString().toLowerCase() ?? 'technician';
-          if (userRole != 'technician') {
-            debugPrint(
-              "❌ [TECH AUTH] User found by phone but role is '$userRole', not 'technician'. Skipping.",
-            );
-          } else {
-            debugPrint(
-              "✅ [TECH AUTH] Existing technician found by phone (old UID: $oldDocId), migrating to new UID: $uid",
-            );
-
+          if (userRole == 'technician') {
             // Migrate doc to new UID
             oldData['uid'] = uid;
             oldData['updatedAt'] = Timestamp.now();
@@ -568,9 +468,6 @@ class AuthServices {
             // Delete old document
             if (oldDocId != uid) {
               await AppFirestore.usersCollectionRef.doc(oldDocId).delete();
-              debugPrint(
-                "🗑️ [TECH AUTH] Old technician doc ($oldDocId) deleted",
-              );
             }
 
             await LocalStore.putUID(uid);
@@ -588,16 +485,12 @@ class AuthServices {
       }
 
       // 6. User not found in any collection — redirect to signup
-      debugPrint(
-        "📝 [TECH AUTH] Redirecting to Signup (User not found or invalid role): $uid",
-      );
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => Signup(uid: uid)),
         (route) => false,
       );
     } catch (e) {
-      debugPrint("Error in checkUser: $e");
       if (e is FirebaseAuthException) {
         rethrow;
       } else {

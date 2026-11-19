@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:aboglumbo_bbk_panel/common_widget/cached_video_player.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
 import 'package:aboglumbo_bbk_panel/helpers/date_formatter.dart';
@@ -90,16 +89,6 @@ class _BookingInfoState extends State<BookingInfo> {
       if (latestChatroomId != null && latestChatroomId.isNotEmpty) {
         // Verify the chat actually exists in Realtime Database using the service method
         chatExists = await chatService.isChatUsable(latestChatroomId);
-
-        if (chatExists) {
-          log(
-            '✅ Chat verified in both Firestore and Realtime Database: $latestChatroomId',
-          );
-        } else {
-          log(
-            '⚠️ Chat ID exists in Firestore but not in Realtime Database. Will create new chat.',
-          );
-        }
       }
 
       if (mounted) {
@@ -133,11 +122,9 @@ class _BookingInfoState extends State<BookingInfo> {
 
       if (chatExists) {
         chatId = latestChatroomId!;
-        log('✅ Using existing chat: $chatId');
         // Small delay to show the message
         await Future.delayed(const Duration(milliseconds: 300));
       } else {
-        log('🔄 Initiating new chat...');
         // Get technician info
         String technicianName;
         String technicianPhoto;
@@ -164,7 +151,6 @@ class _BookingInfoState extends State<BookingInfo> {
           technicianName: technicianName,
           technicianPhoto: technicianPhoto,
         );
-        log('✅ Chat created with ID: $chatId');
       }
 
       // Close loading dialog
@@ -222,7 +208,6 @@ class _BookingInfoState extends State<BookingInfo> {
           ),
         );
       }
-      log('❌ Chat error: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -376,8 +361,7 @@ class _BookingInfoState extends State<BookingInfo> {
           _offerExpiresAt = expiresAt.toDate();
         }
       }
-    } catch (e) {
-      debugPrint('Error loading offer expiry: $e');
+    } catch (_) {
     }
   }
 
@@ -981,8 +965,7 @@ class _BookingInfoState extends State<BookingInfo> {
                         'warranty.updatedAt': FieldValue.serverTimestamp(),
                       });
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
-                } catch (e) {
-                  log('Error resolving: $e');
+                } catch (_) {
                 }
               },
               child: Text(
@@ -3267,8 +3250,7 @@ class _BookingInfoState extends State<BookingInfo> {
                           }
                         },
                       );
-                    } catch (e) {
-                      debugPrint('Error showing invoice: $e');
+                    } catch (_) {
                     } finally {
                       if (!loaderPopped && context.mounted) {
                         Navigator.pop(context);
@@ -3325,8 +3307,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                   }
                                 },
                               );
-                            } catch (e) {
-                              debugPrint('Error sharing invoice: $e');
+                            } catch (_) {
                             } finally {
                               if (!loaderPopped && context.mounted) {
                                 Navigator.pop(context);

@@ -104,8 +104,6 @@ class _LoginPageState extends State<LoginPage> {
       final formattedPhoneNumber = CountryCodeDetector.normalizeSaudiPhone(
         phoneNumber,
       );
-      debugPrint('📱 [PANEL LOGIN] Original: $phoneNumber');
-      debugPrint('📱 [PANEL LOGIN] Formatted: $formattedPhoneNumber');
 
       // Save phone if remember me is checked
       if (_isRememberMeChecked) {
@@ -135,7 +133,6 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
       );
     } catch (e) {
-      debugPrint('❌ [PANEL LOGIN] Auto-verified login failed: $e');
       if (!mounted) return;
       setState(() {
         _isLoggingIn = false;
@@ -198,8 +195,29 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         try {
-          if (FirebaseAuth.instance.currentUser == null) {
-            await FirebaseAuth.instance.signInAnonymously();
+          // Biometrics unlock this device's existing session for the same
+          // account; they never sign anyone in. Without that session the user
+          // verifies their number again.
+          if (!await AuthServices.hasValidSessionFor(customerLastUid)) {
+            final lastUid = customerLastUid;
+            if (lastUid != null) {
+              await LocalStore.clearBiometricAuthEnabled(lastUid);
+            }
+            await LocalStore.clearLastValidUID();
+            await FirebaseAuth.instance.signOut();
+            if (mounted) {
+              setState(() {
+                _isLoggingIn = false;
+                isCheckUserEnableTwoStepVerification = false;
+                customerLastUid = null;
+              });
+              _showSnackBar(
+                AppLocalizations.of(context)?.biometricSessionExpired ??
+                    'Your session has ended. Please sign in with your phone number again.',
+                Colors.red,
+              );
+            }
+            return;
           }
 
           // Refresh FCM token after biometric login

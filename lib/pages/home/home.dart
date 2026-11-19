@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/elevated_button.dart';
 import 'package:aboglumbo_bbk_panel/common_widget/loader.dart';
@@ -68,10 +67,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    log('initState');
-    log('newIndex: ${widget.newIndex}');
     currentIndex = widget.newIndex ?? 0;
-    log('selectedfilter: ${widget.selectedFilter}');
     if (widget.selectedFilter != null) {
       selectedBookingStatus = widget.selectedFilter!;
     } else {
@@ -86,13 +82,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // 1. Update location immediately on app startup
       if (mounted) {
         if (!LocalStore.isCurrentUserAdmin()) {
-          debugPrint('🚀 Initializing location update on Home launch');
           await TechnicianLocationUpdateService.updateLocationNow(
             context: context,
-          );
-        } else {
-          debugPrint(
-            'ℹ️ User is admin, skipping location update on Home launch',
           );
         }
         if (mounted) {
@@ -143,7 +134,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.resumed) {
       if (!LocalStore.isCurrentUserAdmin()) {
-        debugPrint('🔄 App resumed - updating location');
         TechnicianLocationUpdateService.updateLocationNow(
           context: context,
         ).then((_) {
@@ -153,7 +143,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         });
         TechnicianLocationUpdateService.startBackgroundLocationUpdates();
       } else {
-        debugPrint('ℹ️ App resumed - user is admin, refreshing user data only');
         if (mounted) {
           context.read<LoginBloc>().add(RefreshUserData());
         }

@@ -386,6 +386,13 @@ Card payments go through Telr (`lib/apis/telr_services.dart`, `telr_apple_pay.da
 `paymentModeCode` `C`/`A`; `O` (outside app / cash) routes to `VP` instead of `C`
 ([save_booking.dart:330](../abo_glumbo_bkk/lib/services/booking/save_booking.dart:330)).
 
+**Telr test or live mode** is the boolean `testMode` in `app_settings/gateway`, read from the server
+before every card and Apple Pay payment (`AppSettingsService.resolveGatewayTestMode`, customer app
+builds after 3.0.4+74). Only `true` means test. A missing document or field, a non-bool value, or a read
+failing or taking over 5 seconds all mean live. Older builds are fixed at live for cards and at test for
+Apple Pay, which no build offers in its payment sheet. While the default Firestore rules allow any
+write, anyone can flip this flag.
+
 Invoices are generated client-side as PDFs (`InvoiceService`, `pw.Document`) and cached to
 `booking.invoicePdfUrl`.
 

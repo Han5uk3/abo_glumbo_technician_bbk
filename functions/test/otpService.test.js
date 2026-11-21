@@ -327,7 +327,26 @@ describe("reserved core admin number", () => {
 
   it("refuses to log in if the number moved to another account", async () => {
     t.auth.users.clear();
+    t.auth.add({ uid: CORE_ADMIN_UID });
     t.auth.add({ uid: "someone-else", phoneNumber: CORE_ADMIN });
+    const { verificationId } = await t.service.handleRequestOtp(loginRequest(CORE_ADMIN));
+    await rejectsWith(
+      t.service.handleVerifyOtp(verifyRequest(verificationId, CORE_ADMIN_CODE)),
+      "internal-error",
+    );
+  });
+
+  it("logs in when no account holds the number", async () => {
+    t.auth.users.clear();
+    t.auth.add({ uid: CORE_ADMIN_UID });
+    const { verificationId } = await t.service.handleRequestOtp(loginRequest(CORE_ADMIN));
+    const result = await t.service.handleVerifyOtp(verifyRequest(verificationId, CORE_ADMIN_CODE));
+    assert.equal(result.token, `token:${CORE_ADMIN_UID}`);
+  });
+
+  it("refuses a disabled core admin account", async () => {
+    t.auth.users.clear();
+    t.auth.add({ uid: CORE_ADMIN_UID, disabled: true });
     const { verificationId } = await t.service.handleRequestOtp(loginRequest(CORE_ADMIN));
     await rejectsWith(
       t.service.handleVerifyOtp(verifyRequest(verificationId, CORE_ADMIN_CODE)),

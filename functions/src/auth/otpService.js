@@ -267,8 +267,18 @@ function createOtpService({
 
   async function mintToken(phone, reservedEntry) {
     if (reservedEntry) {
-      const user = await auth.getUserByPhoneNumber(phone).catch(() => null);
-      if (!user || user.uid !== reservedEntry.uid || user.disabled) {
+      // The private code proves this login, so the account need not hold the
+      // number, and is safer without it: Firebase phone auth can then never
+      // text that SIM, which the project does not control, into this account.
+      // A number that turns up on a different account still blocks the login.
+      const [user, holder] = await Promise.all([
+        auth.getUser(reservedEntry.uid).catch(() => null),
+        auth.getUserByPhoneNumber(phone).catch((error) => {
+          if (error?.code === "auth/user-not-found") return null;
+          throw error;
+        }),
+      ]);
+      if (!user || user.disabled || (holder && holder.uid !== user.uid)) {
         logger.error("otp_reserved_account_mismatch", {
           alert: "otp_reserved_login_blocked",
           phone: maskPhone(phone),
